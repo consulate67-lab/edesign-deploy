@@ -1,341 +1,721 @@
-import React from 'react';
-import { FileText, Layers, Zap, Shield, Sparkles, ArrowRight, Globe } from 'lucide-react';
+import React, { useState } from 'react';
+import {
+    FileText, Layers, Zap, Shield, Sparkles, ArrowRight, Globe,
+    Check, MousePointer,
+} from 'lucide-react';
 
 interface LandingProps {
     onRegister: () => void;
     onLogin: () => void;
 }
 
+interface DocTypeCard {
+    id: string;
+    label: string;
+    icon: string;
+    desc: string;
+    accent: string;
+}
+
+interface FeatureCard {
+    icon: React.ReactNode;
+    title: string;
+    desc: string;
+}
+
+interface Stat {
+    value: string;
+    label: string;
+    accent: string;
+}
+
+const DOC_TYPES: DocTypeCard[] = [
+    { id: 'invoice',     label: 'e-Fatura',        icon: '📄', desc: 'UBL 2.1 ticari/alıcı tanımsız',     accent: '#6366f1' },
+    { id: 'archive',     label: 'e-Arşiv',         icon: '🗂️', desc: 'e-Fatura mükellefi olmayan alıcılar', accent: '#8b5cf6' },
+    { id: 'waybill',     label: 'e-İrsaliye',      icon: '🚚', desc: 'Sevkiyat ve mal hareketi',          accent: '#06b6d4' },
+    { id: 'export',      label: 'e-İhracat',       icon: '🌍', desc: 'Gümrüklü uluslararası ticaret',     accent: '#10b981' },
+    { id: 'microExport', label: 'e-Mikro İhracat', icon: '📦', desc: '≤500 kg basitleştirilmiş süreç',    accent: '#22d3ee' },
+    { id: 'smm',         label: 'e-SMM',           icon: '💼', desc: 'Serbest meslek makbuzu',            accent: '#ec4899' },
+    { id: 'mustahsil',   label: 'e-Müstahsil',     icon: '🌾', desc: 'Çiftçi/hayvancıdan alım makbuzu',   accent: '#84cc16' },
+    { id: 'bilet',       label: 'e-Bilet',         icon: '🎫', desc: 'Hava/kara yolu ulaşım biletleri',   accent: '#f97316' },
+    { id: 'receipt',     label: 'e-Makbuz',        icon: '🧾', desc: 'Diğer tahsilat makbuzları',         accent: '#14b8a6' },
+];
+
+const FEATURES: FeatureCard[] = [
+    {
+        icon: <MousePointer size={22} />,
+        title: 'Sürükle & Bırak',
+        desc: 'Karmaşık XSLT bilmenize gerek yok. Elementleri sürükleyin, önizlemeyi anlık görün.',
+    },
+    {
+        icon: <Zap size={22} />,
+        title: 'Gerçek Zamanlı Önizleme',
+        desc: 'UBL 2.1 örnek verisi ile tasarımınızı canlı test edin. Müşteriye bitmeden gösterin.',
+    },
+    {
+        icon: <FileText size={22} />,
+        title: 'GİB UBL-TR Uyumlu',
+        desc: 'GİB resmi XSLT şablonları (e-Fatura Paketi v29) ile birebir uyumlu çıktı.',
+    },
+    {
+        icon: <Shield size={22} />,
+        title: 'Güvenli Üyelik',
+        desc: 'bcrypt + JWT ile şifrelenmiş hesaplar. Ücretsiz deneme ile başlayın.',
+    },
+    {
+        icon: <Globe size={22} />,
+        title: 'Çoklu Belge Tipi',
+        desc: 'e-Fatura, e-Arşiv, e-İrsaliye, e-İhracat ve daha fazlası tek tasarımcıda.',
+    },
+    {
+        icon: <Sparkles size={22} />,
+        title: 'Şablon Galerisi',
+        desc: 'Hazır tasarımlardan ilham alın, kendi şablonunuzu oluşturun.',
+    },
+];
+
+const STATS: Stat[] = [
+    { value: '9',   label: 'Desteklenen Belge Türü', accent: '#6366f1' },
+    { value: 'GİB', label: 'UBL-TR Resmi Uyumluluk', accent: '#10b981' },
+    { value: '5',   label: 'Ücretsiz Tasarım Hakkı', accent: '#ec4899' },
+    { value: '∞',   label: '%100 Web Tabanlı',       accent: '#06b6d4' },
+];
+
 /**
  * Landing page — shown on first visit (no auth token in sessionStorage).
- * Highlights the product, lists supported doc types, and offers
- * Üye Ol / Giriş Yap CTAs.
+ * Glassmorphic dark theme:
+ *  - Background: deep navy + 5 radial glow blobs (indigo/violet/cyan/emerald/pink)
+ *  - Hero: glass badge + gradient headline + dual CTA + trust line
+ *  - 9 Doc Type cards in responsive grid (color-coded accents)
+ *  - Stats row (4 metrics)
+ *  - 6 Feature cards (icon + title + desc)
+ *  - Final CTA panel with gradient border glow
  */
 export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
-    const docTypes = [
-        { id: 'invoice', label: 'e-Fatura', icon: '📄' },
-        { id: 'archive', label: 'e-Arşiv', icon: '🗂️' },
-        { id: 'waybill', label: 'e-İrsaliye', icon: '🚚' },
-        { id: 'export', label: 'e-İhracat', icon: '🌍' },
-        { id: 'microExport', label: 'e-Mikro İhracat', icon: '📦' },
-        { id: 'smm', label: 'e-SMM', icon: '💼' },
-        { id: 'mustahsil', label: 'e-Müstahsil Makbuzu', icon: '🌾' },
-        { id: 'bilet', label: 'e-Bilet', icon: '🎫' },
-        { id: 'receipt', label: 'e-Makbuz', icon: '🧾' },
-    ];
-
-    const features = [
-        {
-            icon: <Layers size={24} />,
-            title: 'Sürükle & Bırak',
-            desc: 'Karmaşık XSLT bilmenize gerek yok. Elementleri sürükleyin, önizlemeyi anlık görün.',
-        },
-        {
-            icon: <Zap size={24} />,
-            title: 'Gerçek Zamanlı Önizleme',
-            desc: 'UBL 2.1 örnek verisi ile tasarımınızı canlı test edin. Tasarım bitmeden müşteriye gösterin.',
-        },
-        {
-            icon: <FileText size={24} />,
-            title: 'GİB UBL-TR Uyumlu',
-            desc: 'GİB resmi XSLT şablonları (e-Fatura Paketi v29) ile birebir uyumlu çıktı.',
-        },
-        {
-            icon: <Shield size={24} />,
-            title: 'Güvenli Üyelik',
-            desc: 'bcrypt + JWT ile şifrelenmiş hesaplar. Ücretsiz deneme ile başlayın.',
-        },
-        {
-            icon: <Globe size={24} />,
-            title: 'Çoklu Belge Tipi',
-            desc: 'e-Fatura, e-Arşiv, e-İrsaliye, e-İhracat, e-Müstahsil, e-SMM, e-Bilet, e-Makbuz.',
-        },
-        {
-            icon: <Sparkles size={24} />,
-            title: 'Şablon Galerisi',
-            desc: 'Hazır tasarımlardan ilham alın, kendi şablonunuzu oluşturun veya satın.',
-        },
-    ];
-
     return (
         <div
             style={{
                 minHeight: '100vh',
-                background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
-                color: '#f1f5f9',
+                background: '#060914',
+                color: '#f8fafc',
                 fontFamily: 'system-ui, -apple-system, sans-serif',
+                position: 'relative',
+                overflow: 'hidden',
             }}
         >
-            {/* Hero */}
-            <header
-                style={{
-                    padding: '80px 24px 60px',
-                    textAlign: 'center',
-                    maxWidth: 1200,
-                    margin: '0 auto',
-                }}
-            >
-                <div
-                    style={{
-                        display: 'inline-block',
-                        padding: '6px 14px',
-                        background: 'rgba(99, 102, 241, 0.15)',
-                        border: '1px solid rgba(99, 102, 241, 0.4)',
-                        borderRadius: 999,
-                        fontSize: 13,
-                        color: '#a5b4fc',
-                        marginBottom: 24,
-                    }}
-                >
-                    ✨ Yeni: e-SMM, e-Müstahsil, e-Bilet desteği eklendi
-                </div>
+            {/* Glow blobs — absolute, blurred radial gradients */}
+            <Blob top="-15%"  left="8%"   size={520} color="rgba(99,102,241,0.45)" />
+            <Blob top="-8%"   right="5%"  size={480} color="rgba(139,92,246,0.35)" />
+            <Blob top="38%"   left="-6%"  size={420} color="rgba(6,182,212,0.25)" />
+            <Blob top="62%"   right="-12%" size={460} color="rgba(236,72,153,0.18)" />
+            <Blob top="82%"   left="22%"  size={380} color="rgba(16,185,129,0.15)" />
 
-                <h1
-                    style={{
-                        fontSize: 'clamp(36px, 6vw, 64px)',
-                        fontWeight: 800,
-                        margin: '0 0 20px',
-                        lineHeight: 1.1,
-                        background: 'linear-gradient(135deg, #fff 0%, #cbd5e1 100%)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                    }}
-                >
-                    e-Belge Tasarım Artık Çok Kolay
-                </h1>
-
-                <p
-                    style={{
-                        fontSize: 'clamp(16px, 2vw, 20px)',
-                        color: '#94a3b8',
-                        maxWidth: 720,
-                        margin: '0 auto 40px',
-                        lineHeight: 1.5,
-                    }}
-                >
-                    GİB uyumlu e-Fatura, e-Arşiv, e-İrsaliye ve daha fazlasını görsel tasarımcıyla
-                    dakikalar içinde oluşturun. XSLT bilgisi gerekmez.
-                </p>
-
-                <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
-                    <button
-                        type="button"
-                        onClick={onRegister}
+            {/* ====================== HERO ====================== */}
+            <section style={{ position: 'relative', zIndex: 1, padding: '96px 24px 48px' }}>
+                <div style={{ maxWidth: 880, margin: '0 auto', textAlign: 'center' }}>
+                    {/* Badge */}
+                    <div
                         style={{
-                            padding: '14px 28px',
-                            background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: 8,
-                            fontSize: 16,
-                            fontWeight: 600,
-                            cursor: 'pointer',
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: 8,
-                            boxShadow: '0 4px 14px rgba(99, 102, 241, 0.4)',
+                            padding: '8px 16px',
+                            background: 'rgba(99,102,241,0.12)',
+                            backdropFilter: 'blur(10px)',
+                            WebkitBackdropFilter: 'blur(10px)',
+                            border: '1px solid rgba(99,102,241,0.35)',
+                            borderRadius: 999,
+                            fontSize: 13,
+                            color: '#c7d2fe',
+                            fontWeight: 500,
+                            marginBottom: 28,
                         }}
                     >
-                        Ücretsiz Üye Ol <ArrowRight size={18} />
-                    </button>
+                        ✨ Yeni: e-SMM, e-Müstahsil, e-Bilet desteği eklendi
+                    </div>
 
-                    <button
-                        type="button"
-                        onClick={onLogin}
+                    {/* Headline */}
+                    <h1
                         style={{
-                            padding: '14px 28px',
-                            background: 'transparent',
-                            color: '#e2e8f0',
-                            border: '1px solid #475569',
-                            borderRadius: 8,
-                            fontSize: 16,
-                            fontWeight: 600,
-                            cursor: 'pointer',
+                            fontSize: 'clamp(40px, 7vw, 76px)',
+                            fontWeight: 800,
+                            margin: '0 0 24px',
+                            lineHeight: 1.05,
+                            letterSpacing: '-0.02em',
+                            background: 'linear-gradient(135deg, #ffffff 0%, #a5b4fc 50%, #c4b5fd 100%)',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            backgroundClip: 'text',
                         }}
                     >
-                        Zaten üyeyim, giriş yap
-                    </button>
-                </div>
+                        e-Belge Tasarım
+                        <br />
+                        Artık Çok Kolay
+                    </h1>
 
-                <p style={{ marginTop: 20, fontSize: 13, color: '#64748b' }}>
-                    Kredi kartı gerekmez • 5 ücretsiz tasarım hakkı • Kredi paketi ile devam
-                </p>
-            </header>
+                    {/* Subtitle */}
+                    <p
+                        style={{
+                            fontSize: 'clamp(16px, 2vw, 19px)',
+                            color: '#cbd5e1',
+                            maxWidth: 680,
+                            margin: '0 auto 40px',
+                            lineHeight: 1.6,
+                        }}
+                    >
+                        GİB uyumlu{' '}
+                        <strong style={{ color: '#f1f5f9' }}>e-Fatura, e-Arşiv, e-İrsaliye</strong>{' '}
+                        ve daha fazlasını görsel tasarımcıyla dakikalar içinde oluşturun.{' '}
+                        <u style={{ textDecorationStyle: 'dotted', textUnderlineOffset: 4 }}>
+                            XSLT bilgisi gerekmez.
+                        </u>
+                    </p>
 
-            {/* Doc Types Strip */}
-            <section
-                style={{
-                    padding: '32px 24px',
-                    background: 'rgba(15, 23, 42, 0.5)',
-                    borderTop: '1px solid #1e293b',
-                    borderBottom: '1px solid #1e293b',
-                }}
-            >
-                <div
-                    style={{
-                        maxWidth: 1200,
-                        margin: '0 auto',
-                        display: 'flex',
-                        gap: 24,
-                        flexWrap: 'wrap',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                    }}
-                >
-                    <span style={{ color: '#94a3b8', fontSize: 14, fontWeight: 600 }}>
-                        Desteklenen Belge Türleri:
-                    </span>
-                    {docTypes.map((dt) => (
-                        <span
-                            key={dt.id}
+                    {/* CTAs */}
+                    <div
+                        style={{
+                            display: 'flex',
+                            gap: 14,
+                            justifyContent: 'center',
+                            flexWrap: 'wrap',
+                            marginBottom: 28,
+                        }}
+                    >
+                        <button
+                            type="button"
+                            onClick={onRegister}
                             style={{
+                                padding: '16px 32px',
+                                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                                color: '#fff',
+                                border: 'none',
+                                borderRadius: 12,
+                                fontSize: 16,
+                                fontWeight: 600,
+                                cursor: 'pointer',
                                 display: 'inline-flex',
                                 alignItems: 'center',
-                                gap: 6,
-                                padding: '6px 12px',
-                                background: '#1e293b',
-                                border: '1px solid #334155',
-                                borderRadius: 6,
-                                fontSize: 13,
-                                color: '#e2e8f0',
+                                gap: 10,
+                                boxShadow:
+                                    '0 8px 32px rgba(99,102,241,0.45), inset 0 1px 0 rgba(255,255,255,0.15)',
+                                transition: 'transform 0.2s, box-shadow 0.2s',
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                e.currentTarget.style.boxShadow =
+                                    '0 12px 40px rgba(99,102,241,0.55), inset 0 1px 0 rgba(255,255,255,0.2)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow =
+                                    '0 8px 32px rgba(99,102,241,0.45), inset 0 1px 0 rgba(255,255,255,0.15)';
                             }}
                         >
-                            <span style={{ fontSize: 16 }}>{dt.icon}</span>
-                            {dt.label}
-                        </span>
-                    ))}
+                            Ücretsiz Üye Ol <ArrowRight size={18} />
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={onLogin}
+                            style={{
+                                padding: '16px 28px',
+                                background: 'rgba(255,255,255,0.04)',
+                                backdropFilter: 'blur(10px)',
+                                WebkitBackdropFilter: 'blur(10px)',
+                                color: '#e2e8f0',
+                                border: '1px solid rgba(255,255,255,0.12)',
+                                borderRadius: 12,
+                                fontSize: 16,
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                transition: 'background 0.2s, border-color 0.2s',
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
+                                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.22)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+                                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)';
+                            }}
+                        >
+                            Zaten üyeyim, giriş yap
+                        </button>
+                    </div>
+
+                    {/* Trust line */}
+                    <div
+                        style={{
+                            display: 'flex',
+                            gap: 24,
+                            justifyContent: 'center',
+                            flexWrap: 'wrap',
+                            fontSize: 13,
+                            color: '#94a3b8',
+                        }}
+                    >
+                        {[
+                            { text: 'Kredi kartı gerekmez' },
+                            { text: '5 ücretsiz tasarım hakkı' },
+                            { text: 'İstediğin zaman iptal' },
+                        ].map((t, i) => (
+                            <div
+                                key={i}
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                            >
+                                <Check size={14} color="#10b981" />
+                                <span>{t.text}</span>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </section>
 
-            {/* Features Grid */}
-            <section style={{ padding: '80px 24px', maxWidth: 1200, margin: '0 auto' }}>
-                <h2
-                    style={{
-                        fontSize: 36,
-                        fontWeight: 700,
-                        textAlign: 'center',
-                        margin: '0 0 16px',
-                    }}
-                >
-                    Neden EDesign?
-                </h2>
-                <p
-                    style={{
-                        fontSize: 16,
-                        color: '#94a3b8',
-                        textAlign: 'center',
-                        maxWidth: 600,
-                        margin: '0 auto 48px',
-                    }}
-                >
-                    Tasarımcıdan muhasebeciye kadar herkes için. GİB uyumlu, hızlı, web tabanlı.
-                </p>
+            {/* ====================== DOC TYPES GRID ====================== */}
+            <section style={{ position: 'relative', zIndex: 1, padding: '64px 24px 32px' }}>
+                <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+                    <div style={{ textAlign: 'center', marginBottom: 48 }}>
+                        <div
+                            style={{
+                                display: 'inline-block',
+                                padding: '4px 12px',
+                                background: 'rgba(255,255,255,0.06)',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                borderRadius: 999,
+                                fontSize: 12,
+                                fontWeight: 600,
+                                color: '#a5b4fc',
+                                letterSpacing: 1.2,
+                                marginBottom: 16,
+                            }}
+                        >
+                            BELGE PORTFÖYÜ
+                        </div>
+                        <h2
+                            style={{
+                                fontSize: 'clamp(28px, 4vw, 40px)',
+                                fontWeight: 700,
+                                margin: '0 0 12px',
+                                letterSpacing: '-0.02em',
+                            }}
+                        >
+                            9 Belge Türü, Tek Tasarımcı
+                        </h2>
+                        <p
+                            style={{
+                                fontSize: 16,
+                                color: '#94a3b8',
+                                maxWidth: 540,
+                                margin: '0 auto',
+                            }}
+                        >
+                            GİB'in tüm aktif e-belge türleri için hazır şablonlar
+                        </p>
+                    </div>
 
+                    <div
+                        style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+                            gap: 16,
+                        }}
+                    >
+                        {DOC_TYPES.map((dt) => (
+                            <DocTypeCard key={dt.id} card={dt} onRegister={onRegister} />
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* ====================== STATS ====================== */}
+            <section style={{ position: 'relative', zIndex: 1, padding: '48px 24px 64px' }}>
                 <div
                     style={{
+                        maxWidth: 1080,
+                        margin: '0 auto',
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                        gap: 24,
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                        gap: 16,
                     }}
                 >
-                    {features.map((f, i) => (
+                    {STATS.map((s, i) => (
                         <div
                             key={i}
                             style={{
-                                padding: 24,
-                                background: 'rgba(30, 41, 59, 0.5)',
-                                border: '1px solid #334155',
-                                borderRadius: 12,
-                                transition: 'transform 0.2s, border-color 0.2s',
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.borderColor = '#6366f1';
-                                e.currentTarget.style.transform = 'translateY(-2px)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.borderColor = '#334155';
-                                e.currentTarget.style.transform = 'translateY(0)';
+                                padding: '24px 20px',
+                                background: 'rgba(255,255,255,0.03)',
+                                backdropFilter: 'blur(10px)',
+                                WebkitBackdropFilter: 'blur(10px)',
+                                border: '1px solid rgba(255,255,255,0.08)',
+                                borderRadius: 14,
+                                textAlign: 'center',
                             }}
                         >
                             <div
                                 style={{
-                                    display: 'inline-flex',
-                                    padding: 10,
-                                    background: 'rgba(99, 102, 241, 0.1)',
-                                    color: '#818cf8',
-                                    borderRadius: 8,
-                                    marginBottom: 12,
+                                    fontSize: 32,
+                                    fontWeight: 800,
+                                    color: s.accent,
+                                    marginBottom: 4,
+                                    letterSpacing: '-0.02em',
                                 }}
                             >
-                                {f.icon}
+                                {s.value}
                             </div>
-                            <h3 style={{ fontSize: 18, fontWeight: 600, margin: '0 0 8px' }}>
-                                {f.title}
-                            </h3>
-                            <p style={{ fontSize: 14, color: '#94a3b8', margin: 0, lineHeight: 1.5 }}>
-                                {f.desc}
-                            </p>
+                            <div
+                                style={{
+                                    fontSize: 13,
+                                    color: '#94a3b8',
+                                    fontWeight: 500,
+                                }}
+                            >
+                                {s.label}
+                            </div>
                         </div>
                     ))}
                 </div>
             </section>
 
-            {/* CTA */}
+            {/* ====================== FEATURES GRID ====================== */}
             <section
                 style={{
+                    position: 'relative',
+                    zIndex: 1,
                     padding: '80px 24px',
-                    background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.05))',
-                    borderTop: '1px solid #1e293b',
-                    textAlign: 'center',
-                }}
-            >
-                <h2 style={{ fontSize: 32, fontWeight: 700, margin: '0 0 16px' }}>
-                    Hemen Başla, 5 Ücretsiz Tasarım Hakkı Seni Bekliyor
-                </h2>
-                <p style={{ fontSize: 16, color: '#94a3b8', margin: '0 0 32px', maxWidth: 600, marginLeft: 'auto', marginRight: 'auto' }}>
-                    Kredi kartı istemiyoruz. Üye ol, ilk tasarımını oluştur, beğenirsen kredi paketi satın al.
-                </p>
-                <button
-                    type="button"
-                    onClick={onRegister}
-                    style={{
-                        padding: '16px 32px',
-                        background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: 8,
-                        fontSize: 17,
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: 8,
-                        boxShadow: '0 4px 14px rgba(99, 102, 241, 0.4)',
-                    }}
-                >
-                    Ücretsiz Üye Ol <ArrowRight size={18} />
-                </button>
-            </section>
-
-            {/* Footer */}
-            <footer
-                style={{
-                    padding: '40px 24px',
-                    textAlign: 'center',
-                    borderTop: '1px solid #1e293b',
-                    color: '#64748b',
-                    fontSize: 13,
+                    background:
+                        'linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.02) 50%, transparent 100%)',
                 }}
             >
                 <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-                    <p style={{ margin: '0 0 8px' }}>
+                    <div style={{ textAlign: 'center', marginBottom: 56 }}>
+                        <div
+                            style={{
+                                display: 'inline-block',
+                                padding: '4px 12px',
+                                background: 'rgba(255,255,255,0.06)',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                borderRadius: 999,
+                                fontSize: 12,
+                                fontWeight: 600,
+                                color: '#a5b4fc',
+                                letterSpacing: 1.2,
+                                marginBottom: 16,
+                            }}
+                        >
+                            ÖZELLİKLER
+                        </div>
+                        <h2
+                            style={{
+                                fontSize: 'clamp(28px, 4vw, 40px)',
+                                fontWeight: 700,
+                                margin: '0 0 12px',
+                                letterSpacing: '-0.02em',
+                            }}
+                        >
+                            Neden EDesign?
+                        </h2>
+                        <p
+                            style={{
+                                fontSize: 16,
+                                color: '#94a3b8',
+                                maxWidth: 600,
+                                margin: '0 auto',
+                            }}
+                        >
+                            Tasarımcıdan muhasebeciye kadar herkes için. GİB uyumlu, hızlı, web tabanlı.
+                        </p>
+                    </div>
+
+                    <div
+                        style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                            gap: 20,
+                        }}
+                    >
+                        {FEATURES.map((f, i) => (
+                            <FeatureCard key={i} feature={f} />
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* ====================== FINAL CTA ====================== */}
+            <section style={{ position: 'relative', zIndex: 1, padding: '40px 24px 80px' }}>
+                <div
+                    style={{
+                        maxWidth: 920,
+                        margin: '0 auto',
+                        padding: '64px 40px',
+                        background:
+                            'linear-gradient(135deg, rgba(99,102,241,0.18) 0%, rgba(139,92,246,0.12) 50%, rgba(236,72,153,0.08) 100%)',
+                        backdropFilter: 'blur(20px)',
+                        WebkitBackdropFilter: 'blur(20px)',
+                        border: '1px solid rgba(255,255,255,0.12)',
+                        borderRadius: 24,
+                        textAlign: 'center',
+                        position: 'relative',
+                        overflow: 'hidden',
+                    }}
+                >
+                    <h2
+                        style={{
+                            fontSize: 'clamp(24px, 3.5vw, 36px)',
+                            fontWeight: 700,
+                            margin: '0 0 16px',
+                            letterSpacing: '-0.01em',
+                        }}
+                    >
+                        Hemen Başla,{' '}
+                        <span
+                            style={{
+                                background:
+                                    'linear-gradient(135deg, #a5b4fc 0%, #f0abfc 100%)',
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent',
+                                backgroundClip: 'text',
+                            }}
+                        >
+                            5 Ücretsiz
+                        </span>{' '}
+                        Tasarım Hakkı Seni Bekliyor
+                    </h2>
+                    <p
+                        style={{
+                            fontSize: 16,
+                            color: '#cbd5e1',
+                            margin: '0 auto 36px',
+                            maxWidth: 560,
+                            lineHeight: 1.6,
+                        }}
+                    >
+                        Kredi kartı istemiyoruz. Üye ol, ilk tasarımını oluştur, beğenirsen kredi
+                        paketi satın al.
+                    </p>
+                    <button
+                        type="button"
+                        onClick={onRegister}
+                        style={{
+                            padding: '18px 36px',
+                            background: 'linear-gradient(135deg, #6366f1 0%, #ec4899 100%)',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: 12,
+                            fontSize: 17,
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 10,
+                            boxShadow:
+                                '0 12px 40px rgba(99,102,241,0.5), inset 0 1px 0 rgba(255,255,255,0.2)',
+                            transition: 'transform 0.2s',
+                        }}
+                        onMouseEnter={(e) =>
+                            (e.currentTarget.style.transform = 'translateY(-2px)')
+                        }
+                        onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
+                    >
+                        Ücretsiz Üye Ol <ArrowRight size={18} />
+                    </button>
+                </div>
+            </section>
+
+            {/* ====================== FOOTER ====================== */}
+            <footer
+                style={{
+                    position: 'relative',
+                    zIndex: 1,
+                    padding: '40px 24px',
+                    borderTop: '1px solid rgba(255,255,255,0.06)',
+                    color: '#64748b',
+                    fontSize: 13,
+                    textAlign: 'center',
+                }}
+            >
+                <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+                    <p style={{ margin: '0 0 8px', color: '#94a3b8', fontWeight: 500 }}>
                         EDesign — GİB UBL-TR uyumlu e-Belge görsel tasarımcısı
                     </p>
-                    <p style={{ margin: 0, color: '#475569' }}>
+                    <p style={{ margin: 0 }}>
                         © 2026 EDesign · GitHub Pages + Railway · UBL 2.1 · Açık kaynak XSLT'ler
                     </p>
                 </div>
             </footer>
+        </div>
+    );
+};
+
+// ====================== Sub-components ======================
+
+interface BlobProps {
+    top?: string;
+    left?: string;
+    right?: string;
+    size?: number;
+    color: string;
+}
+
+const Blob: React.FC<BlobProps> = ({ top, left, right, size = 400, color }) => (
+    <div
+        style={{
+            position: 'absolute',
+            top,
+            left,
+            right,
+            width: size,
+            height: size,
+            borderRadius: '50%',
+            background: `radial-gradient(circle, ${color} 0%, transparent 70%)`,
+            filter: 'blur(80px)',
+            pointerEvents: 'none',
+            zIndex: 0,
+        }}
+    />
+);
+
+interface DocTypeCardProps {
+    card: DocTypeCard;
+    onRegister: () => void;
+}
+
+const DocTypeCard: React.FC<DocTypeCardProps> = ({ card, onRegister }) => {
+    const [hover, setHover] = useState(false);
+    return (
+        <div
+            onClick={onRegister}
+            onMouseEnter={() => setHover(true)}
+            onMouseLeave={() => setHover(false)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onRegister();
+                }
+            }}
+            style={{
+                padding: '24px 20px',
+                background: hover
+                    ? `linear-gradient(135deg, ${card.accent}22 0%, transparent 100%)`
+                    : 'rgba(255,255,255,0.025)',
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
+                border: `1px solid ${hover ? card.accent + '66' : 'rgba(255,255,255,0.08)'}`,
+                borderRadius: 16,
+                cursor: 'pointer',
+                transition: 'all 0.25s',
+                transform: hover ? 'translateY(-4px)' : 'translateY(0)',
+                boxShadow: hover ? `0 12px 32px ${card.accent}30` : 'none',
+                position: 'relative',
+                overflow: 'hidden',
+            }}
+        >
+            <div
+                style={{
+                    fontSize: 44,
+                    marginBottom: 14,
+                    filter: hover ? `drop-shadow(0 6px 16px ${card.accent}aa)` : 'none',
+                    transition: 'filter 0.25s',
+                    display: 'inline-block',
+                    lineHeight: 1,
+                }}
+            >
+                {card.icon}
+            </div>
+            <h3
+                style={{
+                    fontSize: 16,
+                    fontWeight: 600,
+                    margin: '0 0 6px',
+                    color: '#f1f5f9',
+                }}
+            >
+                {card.label}
+            </h3>
+            <p
+                style={{
+                    fontSize: 13,
+                    color: '#94a3b8',
+                    margin: 0,
+                    lineHeight: 1.5,
+                }}
+            >
+                {card.desc}
+            </p>
+            <div
+                aria-hidden="true"
+                style={{
+                    position: 'absolute',
+                    top: 16,
+                    right: 16,
+                    width: 8,
+                    height: 8,
+                    borderRadius: '50%',
+                    background: card.accent,
+                    opacity: hover ? 1 : 0.45,
+                    boxShadow: hover ? `0 0 12px ${card.accent}` : 'none',
+                    transition: 'all 0.25s',
+                }}
+            />
+        </div>
+    );
+};
+
+interface FeatureCardProps {
+    feature: FeatureCard;
+}
+
+const FeatureCard: React.FC<FeatureCardProps> = ({ feature }) => {
+    const [hover, setHover] = useState(false);
+    return (
+        <div
+            onMouseEnter={() => setHover(true)}
+            onMouseLeave={() => setHover(false)}
+            style={{
+                padding: 28,
+                background: hover ? 'rgba(99,102,241,0.08)' : 'rgba(255,255,255,0.025)',
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
+                border: `1px solid ${hover ? 'rgba(99,102,241,0.35)' : 'rgba(255,255,255,0.08)'}`,
+                borderRadius: 16,
+                transition: 'all 0.25s',
+                transform: hover ? 'translateY(-3px)' : 'translateY(0)',
+            }}
+        >
+            <div
+                style={{
+                    display: 'inline-flex',
+                    padding: 12,
+                    background: hover ? 'rgba(99,102,241,0.22)' : 'rgba(99,102,241,0.1)',
+                    color: '#a5b4fc',
+                    borderRadius: 10,
+                    marginBottom: 16,
+                    transition: 'background 0.25s',
+                }}
+            >
+                {feature.icon}
+            </div>
+            <h3
+                style={{
+                    fontSize: 17,
+                    fontWeight: 600,
+                    margin: '0 0 8px',
+                    color: '#f1f5f9',
+                }}
+            >
+                {feature.title}
+            </h3>
+            <p
+                style={{
+                    fontSize: 14,
+                    color: '#94a3b8',
+                    margin: 0,
+                    lineHeight: 1.6,
+                }}
+            >
+                {feature.desc}
+            </p>
         </div>
     );
 };
