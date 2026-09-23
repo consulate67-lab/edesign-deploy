@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { FileText, ShoppingCart, Globe, Plane, Package, Zap, Upload, LogOut, User, X, CreditCard, Building2, Phone, Mail, Sparkles, Layout } from 'lucide-react';
+import { FileText, ShoppingCart, Globe, Plane, Package, Zap, Upload, LogOut, User, X, CreditCard, Building2, Phone, Mail, Sparkles, Layout, Truck, Briefcase, Sprout, Ticket, Receipt } from 'lucide-react';
 import { api } from './api';
 import { PaymentModal } from './PaymentModal.tsx';
 import { TemplateGallery } from './TemplateGallery.tsx';
@@ -22,45 +22,66 @@ interface Module {
 const modules: Module[] = [
     {
         id: 'fatura',
-        name: 'E-Fatura',
+        name: 'e-Fatura',
         icon: <FileText size={24} />,
         color: '#6366f1',
-        template: 'Antrepo_Fatura.xslt'
+        template: 'gib/e-Fatura.xslt'
     },
     {
         id: 'arsiv',
-        name: 'E-Arşiv',
+        name: 'e-Arşiv',
         icon: <Package size={24} />,
         color: '#10b981',
-        template: 'antrepo_arsiv.xslt'
+        template: 'gib/e-Fatura.xslt'
     },
     {
-        id: 'mikro',
-        name: 'Mikro İhracat',
-        icon: <Zap size={24} />,
-        color: '#f59e0b',
-        template: 'Antrepo_Arsiv-mikro.xslt'
-    },
-    {
-        id: 'net',
-        name: 'İnternet Satışı',
-        icon: <ShoppingCart size={24} />,
-        color: '#ec4899',
-        template: 'Antrepo_Net.xslt'
-    },
-    {
-        id: 'yolcu',
-        name: 'Yolcu Beraber',
-        icon: <Plane size={24} />,
+        id: 'irsaliye',
+        name: 'e-İrsaliye',
+        icon: <Truck size={24} />,
         color: '#0ea5e9',
-        template: 'Antrepo_Yolcu.xslt'
+        template: 'community/IRPTeam-eWaybill-Irsaliye.xslt'
     },
     {
         id: 'ihracat',
-        name: 'E-İhracat',
+        name: 'e-İhracat',
         icon: <Globe size={24} />,
         color: '#8b5cf6',
-        template: 'Antrepo_Ihracat.xslt'
+        template: 'gib/e-Fatura.xslt'
+    },
+    {
+        id: 'mikro_ihracat',
+        name: 'e-Mikro İhracat',
+        icon: <Plane size={24} />,
+        color: '#a855f7',
+        template: 'gib/e-Fatura.xslt'
+    },
+    {
+        id: 'smm',
+        name: 'e-SMM (Serbest Meslek)',
+        icon: <Briefcase size={24} />,
+        color: '#14b8a6',
+        template: 'community/hzkucuk-eFatura.xslt'
+    },
+    {
+        id: 'mustahsil',
+        name: 'e-Müstahsil Makbuzu',
+        icon: <Sprout size={24} />,
+        color: '#84cc16',
+        template: 'community/hzkucuk-eFatura.xslt'
+    },
+    {
+        id: 'bilet',
+        name: 'e-Bilet',
+        icon: <Ticket size={24} />,
+        color: '#f97316',
+        template: 'community/hzkucuk-eFatura.xslt'
+    },
+    {
+        id: 'makbuz',
+        name: 'e-Makbuz',
+        icon: <Receipt size={24} />,
+        color: '#06b6d4',
+        template: 'community/hzkucuk-eFatura.xslt'
     },
 ];
 

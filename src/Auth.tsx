@@ -1,14 +1,26 @@
 import React, { useState } from 'react';
-import { LogIn, UserPlus, ShieldCheck } from 'lucide-react';
+import { LogIn, UserPlus, ShieldCheck, ArrowLeft } from 'lucide-react';
+
+type AuthMode = 'login' | 'register';
 
 interface AuthProps {
+    mode?: AuthMode;
     onLogin: () => void;
+    onRegister?: () => void;
+    onSwitchMode?: (mode: AuthMode) => void;
+    onBackToLanding?: () => void;
 }
 
 import { api } from './api';
 
-export const Auth: React.FC<AuthProps> = ({ onLogin }) => {
-    const [isLogin, setIsLogin] = useState(true);
+export const Auth: React.FC<AuthProps> = ({
+    mode = 'login',
+    onLogin,
+    onRegister,
+    onSwitchMode,
+    onBackToLanding,
+}) => {
+    const [isLogin, setIsLogin] = useState(mode === 'login');
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
 
@@ -41,8 +53,12 @@ export const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                     phone_number: phoneNumber
                 });
 
-                setSuccessMessage('Hesabınız başarıyla oluşturuldu! Şimdi giriş yapabilirsiniz.');
-                setIsLogin(true); // Switch to login after registration
+                // Auto-login after successful register — better UX than
+                // forcing a second login click.
+                const res = await api.login(username, password);
+                api.setToken(res.token);
+                if (onRegister) onRegister();
+                else onLogin();
             }
         } catch (err: any) {
             setError(err.message || 'Bir hata oluştu');
@@ -51,16 +67,48 @@ export const Auth: React.FC<AuthProps> = ({ onLogin }) => {
         }
     };
 
+    const handleToggleMode = () => {
+        const next = !isLogin;
+        setIsLogin(next);
+        setError('');
+        setSuccessMessage('');
+        if (onSwitchMode) onSwitchMode(next ? 'login' : 'register');
+    };
+
     return (
         <div style={{
             minHeight: '100vh',
             display: 'flex',
+            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
             background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
             fontFamily: 'Inter, sans-serif',
             padding: '2rem'
         }}>
+            {onBackToLanding && (
+                <button
+                    type="button"
+                    onClick={onBackToLanding}
+                    style={{
+                        position: 'absolute',
+                        top: 24,
+                        left: 24,
+                        padding: '8px 16px',
+                        background: 'transparent',
+                        border: '1px solid #334155',
+                        borderRadius: 6,
+                        color: '#94a3b8',
+                        fontSize: 14,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 6,
+                    }}
+                >
+                    <ArrowLeft size={14} /> Ana sayfa
+                </button>
+            )}
             <div style={{
                 width: '100%',
                 maxWidth: isLogin ? '400px' : '500px',
@@ -183,11 +231,8 @@ export const Auth: React.FC<AuthProps> = ({ onLogin }) => {
 
                 <div style={{ marginTop: '2rem', textAlign: 'center' }}>
                     <button
-                        onClick={() => {
-                            setIsLogin(!isLogin);
-                            setError('');
-                            setSuccessMessage('');
-                        }}
+                        type="button"
+                        onClick={handleToggleMode}
                         style={{
                             background: 'none',
                             border: 'none',
