@@ -110,9 +110,18 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
             <Blob top="62%"   right="-12%" size={460} color="rgba(236,72,153,0.18)" />
             <Blob top="82%"   left="22%"  size={380} color="rgba(16,185,129,0.15)" />
 
-            {/* ====================== HERO ====================== */}
-            <section style={{ position: 'relative', zIndex: 1, padding: '96px 24px 48px' }}>
-                <div style={{ maxWidth: 880, margin: '0 auto', textAlign: 'center' }}>
+            {/* ====================== HERO (SPLIT-SCREEN) ====================== */}
+            <section style={{ position: 'relative', zIndex: 1, padding: '64px 24px 48px' }}>
+                <div
+                    style={{
+                        maxWidth: 1200,
+                        margin: '0 auto',
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))',
+                        gap: 56,
+                        alignItems: 'center',
+                    }}
+                >
                     {/* Badge */}
                     <div
                         style={{
@@ -137,7 +146,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                     {/* Headline */}
                     <h1
                         style={{
-                            fontSize: 'clamp(40px, 7vw, 76px)',
+                            fontSize: 'clamp(32px, 4.2vw, 52px)',
                             fontWeight: 800,
                             margin: '0 0 24px',
                             lineHeight: 1.05,
@@ -159,7 +168,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                             fontSize: 'clamp(16px, 2vw, 19px)',
                             color: '#cbd5e1',
                             maxWidth: 680,
-                            margin: '0 auto 40px',
+                            margin: '0 0 28px',
                             lineHeight: 1.6,
                         }}
                     >
@@ -176,7 +185,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                         style={{
                             display: 'flex',
                             gap: 14,
-                            justifyContent: 'center',
+                            justifyContent: 'flex-start',
                             flexWrap: 'wrap',
                             marginBottom: 28,
                         }}
@@ -243,61 +252,18 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                         </button>
                     </div>
                 </div>
-            </section>
 
-            {/* ====================== DOC TYPES GRID ====================== */}
-            <section style={{ position: 'relative', zIndex: 1, padding: '64px 24px 32px' }}>
-                <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-                    <div style={{ textAlign: 'center', marginBottom: 48 }}>
-                        <div
-                            style={{
-                                display: 'inline-block',
-                                padding: '4px 12px',
-                                background: 'rgba(255,255,255,0.06)',
-                                border: '1px solid rgba(255,255,255,0.1)',
-                                borderRadius: 999,
-                                fontSize: 12,
-                                fontWeight: 600,
-                                color: '#a5b4fc',
-                                letterSpacing: 1.2,
-                                marginBottom: 16,
-                            }}
-                        >
-                            BELGE PORTFÖYÜ
-                        </div>
-                        <h2
-                            style={{
-                                fontSize: 'clamp(28px, 4vw, 40px)',
-                                fontWeight: 700,
-                                margin: '0 0 12px',
-                                letterSpacing: '-0.02em',
-                            }}
-                        >
-                            9 Belge Türü, Tek Tasarımcı
-                        </h2>
-                        <p
-                            style={{
-                                fontSize: 16,
-                                color: '#94a3b8',
-                                maxWidth: 540,
-                                margin: '0 auto',
-                            }}
-                        >
-                            GİB'in tüm aktif e-belge türleri için hazır şablonlar
-                        </p>
-                    </div>
-
-                    <div
-                        style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-                            gap: 16,
-                        }}
-                    >
-                        {DOC_TYPES.map((dt) => (
-                            <DocTypeCard key={dt.id} card={dt} onRegister={onRegister} />
-                        ))}
-                    </div>
+                {/* SAĞ KOLON — 9 mini belge kartı grid */}
+                <div
+                    style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(3, 1fr)',
+                        gap: 12,
+                    }}
+                >
+                    {DOC_TYPES.map((dt) => (
+                        <MiniDocCard key={dt.id} card={dt} onRegister={onRegister} />
+                    ))}
                 </div>
             </section>
 
@@ -548,12 +514,16 @@ const Blob: React.FC<BlobProps> = ({ top, left, right, size = 400, color }) => (
     />
 );
 
-interface DocTypeCardProps {
+interface MiniDocCardProps {
     card: DocTypeCard;
     onRegister: () => void;
 }
 
-const DocTypeCard: React.FC<DocTypeCardProps> = ({ card, onRegister }) => {
+/**
+ * Compact doc-type card used inside the split-screen hero (right column).
+ * Shows icon + label only — shorter than the standalone DocTypeCard.
+ */
+const MiniDocCard: React.FC<MiniDocCardProps> = ({ card, onRegister }) => {
     const [hover, setHover] = useState(false);
     return (
         <div
@@ -569,67 +539,56 @@ const DocTypeCard: React.FC<DocTypeCardProps> = ({ card, onRegister }) => {
                 }
             }}
             style={{
-                padding: '24px 20px',
+                padding: '16px 12px',
                 background: hover
                     ? `linear-gradient(135deg, ${card.accent}22 0%, transparent 100%)`
-                    : 'rgba(255,255,255,0.025)',
+                    : 'rgba(255,255,255,0.03)',
                 backdropFilter: 'blur(10px)',
                 WebkitBackdropFilter: 'blur(10px)',
                 border: `1px solid ${hover ? card.accent + '66' : 'rgba(255,255,255,0.08)'}`,
-                borderRadius: 16,
+                borderRadius: 12,
                 cursor: 'pointer',
-                transition: 'all 0.25s',
-                transform: hover ? 'translateY(-4px)' : 'translateY(0)',
-                boxShadow: hover ? `0 12px 32px ${card.accent}30` : 'none',
+                transition: 'all 0.2s',
+                transform: hover ? 'translateY(-2px)' : 'translateY(0)',
+                boxShadow: hover ? `0 8px 24px ${card.accent}30` : 'none',
                 position: 'relative',
-                overflow: 'hidden',
+                textAlign: 'center',
             }}
         >
             <div
                 style={{
-                    fontSize: 44,
-                    marginBottom: 14,
-                    filter: hover ? `drop-shadow(0 6px 16px ${card.accent}aa)` : 'none',
-                    transition: 'filter 0.25s',
-                    display: 'inline-block',
+                    fontSize: 26,
+                    marginBottom: 6,
                     lineHeight: 1,
+                    filter: hover ? `drop-shadow(0 4px 10px ${card.accent}aa)` : 'none',
+                    transition: 'filter 0.2s',
                 }}
             >
                 {card.icon}
             </div>
-            <h3
+            <div
                 style={{
-                    fontSize: 16,
+                    fontSize: 11.5,
                     fontWeight: 600,
-                    margin: '0 0 6px',
                     color: '#f1f5f9',
+                    letterSpacing: 0.2,
                 }}
             >
                 {card.label}
-            </h3>
-            <p
-                style={{
-                    fontSize: 13,
-                    color: '#94a3b8',
-                    margin: 0,
-                    lineHeight: 1.5,
-                }}
-            >
-                {card.desc}
-            </p>
+            </div>
             <div
                 aria-hidden="true"
                 style={{
                     position: 'absolute',
-                    top: 16,
-                    right: 16,
-                    width: 8,
-                    height: 8,
+                    top: 8,
+                    right: 8,
+                    width: 6,
+                    height: 6,
                     borderRadius: '50%',
                     background: card.accent,
                     opacity: hover ? 1 : 0.45,
-                    boxShadow: hover ? `0 0 12px ${card.accent}` : 'none',
-                    transition: 'all 0.25s',
+                    boxShadow: hover ? `0 0 8px ${card.accent}` : 'none',
+                    transition: 'all 0.2s',
                 }}
             />
         </div>
