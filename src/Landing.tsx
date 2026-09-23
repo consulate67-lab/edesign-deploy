@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
     FileText, Layers, Zap, Shield, Sparkles, ArrowRight, Globe,
-    Check, MousePointer,
+    MousePointer,
 } from 'lucide-react';
 
 interface LandingProps {
@@ -241,32 +241,6 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                         >
                             Zaten üyeyim, giriş yap
                         </button>
-                    </div>
-
-                    {/* Trust line */}
-                    <div
-                        style={{
-                            display: 'flex',
-                            gap: 24,
-                            justifyContent: 'center',
-                            flexWrap: 'wrap',
-                            fontSize: 13,
-                            color: '#94a3b8',
-                        }}
-                    >
-                        {[
-                            { text: 'Kredi kartı gerekmez' },
-                            { text: '5 ücretsiz tasarım hakkı' },
-                            { text: 'İstediğin zaman iptal' },
-                        ].map((t, i) => (
-                            <div
-                                key={i}
-                                style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
-                            >
-                                <Check size={14} color="#10b981" />
-                                <span>{t.text}</span>
-                            </div>
-                        ))}
                     </div>
                 </div>
             </section>
