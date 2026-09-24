@@ -15,7 +15,7 @@ interface LandingProps {
  * - Hero: bold gradient başlık (sky → indigo) + 2 CTA
  * - Sticky trust bar
  * - Bento grid + 9 belge strip + final CTA
- * - Sabit CANLI DESTEK (koyu, scroll-safe)
+ * - Sabit WhatsApp butonu (wa.me/905336660125)
  */
 export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
     return (
@@ -812,33 +812,47 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                 </div>
             </footer>
 
-            {/* ====================== CANLI DESTEK ====================== */}
-            <button
-                type="button"
+            {/* ====================== WHATSAPP DESTEK ====================== */}
+            <a
+                href="https://wa.me/905336660125"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="WhatsApp ile iletişime geç"
                 style={{
                     position: 'fixed',
                     bottom: 20,
                     right: 20,
-                    background: 'linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)',
+                    background: 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)',
                     color: '#fff',
-                    border: 'none',
-                    borderRadius: 12,
-                    padding: '12px 18px',
+                    textDecoration: 'none',
+                    borderRadius: 999,
+                    padding: '12px 20px',
                     display: 'flex',
                     alignItems: 'center',
                     gap: 8,
                     cursor: 'pointer',
-                    fontSize: 12,
+                    fontSize: 13,
                     fontWeight: 700,
-                    letterSpacing: 1.5,
-                    boxShadow: '0 8px 24px rgba(14,165,233,0.45)',
+                    letterSpacing: 0.4,
+                    boxShadow: '0 10px 28px rgba(37, 211, 102, 0.45)',
                     zIndex: 30,
                     fontFamily: 'inherit',
+                    transition: 'transform 0.18s, box-shadow 0.2s',
+                }}
+                onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                    e.currentTarget.style.boxShadow =
+                        '0 14px 36px rgba(37, 211, 102, 0.55)';
+                }}
+                onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow =
+                        '0 10px 28px rgba(37, 211, 102, 0.45)';
                 }}
             >
-                <MessageCircle size={14} />
-                CANLI DESTEK
-            </button>
+                <MessageCircle size={15} />
+                WhatsApp · 0533 666 01 25
+            </a>
         </div>
     );
 };
