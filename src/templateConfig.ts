@@ -78,7 +78,7 @@ export const MODULE_CONFIGS: Record<string, TemplateConfig> = {
         hasPassenger: false,
         hasService: false,
         specialFields: ['vehicle', 'driver', 'loading_point', 'unloading_point', 'product_table', 'despatch_info'],
-        defaultTemplate: 'community/IRPTeam-eWaybill-Irsaliye.xslt',
+        defaultTemplate: 'community/IRPTeam-eWaybill-Irsaliye-Aracli.xslt',
         recommendedSample: 'samples/e-Irsaliye-TEMEL.xml',
         description: 'e-İrsaliye — araç/sürücü/mal kabul yeri 3-sütunlu layout.',
     },

@@ -43,8 +43,8 @@ const modules: Module[] = [
         name: 'e-İrsaliye',
         icon: <Truck size={24} />,
         color: '#0ea5e9',
-        // DespatchAdvice-2 şeması için özel XSLT
-        template: 'community/IRPTeam-eWaybill-Irsaliye.xslt'
+        // DespatchAdvice-2 semasi + arac/surucu/mal kabul 3-sutun section
+        template: 'community/IRPTeam-eWaybill-Irsaliye-Aracli.xslt'
     },
     {
         id: 'ihracat',
