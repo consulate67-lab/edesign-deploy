@@ -114,11 +114,11 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
             <section style={{ position: 'relative', zIndex: 1, padding: '64px 24px 48px' }}>
                 <div
                     style={{
-                        maxWidth: 1200,
+                        maxWidth: 1600,
                         margin: '0 auto',
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))',
-                        gap: 56,
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))',
+                        gap: 72,
                         alignItems: 'center',
                     }}
                 >
