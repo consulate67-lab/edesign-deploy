@@ -123,8 +123,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onS
                                     aria-label={`${plan.count} tasarım için ${plan.price} TL paketi seç`}
                                     style={{
                                         position: 'relative',
-                                        // Populer paket icin ust padding (EN POPULER pill icin)
-                                        padding: plan.popular ? '32px 16px 20px' : '20px 16px',
+                                        // Pill artik kartin icinde — esit padding (gorsel tutarlilik)
+                                        padding: '20px 16px',
                                         background: plan.popular
                                             ? 'linear-gradient(135deg, rgba(99,102,241,0.18) 0%, rgba(14,165,233,0.10) 100%)'
                                             : 'rgba(255,255,255,0.04)',
@@ -136,7 +136,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onS
                                         transition: 'transform 0.18s, border-color 0.18s, background 0.18s',
                                         display: 'flex',
                                         flexDirection: 'column',
-                                        gap: 6,
+                                        gap: 4,
                                         textAlign: 'left',
                                         fontFamily: 'inherit',
                                         color: '#f8fafc',
@@ -155,14 +155,14 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onS
                                 >
                                     {plan.popular && (
                                         <div style={{
-                                            position: 'absolute',
-                                            top: -10,
-                                            left: '50%',
-                                            transform: 'translateX(-50%)',
-                                            padding: '3px 10px',
+                                            // Pill kartin icinde, altindaki icerikle cakismaz
+                                            position: 'relative',
+                                            alignSelf: 'center',
+                                            marginBottom: 8,
+                                            padding: '2px 10px',
                                             background: 'linear-gradient(90deg, #6366f1, #0ea5e9)',
                                             color: '#fff',
-                                            fontSize: 10,
+                                            fontSize: 9,
                                             fontWeight: 700,
                                             borderRadius: 999,
                                             letterSpacing: 1.5,
@@ -170,7 +170,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onS
                                             alignItems: 'center',
                                             gap: 4,
                                         }}>
-                                            <Sparkles size={10} /> EN POPÜLER
+                                            <Sparkles size={9} /> EN POPÜLER
                                         </div>
                                     )}
 
@@ -185,14 +185,14 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onS
                                     </div>
 
                                     <div style={{
-                                        fontSize: 26,
+                                        fontSize: 24,
                                         fontWeight: 800,
                                         color: '#f8fafc',
                                         letterSpacing: '-0.02em',
                                         marginTop: 2,
                                     }}>
                                         {plan.price.toLocaleString('tr-TR')}
-                                        <span style={{ fontSize: 15, color: '#94a3b8', fontWeight: 600 }}> TL</span>
+                                        <span style={{ fontSize: 13, color: '#94a3b8', fontWeight: 600 }}> TL</span>
                                     </div>
 
                                     <div style={{
