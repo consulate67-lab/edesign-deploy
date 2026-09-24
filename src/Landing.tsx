@@ -276,7 +276,6 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                     </div>
 
                     <div style={{ fontSize: 14, color: '#94a3b8' }}>
-                        Kredi kartı gerekmez ·{' '}
                         <a
                             href="#"
                             onClick={(e) => { e.preventDefault(); onLogin(); }}
@@ -618,7 +617,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                         Fiyatlandırma
                     </h2>
                     <p style={{ fontSize: 15, color: '#94a3b8', margin: 0 }}>
-                        İhtiyacınıza uygun paketi seçin. Kredi kartı gerekmez.
+                        İhtiyacınıza uygun paketi seçin.
                     </p>
                 </div>
 
@@ -764,7 +763,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                             lineHeight: 1.5,
                         }}
                     >
-                        Kredi kartı gerekmez. Beş ücretsiz tasarım hakkı.
+                        Beş ücretsiz tasarım hakkı.
                     </p>
                     <button
                         type="button"
