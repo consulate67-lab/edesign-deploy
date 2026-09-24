@@ -594,13 +594,141 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                 </div>
             </section>
 
-            {/* ====================== FINAL CTA ====================== */}
+            {/* ====================== PRICING ====================== */}
             <section
                 id="fiyatlar"
                 style={{
                     position: 'relative',
                     zIndex: 1,
-                    padding: '48px 32px',
+                    padding: '64px 32px 32px',
+                    maxWidth: 1280,
+                    margin: '0 auto',
+                }}
+            >
+                <div style={{ textAlign: 'center', marginBottom: 40 }}>
+                    <h2
+                        style={{
+                            fontSize: 'clamp(28px, 3.5vw, 40px)',
+                            fontWeight: 800,
+                            letterSpacing: '-0.02em',
+                            margin: '0 0 8px',
+                            color: '#f8fafc',
+                        }}
+                    >
+                        Fiyatlandırma
+                    </h2>
+                    <p style={{ fontSize: 15, color: '#94a3b8', margin: 0 }}>
+                        İhtiyacınıza uygun paketi seçin. Kredi kartı gerekmez.
+                    </p>
+                </div>
+
+                <div
+                    style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))',
+                        gap: 14,
+                    }}
+                >
+                    {[
+                        { name: 'Starter', count: 1, price: 400, perUnit: 400, popular: false, accent: '#64748b' },
+                        { name: 'Basic', count: 10, price: 3000, perUnit: 300, popular: false, accent: '#0ea5e9' },
+                        { name: 'Pro', count: 30, price: 5500, perUnit: 183, popular: true, accent: '#6366f1' },
+                        { name: 'Business', count: 50, price: 4500, perUnit: 90, popular: false, accent: '#10b981' },
+                        { name: 'Enterprise', count: 100, price: 6000, perUnit: 60, popular: false, accent: '#ec4899' },
+                    ].map((p) => (
+                        <div
+                            key={p.name}
+                            style={{
+                                position: 'relative',
+                                padding: 22,
+                                background: p.popular
+                                    ? 'linear-gradient(135deg, rgba(99,102,241,0.18) 0%, rgba(14,165,233,0.10) 100%)'
+                                    : 'rgba(255,255,255,0.04)',
+                                border: p.popular
+                                    ? '2px solid #6366f1'
+                                    : '1px solid rgba(248,250,252,0.08)',
+                                borderRadius: 16,
+                                transition: 'transform 0.2s, border-color 0.2s',
+                                boxShadow: p.popular ? '0 16px 40px rgba(99,102,241,0.25)' : 'none',
+                            }}
+                        >
+                            {p.popular && (
+                                <div
+                                    style={{
+                                        position: 'absolute',
+                                        top: -10,
+                                        left: '50%',
+                                        transform: 'translateX(-50%)',
+                                        padding: '3px 10px',
+                                        background: 'linear-gradient(90deg, #6366f1, #0ea5e9)',
+                                        color: '#fff',
+                                        fontSize: 10,
+                                        fontWeight: 700,
+                                        borderRadius: 999,
+                                        letterSpacing: 1.5,
+                                    }}
+                                >
+                                    EN POPÜLER
+                                </div>
+                            )}
+                            <div
+                                style={{
+                                    fontSize: 11,
+                                    fontWeight: 700,
+                                    color: p.accent,
+                                    textTransform: 'uppercase',
+                                    letterSpacing: 1.5,
+                                    marginBottom: 8,
+                                }}
+                            >
+                                {p.name}
+                            </div>
+                            <div
+                                style={{
+                                    fontSize: 28,
+                                    fontWeight: 800,
+                                    color: '#f8fafc',
+                                    marginBottom: 2,
+                                    letterSpacing: '-0.02em',
+                                }}
+                            >
+                                {p.price.toLocaleString('tr-TR')} <span style={{ fontSize: 16, color: '#94a3b8', fontWeight: 600 }}>TL</span>
+                            </div>
+                            <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 14 }}>
+                                {p.count} tasarım hakkı · {p.perUnit} TL / tasarım
+                            </div>
+                            <button
+                                type="button"
+                                onClick={onRegister}
+                                style={{
+                                    width: '100%',
+                                    padding: '9px 14px',
+                                    background: p.popular
+                                        ? 'linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)'
+                                        : 'rgba(255,255,255,0.06)',
+                                    color: '#fff',
+                                    border: p.popular ? 'none' : '1px solid rgba(248,250,252,0.16)',
+                                    borderRadius: 10,
+                                    fontSize: 13,
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                    fontFamily: 'inherit',
+                                }}
+                            >
+                                Seç
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+            {/* ====================== FINAL CTA ====================== */}
+            <section
+                id="son-adim"
+                style={{
+                    position: 'relative',
+                    zIndex: 1,
+                    padding: '32px 32px 48px',
                 }}
             >
                 <div
