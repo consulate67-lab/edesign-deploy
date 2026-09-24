@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, MessageCircle, Sparkles, Shield, Zap, FileText, Globe, Layers } from 'lucide-react';
+import { ArrowRight, MessageCircle, Sparkles, Zap, FileText, Globe, Layers } from 'lucide-react';
 
 interface LandingProps {
     onRegister: () => void;
@@ -7,23 +7,24 @@ interface LandingProps {
 }
 
 /**
- * Landing — "Modern Bento" tarzı.
- * - Sticky glass nav (backdrop-filter blur)
- * - Açık mavi gradient + subtle blur orb background
- * - Bold serif/sans typografi
- * - Bento grid: 1 büyük showcase kartı + 4 küçük feature kartı
- * - Sticky trust bar (GİB, XSLT, vb.)
- * - Sabit CANLI DESTEK (sadece position:fixed, scroll'u engellemez)
+ * Landing — "Dark Modern Bento" tarzı.
+ * - Koyu gradient background (#020617 → #0a0f1f → #1e1b4b)
+ * - Subtle blur orb background
+ * - Glass card'lar (rgba(255,255,255,0.04) + light border)
+ * - Logo kaldırıldı (sadece nav + CTA)
+ * - Hero: bold gradient başlık (sky → indigo) + 2 CTA
+ * - Sticky trust bar
+ * - Bento grid + 9 belge strip + final CTA
+ * - Sabit CANLI DESTEK (koyu, scroll-safe)
  */
 export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
     return (
-        // Outer container — scroll için overflow:visible (default), sadece min-height
         <div
             style={{
                 minHeight: '100vh',
                 width: '100%',
-                background: 'linear-gradient(180deg, #eff6ff 0%, #ffffff 35%, #f0f9ff 100%)',
-                color: '#0f172a',
+                background: 'linear-gradient(180deg, #020617 0%, #0a0f1f 50%, #1e1b4b 100%)',
+                color: '#f8fafc',
                 fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
                 position: 'relative',
                 overflowX: 'hidden',
@@ -39,7 +40,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                     width: 600,
                     height: 600,
                     borderRadius: '50%',
-                    background: 'radial-gradient(circle, rgba(59,130,246,0.18) 0%, transparent 70%)',
+                    background: 'radial-gradient(circle, rgba(59,130,246,0.22) 0%, transparent 70%)',
                     filter: 'blur(40px)',
                     pointerEvents: 'none',
                     zIndex: 0,
@@ -54,7 +55,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                     width: 500,
                     height: 500,
                     borderRadius: '50%',
-                    background: 'radial-gradient(circle, rgba(14,165,233,0.14) 0%, transparent 70%)',
+                    background: 'radial-gradient(circle, rgba(14,165,233,0.18) 0%, transparent 70%)',
                     filter: 'blur(50px)',
                     pointerEvents: 'none',
                     zIndex: 0,
@@ -69,7 +70,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                     width: 700,
                     height: 700,
                     borderRadius: '50%',
-                    background: 'radial-gradient(circle, rgba(99,102,241,0.10) 0%, transparent 70%)',
+                    background: 'radial-gradient(circle, rgba(139,92,246,0.16) 0%, transparent 70%)',
                     filter: 'blur(60px)',
                     pointerEvents: 'none',
                     zIndex: 0,
@@ -83,10 +84,10 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                     top: 0,
                     zIndex: 50,
                     padding: '14px 32px',
-                    background: 'rgba(255,255,255,0.65)',
+                    background: 'rgba(2,6,23,0.65)',
                     backdropFilter: 'blur(16px) saturate(160%)',
                     WebkitBackdropFilter: 'blur(16px) saturate(160%)',
-                    borderBottom: '1px solid rgba(15,23,42,0.06)',
+                    borderBottom: '1px solid rgba(248,250,252,0.08)',
                 }}
             >
                 <div
@@ -94,35 +95,18 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                         maxWidth: 1280,
                         margin: '0 auto',
                         display: 'flex',
-                        justifyContent: 'space-between',
+                        justifyContent: 'flex-end',
                         alignItems: 'center',
+                        gap: 24,
                     }}
                 >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ color: '#f97316', fontWeight: 800, fontSize: 30 }}>E</span>
-                        <span style={{ color: '#0ea5e9', fontWeight: 800, fontSize: 30 }}>Design</span>
-                        <span
-                            style={{
-                                marginLeft: 8,
-                                padding: '3px 8px',
-                                background: 'linear-gradient(90deg, #3b82f6, #0ea5e9)',
-                                color: '#fff',
-                                borderRadius: 999,
-                                fontSize: 10,
-                                fontWeight: 700,
-                                letterSpacing: 1.2,
-                            }}
-                        >
-                            v2.0
-                        </span>
-                    </div>
                     <nav
                         style={{
                             display: 'flex',
                             gap: 28,
                             fontSize: 14,
                             fontWeight: 500,
-                            color: '#334155',
+                            color: '#cbd5e1',
                         }}
                     >
                         <a href="#urun" style={{ color: 'inherit', textDecoration: 'none' }}>Ürün</a>
@@ -141,7 +125,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                                 fontSize: 14,
                                 fontWeight: 600,
                                 cursor: 'pointer',
-                                color: '#1e293b',
+                                color: '#e2e8f0',
                             }}
                         >
                             Giriş
@@ -151,7 +135,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                             onClick={onRegister}
                             style={{
                                 padding: '10px 20px',
-                                background: '#0f172a',
+                                background: 'linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)',
                                 color: '#fff',
                                 border: 'none',
                                 borderRadius: 10,
@@ -161,7 +145,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                                 display: 'inline-flex',
                                 alignItems: 'center',
                                 gap: 6,
-                                boxShadow: '0 4px 14px rgba(15,23,42,0.25)',
+                                boxShadow: '0 6px 20px rgba(99,102,241,0.35)',
                             }}
                         >
                             Ücretsiz başla <ArrowRight size={14} />
@@ -188,14 +172,14 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                             alignItems: 'center',
                             gap: 8,
                             padding: '6px 14px',
-                            background: 'rgba(255,255,255,0.7)',
+                            background: 'rgba(255,255,255,0.06)',
                             backdropFilter: 'blur(10px)',
                             WebkitBackdropFilter: 'blur(10px)',
-                            border: '1px solid rgba(15,23,42,0.08)',
+                            border: '1px solid rgba(248,250,252,0.12)',
                             borderRadius: 999,
                             fontSize: 13,
                             fontWeight: 500,
-                            color: '#475569',
+                            color: '#cbd5e1',
                             marginBottom: 24,
                         }}
                     >
@@ -211,13 +195,13 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                             lineHeight: 1.05,
                             letterSpacing: '-0.03em',
                             margin: '0 0 20px',
-                            color: '#0f172a',
+                            color: '#f8fafc',
                         }}
                     >
                         e-Fatura tasarımı{' '}
                         <span
                             style={{
-                                background: 'linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)',
+                                background: 'linear-gradient(135deg, #38bdf8 0%, #818cf8 100%)',
                                 WebkitBackgroundClip: 'text',
                                 WebkitTextFillColor: 'transparent',
                                 backgroundClip: 'text',
@@ -231,13 +215,13 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                     <p
                         style={{
                             fontSize: 19,
-                            color: '#475569',
+                            color: '#94a3b8',
                             margin: '0 auto 32px',
                             lineHeight: 1.55,
                             maxWidth: 640,
                         }}
                     >
-                        GİB uyumlu <strong style={{ color: '#0f172a' }}>e-Fatura, e-Arşiv, e-İrsaliye</strong>{' '}
+                        GİB uyumlu <strong style={{ color: '#f1f5f9' }}>e-Fatura, e-Arşiv, e-İrsaliye</strong>{' '}
                         ve 6 tür daha. Şablonu seç, logo-kaşe-bankasını ekle, XML önizle.
                         XSLT bilgisi olmadan dakikalar içinde profesyonel tasarım.
                     </p>
@@ -257,7 +241,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                             onClick={onRegister}
                             style={{
                                 padding: '14px 28px',
-                                background: '#0f172a',
+                                background: 'linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)',
                                 color: '#fff',
                                 border: 'none',
                                 borderRadius: 12,
@@ -267,7 +251,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                                 display: 'inline-flex',
                                 alignItems: 'center',
                                 gap: 8,
-                                boxShadow: '0 8px 24px rgba(15,23,42,0.3)',
+                                boxShadow: '0 8px 28px rgba(99,102,241,0.45)',
                             }}
                         >
                             Ücretsiz hesap aç <ArrowRight size={16} />
@@ -276,9 +260,9 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                             type="button"
                             style={{
                                 padding: '14px 26px',
-                                background: 'rgba(255,255,255,0.85)',
-                                color: '#0f172a',
-                                border: '1px solid rgba(15,23,42,0.12)',
+                                background: 'rgba(255,255,255,0.06)',
+                                color: '#f8fafc',
+                                border: '1px solid rgba(248,250,252,0.16)',
                                 borderRadius: 12,
                                 fontSize: 15,
                                 fontWeight: 600,
@@ -291,12 +275,12 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                         </button>
                     </div>
 
-                    <div style={{ fontSize: 14, color: '#64748b' }}>
+                    <div style={{ fontSize: 14, color: '#94a3b8' }}>
                         Kredi kartı gerekmez ·{' '}
                         <a
                             href="#"
                             onClick={(e) => { e.preventDefault(); onLogin(); }}
-                            style={{ color: '#0ea5e9', textDecoration: 'underline', fontWeight: 500 }}
+                            style={{ color: '#38bdf8', textDecoration: 'underline', fontWeight: 500 }}
                         >
                             Zaten üyeyim
                         </a>
@@ -317,10 +301,10 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                         maxWidth: 1080,
                         margin: '0 auto',
                         padding: '20px 28px',
-                        background: 'rgba(255,255,255,0.65)',
+                        background: 'rgba(255,255,255,0.04)',
                         backdropFilter: 'blur(16px) saturate(160%)',
                         WebkitBackdropFilter: 'blur(16px) saturate(160%)',
-                        border: '1px solid rgba(15,23,42,0.06)',
+                        border: '1px solid rgba(248,250,252,0.08)',
                         borderRadius: 18,
                         display: 'grid',
                         gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
@@ -330,9 +314,9 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                 >
                     {[
                         { v: 'GİB', l: 'UBL-TR Resmi Uyumlu', a: '#10b981' },
-                        { v: '9', l: 'Belge Türü Desteği', a: '#0ea5e9' },
+                        { v: '9', l: 'Belge Türü Desteği', a: '#38bdf8' },
                         { v: '5', l: 'Ücretsiz Tasarım Hakkı', a: '#ec4899' },
-                        { v: '%100', l: 'Web Tabanlı', a: '#6366f1' },
+                        { v: '%100', l: 'Web Tabanlı', a: '#a78bfa' },
                     ].map((s, i) => (
                         <div key={i} style={{ textAlign: 'center' }}>
                             <div
@@ -346,7 +330,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                             >
                                 {s.v}
                             </div>
-                            <div style={{ fontSize: 12, color: '#64748b', fontWeight: 500 }}>{s.l}</div>
+                            <div style={{ fontSize: 12, color: '#94a3b8', fontWeight: 500 }}>{s.l}</div>
                         </div>
                     ))}
                 </div>
@@ -370,12 +354,12 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                             fontWeight: 800,
                             letterSpacing: '-0.02em',
                             margin: '0 0 8px',
-                            color: '#0f172a',
+                            color: '#f8fafc',
                         }}
                     >
                         Tek tasarımcı, dokuz e-belge
                     </h2>
-                    <p style={{ fontSize: 15, color: '#64748b', margin: 0 }}>
+                    <p style={{ fontSize: 15, color: '#94a3b8', margin: 0 }}>
                         GİB UBL 2.1 uyumlu, hepsi tek editörde
                     </p>
                 </div>
@@ -394,15 +378,16 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                         style={{
                             gridRow: '1 / span 2',
                             padding: 24,
-                            background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%)',
+                            background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)',
                             color: '#fff',
                             borderRadius: 20,
                             position: 'relative',
                             overflow: 'hidden',
                             minHeight: 320,
+                            border: '1px solid rgba(248,250,252,0.1)',
                         }}
                     >
-                        <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 2, color: '#93c5fd', fontWeight: 600 }}>
+                        <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 2, color: '#a5b4fc', fontWeight: 600 }}>
                             SHOWCASE
                         </div>
                         <h3
@@ -415,7 +400,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                         >
                             e-Arşiv Fatura Tasarımı
                         </h3>
-                        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', margin: '0 0 20px', lineHeight: 1.5 }}>
+                        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', margin: '0 0 20px', lineHeight: 1.5 }}>
                             Gerçek bir GİB faturasının tasarım ekranı. Logo, kaşe, banka, ürün tablosu, toplam alanı — hepsi sürükle-bırak ile düzenlenir.
                         </p>
                         <button
@@ -424,7 +409,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                             style={{
                                 padding: '10px 18px',
                                 background: '#fff',
-                                color: '#0f172a',
+                                color: '#312e81',
                                 border: 'none',
                                 borderRadius: 8,
                                 fontSize: 13,
@@ -451,7 +436,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                                 padding: 14,
                                 transform: 'rotate(4deg)',
                                 opacity: 0.95,
-                                boxShadow: '0 12px 30px rgba(0,0,0,0.4)',
+                                boxShadow: '0 12px 30px rgba(0,0,0,0.5)',
                             }}
                         >
                             <div style={{ fontSize: 9, fontWeight: 700, color: '#1e3a8a', marginBottom: 4 }}>e-Arşiv Fatura</div>
@@ -469,9 +454,9 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                         </div>
                     </div>
 
-                    {/* 4 küçük feature kartı */}
+                    {/* 4 küçük feature kartı (dark glass) */}
                     {[
-                        { icon: <Layers size={22} />, t: 'Sürükle & Bırak', d: 'XSLT öğrenmeden görsel tasarım', a: '#3b82f6' },
+                        { icon: <Layers size={22} />, t: 'Sürükle & Bırak', d: 'XSLT öğrenmeden görsel tasarım', a: '#38bdf8' },
                         { icon: <Zap size={22} />, t: 'Anlık Önizleme', d: 'Kendi XML ile test et', a: '#10b981' },
                         { icon: <FileText size={22} />, t: 'GİB Uyumlu', d: 'e-Fatura Paketi v29', a: '#f97316' },
                         { icon: <Globe size={22} />, t: '9 Belge Türü', d: 'Fatura, irsaliye, makbuz...', a: '#ec4899' },
@@ -480,25 +465,27 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                             key={i}
                             style={{
                                 padding: 22,
-                                background: '#ffffff',
-                                border: '1px solid #e2e8f0',
+                                background: 'rgba(255,255,255,0.04)',
+                                border: '1px solid rgba(248,250,252,0.08)',
                                 borderRadius: 16,
-                                transition: 'transform 0.2s, box-shadow 0.2s',
+                                transition: 'transform 0.2s, background 0.2s, border-color 0.2s',
                             }}
                             onMouseEnter={(e) => {
                                 e.currentTarget.style.transform = 'translateY(-2px)';
-                                e.currentTarget.style.boxShadow = '0 8px 24px rgba(15,23,42,0.08)';
+                                e.currentTarget.style.background = 'rgba(255,255,255,0.07)';
+                                e.currentTarget.style.borderColor = f.a + '55';
                             }}
                             onMouseLeave={(e) => {
                                 e.currentTarget.style.transform = 'translateY(0)';
-                                e.currentTarget.style.boxShadow = 'none';
+                                e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+                                e.currentTarget.style.borderColor = 'rgba(248,250,252,0.08)';
                             }}
                         >
                             <div
                                 style={{
                                     display: 'inline-flex',
                                     padding: 10,
-                                    background: `${f.a}14`,
+                                    background: `${f.a}26`,
                                     color: f.a,
                                     borderRadius: 10,
                                     marginBottom: 12,
@@ -506,10 +493,10 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                             >
                                 {f.icon}
                             </div>
-                            <h4 style={{ fontSize: 15, fontWeight: 700, margin: '0 0 4px', color: '#0f172a' }}>
+                            <h4 style={{ fontSize: 15, fontWeight: 700, margin: '0 0 4px', color: '#f8fafc' }}>
                                 {f.t}
                             </h4>
-                            <p style={{ fontSize: 13, color: '#64748b', margin: 0, lineHeight: 1.5 }}>
+                            <p style={{ fontSize: 13, color: '#94a3b8', margin: 0, lineHeight: 1.5 }}>
                                 {f.d}
                             </p>
                         </div>
@@ -533,7 +520,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                         style={{
                             fontSize: 22,
                             fontWeight: 700,
-                            color: '#0f172a',
+                            color: '#f8fafc',
                             margin: '0 0 4px',
                             letterSpacing: '-0.01em',
                         }}
@@ -565,8 +552,8 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                             onClick={onRegister}
                             style={{
                                 padding: '14px 12px',
-                                background: '#fff',
-                                border: '1px solid #e2e8f0',
+                                background: 'rgba(255,255,255,0.04)',
+                                border: '1px solid rgba(248,250,252,0.08)',
                                 borderRadius: 12,
                                 cursor: 'pointer',
                                 textAlign: 'left',
@@ -575,14 +562,17 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                                 gap: 10,
                                 fontFamily: 'inherit',
                                 transition: 'all 0.2s',
+                                color: '#f8fafc',
                             }}
                             onMouseEnter={(e) => {
                                 e.currentTarget.style.borderColor = dt.a;
                                 e.currentTarget.style.transform = 'translateY(-2px)';
+                                e.currentTarget.style.background = 'rgba(255,255,255,0.07)';
                             }}
                             onMouseLeave={(e) => {
-                                e.currentTarget.style.borderColor = '#e2e8f0';
+                                e.currentTarget.style.borderColor = 'rgba(248,250,252,0.08)';
                                 e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
                             }}
                         >
                             <div
@@ -596,7 +586,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                             >
                                 {dt.code}
                             </div>
-                            <div style={{ fontSize: 14, fontWeight: 600, color: '#0f172a' }}>
+                            <div style={{ fontSize: 14, fontWeight: 600, color: '#f1f5f9' }}>
                                 {dt.label}
                             </div>
                         </button>
@@ -624,7 +614,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                         textAlign: 'center',
                         position: 'relative',
                         overflow: 'hidden',
-                        boxShadow: '0 24px 60px rgba(99,102,241,0.25)',
+                        boxShadow: '0 24px 60px rgba(99,102,241,0.4)',
                     }}
                 >
                     <h2
@@ -641,7 +631,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                     <p
                         style={{
                             fontSize: 16,
-                            color: 'rgba(255,255,255,0.9)',
+                            color: 'rgba(255,255,255,0.95)',
                             margin: '0 0 28px',
                             lineHeight: 1.5,
                         }}
@@ -663,7 +653,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: 8,
-                            boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+                            boxShadow: '0 8px 24px rgba(0,0,0,0.25)',
                         }}
                     >
                         Ücretsiz hesap aç <ArrowRight size={16} />
@@ -677,7 +667,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                     position: 'relative',
                     zIndex: 1,
                     padding: '32px',
-                    borderTop: '1px solid rgba(15,23,42,0.06)',
+                    borderTop: '1px solid rgba(248,250,252,0.06)',
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
@@ -687,7 +677,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                     color: '#64748b',
                 }}
             >
-                <div>© 2026 EDesign · GİB UBL-TR · GitHub Pages + Railway</div>
+                <div>© 2026 · GİB UBL-TR · GitHub Pages + Railway</div>
                 <div style={{ display: 'flex', gap: 20 }}>
                     <a href="#sss" style={{ color: '#64748b', textDecoration: 'none' }}>SSS</a>
                     <a href="#" style={{ color: '#64748b', textDecoration: 'none' }}>KVKK</a>
@@ -702,7 +692,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                     position: 'fixed',
                     bottom: 20,
                     right: 20,
-                    background: '#0f172a',
+                    background: 'linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)',
                     color: '#fff',
                     border: 'none',
                     borderRadius: 12,
@@ -714,7 +704,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                     fontSize: 12,
                     fontWeight: 700,
                     letterSpacing: 1.5,
-                    boxShadow: '0 8px 24px rgba(15,23,42,0.4)',
+                    boxShadow: '0 8px 24px rgba(14,165,233,0.45)',
                     zIndex: 30,
                     fontFamily: 'inherit',
                 }}
