@@ -38,3 +38,6 @@ malformed_check.txt
 
 .verify
 .verify-sel
+
+.unpack-*
+.unpack
