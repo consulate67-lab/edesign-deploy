@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { FileText, ShoppingCart, Globe, Plane, Package, Zap, Upload, LogOut, User, X, CreditCard, Building2, Phone, Mail, Sparkles, Layout, Truck, Briefcase, Sprout, Ticket, Receipt } from 'lucide-react';
+import { FileText, ShoppingCart, Globe, Plane, Package, Zap, Upload, LogOut, User, X, CreditCard, Building2, Phone, Mail, Sparkles, Layout, Truck, Briefcase, Sprout, Ticket, Receipt, Shield, Banknote, Coins, Plus } from 'lucide-react';
 import { api } from './api';
 import { PaymentModal } from './PaymentModal.tsx';
 import { TemplateGallery } from './TemplateGallery.tsx';
@@ -17,6 +17,7 @@ interface Module {
     icon: React.ReactElement;
     color: string;
     template: string;
+    subTypes?: { id: string; label: string; suffix: string }[];
 }
 
 const modules: Module[] = [
@@ -82,6 +83,35 @@ const modules: Module[] = [
         icon: <Receipt size={24} />,
         color: '#06b6d4',
         template: 'community/hzkucuk-eFatura.xslt'
+    },
+    {
+        id: 'sigorta',
+        name: 'e-Sigorta Komisyon',
+        icon: <Shield size={24} />,
+        color: '#dc2626',
+        template: 'gib/sigortakomisyonGiderBelgesi.xslt'
+    },
+    {
+        id: 'doviz',
+        name: 'e-Döviz',
+        icon: <Banknote size={24} />,
+        color: '#10b981',
+        template: 'gib/eDoviz_Alim.xslt',
+        subTypes: [
+            { id: 'doviz_alim', label: 'Alım', suffix: 'Alim' },
+            { id: 'doviz_satim', label: 'Satım', suffix: 'Satim' },
+        ]
+    },
+    {
+        id: 'kmaden',
+        name: 'e-Kıymetli Maden',
+        icon: <Coins size={24} />,
+        color: '#f59e0b',
+        template: 'gib/eDoviz_Alim.xslt',
+        subTypes: [
+            { id: 'kmaden_alim', label: 'Alım', suffix: 'KMAlim' },
+            { id: 'kmaden_satim', label: 'Satım', suffix: 'KMSatim' },
+        ]
     },
 ];
 
@@ -412,26 +442,46 @@ export const Selection: React.FC<SelectionProps> = ({ onSelect, onLogout }) => {
 
                     <div style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
                         gap: '16px',
                         width: '100%'
                     }}>
                         {modules.map((module) => (
-                            <button
+                            <div
                                 key={module.id}
-                                onClick={() => onSelect(module.id, module.template, module.name)}
+                                onClick={(e) => {
+                                    // Sub-butona tiklandiysa bu onClick'i yoksay
+                                    const tgt = e.target as HTMLElement;
+                                    if (tgt.closest('[data-subbtn]')) return;
+                                    if (module.subTypes && module.subTypes.length > 0) {
+                                        const sub = module.subTypes[0];
+                                        onSelect(`${module.id}_${sub.id}`, module.template, `${module.name} - ${sub.label}`);
+                                    } else {
+                                        onSelect(module.id, module.template, module.name);
+                                    }
+                                }}
                                 style={{
                                     background: 'rgba(30, 41, 59, 0.2)',
                                     border: '1px solid rgba(255,255,255,0.05)',
                                     borderRadius: '16px',
                                     padding: '16px',
-                                    textAlign: 'left',
                                     cursor: 'pointer',
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '12px',
                                     transition: 'all 0.2s',
-                                    backdropFilter: 'blur(5px)'
+                                    backdropFilter: 'blur(5px)',
+                                    position: 'relative',
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.background = 'rgba(99, 102, 241, 0.1)';
+                                    e.currentTarget.style.borderColor = 'rgba(99, 102, 241, 0.3)';
+                                    e.currentTarget.style.transform = 'translateY(-2px)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = 'rgba(30, 41, 59, 0.2)';
+                                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)';
+                                    e.currentTarget.style.transform = 'translateY(0)';
                                 }}
                             >
                                 <div style={{
@@ -439,12 +489,73 @@ export const Selection: React.FC<SelectionProps> = ({ onSelect, onLogout }) => {
                                     background: `${module.color}15`,
                                     borderRadius: '10px',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    color: module.color
+                                    color: module.color,
+                                    flexShrink: 0,
                                 }}>
                                     {module.icon}
                                 </div>
-                                <span style={{ fontSize: '0.9rem', fontWeight: '600', color: 'white' }}>{module.name}</span>
-                            </button>
+                                <span style={{
+                                    fontSize: '0.9rem',
+                                    fontWeight: 600,
+                                    color: 'white',
+                                    flex: 1,
+                                    lineHeight: 1.2,
+                                }}>{module.name}</span>
+                                {module.subTypes && (
+                                    <div
+                                        onClick={(e) => e.stopPropagation()}
+                                        style={{ display: 'flex', gap: 4, flexShrink: 0 }}
+                                    >
+                                        {module.subTypes.map((sub) => (
+                                            <span
+                                                key={sub.id}
+                                                data-subbtn="true"
+                                                role="button"
+                                                tabIndex={0}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    onSelect(
+                                                        `${module.id}_${sub.id}`,
+                                                        module.template,
+                                                        `${module.name} - ${sub.label}`
+                                                    );
+                                                }}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter' || e.key === ' ') {
+                                                        e.preventDefault();
+                                                        (e.currentTarget as HTMLElement).click();
+                                                    }
+                                                }}
+                                                style={{
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center',
+                                                    padding: '5px 10px',
+                                                    background: `${module.color}26`,
+                                                    border: `1px solid ${module.color}55`,
+                                                    borderRadius: 999,
+                                                    color: module.color,
+                                                    fontSize: '0.72rem',
+                                                    fontWeight: 700,
+                                                    letterSpacing: 0.3,
+                                                    cursor: 'pointer',
+                                                    transition: 'transform 0.15s, background 0.18s',
+                                                    userSelect: 'none',
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                    e.currentTarget.style.background = `${module.color}40`;
+                                                    e.currentTarget.style.transform = 'translateY(-1px)';
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    e.currentTarget.style.background = `${module.color}26`;
+                                                    e.currentTarget.style.transform = 'translateY(0)';
+                                                }}
+                                            >
+                                                {sub.label}
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         ))}
                     </div>
                 </div>
