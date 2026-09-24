@@ -1,10 +1,42 @@
-import React from 'react';
-import { ArrowRight, MessageCircle, Sparkles, Zap, FileText, Globe, Layers } from 'lucide-react';
+import React, { useState } from 'react';
+import { ArrowRight, MessageCircle, Sparkles, Zap, FileText, Globe, Layers, ChevronDown } from 'lucide-react';
 
 interface LandingProps {
     onRegister: () => void;
     onLogin: () => void;
 }
+
+interface SssItem {
+    q: string;
+    a: string;
+}
+
+const SSS_ITEMS: SssItem[] = [
+    {
+        q: 'e-Belge Tasarımcı ücretsiz mi?',
+        a: 'Evet — yeni hesap açtığınızda beş ücretsiz tasarım hakkı otomatik tanımlanır. Kredi kartı bilgisi gerekmez. Haklar bittiğinde uygun bir paket seçerek tasarım üretmeye devam edebilirsiniz.',
+    },
+    {
+        q: 'Hangi e-belge tiplerini tasarlayabilirim?',
+        a: 'Toplam 12 modül: e-Fatura, e-Arşiv, e-İrsaliye, e-İhracat, e-Mikro İhracat, e-SMM, e-Müstahsil, e-Bilet, e-Makbuz, e-Sigorta Komisyon, e-Döviz (Alım/Satım) ve e-Kıymetli Maden (Alım/Satım). Her modül için GİB resmi XSLT veya topluluk versiyonu yüklenir.',
+    },
+    {
+        q: 'XSLT bilmem gerekiyor mu?',
+        a: 'Hayır. Hazır şablonlardan birini seçip görsel editörle sürükle-bırak mantığıyla özelleştirebilirsiniz. İsterseniz kendi XSLT dosyanızı da (.xslt / .xsl / .xml) yükleyip aynı editörde düzenleyebilirsiniz.',
+    },
+    {
+        q: 'Tasarımlarım GİB uyumlu mu?',
+        a: 'Evet. Tüm şablonlar GİB UBL-TR 1.2.1 şemasına ve e-Fatura Paketi v29’a uygun şekilde hazırlanmıştır. GİB tarafından yayımlanan örnek XML dosyalarıyla test edilmiştir.',
+    },
+    {
+        q: 'Ödeme nasıl çalışır?',
+        a: 'Paket Al bölümünden bir plan seçip kredi yüklemesi yaparsınız. Her tasarım kaydı 1 kredi harcar. Satın alma sonrası krediler hesabınıza otomatik yansır; ihtiyaca göre yeni paketler ekleyebilirsiniz.',
+    },
+    {
+        q: 'Verilerim Türkiye’de mi saklanıyor?',
+        a: 'Evet. Tüm kullanıcı ve şablon verileri Türkiye’deki (Railway) PostgreSQL veritabanında, KVKK kapsamında saklanır. XSLT dosyaları statik olarak GitHub Pages üzerinden sunulur.',
+    },
+];
 
 /**
  * Landing — "Dark Modern Bento" tarzı.
@@ -14,10 +46,11 @@ interface LandingProps {
  * - Logo kaldırıldı (sadece nav + CTA)
  * - Hero: bold gradient başlık (sky → indigo) + 2 CTA
  * - Sticky trust bar
- * - Bento grid + 9 belge strip + final CTA
+ * - Bento grid + 9 belge strip + fiyatlandırma + SSS + final CTA
  * - Sabit WhatsApp butonu (wa.me/905336660125)
  */
 export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
+    const [openSss, setOpenSss] = useState<string | null>(null);
     return (
         <div
             style={{
@@ -718,6 +751,110 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                             </button>
                         </div>
                     ))}
+                </div>
+            </section>
+
+            {/* ====================== SSS ====================== */}
+            <section
+                id="sss"
+                style={{
+                    position: 'relative',
+                    zIndex: 1,
+                    padding: '64px 32px',
+                    maxWidth: 880,
+                    margin: '0 auto',
+                }}
+            >
+                <div style={{ textAlign: 'center', marginBottom: 32 }}>
+                    <h2
+                        style={{
+                            fontSize: 'clamp(28px, 3.5vw, 40px)',
+                            fontWeight: 800,
+                            letterSpacing: '-0.02em',
+                            margin: '0 0 8px',
+                            color: '#f8fafc',
+                        }}
+                    >
+                        Sıkça Sorulan Sorular
+                    </h2>
+                    <p style={{ fontSize: 15, color: '#94a3b8', margin: 0 }}>
+                        Aklınıza takılanlar — ihtiyacınıza uygun cevaplar burada.
+                    </p>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {SSS_ITEMS.map((item) => {
+                        const open = openSss === item.q;
+                        return (
+                            <div
+                                key={item.q}
+                                style={{
+                                    background: open
+                                        ? 'rgba(99, 102, 241, 0.08)'
+                                        : 'rgba(255, 255, 255, 0.03)',
+                                    border: open
+                                        ? '1px solid rgba(99, 102, 241, 0.4)'
+                                        : '1px solid rgba(148, 163, 184, 0.14)',
+                                    borderRadius: 16,
+                                    overflow: 'hidden',
+                                    transition: 'background 0.2s, border-color 0.2s',
+                                }}
+                            >
+                                <button
+                                    type="button"
+                                    onClick={() => setOpenSss(open ? null : item.q)}
+                                    aria-expanded={open}
+                                    style={{
+                                        width: '100%',
+                                        background: 'transparent',
+                                        border: 'none',
+                                        padding: '18px 24px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        gap: 16,
+                                        cursor: 'pointer',
+                                        fontFamily: 'inherit',
+                                        color: '#f8fafc',
+                                        textAlign: 'left',
+                                    }}
+                                >
+                                    <span style={{ fontSize: 16, fontWeight: 600, lineHeight: 1.4 }}>
+                                        {item.q}
+                                    </span>
+                                    <ChevronDown
+                                        size={18}
+                                        style={{
+                                            flexShrink: 0,
+                                            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+                                            transition: 'transform 0.25s',
+                                            color: open ? '#a5b4fc' : '#64748b',
+                                        }}
+                                    />
+                                </button>
+                                <div
+                                    style={{
+                                        maxHeight: open ? 320 : 0,
+                                        opacity: open ? 1 : 0,
+                                        overflow: 'hidden',
+                                        transition: 'max-height 0.3s ease, opacity 0.25s ease',
+                                    }}
+                                >
+                                    <p
+                                        style={{
+                                            margin: 0,
+                                            padding: '0 24px 20px',
+                                            color: '#94a3b8',
+                                            fontSize: 14,
+                                            lineHeight: 1.65,
+                                        }}
+                                    >
+                                        {item.a}
+                                    </p>
+                                </div>
+                            </div>
+                        );
+                    })}
                 </div>
             </section>
 
