@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, MessageCircle } from 'lucide-react';
+import { ArrowRight, MessageCircle, Sparkles, Shield, Zap, FileText, Globe, Layers } from 'lucide-react';
 
 interface LandingProps {
     onRegister: () => void;
@@ -7,471 +7,663 @@ interface LandingProps {
 }
 
 /**
- * Landing — "Görsel E-Tasarımcı" tarzı.
- * İlham: e-tasari.com — açık mavi gradient, split-screen hero (sol metin + sağda
- * tam bir e-fatura tasarımı mock-up'ı), Tema rengi + Kenarlık stili interaktif
- * showcase paneli, 9 belge kartı, sabit CANLI DESTEK widget'i.
+ * Landing — "Modern Bento" tarzı.
+ * - Sticky glass nav (backdrop-filter blur)
+ * - Açık mavi gradient + subtle blur orb background
+ * - Bold serif/sans typografi
+ * - Bento grid: 1 büyük showcase kartı + 4 küçük feature kartı
+ * - Sticky trust bar (GİB, XSLT, vb.)
+ * - Sabit CANLI DESTEK (sadece position:fixed, scroll'u engellemez)
  */
 export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
     return (
+        // Outer container — scroll için overflow:visible (default), sadece min-height
         <div
             style={{
                 minHeight: '100vh',
-                background: 'linear-gradient(180deg, #e0f2fe 0%, #ffffff 60%)',
+                width: '100%',
+                background: 'linear-gradient(180deg, #eff6ff 0%, #ffffff 35%, #f0f9ff 100%)',
                 color: '#0f172a',
-                fontFamily: 'system-ui, -apple-system, sans-serif',
+                fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+                position: 'relative',
+                overflowX: 'hidden',
             }}
         >
-            {/* ====================== MASTHEAD ====================== */}
+            {/* Subtle background orbs */}
+            <div
+                aria-hidden
+                style={{
+                    position: 'absolute',
+                    top: '-180px',
+                    left: '-120px',
+                    width: 600,
+                    height: 600,
+                    borderRadius: '50%',
+                    background: 'radial-gradient(circle, rgba(59,130,246,0.18) 0%, transparent 70%)',
+                    filter: 'blur(40px)',
+                    pointerEvents: 'none',
+                    zIndex: 0,
+                }}
+            />
+            <div
+                aria-hidden
+                style={{
+                    position: 'absolute',
+                    top: '40%',
+                    right: '-160px',
+                    width: 500,
+                    height: 500,
+                    borderRadius: '50%',
+                    background: 'radial-gradient(circle, rgba(14,165,233,0.14) 0%, transparent 70%)',
+                    filter: 'blur(50px)',
+                    pointerEvents: 'none',
+                    zIndex: 0,
+                }}
+            />
+            <div
+                aria-hidden
+                style={{
+                    position: 'absolute',
+                    bottom: '-200px',
+                    left: '30%',
+                    width: 700,
+                    height: 700,
+                    borderRadius: '50%',
+                    background: 'radial-gradient(circle, rgba(99,102,241,0.10) 0%, transparent 70%)',
+                    filter: 'blur(60px)',
+                    pointerEvents: 'none',
+                    zIndex: 0,
+                }}
+            />
+
+            {/* ====================== STICKY GLASS NAV ====================== */}
             <header
                 style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: '16px 48px',
-                    background: 'rgba(255,255,255,0.7)',
-                    backdropFilter: 'blur(8px)',
-                    WebkitBackdropFilter: 'blur(8px)',
-                    borderBottom: '1px solid rgba(15,23,42,0.06)',
                     position: 'sticky',
                     top: 0,
-                    zIndex: 10,
+                    zIndex: 50,
+                    padding: '14px 32px',
+                    background: 'rgba(255,255,255,0.65)',
+                    backdropFilter: 'blur(16px) saturate(160%)',
+                    WebkitBackdropFilter: 'blur(16px) saturate(160%)',
+                    borderBottom: '1px solid rgba(15,23,42,0.06)',
                 }}
             >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ color: '#f97316', fontWeight: 800, fontSize: 30 }}>E</span>
-                    <span style={{ color: '#3b82f6', fontWeight: 800, fontSize: 30 }}>Design</span>
-                </div>
-                <nav
+                <div
                     style={{
+                        maxWidth: 1280,
+                        margin: '0 auto',
                         display: 'flex',
-                        gap: 28,
-                        fontSize: 14,
-                        fontWeight: 500,
-                        color: '#1e293b',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
                     }}
                 >
-                    <a href="#nasil" style={{ color: 'inherit', textDecoration: 'none' }}>Nasıl çalışır</a>
-                    <a href="#ornekler" style={{ color: 'inherit', textDecoration: 'none' }}>Örnekler</a>
-                    <a href="#fiyatlar" style={{ color: 'inherit', textDecoration: 'none' }}>Fiyatlar</a>
-                    <a href="#sss" style={{ color: 'inherit', textDecoration: 'none' }}>SSS</a>
-                    <a href="#iletisim" style={{ color: 'inherit', textDecoration: 'none' }}>İletişim</a>
-                </nav>
-                <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                    <button
-                        type="button"
-                        onClick={onLogin}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span style={{ color: '#f97316', fontWeight: 800, fontSize: 30 }}>E</span>
+                        <span style={{ color: '#0ea5e9', fontWeight: 800, fontSize: 30 }}>Design</span>
+                        <span
+                            style={{
+                                marginLeft: 8,
+                                padding: '3px 8px',
+                                background: 'linear-gradient(90deg, #3b82f6, #0ea5e9)',
+                                color: '#fff',
+                                borderRadius: 999,
+                                fontSize: 10,
+                                fontWeight: 700,
+                                letterSpacing: 1.2,
+                            }}
+                        >
+                            v2.0
+                        </span>
+                    </div>
+                    <nav
                         style={{
-                            padding: '10px 18px',
-                            background: 'transparent',
-                            border: 'none',
+                            display: 'flex',
+                            gap: 28,
                             fontSize: 14,
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                            color: '#1e293b',
+                            fontWeight: 500,
+                            color: '#334155',
                         }}
                     >
-                        Giriş
-                    </button>
-                    <button
-                        type="button"
-                        onClick={onRegister}
-                        style={{
-                            padding: '10px 22px',
-                            background: '#3b82f6',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: 8,
-                            fontSize: 14,
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: 6,
-                            boxShadow: '0 4px 14px rgba(59,130,246,0.3)',
-                        }}
-                    >
-                        Kayıt ol <ArrowRight size={14} />
-                    </button>
+                        <a href="#urun" style={{ color: 'inherit', textDecoration: 'none' }}>Ürün</a>
+                        <a href="#belgeler" style={{ color: 'inherit', textDecoration: 'none' }}>Belgeler</a>
+                        <a href="#fiyatlar" style={{ color: 'inherit', textDecoration: 'none' }}>Fiyatlar</a>
+                        <a href="#sss" style={{ color: 'inherit', textDecoration: 'none' }}>SSS</a>
+                    </nav>
+                    <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                        <button
+                            type="button"
+                            onClick={onLogin}
+                            style={{
+                                padding: '9px 16px',
+                                background: 'transparent',
+                                border: 'none',
+                                fontSize: 14,
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                color: '#1e293b',
+                            }}
+                        >
+                            Giriş
+                        </button>
+                        <button
+                            type="button"
+                            onClick={onRegister}
+                            style={{
+                                padding: '10px 20px',
+                                background: '#0f172a',
+                                color: '#fff',
+                                border: 'none',
+                                borderRadius: 10,
+                                fontSize: 14,
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 6,
+                                boxShadow: '0 4px 14px rgba(15,23,42,0.25)',
+                            }}
+                        >
+                            Ücretsiz başla <ArrowRight size={14} />
+                        </button>
+                    </div>
                 </div>
             </header>
 
-            {/* ====================== HERO (SPLIT-SCREEN) ====================== */}
+            {/* ====================== HERO ====================== */}
             <section
                 style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))',
-                    gap: 48,
-                    padding: '64px 48px 48px',
-                    maxWidth: 1400,
+                    position: 'relative',
+                    zIndex: 1,
+                    padding: '72px 32px 48px',
+                    maxWidth: 1280,
                     margin: '0 auto',
-                    alignItems: 'center',
                 }}
             >
-                {/* SOL — Metin + CTA */}
-                <div>
+                <div style={{ textAlign: 'center', maxWidth: 880, margin: '0 auto' }}>
+                    {/* Trust pill */}
+                    <div
+                        style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 8,
+                            padding: '6px 14px',
+                            background: 'rgba(255,255,255,0.7)',
+                            backdropFilter: 'blur(10px)',
+                            WebkitBackdropFilter: 'blur(10px)',
+                            border: '1px solid rgba(15,23,42,0.08)',
+                            borderRadius: 999,
+                            fontSize: 13,
+                            fontWeight: 500,
+                            color: '#475569',
+                            marginBottom: 24,
+                        }}
+                    >
+                        <Sparkles size={14} color="#0ea5e9" />
+                        Yeni: e-SMM, e-Müstahsil, e-Bilet desteği eklendi
+                    </div>
+
+                    {/* Headline */}
                     <h1
                         style={{
-                            fontSize: 'clamp(40px, 5.5vw, 72px)',
+                            fontSize: 'clamp(40px, 5.5vw, 76px)',
                             fontWeight: 800,
                             lineHeight: 1.05,
-                            letterSpacing: '-0.025em',
-                            margin: '0 0 24px',
+                            letterSpacing: '-0.03em',
+                            margin: '0 0 20px',
                             color: '#0f172a',
                         }}
                     >
-                        E-fatura tasarımınızı{' '}
-                        <span style={{ color: '#3b82f6' }}>kod yazmadan</span>{' '}
-                        hazırlayın
+                        e-Fatura tasarımı{' '}
+                        <span
+                            style={{
+                                background: 'linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)',
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent',
+                                backgroundClip: 'text',
+                            }}
+                        >
+                            artık çok kolay
+                        </span>
                     </h1>
+
+                    {/* Subtitle */}
                     <p
                         style={{
-                            fontSize: 18,
+                            fontSize: 19,
                             color: '#475569',
-                            margin: '0 0 36px',
-                            lineHeight: 1.6,
-                            maxWidth: 540,
+                            margin: '0 auto 32px',
+                            lineHeight: 1.55,
+                            maxWidth: 640,
                         }}
                     >
-                        Şablon seçin; logo, kaşe ve banka bilgilerinizi ekleyin; kendi XML
-                        dosyanızla önizleyin. Tasarılamak ücretsiz, kredi yalnızca XSLT
-                        dosyasını indirirken düşer.
+                        GİB uyumlu <strong style={{ color: '#0f172a' }}>e-Fatura, e-Arşiv, e-İrsaliye</strong>{' '}
+                        ve 6 tür daha. Şablonu seç, logo-kaşe-bankasını ekle, XML önizle.
+                        XSLT bilgisi olmadan dakikalar içinde profesyonel tasarım.
                     </p>
-                    <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginBottom: 16 }}>
+
+                    {/* CTAs */}
+                    <div
+                        style={{
+                            display: 'flex',
+                            gap: 12,
+                            justifyContent: 'center',
+                            flexWrap: 'wrap',
+                            marginBottom: 20,
+                        }}
+                    >
                         <button
                             type="button"
                             onClick={onRegister}
                             style={{
                                 padding: '14px 28px',
-                                background: '#3b82f6',
+                                background: '#0f172a',
                                 color: '#fff',
                                 border: 'none',
-                                borderRadius: 8,
+                                borderRadius: 12,
                                 fontSize: 15,
                                 fontWeight: 600,
                                 cursor: 'pointer',
                                 display: 'inline-flex',
                                 alignItems: 'center',
                                 gap: 8,
-                                boxShadow: '0 6px 18px rgba(59,130,246,0.35)',
+                                boxShadow: '0 8px 24px rgba(15,23,42,0.3)',
                             }}
                         >
-                            Ücretsiz kayıt ol <ArrowRight size={16} />
+                            Ücretsiz hesap aç <ArrowRight size={16} />
                         </button>
                         <button
                             type="button"
                             style={{
-                                padding: '14px 28px',
-                                background: '#fff',
-                                color: '#1e293b',
-                                border: '1px solid #cbd5e1',
-                                borderRadius: 8,
+                                padding: '14px 26px',
+                                background: 'rgba(255,255,255,0.85)',
+                                color: '#0f172a',
+                                border: '1px solid rgba(15,23,42,0.12)',
+                                borderRadius: 12,
                                 fontSize: 15,
                                 fontWeight: 600,
                                 cursor: 'pointer',
+                                backdropFilter: 'blur(10px)',
+                                WebkitBackdropFilter: 'blur(10px)',
                             }}
                         >
                             Fiyatları gör
                         </button>
                     </div>
+
                     <div style={{ fontSize: 14, color: '#64748b' }}>
-                        Hesabınız var mı?{' '}
+                        Kredi kartı gerekmez ·{' '}
                         <a
                             href="#"
                             onClick={(e) => { e.preventDefault(); onLogin(); }}
-                            style={{ color: '#3b82f6', textDecoration: 'underline', fontWeight: 500 }}
+                            style={{ color: '#0ea5e9', textDecoration: 'underline', fontWeight: 500 }}
                         >
-                            Giriş yapın
+                            Zaten üyeyim
                         </a>
-                    </div>
-                </div>
-
-                {/* SAĞ — e-Arşiv fatura mock-up */}
-                <div style={{ position: 'relative' }}>
-                    <FaturaMockup />
-
-                    {/* Sağ alt köşe: Tema rengi + Kenarlık stili showcase */}
-                    <div
-                        style={{
-                            position: 'absolute',
-                            bottom: -28,
-                            right: -12,
-                            background: '#ffffff',
-                            padding: 16,
-                            borderRadius: 14,
-                            boxShadow: '0 12px 36px rgba(15,23,42,0.18)',
-                            border: '1px solid #e2e8f0',
-                            minWidth: 240,
-                        }}
-                    >
-                        <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 10, color: '#0f172a' }}>
-                            Tema rengi
-                        </div>
-                        <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
-                            {[
-                                { c: '#f97316', active: false },
-                                { c: '#1d4ed8', active: true },
-                                { c: '#15803d', active: false },
-                                { c: '#b91c1c', active: false },
-                                { c: '#0f172a', active: false },
-                            ].map((d, i) => (
-                                <div
-                                    key={i}
-                                    style={{
-                                        width: 26,
-                                        height: 26,
-                                        borderRadius: '50%',
-                                        background: d.c,
-                                        border: d.active ? '3px solid #fff' : '2px solid transparent',
-                                        boxShadow: d.active
-                                            ? `0 0 0 2px ${d.c}, 0 4px 10px ${d.c}66`
-                                            : '0 1px 4px rgba(0,0,0,0.1)',
-                                        cursor: 'pointer',
-                                    }}
-                                />
-                            ))}
-                        </div>
-                        <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 10, color: '#0f172a' }}>
-                            Kenarlık stili
-                        </div>
-                        <div style={{ display: 'flex', gap: 6 }}>
-                            <button
-                                style={{
-                                    padding: '6px 12px',
-                                    background: '#1e293b',
-                                    color: '#fff',
-                                    border: 'none',
-                                    borderRadius: 6,
-                                    fontSize: 11,
-                                    fontWeight: 600,
-                                    cursor: 'pointer',
-                                }}
-                            >
-                                Düz
-                            </button>
-                            <button
-                                style={{
-                                    padding: '6px 12px',
-                                    background: '#fff',
-                                    color: '#475569',
-                                    border: '1px solid #e2e8f0',
-                                    borderRadius: 6,
-                                    fontSize: 11,
-                                    fontWeight: 600,
-                                    cursor: 'pointer',
-                                }}
-                            >
-                                Kesik
-                            </button>
-                            <button
-                                style={{
-                                    padding: '6px 12px',
-                                    background: '#fff',
-                                    color: '#475569',
-                                    border: '1px solid #e2e8f0',
-                                    borderRadius: 6,
-                                    fontSize: 11,
-                                    fontWeight: 600,
-                                    cursor: 'pointer',
-                                }}
-                            >
-                                Çift
-                            </button>
-                        </div>
-                        <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 10, lineHeight: 1.4 }}>
-                            Logo, kaşe, banka ve not ayarları da panelde böyle yapılır.
-                        </div>
                     </div>
                 </div>
             </section>
 
-            {/* ====================== DOC TYPES ====================== */}
+            {/* ====================== TRUST BAR ====================== */}
             <section
-                id="ornekler"
                 style={{
-                    padding: '96px 48px 64px',
-                    maxWidth: 1200,
-                    margin: '0 auto',
+                    position: 'relative',
+                    zIndex: 1,
+                    padding: '32px 32px 48px',
                 }}
             >
-                <div style={{ textAlign: 'center', marginBottom: 48 }}>
-                    <h2
-                        style={{
-                            fontSize: 'clamp(28px, 4vw, 42px)',
-                            fontWeight: 800,
-                            color: '#0f172a',
-                            margin: '0 0 12px',
-                            letterSpacing: '-0.02em',
-                        }}
-                    >
-                        Hangi belgeleri tasarlayabilirsiniz?
-                    </h2>
-                    <p style={{ fontSize: 16, color: '#64748b', margin: 0 }}>
-                        GİB UBL 2.1 uyumlu, dokuz aktif e-belge türü
-                    </p>
-                </div>
                 <div
                     style={{
+                        maxWidth: 1080,
+                        margin: '0 auto',
+                        padding: '20px 28px',
+                        background: 'rgba(255,255,255,0.65)',
+                        backdropFilter: 'blur(16px) saturate(160%)',
+                        WebkitBackdropFilter: 'blur(16px) saturate(160%)',
+                        border: '1px solid rgba(15,23,42,0.06)',
+                        borderRadius: 18,
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                        gap: 16,
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+                        gap: 24,
+                        alignItems: 'center',
                     }}
                 >
                     {[
-                        { label: 'e-Fatura', desc: 'UBL 2.1 ticari', accent: '#3b82f6' },
-                        { label: 'e-Arşiv', desc: 'Mükellef dışı', accent: '#8b5cf6' },
-                        { label: 'e-İrsaliye', desc: 'Sevkiyat', accent: '#06b6d4' },
-                        { label: 'e-İhracat', desc: 'Uluslararası', accent: '#10b981' },
-                        { label: 'e-Mikro İhracat', desc: '≤500 kg', accent: '#22d3ee' },
-                        { label: 'e-SMM', desc: 'Serbest meslek', accent: '#ec4899' },
-                        { label: 'e-Müstahsil', desc: 'Çiftçi/hayvancı', accent: '#84cc16' },
-                        { label: 'e-Bilet', desc: 'Ulaşım', accent: '#f97316' },
-                        { label: 'e-Makbuz', desc: 'Tahsilat', accent: '#14b8a6' },
-                    ].map((dt) => (
+                        { v: 'GİB', l: 'UBL-TR Resmi Uyumlu', a: '#10b981' },
+                        { v: '9', l: 'Belge Türü Desteği', a: '#0ea5e9' },
+                        { v: '5', l: 'Ücretsiz Tasarım Hakkı', a: '#ec4899' },
+                        { v: '%100', l: 'Web Tabanlı', a: '#6366f1' },
+                    ].map((s, i) => (
+                        <div key={i} style={{ textAlign: 'center' }}>
+                            <div
+                                style={{
+                                    fontSize: 28,
+                                    fontWeight: 800,
+                                    color: s.a,
+                                    marginBottom: 2,
+                                    letterSpacing: '-0.02em',
+                                }}
+                            >
+                                {s.v}
+                            </div>
+                            <div style={{ fontSize: 12, color: '#64748b', fontWeight: 500 }}>{s.l}</div>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+            {/* ====================== BENTO GRID: SHOWCASE + FEATURES ====================== */}
+            <section
+                id="urun"
+                style={{
+                    position: 'relative',
+                    zIndex: 1,
+                    padding: '48px 32px',
+                    maxWidth: 1280,
+                    margin: '0 auto',
+                }}
+            >
+                <div style={{ textAlign: 'center', marginBottom: 32 }}>
+                    <h2
+                        style={{
+                            fontSize: 'clamp(28px, 3.5vw, 40px)',
+                            fontWeight: 800,
+                            letterSpacing: '-0.02em',
+                            margin: '0 0 8px',
+                            color: '#0f172a',
+                        }}
+                    >
+                        Tek tasarımcı, dokuz e-belge
+                    </h2>
+                    <p style={{ fontSize: 15, color: '#64748b', margin: 0 }}>
+                        GİB UBL 2.1 uyumlu, hepsi tek editörde
+                    </p>
+                </div>
+
+                {/* Bento: büyük showcase + 4 küçük özellik */}
+                <div
+                    style={{
+                        display: 'grid',
+                        gridTemplateColumns: '1.4fr 1fr 1fr',
+                        gridTemplateRows: 'auto auto',
+                        gap: 16,
+                    }}
+                >
+                    {/* Büyük kart — Showcase */}
+                    <div
+                        style={{
+                            gridRow: '1 / span 2',
+                            padding: 24,
+                            background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%)',
+                            color: '#fff',
+                            borderRadius: 20,
+                            position: 'relative',
+                            overflow: 'hidden',
+                            minHeight: 320,
+                        }}
+                    >
+                        <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 2, color: '#93c5fd', fontWeight: 600 }}>
+                            SHOWCASE
+                        </div>
+                        <h3
+                            style={{
+                                fontSize: 24,
+                                fontWeight: 700,
+                                margin: '8px 0 12px',
+                                color: '#fff',
+                            }}
+                        >
+                            e-Arşiv Fatura Tasarımı
+                        </h3>
+                        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', margin: '0 0 20px', lineHeight: 1.5 }}>
+                            Gerçek bir GİB faturasının tasarım ekranı. Logo, kaşe, banka, ürün tablosu, toplam alanı — hepsi sürükle-bırak ile düzenlenir.
+                        </p>
                         <button
                             type="button"
-                            key={dt.label}
                             onClick={onRegister}
                             style={{
-                                padding: '20px 18px',
+                                padding: '10px 18px',
+                                background: '#fff',
+                                color: '#0f172a',
+                                border: 'none',
+                                borderRadius: 8,
+                                fontSize: 13,
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 6,
+                            }}
+                        >
+                            Denemek için tıkla <ArrowRight size={13} />
+                        </button>
+                        {/* Dekoratif fatura önizleme */}
+                        <div
+                            aria-hidden
+                            style={{
+                                position: 'absolute',
+                                right: -20,
+                                bottom: -30,
+                                width: 320,
+                                height: 220,
+                                background: '#fff',
+                                borderRadius: 10,
+                                padding: 14,
+                                transform: 'rotate(4deg)',
+                                opacity: 0.95,
+                                boxShadow: '0 12px 30px rgba(0,0,0,0.4)',
+                            }}
+                        >
+                            <div style={{ fontSize: 9, fontWeight: 700, color: '#1e3a8a', marginBottom: 4 }}>e-Arşiv Fatura</div>
+                            <div style={{ fontSize: 7, color: '#475569', lineHeight: 1.4 }}>
+                                <div>Örnek Kırtasiye Ltd. Şti.</div>
+                                <div>VKN: 1234567890</div>
+                                <div style={{ marginTop: 4, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4 }}>
+                                    <div>A4 Fotokopi · 2 Koli · 900 ₺</div>
+                                    <div>Toner · 1 Adet · 1.250 ₺</div>
+                                </div>
+                            </div>
+                            <div style={{ position: 'absolute', bottom: 8, right: 12, fontSize: 8, fontWeight: 700, color: '#0f172a' }}>
+                                Toplam: 5.280 ₺
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* 4 küçük feature kartı */}
+                    {[
+                        { icon: <Layers size={22} />, t: 'Sürükle & Bırak', d: 'XSLT öğrenmeden görsel tasarım', a: '#3b82f6' },
+                        { icon: <Zap size={22} />, t: 'Anlık Önizleme', d: 'Kendi XML ile test et', a: '#10b981' },
+                        { icon: <FileText size={22} />, t: 'GİB Uyumlu', d: 'e-Fatura Paketi v29', a: '#f97316' },
+                        { icon: <Globe size={22} />, t: '9 Belge Türü', d: 'Fatura, irsaliye, makbuz...', a: '#ec4899' },
+                    ].map((f, i) => (
+                        <div
+                            key={i}
+                            style={{
+                                padding: 22,
                                 background: '#ffffff',
                                 border: '1px solid #e2e8f0',
-                                borderRadius: 12,
-                                cursor: 'pointer',
-                                textAlign: 'left',
-                                transition: 'transform 0.2s, border-color 0.2s, box-shadow 0.2s',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 14,
-                                fontFamily: 'inherit',
+                                borderRadius: 16,
+                                transition: 'transform 0.2s, box-shadow 0.2s',
                             }}
                             onMouseEnter={(e) => {
-                                e.currentTarget.style.borderColor = dt.accent;
                                 e.currentTarget.style.transform = 'translateY(-2px)';
-                                e.currentTarget.style.boxShadow = `0 8px 24px ${dt.accent}22`;
+                                e.currentTarget.style.boxShadow = '0 8px 24px rgba(15,23,42,0.08)';
                             }}
                             onMouseLeave={(e) => {
-                                e.currentTarget.style.borderColor = '#e2e8f0';
                                 e.currentTarget.style.transform = 'translateY(0)';
                                 e.currentTarget.style.boxShadow = 'none';
                             }}
                         >
                             <div
                                 style={{
-                                    width: 6,
-                                    height: 36,
-                                    borderRadius: 3,
-                                    background: dt.accent,
-                                    flexShrink: 0,
+                                    display: 'inline-flex',
+                                    padding: 10,
+                                    background: `${f.a}14`,
+                                    color: f.a,
+                                    borderRadius: 10,
+                                    marginBottom: 12,
                                 }}
-                            />
-                            <div>
-                                <div style={{ fontSize: 15, fontWeight: 700, color: '#0f172a', marginBottom: 2 }}>
-                                    {dt.label}
-                                </div>
-                                <div style={{ fontSize: 13, color: '#64748b' }}>{dt.desc}</div>
+                            >
+                                {f.icon}
+                            </div>
+                            <h4 style={{ fontSize: 15, fontWeight: 700, margin: '0 0 4px', color: '#0f172a' }}>
+                                {f.t}
+                            </h4>
+                            <p style={{ fontSize: 13, color: '#64748b', margin: 0, lineHeight: 1.5 }}>
+                                {f.d}
+                            </p>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+            {/* ====================== DOC TYPES STRIP ====================== */}
+            <section
+                id="belgeler"
+                style={{
+                    position: 'relative',
+                    zIndex: 1,
+                    padding: '32px',
+                    maxWidth: 1280,
+                    margin: '0 auto',
+                }}
+            >
+                <div style={{ textAlign: 'center', marginBottom: 20 }}>
+                    <h3
+                        style={{
+                            fontSize: 22,
+                            fontWeight: 700,
+                            color: '#0f172a',
+                            margin: '0 0 4px',
+                            letterSpacing: '-0.01em',
+                        }}
+                    >
+                        Hangi belgeleri tasarlayabilirsiniz?
+                    </h3>
+                </div>
+                <div
+                    style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                        gap: 10,
+                    }}
+                >
+                    {[
+                        { label: 'e-Fatura', code: '01', a: '#3b82f6' },
+                        { label: 'e-Arşiv', code: '02', a: '#8b5cf6' },
+                        { label: 'e-İrsaliye', code: '03', a: '#0ea5e9' },
+                        { label: 'e-İhracat', code: '04', a: '#10b981' },
+                        { label: 'e-Mikro İhracat', code: '05', a: '#22d3ee' },
+                        { label: 'e-SMM', code: '06', a: '#ec4899' },
+                        { label: 'e-Müstahsil', code: '07', a: '#84cc16' },
+                        { label: 'e-Bilet', code: '08', a: '#f97316' },
+                        { label: 'e-Makbuz', code: '09', a: '#14b8a6' },
+                    ].map((dt) => (
+                        <button
+                            type="button"
+                            key={dt.code}
+                            onClick={onRegister}
+                            style={{
+                                padding: '14px 12px',
+                                background: '#fff',
+                                border: '1px solid #e2e8f0',
+                                borderRadius: 12,
+                                cursor: 'pointer',
+                                textAlign: 'left',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 10,
+                                fontFamily: 'inherit',
+                                transition: 'all 0.2s',
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.borderColor = dt.a;
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.borderColor = '#e2e8f0';
+                                e.currentTarget.style.transform = 'translateY(0)';
+                            }}
+                        >
+                            <div
+                                style={{
+                                    fontSize: 11,
+                                    fontWeight: 700,
+                                    color: dt.a,
+                                    letterSpacing: 1,
+                                    minWidth: 22,
+                                }}
+                            >
+                                {dt.code}
+                            </div>
+                            <div style={{ fontSize: 14, fontWeight: 600, color: '#0f172a' }}>
+                                {dt.label}
                             </div>
                         </button>
                     ))}
                 </div>
             </section>
 
-            {/* ====================== FEATURES ====================== */}
-            <section
-                style={{
-                    padding: '64px 48px',
-                    background: '#f1f5f9',
-                    marginTop: 48,
-                }}
-            >
-                <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-                    <div
-                        style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-                            gap: 24,
-                        }}
-                    >
-                        {[
-                            { n: '01', title: 'Sürükle & Bırak', desc: 'XSLT bilmeden görsel tasarımcı.', accent: '#3b82f6' },
-                            { n: '02', title: 'Gerçek Zamanlı Önizleme', desc: 'Kendi XML dosyanızla anlık test.', accent: '#10b981' },
-                            { n: '03', title: 'GİB UBL-TR Uyumlu', desc: 'e-Fatura Paketi v29 ile birebir.', accent: '#f97316' },
-                            { n: '04', title: 'Tema & Kenarlık Stili', desc: 'Logo, kaşe, banka ayarları panelde.', accent: '#ec4899' },
-                        ].map((f) => (
-                            <div
-                                key={f.n}
-                                style={{
-                                    padding: 28,
-                                    background: '#ffffff',
-                                    borderRadius: 14,
-                                    border: '1px solid #e2e8f0',
-                                }}
-                            >
-                                <div
-                                    style={{
-                                        fontSize: 14,
-                                        fontWeight: 700,
-                                        color: f.accent,
-                                        marginBottom: 8,
-                                        letterSpacing: 1.5,
-                                    }}
-                                >
-                                    {f.n}
-                                </div>
-                                <h3 style={{ fontSize: 19, fontWeight: 700, color: '#0f172a', margin: '0 0 8px' }}>
-                                    {f.title}
-                                </h3>
-                                <p style={{ fontSize: 14, color: '#64748b', margin: 0, lineHeight: 1.55 }}>
-                                    {f.desc}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
             {/* ====================== FINAL CTA ====================== */}
             <section
+                id="fiyatlar"
                 style={{
-                    padding: '80px 48px',
-                    textAlign: 'center',
-                    background: 'linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%)',
-                    color: '#fff',
+                    position: 'relative',
+                    zIndex: 1,
+                    padding: '48px 32px',
                 }}
             >
-                <div style={{ maxWidth: 720, margin: '0 auto' }}>
+                <div
+                    style={{
+                        maxWidth: 1080,
+                        margin: '0 auto',
+                        padding: '56px 40px',
+                        background: 'linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)',
+                        borderRadius: 24,
+                        color: '#fff',
+                        textAlign: 'center',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        boxShadow: '0 24px 60px rgba(99,102,241,0.25)',
+                    }}
+                >
                     <h2
                         style={{
-                            fontSize: 'clamp(28px, 4vw, 44px)',
+                            fontSize: 'clamp(28px, 3.5vw, 40px)',
                             fontWeight: 800,
-                            margin: '0 0 16px',
+                            margin: '0 0 12px',
                             letterSpacing: '-0.02em',
                             lineHeight: 1.15,
                         }}
                     >
                         İlk tasarımınızı bugün oluşturun
                     </h2>
-                    <p style={{ fontSize: 17, color: 'rgba(255,255,255,0.9)', margin: '0 0 36px', lineHeight: 1.5 }}>
-                        Kredi kartı gerekmez. Beş ücretsiz tasarım hakkı. XSLT dosyasını
-                        indirmek için kredi gerekir.
+                    <p
+                        style={{
+                            fontSize: 16,
+                            color: 'rgba(255,255,255,0.9)',
+                            margin: '0 0 28px',
+                            lineHeight: 1.5,
+                        }}
+                    >
+                        Kredi kartı gerekmez. Beş ücretsiz tasarım hakkı.
                     </p>
                     <button
                         type="button"
                         onClick={onRegister}
                         style={{
-                            padding: '16px 32px',
+                            padding: '14px 32px',
                             background: '#fff',
-                            color: '#1d4ed8',
+                            color: '#0ea5e9',
                             border: 'none',
-                            borderRadius: 8,
+                            borderRadius: 12,
                             fontSize: 15,
                             fontWeight: 700,
                             cursor: 'pointer',
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: 8,
-                            fontFamily: 'inherit',
-                            boxShadow: '0 6px 20px rgba(0,0,0,0.2)',
+                            boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
                         }}
                     >
                         Ücretsiz hesap aç <ArrowRight size={16} />
@@ -482,8 +674,10 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
             {/* ====================== FOOTER ====================== */}
             <footer
                 style={{
-                    padding: '32px 48px',
-                    borderTop: '1px solid #e2e8f0',
+                    position: 'relative',
+                    zIndex: 1,
+                    padding: '32px',
+                    borderTop: '1px solid rgba(15,23,42,0.06)',
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
@@ -494,232 +688,42 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                 }}
             >
                 <div>© 2026 EDesign · GİB UBL-TR · GitHub Pages + Railway</div>
-                <div style={{ display: 'flex', gap: 24 }}>
+                <div style={{ display: 'flex', gap: 20 }}>
+                    <a href="#sss" style={{ color: '#64748b', textDecoration: 'none' }}>SSS</a>
                     <a href="#" style={{ color: '#64748b', textDecoration: 'none' }}>KVKK</a>
-                    <a href="#" style={{ color: '#64748b', textDecoration: 'none' }}>Kullanım</a>
                     <a href="#" style={{ color: '#64748b', textDecoration: 'none' }}>İletişim</a>
                 </div>
             </footer>
 
-            {/* ====================== CANLI DESTEK (fixed) ====================== */}
+            {/* ====================== CANLI DESTEK ====================== */}
             <button
                 type="button"
                 style={{
                     position: 'fixed',
-                    bottom: 24,
-                    right: 24,
-                    background: '#3b82f6',
+                    bottom: 20,
+                    right: 20,
+                    background: '#0f172a',
                     color: '#fff',
                     border: 'none',
                     borderRadius: 12,
-                    padding: '12px 20px',
+                    padding: '12px 18px',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 10,
+                    gap: 8,
                     cursor: 'pointer',
-                    fontSize: 13,
+                    fontSize: 12,
                     fontWeight: 700,
                     letterSpacing: 1.5,
-                    boxShadow: '0 8px 28px rgba(59,130,246,0.4)',
+                    boxShadow: '0 8px 24px rgba(15,23,42,0.4)',
+                    zIndex: 30,
                     fontFamily: 'inherit',
-                    zIndex: 20,
                 }}
             >
-                <MessageCircle size={16} />
+                <MessageCircle size={14} />
                 CANLI DESTEK
             </button>
         </div>
     );
 };
-
-/**
- * Tam bir e-Arşiv fatura tasarımı mock-up'ı.
- * Gerçek bir GİB e-Arşiv faturasının görsel kopyası — kullanıcıya
- * "tasarımcının çıktısı böyle görünüyor" diye göstermek için.
- */
-const FaturaMockup: React.FC = () => (
-    <div
-        style={{
-            background: '#ffffff',
-            border: '1px solid #bfdbfe',
-            borderRadius: 6,
-            boxShadow: '0 24px 60px rgba(15,23,42,0.18), 0 0 0 1px rgba(255,255,255,0.5) inset',
-            overflow: 'hidden',
-            fontSize: 12,
-            transform: 'rotate(-1deg)',
-            transformOrigin: 'center center',
-        }}
-    >
-        {/* Üst header */}
-        <div
-            style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 100px 1fr',
-                padding: '14px 18px',
-                borderBottom: '2px solid #1d4ed8',
-                alignItems: 'start',
-                gap: 12,
-            }}
-        >
-            <div style={{ fontSize: 10.5, lineHeight: 1.45 }}>
-                <div style={{ fontWeight: 700, fontSize: 11, color: '#1d4ed8' }}>Örnek Kırtasiye Ltd. Şti.</div>
-                <div>Gümülpınar Mah. 2. Cad. No:6</div>
-                <div>Mersis / Afyonkarahisar</div>
-                <div>Tel: 0850 441 21 44</div>
-                <div>Vergi Dairesi: Küçükçekmece</div>
-                <div style={{ fontWeight: 600 }}>VKN: 1234567890</div>
-            </div>
-            <div
-                style={{
-                    width: 80,
-                    height: 80,
-                    borderRadius: '50%',
-                    border: '2px solid #1d4ed8',
-                    margin: '0 auto',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#1d4ed8',
-                    fontSize: 9,
-                    fontWeight: 700,
-                    textAlign: 'center',
-                    lineHeight: 1.1,
-                }}
-            >
-                LOGO
-            </div>
-            <div style={{ textAlign: 'right', fontSize: 10.5, lineHeight: 1.45 }}>
-                <div style={{ fontSize: 16, fontWeight: 800, color: '#1d4ed8' }}>e-Arşiv Fatura</div>
-                <div>QR Kod</div>
-                <div style={{ marginTop: 4 }}>
-                    <div><strong>Özelleştirme No:</strong> TR1.2</div>
-                    <div><strong>Senaryo:</strong> EARSIVFATURA</div>
-                    <div><strong>Fatura Tipi:</strong> SATIŞ</div>
-                    <div><strong>Fatura No:</strong> ETS202600000123</div>
-                    <div><strong>Fatura Tarihi:</strong> 18-09-2026</div>
-                </div>
-            </div>
-        </div>
-
-        {/* SAYIN bölümü */}
-        <div style={{ padding: '12px 18px', background: '#eff6ff', borderBottom: '1px solid #bfdbfe' }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: '#1d4ed8', marginBottom: 4 }}>SAYIN</div>
-            <div style={{ fontSize: 11, lineHeight: 1.45 }}>
-                <div style={{ fontWeight: 600 }}>Alici Firma A.Ş.</div>
-                <div>Kuley Mah. Anafartalar Blv. No:12</div>
-                <div>Çankaya / Ankara</div>
-                <div>Vergi Dairesi: Kavaklıdere</div>
-                <div style={{ fontWeight: 600 }}>VKN: 9876543210</div>
-            </div>
-        </div>
-
-        {/* Tablo */}
-        <table
-            style={{
-                width: '100%',
-                borderCollapse: 'collapse',
-                fontSize: 10,
-            }}
-        >
-            <thead style={{ background: '#dbeafe', color: '#1d4ed8' }}>
-                <tr>
-                    {['Sıra No', 'Mal Hizmet', 'Miktar', 'Birim Fiyat', 'KDV Oranı', 'KDV Tutarı', 'Mal Hizmet Tutarı'].map(
-                        (h) => (
-                            <th
-                                key={h}
-                                style={{
-                                    padding: '6px 4px',
-                                    textAlign: h === 'Sıra No' || h === 'Mal Hizmet' ? 'left' : 'right',
-                                    fontSize: 9,
-                                    fontWeight: 700,
-                                    borderRight: '1px solid #bfdbfe',
-                                }}
-                            >
-                                {h}
-                            </th>
-                        ),
-                    )}
-                </tr>
-            </thead>
-            <tbody>
-                {[
-                    ['1', 'A4 fotokopi kâğıdı', '2 Koli', '450,00 TL', '%20', '180,00 TL', '900,00 TL'],
-                    ['2', 'Toner kartuşu', '1 Adet', '1.250,00 TL', '%20', '250,00 TL', '1.250,00 TL'],
-                    ['3', 'Dönemsel hizmet', '3 Saat', '750,00 TL', '%20', '450,00 TL', '2.250,00 TL'],
-                ].map((row, i) => (
-                    <tr key={i} style={{ borderBottom: '1px solid #e0f2fe' }}>
-                        {row.map((cell, j) => (
-                            <td
-                                key={j}
-                                style={{
-                                    padding: '6px 4px',
-                                    textAlign: j === 0 || j === 1 ? 'left' : 'right',
-                                    fontSize: 9.5,
-                                    borderRight: '1px solid #e0f2fe',
-                                }}
-                            >
-                                {cell}
-                            </td>
-                        ))}
-                    </tr>
-                ))}
-            </tbody>
-        </table>
-
-        {/* Toplam alanı */}
-        <div style={{ padding: '10px 18px', display: 'flex', justifyContent: 'flex-end' }}>
-            <div style={{ minWidth: 240, fontSize: 10 }}>
-                {[
-                    ['Mal Hizmet Toplam Tutarı', '4.400,00 TL'],
-                    ['Hesaplanan KDV (%20)', '880,00 TL'],
-                    ['Vergiler Dahil Toplam Tutar', '5.280,00 TL'],
-                    ['Ödenecek Tutar', '5.280,00 TL'],
-                ].map(([label, val], i) => (
-                    <div
-                        key={label}
-                        style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            padding: '4px 0',
-                            background: i === 3 ? '#dbeafe' : 'transparent',
-                            fontWeight: i === 3 ? 700 : 400,
-                            color: i === 3 ? '#1d4ed8' : '#334155',
-                            paddingLeft: i === 3 ? 6 : 0,
-                            paddingRight: i === 3 ? 6 : 0,
-                        }}
-                    >
-                        <span>{label}</span>
-                        <span>{val}</span>
-                    </div>
-                ))}
-            </div>
-        </div>
-
-        {/* Not + Banka */}
-        <div style={{ padding: '10px 18px', background: '#eff6ff', borderTop: '1px solid #bfdbfe', fontSize: 9.5, lineHeight: 1.5 }}>
-            <div>
-                <strong>Not:</strong> YALNIZ: BEŞBİNİKİYÜZSEKSEN TÜRK LİRASI SIFIR KURUŞ
-            </div>
-            <div><strong>Ödeme Koşulu:</strong> Banka havalesi</div>
-        </div>
-        <div style={{ padding: '8px 18px', background: '#1d4ed8', color: '#fff', fontSize: 10, fontWeight: 700, textAlign: 'center' }}>
-            BANKA HESAP BİLGİLERİ
-        </div>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 10 }}>
-            <thead style={{ background: '#eff6ff', color: '#1d4ed8' }}>
-                <tr>
-                    <th style={{ padding: '6px 10px', textAlign: 'left', fontSize: 9, fontWeight: 700 }}>Banka</th>
-                    <th style={{ padding: '6px 10px', textAlign: 'left', fontSize: 9, fontWeight: 700 }}>Hesap Adı</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td style={{ padding: '6px 10px', fontSize: 9.5 }}>Örnek Bank</td>
-                    <td style={{ padding: '6px 10px', fontSize: 9.5 }}>Örnek Kırtasiye Ltd. Şti.</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-);
 
 export default Landing;
