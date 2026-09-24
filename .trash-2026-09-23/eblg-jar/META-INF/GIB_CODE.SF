@@ -1,0 +1,610 @@
+Signature-Version: 1.0
+SHA-256-Digest-Manifest-Main-Attributes: 7F4knwD/RdPw+KjN8Us3TeyhIWMUE
+ f5zCcoKc8oy4No=
+SHA-256-Digest-Manifest: wMKHFd5zFAQL/+1bnUAe8L1XVDqT85+o8DXj68I3m60=
+Created-By: 1.8.0-ea (Oracle Corporation)
+
+Name: tr/gov/gib/vedop3/efaturaviewer/EFaturaViewerView$23.class
+SHA-256-Digest: 6jmGOShx1IozUQ+1WKIsHSqcqt9P8Ec0ciYzWeppDQ0=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.2/maindoc/Man
+ ifest.xsd
+SHA-256-Digest: aZbqyeDcnRaImIKJtS/TL7z/nXlht34UVG2sT9q0K/o=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.0/common/UBL-
+ ExtensionContentDatatype-2.0.xsd
+SHA-256-Digest: 1Zh69eBx0eHjvYVO3QRCagDEeCPV8kCsEcErT6oY/pY=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/XBRLDefault_old.xslt
+SHA-256-Digest: ffRQ1H1yXcLIFIXvCYMXr2p5uXcRTrcS0TbAdjINeNM=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.2/common/UBL-
+ XAdESv132-2.1.xsd
+SHA-256-Digest: JfNYA8bhVTBa0iY+U6ltqfEfOkXW1CU4gOMGE6Cmscw=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/icons/durumSorgula.png
+SHA-256-Digest: Np3uJ9FM7P+zMOAV+eUlVB0NtK6SzmXl44MBdFczPmU=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.2/common/UBL-
+ ExtensionContentDataType-2.1.xsd
+SHA-256-Digest: /8otTDK6CmsUPD1CAgKY1CxtPw8rWZlURfU8BTqu+ko=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/ShowCert.class
+SHA-256-Digest: wds/86JWZfe6go7aNVUvoILXZig7hvM/M3k2GB992vc=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/EFaturaViewerView$4.class
+SHA-256-Digest: fU8yFwqtpF3PfrvxOf56P2GEbymrA2VLOIdVTZqtP2w=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/EFaturaViewerView$9.class
+SHA-256-Digest: 181hAv5FqNjcMpK+jBzhLQLIzpgDF/qjswS0jW1r6ww=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/FileUtil.class
+SHA-256-Digest: tfAy4AT2fe+JHGRlflv/wR1KbD//b3q6zENQNEXBISU=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.2/common/UBL-
+ CommonExtensionComponents-2.1.xsd
+SHA-256-Digest: zhYW6W33qYjJYTq28NJNBoZ9tLsRpAhST6BOzJ8642w=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/busyicons/busy-icon0.p
+ ng
+SHA-256-Digest: 7dtVGCngt3kJWI/v/y9ACu6frErRrF7XHnvvTjZJboY=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.0/common/Code
+ List_CurrencyCode_ISO_7_04.xsd
+SHA-256-Digest: VSJcAX2Ms9MQsCyf/rE741VVkisCCa0JTAOAt+14NDw=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/default2.xslt
+SHA-256-Digest: gDTEfUk7JkjJh293+i/5xVslzNRSfkpkdD4OSPv6lK0=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/busyicons/busy-icon14.
+ png
+SHA-256-Digest: jlmBkoMq/5IYg++mNi/O6mUkYgN2mdaNNMxWCRkh9mY=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/efatura_schematron-070
+ 42015.xsl
+SHA-256-Digest: SXpdC04xNQt6606s84vC4R3uI8/uosnBQc1Ogt+AxYo=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.2/common/UBL-
+ CommonAggregateComponents-2.1.xsd
+SHA-256-Digest: JJ2j5+AUUb7AwCXuyAcaNksFb0UVXTf7DQIhvZA7g8U=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.0/common/UBL-
+ CommonBasicComponents-2.0.xsd
+SHA-256-Digest: UJHHrPgNAyhgqViuiBlLJo21+1xTvnoZgnRlbwAgqVk=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.2/maindoc/Doc
+ umentIdentification.xsd
+SHA-256-Digest: Q4vXuIexPSJMVrX/olezT5+7SDyTrdNCk7By2qub1zc=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.0/maindoc/Doc
+ umentIdentification.xsd
+SHA-256-Digest: 7MoSqPA2jw9LfjiYPJodQPzezA6Xpro7iJUH89mXGLo=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.0/maindoc/Bas
+ icTypes.xsd
+SHA-256-Digest: W+WnDCwR7hUFTKYBbFz/ivhIiS5mEH3I4zQ5jH4H0LE=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/SignValidation.class
+SHA-256-Digest: wCR74EffTYho4NyUlROys2x0OTc3YPKQM9qslm5iIkU=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/gib.png
+SHA-256-Digest: SLRDTEe9e1xRTCvEexRHN2UZMC0DJVEROR7m138EBpE=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/EFaturaViewerApp.prope
+ rties
+SHA-256-Digest: xhp6kqoFI1Ey4QkRGAFEqIwLBLa1c/bSLJPSYaHoOks=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/icons/folder_document.
+ png
+SHA-256-Digest: v3zpb5F/+Au7MfVileUZN2ghrIke3vqKlmHObfqq/uE=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.2/maindoc/Bas
+ icTypes.xsd
+SHA-256-Digest: AKjiI21udeFVvBWKpsUfTSpKsvzi56vSx8hEm2tYrdw=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.2/common/UBL-
+ XAdESv141-2.1.xsd
+SHA-256-Digest: CB4bHTNadIPnb9jqpNFHZX4inSM0iGzUw0V2M2D4G9k=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/EFaturaViewerView$11.class
+SHA-256-Digest: Wn+L7wtyZRFSvq8HjiQQGW2LYFoeVHDjxiQ4e3Q4cVs=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/Common.class
+SHA-256-Digest: wo610QzLVu+uuVHf+7KhJHS8usz72DNy2dKyDtAQ/kk=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/ProxyDialog.properties
+SHA-256-Digest: M+fehotmMzgfKq5ocEv1hl8mfdEjwsFdcCYw9ckkw94=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.0/maindoc/Sta
+ ndardBusinessDocumentHeader.xsd
+SHA-256-Digest: b8suVBLvbgMR675xTop3LiksTsjOBDDR81OEeVHxq+Y=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/html/hosgeldin.html
+SHA-256-Digest: kQQLcMlpQa9S+Mr2jYE7q4IPxCqmHFXb/hLeKalfJQU=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/UnicodeXMLInputStream.class
+SHA-256-Digest: BKQ/mDBItKVt1qjjjLZRYKrDTJNe7zk2+8GGBgOTFz0=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/MyErrorListener.class
+SHA-256-Digest: vvOZ4fvcGPpBz5IFZnfkePf9PqcFAcvgDF8CvvCdmYY=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/FXWebBrowser$1$3$1.class
+SHA-256-Digest: sxQzPYfV1bq86jmLP2qB3JL8WdRdUCnqrV+48slwvXk=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/icons/failure.png
+SHA-256-Digest: LSWs0nfDSGzQHFpaY43pE3hAH+CKgdxdt9sqWI0ZlHo=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/icons/gelir_idaresi.gi
+ f
+SHA-256-Digest: ICgpyNhoJyZZ4MptZeQJ+rWL7gw6YwZ/I8Hf8BA5QPQ=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/FXWebBrowser$1$4$1.class
+SHA-256-Digest: 92KEcxKMJF9EXNbreUcaXUGsT/AOHOQQhhqhqjB8HaE=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.0/common/UBL-
+ CoreComponentParameters-2.0.xsd
+SHA-256-Digest: bXcmvLdnMYilJGlv1jeO5P28gPJNk+U93NEy5JKf3b8=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/EFaturaViewerView$3.class
+SHA-256-Digest: nk1r7l45fZ/17EhfgTP+AwPQqi9mriMPaxNWA/s+5+o=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/default_20150812.xslt
+SHA-256-Digest: 1K12uL//FXOVgflRINVV93XwFjo2M6tGJXi/TZ6cp+E=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/EFaturaViewerView$21.class
+SHA-256-Digest: N/cbywiDmqZR0QodJvw6Rfrn2cQeFZTYMmNtGV57Y2M=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.2/maindoc/UBL
+ -ApplicationResponse-2.1.xsd
+SHA-256-Digest: /NdhlieWUpW2knbd/oyY2baMX5hB/Pg2Dv8vzUmALCI=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/busyicons/busy-icon7.p
+ ng
+SHA-256-Digest: I/oLWzdMFMogw0fS0nZo5z13Ym928OTMpJeT2SC0IKM=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/MyWebBrowserListener.class
+SHA-256-Digest: 15cOT+XGuM26f0W30fIIA7GxFwUyP/8kvtMEC0jz5kQ=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/XBRLDefault.xslt
+SHA-256-Digest: mafVO1QsG6fsDhmF5/r/ZHP7v40BmoQ9IagLYdvMWMs=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.2/HRXML/www.o
+ penapplications.org_oagis_9/Components.xsd
+SHA-256-Digest: E/Pm3hh5O0cGtUCOMnZep9mMv658GlN0ZexnB5u/Mqc=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/EFaturaViewerView.class
+SHA-256-Digest: 51YNVXfmEw0EUDENx9E7PhDPEkYJ/yCuc91cUd/rCLA=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.2/common/UBL-
+ SignatureAggregateComponents-2.1.xsd
+SHA-256-Digest: K9riBVyyYZy7vPm8ItFXLBaPp4GtLDX06jRdk90FaS0=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/ProxyDialog$1.class
+SHA-256-Digest: OGBgzvo9JmQ+vWuNm0Ya21kikGk3Hy++xBAovYU4spM=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/EFaturaViewerView.prop
+ erties
+SHA-256-Digest: 9i61j+STCAnvMctqVc9iIBhiMiBJxfQQtVHj4yhD7mE=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.2/maindoc/UBL
+ -Invoice-2.1.xsd
+SHA-256-Digest: Lwmek/71EFk4hnefmg9dxQZ1H5O0c69SRPT7LPAo2JM=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/XmlFileFilter.class
+SHA-256-Digest: 2XElGcpumquNdIIvS+ZnqrzMmrR2srMJAw365qd3QoA=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.0/common/xmld
+ sig-core-schema.xsd
+SHA-256-Digest: VaI+FIpaUYCghmG2Xw3W71qEB3l4bGpzVNhOv7M4N48=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/EFaturaViewerView$20.class
+SHA-256-Digest: usAX3oqJ7MkatpxOIS0rGe6Rx6uXUkVc+8i6iASQIh8=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/splash.png
+SHA-256-Digest: oPGyNrOJGjmORk/ebVM5tVEbPe7PEisnN9mHrC50zW8=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.2/common/UBL-
+ CoreComponentParameters-2.1.xsd
+SHA-256-Digest: rNz9sbZlGXHwXxsNT1JofNGu4OL6QLK7k6QvDlKr118=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/FXWebBrowser$1$2$1.class
+SHA-256-Digest: Y7LYf+psnoygOOctSCayh8c+tbFj82Eq9sa9YTrEW/8=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/icons/gib.png
+SHA-256-Digest: r7iMCf5naHUJ5hxI0jS9dTsLXkWVJoDqysn7jXSpUME=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/icons/exit.png
+SHA-256-Digest: n19S3r5b51vGt3JhzvBA5Uckr/6cbud3TzJeia/ffSU=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/EFaturaViewerView$18.class
+SHA-256-Digest: M+/mQ2ZRnqCFdpGW6xurgcpLj4taA5XQR9oSh+hI3iY=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/busyicons/busy-icon1.p
+ ng
+SHA-256-Digest: ZXR7II1tYFAhwYtFQa6Eu+/vVs4oDyFD4N+wEBwpSmE=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/FXWebBrowser$1$1$1.class
+SHA-256-Digest: OySR+6az79xP9/vBplNeeSfot7FrMO8JiuXGtIlBGzU=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/icons/success.png
+SHA-256-Digest: 7Qxq9XOKi2wTy02k1fwwcP5AE7enwQk1DDaHBZ/pkkw=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.0/maindoc/Pac
+ kage.xsd
+SHA-256-Digest: 86fTKR/L9Vpa+VDF1c42WDbA9Npc3xUUpSAXffYSTnA=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/html/faturaGoruntulene
+ medi.html
+SHA-256-Digest: Tf91H76fQUAJknb3k1lMxfXmMOf2odEaSEaHFeuTEE8=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/EFaturaViewerView$5.class
+SHA-256-Digest: jc12u7bNvHY7RadjQpR0/z7FWBv9wlMHuOrsHSgZolY=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/default3.xslt
+SHA-256-Digest: uPI80T3uoSisJGx4kJqRxttHTriCNrxCE+K7LbXlh1I=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/default4.xslt
+SHA-256-Digest: nekFDMA69ckOqlEaToFB8lQ/Iq/JIsrwIKUAvtXVqbk=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/invoice.xslt
+SHA-256-Digest: MbXYx408zJ2+f4POrOJC7TjICRzUsk0SYTrszb0ZcNs=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/EFaturaViewerAboutBox.
+ properties
+SHA-256-Digest: 4DKrDEvt+H3H9v+G7mGHdNFkO9xJ9aILL5xb01lhe5c=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/busyicons/busy-icon6.p
+ ng
+SHA-256-Digest: d/yn4saJ96NA3/FuzoNmClyu655pOfmHhoMRxpX7fGE=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/busyicons/busy-icon3.p
+ ng
+SHA-256-Digest: X8WitIaAxayqtERbK4BQTINQZ57z2VsNFgcypHyqCqs=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.0/maindoc/Pac
+ kageProxy.xsd
+SHA-256-Digest: cWw+LaCtx4/yfKdiDISlbUpTz3ZQIyVIzg9EEZM0ekM=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/busyicons/busy-icon12.
+ png
+SHA-256-Digest: M+QxzPAcIAa0EU4wprKVqttRH1wQCcpreIInv0ad8vc=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.0/common/Code
+ List_LanguageCode_ISO_7_04.xsd
+SHA-256-Digest: AW1EkbtqGGGLpsmW1IJI0GqSVC4By2xjAEKsLpdec4w=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/busyicons/busy-icon2.p
+ ng
+SHA-256-Digest: ZqjOFf5USpYuKTwtrwrc+uYnqiK+db12mnGDioiWtB4=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.0/maindoc/Par
+ tner.xsd
+SHA-256-Digest: xa2LreK83dD/jnBXdKkhxquF7lbDaNWj+YlW62WFz6c=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/busyicons/busy-icon8.p
+ ng
+SHA-256-Digest: whLBpcE353XABDI+h4+j+Ihia+269o9Prrtei+BMOkk=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.2/maindoc/Pac
+ kageProxy_1_2.xsd
+SHA-256-Digest: CTVlXvc7akslL/uhqp1UBxnou1aro/uyuCh+Su1gXAE=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.0/common/XAdE
+ S.xsd
+SHA-256-Digest: TxTOfMmxWp8NY6aPTn7BpIEUmy14BTzem4syFknxm9Q=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/icons/information.png
+SHA-256-Digest: YjgajZuZxBUrhsLQw970BZt8gIEl+F1E7H+ebTfUF4Y=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.2/maindoc/Par
+ tner.xsd
+SHA-256-Digest: WOHxhAjIYJpuza6HdApU22WYli2ZmR1ESjwJRnws0ts=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.2/common/CCTS
+ _CCT_SchemaModule-2.1.xsd
+SHA-256-Digest: lKJZyzQuwGsNSQV86CbiFpScLAyJvr+jDbaUH+kcizY=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/ShowCert$1.class
+SHA-256-Digest: +7N9Icj0lecpzKz6ENGq+anL+ZN6N+mY9JMdYB+WcIQ=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/EFaturaViewerView$15.class
+SHA-256-Digest: G9qoN3c9RB0OPugwx5z6SrUQBtw/UkG2na39tuZtgbo=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/efatura_schematron.xsl
+SHA-256-Digest: y0y3EqvpKKs0PRIj+mDx8AbNfBIGsjt8BTIczExnm+E=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/FXWebBrowser.class
+SHA-256-Digest: wS7MH16tuBCE9zZ898L4Y9GD2BMnsxHPIuhNzDIGgIM=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.0/maindoc/UBL
+ TR-ApplicationResponse-2.0.xsd
+SHA-256-Digest: KKEkxz/6B09D+TQYx2lScu1wRV4O4/5/vaLq52BTPho=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.2/common/UBL-
+ CommonBasicComponents-2.1.xsd
+SHA-256-Digest: IeWG9Uu1JxahfzptWd2qeV/nOfXToKz1v6mbW7P1Trw=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/icons/deny.png
+SHA-256-Digest: bldT771xYyyf29fUBWpSiWLYhJo5ArI0Ich3A55nwbA=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/FXWebBrowser$1$3.class
+SHA-256-Digest: z0jaqw8PbDW/P3z54Xq+BDm6MX49vG6U8IEBH21Z1as=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/EFaturaViewerView$19.class
+SHA-256-Digest: kCGIXWfRK2VSwTbjI/72J1C7GUom1a4LMifU/JiGPdE=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/EFaturaViewerApp.class
+SHA-256-Digest: svp1teuLd1RzER5cghqMZhyWAQw1UuhGehs74+iE9GQ=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/icons/New24.gif
+SHA-256-Digest: crSFfH4ztYTeLonv5W0Tg+NrYebbsE2R44g72MbKBuI=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.2/HRXML/www.o
+ penapplications.org_oagis_9_unqualifieddatatypes_1.1/UnqualifiedDataT
+ ypes.xsd
+SHA-256-Digest: cTxxK1WEPEE91XZOthQ+FG7BoHfllzrHpf2LYxwUrKw=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/CheckUpdates$DownloadExeFile$Tas
+ k.class
+SHA-256-Digest: HcMUGUAB9IchLxZENRuizBhcdS89YJwdlba1+8QvSAM=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/EFaturaViewerView$14.class
+SHA-256-Digest: iuY0tGiOUnctVw3q3jfutaaCxi7DgVMqDIOoprd2Ljc=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/FXWebBrowser$1$1.class
+SHA-256-Digest: cnBiAdfOHnlU2DseOOYD9WyIppn8RPpAhIbBDA1lc/E=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/busyicons/busy-icon9.p
+ ng
+SHA-256-Digest: XRnA2e969Qj+vDopLrvY9oLWHb8EpLG/vALXzMiZhZ8=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/DocParser.class
+SHA-256-Digest: XYI+Zh5xTTORMib82q1QWpMu41T3v6G9ou5Y9YO9hHM=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/html/hosgeldin.jpg
+SHA-256-Digest: t3nyGzIIHFFr1Zwu5I4uRaXPhqGJWUD70qa6At4++N4=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.2/common/UBL-
+ xmldsig-core-schema-2.1.xsd
+SHA-256-Digest: Z3JfEHUVyxFEMIxVXQurMB16Vmw64sNst1DnEu9QH3M=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/ShowValidateLog.class
+SHA-256-Digest: g19XYogul8ap0SdQeRcF1mclBpXBMPWxBsYjmbVFPMo=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/icons/green_ribbon.png
+SHA-256-Digest: GdipkU97+txbtFP5BbVzF1hd8u/bWxgF3c2PbmM1OSw=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.0/common/Unqu
+ alifiedDataTypeSchemaModule-2.0.xsd
+SHA-256-Digest: LJRuiAvQKUaJ+J1sgCvrfqOTN7zoe5Jw0cpkRo1awb0=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/FXWebBrowser$1$5$1.class
+SHA-256-Digest: cw/y1xSUisx9OYoUY6B38A0X/ojg2PXNT+oPD8dAYlY=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/FXWebBrowser$1$2.class
+SHA-256-Digest: Vb3q3/8/D6zzqMQqnV0No7VfxUSxpaQCXQFAN9PAd8k=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.2/common/UBL-
+ UnqualifiedDataTypes-2.1.xsd
+SHA-256-Digest: EsIjSvEzEpYfWKY+uy+koICtk5jbc4ILt+huMmQ7eBA=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/FXWebBrowser$1$4.class
+SHA-256-Digest: 8STF4otAzeDCmXLD+v3rptRuZA8VqHbnwSBmiGIV9QU=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.2/common/UBL-
+ SignatureBasicComponents-2.1.xsd
+SHA-256-Digest: n4wVXYJpiE90op4P1sm2EnG7uvH8ToycSky7p+BnGBs=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/CSEntityResolver.class
+SHA-256-Digest: qkeESKCcUxSXBR69c7aa35e9iPDVAWqYsa0ciq4ugmI=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/icons/invoice.jpg
+SHA-256-Digest: 814NFOv4Sd/q0MAYFTc5GJZVwMakAu7nombCdRbo/aY=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.2/HRXML/www.o
+ penapplications.org_oagis_9_codelists/CodeLists.xsd
+SHA-256-Digest: bmb78vHb7LM6/n9190nVD+eNH8bMi18Z1eR/g5xh3MA=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/busyicons/busy-icon11.
+ png
+SHA-256-Digest: 9OKiuwU13hqjZ4zToNvq2Jx5/tlPsizXROggxHTNYsI=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/icons/failure_48.png
+SHA-256-Digest: XAnuR+S6sL43iyg8vB+Mc3sO5n7bTHtOwtlw4uOpLjA=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/efatura_schematron_201
+ 50811.xsl
+SHA-256-Digest: aid84oxxgxwqyAqUUCKxnbU+3ukNyN6ci4XkYcGhVnI=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/FXWebBrowser$1$5.class
+SHA-256-Digest: JqJCFF7XkT/9SmICz6gaofDpknNFEggpC9b/3RxZBuA=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/icons/window_split_hor
+ .png
+SHA-256-Digest: NR5Yb3fScJj9qsqCYor+udU3hVNmUyUIqt2xiVv/fFo=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.0/maindoc/UBL
+ TR-Invoice-2.0.xsd
+SHA-256-Digest: rBV7wpWGPj7PGA2w5qjgHvQSjs1PtjqXfQRRsaTMB1s=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.0/common/Code
+ List_MIMEMediaTypeCode_IANA_7_04.xsd
+SHA-256-Digest: JvI5uHBB3mTCKqZWywzqCn1pka4m+3fyH0yakIrc4jA=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.0/common/CCTS
+ _CCT_SchemaModule-2.0.xsd
+SHA-256-Digest: fzeShjeyvQXURUllqIZMMmYjZnRDAXFFji+0OnCX5i0=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/EFaturaViewerView$16.class
+SHA-256-Digest: itkHopAfLY8zybUQEiUDzVPhTSk22wGzFg8942FDV9E=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.0/maindoc/Man
+ ifest.xsd
+SHA-256-Digest: 9ELsNz/lWk8cigf+P2Z2gtfTkWDw2BNAlWjiLU7gAzo=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/APRDefault.xslt
+SHA-256-Digest: h5hld31V5lWYyB/Te5Ns/bWiB71KvbTcwUcUV/a6Csw=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.2/maindoc/Pac
+ kage_1_2.xsd
+SHA-256-Digest: hpFEUurTCH+sJnSAhfE6+pUuzFV1rgXDEExIa2AmHrQ=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/Doc$1.class
+SHA-256-Digest: E/SXLPJ5JeMIGzQ80TdQSIGNdGcoSqxF+dXDLL3+Cxc=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/EFaturaViewerView$13.class
+SHA-256-Digest: S5gj7D0Uj97ZcQXLPZlGSmDNeHsP7Am11MoZjSALSbI=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.0/common/UBL-
+ QualifiedDatatypes-2.0.xsd
+SHA-256-Digest: n+oyrwZ0j1+6qZ3Hh4IvTbcINogn+TKy1q1ZBQJOpas=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/CheckUpdates.class
+SHA-256-Digest: Wf7Wm6/gWQYOX74AKNxBqpVG29iTOFnvxCUHlQUFh4Y=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.0/common/UBL-
+ CommonExtensionComponents-2.0.xsd
+SHA-256-Digest: OBQQexFy2T6IutEzRZgCa8P+LDVRLbmZt4jiatr6Tk8=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/InvoiceHandler.class
+SHA-256-Digest: owILQB8XkhH0yN9j6veN/AiThJWAidtk1ehpOUzy+mU=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/EFaturaViewerView$1.class
+SHA-256-Digest: OUJU0Mw/ljFq8OycOhMbTsw0LlT0ZC411IO7CdpcR70=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/EFaturaViewerView$2.class
+SHA-256-Digest: 46adlYQthMjaprjXodozRzEFwbQICgqU9XnAF6yNwPY=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/EFaturaViewerView$12.class
+SHA-256-Digest: yPlcCbtCH5nAnp5rPNXQf6A+L2a5ygctCCwtH7mXFOo=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.2/HRXML/www.o
+ penapplications.org_oagis_9_qualifieddatatypes_1.1/QualifiedDataTypes
+ .xsd
+SHA-256-Digest: 6qMBXPz71du4RU83EL/7RTVFKHekc5zq3+hQUZX6QG8=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/efatura_schematron_1.x
+ sl
+SHA-256-Digest: gOW6RanAWEit/8hvHO9a4yXqvzqC9tG1x+CJIG5Qqdk=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.2/HRXML/UserA
+ ccount.xsd
+SHA-256-Digest: XbFpVJ5SOvHjxNOPTFYc3Cy7gvIHYaEUBRoPcvarbgI=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/Invoice.class
+SHA-256-Digest: +brmaAzg5YjwG4OB0/EWzvQ27OiVkQN9Z245Wiv0Y/Q=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/CommonMethods.class
+SHA-256-Digest: rudpZx782kfuq6DRyMO9UKXCv3UVxlmdcQVSLJqacd4=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/EFaturaViewerView$8.class
+SHA-256-Digest: OHcawOxGnMNNqDxjmMyCMbNVx2A4iNubDqzPMT+UWcc=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/EFaturaViewerView$17.class
+SHA-256-Digest: l5MHpS4tkN/0wlu/710+z/fbrPgtQz5e8yavb7raJcU=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/busyicons/busy-icon4.p
+ ng
+SHA-256-Digest: 1GfBikbTU44dhO0malAwfF4POB/5o0gzshoiREpdxNI=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/CheckUpdates$DownloadExeFile.cla
+ ss
+SHA-256-Digest: wnE/e0Ps7PawCGsK5vNOBz1Wo1KmvvBVYXvQuGCKC6E=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/Doc.class
+SHA-256-Digest: 1V87ZpvYlTiE+NiLyVllBPVitaihnBmzWLSUDBWmyso=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/FXWebBrowser$1.class
+SHA-256-Digest: aFfgtH/xEYYLxF5caDkDv5PUXXMrFINxNARTTc6ILoQ=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.2/maindoc/Bus
+ inessScope.xsd
+SHA-256-Digest: q64UvDwNuQxZ6lne2tUJRUZ8WmvUbysUUCV+20b5h70=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.2/common/UBL-
+ QualifiedDataTypes-2.1.xsd
+SHA-256-Digest: USz7P3YOVkByxP+kzbM+WjNWEjoHCgix02KY+9ictHs=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/icons/print.png
+SHA-256-Digest: caWdP8+UsBj5JRexCMiaKgy3YbcCc/PnXx3teIqn1nU=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/icons/text_rich_colore
+ d.png
+SHA-256-Digest: cWS1HZPfcmeItL3Q9+yzlOXbJRlaSgrTY1cz5VTdbks=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/icons/imzaDogrula.png
+SHA-256-Digest: Rcoi+S+p/Q8EEO3e7x0jlB9uCLo7+9d+RP7WT45wxh8=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.0/common/UBL-
+ CommonAggregateComponents-2.0.xsd
+SHA-256-Digest: Sn+sO1Z0PyhaRSn7aq2glT/zl/LqqXxzZThTvd1YFgU=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/busyicons/idle-icon.pn
+ g
+SHA-256-Digest: iCeB7fgE9pCqmQQESME6kCSqGUe/RILE+69EsB2MEPc=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/Doc$2.class
+SHA-256-Digest: ohIaa903RYLoIPkLAyo9S/2tIYjT+R2bKbMeBGJnltM=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/EFaturaViewerView$10.class
+SHA-256-Digest: KHCgNFYGSDzxAxfG1t3Ft8Vb8g3D+NQ6jxme8QLiKx4=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.2/maindoc/Sta
+ ndardBusinessDocumentHeader.xsd
+SHA-256-Digest: 8TlIOkF2d/8ZGxJk8Bu4QO4e+Arli72e/m51dUY36w0=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/default.xslt
+SHA-256-Digest: tcCxRVm0NvlK8nG0K5I5MnASOYHfgZRG1M1YFPrtp6Y=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/MyWebBrowser.class
+SHA-256-Digest: um/eb84MFMzqo23Biuv5eG9/Jf/PywmvyKetEqoKqd0=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/busyicons/busy-icon5.p
+ ng
+SHA-256-Digest: YhRqdsooZmG6COxDdSJ6/L9hILpyl0t5XmihjdE0mLo=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/busyicons/busy-icon10.
+ png
+SHA-256-Digest: eGYCRQG1otJgKvZM5o/pvg7EyFheWG/fqj/jDYgjw38=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.0/maindoc/Bus
+ inessScope.xsd
+SHA-256-Digest: ZHSsJEJO21Lw2XUFTHNqRaYmHXW29l4IqUXzfj0X5lE=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/ProxyDialog.class
+SHA-256-Digest: AcwZtY5cCNePgzKlU81RVut5b+U9C4/MZz97qVV1yA4=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/efatura_schematron_270
+ 62014.xsl
+SHA-256-Digest: xQKN59u9AExUE9hIbPcSM+rxD99WhjyPfX+ESAe0Q+Q=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/EFaturaViewerView$6.class
+SHA-256-Digest: NGP1AmT6xAVJuf+7/2ycEukyy/QqMEeE4IvSdeP7c+o=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/StopWatch.class
+SHA-256-Digest: 4nSOA6FaBpiFjo9o/2LACxKvGNPHZx9fk57JjTVeOSY=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/busyicons/busy-icon13.
+ png
+SHA-256-Digest: OC/O7pK1s7tv6TRLozNxY6ih7nySCOAU24BKcrunxJU=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/Const.class
+SHA-256-Digest: oTR7Fnv/OIBT5S7Zwl7En2Uf9ab7j1MfYsKbZOKe/S0=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/EFaturaViewerAboutBox.class
+SHA-256-Digest: jes2zEcv4wJbKfx/deKiODNzBKgYrMYDbktc9tVzEqY=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.0/common/Code
+ List_UnitCode_UNECE_7_04.xsd
+SHA-256-Digest: 6ETYEXvPz5eHTh5G9ibqgk+y9dlfXT8c4DOYOM8y5d8=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/resources/schema/1.2/common/UBL-
+ CommonSignatureComponents-2.1.xsd
+SHA-256-Digest: YGC09DjsSiHlJxbhz3kJl+WpW2pDej/NVEaHH7D29gM=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/EFaturaViewerView$7.class
+SHA-256-Digest: yKq+SExydzn4Z2GCuKqZIeHFC04MAjhC3K8Sy/taR4I=
+
+Name: tr/gov/gib/vedop3/efaturaviewer/EFaturaViewerView$22.class
+SHA-256-Digest: J2nZtmcpJpIA0j7uCPqqtq6L5lQZc1TyNHwF5Tj49ac=
+

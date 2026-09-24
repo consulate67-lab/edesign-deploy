@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<jnlp spec="0.2 1.0"
+      codebase="https://ebelge.gib.gov.tr/EFaturaGoruntuleyici/Windows/Java17/"
+      href="EFaturaGoruntuleyici.jnlp">
+   <information> 
+      <title>EFatura Görüntüleyici</title> 
+      <vendor>GELİR İDARESİ BAŞKANLIĞI</vendor>
+      <homepage href="/EFaturaGoruntuleyici/Windows/Java17/"/>
+      <description>EFatura Görüntüleyici</description>
+   </information> 
+   <security>
+     <all-permissions/>
+   </security>
+   <resources>
+      <j2se version="1.7+" initial-heap-size="128m" max-heap-size="512m"/>
+      <jar href="EBelgeGoruntuleyici.jar"/>
+      <jar href="lib/AbsoluteLayout.jar" />
+      <jar href="lib/appframework-1.0.3.jar" />
+      <jar href="lib/CSSigner.jar"/>
+	  <jar href="lib/jfxrt.jar"/>
+      <jar href="lib/rsyntaxtextarea.jar"/>
+      <jar href="lib/serializer.jar"/>
+      <jar href="lib/swing-layout-1.0.3.jar"/>
+      <jar href="lib/swing-worker-1.1.jar"/>
+      <jar href="lib/saxon9he.jar"/>
+      <jar href="lib/xercesImpl.jar"/>
+      <jar href="lib/xml-apis.jar"/>
+   </resources>
+   <application-desc main-class="tr.gov.gib.vedop3.efaturaviewer.EFaturaViewerApp">
+   </application-desc>
+</jnlp> 
