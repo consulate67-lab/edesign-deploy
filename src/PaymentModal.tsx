@@ -106,7 +106,10 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onS
 
                         <div style={{
                             display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                            // 5 paket 2 satira bolunur: [Starter, Basic, Pro] + [Business, Enterprise]
+                            // Pro otomatik 1. satirin saginda (vurgulu EN POPULER pill ile)
+                            // Responsive: 1040px+ → 3 sutun, 720px → 2 sutun, 350px → 1 sutun
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
                             gap: 14,
                             marginBottom: '1.5rem',
                         }}>
