@@ -67,29 +67,32 @@ const modules: Module[] = [
         name: 'e-SMM (Serbest Meslek)',
         icon: <Briefcase size={24} />,
         color: '#14b8a6',
-        // hzkucuk-eFatura Invoice-2 görselleştirme (en zengin topluluk XSLT — 600 KB)
-        template: 'community/hzkucuk-eFatura.xslt'
+        // hzkucuk-eFatura + e-SMM hizmet bilgileri section
+        template: 'community/hzkucuk-eFatura-smm.xslt'
     },
     {
         id: 'mustahsil',
         name: 'e-Müstahsil Makbuzu',
         icon: <Sprout size={24} />,
         color: '#84cc16',
-        template: 'community/hzkucuk-eFatura.xslt'
+        // hzkucuk-eFatura + e-Müstahsil müstahsil/stopaj section
+        template: 'community/hzkucuk-eFatura-mustahsil.xslt'
     },
     {
         id: 'bilet',
         name: 'e-Bilet',
         icon: <Ticket size={24} />,
         color: '#f97316',
-        template: 'community/hzkucuk-eFatura.xslt'
+        // hzkucuk-eFatura + e-Bilet yolcu/sefer/koltuk section
+        template: 'community/hzkucuk-eFatura-bilet.xslt'
     },
     {
         id: 'makbuz',
         name: 'e-Makbuz',
         icon: <Receipt size={24} />,
         color: '#06b6d4',
-        template: 'community/hzkucuk-eFatura.xslt'
+        // hzkucuk-eFatura + e-Makbuz basit ödeme section
+        template: 'community/hzkucuk-eFatura-makbuz.xslt'
     },
     {
         id: 'sigorta',
