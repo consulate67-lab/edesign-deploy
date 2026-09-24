@@ -62,9 +62,9 @@ export const MODULE_CONFIGS: Record<string, TemplateConfig> = {
         hasPassenger: false,
         hasService: false,
         specialFields: ['logo', 'stamp', 'bank', 'product_table', 'totals', 'notes', 'signature'],
-        defaultTemplate: 'community/IRPTeam-eFatura-eArsiv.xslt',
+        defaultTemplate: 'gib/e-Arsiv-Sablon.xslt',
         recommendedSample: 'samples/e-Arsiv-TEMEL.xml',
-        description: 'e-Arşiv — e-Fatura + zorunlu imza alanı (GİB gereği).',
+        description: 'e-Arşiv — sıfırdan tasarlanmış minimal XSLT, GİB uyumlu, e-imzalı.',
     },
     irsaliye: {
         layout: 'multi-section',

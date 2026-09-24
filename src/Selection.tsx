@@ -36,8 +36,8 @@ const modules: Module[] = [
         name: 'e-Arşiv',
         icon: <Package size={24} />,
         color: '#10b981',
-        // e-Arşiv icin GIB zorunlu imza alani olan ozel XSLT
-        template: 'community/IRPTeam-eFatura-eArsiv.xslt'
+        // e-Arşiv icin sifirdan tasarlanmis minimal XSLT (GIB uyumlu, imzali)
+        template: 'gib/e-Arsiv-Sablon.xslt'
     },
     {
         id: 'irsaliye',
