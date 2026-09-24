@@ -577,6 +577,9 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                         { label: 'e-Müstahsil', code: '07', a: '#84cc16' },
                         { label: 'e-Bilet', code: '08', a: '#f97316' },
                         { label: 'e-Makbuz', code: '09', a: '#14b8a6' },
+                        { label: 'e-Sigorta Komisyon', code: '10', a: '#dc2626' },
+                        { label: 'e-Döviz', code: '11', a: '#22c55e' },
+                        { label: 'e-Kıymetli Maden', code: '12', a: '#f59e0b' },
                     ].map((dt) => (
                         <button
                             type="button"
