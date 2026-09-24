@@ -1,9 +1,10 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { FileText, ShoppingCart, Globe, Plane, Package, Zap, Upload, LogOut, User, X, CreditCard, Building2, Phone, Mail, Sparkles, Layout, Truck, Briefcase, Sprout, Ticket, Receipt, Shield, Banknote, Coins, Plus, FileSignature } from 'lucide-react';
+import { FileText, ShoppingCart, Globe, Plane, Package, Zap, Upload, LogOut, User, X, CreditCard, Building2, Phone, Mail, Sparkles, Layout, Truck, Briefcase, Sprout, Ticket, Receipt, Shield, Banknote, Coins, Plus, FileSignature, Code2, Copy, Check } from 'lucide-react';
 import { api } from './api';
 import { PaymentModal } from './PaymentModal.tsx';
 import { TemplateGallery } from './TemplateGallery.tsx';
 import { getModuleHints, getModuleConfig } from './templateConfig';
+import { getSnippetsForModule, Snippet } from './snippets';
 import { XSLTTemplate, xsltTemplates } from './templates';
 import { useUiStore } from './store/uiStore';
 
@@ -132,6 +133,8 @@ export const Selection: React.FC<SelectionProps> = ({ onSelect, onLogout }) => {
     const [showProfileModal, setShowProfileModal] = useState(false);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [showGallery, setShowGallery] = useState(false);
+    const [showSnippetsModal, setShowSnippetsModal] = useState<string | null>(null);
+    const [copiedSnippetId, setCopiedSnippetId] = useState<string | null>(null);
     const [userInfo, setUserInfo] = useState<any>(null);
 
     useEffect(() => {
@@ -570,6 +573,42 @@ export const Selection: React.FC<SelectionProps> = ({ onSelect, onLogout }) => {
                                         ))}
                                     </div>
                                 )}
+
+                                {/* Snippet butonu (modüle özgü XSLT section library) */}
+                                {getSnippetsForModule(module.id).length > 0 && (
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setShowSnippetsModal(module.id);
+                                        }}
+                                        style={{
+                                            marginTop: 8,
+                                            alignSelf: 'flex-start',
+                                            padding: '4px 10px',
+                                            background: 'transparent',
+                                            border: `1px solid ${module.color}55`,
+                                            borderRadius: 999,
+                                            color: module.color,
+                                            fontSize: '0.68rem',
+                                            fontWeight: 600,
+                                            letterSpacing: 0.3,
+                                            cursor: 'pointer',
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: 4,
+                                            transition: 'background 0.15s',
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.background = `${module.color}15`;
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.background = 'transparent';
+                                        }}
+                                    >
+                                        <Code2 size={11} /> Snippet&apos;ler
+                                    </button>
+                                )}
                             </div>
                             );
                         })}
@@ -588,6 +627,123 @@ export const Selection: React.FC<SelectionProps> = ({ onSelect, onLogout }) => {
                 onClose={() => setShowPaymentModal(false)}
                 onSuccess={(credits) => setUserInfo((prev: any) => prev ? { ...prev, credits } : null)}
             />
+
+            {/* Snippet Library Modal */}
+            {showSnippetsModal && (() => {
+                const snippets = getSnippetsForModule(showSnippetsModal);
+                const cfg = getModuleConfig(showSnippetsModal);
+                return (
+                    <div style={{
+                        position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 1100,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(10px)',
+                        padding: '2rem',
+                    }}>
+                        <div style={{
+                            background: 'linear-gradient(180deg, #020617 0%, #0a0f1f 100%)',
+                            border: '1px solid rgba(148, 163, 184, 0.14)',
+                            padding: '2rem',
+                            borderRadius: '1.25rem',
+                            maxWidth: 960, width: '100%', position: 'relative',
+                            boxShadow: '0 24px 60px rgba(0, 0, 0, 0.55)',
+                            maxHeight: '90vh', overflowY: 'auto',
+                        }}>
+                            <button onClick={() => { setShowSnippetsModal(null); setCopiedSnippetId(null); }}
+                                style={{ position: 'absolute', top: 16, right: 16, background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(148, 163, 184, 0.18)', borderRadius: 999, width: 32, height: 32, color: '#cbd5e1', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <X size={16} />
+                            </button>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                                <Code2 size={22} color="#6366f1" />
+                                <h2 style={{ color: '#f8fafc', margin: 0, fontSize: '1.4rem', fontWeight: 800 }}>
+                                    XSLT Snippet Kütüphanesi
+                                </h2>
+                            </div>
+                            <p style={{ color: '#94a3b8', fontSize: 13, margin: '0 0 16px' }}>
+                                <strong style={{ color: '#a5b4fc' }}>{cfg.description.split('—')[0].trim()}</strong> için hazır section snippet&apos;leri.
+                                Aşağıdaki kodları kopyalayıp Designer&apos;da XSLT edit&apos;ine yapıştırabilirsin.
+                            </p>
+
+                            {snippets.length === 0 ? (
+                                <div style={{ padding: 24, textAlign: 'center', color: '#64748b' }}>
+                                    Bu modül için henüz snippet eklenmedi.
+                                </div>
+                            ) : (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                                    {snippets.map((snip) => (
+                                        <div key={snip.id} style={{
+                                            background: 'rgba(255,255,255,0.03)',
+                                            border: '1px solid rgba(148, 163, 184, 0.14)',
+                                            borderRadius: 12,
+                                            padding: 16,
+                                        }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                                                <div>
+                                                    <div style={{ color: '#f8fafc', fontWeight: 700, fontSize: 14 }}>{snip.label}</div>
+                                                    <div style={{ color: '#94a3b8', fontSize: 12, marginTop: 2 }}>{snip.description}</div>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        try {
+                                                            if (navigator.clipboard && (navigator.clipboard as any).writeText) {
+                                                                (navigator.clipboard as any).writeText(snip.code);
+                                                            } else {
+                                                                const ta = document.createElement('textarea');
+                                                                ta.value = snip.code;
+                                                                document.body.appendChild(ta);
+                                                                ta.select();
+                                                                document.execCommand('copy');
+                                                                document.body.removeChild(ta);
+                                                            }
+                                                            setCopiedSnippetId(snip.id);
+                                                            setTimeout(() => setCopiedSnippetId(c => c === snip.id ? null : c), 1500);
+                                                        } catch (err) {
+                                                            console.error('Kopyalama hatası:', err);
+                                                        }
+                                                    }}
+                                                    style={{
+                                                        padding: '5px 12px',
+                                                        background: copiedSnippetId === snip.id ? 'rgba(16, 185, 129, 0.2)' : 'rgba(99, 102, 241, 0.15)',
+                                                        border: `1px solid ${copiedSnippetId === snip.id ? 'rgba(16, 185, 129, 0.5)' : 'rgba(99, 102, 241, 0.4)'}`,
+                                                        borderRadius: 8,
+                                                        color: copiedSnippetId === snip.id ? '#10b981' : '#a5b4fc',
+                                                        cursor: 'pointer',
+                                                        fontSize: 11,
+                                                        fontWeight: 700,
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        gap: 4,
+                                                        fontFamily: 'inherit',
+                                                    }}
+                                                >
+                                                    {copiedSnippetId === snip.id ? (
+                                                        <><Check size={11} /> Kopyalandı</>
+                                                    ) : (
+                                                        <><Copy size={11} /> Kopyala</>
+                                                    )}
+                                                </button>
+                                            </div>
+                                            <pre style={{
+                                                background: '#020617',
+                                                border: '1px solid rgba(148, 163, 184, 0.1)',
+                                                borderRadius: 8,
+                                                padding: 12,
+                                                margin: 0,
+                                                color: '#a5b4fc',
+                                                fontSize: 11,
+                                                fontFamily: 'monospace',
+                                                overflow: 'auto',
+                                                maxHeight: 200,
+                                                whiteSpace: 'pre-wrap',
+                                            }}>{snip.code}</pre>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                );
+            })()}
         </div>
     );
 };
