@@ -1,8 +1,9 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { FileText, ShoppingCart, Globe, Plane, Package, Zap, Upload, LogOut, User, X, CreditCard, Building2, Phone, Mail, Sparkles, Layout, Truck, Briefcase, Sprout, Ticket, Receipt, Shield, Banknote, Coins, Plus } from 'lucide-react';
+import { FileText, ShoppingCart, Globe, Plane, Package, Zap, Upload, LogOut, User, X, CreditCard, Building2, Phone, Mail, Sparkles, Layout, Truck, Briefcase, Sprout, Ticket, Receipt, Shield, Banknote, Coins, Plus, FileSignature } from 'lucide-react';
 import { api } from './api';
 import { PaymentModal } from './PaymentModal.tsx';
 import { TemplateGallery } from './TemplateGallery.tsx';
+import { getModuleHints, getModuleConfig } from './templateConfig';
 import { XSLTTemplate, xsltTemplates } from './templates';
 import { useUiStore } from './store/uiStore';
 
@@ -454,9 +455,12 @@ export const Selection: React.FC<SelectionProps> = ({ onSelect, onLogout }) => {
                         gap: '16px',
                         width: '100%'
                     }}>
-                        {modules.map((module) => (
+                        {modules.map((module) => {
+                            const cfg = getModuleConfig(module.id);
+                            return (
                             <div
                                 key={module.id}
+                                title={cfg.description}
                                 onClick={(e) => {
                                     // Sub-butona tiklandiysa bu onClick'i yoksay
                                     const tgt = e.target as HTMLElement;
@@ -564,7 +568,8 @@ export const Selection: React.FC<SelectionProps> = ({ onSelect, onLogout }) => {
                                     </div>
                                 )}
                             </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
             </div>
