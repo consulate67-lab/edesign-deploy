@@ -197,3 +197,44 @@ app.post('/api/admin/add-credits', authenticateToken, async (req, res) => {
         res.status(500).json({ error: e.message });
     }
 });
+
+// Admin: One-time password reset (recover access for an existing account).
+// Protected by ADMIN_KEY env var (NOT JWT_SECRET). Caller must pass
+//   { admin_key, username, new_password }
+// Disable / delete this endpoint once the recovery is done by setting
+// ADMIN_KEY to an empty string in Railway env — the endpoint will refuse
+// to operate.
+app.post('/api/_dev/reset-password', async (req, res) => {
+    const { admin_key, username, new_password } = req.body || {};
+
+    const expected = process.env.ADMIN_KEY;
+    if (!expected) {
+        return res.status(503).json({ error: 'ADMIN_KEY env is not configured on server.' });
+    }
+    if (admin_key !== expected) {
+        return res.status(403).json({ error: 'Invalid admin key.' });
+    }
+    if (!username || !new_password) {
+        return res.status(400).json({ error: 'username and new_password are required.' });
+    }
+    if (new_password.length < 6) {
+        return res.status(400).json({ error: 'new_password must be at least 6 characters.' });
+    }
+
+    try {
+        const existing = await db.get('SELECT id FROM users WHERE username = ?', [username]);
+        if (!existing) {
+            return res.status(404).json({ error: `User '${username}' not found.` });
+        }
+        const hashed = await bcrypt.hash(new_password, 10);
+        await db.run(
+            'UPDATE users SET password = ?, updated_at = NOW() WHERE username = ?',
+            [hashed, username]
+        );
+        // Do NOT log the password, only the username.
+        console.log(`[admin] password reset for user '${username}' at ${new Date().toISOString()}`);
+        res.json({ success: true, message: `Password reset for '${username}'.` });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
