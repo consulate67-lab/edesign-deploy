@@ -139,14 +139,28 @@ app.get('/api/me', authenticateToken, async (req, res) => {
 
 // Mock Payment (Add Credits) - Commission based logic placeholder
 // In real world, this would be a webhook from Stripe/Iyzico
+// Plan prices MUST stay in sync with the Landing page (Landing.tsx → PACKAGES_PLANS)
+// and the in-app PaymentModal.tsx → PACKAGES_PLANS.
+const PLAN_AMOUNT_TO_CREDITS = {
+    400: 1,       // Starter
+    3000: 10,     // Basic
+    5500: 30,     // Pro (en popüler)
+    4500: 50,     // Business
+    6000: 100,    // Enterprise
+};
+
 app.post('/api/payment/mock', authenticateToken, async (req, res) => {
     const { amount } = req.body;
     let creditsToAdd = 0;
 
-    if (amount === 2500) creditsToAdd = 10;
-    else if (amount === 10000) creditsToAdd = 50;
-    else if (amount === 15000) creditsToAdd = 100;
-    else creditsToAdd = Math.floor(amount / 250); // Fallover
+    if (typeof amount === 'number' && PLAN_AMOUNT_TO_CREDITS[amount] !== undefined) {
+        creditsToAdd = PLAN_AMOUNT_TO_CREDITS[amount];
+    } else {
+        // Fallback: keep a sensible per-credit floor so legacy / wrong amounts
+        // still produce some credits instead of zero. Should never happen
+        // when the modal is the only entry point.
+        creditsToAdd = Math.floor((amount || 0) / 400);
+    }
 
     try {
         await db.run('UPDATE users SET credits = credits + ? WHERE id = ?', [creditsToAdd, req.user.id]);
