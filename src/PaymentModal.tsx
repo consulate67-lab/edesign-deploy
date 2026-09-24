@@ -198,18 +198,19 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onS
                                     </div>
 
                                     <div style={{
-                                        marginTop: 10,
+                                        marginTop: 6,
                                         width: '100%',
-                                        padding: '8px 12px',
+                                        padding: '6px 10px',
                                         background: plan.popular
                                             ? 'linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)'
                                             : 'rgba(255,255,255,0.06)',
                                         color: '#fff',
                                         border: plan.popular ? 'none' : '1px solid rgba(148, 163, 184, 0.18)',
-                                        borderRadius: 10,
-                                        fontSize: 12,
-                                        fontWeight: 600,
+                                        borderRadius: 8,
+                                        fontSize: 11,
+                                        fontWeight: 700,
                                         textAlign: 'center',
+                                        letterSpacing: 0.3,
                                     }}>
                                         Seç
                                     </div>
