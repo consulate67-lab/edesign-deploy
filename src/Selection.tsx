@@ -26,20 +26,23 @@ const modules: Module[] = [
         name: 'e-Fatura',
         icon: <FileText size={24} />,
         color: '#6366f1',
-        template: 'gib/e-Fatura.xslt'
+        // IRPTeam topluluk XSLT (390 KB, zengin Invoice görseli — e-Fatura için önerilen)
+        template: 'community/IRPTeam-eFatura.xslt'
     },
     {
         id: 'arsiv',
         name: 'e-Arşiv',
         icon: <Package size={24} />,
         color: '#10b981',
-        template: 'gib/e-Fatura.xslt'
+        // e-Arşiv için ayrı GİB XSLT yok; Invoice-2 şemasını paylaşır
+        template: 'community/IRPTeam-eFatura.xslt'
     },
     {
         id: 'irsaliye',
         name: 'e-İrsaliye',
         icon: <Truck size={24} />,
         color: '#0ea5e9',
+        // DespatchAdvice-2 şeması için özel XSLT
         template: 'community/IRPTeam-eWaybill-Irsaliye.xslt'
     },
     {
@@ -47,20 +50,23 @@ const modules: Module[] = [
         name: 'e-İhracat',
         icon: <Globe size={24} />,
         color: '#8b5cf6',
-        template: 'gib/e-Fatura.xslt'
+        // e-İhracat Invoice-2 bazlı
+        template: 'community/IRPTeam-eFatura.xslt'
     },
     {
         id: 'mikro_ihracat',
         name: 'e-Mikro İhracat',
         icon: <Plane size={24} />,
         color: '#a855f7',
-        template: 'gib/e-Fatura.xslt'
+        // e-Mikro İhracat da Invoice-2 bazlı
+        template: 'community/IRPTeam-eFatura.xslt'
     },
     {
         id: 'smm',
         name: 'e-SMM (Serbest Meslek)',
         icon: <Briefcase size={24} />,
         color: '#14b8a6',
+        // hzkucuk-eFatura Invoice-2 görselleştirme (en zengin topluluk XSLT — 600 KB)
         template: 'community/hzkucuk-eFatura.xslt'
     },
     {
@@ -89,14 +95,16 @@ const modules: Module[] = [
         name: 'e-Sigorta Komisyon',
         icon: <Shield size={24} />,
         color: '#dc2626',
-        template: 'gib/sigortakomisyonGiderBelgesi.xslt'
+        // Görselleştirme XSLT (12 KB, HTML çıktılı, tasarım için optimize)
+        template: 'gib/e-SigortaKomisyonGider_gorsellestirme.xslt'
     },
     {
         id: 'doviz',
         name: 'e-Döviz',
         icon: <Banknote size={24} />,
         color: '#10b981',
-        template: 'gib/eDoviz_Alim.xslt',
+        // Tek XSLT, ProfileID (EDOVIZBELGE/EKIYMETLIMADENBELGE) + TypeCode (ALIM/SATIM) ile dallanır
+        template: 'gib/eDoviz_KMaden_gorsellestirme.xslt',
         subTypes: [
             { id: 'doviz_alim', label: 'Alım', suffix: 'Alim' },
             { id: 'doviz_satim', label: 'Satım', suffix: 'Satim' },
@@ -107,7 +115,7 @@ const modules: Module[] = [
         name: 'e-Kıymetli Maden',
         icon: <Coins size={24} />,
         color: '#f59e0b',
-        template: 'gib/eDoviz_Alim.xslt',
+        template: 'gib/eDoviz_KMaden_gorsellestirme.xslt',
         subTypes: [
             { id: 'kmaden_alim', label: 'Alım', suffix: 'KMAlim' },
             { id: 'kmaden_satim', label: 'Satım', suffix: 'KMSatim' },
