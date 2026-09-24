@@ -110,6 +110,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onS
                             // Pro otomatik 1. satirin saginda (vurgulu EN POPULER pill ile)
                             // Responsive: 1040px+ → 3 sutun, 720px → 2 sutun, 350px → 1 sutun
                             gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+                            // TUM KARTLAR AYNI YUKSEKLIKTE: Sec butonu marginTop:auto ile alta yapisir
+                            gridAutoRows: '1fr',
                             gap: 14,
                             marginBottom: '1.5rem',
                         }}>
@@ -121,13 +123,16 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onS
                                     aria-label={`${plan.count} tasarım için ${plan.price} TL paketi seç`}
                                     style={{
                                         position: 'relative',
-                                        padding: '20px 16px',
+                                        // Populer paket icin ust padding (EN POPULER pill icin)
+                                        padding: plan.popular ? '32px 16px 20px' : '20px 16px',
                                         background: plan.popular
                                             ? 'linear-gradient(135deg, rgba(99,102,241,0.18) 0%, rgba(14,165,233,0.10) 100%)'
                                             : 'rgba(255,255,255,0.04)',
                                         border: plan.popular ? '2px solid #6366f1' : '1px solid rgba(148, 163, 184, 0.14)',
                                         borderRadius: 14,
                                         cursor: 'pointer',
+                                        // Flex column: Sec butonu marginTop:auto ile karta en alta yapisir
+                                        alignItems: 'stretch',
                                         transition: 'transform 0.18s, border-color 0.18s, background 0.18s',
                                         display: 'flex',
                                         flexDirection: 'column',
@@ -198,7 +203,9 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onS
                                     </div>
 
                                     <div style={{
-                                        marginTop: 6,
+                                        // marginTop:auto ile Sec butonu karta en alta yapisir
+                                        // (kartlar 1fr yükseklikli oldugu icin hepsi ayni boyda)
+                                        marginTop: 'auto',
                                         width: '100%',
                                         padding: '6px 10px',
                                         background: plan.popular
