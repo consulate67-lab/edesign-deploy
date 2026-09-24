@@ -35,8 +35,8 @@ const modules: Module[] = [
         name: 'e-Arşiv',
         icon: <Package size={24} />,
         color: '#10b981',
-        // e-Arşiv için ayrı GİB XSLT yok; Invoice-2 şemasını paylaşır
-        template: 'community/IRPTeam-eFatura.xslt'
+        // e-Arşiv icin GIB zorunlu imza alani olan ozel XSLT
+        template: 'community/IRPTeam-eFatura-eArsiv.xslt'
     },
     {
         id: 'irsaliye',
