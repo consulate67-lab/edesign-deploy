@@ -80,9 +80,9 @@ export const SNIPPETS: Snippet[] = [
     {
         id: 'currency-info',
         label: 'Döviz Kuru',
-        description: 'e-Döviz ve e-İhracat için döviz kuru alanı (alış/satış).',
+        description: 'e-İhracat ve e-Mikro İhracat için döviz kuru alanı (alış/satış).',
         category: 'currency',
-        appliesTo: ['doviz', 'ihracat', 'mikro_ihracat'],
+        appliesTo: ['ihracat', 'mikro_ihracat'],
         code: `
 <div class="currency-info" style="margin-top: 16px; padding: 16px; background: rgba(34, 197, 94, 0.06); border: 1px solid rgba(34, 197, 94, 0.25); border-radius: 8px;">
     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
@@ -92,37 +92,7 @@ export const SNIPPETS: Snippet[] = [
     </div>
 </div>`,
     },
-    {
-        id: 'commodity-info',
-        label: 'Kıymetli Maden',
-        description: 'e-Kıymetli Maden için altın/gümüş/platin bilgisi (gram/ons).',
-        category: 'commodity',
-        appliesTo: ['kmaden'],
-        code: `
-<div class="commodity-info" style="margin-top: 16px; padding: 16px; background: rgba(245, 158, 11, 0.06); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 8px;">
-    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px;">
-        <div><div style="font-size: 10px; color: #f59e0b; font-weight: 700;">TÜR</div><div style="font-size: 11px;">[XAU/XAG/XPT]</div></div>
-        <div><div style="font-size: 10px; color: #f59e0b; font-weight: 700;">SAFLIK</div><div style="font-size: 11px;">[999/995/925]</div></div>
-        <div><div style="font-size: 10px; color: #f59e0b; font-weight: 700;">AĞIRLIK</div><div style="font-size: 11px;">[gram]</div></div>
-        <div><div style="font-size: 10px; color: #f59e0b; font-weight: 700;">BİRİM FİYAT</div><div style="font-size: 11px;">[TL/gram]</div></div>
-    </div>
-</div>`,
-    },
-    {
-        id: 'commission-info',
-        label: 'Komisyon',
-        description: 'e-Sigorta için branş + komisyon oranı + tutar.',
-        category: 'commission',
-        appliesTo: ['sigorta'],
-        code: `
-<div class="commission-info" style="margin-top: 16px; padding: 16px; background: rgba(220, 38, 38, 0.06); border: 1px solid rgba(220, 38, 38, 0.25); border-radius: 8px;">
-    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
-        <div><div style="font-size: 10px; color: #dc2626; font-weight: 700;">BRANŞ</div><div style="font-size: 11px;">[Kara/Su/Yangın]</div></div>
-        <div><div style="font-size: 10px; color: #dc2626; font-weight: 700;">ORAN</div><div style="font-size: 11px;">[%]</div></div>
-        <div><div style="font-size: 10px; color: #dc2626; font-weight: 700;">TUTAR</div><div style="font-size: 11px;">[TL]</div></div>
-    </div>
-</div>`,
-    },
+    // 2026-09-25: commodity-info (kmaden) ve commission-info (sigorta) snippet'ları kaldırıldı.
     {
         id: 'service-info',
         label: 'Hizmet Bilgileri',

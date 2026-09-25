@@ -18,7 +18,7 @@ const SSS_ITEMS: SssItem[] = [
     },
     {
         q: 'Hangi e-belge tiplerini tasarlayabilirim?',
-        a: 'Toplam 12 modül: e-Fatura, e-Arşiv, e-İrsaliye, e-İhracat, e-Mikro İhracat, e-SMM, e-Müstahsil, e-Bilet, e-Makbuz, e-Sigorta Komisyon, e-Döviz (Alım/Satım) ve e-Kıymetli Maden (Alım/Satım). Her modül için GİB resmi XSLT veya topluluk versiyonu yüklenir.',
+        a: 'Toplam 9 modül: e-Fatura, e-Arşiv, e-İrsaliye, e-İhracat, e-Mikro İhracat, e-SMM, e-Müstahsil, e-Bilet ve e-Makbuz. Her modül için GİB resmi XSLT veya topluluk versiyonu yüklenir.',
     },
     {
         q: 'XSLT bilmem gerekiyor mu?',
@@ -577,9 +577,6 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                         { label: 'e-Müstahsil', code: '07', a: '#84cc16' },
                         { label: 'e-Bilet', code: '08', a: '#f97316' },
                         { label: 'e-Makbuz', code: '09', a: '#14b8a6' },
-                        { label: 'e-Sigorta Komisyon', code: '10', a: '#dc2626' },
-                        { label: 'e-Döviz', code: '11', a: '#22c55e' },
-                        { label: 'e-Kıymetli Maden', code: '12', a: '#f59e0b' },
                     ].map((dt) => (
                         <button
                             type="button"

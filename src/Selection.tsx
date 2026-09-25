@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { FileText, ShoppingCart, Globe, Plane, Package, Zap, Upload, LogOut, User, X, CreditCard, Building2, Phone, Mail, Sparkles, Layout, Truck, Briefcase, Sprout, Ticket, Receipt, Shield, Banknote, Coins, Plus, FileSignature, Code2, Copy, Check } from 'lucide-react';
+import { FileText, ShoppingCart, Globe, Plane, Package, Zap, Upload, LogOut, User, X, CreditCard, Building2, Phone, Mail, Sparkles, Layout, Truck, Briefcase, Sprout, Ticket, Receipt, Plus, FileSignature, Code2, Copy, Check } from 'lucide-react';
 import { api } from './api';
 import { PaymentModal } from './PaymentModal.tsx';
 import { TemplateGallery } from './TemplateGallery.tsx';
@@ -28,8 +28,8 @@ const modules: Module[] = [
         name: 'e-Fatura',
         icon: <FileText size={24} />,
         color: '#6366f1',
-        // IRPTeam topluluk XSLT (390 KB, zengin Invoice görseli — e-Fatura için önerilen)
-        template: 'community/IRPTeam-eFatura.xslt'
+        // Sifirdan tasarlanmis minimal XSLT (Faz 7 — 11 sutunlu urun tablosu, ETTN satiri, sag-alt toplamlar)
+        template: 'gib/e-Fatura-Sablon.xslt'
     },
     {
         id: 'arsiv',
@@ -95,37 +95,7 @@ const modules: Module[] = [
         // hzkucuk-eFatura + e-Makbuz basit ödeme section
         template: 'community/hzkucuk-eFatura-makbuz.xslt'
     },
-    {
-        id: 'sigorta',
-        name: 'e-Sigorta Komisyon',
-        icon: <Shield size={24} />,
-        color: '#dc2626',
-        // Görselleştirme XSLT (12 KB, HTML çıktılı, tasarım için optimize)
-        template: 'gib/e-SigortaKomisyonGider_gorsellestirme.xslt'
-    },
-    {
-        id: 'doviz',
-        name: 'e-Döviz',
-        icon: <Banknote size={24} />,
-        color: '#10b981',
-        // Tek XSLT, ProfileID (EDOVIZBELGE/EKIYMETLIMADENBELGE) + TypeCode (ALIM/SATIM) ile dallanır
-        template: 'gib/eDoviz_KMaden_gorsellestirme.xslt',
-        subTypes: [
-            { id: 'doviz_alim', label: 'Alım', suffix: 'Alim' },
-            { id: 'doviz_satim', label: 'Satım', suffix: 'Satim' },
-        ]
-    },
-    {
-        id: 'kmaden',
-        name: 'e-Kıymetli Maden',
-        icon: <Coins size={24} />,
-        color: '#f59e0b',
-        template: 'gib/eDoviz_KMaden_gorsellestirme.xslt',
-        subTypes: [
-            { id: 'kmaden_alim', label: 'Alım', suffix: 'KMAlim' },
-            { id: 'kmaden_satim', label: 'Satım', suffix: 'KMSatim' },
-        ]
-    },
+    // 2026-09-25: e-Sigorta Komisyon, e-Döviz, e-Kıymetli Maden modülleri kaldırıldı (12→9 modül).
 ];
 
 export const Selection: React.FC<SelectionProps> = ({ onSelect, onLogout }) => {
