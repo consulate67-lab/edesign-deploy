@@ -240,6 +240,12 @@ export const ProfessionalDesigner: React.FC<ProfessionalDesignerProps> = ({ temp
                     text = loadedText;
                 }
 
+                // 2026-09-25: Modul degisiminde onceki XSLT render'ini temizle.
+                // iframe eski tasarimi gostermeye devam etmesin, yeni XSLT gelince temiz baslasin.
+                // originalXslt'e dokunma — useEffect 2 moduleId dependency ile yeni XSLT'i alip render edecek.
+                setBackgroundHtml('');
+                setPreviewHtml('');
+
                 // 4. Instrument with Fallback Retry
                 try {
                     const instrumented = instrumentXslt(text);
@@ -458,7 +464,7 @@ export const ProfessionalDesigner: React.FC<ProfessionalDesignerProps> = ({ temp
         if (originalXslt) {
             refreshPreview(originalXslt, state);
         }
-    }, [originalXslt, state.xsltOverrides, state.elements, state.companyName, state.logoUrl, state.themeColor]);
+    }, [originalXslt, state.xsltOverrides, state.elements, state.companyName, state.logoUrl, state.themeColor, moduleId]);
 
     useEffect(() => {
         const handleMessage = (event: MessageEvent) => {
