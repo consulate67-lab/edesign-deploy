@@ -191,16 +191,33 @@ export const ProfessionalDesigner: React.FC<ProfessionalDesignerProps> = ({ temp
 
                         console.log('📂 Loading XSLT template from:', fetchUrl);
 
-                        try {
-                            const xsltRes = await fetch(fetchUrl);
-                            if (!xsltRes.ok) {
-                                throw new Error(`HTTP Hata ${xsltRes.status} (${xsltRes.statusText})`);
+                        // 2026-09-25: GH Pages CDN'in bazi node'larinda dosya 404 donuyor (henuz propagate olmamis).
+                        // 3 deneme + exponential backoff ile gecici hatalari tolere et.
+                        let xsltRes: Response | null = null;
+                        let lastFetchErr: unknown = null;
+                        for (let attempt = 0; attempt < 3; attempt++) {
+                            try {
+                                xsltRes = await fetch(fetchUrl, { cache: 'no-cache' });
+                                if (xsltRes.ok) {
+                                    lastFetchErr = null;
+                                    break;
+                                }
+                                lastFetchErr = new Error(`HTTP Hata ${xsltRes.status} (${xsltRes.statusText})`);
+                                console.warn(`📂 XSLT fetch attempt ${attempt + 1}/3 failed: ${xsltRes.status}`);
+                            } catch (fetchErr) {
+                                lastFetchErr = fetchErr;
+                                console.warn(`📂 XSLT fetch attempt ${attempt + 1}/3 threw:`, fetchErr);
                             }
-                            loadedText = await xsltRes.text();
-                        } catch (fetchErr) {
-                            console.warn('Network fetch failed, trying fallback...', fetchErr);
+                            if (attempt < 2) {
+                                await new Promise((r) => setTimeout(r, 600 * (attempt + 1)));
+                            }
+                        }
+                        if (!xsltRes || !xsltRes.ok) {
+                            console.warn('All fetch attempts failed, using fallback template...', lastFetchErr);
                             loadedText = DEFAULT_MODERN_XSLT;
                             source = 'fallback';
+                        } else {
+                            loadedText = await xsltRes.text();
                         }
                     }
 
