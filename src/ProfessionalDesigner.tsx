@@ -192,12 +192,14 @@ export const ProfessionalDesigner: React.FC<ProfessionalDesignerProps> = ({ temp
                         console.log('📂 Loading XSLT template from:', fetchUrl);
 
                         // 2026-09-25: GH Pages CDN'in bazi node'larinda dosya 404 donuyor (henuz propagate olmamis).
+                        // Cache-busting query parameter (?v=timestamp) ile CDN cache bypass edilir.
                         // 3 deneme + exponential backoff ile gecici hatalari tolere et.
+                        const cacheBustUrl = `${fetchUrl}?v=${Date.now()}`;
                         let xsltRes: Response | null = null;
                         let lastFetchErr: unknown = null;
                         for (let attempt = 0; attempt < 3; attempt++) {
                             try {
-                                xsltRes = await fetch(fetchUrl, { cache: 'no-cache' });
+                                xsltRes = await fetch(cacheBustUrl, { cache: 'reload' });
                                 if (xsltRes.ok) {
                                     lastFetchErr = null;
                                     break;
