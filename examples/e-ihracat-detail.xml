@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+         xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+         xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2 ../xsdrt/maindoc/UBL-Invoice-2.1.xsd">
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>EARSIVFATURA</cbc:ProfileID>
+    <cbc:ID>ARS2026000000001</cbc:ID>
+    <cbc:UUID>f50e8400-e29b-41d4-a716-446655440005</cbc:UUID>
+    <cbc:IssueDate>2026-01-23</cbc:IssueDate>
+    <cbc:IssueTime>13:15:00</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>SATIS</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız ÜçBinBeşYüzSeksen TürkLirası Sıfır Kuruştur.</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>2</cbc:LineCountNumeric>
+
+    <!-- Senaryo Bilgileri -->
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>EARSIV</cbc:ID>
+        <cbc:IssueDate>2026-01-23</cbc:IssueDate>
+        <cac:Attachment>
+            <cbc:EmbeddedDocumentBinaryObject mimeCode="application/xml" encodingCode="Base64">...</cbc:EmbeddedDocumentBinaryObject>
+        </cac:Attachment>
+    </cac:AdditionalDocumentReference>
+
+    <!-- Tedarikçi (Satıcı) Bilgileri -->
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>http://www.antigravity-yazilim.com</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">1234567890</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Antigravity Yazılım ve Teknoloji A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Teknopark Bulvarı No:123</cbc:StreetName>
+                <cbc:BuildingNumber>B Blok D:12</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Çankaya</cbc:CitySubdivisionName>
+                <cbc:CityName>Ankara</cbc:CityName>
+                <cbc:PostalZone>06530</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Doğanbey Vergi Dairesi</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>03125554433</cbc:Telephone>
+                <cbc:ElectronicMail>destek@antigravity.com</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+
+    <!-- Müşteri (Alıcı) Bilgileri -->
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">11122233344</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Selim Yılmaz</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Hürriyet Mah. Cumhuriyet Sok.</cbc:StreetName>
+                <cbc:BuildingNumber>45</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Kadıköy</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:Contact>
+                <cbc:ElectronicMail>selim.yilmaz@example.com</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+
+    <!-- Vergi Toplamları -->
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">540.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">3000.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">540.00</cbc:TaxAmount>
+            <cac:TaxCategory>
+                <cbc:Percent>18</cbc:Percent>
+                <cac:TaxScheme>
+                    <cbc:Name>Katma Değer Vergisi</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+
+    <!-- Genel Toplamlar -->
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">3000.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">3000.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">3540.00</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="TRY">0.00</cbc:AllowanceTotalAmount>
+        <cbc:PayableAmount currencyID="TRY">3540.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+
+    <!-- Kalemler -->
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">2</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">2000.00</cbc:LineExtensionAmount>
+        <cac:Item>
+            <cbc:Name>Gelişmiş Yazılım Lisansı - Kurumsal</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>SOFT-ENT-01</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">1000.0000</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">1000.00</cbc:LineExtensionAmount>
+        <cac:Item>
+            <cbc:Name>Teknik Destek ve Bakım Paketi (1 Yıllık)</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>SRV-SUPP-12</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">1000.0000</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>

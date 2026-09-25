@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  e-Makbuz minimal örnek XML
+  Resmi GİB paketi: eMakbuzPaketi.zip
+  URL: https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/eMakbuzPaketi.zip
+  Şema: Receipt.xsd (yaygın) — GİB'in kendi özel şeması
+  GİB XSLT viewer: EBelgeGoruntuleyici.jar içinde makbuz-specific şablon
+  NOT: e-Makbuz farklı bir UBL doc type kullanır (Receipt), test sırasında GİB şemasını doğrula
+-->
+<Receipt
+    xmlns="urn:oasis:names:specification:ubl:schema:xsd:Receipt-2"
+    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+    xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2"
+    xmlns:ubltr="urn:oasis:names:specification:ubl:schema:xsd:TurkishCustomizationExtensionComponents">
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>e-Makbuz</cbc:ProfileID>
+    <cbc:ID>MKB2026000000001</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>eeeeeeee-ffff-1111-2222-333333333333</cbc:UUID>
+    <cbc:IssueDate>2026-09-23</cbc:IssueDate>
+    <cbc:IssueTime>15:30:00</cbc:IssueTime>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cac:SupplierParty>
+        <cac:Party>
+            <cac:PartyIdentification><cbc:ID schemeID="VKN">1111111111</cbc:ID></cac:PartyIdentification>
+            <cac:PartyName><cbc:Name>Makbuz Veren Firma</cbc:Name></cac:PartyName>
+        </cac:Party>
+    </cac:SupplierParty>
+    <cac:CustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification><cbc:ID schemeID="TCKN">11111111111</cbc:ID></cac:PartyIdentification>
+            <cac:PartyName><cbc:Name>Makbuz Alan</cbc:Name></cac:PartyName>
+        </cac:Party>
+    </cac:CustomerParty>
+    <cac:LegalMonetaryTotal>
+        <cbc:PayableAmount currencyID="TRY">500.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+</Receipt>
