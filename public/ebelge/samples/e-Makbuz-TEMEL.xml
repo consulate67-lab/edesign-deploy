@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  e-Makbuz minimal örnek XML
+  e-Makbuz (Receipt) örnek XML
+  UBL-TR 1.2.1 Receipt tipi — GİB'in özelleştirilmiş belge tipi
   Resmi GİB paketi: eMakbuzPaketi.zip
   URL: https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/eMakbuzPaketi.zip
-  Şema: Receipt.xsd (yaygın) — GİB'in kendi özel şeması
-  GİB XSLT viewer: EBelgeGoruntuleyici.jar içinde makbuz-specific şablon
-  NOT: e-Makbuz farklı bir UBL doc type kullanır (Receipt), test sırasında GİB şemasını doğrula
+  Şema: Receipt.xsd — UBL-TR özelleştirmesi
+
+  Özellikler:
+  - Basit tek satırlık ödeme makbuzu
+  - Kasa tahsilatı / banka havalesi / POS tahsilatı ayrımı
+  - Gerçek kişi (TCKN) veya kurum (VKN)
 -->
 <Receipt
     xmlns="urn:oasis:names:specification:ubl:schema:xsd:Receipt-2"
@@ -18,23 +22,94 @@
     <cbc:ProfileID>e-Makbuz</cbc:ProfileID>
     <cbc:ID>MKB2026000000001</cbc:ID>
     <cbc:CopyIndicator>false</cbc:CopyIndicator>
-    <cbc:UUID>eeeeeeee-ffff-1111-2222-333333333333</cbc:UUID>
-    <cbc:IssueDate>2026-09-23</cbc:IssueDate>
+    <cbc:UUID>44444444-5555-6666-7777-888888888888</cbc:UUID>
+    <cbc:IssueDate>2026-09-25</cbc:IssueDate>
     <cbc:IssueTime>15:30:00</cbc:IssueTime>
     <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+
+    <!-- Makbuzu kesen (alıcı/ödeme alan kurum) — customer rolünde -->
     <cac:SupplierParty>
         <cac:Party>
-            <cac:PartyIdentification><cbc:ID schemeID="VKN">1111111111</cbc:ID></cac:PartyIdentification>
-            <cac:PartyName><cbc:Name>Makbuz Veren Firma</cbc:Name></cac:PartyName>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">1111111111</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>KORGUN Yazılım ve Danışmanlık Ltd. Şti.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Teknopark Bulvarı</cbc:StreetName>
+                <cbc:BuildingNumber>4</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Yıldız</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34349</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:ID>0001</cbc:ID>
+                    <cbc:Name>Beyoğlu</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
         </cac:Party>
     </cac:SupplierParty>
+
+    <!-- Makbuzu alan (ödemeyi yapan müşteri) -->
     <cac:CustomerParty>
         <cac:Party>
-            <cac:PartyIdentification><cbc:ID schemeID="TCKN">11111111111</cbc:ID></cac:PartyIdentification>
-            <cac:PartyName><cbc:Name>Makbuz Alan</cbc:Name></cac:PartyName>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">11122233344</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Selim YILMAZ</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Atatürk Mah.</cbc:StreetName>
+                <cbc:CitySubdivisionName>Çankaya</cbc:CitySubdivisionName>
+                <cbc:CityName>Ankara</cbc:CityName>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:Person>
+                <cbc:FirstName>Selim</cbc:FirstName>
+                <cbc:FamilyName>YILMAZ</cbc:FamilyName>
+            </cac:Person>
         </cac:Party>
     </cac:CustomerParty>
+
+    <!-- Ödeme kalemi: Banka havalesi ile alınan ödeme -->
+    <cac:ReceiptLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:ReceivedDate>2026-09-25</cbc:ReceivedDate>
+        <cac:Quantity unitCode="C62">1</cac:Quantity>
+        <cbc:Description>Haziran 2026 e-Fatura paketi kullanımı için banka havalesi ile yapılan ödeme (TR33 0006 4000 0011 1111 2222 33)</cbc:Description>
+    </cac:ReceiptLine>
+
+    <!-- KDV istisna (KDV'siz tahsilat) -->
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">0.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">500.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">0.00</cbc:TaxAmount>
+            <cac:TaxCategory>
+                <cbc:ID>0015</cbc:ID>
+                <cbc:Name>KDV İstisna</cbc:Name>
+                <cbc:TaxExemptionReasonCode>17/4-g</cbc:TaxExemptionReasonCode>
+                <cbc:TaxExemptionReason>Hizmet ihracı — KDV'den müstesna</cbc:TaxExemptionReason>
+                <cac:TaxScheme>
+                    <cbc:ID>0015</cbc:ID>
+                    <cbc:Name>KDV</cbc:Name>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+
     <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">500.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">500.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">500.00</cbc:TaxInclusiveAmount>
         <cbc:PayableAmount currencyID="TRY">500.00</cbc:PayableAmount>
     </cac:LegalMonetaryTotal>
 </Receipt>

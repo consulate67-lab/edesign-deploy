@@ -8,6 +8,7 @@ import { transformXmlWithXslt } from './xsltTransformer.ts';
 import { instrumentXslt, selectionScript } from './xsltInstrumenter.ts';
 import { xsltToState, summarizeState } from './xsltToState.ts';
 import { getInlineXslt } from './xsltContent.ts';
+import { injectModuleBadge } from './moduleBadge.ts';
 import { api } from './api';
 import { DEFAULT_MODERN_XSLT, DEFAULT_CLASSIC_XSLT } from './defaultTemplate';
 import { PaymentModal } from './PaymentModal.tsx';
@@ -323,30 +324,41 @@ export const ProfessionalDesigner: React.FC<ProfessionalDesignerProps> = ({ temp
         console.log('📋 Copied to clipboard');
     };
 
-    // Map module IDs to their corresponding XML files
+    // Map module IDs to their corresponding XML files (Phase A.2: 9 module coverage)
+    // Dosyalar public/ebelge/samples/ dizininde. Phase A.1.2'den sonra 4 yeni
+    // module-specific örnek eklendi (e-SMM, e-Mustahsil, e-Bilet, e-Makbuz).
     const getXmlFile = (moduleId: string): string => {
-        // If it's from library, we try to guess based on template filename
+        // Library/custom — template adından tahmin et
         if (moduleId === 'library' || moduleId === 'custom') {
-            const temp = template.toLowerCase();
-            if (temp.includes('arsiv') || temp.includes('mikro')) return 'e-arsiv-detail.xml';
-            if (temp.includes('net') || temp.includes('ticaret')) return 'e-ticaret-detail.xml';
-            if (temp.includes('ihracat')) return 'e-ihracat-detail.xml';
-            if (temp.includes('irsaliye')) return 'e-irsaliye.xml';
-            if (temp.includes('fatura')) return 'e-fatura-detail.xml';
-            // Default based on template naming convention if possible
-            return 'e-fatura-detail.xml';
+            const temp = (template || '').toLowerCase();
+            if (temp.includes('arsiv')) return 'e-Arsiv-TEMEL.xml';
+            if (temp.includes('irsaliye')) return 'e-Irsaliye-TEMEL.xml';
+            if (temp.includes('ihracat') || temp.includes('mikro')) return 'e-Ihracat-TEMEL.xml';
+            if (temp.includes('smm')) return 'e-SMM-TEMEL.xml';
+            if (temp.includes('mustahsil')) return 'e-Mustahsil-TEMEL.xml';
+            if (temp.includes('bilet')) return 'e-Bilet-TEMEL.xml';
+            if (temp.includes('makbuz')) return 'e-Makbuz-TEMEL.xml';
+            if (temp.includes('fatura')) return 'e-Fatura-TICARI.xml';
+            return 'e-Fatura-TICARI.xml';
         }
 
+        // 9 modül için modüle-özgü örnek (Phase A.2)
         const xmlMap: Record<string, string> = {
-            'fatura': 'e-fatura-detail.xml',
-            'arsiv': 'e-arsiv-detail.xml',
-            'mikro': 'e-arsiv-detail.xml',
-            'net': 'e-ticaret-detail.xml',
-            'yolcu': 'e-fatura-detail.xml',
-            'ihracat': 'e-ihracat-detail.xml',
-            'irsaliye': 'e-irsaliye.xml',
+            'fatura': 'e-Fatura-TICARI.xml',
+            'arsiv': 'e-Arsiv-TEMEL.xml',
+            'irsaliye': 'e-Irsaliye-TEMEL.xml',
+            'ihracat': 'e-Ihracat-TEMEL.xml',
+            'mikro_ihracat': 'e-Ihracat-TEMEL.xml',
+            'smm': 'e-SMM-TEMEL.xml',
+            'mustahsil': 'e-Mustahsil-TEMEL.xml',
+            'bilet': 'e-Bilet-TEMEL.xml',
+            'makbuz': 'e-Makbuz-TEMEL.xml',
+            // Legacy alias (eski ID'ler — geriye uyumluluk)
+            'mikro': 'e-Arsiv-TEMEL.xml',
+            'net': 'e-Fatura-TICARI.xml',
+            'yolcu': 'e-Bilet-TEMEL.xml',
         };
-        return xmlMap[moduleId] || 'e-fatura-detail.xml';
+        return xmlMap[moduleId] || 'e-Fatura-TICARI.xml';
     };
 
     const isTableElement = (type?: string) => type === 'table' || type === 'td' || type === 'tr' || type === 'th';
@@ -391,12 +403,17 @@ export const ProfessionalDesigner: React.FC<ProfessionalDesignerProps> = ({ temp
             let xmlText = xmlCache.current;
             if (!xmlText) {
                 const xmlFile = getXmlFile(moduleId);
-                // Robust Fetch Strategy
+                // Robust Fetch Strategy — Phase A.2: examples/ + ebelge/samples/ + ebelge/examples/
                 const baseUrl = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
                 const pathsToTry = [
+                    `${baseUrl}ebelge/samples/${xmlFile}`,
+                    `${baseUrl}ebelge/examples/${xmlFile}`,
                     `${baseUrl}examples/${xmlFile}`,
+                    `/ebelge/samples/${xmlFile}`,
+                    `/ebelge/examples/${xmlFile}`,
                     `/examples/${xmlFile}`,
-                    `./examples/${xmlFile}`
+                    `./ebelge/samples/${xmlFile}`,
+                    `./examples/${xmlFile}`,
                 ];
 
                 let loadedText: string | null = null;
@@ -444,6 +461,9 @@ export const ProfessionalDesigner: React.FC<ProfessionalDesignerProps> = ({ temp
             console.log('🎨 Transforming for background...');
             let bgHtml = transformXmlWithXslt(xmlText, xslt);
 
+            // Phase A.2: Modüle özgü GİB banner prepending (Phase A.2)
+            bgHtml = injectModuleBadge(bgHtml, moduleId);
+
             // Inject selection script into generated HTML
             const scriptHtml = `<script id="designer-selection-script">${selectionScript}</script>`;
             if (bgHtml.includes('</body>')) {
@@ -459,6 +479,9 @@ export const ProfessionalDesigner: React.FC<ProfessionalDesignerProps> = ({ temp
             console.log('🎨 Transforming for preview...');
             const mergedXslt = mergeDesignWithXslt(xslt, currentState);
             let finalHtml = transformXmlWithXslt(xmlText, mergedXslt);
+
+            // Phase A.2: Modüle özgü GİB banner prepending
+            finalHtml = injectModuleBadge(finalHtml, moduleId);
 
             // Inject selection script into preview HTML too, so we can interact with it
             if (finalHtml.includes('</body>')) {
