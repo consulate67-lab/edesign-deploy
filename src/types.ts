@@ -1,6 +1,12 @@
 import React from 'react';
 
-export type ElementType = 'text' | 'table' | 'image' | 'formula' | 'shape' | 'qrcode';
+// 2026-09-26 (Faz A.1): Canvas-first refactor — yeni layout elementleri eklendi.
+// Eski tipler geriye donuk uyumlu (text/table/image/formula/shape/qrcode).
+// Yeni tipler: div, span, p, h1-h6, td, th, tr — XSLT'den tam state'e cevirmek icin.
+export type ElementType =
+    | 'text' | 'table' | 'image' | 'formula' | 'shape' | 'qrcode' | 'img' // legacy
+    | 'div' | 'span' | 'p' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
+    | 'td' | 'th' | 'tr'; // Faz A.1 — XSLT literal result elementler
 
 export interface TableCell {
   content: string;
@@ -35,6 +41,7 @@ export interface DesignElement {
   shapeType?: 'rect' | 'circle' | 'line'; // For shape elements
   format?: string; // e.g., 'number', 'currency', 'percentage'
   decimals?: number; // Number of decimal places
+  htmlTag?: string; // Faz A.1 — orijinal XSLT literal result element tagName
 }
 
 export interface XsltElementOverride {

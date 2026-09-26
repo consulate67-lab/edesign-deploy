@@ -6,6 +6,7 @@ import { DraggableElement } from './designer/components/DraggableElement.tsx';
 import { mergeDesignWithXslt } from './xsltMerger.ts';
 import { transformXmlWithXslt } from './xsltTransformer.ts';
 import { instrumentXslt, selectionScript } from './xsltInstrumenter.ts';
+import { xsltToState, summarizeState } from './xsltToState.ts';
 import { api } from './api';
 import { DEFAULT_MODERN_XSLT, DEFAULT_CLASSIC_XSLT } from './defaultTemplate';
 import { PaymentModal } from './PaymentModal.tsx';
@@ -253,6 +254,15 @@ export const ProfessionalDesigner: React.FC<ProfessionalDesignerProps> = ({ temp
                     const instrumented = instrumentXslt(text);
                     console.log('✅ XSLT loaded & instrumented.');
                     setOriginalXslt(instrumented);
+
+                    // 2026-09-26 (Faz A.1): xsltToState debug — XSLT → Canvas state donusumunu test et.
+                    // State'i henuz aktif kullanmiyoruz — sadece console'a ozet yaziyoruz (round-trip kalite kontrolu).
+                    try {
+                        const canvasState = xsltToState(text);
+                        console.log('🎨 [Faz A.1 DEBUG] xsltToState sonucu:\n' + summarizeState(canvasState));
+                    } catch (toStateErr) {
+                        console.warn('⚠️ [Faz A.1 DEBUG] xsltToState hatasi:', toStateErr);
+                    }
                 } catch (instErr) {
                     console.error('Instrumentation failed:', instErr);
                     // If we haven't firmly established it's the builtin, try the builtin now as a last resort
