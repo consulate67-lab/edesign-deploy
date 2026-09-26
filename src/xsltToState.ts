@@ -238,11 +238,21 @@ export const xsltToState = (xsltString: string): DesignState => {
 
 /**
  * Debug: xsltToState çıktısını özetler.
+ * 2026-09-26: Recursive structure tree count eklendi.
  */
+const countTreeNodes = (nodes: StructureNode[] | undefined): number => {
+    if (!nodes) return 0;
+    let count = nodes.length;
+    for (const n of nodes) {
+        if (n.children) count += countTreeNodes(n.children);
+    }
+    return count;
+};
+
 export const summarizeState = (state: DesignState): string => {
     const lines: string[] = [];
     lines.push(`Elements: ${state.elements.length}`);
-    lines.push(`Structure tree nodes: ${(state.structureTree || []).length}`);
+    lines.push(`Structure tree nodes (recursive): ${countTreeNodes(state.structureTree)}`);
     for (const el of state.elements.slice(0, 10)) {
         lines.push(`  - ${el.type} (${el.htmlTag || el.type})${el.binding ? ` bind=${el.binding}` : ''}`);
     }
