@@ -179,10 +179,7 @@ export const ProfessionalDesigner: React.FC<ProfessionalDesignerProps> = ({ temp
                         loadedText = inlineContent;
                         source = 'inline';
                         console.log(`📂 [INLINE] XSLT loaded from bundle: ${cleanName} (${inlineContent.length} chars)`);
-                    }
-
-                    // 1. Try to fetch or use default
-                    if (cleanName.includes('Modern_1.0_Fatura')) {
+                    } else if (cleanName.includes('Modern_1.0_Fatura')) {
                         loadedText = DEFAULT_MODERN_XSLT;
                         source = 'builtin';
                         console.log('📂 Using Built-in Fallback for Modern Template directly.');
