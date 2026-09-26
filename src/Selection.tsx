@@ -29,7 +29,7 @@ const modules: Module[] = [
         icon: <FileText size={24} />,
         color: '#6366f1',
         // Sifirdan tasarlanmis minimal XSLT (Faz 7 — 11 sutunlu urun tablosu, ETTN satiri, sag-alt toplamlar)
-        template: 'gib/e-Fatura-Sablon.xslt'
+        template: 'gib/v2/e-Fatura-Sablon.xslt'
     },
     {
         id: 'arsiv',
@@ -37,7 +37,7 @@ const modules: Module[] = [
         icon: <Package size={24} />,
         color: '#10b981',
         // e-Arşiv icin sifirdan tasarlanmis minimal XSLT (GIB uyumlu, imzali)
-        template: 'gib/e-Arsiv-Sablon.xslt'
+        template: 'gib/v2/e-Arsiv-Sablon.xslt'
     },
     {
         id: 'irsaliye',
