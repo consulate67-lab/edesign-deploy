@@ -7,6 +7,7 @@ import { mergeDesignWithXslt } from './xsltMerger.ts';
 import { transformXmlWithXslt } from './xsltTransformer.ts';
 import { instrumentXslt, selectionScript } from './xsltInstrumenter.ts';
 import { xsltToState, summarizeState } from './xsltToState.ts';
+import { getInlineXslt } from './xsltContent.ts';
 import { api } from './api';
 import { DEFAULT_MODERN_XSLT, DEFAULT_CLASSIC_XSLT } from './defaultTemplate';
 import { PaymentModal } from './PaymentModal.tsx';
@@ -170,6 +171,15 @@ export const ProfessionalDesigner: React.FC<ProfessionalDesignerProps> = ({ temp
                     // Remove any leading ./ or / to sanitize
                     const cleanName = template.replace(/^(\.\/|\/)/, '');
                     let loadedText = '';
+
+                    // 0. (2026-09-26) Inline XSLT lookup — CDN node'larinda 404 sorununu bypass.
+                    // Default template'ler bundle'a gomulu, fetch'e gerek yok.
+                    const inlineContent = getInlineXslt(cleanName);
+                    if (inlineContent) {
+                        loadedText = inlineContent;
+                        source = 'inline';
+                        console.log(`📂 [INLINE] XSLT loaded from bundle: ${cleanName} (${inlineContent.length} chars)`);
+                    }
 
                     // 1. Try to fetch or use default
                     if (cleanName.includes('Modern_1.0_Fatura')) {
