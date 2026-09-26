@@ -248,6 +248,46 @@ app.post('/api/_dev/reset-password', async (req, res) => {
         // Do NOT log the password, only the username.
         console.log(`[admin] password reset for user '${username}' at ${new Date().toISOString()}`);
         res.json({ success: true, message: `Password reset for '${username}'.` });
+
+    } catch (e) {
+        console.error('[admin] reset-password error:', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// 2026-09-26: Kontör tanımlama endpoint'i — admin tarafından kullanıcıya kredi ekler.
+// Aynı ADMIN_KEY gate ile korunuyor. Production'da ADMIN_KEY bos ise calismaz.
+app.post('/api/_dev/add-credits', async (req, res) => {
+    const { admin_key, username, credits } = req.body || {};
+
+    const expected = process.env.ADMIN_KEY;
+    if (!expected) {
+        return res.status(503).json({ error: 'ADMIN_KEY env is not configured on server.' });
+    }
+    if (admin_key !== expected) {
+        return res.status(403).json({ error: 'Invalid admin key.' });
+    }
+    if (!username || typeof credits !== 'number' || credits <= 0) {
+        return res.status(400).json({ error: 'username and positive credits number are required.' });
+    }
+
+    try {
+        const user = await db.get('SELECT id, credits FROM users WHERE username = ?', [username]);
+        if (!user) {
+            return res.status(404).json({ error: `User '${username}' not found.` });
+        }
+        await db.run(
+            'UPDATE users SET credits = credits + ?, updated_at = NOW() WHERE id = ?',
+            [credits, user.id]
+        );
+        const updated = await db.get('SELECT credits FROM users WHERE id = ?', [user.id]);
+        console.log(`[admin] ${credits} credits added to '${username}' (total=${updated.credits}) at ${new Date().toISOString()}`);
+        res.json({
+            success: true,
+            message: `${credits} credits added to '${username}'.`,
+            previousCredits: user.credits,
+            newCredits: updated.credits,
+        });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
