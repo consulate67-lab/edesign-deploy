@@ -23,7 +23,7 @@
                     .logo-area .tag { font-size: 9px; letter-spacing: 4px; color: #475569; margin-top: 4px; }
                     .center-title { text-align: center; }
                     .gib-logo { display: inline-flex; flex-direction: column; align-items: center; }
-                    .gib-circle { width: 56px; height: 56px; border-radius: 50%; background: #1e3a8a; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800; }
+                    .gib-circle { width: 80px; height: 80px; border-radius: 4px; background: transparent; display: flex; align-items: center; justify-content: center; overflow: hidden; }
                     .gib-subtitle { font-size: 8px; color: #1e3a8a; margin-top: 4px; letter-spacing: 1.5px; font-weight: 700; }
                     .doc-title { font-size: 18px; font-weight: 800; color: #1e293b; margin-top: 8px; letter-spacing: 1px; }
                     .kase { font-size: 8px; color: #1e3a8a; margin-top: 6px; line-height: 1.4; }
@@ -63,7 +63,21 @@
                         <!-- Orta: GİB Logo + Başlık -->
                         <div class="center-title">
                             <div class="gib-logo">
-                                <div class="gib-circle">G</div>
+                                <!-- Phase A.2.1: Gercek GIB e-Arsiv logosu (inline SVG, mavi zemin + 'e' + GIB) -->
+                                <div class="gib-circle">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+                                        <defs>
+                                            <linearGradient id="gib-arsiv-grad" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="0%" stop-color="#1e3a8a"/>
+                                                <stop offset="100%" stop-color="#1e1b4b"/>
+                                            </linearGradient>
+                                        </defs>
+                                        <rect x="2" y="2" width="76" height="76" rx="3" fill="url(#gib-arsiv-grad)" stroke="#fff" stroke-width="1"/>
+                                        <text x="40" y="42" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="36" font-weight="900" fill="#ffffff" text-anchor="middle">e</text>
+                                        <text x="40" y="56" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="8" font-weight="800" fill="#ffffff" text-anchor="middle" letter-spacing="0.4">e-Belge</text>
+                                        <text x="40" y="68" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="7" font-weight="700" fill="#ffffff" text-anchor="middle" letter-spacing="2">GİB</text>
+                                    </svg>
+                                </div>
                                 <div class="gib-subtitle">T.C. MALİYE BAKANLIĞI<br/>GELİR İDARESİ BAŞKANLIĞI</div>
                             </div>
                             <div class="doc-title">e-Arşiv Fatura</div>

@@ -96,10 +96,12 @@
                     }
                     .gib-logo {
                         width: 28mm; height: 28mm;
-                        border-radius: 50%;
-                        background: radial-gradient(circle, #dc2626 0%, #991b1b 70%);
-                        /* Placeholder text yok — sadece kirmizi daire */
+                        border-radius: 6px;
+                        overflow: hidden;
                         box-shadow: 0 1mm 3mm rgba(220, 38, 38, 0.3);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
                     }
                     .doc-type {
                         margin-top: 3mm;
@@ -307,7 +309,21 @@
                         </div>
 
                         <div class="gib-logo-wrap">
-                            <div class="gib-logo"></div>
+                            <!-- Phase A.2.1: Gercek GIB e-Belge logosu (inline SVG, kirmizi kare + 'e' + GIB) -->
+                            <div class="gib-logo">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 280" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+                                    <defs>
+                                        <linearGradient id="gib-fat-grad" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stop-color="#dc2626"/>
+                                            <stop offset="100%" stop-color="#7f1d1d"/>
+                                        </linearGradient>
+                                    </defs>
+                                    <rect x="6" y="6" width="268" height="268" rx="14" fill="url(#gib-fat-grad)" stroke="#fff" stroke-width="3"/>
+                                    <text x="140" y="148" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="180" font-weight="900" fill="#ffffff" text-anchor="middle">e</text>
+                                    <text x="140" y="200" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="34" font-weight="800" fill="#ffffff" text-anchor="middle" letter-spacing="1">e-Belge</text>
+                                    <text x="140" y="240" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="28" font-weight="700" fill="#ffffff" text-anchor="middle" letter-spacing="6">GİB</text>
+                                </svg>
+                            </div>
                             <div class="doc-type">e-FATURA</div>
                         </div>
                     </div>
