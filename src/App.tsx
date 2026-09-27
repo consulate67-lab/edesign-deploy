@@ -12,6 +12,10 @@ const Selection = lazy(() => import('./Selection.tsx').then((m) => ({ default: m
 const ProfessionalDesigner = lazy(() =>
     import('./ProfessionalDesigner.tsx').then((m) => ({ default: m.ProfessionalDesigner }))
 );
+// Designer 2.0 — sıfırdan yeniden tasarlanmış tasarım editörü (Phase 16+)
+const DesignerApp = lazy(() =>
+    import('./designer/v2/DesignerApp').then((m) => ({ default: m.DesignerApp }))
+);
 
 const ScreenFallback: React.FC = () => (
     <div
@@ -28,7 +32,7 @@ const ScreenFallback: React.FC = () => (
     </div>
 );
 
-type View = 'landing' | 'auth' | 'selection' | 'designer';
+type View = 'landing' | 'auth' | 'selection' | 'designer' | 'designer-v2';
 type AuthMode = 'login' | 'register';
 
 const App: React.FC = () => {
@@ -74,6 +78,22 @@ const App: React.FC = () => {
 
     const handleBack = () => setView('selection');
 
+    /**
+     * Designer 2.0 (Beta) — sıfırdan tasarlanmış yeni editör.
+     * Phase 17.2: Selection.tsx'teki "Designer 2.0 Beta" butonundan tetiklenir.
+     * Seçili doc yoksa boş tasarım ile başlar.
+     */
+    const handleSelectDesignerV2 = () => {
+        if (!selectedDoc) {
+            setSelectedDoc({
+                moduleId: 'fatura',
+                moduleName: 'Yeni Tasarım (Beta)',
+                template: 'Modern_1.0_Fatura',
+            });
+        }
+        setView('designer-v2');
+    };
+
     return (
         <>
             <ToastHost />
@@ -91,13 +111,26 @@ const App: React.FC = () => {
                     />
                 )}
                 {view === 'selection' && (
-                    <Selection onSelect={handleDocSelect} onLogout={handleLogout} />
+                    <Selection
+                        onSelect={handleDocSelect}
+                        onLogout={handleLogout}
+                        onSelectDesignerV2={handleSelectDesignerV2}
+                    />
                 )}
                 {view === 'designer' && selectedDoc && (
                     <ProfessionalDesigner
                         template={selectedDoc.template}
                         customContent={selectedDoc.customContent}
                         themeColor={selectedDoc.themeColor}
+                        docName={selectedDoc.moduleName}
+                        moduleId={selectedDoc.moduleId}
+                        onBack={handleBack}
+                    />
+                )}
+                {view === 'designer-v2' && selectedDoc && (
+                    <DesignerApp
+                        template={selectedDoc.template}
+                        customContent={selectedDoc.customContent}
                         docName={selectedDoc.moduleName}
                         moduleId={selectedDoc.moduleId}
                         onBack={handleBack}
