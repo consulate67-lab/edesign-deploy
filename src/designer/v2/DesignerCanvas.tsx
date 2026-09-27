@@ -1,10 +1,10 @@
 /**
- * Designer 2.0 — Canvas (Phase 16.4 iskelet)
+ * Designer 2.0 — Canvas (Phase 17.1 click-to-place)
  *
  * İçerik: iframe XSLT render + click-to-place + drag-drop
- * Phase 17'de implementasyon detaylandırılacak.
+ * Phase 17.1: click-to-place gerçek davranış eklendi.
  */
-import React, { useRef } from 'react';
+import React, { useRef, useCallback } from 'react';
 import type { DesignerStateV2 } from './hooks/useDesignerState';
 import type { DesignElement, SectionId } from '../../types.ts';
 
@@ -17,32 +17,42 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({ state, onPlaceEl
     const canvasRef = useRef<HTMLDivElement>(null);
 
     /**
-     * Phase 17 TODO: tıkla-yerleştir (placingMode) + drag-drop implementasyonu.
-     * Şu an sadece iframe + bölüm göstergesi render ediliyor.
+     * Phase 17.1: Tıkla-yerleştir implementasyonu.
+     * - state.activeTool bir element tipini belirler (text/image/shape/qr/formula/table)
+     * - state.mode 'clickPlace' olmalı (toolbar'dan araç seçilince otomatik set edilir)
+     * - state.snapToGrid true ise gridSize'a yuvarlanır (default 5px)
+     * - element aktif section'a eklenir (default: reportHeader)
      */
+    const handleCanvasClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+        if (state.activeTool === 'select') return; // sadece-select modunda tıklama yerleştirmez
+        if (e.target !== e.currentTarget) return; // iframe veya overlay tıklaması
 
-    const handleCanvasClick = (e: React.MouseEvent<HTMLDivElement>) => {
-        // Phase 17: tıklanan koordinatta grid-snap ile yeni element oluştur
-        // if (state.mode === 'clickPlace') {
-        //     const rect = canvasRef.current!.getBoundingClientRect();
-        //     const x = Math.round((e.clientX - rect.left) / state.gridSize) * state.gridSize;
-        //     const y = Math.round((e.clientY - rect.top) / state.gridSize) * state.gridSize;
-        //     onPlaceElement({ id: ..., type: state.activeTool, x, y, content: '', ... });
-        // }
-    };
+        const rect = canvasRef.current!.getBoundingClientRect();
+        let x = e.clientX - rect.left;
+        let y = e.clientY - rect.top;
+
+        if (state.snapToGrid) {
+            x = Math.round(x / state.gridSize) * state.gridSize;
+            y = Math.round(y / state.gridSize) * state.gridSize;
+        }
+
+        const id = `${state.activeTool}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+        const el: DesignElement = buildElementForTool(state.activeTool, id, x, y);
+        onPlaceElement(el);
+    }, [state.activeTool, state.snapToGrid, state.gridSize, onPlaceElement]);
 
     return (
         <div
             ref={canvasRef}
             data-designer-canvas
-            data-mode={state.mode}
+            data-mode={state.activeTool}
             onClick={handleCanvasClick}
             style={{
                 position: 'relative',
                 width: '100%',
                 height: '100%',
                 overflow: 'auto',
-                cursor: state.mode === 'clickPlace' ? 'crosshair' : 'default',
+                cursor: state.activeTool === 'select' ? 'default' : 'crosshair',
                 backgroundImage: state.showGrid
                     ? 'linear-gradient(to right, #334155 1px, transparent 1px), linear-gradient(to bottom, #334155 1px, transparent 1px)'
                     : 'none',
@@ -65,8 +75,8 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({ state, onPlaceEl
                 Section: {state.activeSectionId} ({state.sections[state.activeSectionId].elements.length} element)
             </div>
 
-            {/* Mod göstergesi */}
-            {state.mode !== 'idle' && (
+            {/* Aktif araç göstergesi */}
+            {state.activeTool !== 'select' && (
                 <div style={{
                     position: 'absolute',
                     top: 12,
@@ -79,7 +89,7 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({ state, onPlaceEl
                     fontWeight: 700,
                     zIndex: 10,
                 }}>
-                    Mod: {state.mode} • Araç: {state.activeTool}
+                    Araç: {state.activeTool} (canvas'ta tıkla → yerleştir)
                 </div>
             )}
 
@@ -98,6 +108,16 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({ state, onPlaceEl
                 title="Designer Preview"
             />
 
+            {/* Phase 17.1: Yeni oluşturulan elementleri canvas üzerinde görsel olarak göster */}
+            {Object.values(state.sections).find(s => s.id === state.activeSectionId)?.elements.map(el => (
+                <ElementOverlay
+                    key={el.id}
+                    element={el}
+                    isSelected={el.id === state.selectedElementId}
+                    zoom={state.zoom}
+                />
+            ))}
+
             {/* Section overlay çerçeveleri (placeholder) */}
             {Object.values(state.sections).sort((a, b) => a.order - b.order).map(section => (
                 <SectionOverlay
@@ -110,6 +130,96 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({ state, onPlaceEl
                     zoom={state.zoom}
                 />
             ))}
+        </div>
+    );
+};
+
+// ============================================================================
+// Phase 17.1: buildElementForTool — aktif araca göre default element üret
+// ============================================================================
+
+function buildElementForTool(
+    tool: 'select' | 'text' | 'image' | 'shape' | 'qrcode' | 'formula' | 'table',
+    id: string,
+    x: number,
+    y: number
+): DesignElement {
+    const baseStyle = { fontSize: '14px', color: '#000', fontFamily: 'system-ui, sans-serif' };
+    switch (tool) {
+        case 'text':
+            return {
+                id, type: 'text', x, y, content: 'Yeni Metin', width: 200, height: 30, style: baseStyle,
+            } as DesignElement;
+        case 'image':
+            return {
+                id, type: 'image', x, y, content: 'image', width: 100, height: 100, style: {},
+            } as DesignElement;
+        case 'shape':
+            return {
+                id, type: 'shape', x, y, content: 'rect', shapeType: 'rect', width: 100, height: 60, style: { backgroundColor: '#6366f1', borderRadius: '4px' },
+            } as DesignElement;
+        case 'qrcode':
+            return {
+                id, type: 'qrcode', x, y, content: 'https://example.com', width: 80, height: 80, style: {},
+            } as DesignElement;
+        case 'formula':
+            return {
+                id, type: 'formula', x, y, content: 'sum(LineExtensionAmount)', width: 200, height: 24, style: { ...baseStyle, fontFamily: 'monospace' },
+            } as DesignElement;
+        case 'table':
+            return {
+                id, type: 'table', x, y, content: '', rows: 3, cols: 4, width: 300, height: 100,
+                tableData: [
+                    [{ content: 'Sıra' }, { content: 'Ürün' }, { content: 'Miktar' }, { content: 'Fiyat' }],
+                    [{ content: '1' }, { content: '' }, { content: '' }, { content: '' }],
+                    [{ content: '2' }, { content: '' }, { content: '' }, { content: '' }],
+                ],
+                style: { borderCollapse: 'collapse' },
+            } as DesignElement;
+        default:
+            return {
+                id, type: 'text', x, y, content: 'Yeni', width: 100, height: 24, style: baseStyle,
+            } as DesignElement;
+    }
+}
+
+// ============================================================================
+// Phase 17.1: ElementOverlay — canvas üzerinde yeni element görsel feedback
+// ============================================================================
+
+interface ElementOverlayProps {
+    element: DesignElement;
+    isSelected: boolean;
+    zoom: number;
+}
+
+const ElementOverlay: React.FC<ElementOverlayProps> = ({ element, isSelected, zoom }) => {
+    const w = (element.width || 100) / zoom;
+    const h = (element.height || 30) / zoom;
+    const left = element.x / zoom;
+    const top = element.y / zoom;
+
+    return (
+        <div
+            style={{
+                position: 'absolute',
+                left: `${left}px`,
+                top: `${top}px`,
+                width: `${w}px`,
+                height: `${h}px`,
+                border: isSelected ? '2px solid #6366f1' : '1px dashed rgba(99, 102, 241, 0.4)',
+                background: isSelected ? 'rgba(99, 102, 241, 0.05)' : 'rgba(99, 102, 241, 0.02)',
+                pointerEvents: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: `${11 / zoom}px`,
+                color: '#6366f1',
+                fontWeight: 600,
+                zIndex: 8,
+            }}
+        >
+            {element.type} ({element.id.slice(-6)})
         </div>
     );
 };
