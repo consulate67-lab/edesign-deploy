@@ -14,6 +14,8 @@ import { DEFAULT_MODERN_XSLT, DEFAULT_CLASSIC_XSLT } from './defaultTemplate';
 import { PaymentModal } from './PaymentModal.tsx';
 import type { DesignElement, DesignState, TableCell, XsltElementOverride, StructureNode } from './types.ts';
 import { standardUBLFields } from './standardFields.ts';
+import { isReadonlyField, getReadonlyReason } from './readonlyFields.ts';
+import { Lock } from 'lucide-react';
 
 interface StructureItemProps {
     node: StructureNode;
@@ -1386,37 +1388,88 @@ export const ProfessionalDesigner: React.FC<ProfessionalDesignerProps> = ({ temp
                             <div style={{ display: 'flex', gap: '10px', flexDirection: 'column' }}>
                                 {(() => {
                                     const mergedFields = [
-                                        ...allXmlFields,
+                                        ...allXmlFields.map(f => ({ ...f, isReadonly: isReadonlyField(f.path) })),
                                         ...standardUBLFields
                                             .filter(sf => !allXmlFields.some(af => af.path === sf.path))
-                                            .map(sf => ({ name: sf.name, path: sf.path, value: '(Standart Alan)', isNumeric: sf.isNumeric }))
+                                            .map(sf => ({
+                                                name: sf.name,
+                                                path: sf.path,
+                                                value: '(Standart Alan)',
+                                                isNumeric: sf.isNumeric,
+                                                isReadonly: isReadonlyField(sf.path),
+                                            }))
                                     ];
 
                                     return mergedFields.length > 0 ? (
-                                        mergedFields.map((field, idx) => (
-                                            <div key={idx} style={{ background: '#0f172a', padding: '10px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid #334155' }}>
-                                                <div style={{ overflow: 'hidden' }}>
-                                                    <div style={{ color: '#60a5fa', fontSize: '0.8rem', fontWeight: 'bold' }}>{field.name}</div>
-                                                    <div style={{ color: '#64748b', fontSize: '0.7rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{field.path}</div>
-                                                    <div style={{ color: '#94a3b8', fontSize: '0.75rem', marginTop: '4px' }}>Örnek: <span style={{ color: '#e2e8f0' }}>{field.value}</span></div>
+                                        mergedFields.map((field, idx) => {
+                                            const readonly = field.isReadonly;
+                                            const reason = readonly ? getReadonlyReason(field.path) : '';
+                                            return (
+                                                <div key={idx} style={{
+                                                    background: readonly ? 'rgba(60, 50, 80, 0.4)' : '#0f172a',
+                                                    padding: '10px',
+                                                    borderRadius: '8px',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                                    border: readonly ? '1px dashed #6b7280' : '1px solid #334155',
+                                                    opacity: readonly ? 0.65 : 1
+                                                }}>
+                                                    <div style={{ overflow: 'hidden', flex: 1 }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                            <div style={{ color: readonly ? '#94a3b8' : '#60a5fa', fontSize: '0.8rem', fontWeight: 'bold' }}>{field.name}</div>
+                                                            {readonly && (
+                                                                <span title={reason} style={{
+                                                                    display: 'inline-flex', alignItems: 'center', gap: '3px',
+                                                                    padding: '1px 6px',
+                                                                    background: 'rgba(120, 113, 134, 0.25)',
+                                                                    color: '#c4b5fd',
+                                                                    borderRadius: '4px',
+                                                                    fontSize: '0.6rem',
+                                                                    fontWeight: 700,
+                                                                    letterSpacing: '0.5px',
+                                                                    textTransform: 'uppercase'
+                                                                }}>
+                                                                    <Lock size={9} /> Salt Okunur
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <div style={{ color: readonly ? '#64748b' : '#64748b', fontSize: '0.7rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{field.path}</div>
+                                                        <div style={{ color: '#94a3b8', fontSize: '0.75rem', marginTop: '4px' }}>
+                                                            {readonly ? (
+                                                                <span style={{ fontStyle: 'italic', fontSize: '0.65rem', color: '#8b5cf6' }}>{reason}</span>
+                                                            ) : (
+                                                                <>Örnek: <span style={{ color: '#e2e8f0' }}>{field.value}</span></>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <button
+                                                        disabled={readonly}
+                                                        onClick={() => {
+                                                            setShowFieldModal(false);
+                                                            setPlacingMode({
+                                                                type: 'text',
+                                                                content: `{${field.name}}`,
+                                                                binding: field.path,
+                                                                format: field.isNumeric ? 'number' : undefined
+                                                            });
+                                                            setNotification({ message: 'Alanı yerleştirmek için tıklayın...', type: 'success' });
+                                                        }}
+                                                        style={{
+                                                            padding: '6px 12px',
+                                                            background: readonly ? '#475569' : '#3b82f6',
+                                                            color: readonly ? '#94a3b8' : 'white',
+                                                            borderRadius: '6px',
+                                                            border: 'none',
+                                                            cursor: readonly ? 'not-allowed' : 'pointer',
+                                                            fontSize: '0.75rem',
+                                                            fontWeight: 'bold',
+                                                            flexShrink: 0
+                                                        }}
+                                                    >
+                                                        {readonly ? 'Kilitli' : 'Ekle'}
+                                                    </button>
                                                 </div>
-                                                <button
-                                                    onClick={() => {
-                                                        setShowFieldModal(false);
-                                                        setPlacingMode({
-                                                            type: 'text',
-                                                            content: `{${field.name}}`, // Show simplified binding name in UI
-                                                            binding: field.path, // Store full path
-                                                            format: field.isNumeric ? 'number' : undefined // Default format if numeric
-                                                        });
-                                                        setNotification({ message: 'Alanı yerleştirmek için tıklayın...', type: 'success' });
-                                                    }}
-                                                    style={{ padding: '6px 12px', background: '#3b82f6', color: 'white', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 'bold' }}
-                                                >
-                                                    Ekle
-                                                </button>
-                                            </div>
-                                        ))
+                                            );
+                                        })
                                     ) : (
                                         <div style={{ color: '#94a3b8', textAlign: 'center', padding: '2rem' }}>Yüklü XML bulunamadı veya ayrıştırılamadı.</div>
                                     )
