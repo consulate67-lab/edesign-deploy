@@ -42,6 +42,22 @@
         %<xsl:value-of select="format-number($val, '#0,00')"/>
     </xsl:template>
 
+    <!-- Phase 11.1: Fatura Tipi kodunu Turkce karsiligina cevir -->
+    <xsl:template name="fmt-invoice-type">
+        <xsl:param name="code" select="''"/>
+        <xsl:choose>
+            <xsl:when test="$code = 'SATIS'">SATIŞ</xsl:when>
+            <xsl:when test="$code = 'IADE'">İADE</xsl:when>
+            <xsl:when test="$code = 'TEMELFATURA'">TEMEL FATURA</xsl:when>
+            <xsl:when test="$code = 'TICARIFATURA'">TİCARİ FATURA</xsl:when>
+            <xsl:when test="$code = 'ISTISNA'">İSTİSNA</xsl:when>
+            <xsl:when test="$code = 'IHRACAT'">İHRACAT</xsl:when>
+            <xsl:when test="$code = 'IHRACATKAYITLI'">İHRACAT (KAYITLI)</xsl:when>
+            <xsl:when test="$code = 'OZELMATRAHFAZLASIFATURA'">ÖZEL MATRAH FAZLASI FATURA</xsl:when>
+            <xsl:otherwise><xsl:value-of select="$code"/></xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
     <xsl:template match="/">
         <html>
             <head>
@@ -350,7 +366,17 @@
                                 </tr>
                                 <tr>
                                     <td class="label">Fatura Tipi:</td>
-                                    <td><xsl:value-of select="//cac:InvoiceType/cbc:Name"/></td>
+                                    <td>
+                                        <xsl:choose>
+                                            <!-- Phase 11.1: Gercek UBL-TR 1.2.1'de cac:InvoiceType elementi YOK, tip flat cbc:InvoiceTypeCode'da -->
+                                            <xsl:when test="//cbc:InvoiceTypeCode">
+                                                <xsl:call-template name="fmt-invoice-type">
+                                                    <xsl:with-param name="code" select="//cbc:InvoiceTypeCode"/>
+                                                </xsl:call-template>
+                                            </xsl:when>
+                                            <xsl:otherwise>SATIS</xsl:otherwise>
+                                        </xsl:choose>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td class="label">Fatura No:</td>

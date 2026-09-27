@@ -153,6 +153,9 @@ export function renderGibBadge(moduleId: string): string {
 /**
  * Faz 8.5 — Tüm modüller için tutarlı 'Örnek' kaşesi.
  *
+ * Phase 11.2 (Selim: 'e fatura örneği yazsını kaldır'): devre dışı.
+ * renderOrnekStamp artık çağrılmıyor; fonksiyon korunuyor ileride lazım olursa diye.
+ *
  * - e-SMM: 'luca MALİ MÜŞAVİR' (referans görsel)
  * - e-Bilet: 'MasterBilet — TÜRKİYE'NİN BİLET PLATFORMU' (Selim'in bionluk paylaşımı)
  * - Diğerleri: genel '{moduleName} ÖRNEK' kaşesi
@@ -166,7 +169,6 @@ export function renderOrnekStamp(moduleId: string): string {
     const brandColor = b.stampBrandColor || '#1e3a8a';
     const starColor = b.stampStarColor || '#dc2626';
 
-    // Tagline büyükse (örn. e-SMM, e-Bilet) 2 satırlı layout; değilse tek satır
     const taglineHtml = tagline
         ? `<span style="font-size: 8.5px; font-weight: 800; color: ${brandColor}; line-height: 1; letter-spacing: 0.8px;">${tagline}</span>`
         : '';
@@ -197,15 +199,14 @@ export function renderOrnekStamp(moduleId: string): string {
 }
 
 /**
- * HTML içeriğine banner + modüle özgü örnek kaşesi inject eder.
+ * HTML içeriğine **yalnızca banner** inject eder (ÖRNEK kaşesi devre dışı, Phase 11.2).
  * Body varsa açılıştan hemen sonra, yoksa en başa.
  */
 export function injectModuleBadge(html: string, moduleId: string): string {
     const banner = renderGibBadge(moduleId);
-    const stamp = renderOrnekStamp(moduleId);
     const bodyMatch = html.match(/<body[^>]*>/i);
     if (bodyMatch) {
-        return html.replace(bodyMatch[0], bodyMatch[0] + banner + stamp);
+        return html.replace(bodyMatch[0], bodyMatch[0] + banner);
     }
     return banner + html;
 }

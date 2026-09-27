@@ -107,9 +107,20 @@
                             <div class="info-line"><span class="lbl">VKN:</span><span class="val"><xsl:value-of select="//cac:AccountingCustomerParty/cac:Party/cac:PartyTaxScheme/cbc:CompanyID"/></span></div>
 
                             <table class="belge-table">
-                                <tr><td>Ã–zelleÅŸtirme No:</td><td>TR1.2</td></tr>
-                                <tr><td>Senaryo:</td><td>EARSIVFATURA</td></tr>
-                                <tr><td>Fatura Tipi:</td><td>SATIS</td></tr>
+                                <tr><td>Ã–zelleÅŸtirme No:</td><td><xsl:value-of select="//cbc:CustomizationID"/></td></tr>
+                                <tr><td>Senaryo:</td><td><xsl:value-of select="//cbc:ProfileID"/></td></tr>
+                                <tr><td>Fatura Tipi:</td>
+                                    <td>
+                                        <xsl:choose>
+                                            <xsl:when test="//cbc:InvoiceTypeCode">
+                                                <xsl:call-template name="arsiv-fmt-invoice-type">
+                                                    <xsl:with-param name="code" select="//cbc:InvoiceTypeCode"/>
+                                                </xsl:call-template>
+                                            </xsl:when>
+                                            <xsl:otherwise>SATIŞ</xsl:otherwise>
+                                        </xsl:choose>
+                                    </td>
+                                </tr>
                                 <tr><td>Fatura No:</td><td><xsl:value-of select="//cbc:ID"/></td></tr>
                                 <tr><td>Fatura Tarihi:</td><td><xsl:value-of select="//cbc:IssueDate"/></td></tr>
                                 <tr><td>Fatura Saati:</td><td><xsl:value-of select="substring(//cbc:IssueTime, 1, 5)"/></td></tr>
@@ -197,6 +208,18 @@
                 </div>
             </body>
         </html>
+    </xsl:template>
+
+    <!-- Phase 11.1: e-Arsiv icin Fatura Tipi kodunu Turkce karsiligina cevir -->
+    <xsl:template name="arsiv-fmt-invoice-type">
+        <xsl:param name="code" select="''"/>
+        <xsl:choose>
+            <xsl:when test="$code = 'SATIS'">SATIŞ</xsl:when>
+            <xsl:when test="$code = 'IADE'">İADE</xsl:when>
+            <xsl:when test="$code = 'EARSIVFATURA'">e-ARŞİV FATURA</xsl:when>
+            <xsl:when test="$code = 'EARSIVKAGITFATURA'">e-ARŞİV KAGIT</xsl:when>
+            <xsl:otherwise><xsl:value-of select="$code"/></xsl:otherwise>
+        </xsl:choose>
     </xsl:template>
 
 </xsl:stylesheet>
