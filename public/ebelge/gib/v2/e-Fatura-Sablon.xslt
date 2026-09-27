@@ -95,13 +95,14 @@
                         justify-content: flex-start;
                     }
                     .gib-logo {
-                        width: 28mm; height: 28mm;
+                        width: 32mm; height: 32mm;
                         border-radius: 50%;
                         overflow: hidden;
-                        box-shadow: 0 1mm 3mm rgba(220, 38, 38, 0.3);
+                        box-shadow: 0 1mm 3mm rgba(30, 58, 138, 0.25);
                         display: flex;
                         align-items: center;
                         justify-content: center;
+                        background: #fff;
                     }
                     .doc-type {
                         margin-top: 3mm;
@@ -309,25 +310,31 @@
                         </div>
 
                         <div class="gib-logo-wrap">
-                            <!-- Phase A.2.2: Yuvarlak kirmizi GIB logosu (e-Irsaliye ile ayni form) -->
+                            <!-- Phase A.2.3: Gercek GIB logosu — mavi dis halka + egri yazilar + kirmizi GIB wordmark -->
                             <div class="gib-logo">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
                                     <defs>
-                                        <radialGradient id="gib-fat-grad" cx="50%" cy="40%" r="70%">
-                                            <stop offset="0%" stop-color="#ef4444"/>
-                                            <stop offset="60%" stop-color="#dc2626"/>
-                                            <stop offset="100%" stop-color="#7f1d1d"/>
-                                        </radialGradient>
-                                        <clipPath id="gib-fat-clip">
-                                            <circle cx="100" cy="100" r="99"/>
-                                        </clipPath>
+                                        <!-- Ust egri: 'T.C. Hazine ve Maliye Bakanligi' (yay ust kavsinde) -->
+                                        <path id="gib-fat-upper" d="M 30 120 A 90 90 0 0 1 210 120" fill="none"/>
+                                        <!-- Alt egri: 'Gelir Idaresi Baskanligi' (yay alt kavsinde, ters) -->
+                                        <path id="gib-fat-lower" d="M 210 120 A 90 90 0 0 1 30 120" fill="none"/>
                                     </defs>
-                                    <g clip-path="url(#gib-fat-clip)">
-                                        <circle cx="100" cy="100" r="99" fill="url(#gib-fat-grad)" stroke="#ffffff" stroke-width="2"/>
-                                        <text x="100" y="100" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="120" font-weight="900" fill="#ffffff" text-anchor="middle" dominant-baseline="middle">e</text>
-                                        <text x="100" y="155" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="22" font-weight="800" fill="#ffffff" text-anchor="middle" letter-spacing="1">e-Belge</text>
-                                        <text x="100" y="180" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="18" font-weight="700" fill="#ffffff" text-anchor="middle" letter-spacing="4">GİB</text>
-                                    </g>
+                                    <!-- Dis mavi halka + beyaz ic alan -->
+                                    <circle cx="120" cy="120" r="115" fill="#ffffff" stroke="#1e3a8a" stroke-width="8"/>
+                                    <!-- Ic ince mavi halka -->
+                                    <circle cx="120" cy="120" r="100" fill="none" stroke="#1e3a8a" stroke-width="1.5"/>
+                                    <!-- Ust egri yazi -->
+                                    <text font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="11" font-weight="700" fill="#1e3a8a" letter-spacing="1.2">
+                                        <textPath href="#gib-fat-upper" startOffset="50%" text-anchor="middle">T.C. HAZİNE VE MALİYE BAKANLIĞI</textPath>
+                                    </text>
+                                    <!-- Alt egri yazi -->
+                                    <text font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="11" font-weight="700" fill="#1e3a8a" letter-spacing="1.2">
+                                        <textPath href="#gib-fat-lower" startOffset="50%" text-anchor="middle">GELİR İDARESİ BAŞKANLIĞI</textPath>
+                                    </text>
+                                    <!-- Ortada kirmizi GIB wordmark -->
+                                    <text x="120" y="138" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="60" font-weight="900" fill="#dc2626" text-anchor="middle" font-style="italic">
+                                        <tspan font-style="italic">G</tspan><tspan dx="-2">İB</tspan>
+                                    </text>
                                 </svg>
                             </div>
                             <div class="doc-type">e-FATURA</div>
