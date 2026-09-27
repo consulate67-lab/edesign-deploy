@@ -1977,6 +1977,7 @@ export const ProfessionalDesigner: React.FC<ProfessionalDesignerProps> = ({ temp
                                                     <label style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{selectedElement.type === 'text' ? 'Metin' : selectedElement.type === 'formula' ? 'Formül' : 'İçerik'}</label>
                                                     <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                                                         <input
+                                                            key={selectedElement.id}
                                                             className="input-field"
                                                             style={{ background: '#020617', border: '1px solid #334155', color: 'white', flex: 1, padding: '8px', borderRadius: '4px', fontSize: '0.85rem' }}
                                                             value={selectedElement.content}
@@ -2611,6 +2612,7 @@ export const ProfessionalDesigner: React.FC<ProfessionalDesignerProps> = ({ temp
                                                             </div>
                                                             <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-start' }}>
                                                                 <textarea
+                                                                    key={`xslt-${state.selectedXsltElement.elementId}`}
                                                                     className="input-field"
                                                                     style={{ background: '#020617', border: '1px solid #10b98144', color: 'white', flex: 1, padding: '6px', minHeight: '60px', borderRadius: '4px', fontSize: '0.75rem' }}
                                                                     value={state.selectedXsltElement.content || ''}
