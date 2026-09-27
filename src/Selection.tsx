@@ -2,10 +2,8 @@ import React, { useRef, useState, useEffect } from 'react';
 import { FileText, ShoppingCart, Globe, Plane, Package, Zap, Upload, LogOut, User, X, CreditCard, Building2, Phone, Mail, Sparkles, Layout, Truck, Briefcase, Sprout, Ticket, Receipt, Plus, FileSignature, Code2, Copy, Check } from 'lucide-react';
 import { api } from './api';
 import { PaymentModal } from './PaymentModal.tsx';
-import { TemplateGallery } from './TemplateGallery.tsx';
 import { getModuleHints, getModuleConfig } from './templateConfig';
 import { getSnippetsForModule, Snippet } from './snippets';
-import { XSLTTemplate, xsltTemplates } from './templates';
 import { useUiStore } from './store/uiStore';
 
 interface SelectionProps {
@@ -102,7 +100,6 @@ export const Selection: React.FC<SelectionProps> = ({ onSelect, onLogout }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [showProfileModal, setShowProfileModal] = useState(false);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
-    const [showGallery, setShowGallery] = useState(false);
     const [showSnippetsModal, setShowSnippetsModal] = useState<string | null>(null);
     const [copiedSnippetId, setCopiedSnippetId] = useState<string | null>(null);
     const [userInfo, setUserInfo] = useState<any>(null);
@@ -162,23 +159,6 @@ export const Selection: React.FC<SelectionProps> = ({ onSelect, onLogout }) => {
             e.target.value = '';
         };
         reader.readAsText(file);
-    };
-
-    const handleTemplateSelect = (template: XSLTTemplate, docTypeId?: string) => {
-        let fileName = template.fileName;
-        let moduleName = template.name;
-
-        if (docTypeId) {
-            const module = modules.find(m => m.id === docTypeId);
-            if (module) {
-                // Keep the design from the gallery (template.fileName), only update name context
-                moduleName = `${template.name} - ${module.name}`;
-            }
-        }
-
-        // Theme color is passed as a dedicated 5th argument (no customContent hack).
-        onSelect('library', fileName, moduleName, undefined, template.previewColor);
-        setShowGallery(false);
     };
 
     return (
@@ -361,34 +341,6 @@ export const Selection: React.FC<SelectionProps> = ({ onSelect, onLogout }) => {
                     width: '100%',
                     marginBottom: '4rem'
                 }}>
-                    <div
-                        onClick={() => setShowGallery(true)}
-                        style={{
-                            background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%)',
-                            border: '1px solid rgba(99, 102, 241, 0.3)',
-                            borderRadius: '24px', padding: '2rem', cursor: 'pointer',
-                            display: 'flex', flexDirection: 'column', gap: '1.5rem',
-                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                            position: 'relative', overflow: 'hidden'
-                        }}
-                    >
-                        <div style={{
-                            width: '56px', height: '56px', background: '#6366f1', borderRadius: '16px',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white'
-                        }}>
-                            <Layout size={30} />
-                        </div>
-                        <div>
-                            <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>Tasarım Kütüphanesi</h2>
-                            <p style={{ color: '#94a3b8', fontSize: '0.9rem', lineHeight: '1.5' }}>
-                                Profesyonellerce hazırlanmış onlarca hazır XSLT şablonu arasından seçin ve saniyeler içinde düzenlemeye başlayın.
-                            </p>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#818cf8', fontWeight: 'bold', fontSize: '0.9rem' }}>
-                            Kütüphaneyi Keşfet <Sparkles size={16} />
-                        </div>
-                    </div>
-
                     <div
                         onClick={() => fileInputRef.current?.click()}
                         style={{
@@ -585,12 +537,6 @@ export const Selection: React.FC<SelectionProps> = ({ onSelect, onLogout }) => {
                     </div>
                 </div>
             </div>
-
-            <TemplateGallery
-                isOpen={showGallery}
-                onClose={() => setShowGallery(false)}
-                onSelect={handleTemplateSelect}
-            />
 
             <PaymentModal
                 isOpen={showPaymentModal}
