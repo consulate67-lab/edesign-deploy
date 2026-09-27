@@ -23,7 +23,7 @@
                     .logo-area .tag { font-size: 9px; letter-spacing: 4px; color: #475569; margin-top: 4px; }
                     .center-title { text-align: center; }
                     .gib-logo { display: inline-flex; flex-direction: column; align-items: center; }
-                    .gib-circle { width: 80px; height: 80px; border-radius: 4px; background: transparent; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+                    .gib-circle { width: 60px; height: 60px; border-radius: 50%; background: transparent; display: flex; align-items: center; justify-content: center; overflow: hidden; }
                     .gib-subtitle { font-size: 8px; color: #1e3a8a; margin-top: 4px; letter-spacing: 1.5px; font-weight: 700; }
                     .doc-title { font-size: 18px; font-weight: 800; color: #1e293b; margin-top: 8px; letter-spacing: 1px; }
                     .kase { font-size: 8px; color: #1e3a8a; margin-top: 6px; line-height: 1.4; }
@@ -63,19 +63,25 @@
                         <!-- Orta: GİB Logo + Başlık -->
                         <div class="center-title">
                             <div class="gib-logo">
-                                <!-- Phase A.2.1: Gercek GIB e-Arsiv logosu (inline SVG, mavi zemin + 'e' + GIB) -->
+                                <!-- Phase A.2.2: Yuvarlak kirmizi GIB logosu (e-Irsaliye ile ayni form, GIB standardi) -->
                                 <div class="gib-circle">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
                                         <defs>
-                                            <linearGradient id="gib-arsiv-grad" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="0%" stop-color="#1e3a8a"/>
-                                                <stop offset="100%" stop-color="#1e1b4b"/>
-                                            </linearGradient>
+                                            <radialGradient id="gib-arsiv-grad" cx="50%" cy="40%" r="70%">
+                                                <stop offset="0%" stop-color="#ef4444"/>
+                                                <stop offset="60%" stop-color="#dc2626"/>
+                                                <stop offset="100%" stop-color="#7f1d1d"/>
+                                            </radialGradient>
+                                            <clipPath id="gib-arsiv-clip">
+                                                <circle cx="100" cy="100" r="99"/>
+                                            </clipPath>
                                         </defs>
-                                        <rect x="2" y="2" width="76" height="76" rx="3" fill="url(#gib-arsiv-grad)" stroke="#fff" stroke-width="1"/>
-                                        <text x="40" y="42" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="36" font-weight="900" fill="#ffffff" text-anchor="middle">e</text>
-                                        <text x="40" y="56" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="8" font-weight="800" fill="#ffffff" text-anchor="middle" letter-spacing="0.4">e-Belge</text>
-                                        <text x="40" y="68" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="7" font-weight="700" fill="#ffffff" text-anchor="middle" letter-spacing="2">GİB</text>
+                                        <g clip-path="url(#gib-arsiv-clip)">
+                                            <circle cx="100" cy="100" r="99" fill="url(#gib-arsiv-grad)" stroke="#ffffff" stroke-width="2"/>
+                                            <text x="100" y="100" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="120" font-weight="900" fill="#ffffff" text-anchor="middle" dominant-baseline="middle">e</text>
+                                            <text x="100" y="155" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="22" font-weight="800" fill="#ffffff" text-anchor="middle" letter-spacing="1">e-Belge</text>
+                                            <text x="100" y="180" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="18" font-weight="700" fill="#ffffff" text-anchor="middle" letter-spacing="4">GİB</text>
+                                        </g>
                                     </svg>
                                 </div>
                                 <div class="gib-subtitle">T.C. MALİYE BAKANLIĞI<br/>GELİR İDARESİ BAŞKANLIĞI</div>

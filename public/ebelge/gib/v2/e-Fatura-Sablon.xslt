@@ -96,7 +96,7 @@
                     }
                     .gib-logo {
                         width: 28mm; height: 28mm;
-                        border-radius: 6px;
+                        border-radius: 50%;
                         overflow: hidden;
                         box-shadow: 0 1mm 3mm rgba(220, 38, 38, 0.3);
                         display: flex;
@@ -309,19 +309,25 @@
                         </div>
 
                         <div class="gib-logo-wrap">
-                            <!-- Phase A.2.1: Gercek GIB e-Belge logosu (inline SVG, kirmizi kare + 'e' + GIB) -->
+                            <!-- Phase A.2.2: Yuvarlak kirmizi GIB logosu (e-Irsaliye ile ayni form) -->
                             <div class="gib-logo">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 280" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
                                     <defs>
-                                        <linearGradient id="gib-fat-grad" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="0%" stop-color="#dc2626"/>
+                                        <radialGradient id="gib-fat-grad" cx="50%" cy="40%" r="70%">
+                                            <stop offset="0%" stop-color="#ef4444"/>
+                                            <stop offset="60%" stop-color="#dc2626"/>
                                             <stop offset="100%" stop-color="#7f1d1d"/>
-                                        </linearGradient>
+                                        </radialGradient>
+                                        <clipPath id="gib-fat-clip">
+                                            <circle cx="100" cy="100" r="99"/>
+                                        </clipPath>
                                     </defs>
-                                    <rect x="6" y="6" width="268" height="268" rx="14" fill="url(#gib-fat-grad)" stroke="#fff" stroke-width="3"/>
-                                    <text x="140" y="148" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="180" font-weight="900" fill="#ffffff" text-anchor="middle">e</text>
-                                    <text x="140" y="200" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="34" font-weight="800" fill="#ffffff" text-anchor="middle" letter-spacing="1">e-Belge</text>
-                                    <text x="140" y="240" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="28" font-weight="700" fill="#ffffff" text-anchor="middle" letter-spacing="6">GİB</text>
+                                    <g clip-path="url(#gib-fat-clip)">
+                                        <circle cx="100" cy="100" r="99" fill="url(#gib-fat-grad)" stroke="#ffffff" stroke-width="2"/>
+                                        <text x="100" y="100" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="120" font-weight="900" fill="#ffffff" text-anchor="middle" dominant-baseline="middle">e</text>
+                                        <text x="100" y="155" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="22" font-weight="800" fill="#ffffff" text-anchor="middle" letter-spacing="1">e-Belge</text>
+                                        <text x="100" y="180" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="18" font-weight="700" fill="#ffffff" text-anchor="middle" letter-spacing="4">GİB</text>
+                                    </g>
                                 </svg>
                             </div>
                             <div class="doc-type">e-FATURA</div>
