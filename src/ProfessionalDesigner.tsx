@@ -1980,11 +1980,19 @@ export const ProfessionalDesigner: React.FC<ProfessionalDesignerProps> = ({ temp
                                                             key={selectedElement.id}
                                                             className="input-field"
                                                             style={{ background: '#020617', border: '1px solid #334155', color: 'white', flex: 1, padding: '8px', borderRadius: '4px', fontSize: '0.85rem' }}
-                                                            value={selectedElement.content}
-                                                            onChange={(e) => setState(prev => ({
-                                                                ...prev,
-                                                                elements: prev.elements.map(el => el.id === state.selectedId ? { ...el, content: e.target.value } : el)
-                                                            }))}
+                                                            defaultValue={selectedElement.content}
+                                                            onFocus={() => saveHistory()}
+                                                            onBlur={(e) => {
+                                                                // Phase 15.2: blur'da parent state'e yaz — her tuş vuruşunda useEffect tetiklenip refreshPreview
+                                                                // çağrılmasın (controlled input sync bozulmasın)
+                                                                const newVal = e.target.value;
+                                                                if (selectedElement && newVal !== selectedElement.content) {
+                                                                    setState(prev => ({
+                                                                        ...prev,
+                                                                        elements: prev.elements.map(el => el.id === state.selectedId ? { ...el, content: newVal } : el)
+                                                                    }));
+                                                                }
+                                                            }}
                                                         />
                                                         <button
                                                             onClick={() => copyToClipboard(selectedElement.content, "İçerik kopyalandı")}
@@ -2615,28 +2623,45 @@ export const ProfessionalDesigner: React.FC<ProfessionalDesignerProps> = ({ temp
                                                                     key={`xslt-${state.selectedXsltElement.elementId}`}
                                                                     className="input-field"
                                                                     style={{ background: '#020617', border: '1px solid #10b98144', color: 'white', flex: 1, padding: '6px', minHeight: '60px', borderRadius: '4px', fontSize: '0.75rem' }}
-                                                                    value={state.selectedXsltElement.content || ''}
+                                                                    defaultValue={state.selectedXsltElement.content || ''}
                                                                     onKeyDown={(e) => e.stopPropagation()}
                                                                     onFocus={() => saveHistory()}
+                                                                    onBlur={(e) => {
+                                                                        // Phase 15.2: blur'da parent state'e yaz — controlled input sync sorununu önle
+                                                                        const newVal = e.target.value;
+                                                                        if (newVal !== state.selectedXsltElement?.content) {
+                                                                            setState(prev => {
+                                                                                const updated = { ...prev.selectedXsltElement!, content: newVal };
+                                                                                const overrideIndex = prev.xsltOverrides.findIndex(o => o.elementId === updated.elementId);
+                                                                                const newOverrides = [...prev.xsltOverrides];
+                                                                                if (overrideIndex >= 0) newOverrides[overrideIndex] = updated;
+                                                                                else newOverrides.push(updated);
+
+                                                                                if (iframeRef.current?.contentWindow) {
+                                                                                    iframeRef.current.contentWindow.postMessage({
+                                                                                        type: 'UPDATE_ELEMENT_CONTENT',
+                                                                                        elementId: updated.elementId,
+                                                                                        content: newVal
+                                                                                    }, '*');
+                                                                                }
+                                                                                return {
+                                                                                    ...prev,
+                                                                                    xsltOverrides: newOverrides,
+                                                                                    selectedXsltElement: updated
+                                                                                };
+                                                                            });
+                                                                        }
+                                                                    }}
                                                                     onChange={(e) => {
+                                                                        // Phase 15.2: sadece gerçek-zamanlı iframe preview (parent state'e dokunma — blur'da save olacak)
                                                                         const newContent = e.target.value;
-                                                                        setState(prev => {
-                                                                            const updated = { ...prev.selectedXsltElement!, content: newContent };
-                                                                            const overrideIndex = prev.xsltOverrides.findIndex(o => o.elementId === updated.elementId);
-                                                                            const newOverrides = [...prev.xsltOverrides];
-                                                                            if (overrideIndex >= 0) newOverrides[overrideIndex] = updated;
-                                                                            else newOverrides.push(updated);
-
-                                                                            if (iframeRef.current?.contentWindow) {
-                                                                                iframeRef.current.contentWindow.postMessage({
-                                                                                    type: 'UPDATE_ELEMENT_CONTENT',
-                                                                                    elementId: updated.elementId,
-                                                                                    content: newContent
-                                                                                }, '*');
-                                                                            }
-
-                                                                            return { ...prev, selectedXsltElement: updated, xsltOverrides: newOverrides };
-                                                                        });
+                                                                        if (iframeRef.current?.contentWindow) {
+                                                                            iframeRef.current.contentWindow.postMessage({
+                                                                                type: 'UPDATE_ELEMENT_CONTENT',
+                                                                                elementId: state.selectedXsltElement!.elementId,
+                                                                                content: newContent
+                                                                            }, '*');
+                                                                        }
                                                                     }}
                                                                 />
                                                                 <button
