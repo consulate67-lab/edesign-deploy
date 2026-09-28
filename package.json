@@ -8,11 +8,12 @@
     "dev": "vite",
     "build": "echo 'backend-only deploy, skipping frontend build' && exit 0",
     "build:frontend": "tsc -p tsconfig.app.json && vite build",
+    "gen:xslt-defaults": "node scripts/gen-xslt-defaults.cjs",
     "start": "node server/index.js",
     "server:dev": "node --watch server/index.js",
     "lint": "eslint .",
     "preview": "vite preview",
-    "predeploy": "npm run build:frontend",
+    "predeploy": "npm run gen:xslt-defaults && npm run build:frontend",
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {

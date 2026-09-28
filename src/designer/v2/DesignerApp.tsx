@@ -24,7 +24,7 @@ import { useDesignerState, type DesignerStateV2 } from './hooks/useDesignerState
 import type { DesignElement, SectionId } from '../../types.ts';
 import { xsltToSections } from './utils/xsltToSections';
 import { SAMPLE_FATURA_XML } from './utils/xsltRender';
-import { fetchDefaultXslt } from './utils/xsltDefaults';
+import { getDefaultXsltInline, fetchDefaultXslt } from './utils/xsltDefaults';
 
 interface DesignerAppProps {
     template?: string;
@@ -108,14 +108,25 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
         let cancelled = false;
         async function loadXslt() {
             let xslt = customContent?.trim() || '';
+            let source: 'custom' | 'inline' | 'fetched' | 'none' = 'none';
 
             if (!xslt) {
-                const fetched = await fetchDefaultXslt(moduleId);
-                if (cancelled) return;
-                if (fetched) {
-                    xslt = fetched;
+                // Önce inline (anında, fetch/cache yok)
+                const inline = getDefaultXsltInline(moduleId);
+                if (inline && inline.length > 100) {
+                    xslt = inline;
+                    source = 'inline';
+                } else {
+                    // Sonra fetch dene
+                    const fetched = await fetchDefaultXslt(moduleId);
+                    if (cancelled) return;
+                    if (fetched) {
+                        xslt = fetched;
+                        source = 'fetched';
+                    }
                 }
-                // else: xslt boş kalır → placeholder render + error badge
+            } else {
+                source = 'custom';
             }
 
             if (cancelled) return;
@@ -127,10 +138,11 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
                 ds.setSections(sections);
                 // eslint-disable-next-line no-console
                 console.log(
-                    customContent
-                        ? `[DesignerApp] Custom XSLT: ${xslt.length} chars`
-                        : `[DesignerApp] Default XSLT: ${xslt.length} chars · module=${moduleId || 'fallback'}`
+                    `[DesignerApp] XSLT (${source}): ${xslt.length} chars · module=${moduleId || 'fallback'}`
                 );
+            } else {
+                // eslint-disable-next-line no-console
+                console.warn('[DesignerApp] XSLT yüklenemedi — placeholder gösterilecek');
             }
         }
         loadXslt();

@@ -75,6 +75,9 @@ export function renderXslt(xsltString: string, xmlString: string): XsltRenderRes
 
         if (!html.includes('<html') && !html.includes('<HTML')) {
             html = `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>${html}</body></html>`;
+        } else if (!/charset/i.test(html)) {
+            // html var ama charset yoksa head'e ekle
+            html = html.replace(/<head([^>]*)>/i, `<head$1><meta charset="utf-8">`);
         }
 
         return { html, error: null, durationMs: performance.now() - start };
