@@ -24,6 +24,7 @@ import { useDesignerState } from './hooks/useDesignerState';
 import type { DesignElement } from '../../types.ts';
 import { xsltToSections } from './utils/xsltToSections';
 import { SAMPLE_FATURA_XML } from './utils/xsltRender';
+import { fetchDefaultXslt } from './utils/xsltDefaults';
 
 interface DesignerAppProps {
     template?: string;
@@ -50,13 +51,12 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
     /**
      * Phase 17.3 + 17.4 — XSLT import pipeline.
      * Selim "veriler yok" dedi: e-Fatura modülünden açıldığında customContent boş
-     * geliyordu ve placeholder gösteriliyordu. Çözüm: customContent boşsa default
-     * XSLT'yi fetch et.
+     * geliyordu ve fetch 404 dönüyordu → iframe hâlâ placeholder.
      *
-     * 1. customContent dolu → onu kullan
-     * 2. customContent boş + moduleId='fatura' → /ebelge/gib/v2/e-Fatura-Sablon.xslt
-     * 3. customContent boş + moduleId yok → e-Fatura default
-     * 4. Fetch başarısız → placeholder kalır (hata badge'inde gösterilir)
+     * Pipeline:
+     * 1. customContent dolu → onu kullan (dosya yükleme)
+     * 2. customContent boş → moduleId'ye göre public/.../*.xslt path'ten fetch
+     * 3. Fetch başarısız → kullanıcıya badge ile bildir (placeholder devam)
      */
     useEffect(() => {
         let cancelled = false;
@@ -64,36 +64,28 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
             let xslt = customContent?.trim() || '';
 
             if (!xslt) {
-                // Default XSLT path — moduleId'ye göre
-                const path = moduleId && moduleId.startsWith('fatura')
-                    ? 'ebelge/gib/v2/e-Fatura-Sablon.xslt'
-                    : moduleId === 'arsiv' || moduleId === 'e-Arsiv-TEMEL'
-                    ? 'ebelge/gib/v2/e-Arsiv-Sablon.xslt'
-                    : 'ebelge/gib/v2/e-Fatura-Sablon.xslt';
-                const baseUrl = import.meta.env.BASE_URL || '/';
-                const url = `${baseUrl}${path}`;
-                try {
-                    const r = await fetch(url);
-                    if (cancelled) return;
-                    if (!r.ok) {
-                        console.warn('[DesignerApp] Default XSLT fetch failed:', r.status, url);
-                        return;
-                    }
-                    xslt = await r.text();
-                    console.log('[DesignerApp] Default XSLT loaded:', xslt.length, 'chars from', url);
-                } catch (err) {
-                    console.warn('[DesignerApp] Default XSLT fetch error:', err);
-                    return;
+                const fetched = await fetchDefaultXslt(moduleId);
+                if (cancelled) return;
+                if (fetched) {
+                    xslt = fetched;
                 }
+                // else: xslt boş kalır → placeholder render + error badge
             }
 
-            if (cancelled || !xslt) return;
+            if (cancelled) return;
 
             ds.setCurrentXslt(xslt);
             ds.setXml(SAMPLE_FATURA_XML);
-            const sections = xsltToSections(xslt);
-            ds.setSections(sections);
-            console.log('[DesignerApp] XSLT loaded: sections=', Object.keys(sections).map(k => `${k}=${sections[k as keyof typeof sections].elements.length}`).join(', '));
+            if (xslt) {
+                const sections = xsltToSections(xslt);
+                ds.setSections(sections);
+                // eslint-disable-next-line no-console
+                console.log(
+                    customContent
+                        ? `[DesignerApp] Custom XSLT: ${xslt.length} chars`
+                        : `[DesignerApp] Default XSLT: ${xslt.length} chars · module=${moduleId || 'fallback'}`
+                );
+            }
         }
         loadXslt();
         return () => { cancelled = true; };
