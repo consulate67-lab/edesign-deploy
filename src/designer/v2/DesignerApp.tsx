@@ -48,24 +48,57 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
     };
 
     /**
-     * Phase 17.3 — XSLT import pipeline.
-     * Selection.tsx'ten "Kendi Tasarımın" ile XSLT yüklenince customContent prop'u gelir.
-     * 1. currentXslt state'ine kaydet
-     * 2. xsltToSections ile parse et → 5 section'a dağıt
-     * 3. Sample XML'i currentXml'e set et (render için)
+     * Phase 17.3 + 17.4 — XSLT import pipeline.
+     * Selim "veriler yok" dedi: e-Fatura modülünden açıldığında customContent boş
+     * geliyordu ve placeholder gösteriliyordu. Çözüm: customContent boşsa default
+     * XSLT'yi fetch et.
+     *
+     * 1. customContent dolu → onu kullan
+     * 2. customContent boş + moduleId='fatura' → /ebelge/gib/v2/e-Fatura-Sablon.xslt
+     * 3. customContent boş + moduleId yok → e-Fatura default
+     * 4. Fetch başarısız → placeholder kalır (hata badge'inde gösterilir)
      */
     useEffect(() => {
-        if (customContent && customContent.trim().length > 0) {
-            ds.setCurrentXslt(customContent);
+        let cancelled = false;
+        async function loadXslt() {
+            let xslt = customContent?.trim() || '';
+
+            if (!xslt) {
+                // Default XSLT path — moduleId'ye göre
+                const path = moduleId && moduleId.startsWith('fatura')
+                    ? 'ebelge/gib/v2/e-Fatura-Sablon.xslt'
+                    : moduleId === 'arsiv' || moduleId === 'e-Arsiv-TEMEL'
+                    ? 'ebelge/gib/v2/e-Arsiv-Sablon.xslt'
+                    : 'ebelge/gib/v2/e-Fatura-Sablon.xslt';
+                const baseUrl = import.meta.env.BASE_URL || '/';
+                const url = `${baseUrl}${path}`;
+                try {
+                    const r = await fetch(url);
+                    if (cancelled) return;
+                    if (!r.ok) {
+                        console.warn('[DesignerApp] Default XSLT fetch failed:', r.status, url);
+                        return;
+                    }
+                    xslt = await r.text();
+                    console.log('[DesignerApp] Default XSLT loaded:', xslt.length, 'chars from', url);
+                } catch (err) {
+                    console.warn('[DesignerApp] Default XSLT fetch error:', err);
+                    return;
+                }
+            }
+
+            if (cancelled || !xslt) return;
+
+            ds.setCurrentXslt(xslt);
             ds.setXml(SAMPLE_FATURA_XML);
-            const sections = xsltToSections(customContent);
+            const sections = xsltToSections(xslt);
             ds.setSections(sections);
-        } else {
-            // XSLT yoksa sadece sample XML set et (Phase 17.3'te placeholder render devre dışı)
-            ds.setXml(SAMPLE_FATURA_XML);
+            console.log('[DesignerApp] XSLT loaded: sections=', Object.keys(sections).map(k => `${k}=${sections[k as keyof typeof sections].elements.length}`).join(', '));
         }
+        loadXslt();
+        return () => { cancelled = true; };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [customContent]);
+    }, [customContent, moduleId]);
 
     return (
         <div
