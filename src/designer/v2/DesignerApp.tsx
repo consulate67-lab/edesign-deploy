@@ -218,6 +218,27 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
                 <DesignerStatusBar state={ds.state} />
             </div>
 
+            {/* Phase A.1.4 DEBUG — runtime state badge (state.currentXslt length, sections toplam element) */}
+            <div
+                data-designer-debug
+                style={{
+                    position: 'fixed',
+                    top: 76,
+                    left: 16,
+                    padding: '6px 12px',
+                    background: 'rgba(15, 23, 42, 0.92)',
+                    border: '1px solid #475569',
+                    borderRadius: '6px',
+                    color: '#e2e8f0',
+                    fontSize: '10px',
+                    fontFamily: 'monospace',
+                    zIndex: 99,
+                    pointerEvents: 'none',
+                }}
+            >
+                xslt: {ds.state.currentXslt ? `${ds.state.currentXslt.length} chars` : 'EMPTY'} · sections: {Object.values(ds.state.sections).reduce((s, sec) => s + sec.elements.length, 0)} elements
+            </div>
+
             {/* Phase 18.1 — inline edit notification toast */}
             {inlineEditNotice && (
                 <div
