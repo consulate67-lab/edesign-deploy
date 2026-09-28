@@ -45,6 +45,10 @@ export interface DesignerStateV2 {
     xmlPreview: string;
     xsltOutput: string;
     htmlPreview: string;
+    /** Phase 17.3 — Kullanıcının yüklediği XSLT (sample XML ile render edilir). */
+    currentXslt: string;
+    /** Phase 17.3 — Render için kullanılan XML (sample veya kullanıcı yüklemesi). */
+    currentXml: string;
 
     // History (undo/redo)
     history: SectionsMap[];
@@ -72,6 +76,8 @@ export type DesignerActionV2 =
     | { type: 'IMPORT_XSLT'; payload: { xslt: string } }
     | { type: 'EXPORT_XSLT'; payload: { xslt: string } }
     | { type: 'SET_HTML_PREVIEW'; payload: { html: string } }
+    | { type: 'SET_SECTIONS'; payload: { sections: SectionsMap } }
+    | { type: 'SET_XML'; payload: { xml: string } }
     | { type: 'PUSH_HISTORY' };
 
 // ============================================================================
@@ -92,6 +98,8 @@ export function createInitialDesignerState(): DesignerStateV2 {
         xmlPreview: '',
         xsltOutput: '',
         htmlPreview: '',
+        currentXslt: '',
+        currentXml: '',
         history: [],
         historyIndex: -1,
         activeTool: 'select',
@@ -271,6 +279,12 @@ export function designerReducer(
         case 'SET_HTML_PREVIEW':
             return { ...state, htmlPreview: action.payload.html };
 
+        case 'SET_SECTIONS':
+            return { ...state, sections: action.payload.sections };
+
+        case 'SET_XML':
+            return { ...state, currentXml: action.payload.xml };
+
         default:
             return state;
     }
@@ -340,6 +354,24 @@ export function useDesignerState(initial?: Partial<DesignerStateV2>) {
         []
     );
 
+    const setSections = useCallback(
+        (sections: SectionsMap) =>
+            dispatch({ type: 'SET_SECTIONS', payload: { sections } }),
+        []
+    );
+
+    const setXml = useCallback(
+        (xml: string) =>
+            dispatch({ type: 'SET_XML', payload: { xml } }),
+        []
+    );
+
+    const setCurrentXslt = useCallback(
+        (xslt: string) =>
+            dispatch({ type: 'IMPORT_XSLT', payload: { xslt } }),
+        []
+    );
+
     const setZoom = useCallback(
         (zoom: number) =>
             dispatch({ type: 'SET_ZOOM', payload: { zoom } }),
@@ -367,6 +399,9 @@ export function useDesignerState(initial?: Partial<DesignerStateV2>) {
         setActiveSection,
         setMode,
         setTool,
+        setSections,
+        setXml,
+        setCurrentXslt,
         setZoom,
         pushHistory,
         undo,

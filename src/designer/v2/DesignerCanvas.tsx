@@ -1,12 +1,14 @@
 /**
- * Designer 2.0 — Canvas (Phase 17.1 click-to-place)
+ * Designer 2.0 — Canvas (Phase 17.1 + 17.3 XSLT render)
  *
  * İçerik: iframe XSLT render + click-to-place + drag-drop
  * Phase 17.1: click-to-place gerçek davranış eklendi.
+ * Phase 17.3: iframe.srcDoc = browser-side XSLTProcessor render çıktısı.
  */
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useMemo } from 'react';
 import type { DesignerStateV2 } from './hooks/useDesignerState';
 import type { DesignElement, SectionId } from '../../types.ts';
+import { renderXslt } from './utils/xsltRender';
 
 interface DesignerCanvasProps {
     state: DesignerStateV2;
@@ -15,6 +17,19 @@ interface DesignerCanvasProps {
 
 export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({ state, onPlaceElement }) => {
     const canvasRef = useRef<HTMLDivElement>(null);
+
+    /**
+     * Phase 17.3 — XSLT render.
+     * state.currentXslt + state.currentXml → renderXslt() → HTML string.
+     * XSLT yoksa placeholder HTML göster.
+     * Her değişiklikte useMemo ile cache'lenir (performans).
+     */
+    const renderResult = useMemo(() => {
+        if (!state.currentXslt) {
+            return { html: buildPlaceholderHtml(state), error: null, durationMs: 0 };
+        }
+        return renderXslt(state.currentXslt, state.currentXml);
+    }, [state.currentXslt, state.currentXml, state.activeSectionId]);
 
     /**
      * Phase 17.1: Tıkla-yerleştir implementasyonu.
@@ -93,10 +108,10 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({ state, onPlaceEl
                 </div>
             )}
 
-            {/* XSLT render iframe (Phase 17: gerçek render + contentWindow.postMessage) */}
+            {/* XSLT render iframe (Phase 17.3: browser-side XSLTProcessor) */}
             <iframe
                 data-designer-iframe
-                srcDoc={state.htmlPreview || buildPlaceholderHtml(state)}
+                srcDoc={renderResult.html || buildPlaceholderHtml(state)}
                 style={{
                     width: '100%',
                     height: '100%',
@@ -107,6 +122,43 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({ state, onPlaceEl
                 }}
                 title="Designer Preview"
             />
+
+            {/* Phase 17.3 — Render error badge (eğer XSLT parse hatası varsa) */}
+            {renderResult.error && (
+                <div style={{
+                    position: 'absolute',
+                    bottom: 12,
+                    right: 12,
+                    padding: '8px 12px',
+                    background: 'rgba(239, 68, 68, 0.9)',
+                    color: 'white',
+                    borderRadius: '6px',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    zIndex: 20,
+                    maxWidth: '320px',
+                }} title={renderResult.error}>
+                    ⚠ Render Hatası — {renderResult.error.slice(0, 80)}
+                </div>
+            )}
+
+            {/* Phase 17.3 — Render duration badge (success indicator) */}
+            {!renderResult.error && state.currentXslt && (
+                <div style={{
+                    position: 'absolute',
+                    bottom: 12,
+                    right: 12,
+                    padding: '4px 10px',
+                    background: 'rgba(16, 185, 129, 0.85)',
+                    color: 'white',
+                    borderRadius: '4px',
+                    fontSize: '10px',
+                    fontWeight: 700,
+                    zIndex: 20,
+                }}>
+                    ✓ Render: {renderResult.durationMs.toFixed(1)}ms
+                </div>
+            )}
 
             {/* Phase 17.1: Yeni oluşturulan elementleri canvas üzerinde görsel olarak göster */}
             {Object.values(state.sections).find(s => s.id === state.activeSectionId)?.elements.map(el => (

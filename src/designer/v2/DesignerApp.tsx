@@ -1,5 +1,5 @@
 /**
- * Designer 2.0 — Ana orkestratör (Phase 16.4 iskelet)
+ * Designer 2.0 — Ana orkestratör (Phase 16.4 + 17.3)
  *
  * Selim: "daha düzgün gerçekten becermiş bir tasarım ekranı istiyorum"
  *
@@ -10,10 +10,11 @@
  *   - DesignerProperties (sağ)
  *   - DesignerStatusBar (alt)
  *
- * Mevcut ProfessionalDesigner.tsx (293 KB) korunur — Designer 2.0 ayrı bir mimari.
- * Phase 17+'da implementasyon detaylandırılacak.
+ * Phase 17.3: customContent (XSLT) prop'u gelince xsltToSections ile parse edilir
+ * ve sections state'ine dağıtılır. Canvas iframe'i bu state'i kullanarak
+ * browser-side XSLTProcessor ile gerçek render gösterir.
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import { DesignerToolbar } from './DesignerToolbar';
 import { DesignerSidebar } from './DesignerSidebar';
 import { DesignerCanvas } from './DesignerCanvas';
@@ -21,6 +22,8 @@ import { DesignerProperties } from './DesignerProperties';
 import { DesignerStatusBar } from './DesignerStatusBar';
 import { useDesignerState } from './hooks/useDesignerState';
 import type { DesignElement } from '../../types.ts';
+import { xsltToSections } from './utils/xsltToSections';
+import { SAMPLE_FATURA_XML } from './utils/xsltRender';
 
 interface DesignerAppProps {
     template?: string;
@@ -43,6 +46,26 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
         ds.pushHistory();
         ds.placeElement(ds.state.activeSectionId, element);
     };
+
+    /**
+     * Phase 17.3 — XSLT import pipeline.
+     * Selection.tsx'ten "Kendi Tasarımın" ile XSLT yüklenince customContent prop'u gelir.
+     * 1. currentXslt state'ine kaydet
+     * 2. xsltToSections ile parse et → 5 section'a dağıt
+     * 3. Sample XML'i currentXml'e set et (render için)
+     */
+    useEffect(() => {
+        if (customContent && customContent.trim().length > 0) {
+            ds.setCurrentXslt(customContent);
+            ds.setXml(SAMPLE_FATURA_XML);
+            const sections = xsltToSections(customContent);
+            ds.setSections(sections);
+        } else {
+            // XSLT yoksa sadece sample XML set et (Phase 17.3'te placeholder render devre dışı)
+            ds.setXml(SAMPLE_FATURA_XML);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [customContent]);
 
     return (
         <div
