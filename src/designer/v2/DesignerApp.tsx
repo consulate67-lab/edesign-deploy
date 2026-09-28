@@ -14,7 +14,7 @@
  * ve sections state'ine dağıtılır. Canvas iframe'i bu state'i kullanarak
  * browser-side XSLTProcessor ile gerçek render gösterir.
  */
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DesignerToolbar } from './DesignerToolbar';
 import { DesignerSidebar } from './DesignerSidebar';
 import { DesignerCanvas } from './DesignerCanvas';
@@ -42,6 +42,28 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
     moduleId,
 }) => {
     const ds = useDesignerState();
+
+    /**
+     * Phase 18.1 — iframe inline edit bildirim state'i.
+     * Kullanıcı bir element'i düzenlediğinde 4 saniye sonra kaybolan toast gösterilir.
+     */
+    const [inlineEditNotice, setInlineEditNotice] = useState<string | null>(null);
+    useEffect(() => {
+        if (!inlineEditNotice) return;
+        const t = setTimeout(() => setInlineEditNotice(null), 4500);
+        return () => clearTimeout(t);
+    }, [inlineEditNotice]);
+
+    const handleInlineEdit = (info: { originalText: string; newText: string; tagName: string; xpath?: string }) => {
+        // eslint-disable-next-line no-console
+        console.log('[Designer 2.0] Inline edit:', info);
+        setInlineEditNotice(
+            `✏️ Düzenlendi (${info.tagName}${info.xpath ? ` · ${info.xpath}` : ''}): ` +
+            `"${info.originalText.trim().slice(0, 30)}${info.originalText.length > 30 ? '…' : ''}" → ` +
+            `"${info.newText.trim().slice(0, 30)}${info.newText.length > 30 ? '…' : ''}"`
+        );
+        // Phase 18.2'de: xpath'e göre sections state'te element.binding eşleşirse UPDATE_ELEMENT yapılacak
+    };
 
     const handlePlaceElement = (element: DesignElement) => {
         ds.pushHistory();
@@ -141,6 +163,7 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
                 <DesignerCanvas
                     state={ds.state}
                     onPlaceElement={handlePlaceElement}
+                    onInlineEdit={handleInlineEdit}
                 />
             </div>
 
@@ -157,6 +180,29 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
             <div style={{ gridArea: 'statusbar' }}>
                 <DesignerStatusBar state={ds.state} />
             </div>
+
+            {/* Phase 18.1 — inline edit notification toast */}
+            {inlineEditNotice && (
+                <div
+                    role="status"
+                    style={{
+                        position: 'fixed',
+                        bottom: 56,
+                        right: 16,
+                        maxWidth: '420px',
+                        padding: '12px 16px',
+                        background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+                        color: 'white',
+                        borderRadius: '10px',
+                        fontSize: '12px',
+                        boxShadow: '0 12px 32px rgba(0,0,0,0.4)',
+                        zIndex: 100,
+                        animation: 'fadeIn 0.2s ease-out',
+                    }}
+                >
+                    {inlineEditNotice}
+                </div>
+            )}
         </div>
     );
 };

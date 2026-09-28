@@ -5,7 +5,7 @@
  * Phase 17.1: click-to-place gerçek davranış eklendi.
  * Phase 17.3: iframe.srcDoc = browser-side XSLTProcessor render çıktısı.
  */
-import React, { useRef, useCallback, useMemo } from 'react';
+import React, { useRef, useCallback, useMemo, useEffect } from 'react';
 import type { DesignerStateV2 } from './hooks/useDesignerState';
 import type { DesignElement, SectionId } from '../../types.ts';
 import { renderXslt } from './utils/xsltRender';
@@ -13,10 +13,17 @@ import { renderXslt } from './utils/xsltRender';
 interface DesignerCanvasProps {
     state: DesignerStateV2;
     onPlaceElement: (element: DesignElement) => void;
+    /**
+     * Phase 18.1 — iframe içi inline editing bildirimi.
+     * Kullanıcı iframe'de bir element'e çift tıklayıp düzenlediğinde çağrılır.
+     * MVP: notice mesajı + console log. Phase 18.2'de sections state update'i.
+     */
+    onInlineEdit?: (info: { originalText: string; newText: string; tagName: string; xpath?: string }) => void;
 }
 
-export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({ state, onPlaceElement }) => {
+export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({ state, onPlaceElement, onInlineEdit }) => {
     const canvasRef = useRef<HTMLDivElement>(null);
+    const iframeRef = useRef<HTMLIFrameElement>(null);
 
     /**
      * Phase 17.3 — XSLT render.
@@ -55,6 +62,104 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({ state, onPlaceEl
         const el: DesignElement = buildElementForTool(state.activeTool, id, x, y);
         onPlaceElement(el);
     }, [state.activeTool, state.snapToGrid, state.gridSize, onPlaceElement]);
+
+    /**
+     * Phase 18.1 — iframe içi inline edit handler.
+     * iframe.contentDocument.body'ye dblclick + keydown + blur listener ekler.
+     * Hedef element contenteditable olur, blur'da onInlineEdit çağrılır.
+     *
+     * Not: srcDoc ile aynı origin'de (srcdoc URL'leri aynı document olarak davranır),
+     * sandbox yok, sandbox-safe değil ama local preview için OK.
+     */
+    const handleIframeLoad = useCallback(() => {
+        const iframe = iframeRef.current;
+        if (!iframe) return;
+        const doc = iframe.contentDocument;
+        if (!doc || !doc.body) return;
+
+        // Visual feedback için target element'e edit mode class ekle
+        let editingElement: HTMLElement | null = null;
+        let originalText = '';
+
+        const startEdit = (target: HTMLElement) => {
+            if (editingElement) return; // zaten edit modunda
+            editingElement = target;
+            originalText = target.textContent || '';
+            target.contentEditable = 'true';
+            target.style.outline = '2px solid #6366f1';
+            target.style.background = 'rgba(99,102,241,0.08)';
+            target.focus();
+            // Tüm içeriği seç (kullanıcı direkt yazabilsin)
+            const range = doc.createRange();
+            range.selectNodeContents(target);
+            const sel = doc.getSelection();
+            sel?.removeAllRanges();
+            sel?.addRange(range);
+        };
+
+        const finishEdit = (commit: boolean) => {
+            if (!editingElement) return;
+            const newText = editingElement.textContent || '';
+            editingElement.contentEditable = 'false';
+            editingElement.style.outline = '';
+            editingElement.style.background = '';
+            const tag = editingElement.tagName.toLowerCase();
+            const xpath = editingElement.getAttribute('data-xpath') || undefined;
+            if (commit && newText !== originalText && onInlineEdit) {
+                onInlineEdit({ originalText, newText, tagName: tag, xpath });
+            } else if (!commit) {
+                // Esc ile iptal: eski içeriği geri al
+                editingElement.textContent = originalText;
+            }
+            editingElement = null;
+        };
+
+        const onDblClick = (e: Event) => {
+            const t = e.target as HTMLElement;
+            if (!t || t === doc.body || t === doc.documentElement) return;
+            // Eğer zaten edit modundaysa dblclick skip
+            if (t.isContentEditable) return;
+            e.preventDefault();
+            e.stopPropagation();
+            startEdit(t);
+        };
+
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (!editingElement) return;
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                finishEdit(true);
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                finishEdit(false);
+            }
+        };
+
+        const onBlur = (e: FocusEvent) => {
+            if (!editingElement) return;
+            const t = e.target as HTMLElement;
+            if (t === editingElement) finishEdit(true);
+        };
+
+        doc.body.addEventListener('dblclick', onDblClick);
+        doc.body.addEventListener('keydown', onKeyDown);
+        doc.body.addEventListener('blur', onBlur, true);
+    }, [onInlineEdit]);
+
+    /**
+     * Phase 18.1 — iframe srcDoc her değiştiğinde listener'ları yeniden bağla.
+     * useEffect: renderResult.html değişince handleIframeLoad çağrılır.
+     */
+    useEffect(() => {
+        // Iframe yüklendikten sonra listener eklemek için onLoad'a bind ettik
+        // Tekrar bağlamak için: handleIframeLoad'ı ref'e kaydet
+        const iframe = iframeRef.current;
+        if (iframe) {
+            iframe.addEventListener('load', handleIframeLoad);
+            return () => iframe.removeEventListener('load', handleIframeLoad);
+        }
+        return undefined;
+    }, [renderResult.html, handleIframeLoad]);
 
     return (
         <div
@@ -108,8 +213,9 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({ state, onPlaceEl
                 </div>
             )}
 
-            {/* XSLT render iframe (Phase 17.3: browser-side XSLTProcessor) */}
+            {/* XSLT render iframe (Phase 17.3: browser-side XSLTProcessor, Phase 18.1: inline edit) */}
             <iframe
+                ref={iframeRef}
                 data-designer-iframe
                 srcDoc={renderResult.html || buildPlaceholderHtml(state)}
                 style={{
@@ -122,6 +228,26 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({ state, onPlaceEl
                 }}
                 title="Designer Preview"
             />
+
+            {/* Phase 18.1 — inline edit hint badge */}
+            {state.currentXslt && !renderResult.error && (
+                <div style={{
+                    position: 'absolute',
+                    bottom: 12,
+                    left: 12,
+                    padding: '6px 12px',
+                    background: 'rgba(99, 102, 241, 0.12)',
+                    color: '#c7d2fe',
+                    border: '1px solid rgba(99, 102, 241, 0.4)',
+                    borderRadius: '6px',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    zIndex: 20,
+                    pointerEvents: 'none',
+                }}>
+                    💡 İpucu: iframe'te bir elemente <strong>çift tıkla</strong> → düzenle · <strong>Enter</strong> = kaydet · <strong>Esc</strong> = iptal
+                </div>
+            )}
 
             {/* Phase 17.3 — Render error badge (eğer XSLT parse hatası varsa) */}
             {renderResult.error && (
