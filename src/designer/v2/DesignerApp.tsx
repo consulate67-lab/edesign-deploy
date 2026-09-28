@@ -20,8 +20,8 @@ import { DesignerSidebar } from './DesignerSidebar';
 import { DesignerCanvas } from './DesignerCanvas';
 import { DesignerProperties } from './DesignerProperties';
 import { DesignerStatusBar } from './DesignerStatusBar';
-import { useDesignerState } from './hooks/useDesignerState';
-import type { DesignElement } from '../../types.ts';
+import { useDesignerState, type DesignerStateV2 } from './hooks/useDesignerState';
+import type { DesignElement, SectionId } from '../../types.ts';
 import { xsltToSections } from './utils/xsltToSections';
 import { SAMPLE_FATURA_XML } from './utils/xsltRender';
 import { fetchDefaultXslt } from './utils/xsltDefaults';
@@ -54,15 +54,39 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
         return () => clearTimeout(t);
     }, [inlineEditNotice]);
 
-    const handleInlineEdit = (info: { originalText: string; newText: string; tagName: string; xpath?: string }) => {
+    const handleInlineEdit = (info: { renderIndex: number; originalText: string; newText: string; tagName: string }) => {
         // eslint-disable-next-line no-console
         console.log('[Designer 2.0] Inline edit:', info);
+
+        // Phase A.1 — renderIndex üzerinden sections state update
+        const elementId = findElementIdByRenderIndex(ds.state.sections, info.renderIndex);
+        if (!elementId) {
+            setInlineEditNotice(
+                `⚠ Düzenleme kaydedilemedi: renderIndex=${info.renderIndex} sections'ta bulunamadı`
+            );
+            return;
+        }
+        ds.pushHistory();
+        ds.updateElement(elementId, { content: info.newText });
         setInlineEditNotice(
-            `✏️ Düzenlendi (${info.tagName}${info.xpath ? ` · ${info.xpath}` : ''}): ` +
+            `✏️ Kaydedildi (${info.tagName} #${info.renderIndex}): ` +
             `"${info.originalText.trim().slice(0, 30)}${info.originalText.length > 30 ? '…' : ''}" → ` +
             `"${info.newText.trim().slice(0, 30)}${info.newText.length > 30 ? '…' : ''}"`
         );
-        // Phase 18.2'de: xpath'e göre sections state'te element.binding eşleşirse UPDATE_ELEMENT yapılacak
+    };
+
+    /**
+     * Phase A.1 — iframe click → sections element seç.
+     * renderIndex'ten elementId bulur (sections walk) ve ds.selectElement çağırır.
+     */
+    const handleSelectElementByRenderIndex = (renderIndex: number) => {
+        const elementId = findElementIdByRenderIndex(ds.state.sections, renderIndex);
+        if (elementId) {
+            ds.selectElement(elementId);
+        } else {
+            // eslint-disable-next-line no-console
+            console.warn(`[Designer 2.0] renderIndex=${renderIndex} → element bulunamadı`);
+        }
     };
 
     const handlePlaceElement = (element: DesignElement) => {
@@ -164,6 +188,7 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
                     state={ds.state}
                     onPlaceElement={handlePlaceElement}
                     onInlineEdit={handleInlineEdit}
+                    onSelectElement={handleSelectElementByRenderIndex}
                 />
             </div>
 
@@ -208,3 +233,19 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
 };
 
 export default DesignerApp;
+
+// ============================================================================
+// Phase A.1 — sections walk ile renderIndex'ten elementId bul
+// ============================================================================
+
+function findElementIdByRenderIndex(
+    sections: DesignerStateV2['sections'],
+    renderIndex: number
+): string | null {
+    for (const secId of Object.keys(sections) as SectionId[]) {
+        for (const el of sections[secId].elements) {
+            if (el.renderIndex === renderIndex) return el.id;
+        }
+    }
+    return null;
+}

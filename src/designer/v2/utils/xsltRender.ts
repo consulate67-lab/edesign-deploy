@@ -65,12 +65,14 @@ export function renderXslt(xsltString: string, xmlString: string): XsltRenderRes
         processor.importStylesheet(xsltDoc);
         const resultDoc = processor.transformToDocument(xmlDoc);
 
-        // 4. Serialize
+        // 4. Phase A.1 — render DOM annotation: her element'e data-render-index enjekte et.
+        //    Designer 2.0 click/blur handler'ı bu index ile sections[] element'ine eşler.
+        annotateRenderDom(resultDoc);
+
+        // 5. Serialize
         const serializer = new XMLSerializer();
         let html = serializer.serializeToString(resultDoc);
 
-        // XSLT çıktısı <html>...</html> döner; iframe.srcDoc için tam HTML gerekli
-        // Eğer <html> tag yoksa saralım
         if (!html.includes('<html') && !html.includes('<HTML')) {
             html = `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>${html}</body></html>`;
         }
@@ -83,6 +85,40 @@ export function renderXslt(xsltString: string, xmlString: string): XsltRenderRes
             durationMs: performance.now() - start,
         };
     }
+}
+
+/**
+ * Phase A.1 — DOM annotation.
+ * resultDoc içindeki her Element'e sıralı data-render-index attribute ekler.
+ * Bu index, xsltToSections tarafından üretilen element listesindeki sırayla eşleşir
+ * (her ikisi de pre-order DFS ile gezilir).
+ *
+ * Not: Sadece html/body altındaki literal result element'ler (div, span, p, td, th, h1-h6, table, tr)
+ * index'lenir. <style>, <head>, <meta> atlanır.
+ */
+const INDEXED_TAGS = new Set([
+    'div', 'span', 'p', 'table', 'tr', 'td', 'th',
+    'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'img', 'a',
+]);
+
+function annotateRenderDom(doc: Document): void {
+    const body = doc.body || doc.documentElement;
+    if (!body) return;
+    let counter = 0;
+    const walk = (node: Node) => {
+        if (node.nodeType !== 1) return; // sadece Element
+        const el = node as Element;
+        const tag = el.tagName.toLowerCase();
+        if (INDEXED_TAGS.has(tag)) {
+            el.setAttribute('data-render-index', String(counter));
+            counter++;
+        }
+        // Children
+        for (const child of Array.from(el.childNodes)) {
+            walk(child);
+        }
+    };
+    walk(body);
 }
 
 /**

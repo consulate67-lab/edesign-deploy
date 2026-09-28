@@ -44,6 +44,8 @@ export interface DesignElement {
   htmlTag?: string; // Faz A.1 — orijinal XSLT literal result element tagName
   /** Phase 14 — hangi section'a ait (legacy elements[] icin bossa default). */
   sectionId?: string;
+  /** Phase A.1 — renderXslt post-process ile senkronize DFS index (iframe ↔ sections element eşlemesi). */
+  renderIndex?: number;
 }
 
 export interface XsltElementOverride {

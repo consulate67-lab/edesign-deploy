@@ -89,8 +89,12 @@ export function xsltToSections(xsltString: string): SectionsMap {
     const total = elements.length;
 
     // Elementleri section'a dağıt
+    // Phase A.1: her element'e renderIndex ata (xsltRender post-process ile senkronize)
+    let renderIndex = 0;
     elements.forEach((el, idx) => {
         const sectionId = inferSectionId(el, idx, total);
+        el.renderIndex = renderIndex;
+        renderIndex++;
         sections[sectionId].elements.push(el);
     });
 

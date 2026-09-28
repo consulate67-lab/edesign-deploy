@@ -18,10 +18,19 @@ interface DesignerCanvasProps {
      * Kullanıcı iframe'de bir element'e çift tıklayıp düzenlediğinde çağrılır.
      * MVP: notice mesajı + console log. Phase 18.2'de sections state update'i.
      */
-    onInlineEdit?: (info: { originalText: string; newText: string; tagName: string; xpath?: string }) => void;
+    onInlineEdit?: (info: { renderIndex: number; originalText: string; newText: string; tagName: string }) => void;
+    /**
+     * Phase A.1 — iframe click → sections element seç (renderIndex üzerinden).
+     */
+    onSelectElement?: (renderIndex: number) => void;
 }
 
-export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({ state, onPlaceElement, onInlineEdit }) => {
+export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
+    state,
+    onPlaceElement,
+    onInlineEdit,
+    onSelectElement,
+}) => {
     const canvasRef = useRef<HTMLDivElement>(null);
     const iframeRef = useRef<HTMLIFrameElement>(null);
 
@@ -64,12 +73,12 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({ state, onPlaceEl
     }, [state.activeTool, state.snapToGrid, state.gridSize, onPlaceElement]);
 
     /**
-     * Phase 18.1 — iframe içi inline edit handler.
-     * iframe.contentDocument.body'ye dblclick + keydown + blur listener ekler.
-     * Hedef element contenteditable olur, blur'da onInlineEdit çağrılır.
+     * Phase 18.1 + A.1 — iframe içi inline edit + click-to-select handler.
+     * iframe.contentDocument.body'ye click + dblclick + keydown + blur listener ekler.
+     * - click → data-render-index → onSelectElement (sections state seçim)
+     * - dblclick → contenteditable, blur'da onInlineEdit (UPDATE_ELEMENT)
      *
-     * Not: srcDoc ile aynı origin'de (srcdoc URL'leri aynı document olarak davranır),
-     * sandbox yok, sandbox-safe değil ama local preview için OK.
+     * Not: srcDoc ile aynı origin'de, sandbox yok, local preview için OK.
      */
     const handleIframeLoad = useCallback(() => {
         const iframe = iframeRef.current;
@@ -77,19 +86,29 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({ state, onPlaceEl
         const doc = iframe.contentDocument;
         if (!doc || !doc.body) return;
 
-        // Visual feedback için target element'e edit mode class ekle
         let editingElement: HTMLElement | null = null;
+        let editingIndex = -1;
         let originalText = '';
 
+        const getRenderIndex = (el: HTMLElement): number => {
+            let n: HTMLElement | null = el;
+            while (n) {
+                const idx = n.getAttribute('data-render-index');
+                if (idx !== null) return Number(idx);
+                n = n.parentElement;
+            }
+            return -1;
+        };
+
         const startEdit = (target: HTMLElement) => {
-            if (editingElement) return; // zaten edit modunda
+            if (editingElement) return;
             editingElement = target;
+            editingIndex = getRenderIndex(target);
             originalText = target.textContent || '';
             target.contentEditable = 'true';
             target.style.outline = '2px solid #6366f1';
             target.style.background = 'rgba(99,102,241,0.08)';
             target.focus();
-            // Tüm içeriği seç (kullanıcı direkt yazabilsin)
             const range = doc.createRange();
             range.selectNodeContents(target);
             const sel = doc.getSelection();
@@ -104,21 +123,32 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({ state, onPlaceEl
             editingElement.style.outline = '';
             editingElement.style.background = '';
             const tag = editingElement.tagName.toLowerCase();
-            const xpath = editingElement.getAttribute('data-xpath') || undefined;
-            if (commit && newText !== originalText && onInlineEdit) {
-                onInlineEdit({ originalText, newText, tagName: tag, xpath });
+            if (commit && newText !== originalText && onInlineEdit && editingIndex >= 0) {
+                onInlineEdit({ renderIndex: editingIndex, originalText, newText, tagName: tag });
             } else if (!commit) {
-                // Esc ile iptal: eski içeriği geri al
                 editingElement.textContent = originalText;
             }
             editingElement = null;
+            editingIndex = -1;
+        };
+
+        const onClick = (e: Event) => {
+            // Eğer edit modundaysa click skip
+            const t = e.target as HTMLElement;
+            if (!t || t.isContentEditable) return;
+            const idx = getRenderIndex(t);
+            if (idx >= 0 && onSelectElement) {
+                e.preventDefault();
+                e.stopPropagation();
+                onSelectElement(idx);
+            }
         };
 
         const onDblClick = (e: Event) => {
             const t = e.target as HTMLElement;
             if (!t || t === doc.body || t === doc.documentElement) return;
-            // Eğer zaten edit modundaysa dblclick skip
             if (t.isContentEditable) return;
+            // Çift tıklama → edit başlat
             e.preventDefault();
             e.stopPropagation();
             startEdit(t);
@@ -141,10 +171,11 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({ state, onPlaceEl
             if (t === editingElement) finishEdit(true);
         };
 
+        doc.body.addEventListener('click', onClick);
         doc.body.addEventListener('dblclick', onDblClick);
         doc.body.addEventListener('keydown', onKeyDown);
         doc.body.addEventListener('blur', onBlur, true);
-    }, [onInlineEdit]);
+    }, [onInlineEdit, onSelectElement]);
 
     /**
      * Phase 18.1 — iframe srcDoc her değiştiğinde listener'ları yeniden bağla.
