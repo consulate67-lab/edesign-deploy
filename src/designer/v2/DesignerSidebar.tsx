@@ -109,10 +109,12 @@ export const DesignerSidebar: React.FC<DesignerSidebarProps> = ({
                                     <div
                                         key={el.id}
                                         onClick={() => onSelectElement(el.id)}
+                                        title={elementTooltip(el)}
                                         style={{
                                             display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '4px',
+                                            flexDirection: 'column',
+                                            alignItems: 'flex-start',
+                                            gap: '2px',
                                             padding: '4px 8px',
                                             background: selectedElementId === el.id ? 'rgba(99, 102, 241, 0.1)' : 'transparent',
                                             borderRadius: '4px',
@@ -121,20 +123,43 @@ export const DesignerSidebar: React.FC<DesignerSidebarProps> = ({
                                             color: selectedElementId === el.id ? '#a5b4fc' : '#94a3b8',
                                         }}
                                     >
-                                        <span style={{ flex: 1 }}>{el.type} ({el.id.slice(-6)})</span>
-                                        <button
-                                            onClick={(e) => { e.stopPropagation(); onDeleteElement(el.id); }}
-                                            title="Sil"
-                                            style={{
-                                                background: 'transparent',
-                                                border: 'none',
-                                                color: '#ef4444',
-                                                cursor: 'pointer',
-                                                padding: '2px',
-                                            }}
-                                        >
-                                            <Trash2 size={11} />
-                                        </button>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px', width: '100%' }}>
+                                            <span style={{ color: '#fb923c', fontWeight: 700, fontSize: '10px', minWidth: '32px' }}>
+                                                {el.type}
+                                            </span>
+                                            {el.binding && (
+                                                <span style={{ color: '#94a3b8', fontFamily: 'monospace', fontSize: '10px', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                    {el.binding}
+                                                </span>
+                                            )}
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); onDeleteElement(el.id); }}
+                                                title="Sil"
+                                                style={{
+                                                    background: 'transparent',
+                                                    border: 'none',
+                                                    color: '#ef4444',
+                                                    cursor: 'pointer',
+                                                    padding: '2px',
+                                                }}
+                                            >
+                                                <Trash2 size={11} />
+                                            </button>
+                                        </span>
+                                        {el.content && (
+                                            <span style={{
+                                                color: '#cbd5e1',
+                                                fontSize: '10px',
+                                                fontStyle: 'italic',
+                                                marginLeft: '4px',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
+                                                whiteSpace: 'nowrap',
+                                                maxWidth: '180px',
+                                            }}>
+                                                {truncate(el.content, 50)}
+                                            </span>
+                                        )}
                                     </div>
                                 ))}
                             </div>
@@ -213,3 +238,21 @@ export const DesignerSidebar: React.FC<DesignerSidebarProps> = ({
 };
 
 export default DesignerSidebar;
+
+// ============================================================================
+// Helpers — element etiketi için (Selim: section tree'de element içerikleri lazım)
+// ============================================================================
+
+function truncate(text: string, n: number): string {
+    if (!text) return '';
+    const clean = text.replace(/\s+/g, ' ').trim();
+    return clean.length > n ? clean.slice(0, n) + '…' : clean;
+}
+
+function elementTooltip(el: any): string {
+    const parts = [`type: ${el.type}`, `id: ${el.id}`];
+    if (el.binding) parts.push(`binding: ${el.binding}`);
+    if (el.content) parts.push(`content: ${truncate(el.content, 100)}`);
+    if (el.htmlTag) parts.push(`tag: <${el.htmlTag}>`);
+    return parts.join('\n');
+}

@@ -229,25 +229,7 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({ state, onPlaceEl
                 title="Designer Preview"
             />
 
-            {/* Phase 18.1 — inline edit hint badge */}
-            {state.currentXslt && !renderResult.error && (
-                <div style={{
-                    position: 'absolute',
-                    bottom: 12,
-                    left: 12,
-                    padding: '6px 12px',
-                    background: 'rgba(99, 102, 241, 0.12)',
-                    color: '#c7d2fe',
-                    border: '1px solid rgba(99, 102, 241, 0.4)',
-                    borderRadius: '6px',
-                    fontSize: '11px',
-                    fontWeight: 600,
-                    zIndex: 20,
-                    pointerEvents: 'none',
-                }}>
-                    💡 İpucu: iframe'te bir elemente <strong>çift tıkla</strong> → düzenle · <strong>Enter</strong> = kaydet · <strong>Esc</strong> = iptal
-                </div>
-            )}
+            {/* Phase 18.1 — sade edit modu: hint badge kaldırıldı (Selim: şu anki ekran çok karışık) */}
 
             {/* Phase 17.3 — Render error badge (eğer XSLT parse hatası varsa) */}
             {renderResult.error && (
