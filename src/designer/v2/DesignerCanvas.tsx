@@ -571,6 +571,7 @@ const ElementOverlay: React.FC<ElementOverlayProps> = ({ element, isSelected }) 
     const h = element.height || 30;
     const left = element.x;
     const top = element.y;
+    const userStyle: React.CSSProperties = element.style || {};
 
     return (
         <div
@@ -580,19 +581,40 @@ const ElementOverlay: React.FC<ElementOverlayProps> = ({ element, isSelected }) 
                 top: `${top}px`,
                 width: `${w}px`,
                 height: `${h}px`,
-                border: isSelected ? '2px solid #6366f1' : '1px dashed rgba(99, 102, 241, 0.4)',
-                background: isSelected ? 'rgba(99, 102, 241, 0.05)' : 'rgba(99, 102, 241, 0.02)',
+                border: isSelected
+                    ? '2px solid #6366f1'
+                    : userStyle.border || '1px dashed rgba(99, 102, 241, 0.4)',
+                background: isSelected
+                    ? 'rgba(99, 102, 241, 0.05)'
+                    : userStyle.backgroundColor || 'rgba(99, 102, 241, 0.02)',
+                color: userStyle.color || '#6366f1',
+                fontFamily: userStyle.fontFamily || 'inherit',
+                fontSize: userStyle.fontSize || '11px',
+                fontWeight: userStyle.fontWeight || 600,
+                fontStyle: userStyle.fontStyle || 'normal',
+                padding: userStyle.padding || '0',
+                paddingTop: userStyle.paddingTop,
+                paddingRight: userStyle.paddingRight,
+                paddingBottom: userStyle.paddingBottom,
+                paddingLeft: userStyle.paddingLeft,
+                margin: userStyle.margin || '0',
+                marginTop: userStyle.marginTop,
+                marginRight: userStyle.marginRight,
+                marginBottom: userStyle.marginBottom,
+                marginLeft: userStyle.marginLeft,
+                borderRadius: userStyle.borderRadius || '0',
                 pointerEvents: 'none',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '11px',
-                color: '#6366f1',
-                fontWeight: 600,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
                 zIndex: 8,
             }}
+            title={`${element.type} · ${element.id.slice(-6)}${element.binding ? ` · binding: ${element.binding}` : ''}`}
         >
-            {element.type} ({element.id.slice(-6)})
+            {element.content || element.binding || `${element.type} (${element.id.slice(-6)})`}
         </div>
     );
 };
