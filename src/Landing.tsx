@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowRight, MessageCircle, Sparkles, Zap, FileText, Globe, Layers, ChevronDown, Check, Star } from 'lucide-react';
 import { KVKKModal, KullaniciSozlesmesiModal, CerezPolitikasiModal } from './legal/Legal';
+import { api } from './api';
 
 interface LandingProps {
     onRegister: () => void;
@@ -105,12 +106,30 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
     const [openSss, setOpenSss] = useState<string | null>(null);
     const [legalModal, setLegalModal] = useState<'kvkk' | 'sozlesme' | 'cerez' | null>(null);
 
-    const handleBuyPlan = (plan: typeof PACKAGES_PLANS[number]) => {
-        // Şimdilik: giriş/kayıt sayfasına yönlendir. Iyzico entegrasyonu sonra.
+    const handleBuyPlan = async (plan: typeof PACKAGES_PLANS[number]) => {
+        // Sprint 1.3 — Iyzico Checkout Form entegrasyonu
         if (plan.price === 0) {
+            // Ucretsiz plan — register ekranina
             onRegister();
-        } else {
-            onRegister();
+            return;
+        }
+        try {
+            const result = await api.iyzicoCheckout(plan.id as 'starter' | 'pro' | 'kurumsal');
+            if (result.free) {
+                // Backend "free" donerse (starter icin fallback)
+                onRegister();
+                return;
+            }
+            if (result.paymentPageUrl) {
+                // Iyzico 3D odeme sayfasina yonlendir
+                window.location.href = result.paymentPageUrl;
+            } else {
+                window.alert('Odeme baslatilamadi, lutfen tekrar deneyin.');
+            }
+        } catch (e) {
+            // eslint-disable-next-line no-console
+            console.error('[Landing] iyzicoCheckout hatasi:', e);
+            window.alert('Odeme baslatilamadi. Giris yaptiginizdan emin olun. ' + (e instanceof Error ? e.message : 'bilinmeyen'));
         }
     };
 

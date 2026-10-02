@@ -320,6 +320,28 @@ export const api = {
         return { success: true, message: 'Tasarim silindi.' };
     },
 
+    // --- IYZICO CHECKOUT (Sprint 1.3, 2026-10-02) ---
+    // Plan satin alimi icin iyzico checkout form token al.
+    // Backend POST /api/payment/iyzico/checkout — sandbox/prod env'den okur.
+    iyzicoCheckout: async (plan: 'starter' | 'pro' | 'kurumsal') => {
+        if (!IS_DEV) {
+            return api.request('/payment/iyzico/checkout', {
+                method: 'POST',
+                body: JSON.stringify({ plan }),
+            });
+        }
+        // DEV mock — direkt basarili don (Selim'in local sandbox testi icin)
+        // eslint-disable-next-line no-console
+        console.log('[api.dev] iyzicoCheckout mock basarili donuluyor:', plan);
+        return {
+            success: true,
+            token: `mock-token-${plan}-${Date.now()}`,
+            paymentPageUrl: `/?payment=mock-${plan}`,
+            conversationId: `mock-conv-${Date.now()}`,
+            free: plan === 'starter',
+        };
+    },
+
     // --- TEMPLATE MANAGEMENT (Mock DB) ---
     // NOTE: These mock storage helpers are only used in DEV builds.
     // In production the backend endpoints under /api/templates/* are required.

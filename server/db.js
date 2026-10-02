@@ -172,6 +172,25 @@ export const initDb = async () => {
 
         await probe.query(`CREATE INDEX IF NOT EXISTS idx_designs_user_id ON designs (user_id)`);
         await probe.query(`CREATE INDEX IF NOT EXISTS idx_designs_updated_at ON designs (updated_at DESC)`);
+
+        // Sprint 1.3 (2026-10-02) — Payments tablosu (iyzico webhook takibi)
+        await probe.query(`
+            CREATE TABLE IF NOT EXISTS payments (
+                id                SERIAL PRIMARY KEY,
+                user_id           INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                plan_id           TEXT NOT NULL,
+                conversation_id   TEXT,
+                token             TEXT,
+                amount            NUMERIC NOT NULL,
+                currency          TEXT NOT NULL DEFAULT 'TRY',
+                status            TEXT NOT NULL DEFAULT 'pending',
+                created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                completed_at      TIMESTAMPTZ
+            )
+        `);
+        await probe.query(`CREATE INDEX IF NOT EXISTS idx_payments_user_id ON payments (user_id)`);
+        await probe.query(`CREATE INDEX IF NOT EXISTS idx_payments_token ON payments (token)`);
+        await probe.query(`CREATE INDEX IF NOT EXISTS idx_payments_status ON payments (status)`);
     } finally {
         probe.release();
     }

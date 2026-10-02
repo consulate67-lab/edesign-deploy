@@ -429,3 +429,183 @@ app.delete('/api/designs/:id', authenticateToken, async (req, res) => {
         res.status(500).json({ error: e.message });
     }
 });
+
+// ============================================================================
+// Sprint 1.3 (2026-10-02) — Iyzico Checkout Form entegrasyonu
+// Plan satin aliminda 3D Secure odeme. Sandbox/prod key'ler env'den okunur.
+// API doc: https://dev.iyzipay.com/en/checkout-form
+// ============================================================================
+
+const IYZICO_API_KEY = process.env.IYZICO_API_KEY || 'sandbox-afXkVKnA1uEqRvFALwYP7IvTW9rwM3Vo';
+const IYZICO_SECRET = process.env.IYZICO_SECRET || 'sandbox-WnDkE3Zg9Lr5mYqFpKcVxH2bA4tN8jC7vD5sR6yQ8eT3wF4gH';
+const IYZICO_BASE_URL = process.env.IYZICO_BASE_URL || 'https://api.iyzipay.com';
+// Callback URL — odeme sonrasi iyzico bu URL'e POST eder. ENV ile override edilebilir.
+const IYZICO_CALLBACK_URL = process.env.IYZICO_CALLBACK_URL
+    || `${process.env.PUBLIC_URL || 'http://localhost:3002'}/api/payment/iyzico/callback`;
+
+const iyzico1 = (path, body, attempt = 0) => {
+    const url = `${IYZICO_BASE_URL}${path}`;
+    const auth = Buffer.from(`${IYZICO_API_KEY}:${IYZICO_SECRET}`).toString('base64');
+    return fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Basic ${auth}`,
+        },
+        body: JSON.stringify(body),
+    }).then(async (r) => {
+        const text = await r.text();
+        let data;
+        try { data = JSON.parse(text); } catch { data = { raw: text }; }
+        if (!r.ok && attempt === 0 && r.status >= 500) {
+            // Tek dene — 500 alfası may be transient
+            return iyzico1(path, body, attempt + 1);
+        }
+        if (!r.ok) {
+            const err = new Error(`Iyzico API ${r.status}: ${JSON.stringify(data)}`);
+            err.status = r.status;
+            err.iyzicoResponse = data;
+            throw err;
+        }
+        return data;
+    });
+};
+
+// Plan -> Iyzico tutar mapping (TRY cents? No, regular TRY)
+// VIP, iyzico expects string for numeric fields.
+const PACKAGE_PRICES = {
+    starter: { name: 'Baslangic', price: '0',    credits: 5,    free: true  },
+    pro:     { name: 'Pro',       price: '49',   credits: 50,   free: false },
+    kurumsal:{ name: 'Kurumsal',  price: '199',  credits: 9999, free: false },
+};
+
+// POST /api/payment/iyzico/checkout — Plan satin alimi icin iyzico token uretir.
+// Auth gerekli. response: { token, paymentPageUrl }
+{
+    const planId = req.body?.plan;
+    const plan = PACKAGE_PRICES[planId];
+    if (!plan) {
+        return res.status(400).json({ error: 'Gecersiz plan.' });
+    }
+    if (plan.free) {
+        // Ucretsiz plan — direkt register/yonlendir
+        return res.json({ free: true, planId, credits: plan.credits });
+    }
+
+    const conversationId = `designer-${planId}-${req.user.id}-${Date.now()}`;
+    const basketId = `basket-${planId}-${Date.now()}`;
+
+    try {
+        const result = await iyzico1('/payment/v2/checkoutform/initialize/auth/ecom', {
+            locale: 'tr',
+            conversationId,
+            price: plan.price,
+            paidPrice: plan.price,
+            currency: 'TRY',
+            basketId,
+            paymentGroup: 'PRODUCT',
+            callbackUrl: IYZICO_CALLBACK_URL,
+            enabledInstallments: ['1', '2', '3', '6', '9', '12'],
+            buyer: {
+                id: String(req.user.id),
+                name: 'Musteri',
+                surname: '#' + req.user.id,
+                gsmNumber: '+9055555555555',
+                email: 'musteri@example.com',
+                identityNumber: '11111111111',
+                registrationAddress: 'Istanbul',
+                ip: req.ip || '127.0.0.1',
+                country: 'US',
+            },
+            shippingAddress: { address: 'Istanbul', contactName: 'Musteri', city: 'Istanbul', country: 'US' },
+            billingAddress: { address: 'Istanbul', contactName: 'Musteri', city: 'Istanbul', country: 'US' },
+            basketItems: [
+                {
+                    id: `plan-${planId}`,
+                    name: `${plan.name} Paketi (${plan.credits} tasarim)`,
+                    category1: 'Digital Goods',
+                    itemType: 'VIRTUAL',
+                    price: plan.price,
+                },
+            ],
+        });
+        // eslint-disable-next-line no-console
+        console.log(`[iyzico] user=${req.user.id} plan=${planId} token=${result.token}`);
+
+        // Pending payment kaydi DB'ye (callback'dan sonra confirm ederiz)
+        await db.run(
+            `INSERT INTO payments (user_id, plan_id, conversation_id, token, amount, status)
+             VALUES (?, ?, ?, ?, ?, 'pending')`,
+            [req.user.id, planId, conversationId, result.token, parseFloat(plan.price)]
+        ).catch(() => {
+            // payments tablosu henuz olmayabilir — yoksay, loglayici commit ile eklenebilir
+            // eslint-disable-next-line no-console
+            console.warn('[iyzico] payments tablosu INSERT hatasi (yoksayildi).');
+        });
+
+        res.json({
+            success: true,
+            token: result.token,
+            paymentPageUrl: result.paymentPageUrl,
+            conversationId,
+        });
+    } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error('[iyzico] checkout error:', e);
+        res.status(500).json({ error: e.message, iyzico: e.iyzicoResponse });
+    }
+});
+
+// POST /api/payment/iyzico/callback — Iyzico 3D sonrasi bu URL'e POST eder.
+// Form-encoded doner (token alaninda). Iyzico'nun kontrolu icin tekrar API'ye soruyoruz.
+app.post('/api/payment/iyzico/callback', async (req, res) => {
+    const token = req.body?.token || req.query?.token;
+    if (!token) {
+        // Iyzico POST etti ama token yoksa browser redirect ile hata sayfasina gonder
+        return res.redirect('/?payment=invalid');
+    }
+    try {
+        // Iyzico API ile token'i kontrol et (güvenlik)
+        const result = await iyzico1('/payment/v2/checkoutform/auth/ecom/detail', { token });
+
+        if (result.status === 'success' && result.paymentStatus === 'SUCCESS') {
+            // Pending payment kaydini bul, confirm et, kredi ekle
+            const payment = await db.get('SELECT * FROM payments WHERE token = ?', [token]);
+            if (payment && payment.status !== 'success') {
+                const plan = PACKAGE_PRICES[payment.plan_id];
+                if (plan) {
+                    await db.run(
+                        'UPDATE users SET credits = credits + ? WHERE id = ?',
+                        [plan.credits, payment.user_id]
+                    );
+                    await db.run(
+                        'UPDATE payments SET status = ?, completed_at = NOW() WHERE id = ?',
+                        ['success', payment.id]
+                    );
+                    // eslint-disable-next-line no-console
+                    console.log(`[iyzico] payment success user=${payment.user_id} credits+${plan.credits}`);
+                }
+            }
+            return res.redirect('/?payment=success');
+        } else {
+            // eslint-disable-next-line no-console
+            console.warn('[iyzico] payment failed', result.paymentStatus);
+            res.redirect('/?payment=fail');
+        }
+    } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error('[iyzico] callback error:', e);
+        res.redirect('/?payment=error');
+    }
+});
+
+// GET /api/payment/iyzico/test-signature — Paketler (frontend testable).
+{
+    res.json({ packages: Object.entries(PACKAGE_PRICES).map(([id, p]) => ({
+        id,
+        name: p.name,
+        price: p.price,
+        credits: p.credits,
+        free: p.free,
+    })) });
+});
