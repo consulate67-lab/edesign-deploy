@@ -40,6 +40,12 @@ export interface DesignerStateV2 {
     snapToGrid: boolean;
     gridSize: number;
 
+    // Sprint 2 Aşama 2 (2026-10-02) — A4 canvas + serbest resize köşeleri
+    /** Canvas (A4 yaprak) pixel genişliği. Default 794px = 210mm @96dpi. */
+    canvasWidth: number;
+    /** Canvas (A4 yaprak) pixel yüksekliği. Default 1123px = 297mm @96dpi. */
+    canvasHeight: number;
+
     // XSLT pipeline
     originalXslt: string;
     xmlPreview: string;
@@ -71,6 +77,8 @@ export type DesignerActionV2 =
     | { type: 'SET_ZOOM'; payload: { zoom: number } }
     | { type: 'TOGGLE_GRID' }
     | { type: 'TOGGLE_SNAP' }
+    | { type: 'SET_CANVAS_SIZE'; payload: { width: number; height: number } }
+    | { type: 'RESET_CANVAS_SIZE' }
     | { type: 'UNDO' }
     | { type: 'REDO' }
     | { type: 'IMPORT_XSLT'; payload: { xslt: string } }
@@ -94,6 +102,8 @@ export function createInitialDesignerState(): DesignerStateV2 {
         showGrid: false,
         snapToGrid: true,
         gridSize: 5,
+        canvasWidth: 794,   // A4 default (210mm @96dpi)
+        canvasHeight: 1123, // A4 default (297mm @96dpi)
         originalXslt: '',
         xmlPreview: '',
         xsltOutput: '',
@@ -239,6 +249,20 @@ export function designerReducer(
         case 'TOGGLE_SNAP':
             return { ...state, snapToGrid: !state.snapToGrid };
 
+        case 'SET_CANVAS_SIZE':
+            return {
+                ...state,
+                canvasWidth: Math.max(200, action.payload.width),
+                canvasHeight: Math.max(200, action.payload.height),
+            };
+
+        case 'RESET_CANVAS_SIZE':
+            return {
+                ...state,
+                canvasWidth: 794,
+                canvasHeight: 1123,
+            };
+
         case 'PUSH_HISTORY': {
             const trimmed = state.history.slice(0, state.historyIndex + 1);
             return {
@@ -378,6 +402,17 @@ export function useDesignerState(initial?: Partial<DesignerStateV2>) {
         []
     );
 
+    const setCanvasSize = useCallback(
+        (width: number, height: number) =>
+            dispatch({ type: 'SET_CANVAS_SIZE', payload: { width, height } }),
+        []
+    );
+
+    const resetCanvasSize = useCallback(
+        () => dispatch({ type: 'RESET_CANVAS_SIZE' }),
+        []
+    );
+
     const pushHistory = useCallback(
         () => dispatch({ type: 'PUSH_HISTORY' }),
         []
@@ -403,6 +438,8 @@ export function useDesignerState(initial?: Partial<DesignerStateV2>) {
         setXml,
         setCurrentXslt,
         setZoom,
+        setCanvasSize,
+        resetCanvasSize,
         pushHistory,
         undo,
         redo,

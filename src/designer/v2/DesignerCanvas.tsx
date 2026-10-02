@@ -1,9 +1,16 @@
 /**
- * Designer 2.0 — Canvas (Phase 17.1 + 17.3 XSLT render)
+ * Designer 2.0 — Canvas (Sprint 2 Aşama 2 — A4 + Serbest Resize)
  *
- * İçerik: iframe XSLT render + click-to-place + drag-drop
  * Phase 17.1: click-to-place gerçek davranış eklendi.
  * Phase 17.3: iframe.srcDoc = browser-side XSLTProcessor render çıktısı.
+ * Phase 18.1: iframe içi inline edit (contenteditable).
+ * Phase A.1: renderIndex ↔ element id eşlemesi.
+ *
+ * Sprint 2 Aşama 2 (2026-10-02): A4 default (794×1123px @96dpi) + 4 köşe resize
+ *   - Serbest resize: kullanıcı köşelerden sürükleyerek istediği boyutu ayarlar
+ *   - Boyut göstergesi: "210×297 mm (794×1123 px)" A4 sheet sol üst köşede
+ *   - state.canvasWidth/canvasHeight, ds.setCanvasSize action
+ *   - min 200×200 snap-to-grid (5px) snapToGrid true ise
  */
 import React, { useRef, useCallback, useMemo, useEffect } from 'react';
 import type { DesignerStateV2 } from './hooks/useDesignerState';
@@ -16,13 +23,20 @@ interface DesignerCanvasProps {
     /**
      * Phase 18.1 — iframe içi inline editing bildirimi.
      * Kullanıcı iframe'de bir element'e çift tıklayıp düzenlediğinde çağrılır.
-     * MVP: notice mesajı + console log. Phase 18.2'de sections state update'i.
      */
     onInlineEdit?: (info: { renderIndex: number; originalText: string; newText: string; tagName: string }) => void;
     /**
      * Phase A.1 — iframe click → sections element seç (renderIndex üzerinden).
      */
     onSelectElement?: (renderIndex: number) => void;
+    /**
+     * Sprint 2 Aşama 2 — köşe resize sonucu çağrılır (width, height px).
+     */
+    onCanvasResize?: (width: number, height: number) => void;
+    /**
+     * Sprint 2 Aşama 2 — A4 default'a sıfırlama.
+     */
+    onCanvasReset?: () => void;
 }
 
 export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
@@ -30,6 +44,8 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
     onPlaceElement,
     onInlineEdit,
     onSelectElement,
+    onCanvasResize,
+    onCanvasReset,
 }) => {
     const canvasRef = useRef<HTMLDivElement>(null);
     const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -38,7 +54,6 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
      * Phase 17.3 — XSLT render.
      * state.currentXslt + state.currentXml → renderXslt() → HTML string.
      * XSLT yoksa placeholder HTML göster.
-     * Her değişiklikte useMemo ile cache'lenir (performans).
      */
     const renderResult = useMemo(() => {
         if (!state.currentXslt) {
@@ -49,36 +64,81 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
 
     /**
      * Phase 17.1: Tıkla-yerleştir implementasyonu.
-     * - state.activeTool bir element tipini belirler (text/image/shape/qr/formula/table)
-     * - state.mode 'clickPlace' olmalı (toolbar'dan araç seçilince otomatik set edilir)
-     * - state.snapToGrid true ise gridSize'a yuvarlanır (default 5px)
-     * - element aktif section'a eklenir (default: reportHeader)
+     * - state.activeTool bir element tipini belirler
+     * - Sadece boş alana tıklanırsa çalışır (A4 sheet içi, köşeler ve iframe tıklaması değil)
+     * - snap-to-grid true ise gridSize'a yuvarlanır
      */
     const handleCanvasClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-        if (state.activeTool === 'select') return; // sadece-select modunda tıklama yerleştirmez
-        if (e.target !== e.currentTarget) return; // iframe veya overlay tıklaması
+        if (state.activeTool === 'select') return;
+        if (e.target !== e.currentTarget) return;
 
-        const rect = canvasRef.current!.getBoundingClientRect();
-        let x = e.clientX - rect.left;
-        let y = e.clientY - rect.top;
+        // Tıklama noktası canvas container içinde mi?
+        const containerRect = canvasRef.current!.getBoundingClientRect();
+        const x = e.clientX - containerRect.left + canvasRef.current!.scrollLeft;
+        const y = e.clientY - containerRect.top + canvasRef.current!.scrollTop;
 
+        // Boş alan (A4 sheet dışı) tıklamaları da kabul et
+        let finalX = x;
+        let finalY = y;
         if (state.snapToGrid) {
-            x = Math.round(x / state.gridSize) * state.gridSize;
-            y = Math.round(y / state.gridSize) * state.gridSize;
+            finalX = Math.round(x / state.gridSize) * state.gridSize;
+            finalY = Math.round(y / state.gridSize) * state.gridSize;
         }
 
         const id = `${state.activeTool}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-        const el: DesignElement = buildElementForTool(state.activeTool, id, x, y);
+        const el: DesignElement = buildElementForTool(state.activeTool, id, finalX, finalY);
         onPlaceElement(el);
     }, [state.activeTool, state.snapToGrid, state.gridSize, onPlaceElement]);
 
     /**
+     * Sprint 2 Aşama 2 — köşe resize drag handler.
+     * Mousedown ile başlar, document mousemove/mouseup ile devam eder.
+     * Köşe yönüne göre genişlik/yükseklik ayarlanır, snap-to-grid uygulanır.
+     */
+    const handleResizeStart = useCallback(
+        (corner: 'nw' | 'ne' | 'sw' | 'se', e: React.MouseEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const startX = e.clientX;
+            const startY = e.clientY;
+            const startW = state.canvasWidth;
+            const startH = state.canvasHeight;
+
+            const onMove = (ev: MouseEvent) => {
+                const dx = ev.clientX - startX;
+                const dy = ev.clientY - startY;
+                let newW = startW;
+                let newH = startH;
+                if (corner === 'nw') { newW = startW - dx; newH = startH - dy; }
+                else if (corner === 'ne') { newW = startW + dx; newH = startH - dy; }
+                else if (corner === 'sw') { newW = startW - dx; newH = startH + dy; }
+                else if (corner === 'se') { newW = startW + dx; newH = startH + dy; }
+
+                // min 200×200
+                newW = Math.max(200, newW);
+                newH = Math.max(200, newH);
+
+                if (state.snapToGrid) {
+                    newW = Math.round(newW / state.gridSize) * state.gridSize;
+                    newH = Math.round(newH / state.gridSize) * state.gridSize;
+                }
+                onCanvasResize?.(newW, newH);
+            };
+
+            const onUp = () => {
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup', onUp);
+            };
+
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onUp);
+        },
+        [state.canvasWidth, state.canvasHeight, state.snapToGrid, state.gridSize, onCanvasResize]
+    );
+
+    /**
      * Phase 18.1 + A.1 — iframe içi inline edit + click-to-select handler.
      * iframe.contentDocument.body'ye click + dblclick + keydown + blur listener ekler.
-     * - click → data-render-index → onSelectElement (sections state seçim)
-     * - dblclick → contenteditable, blur'da onInlineEdit (UPDATE_ELEMENT)
-     *
-     * Not: srcDoc ile aynı origin'de, sandbox yok, local preview için OK.
      */
     const handleIframeLoad = useCallback(() => {
         const iframe = iframeRef.current;
@@ -133,7 +193,6 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
         };
 
         const onClick = (e: Event) => {
-            // Eğer edit modundaysa click skip
             const t = e.target as HTMLElement;
             if (!t || t.isContentEditable) return;
             const idx = getRenderIndex(t);
@@ -148,7 +207,6 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
             const t = e.target as HTMLElement;
             if (!t || t === doc.body || t === doc.documentElement) return;
             if (t.isContentEditable) return;
-            // Çift tıklama → edit başlat
             e.preventDefault();
             e.stopPropagation();
             startEdit(t);
@@ -177,13 +235,7 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
         doc.body.addEventListener('blur', onBlur, true);
     }, [onInlineEdit, onSelectElement]);
 
-    /**
-     * Phase 18.1 — iframe srcDoc her değiştiğinde listener'ları yeniden bağla.
-     * useEffect: renderResult.html değişince handleIframeLoad çağrılır.
-     */
     useEffect(() => {
-        // Iframe yüklendikten sonra listener eklemek için onLoad'a bind ettik
-        // Tekrar bağlamak için: handleIframeLoad'ı ref'e kaydet
         const iframe = iframeRef.current;
         if (iframe) {
             iframe.addEventListener('load', handleIframeLoad);
@@ -191,6 +243,18 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
         }
         return undefined;
     }, [renderResult.html, handleIframeLoad]);
+
+    // Boyut göstergesi hesaplama (mm + px)
+    const sizeLabel = useMemo(() => {
+        const pxW = Math.round(state.canvasWidth);
+        const pxH = Math.round(state.canvasHeight);
+        const mmW = Math.round((pxW / 96) * 25.4);
+        const mmH = Math.round((pxH / 96) * 25.4);
+        const isA4 = pxW === 794 && pxH === 1123;
+        return isA4
+            ? `A4 · ${mmW}×${mmH} mm (${pxW}×${pxH} px)`
+            : `${mmW}×${mmH} mm (${pxW}×${pxH} px)`;
+    }, [state.canvasWidth, state.canvasHeight]);
 
     return (
         <div
@@ -203,6 +267,7 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
                 width: '100%',
                 height: '100%',
                 overflow: 'auto',
+                background: '#1e293b',
                 cursor: state.activeTool === 'select' ? 'default' : 'crosshair',
                 backgroundImage: state.showGrid
                     ? 'linear-gradient(to right, #334155 1px, transparent 1px), linear-gradient(to bottom, #334155 1px, transparent 1px)'
@@ -210,83 +275,91 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
                 backgroundSize: `${state.gridSize}px ${state.gridSize}px`,
             }}
         >
-            {/* Aktif section göstergesi */}
-            <div style={{
-                position: 'absolute',
-                top: 12,
-                left: 12,
-                padding: '6px 12px',
-                background: '#6366f1',
-                color: 'white',
-                borderRadius: '6px',
-                fontSize: '12px',
-                fontWeight: 700,
-                zIndex: 10,
-            }}>
-                Section: {state.activeSectionId} ({state.sections[state.activeSectionId].elements.length} element)
+            {/* A4 sayfa — sabit pixel boyut, scroll container içinde */}
+            <div
+                data-designer-a4-sheet
+                style={{
+                    position: 'relative',
+                    width: `${state.canvasWidth}px`,
+                    height: `${state.canvasHeight}px`,
+                    margin: '32px auto',
+                    background: 'white',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)',
+                    overflow: 'hidden',
+                }}
+            >
+                {/* Boyut göstergesi — A4 sheet sol üst köşede */}
+                <div
+                    data-designer-size-indicator
+                    style={{
+                        position: 'absolute',
+                        top: -28,
+                        left: 0,
+                        padding: '4px 10px',
+                        background: 'rgba(15, 23, 42, 0.92)',
+                        border: '1px solid #334155',
+                        borderRadius: '4px',
+                        color: '#a5b4fc',
+                        fontSize: '11px',
+                        fontFamily: 'monospace',
+                        fontWeight: 700,
+                        letterSpacing: '0.5px',
+                        zIndex: 30,
+                        cursor: onCanvasReset ? 'pointer' : 'default',
+                    }}
+                    title={onCanvasReset ? 'A4 default\'a sıfırla' : 'A4 sheet'}
+                    onClick={onCanvasReset}
+                >
+                    {sizeLabel}
+                </div>
+
+                {/* iframe — gerçek XSLT render */}
+                <iframe
+                    ref={iframeRef}
+                    data-designer-iframe
+                    srcDoc={renderResult.html || buildPlaceholderHtml(state)}
+                    style={{
+                        width: '100%',
+                        height: '100%',
+                        border: 'none',
+                        background: 'white',
+                    }}
+                    title="Designer Preview"
+                />
+
+                {/* Element overlay'leri (canvas state'te yeni eklenen elementler için görsel feedback) */}
+                {Object.values(state.sections).find(s => s.id === state.activeSectionId)?.elements.map(el => (
+                    <ElementOverlay
+                        key={el.id}
+                        element={el}
+                        isSelected={el.id === state.selectedElementId}
+                    />
+                ))}
+
+                {/* Section overlay çerçeveleri (placeholder — Aşama 5 render fix ile kaldırılacak) */}
+                {Object.values(state.sections).sort((a, b) => a.order - b.order).map(section => (
+                    <SectionOverlay
+                        key={section.id}
+                        sectionId={section.id}
+                        title={section.title}
+                        elementCount={section.elements.length}
+                        isActive={state.activeSectionId === section.id}
+                    />
+                ))}
+
+                {/* Sprint 2 Aşama 2 — 4 köşe resize handle */}
+                <ResizeHandle corner="nw" onResizeStart={handleResizeStart} />
+                <ResizeHandle corner="ne" onResizeStart={handleResizeStart} />
+                <ResizeHandle corner="sw" onResizeStart={handleResizeStart} />
+                <ResizeHandle corner="se" onResizeStart={handleResizeStart} />
             </div>
 
-            {/* Aktif araç göstergesi */}
-            {state.activeTool !== 'select' && (
-                <div style={{
-                    position: 'absolute',
-                    top: 12,
-                    right: 12,
-                    padding: '6px 12px',
-                    background: '#f59e0b',
-                    color: 'white',
-                    borderRadius: '6px',
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    zIndex: 10,
-                }}>
-                    Araç: {state.activeTool} (canvas'ta tıkla → yerleştir)
-                </div>
-            )}
-
-            {/* XSLT render iframe (Phase 17.3: browser-side XSLTProcessor, Phase 18.1: inline edit) */}
-            <iframe
-                ref={iframeRef}
-                data-designer-iframe
-                srcDoc={renderResult.html || buildPlaceholderHtml(state)}
-                style={{
-                    width: '100%',
-                    height: '100%',
-                    border: 'none',
-                    background: 'white',
-                    transform: `scale(${state.zoom})`,
-                    transformOrigin: 'top left',
-                }}
-                title="Designer Preview"
-            />
-
-            {/* Phase 18.1 — sade edit modu: hint badge kaldırıldı (Selim: şu anki ekran çok karışık) */}
-
-            {/* Phase 17.3 — Render error badge (eğer XSLT parse hatası varsa) */}
-            {renderResult.error && (
-                <div style={{
-                    position: 'absolute',
-                    bottom: 12,
-                    right: 12,
-                    padding: '8px 12px',
-                    background: 'rgba(239, 68, 68, 0.9)',
-                    color: 'white',
-                    borderRadius: '6px',
-                    fontSize: '11px',
-                    fontWeight: 600,
-                    zIndex: 20,
-                    maxWidth: '320px',
-                }} title={renderResult.error}>
-                    ⚠ Render Hatası — {renderResult.error.slice(0, 80)}
-                </div>
-            )}
-
-            {/* Phase 17.3 — Render duration badge (success indicator) */}
+            {/* Sağ alt köşede — render duration badge */}
             {!renderResult.error && state.currentXslt && (
                 <div style={{
-                    position: 'absolute',
-                    bottom: 12,
-                    right: 12,
+                    position: 'fixed',
+                    bottom: 44,
+                    right: 16,
                     padding: '4px 10px',
                     background: 'rgba(16, 185, 129, 0.85)',
                     color: 'white',
@@ -299,29 +372,67 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
                 </div>
             )}
 
-            {/* Phase 17.1: Yeni oluşturulan elementleri canvas üzerinde görsel olarak göster */}
-            {Object.values(state.sections).find(s => s.id === state.activeSectionId)?.elements.map(el => (
-                <ElementOverlay
-                    key={el.id}
-                    element={el}
-                    isSelected={el.id === state.selectedElementId}
-                    zoom={state.zoom}
-                />
-            ))}
-
-            {/* Section overlay çerçeveleri (placeholder) */}
-            {Object.values(state.sections).sort((a, b) => a.order - b.order).map(section => (
-                <SectionOverlay
-                    key={section.id}
-                    sectionId={section.id}
-                    title={section.title}
-                    description={section.description}
-                    elementCount={section.elements.length}
-                    isActive={state.activeSectionId === section.id}
-                    zoom={state.zoom}
-                />
-            ))}
+            {/* Render error badge */}
+            {renderResult.error && (
+                <div style={{
+                    position: 'fixed',
+                    bottom: 44,
+                    right: 16,
+                    padding: '8px 12px',
+                    background: 'rgba(239, 68, 68, 0.9)',
+                    color: 'white',
+                    borderRadius: '6px',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    zIndex: 20,
+                    maxWidth: '320px',
+                }} title={renderResult.error}>
+                    ⚠ Render Hatası — {renderResult.error.slice(0, 80)}
+                </div>
+            )}
         </div>
+    );
+};
+
+// ============================================================================
+// Sprint 2 Aşama 2 — Resize Handle (4 köşeden biri)
+// ============================================================================
+
+interface ResizeHandleProps {
+    corner: 'nw' | 'ne' | 'sw' | 'se';
+    onResizeStart: (corner: 'nw' | 'ne' | 'sw' | 'se', e: React.MouseEvent) => void;
+}
+
+const ResizeHandle: React.FC<ResizeHandleProps> = ({ corner, onResizeStart }) => {
+    const cursorMap: Record<ResizeHandleProps['corner'], string> = {
+        nw: 'nw-resize',
+        ne: 'ne-resize',
+        sw: 'sw-resize',
+        se: 'se-resize',
+    };
+    const positionStyle: React.CSSProperties =
+        corner === 'nw' ? { top: -6, left: -6, cursor: cursorMap.nw }
+        : corner === 'ne' ? { top: -6, right: -6, cursor: cursorMap.ne }
+        : corner === 'sw' ? { bottom: -6, left: -6, cursor: cursorMap.sw }
+        : { bottom: -6, right: -6, cursor: cursorMap.se };
+
+    return (
+        <div
+            data-designer-resize-handle={corner}
+            onMouseDown={(e) => onResizeStart(corner, e)}
+            title={`${corner.toUpperCase()} köşesinden sürükle → resize`}
+            style={{
+                position: 'absolute',
+                width: 14,
+                height: 14,
+                background: 'white',
+                border: '2px solid #6366f1',
+                borderRadius: '50%',
+                zIndex: 25,
+                boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
+                ...positionStyle,
+            }}
+        />
     );
 };
 
@@ -381,14 +492,13 @@ function buildElementForTool(
 interface ElementOverlayProps {
     element: DesignElement;
     isSelected: boolean;
-    zoom: number;
 }
 
-const ElementOverlay: React.FC<ElementOverlayProps> = ({ element, isSelected, zoom }) => {
-    const w = (element.width || 100) / zoom;
-    const h = (element.height || 30) / zoom;
-    const left = element.x / zoom;
-    const top = element.y / zoom;
+const ElementOverlay: React.FC<ElementOverlayProps> = ({ element, isSelected }) => {
+    const w = element.width || 100;
+    const h = element.height || 30;
+    const left = element.x;
+    const top = element.y;
 
     return (
         <div
@@ -404,7 +514,7 @@ const ElementOverlay: React.FC<ElementOverlayProps> = ({ element, isSelected, zo
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: `${11 / zoom}px`,
+                fontSize: '11px',
                 color: '#6366f1',
                 fontWeight: 600,
                 zIndex: 8,
@@ -418,34 +528,30 @@ const ElementOverlay: React.FC<ElementOverlayProps> = ({ element, isSelected, zo
 interface SectionOverlayProps {
     sectionId: SectionId;
     title: string;
-    description: string;
     elementCount: number;
     isActive: boolean;
-    zoom: number;
 }
 
 const SectionOverlay: React.FC<SectionOverlayProps> = ({
     sectionId,
     title,
-    description,
     elementCount,
     isActive,
-    zoom,
 }) => {
     return (
         <div
             style={{
                 position: 'absolute',
-                top: `${(SECTION_ORDER[sectionId] * 200) / zoom}px`,
+                top: `${SECTION_ORDER[sectionId] * 200}px`,
                 left: 0,
                 right: 0,
-                height: `${200 / zoom}px`,
+                height: '200px',
                 pointerEvents: 'none',
                 border: `2px dashed ${isActive ? '#6366f1' : '#334155'}`,
                 borderRadius: '4px',
                 padding: '8px',
                 color: isActive ? '#a5b4fc' : '#475569',
-                fontSize: `${12 / zoom}px`,
+                fontSize: '12px',
                 fontWeight: 700,
                 opacity: isActive ? 1 : 0.4,
                 zIndex: 5,
@@ -474,7 +580,6 @@ h1 { color: #0f172a; margin-bottom: 8px; }
 <div class="empty">
 <h1>Designer 2.0 — İskelet Aktif</h1>
 <p>Section: <strong>${state.activeSectionId}</strong> · ${Object.values(state.sections).map(s => `${s.title} (${s.elements.length})`).join(' • ')}</p>
-<p style="margin-top:24px;font-size:13px;">Phase 17'de tıkla-yerleştir + drag-drop + iframe render implementasyonu eklenecek.</p>
 </div>
 </body></html>`;
 }

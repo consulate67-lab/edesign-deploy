@@ -280,6 +280,8 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
                     onPlaceElement={handlePlaceElement}
                     onInlineEdit={handleInlineEdit}
                     onSelectElement={handleSelectElementByRenderIndex}
+                    onCanvasResize={ds.setCanvasSize}
+                    onCanvasReset={ds.resetCanvasSize}
                 />
             </div>
 
