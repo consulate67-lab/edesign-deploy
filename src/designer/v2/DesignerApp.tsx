@@ -26,6 +26,7 @@ import type { DesignElement, SectionId } from '../../types.ts';
 import { xsltToSections } from './utils/xsltToSections';
 import { SAMPLE_FATURA_XML } from './utils/xsltRender';
 import { getDefaultXsltInline, fetchDefaultXslt } from './utils/xsltDefaults';
+import { exportSections, describeSections } from './utils/xsltExporter';
 import { api } from '../../api';
 
 interface DesignerAppProps {
@@ -138,12 +139,26 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
     };
 
     /**
-     * Sprint 1 — XSLT olarak indir (state'i XSLT'ye generate edip Blob olarak indir).
-     * Şimdilik placeholder: inline XSLT'yi olduğu gibi indirir.
-     * Phase C'de sections state'ten generateSectionalXSLT ile üretilecek.
+     * Sprint 3 Aşama 2 (2026-10-02) — XSLT olarak indir (sections'tan generate et).
+     *
+     * Öncelik sırası:
+     * 1. customContent dolu → kullanıcının XSLT'sini kullan
+     * 2. customContent boş → sections state'ten exportSections() ile yeni XSLT üret
+     * 3. Hiçbiri yoksa → placeholder sample XML indir
+     *
+     * Export çıktısı:
+     *   • 5 section template (reportHeader / partyHeader / masterData / totals / reportFooter)
+     *   • Element'ler literal result (div/span/p/td) + stil inline
+     *   • binding varsa → <xsl:value-of select="/Invoice/cbc:ID"/>
+     *   • masterData section → <xsl:for-each select="//cac:InvoiceLine"> loop
      */
     const handleExportXslt = () => {
-        const xslt = ds.state.currentXslt || SAMPLE_FATURA_XML;
+        const stats = describeSections(ds.state.sections);
+        const xslt = exportSections(ds.state.sections, {
+            customContent: ds.state.currentXslt?.trim() ? ds.state.currentXslt : undefined,
+            docName,
+            templateTitle: template,
+        });
         const blob = new Blob([xslt], { type: 'application/xml' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -153,7 +168,9 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        setInlineEditNotice(`📥 XSLT indirildi: ${a.download}`);
+        setInlineEditNotice(
+            `📥 XSLT indirildi: ${a.download} · ${stats.totalElements} element (${stats.bindingsCount} XML binding)`
+        );
     };
 
     /**
