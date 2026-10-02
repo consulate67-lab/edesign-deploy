@@ -427,33 +427,37 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
                     {sizeLabel}
                 </div>
 
-                {/* iframe — gerçek XSLT render. Sprint 4 Acil fix: pointer-events:none
-                    → drag-drop A4 sheet'e düşsün (iframe'in kendisi drop'u yakalamasın).
-                    ElementOverlay/SectionOverlay hâlâ görünür (pointer-events:none zaten). */}
+                {/* Sprint 5 ACİL — iframe GERÇEK XSLT render öne çıksın.
+                    - pointer-events:none (drop için zaten gerekli, Aşama 5 korundu)
+                    - z-index: 1 → SectionOverlay (3) ve ElementOverlay (4) iframe ÜSTÜNDE,
+                      ama iframe render görünür kalır (overlay'ler şeffaf)
+                    - Kullanıcının istediği: antrepo e-Fatura/e-Arşiv dosyalarındaki gibi
+                      gerçek HTML düzen (tablo, satır, kolon) — sıralı kutu değil */}
                 <iframe
                     ref={iframeRef}
                     data-designer-iframe
                     srcDoc={renderResult.html || buildPlaceholderHtml(state)}
                     style={{
+                        position: 'absolute',
+                        inset: 0,
                         width: '100%',
                         height: '100%',
                         border: 'none',
                         background: 'white',
                         pointerEvents: 'none',
+                        zIndex: 1,
                     }}
                     title="Designer Preview"
                 />
 
-                {/* Element overlay'leri (canvas state'te yeni eklenen elementler için görsel feedback) */}
-                {Object.values(state.sections).find(s => s.id === state.activeSectionId)?.elements.map(el => (
-                    <ElementOverlay
-                        key={el.id}
-                        element={el}
-                        isSelected={el.id === state.selectedElementId}
-                    />
-                ))}
-
-                {/* Section overlay çerçeveleri (placeholder — Aşama 5 render fix ile kaldırılacak) */}
+                {/* Section overlay çerçeveleri — Sprint 5 minimalize.
+                    Önce: 5 orantılı bant + dashed border + opacity 0.3 → kullanıcı bunu görüyordu
+                    ve "alt alta bant" şeklinde eleştiriyordu. Artık:
+                    - Top border sadece 1px solid (renkli, ince)
+                    - Sol üst köşede küçük başlık badge (Section adı + element sayısı)
+                    - Geri kalan alan tamamen şeffaf (iframe render görünür)
+                    - Hover'da bg highlight (drop target feedback)
+                    - z-index: 3 (iframe ÜSTÜNDE, ElementOverlay ALTI) */}
                 {Object.values(state.sections).sort((a, b) => a.order - b.order).map(section => (
                     <SectionOverlay
                         key={section.id}
@@ -462,6 +466,20 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
                         elementCount={section.elements.length}
                         isActive={state.activeSectionId === section.id || hoverSectionId === section.id}
                         isHover={hoverSectionId === section.id}
+                    />
+                ))}
+
+                {/* Element overlay'leri (canvas state'te yeni eklenen elementler için görsel feedback).
+                    - z-index: 4 → iframe ÜSTÜNDE (kullanıcı eklediği elementi görsün)
+                    - Sadece aktif section'ın elementleri (Solim'in "alt alta kutu" şikayetini
+                      çözmek için TÜM section'lar değil, sadece aktif)
+                    - isSelected=true olan daha belirgin (border kalın, bg mavi)
+                    - pointer-events:none (canvas tıklamasını yemesin) */}
+                {(Object.values(state.sections).find(s => s.id === state.activeSectionId)?.elements || []).map(el => (
+                    <ElementOverlay
+                        key={el.id}
+                        element={el}
+                        isSelected={el.id === state.selectedElementId}
                     />
                 ))}
 
@@ -619,6 +637,17 @@ const ElementOverlay: React.FC<ElementOverlayProps> = ({ element, isSelected }) 
     const top = element.y;
     const userStyle: React.CSSProperties = element.style || {};
 
+    /**
+     * Sprint 5 ACİL — ElementOverlay.
+     * Önceki: her element dashed border + bg rgba + z-index 8 → iframe render'ı maskeliyordu
+     * ve "alt alta banttaki alanları koymuşsun" eleştirisi geliyordu.
+     *
+     * Yeni yaklaşım:
+     * - z-index: 4 (iframe 1 ÜSTÜNDE ama SectionOverlay 3 ile aynı seviye; seçili olanlar 5)
+     * - Seçili olmayanlar: sadece ince top border (1px solid) + çok şeffaf bg → iframe render görünür
+     * - Seçili olan: belirgin border (2px solid indigo) + bg highlight
+     * - pointer-events:none → canvas'a tıklama geçer
+     */
     return (
         <div
             style={{
@@ -629,10 +658,10 @@ const ElementOverlay: React.FC<ElementOverlayProps> = ({ element, isSelected }) 
                 height: `${h}px`,
                 border: isSelected
                     ? '2px solid #6366f1'
-                    : userStyle.border || '1px dashed rgba(99, 102, 241, 0.4)',
+                    : userStyle.border || '1px solid rgba(99, 102, 241, 0.35)',
                 background: isSelected
-                    ? 'rgba(99, 102, 241, 0.05)'
-                    : userStyle.backgroundColor || 'rgba(99, 102, 241, 0.02)',
+                    ? 'rgba(99, 102, 241, 0.10)'
+                    : userStyle.backgroundColor || 'rgba(99, 102, 241, 0.04)',
                 color: userStyle.color || '#6366f1',
                 fontFamily: userStyle.fontFamily || 'inherit',
                 fontSize: userStyle.fontSize || '11px',
@@ -656,7 +685,9 @@ const ElementOverlay: React.FC<ElementOverlayProps> = ({ element, isSelected }) 
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',
-                zIndex: 8,
+                zIndex: isSelected ? 5 : 4,
+                opacity: isSelected ? 1 : 0.55,
+                transition: 'opacity 0.1s, border-color 0.1s, background 0.1s',
             }}
             title={`${element.type} · ${element.id.slice(-6)}${element.binding ? ` · binding: ${element.binding}` : ''}`}
         >
@@ -694,6 +725,18 @@ const SectionOverlay: React.FC<SectionOverlayProps> = ({
 }) => {
     const band = SECTION_BANDS[sectionId];
     const isHighlight = isActive || isHover;
+    /**
+     * Sprint 5 ACİL — SectionOverlay minimalize.
+     * Önceki: tüm bant alanı dashed box + %0.3 opacity → kullanıcı "alt alta banttaki alanları
+     * koymuşsun" diye eleştiriyordu. iframe render'ını maskeliyordu.
+     *
+     * Yeni yaklaşım:
+     * - Sadece top border (1px solid, ince) → "burada section başlıyor" görsel ipucu
+     * - Sol üst köşede küçük badge (Section adı + element sayısı, 11px font)
+     * - Geri kalan alan tamamen şeffaf → iframe render tamamen görünür
+     * - Hover'da belirgin (bg highlight + top border yeşil) → drop target feedback
+     * - Active section'da top border mavi
+     */
     return (
         <div
             style={{
@@ -703,19 +746,32 @@ const SectionOverlay: React.FC<SectionOverlayProps> = ({
                 right: 0,
                 height: `${band.heightPct}%`,
                 pointerEvents: 'none',
-                border: `2px dashed ${isHover ? '#10b981' : isActive ? '#6366f1' : '#334155'}`,
-                borderRadius: '4px',
-                padding: '8px',
-                color: isHighlight ? (isHover ? '#10b981' : '#a5b4fc') : '#475569',
-                fontSize: '12px',
-                fontWeight: 700,
-                opacity: isHighlight ? 0.9 : 0.3,
-                background: isHover ? 'rgba(16, 185, 129, 0.08)' : 'transparent',
-                transition: 'border-color 0.1s, background 0.1s, opacity 0.1s',
-                zIndex: 5,
+                background: isHover ? 'rgba(16, 185, 129, 0.06)' : 'transparent',
+                borderTop: `1px solid ${isHover ? '#10b981' : isActive ? '#6366f1' : 'rgba(99, 102, 241, 0.18)'}`,
+                transition: 'background 0.1s, border-color 0.1s',
+                zIndex: 3,
             }}
         >
-            {title} ({elementCount}){isHover ? ' ↓ drop here' : ''}
+            {/* Sol üst köşe badge — Section başlığı + element sayısı */}
+            <div
+                style={{
+                    position: 'absolute',
+                    top: 4,
+                    left: 6,
+                    padding: '2px 8px',
+                    background: isHover ? 'rgba(16, 185, 129, 0.85)' : isActive ? 'rgba(99, 102, 241, 0.85)' : 'rgba(30, 41, 59, 0.7)',
+                    color: isHighlight ? 'white' : '#94a3b8',
+                    borderRadius: '3px',
+                    fontSize: '10px',
+                    fontWeight: 700,
+                    letterSpacing: '0.3px',
+                    backdropFilter: 'blur(2px)',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                    transition: 'background 0.1s, color 0.1s',
+                }}
+            >
+                {title} · {elementCount}{isHover ? ' ↓' : ''}
+            </div>
         </div>
     );
 };
