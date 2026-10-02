@@ -25,6 +25,7 @@ import type { DesignElement, SectionId } from '../../types.ts';
 import { xsltToSections } from './utils/xsltToSections';
 import { SAMPLE_FATURA_XML } from './utils/xsltRender';
 import { getDefaultXsltInline, fetchDefaultXslt } from './utils/xsltDefaults';
+import { api } from '../../api';
 
 interface DesignerAppProps {
     template?: string;
@@ -92,6 +93,66 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
     const handlePlaceElement = (element: DesignElement) => {
         ds.pushHistory();
         ds.placeElement(ds.state.activeSectionId, element);
+    };
+
+    /**
+     * Sprint 1 (2026-10-02) — Tasarımı DB'ye kaydet (POST /api/designs).
+     * Kullanıcıya tasarım adı sor, sections state + theme color + custom content ile birlikte sakla.
+     */
+    const handleSaveDesign = async () => {
+        const suggestedName = docName || 'Yeni Tasarım';
+        const name = window.prompt?.('Tasarım adı:', suggestedName) ?? suggestedName;
+        if (!name || !name.trim()) {
+            setInlineEditNotice('⚠ Kayıt iptal edildi: tasarım adı boş olamaz.');
+            return;
+        }
+        try {
+            const result = await api.saveDesign({
+                name: name.trim(),
+                module_id: moduleId || 'custom',
+                xslt_content: ds.state.currentXslt || undefined,
+                custom_content: customContent || undefined,
+                theme_color: '#1e3a8a',
+                sections: Object.fromEntries(
+                    Object.entries(ds.state.sections).map(([k, s]) => [k, {
+                        id: s.id,
+                        title: s.title,
+                        elements: s.elements,
+                    }])
+                ),
+                status: 'draft',
+            });
+            // eslint-disable-next-line no-console
+            console.log('[Designer 2.0] Tasarım kaydedildi:', result.design);
+            setInlineEditNotice(
+                `✅ Tasarım kaydedildi (#${result.design.id}) — "${result.design.name}"`
+            );
+        } catch (e) {
+            // eslint-disable-next-line no-console
+            console.error('[Designer 2.0] Kayıt hatası:', e);
+            setInlineEditNotice(
+                `⚠ Kayıt hatası: ${(e as Error).message || 'bilinmeyen'}`
+            );
+        }
+    };
+
+    /**
+     * Sprint 1 — XSLT olarak indir (state'i XSLT'ye generate edip Blob olarak indir).
+     * Şimdilik placeholder: inline XSLT'yi olduğu gibi indirir.
+     * Phase C'de sections state'ten generateSectionalXSLT ile üretilecek.
+     */
+    const handleExportXslt = () => {
+        const xslt = ds.state.currentXslt || SAMPLE_FATURA_XML;
+        const blob = new Blob([xslt], { type: 'application/xml' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${(docName || 'tasarim').replace(/\s+/g, '_')}.xslt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        setInlineEditNotice(`📥 XSLT indirildi: ${a.download}`);
     };
 
     /**
@@ -180,6 +241,8 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
                     canRedo={ds.state.historyIndex < ds.state.history.length - 1}
                     onSetTool={ds.setTool}
                     activeTool={ds.state.activeTool}
+                    onSave={handleSaveDesign}
+                    onExport={handleExportXslt}
                 />
             </div>
 

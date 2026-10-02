@@ -241,6 +241,85 @@ export const api = {
 
     makeMeRich: () => api.request('/admin/add-credits', { method: 'POST' }),
 
+    // --- DESIGN PERSISTENCE (Sprint 1, 2026-10-02) ---
+    // Kullanici tasarimlarini DB'de saklama. DesignerApp'ten cagrilir.
+    // DEV modda localStorage fallback (mock), PROD modda backend.
+    listDesigns: async () => {
+        if (!IS_DEV) return api.request('/designs');
+        // DEV mock — localStorage
+        const designs = JSON.parse(localStorage.getItem('mock_designs') || '[]');
+        return { designs };
+    },
+
+    getDesign: async (id: number) => {
+        if (!IS_DEV) return api.request(`/designs/${id}`);
+        const designs = JSON.parse(localStorage.getItem('mock_designs') || '[]');
+        const found = designs.find((d: any) => d.id === id);
+        if (!found) throw new Error('Tasarim bulunamadi.');
+        return { design: found };
+    },
+
+    saveDesign: async (design: {
+        name: string;
+        module_id: string;
+        xslt_content?: string;
+        custom_content?: string;
+        theme_color?: string;
+        sections?: any;
+        status?: string;
+    }) => {
+        if (!IS_DEV) return api.request('/designs', {
+            method: 'POST',
+            body: JSON.stringify(design),
+        });
+        // DEV mock
+        const designs = JSON.parse(localStorage.getItem('mock_designs') || '[]');
+        const user = await api.getMe().catch(() => ({ username: 'demo' }));
+        const id = Date.now();
+        const created = {
+            id,
+            user_id: user.id || 0,
+            username: user.username,
+            ...design,
+            status: design.status || 'draft',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+        };
+        designs.unshift(created);
+        localStorage.setItem('mock_designs', JSON.stringify(designs));
+        return { success: true, design: created };
+    },
+
+    updateDesign: async (id: number, patch: Partial<{
+        name: string;
+        xslt_content: string;
+        custom_content: string;
+        theme_color: string;
+        sections: any;
+        status: string;
+    }>) => {
+        if (!IS_DEV) return api.request(`/designs/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(patch),
+        });
+        // DEV mock
+        const designs = JSON.parse(localStorage.getItem('mock_designs') || '[]');
+        const idx = designs.findIndex((d: any) => d.id === id);
+        if (idx === -1) throw new Error('Tasarim bulunamadi.');
+        designs[idx] = { ...designs[idx], ...patch, updated_at: new Date().toISOString() };
+        localStorage.setItem('mock_designs', JSON.stringify(designs));
+        return { success: true, design: designs[idx] };
+    },
+
+    deleteDesign: async (id: number) => {
+        if (!IS_DEV) return api.request(`/designs/${id}`, { method: 'DELETE' });
+        // DEV mock
+        const designs = JSON.parse(localStorage.getItem('mock_designs') || '[]');
+        const filtered = designs.filter((d: any) => d.id !== id);
+        localStorage.setItem('mock_designs', JSON.stringify(filtered));
+        return { success: true, message: 'Tasarim silindi.' };
+    },
+
     // --- TEMPLATE MANAGEMENT (Mock DB) ---
     // NOTE: These mock storage helpers are only used in DEV builds.
     // In production the backend endpoints under /api/templates/* are required.

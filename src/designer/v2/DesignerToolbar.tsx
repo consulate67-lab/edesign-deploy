@@ -14,6 +14,8 @@ interface DesignerToolbarProps {
     onBack?: () => void;
     onUndo: () => void;
     onRedo: () => void;
+    onSave?: () => void;
+    onExport?: () => void;
     onSetTool: (tool: 'select' | 'text' | 'image' | 'shape' | 'qrcode' | 'formula' | 'table') => void;
     activeTool: 'select' | 'text' | 'image' | 'shape' | 'qrcode' | 'formula' | 'table';
 }
@@ -26,6 +28,8 @@ export const DesignerToolbar: React.FC<DesignerToolbarProps> = ({
     onBack,
     onUndo,
     onRedo,
+    onSave,
+    onExport,
     onSetTool,
     activeTool,
 }) => {
@@ -115,11 +119,18 @@ export const DesignerToolbar: React.FC<DesignerToolbarProps> = ({
             <button title="XSLT Yükle" style={iconBtnStyle}>
                 <Upload size={18} />
             </button>
-            <button title="Hızlı Kaydet" style={{ ...iconBtnStyle, background: 'rgba(99, 102, 241, 0.15)', color: '#818cf8' }}>
+            <button
+                onClick={onSave}
+                disabled={!onSave}
+                title="Hızlı Kaydet (DB'ye sakla)"
+                style={{ ...iconBtnStyle, background: 'rgba(99, 102, 241, 0.15)', color: '#818cf8', opacity: onSave ? 1 : 0.4, cursor: onSave ? 'pointer' : 'not-allowed' }}
+            >
                 <Save size={18} />
             </button>
             <button
-                title="Kaydet ve İndir"
+                onClick={onExport}
+                disabled={!onExport}
+                title="Kaydet ve İndir (XSLT export)"
                 style={{
                     height: '36px',
                     padding: '0 16px',
@@ -129,7 +140,8 @@ export const DesignerToolbar: React.FC<DesignerToolbarProps> = ({
                     borderRadius: '8px',
                     fontWeight: 700,
                     fontSize: '13px',
-                    cursor: 'pointer',
+                    cursor: onExport ? 'pointer' : 'not-allowed',
+                    opacity: onExport ? 1 : 0.5,
                     display: 'flex',
                     alignItems: 'center',
                     gap: '6px',
