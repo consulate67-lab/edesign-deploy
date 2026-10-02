@@ -24,9 +24,21 @@ import { standardUBLFields, type StandardField } from '../../standardFields';
 import { isReadonlyField } from '../../readonlyFields';
 
 interface DesignerXmlFieldsProps {
-    /** Aşama 4'te kullanılacak — şimdilik opsiyonel. */
+    /** Aşama 4 — drag başlangıcında parent'a bildirim (opsiyonel, log için). */
     onDragFieldStart?: (field: StandardField, isReadonly: boolean) => void;
     initialQuery?: string;
+}
+
+/** HTML5 dragstart — non-readonly alanlar için. */
+function handleDragStart(field: StandardField, e: React.DragEvent) {
+    try {
+        e.dataTransfer.setData('application/json', JSON.stringify(field));
+        e.dataTransfer.effectAllowed = 'copy';
+        // Custom MIME de bırak — DesignerCanvas'ta algılama için
+        e.dataTransfer.setData('text/x-ubl-field', field.path);
+    } catch (err) {
+        console.error('[XmlFields] dragstart error:', err);
+    }
 }
 
 /** Path prefix'ten grup adı çıkar (10 grup) */
@@ -251,11 +263,16 @@ export const DesignerXmlFields: React.FC<DesignerXmlFieldsProps> = () => {
                                         return (
                                             <div
                                                 key={field.path}
-                                                draggable={false} /* Aşama 4'te readonly olmayanlar true olacak */
+                                                draggable={!isReadonly}
+                                                onDragStart={
+                                                    isReadonly
+                                                        ? undefined
+                                                        : (e) => handleDragStart(field, e)
+                                                }
                                                 title={
                                                     isReadonly
                                                         ? `🔒 Sistem alanı (değiştirilemez): ${field.path}`
-                                                        : `${field.path} — Aşama 4'te canvas'a sürüklenebilir`
+                                                        : `${field.path} — canvas'a sürükle → yerleştir`
                                                 }
                                                 style={{
                                                     display: 'flex',
@@ -269,7 +286,7 @@ export const DesignerXmlFields: React.FC<DesignerXmlFieldsProps> = () => {
                                                         ? '1px solid rgba(71, 85, 105, 0.2)'
                                                         : '1px solid rgba(99, 102, 241, 0.15)',
                                                     borderRadius: '3px',
-                                                    cursor: 'default',
+                                                    cursor: isReadonly ? 'not-allowed' : 'grab',
                                                     opacity: isReadonly ? 0.7 : 1,
                                                     fontSize: '11px',
                                                 }}
@@ -312,7 +329,7 @@ export const DesignerXmlFields: React.FC<DesignerXmlFieldsProps> = () => {
                     );
                 })}
 
-                {/* Footer — read-only özet + Aşama 4 notu */}
+                {/* Footer — read-only özet + Drag & Drop aktif notu */}
                 <div
                     style={{
                         marginTop: '12px',
@@ -339,12 +356,12 @@ export const DesignerXmlFields: React.FC<DesignerXmlFieldsProps> = () => {
                             marginTop: '6px',
                             paddingTop: '6px',
                             borderTop: '1px solid rgba(71, 85, 105, 0.3)',
-                            color: '#a5b4fc',
+                            color: '#10b981',
                             textAlign: 'center',
                             fontWeight: 700,
                         }}
                     >
-                        Aşama 4: Drag &amp; drop
+                        ✅ Drag &amp; drop aktif
                     </div>
                 </div>
             </div>

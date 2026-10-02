@@ -16,6 +16,7 @@ import React, { useRef, useCallback, useMemo, useEffect } from 'react';
 import type { DesignerStateV2 } from './hooks/useDesignerState';
 import type { DesignElement, SectionId } from '../../types.ts';
 import { renderXslt } from './utils/xsltRender';
+import { isReadonlyField } from '../../readonlyFields';
 
 interface DesignerCanvasProps {
     state: DesignerStateV2;
@@ -49,6 +50,8 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
 }) => {
     const canvasRef = useRef<HTMLDivElement>(null);
     const iframeRef = useRef<HTMLIFrameElement>(null);
+    /** Sprint 2 Aşama 4 — son drop zamanı (click çakışması önleme). */
+    const lastDropTimeRef = useRef<number>(0);
 
     /**
      * Phase 17.3 — XSLT render.
@@ -67,8 +70,11 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
      * - state.activeTool bir element tipini belirler
      * - Sadece boş alana tıklanırsa çalışır (A4 sheet içi, köşeler ve iframe tıklaması değil)
      * - snap-to-grid true ise gridSize'a yuvarlanır
+     * - Drop sonrası 250ms içinde gelen click skip edilir (drag-drop çakışma önleme)
      */
     const handleCanvasClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+        // Sprint 2 Aşama 4 — drop'tan hemen sonra gelen click'i skip et
+        if (Date.now() - lastDropTimeRef.current < 250) return;
         if (state.activeTool === 'select') return;
         if (e.target !== e.currentTarget) return;
 
@@ -89,6 +95,70 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
         const el: DesignElement = buildElementForTool(state.activeTool, id, finalX, finalY);
         onPlaceElement(el);
     }, [state.activeTool, state.snapToGrid, state.gridSize, onPlaceElement]);
+
+    /**
+     * Sprint 2 Aşama 4 — HTML5 drag-drop: XML alanını canvas'a bırak.
+     * drop event → alan path parse → text element oluştur (binding=path, content=alan adı).
+     * Drop koordinatı A4 sheet'in içine clamp edilir (sheet dışına taşmasın).
+     * snap-to-grid uygulanır.
+     */
+    const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+        if (e.dataTransfer.types.includes('application/json') || e.dataTransfer.types.includes('text/x-ubl-field')) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+        }
+    }, []);
+
+    const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        lastDropTimeRef.current = Date.now();
+
+        let field: { name: string; path: string; isNumeric?: boolean } | null = null;
+        const json = e.dataTransfer.getData('application/json');
+        if (json) {
+            try {
+                field = JSON.parse(json);
+            } catch (err) {
+                console.error('[DesignerCanvas] drop JSON parse error:', err);
+            }
+        }
+
+        // Readonly alanları kabul etme
+        if (!field || isReadonlyField(field.path)) return;
+
+        // Drop koordinatı canvas container'a göre
+        const containerRect = canvasRef.current!.getBoundingClientRect();
+        let x = e.clientX - containerRect.left + canvasRef.current!.scrollLeft - 32; /* margin auto (32px) */
+        let y = e.clientY - containerRect.top + canvasRef.current!.scrollTop - 32;
+
+        // A4 sheet sınırları içinde clamp (0..canvasWidth, 0..canvasHeight)
+        x = Math.max(0, Math.min(x, state.canvasWidth));
+        y = Math.max(0, Math.min(y, state.canvasHeight));
+
+        // Snap-to-grid
+        if (state.snapToGrid) {
+            x = Math.round(x / state.gridSize) * state.gridSize;
+            y = Math.round(y / state.gridSize) * state.gridSize;
+        }
+
+        const id = `field-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+        const el: DesignElement = {
+            id,
+            type: 'text',
+            x,
+            y,
+            width: 200,
+            height: 30,
+            content: field.name,
+            binding: field.path,
+            style: {
+                fontSize: '14px',
+                color: '#000',
+                fontFamily: 'system-ui, sans-serif',
+            },
+        } as DesignElement;
+        onPlaceElement(el);
+    }, [state.canvasWidth, state.canvasHeight, state.snapToGrid, state.gridSize, onPlaceElement]);
 
     /**
      * Sprint 2 Aşama 2 — köşe resize drag handler.
@@ -262,6 +332,8 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
             data-designer-canvas
             data-mode={state.activeTool}
             onClick={handleCanvasClick}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
             style={{
                 position: 'relative',
                 width: '100%',
