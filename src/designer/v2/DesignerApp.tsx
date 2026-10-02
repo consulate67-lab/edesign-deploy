@@ -48,6 +48,12 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
     const ds = useDesignerState();
 
     /**
+     * Sprint 4 Aşama 2 — Modül seçimi (e-Fatura / e-Arşiv).
+     * Toolbar dropdown'dan değiştirilebilir, useEffect yeniden XSLT yükler.
+     */
+    const [currentModuleId, setCurrentModuleId] = React.useState<string>(moduleId || 'fatura');
+
+    /**
      * Phase 18.1 — iframe inline edit bildirim state'i.
      * Kullanıcı bir element'i düzenlediğinde 4 saniye sonra kaybolan toast gösterilir.
      */
@@ -273,7 +279,7 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
         loadXslt();
         return () => { cancelled = true; };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [customContent, moduleId]);
+    }, [customContent, currentModuleId]);
 
     return (
         <div
@@ -298,6 +304,7 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
                 <DesignerToolbar
                     docName={docName}
                     template={template}
+                    moduleId={currentModuleId}
                     onBack={onBack}
                     onUndo={ds.undo}
                     onRedo={ds.redo}
@@ -307,6 +314,7 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
                     activeTool={ds.state.activeTool}
                     onSave={handleSaveDesign}
                     onExport={handlePreviewExport}
+                    onModuleChange={setCurrentModuleId}
                 />
             </div>
 

@@ -1,14 +1,21 @@
 /**
- * Designer 2.0 — Üst Bar (Phase 16.4 iskelet)
+ * Designer 2.0 — Üst Bar (Phase 16.4 iskelet + Sprint 4 Aşama 2)
  *
  * İçerik: Geri/İleri/Kaydet/İndir + Araç seçici + XSLT Yükle
+ * Sprint 4: e-Fatura / e-Arşiv modül dropdown eklendi (default render)
  */
 import React from 'react';
-import { ChevronLeft, Undo2, Redo2, Save, Download, Upload, Type, Image as ImageIcon, MousePointer2, Square, QrCode, Sigma, Table as LucideTable } from 'lucide-react';
+import { ChevronLeft, Undo2, Redo2, Save, Download, Upload, Type, Image as ImageIcon, MousePointer2, Square, QrCode, Sigma, Table as LucideTable, ChevronDown } from 'lucide-react';
+
+export const SUPPORTED_MODULES = [
+    { id: 'fatura', label: 'e-Fatura', template: 'Modern_1.0_Fatura' },
+    { id: 'earsiv', label: 'e-Arşiv', template: 'Modern_1.0_eArsiv' },
+] as const;
 
 interface DesignerToolbarProps {
     docName: string;
     template: string;
+    moduleId?: string;
     canUndo: boolean;
     canRedo: boolean;
     onBack?: () => void;
@@ -18,11 +25,13 @@ interface DesignerToolbarProps {
     onExport?: () => void;
     onSetTool: (tool: 'select' | 'text' | 'image' | 'shape' | 'qrcode' | 'formula' | 'table') => void;
     activeTool: 'select' | 'text' | 'image' | 'shape' | 'qrcode' | 'formula' | 'table';
+    onModuleChange?: (moduleId: string) => void;
 }
 
 export const DesignerToolbar: React.FC<DesignerToolbarProps> = ({
     docName,
     template,
+    moduleId,
     canUndo,
     canRedo,
     onBack,
@@ -32,7 +41,9 @@ export const DesignerToolbar: React.FC<DesignerToolbarProps> = ({
     onExport,
     onSetTool,
     activeTool,
+    onModuleChange,
 }) => {
+    const [moduleMenuOpen, setModuleMenuOpen] = React.useState(false);
     const tools = [
         { id: 'select', icon: MousePointer2, label: 'Seç (V)' },
         { id: 'text', icon: Type, label: 'Metin (T)' },
@@ -108,10 +119,88 @@ export const DesignerToolbar: React.FC<DesignerToolbarProps> = ({
 
             <div style={{ flex: 1 }} />
 
-            {/* Doc adı */}
+            {/* Doc adı + Modül dropdown */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#94a3b8', fontSize: '13px' }}>
                 <span style={{ fontWeight: 700, color: 'white' }}>{docName}</span>
                 <span style={{ padding: '2px 8px', background: '#0f172a', borderRadius: '4px', fontSize: '11px' }}>{template}</span>
+
+                {/* Sprint 4 Aşama 2 — e-Fatura / e-Arşiv modül dropdown */}
+                {onModuleChange && (
+                    <div style={{ position: 'relative' }}>
+                        <button
+                            onClick={() => setModuleMenuOpen((prev) => !prev)}
+                            data-designer-module-dropdown
+                            title="Belge modülü seç (e-Fatura / e-Arşiv)"
+                            style={{
+                                padding: '4px 10px',
+                                background: moduleMenuOpen ? 'rgba(99, 102, 241, 0.25)' : 'rgba(99, 102, 241, 0.15)',
+                                border: '1px solid rgba(99, 102, 241, 0.4)',
+                                borderRadius: '4px',
+                                color: '#a5b4fc',
+                                fontSize: '11px',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                            }}
+                        >
+                            {SUPPORTED_MODULES.find((m) => m.id === (moduleId || 'fatura'))?.label || 'e-Fatura'}
+                            <ChevronDown size={12} />
+                        </button>
+                        {moduleMenuOpen && (
+                            <div
+                                style={{
+                                    position: 'absolute',
+                                    top: '100%',
+                                    right: 0,
+                                    marginTop: '4px',
+                                    background: '#0f172a',
+                                    border: '1px solid #334155',
+                                    borderRadius: '6px',
+                                    boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+                                    zIndex: 50,
+                                    minWidth: '180px',
+                                    overflow: 'hidden',
+                                }}
+                            >
+                                {SUPPORTED_MODULES.map((m) => {
+                                    const isActive = (moduleId || 'fatura') === m.id;
+                                    return (
+                                        <button
+                                            key={m.id}
+                                            onClick={() => {
+                                                onModuleChange(m.id);
+                                                setModuleMenuOpen(false);
+                                            }}
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                width: '100%',
+                                                padding: '8px 12px',
+                                                background: isActive ? 'rgba(99, 102, 241, 0.2)' : 'transparent',
+                                                border: 'none',
+                                                color: isActive ? '#a5b4fc' : '#cbd5e1',
+                                                cursor: 'pointer',
+                                                fontSize: '12px',
+                                                fontWeight: isActive ? 700 : 500,
+                                                textAlign: 'left',
+                                            }}
+                                        >
+                                            <div style={{ flex: 1 }}>
+                                                <div>{m.label}</div>
+                                                <div style={{ fontSize: '10px', color: '#64748b', fontWeight: 400 }}>
+                                                    {m.template}
+                                                </div>
+                                            </div>
+                                            {isActive && <span style={{ color: '#10b981', fontSize: '10px' }}>✓</span>}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
 
             <div style={{ width: '1px', height: '24px', background: '#334155' }} />
