@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ArrowRight, MessageCircle, Sparkles, Zap, FileText, Globe, Layers, ChevronDown } from 'lucide-react';
+import { ArrowRight, MessageCircle, Sparkles, Zap, FileText, Globe, Layers, ChevronDown, Check, Star } from 'lucide-react';
+import { KVKKModal, KullaniciSozlesmesiModal, CerezPolitikasiModal } from './legal/Legal';
 
 interface LandingProps {
     onRegister: () => void;
@@ -10,6 +11,57 @@ interface SssItem {
     q: string;
     a: string;
 }
+
+/**
+ * Sprint 1 (2026-10-02) — Pricing bölümü paketleri.
+ * Backend PLAN_AMOUNT_TO_CREDITS (server/index.js) ile ayni kalmali.
+ */
+export const PACKAGES_PLANS = [
+    {
+        id: 'starter',
+        name: 'Başlangıç',
+        price: 0,
+        credits: 5,
+        popular: false,
+        features: [
+            '5 ücretsiz tasarım hakkı',
+            '9 belge türü (e-Fatura, e-Arşiv, ...)',
+            'XSLT yükleme & indirme',
+            'Topluluk şablonları',
+            'KVKK uyumlu veri saklama',
+        ],
+    },
+    {
+        id: 'pro',
+        name: 'Pro',
+        price: 49,
+        credits: 50,
+        popular: true,
+        features: [
+            '50 tasarım / ay',
+            '9 belge türü (e-Fatura, e-Arşiv, ...)',
+            'XSLT yükleme & indirme',
+            'Tüm hazır şablonlar',
+            'Öncelikli e-posta desteği',
+            'Tasarım kütüphanesi (sınırsız)',
+        ],
+    },
+    {
+        id: 'kurumsal',
+        name: 'Kurumsal',
+        price: 199,
+        credits: 9999,
+        popular: false,
+        features: [
+            'Sınırsız tasarım',
+            '9+ özel şablon',
+            'XSLT export & API erişimi',
+            'Çoklu kullanıcı (5 hesap)',
+            '7/24 telefon desteği',
+            'Özel entegrasyon desteği',
+        ],
+    },
+];
 
 const SSS_ITEMS: SssItem[] = [
     {
@@ -51,6 +103,17 @@ const SSS_ITEMS: SssItem[] = [
  */
 export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
     const [openSss, setOpenSss] = useState<string | null>(null);
+    const [legalModal, setLegalModal] = useState<'kvkk' | 'sozlesme' | 'cerez' | null>(null);
+
+    const handleBuyPlan = (plan: typeof PACKAGES_PLANS[number]) => {
+        // Şimdilik: giriş/kayıt sayfasına yönlendir. Iyzico entegrasyonu sonra.
+        if (plan.price === 0) {
+            onRegister();
+        } else {
+            onRegister();
+        }
+    };
+
     return (
         <div
             style={{
@@ -754,6 +817,130 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                 </div>
             </section>
 
+            {/* ====================== PRICING (Sprint 1, 2026-10-02) ====================== */}
+            <section
+                id="fiyatlar"
+                style={{
+                    position: 'relative',
+                    zIndex: 1,
+                    padding: '64px 32px',
+                    maxWidth: 1280,
+                    margin: '0 auto',
+                }}
+            >
+                <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+                    <h2 style={{ fontSize: '36px', fontWeight: 800, margin: '0 0 12px', color: '#f1f5f9' }}>
+                        Fiyatlandırma
+                    </h2>
+                    <p style={{ color: '#94a3b8', fontSize: '16px', maxWidth: '600px', margin: '0 auto' }}>
+                        İhtiyacınıza uygun paketi seçin. 5 ücretsiz tasarımla başlayın, büyüdükçe Pro'ya geçin.
+                    </p>
+                </div>
+
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                    gap: '24px',
+                    maxWidth: '1100px',
+                    margin: '0 auto',
+                }}>
+                    {PACKAGES_PLANS.map(plan => (
+                        <div
+                            key={plan.id}
+                            style={{
+                                background: plan.popular
+                                    ? 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.10))'
+                                    : 'rgba(30, 41, 59, 0.6)',
+                                backdropFilter: 'blur(10px)',
+                                border: plan.popular
+                                    ? '2px solid rgba(99, 102, 241, 0.5)'
+                                    : '1px solid rgba(255, 255, 255, 0.08)',
+                                borderRadius: '20px',
+                                padding: '32px 28px',
+                                position: 'relative',
+                                transition: 'transform 0.2s',
+                            }}
+                        >
+                            {plan.popular && (
+                                <div style={{
+                                    position: 'absolute',
+                                    top: -14,
+                                    right: 20,
+                                    background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                                    color: 'white',
+                                    padding: '4px 14px',
+                                    borderRadius: '999px',
+                                    fontSize: '11px',
+                                    fontWeight: 800,
+                                    letterSpacing: '1px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
+                                    boxShadow: '0 4px 12px rgba(99, 102, 241, 0.4)',
+                                }}>
+                                    <Star size={11} /> EN POPÜLER
+                                </div>
+                            )}
+
+                            <h3 style={{ fontSize: '22px', fontWeight: 700, margin: '0 0 4px', color: '#f1f5f9' }}>
+                                {plan.name}
+                            </h3>
+                            <p style={{ color: '#94a3b8', fontSize: '13px', margin: '0 0 20px' }}>
+                                {plan.price === 0 ? 'Ücretsiz başlangıç' : `Tasarım başına ₺${(plan.price / Math.max(plan.credits, 1)).toFixed(2)}`}
+                            </p>
+
+                            <div style={{ marginBottom: '20px' }}>
+                                <span style={{ fontSize: '40px', fontWeight: 800, color: plan.popular ? '#a5b4fc' : '#f1f5f9' }}>
+                                    {plan.price === 0 ? '₺0' : `₺${plan.price}`}
+                                </span>
+                                {plan.price > 0 && (
+                                    <span style={{ color: '#64748b', fontSize: '14px', marginLeft: '6px' }}>/ ay</span>
+                                )}
+                            </div>
+
+                            <div style={{ paddingTop: '4px', borderTop: '1px solid rgba(255, 255, 255, 0.08)', marginBottom: '20px' }}>
+                                <div style={{ color: '#a5b4fc', fontSize: '13px', fontWeight: 600, marginBottom: '12px' }}>
+                                    {plan.credits === 9999 ? 'Sınırsız' : `${plan.credits} tasarım hakkı`}
+                                </div>
+                                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    {plan.features.map((feat, i) => (
+                                        <li key={i} style={{ color: '#cbd5e1', fontSize: '13px', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                                            <Check size={14} color="#10b981" style={{ flexShrink: 0, marginTop: 2 }} />
+                                            <span>{feat}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+
+                            <button
+                                onClick={() => handleBuyPlan(plan)}
+                                style={{
+                                    width: '100%',
+                                    height: '44px',
+                                    background: plan.popular
+                                        ? 'linear-gradient(135deg, #6366f1, #4f46e5)'
+                                        : 'rgba(99, 102, 241, 0.12)',
+                                    color: 'white',
+                                    border: plan.popular ? '1px solid rgba(255,255,255,0.15)' : '1px solid rgba(99, 102, 241, 0.4)',
+                                    borderRadius: '10px',
+                                    fontWeight: 700,
+                                    fontSize: '14px',
+                                    cursor: 'pointer',
+                                    marginTop: '12px',
+                                    transition: 'transform 0.15s',
+                                }}
+                            >
+                                {plan.price === 0 ? 'Ücretsiz Başla' : 'Pakete Geç'}
+                            </button>
+                        </div>
+                    ))}
+                </div>
+
+                <p style={{ textAlign: 'center', color: '#64748b', fontSize: '13px', marginTop: '32px' }}>
+                    Tüm fiyatlara KDV dahildir. Yıllık abonelikte %15 indirim.
+                </p>
+            </section>
+
             {/* ====================== SSS ====================== */}
             <section
                 id="sss"
@@ -942,10 +1129,30 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                 }}
             >
                 <div>© 2026 · GİB UBL-TR · GitHub Pages + Railway</div>
-                <div style={{ display: 'flex', gap: 20 }}>
+                <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
                     <a href="#sss" style={{ color: '#64748b', textDecoration: 'none' }}>SSS</a>
-                    <a href="#" style={{ color: '#64748b', textDecoration: 'none' }}>KVKK</a>
-                    <a href="#" style={{ color: '#64748b', textDecoration: 'none' }}>İletişim</a>
+                    <a
+                        href="#kvkk"
+                        onClick={(e) => { e.preventDefault(); setLegalModal('kvkk'); }}
+                        style={{ color: '#64748b', textDecoration: 'none', cursor: 'pointer' }}
+                    >
+                        KVKK
+                    </a>
+                    <a
+                        href="#sozlesme"
+                        onClick={(e) => { e.preventDefault(); setLegalModal('sozlesme'); }}
+                        style={{ color: '#64748b', textDecoration: 'none', cursor: 'pointer' }}
+                    >
+                        Kullanıcı Sözleşmesi
+                    </a>
+                    <a
+                        href="#cerez"
+                        onClick={(e) => { e.preventDefault(); setLegalModal('cerez'); }}
+                        style={{ color: '#64748b', textDecoration: 'none', cursor: 'pointer' }}
+                    >
+                        Çerez Politikası
+                    </a>
+                    <a href="https://wa.me/905336660125" target="_blank" rel="noopener noreferrer" style={{ color: '#64748b', textDecoration: 'none' }}>İletişim</a>
                 </div>
             </footer>
 
@@ -990,6 +1197,11 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                 <MessageCircle size={15} />
                 WhatsApp · 0533 666 01 25
             </a>
+
+            {/* Sprint 1 — Legal modaller (KVKK, Kullanıcı Sözleşmesi, Çerez Politikası) */}
+            {legalModal === 'kvkk' && <KVKKModal onClose={() => setLegalModal(null)} />}
+            {legalModal === 'sozlesme' && <KullaniciSozlesmesiModal onClose={() => setLegalModal(null)} />}
+            {legalModal === 'cerez' && <CerezPolitikasiModal onClose={() => setLegalModal(null)} />}
         </div>
     );
 };
