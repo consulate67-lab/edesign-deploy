@@ -156,55 +156,66 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
     };
 
     /**
-     * Phase 17.3 + 17.4 — XSLT import pipeline.
-     * Selim "veriler yok" dedi: e-Fatura modülünden açıldığında customContent boş
-     * geliyordu ve fetch 404 dönüyordu → iframe hâlâ placeholder.
+     * Sprint 1.2 (2026-10-02) — XSLT load pipeline + loading state.
+     * Selim "veriler yok" / debug badge EMPTY rapor etti.
+     * Bu version: 3 katmanlı fallback + explicit loading.
      *
      * Pipeline:
-     * 1. customContent dolu → onu kullan (dosya yükleme)
-     * 2. customContent boş → moduleId'ye göre public/.../*.xslt path'ten fetch
-     * 3. Fetch başarısız → kullanıcıya badge ile bildir (placeholder devam)
+     * 1. customContent dolu → onu kullan
+     * 2. customContent boş → inline XSLT (build-time embed)
+     * 3. inline boşsa → public/.../*.xslt fetch
+     * 4. Hicbiri yoksa → placeholder devam (kullaniciya bildir)
      */
+    const [xsltLoading, setXsltLoading] = useState(true);
+    const [xsltSource, setXsltSource] = useState<'custom' | 'inline' | 'fetched' | 'none'>('none');
+
     useEffect(() => {
         let cancelled = false;
+        setXsltLoading(true);
         async function loadXslt() {
             let xslt = customContent?.trim() || '';
             let source: 'custom' | 'inline' | 'fetched' | 'none' = 'none';
 
-            if (!xslt) {
-                // Önce inline (anında, fetch/cache yok)
+            if (xslt) {
+                source = 'custom';
+            } else {
+                // Katman 1: inline (build-time embed, aninda)
                 const inline = getDefaultXsltInline(moduleId);
                 if (inline && inline.length > 100) {
                     xslt = inline;
                     source = 'inline';
                 } else {
-                    // Sonra fetch dene
+                    // Katman 2: public/.../*.xslt fetch (coklu base URL)
                     const fetched = await fetchDefaultXslt(moduleId);
                     if (cancelled) return;
                     if (fetched) {
                         xslt = fetched;
                         source = 'fetched';
                     }
+                    // Katman 3: hicbiri yoksa placeholder (xslt bos kalir)
                 }
-            } else {
-                source = 'custom';
             }
 
             if (cancelled) return;
 
+            setXsltSource(source);
             ds.setCurrentXslt(xslt);
             ds.setXml(SAMPLE_FATURA_XML);
             if (xslt) {
-                const sections = xsltToSections(xslt);
-                ds.setSections(sections);
-                // eslint-disable-next-line no-console
-                console.log(
-                    `[DesignerApp] XSLT (${source}): ${xslt.length} chars · module=${moduleId || 'fallback'}`
-                );
-            } else {
-                // eslint-disable-next-line no-console
-                console.warn('[DesignerApp] XSLT yüklenemedi — placeholder gösterilecek');
+                try {
+                    const sections = xsltToSections(xslt);
+                    ds.setSections(sections);
+                } catch (parseErr) {
+                    // eslint-disable-next-line no-console
+                    console.error('[DesignerApp] xsltToSections failed:', parseErr);
+                }
             }
+
+            // eslint-disable-next-line no-console
+            console.log(
+                `[DesignerApp] XSLT (${source}): ${xslt.length} chars · module=${moduleId || 'fallback'}`
+            );
+            setXsltLoading(false);
         }
         loadXslt();
         return () => { cancelled = true; };
@@ -281,7 +292,7 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
                 <DesignerStatusBar state={ds.state} />
             </div>
 
-            {/* Phase A.1.4 DEBUG — runtime state badge (state.currentXslt length, sections toplam element) */}
+            {/* Sprint 1.2 DEBUG — runtime state badge (xsltLoading + source + sections total) */}
             <div
                 data-designer-debug
                 style={{
@@ -289,7 +300,7 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
                     top: 76,
                     left: 16,
                     padding: '6px 12px',
-                    background: 'rgba(15, 23, 42, 0.92)',
+                    background: xsltLoading ? 'rgba(245, 158, 11, 0.92)' : 'rgba(15, 23, 42, 0.92)',
                     border: '1px solid #475569',
                     borderRadius: '6px',
                     color: '#e2e8f0',
@@ -299,7 +310,12 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
                     pointerEvents: 'none',
                 }}
             >
-                xslt: {ds.state.currentXslt ? `${ds.state.currentXslt.length} chars` : 'EMPTY'} · sections: {Object.values(ds.state.sections).reduce((s, sec) => s + sec.elements.length, 0)} elements
+                {xsltLoading ? '⏳ XSLT yukleniyor...' : (
+                    <>
+                        xslt: {ds.state.currentXslt ? `${ds.state.currentXslt.length}c` : 'EMPTY'} ({xsltSource})
+                        · sections: {Object.values(ds.state.sections).reduce((s, sec) => s + sec.elements.length, 0)} elements
+                    </>
+                )}
             </div>
 
             {/* Phase 18.1 — inline edit notification toast */}
