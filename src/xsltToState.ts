@@ -50,17 +50,25 @@ function xpathToLabel(xpath: string): string {
 }
 
 export const xsltToState = (xsltString: string): DesignState => {
-    // Sprint 4 ACİL — UTF-8 BOM strip (XSLT dosyaları BOM ile başlıyor,
-    // DOMParser ilk karakteri BOM olarak alıyor → parse hatası)
-    if (xsltString.charCodeAt(0) === 0xFEFF) {
-        xsltString = xsltString.slice(1);
-    }
+    // Sprint 4 ACİL v3 — agresif BOM + invisible strip + debug log
+    // Selim console'unda BOM strip sonrası hâlâ parse hatası var,
+    // bu yüzden raw bytes yaklaşımına geçiyoruz.
+    let cleaned = xsltString.replace(/^[\s\uFEFF\u200B\u00A0]+/, '');
+    // eslint-disable-next-line no-console
+    console.log(
+        `[xsltToState] first 30 chars: ${JSON.stringify(cleaned.slice(0, 30))} · original length: ${xsltString.length} · cleaned length: ${cleaned.length}`
+    );
+
     const parser = new DOMParser();
     // application/xml daha güvenilir encoding handling (text/xml'den daha iyi)
-    const doc = parser.parseFromString(xsltString, 'application/xml');
+    const doc = parser.parseFromString(cleaned, 'application/xml');
 
     const parseError = doc.querySelector('parsererror');
     if (parseError) {
+        // eslint-disable-next-line no-console
+        console.error(
+            `[xsltToState] PARSE HATASI — cleaned first 100: ${JSON.stringify(cleaned.slice(0, 100))}`
+        );
         throw new Error(`XSLT parse hatasi: ${parseError.textContent}`);
     }
 

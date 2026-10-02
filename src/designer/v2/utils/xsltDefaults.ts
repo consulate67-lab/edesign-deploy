@@ -61,15 +61,23 @@ export async function fetchDefaultXslt(moduleId?: string): Promise<string | null
                 console.warn(`[xsltDefaults] fetch ${r.status}: ${url}`);
                 continue;
             }
-            let text = await r.text();
-            // Sprint 4 ACİL — UTF-8 BOM strip (XSLT dosyaları EF BB BF ile başlıyor,
-            // DOMParser ilk karakteri '<' olarak görmüyor → parse hatası)
-            if (text.charCodeAt(0) === 0xFEFF) {
-                text = text.slice(1);
+            // Sprint 4 ACİL v3 — arrayBuffer ile raw bytes → TextDecoder utf-8
+            // (response.text() bazı browser'larda BOM'u tam strip etmiyor olabilir;
+            // TextDecoder daha güvenilir)
+            const buffer = await r.arrayBuffer();
+            const bytes = new Uint8Array(buffer);
+            // Manuel BOM strip (raw bytes): EF BB BF
+            let startIdx = 0;
+            if (bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) {
+                startIdx = 3;
             }
+            const decoder = new TextDecoder('utf-8', { fatal: false, ignoreBOM: false });
+            const text = decoder.decode(bytes.slice(startIdx));
             if (text && text.length > 100) {
                 // eslint-disable-next-line no-console
-                console.log(`[xsltDefaults] fetched ${text.length} chars from ${url}`);
+                console.log(
+                    `[xsltDefaults] fetched ${text.length} chars from ${url} · first 20: ${JSON.stringify(text.slice(0, 20))}`
+                );
                 return text;
             }
         } catch (err) {
