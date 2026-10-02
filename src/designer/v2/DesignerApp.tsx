@@ -27,6 +27,7 @@ import { xsltToSections } from './utils/xsltToSections';
 import { SAMPLE_FATURA_XML } from './utils/xsltRender';
 import { getDefaultXsltInline, fetchDefaultXslt } from './utils/xsltDefaults';
 import { exportSections, describeSections } from './utils/xsltExporter';
+import { ExportPreviewModal } from './ExportPreviewModal';
 import { api } from '../../api';
 
 interface DesignerAppProps {
@@ -139,37 +140,50 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
     };
 
     /**
-     * Sprint 3 Aşama 2 (2026-10-02) — XSLT olarak indir (sections'tan generate et).
-     *
-     * Öncelik sırası:
-     * 1. customContent dolu → kullanıcının XSLT'sini kullan
-     * 2. customContent boş → sections state'ten exportSections() ile yeni XSLT üret
-     * 3. Hiçbiri yoksa → placeholder sample XML indir
-     *
-     * Export çıktısı:
-     *   • 5 section template (reportHeader / partyHeader / masterData / totals / reportFooter)
-     *   • Element'ler literal result (div/span/p/td) + stil inline
-     *   • binding varsa → <xsl:value-of select="/Invoice/cbc:ID"/>
-     *   • masterData section → <xsl:for-each select="//cac:InvoiceLine"> loop
+     * Sprint 3 Aşama 3 (2026-10-02) — Export önizleme modalı.
+     * İndir tıklanınca XSLT doğrudan inmez, önce modal açılır.
+     * Kullanıcı içeriği görür, sonra "İndir" tıklarsa gerçek download başlar.
      */
-    const handleExportXslt = () => {
+    const [exportPreview, setExportPreview] = useState<{
+        isOpen: boolean;
+        content: string;
+        fileName: string;
+        stats: ReturnType<typeof describeSections>;
+    }>({
+        isOpen: false,
+        content: '',
+        fileName: '',
+        stats: { totalElements: 0, bindingsCount: 0, shapesCount: 0, sectionSummary: [] },
+    });
+
+    const handlePreviewExport = () => {
         const stats = describeSections(ds.state.sections);
         const xslt = exportSections(ds.state.sections, {
             customContent: ds.state.currentXslt?.trim() ? ds.state.currentXslt : undefined,
             docName,
             templateTitle: template,
         });
-        const blob = new Blob([xslt], { type: 'application/xml' });
+        const fileName = `${(docName || 'tasarim').replace(/\s+/g, '_')}.xslt`;
+        setExportPreview({ isOpen: true, content: xslt, fileName, stats });
+    };
+
+    /**
+     * Modal içinden "İndir" butonu → gerçek Blob download.
+     */
+    const handleDownloadFromPreview = () => {
+        const { content, fileName } = exportPreview;
+        const blob = new Blob([content], { type: 'application/xml' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${(docName || 'tasarim').replace(/\s+/g, '_')}.xslt`;
+        a.download = fileName;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+        setExportPreview((prev) => ({ ...prev, isOpen: false }));
         setInlineEditNotice(
-            `📥 XSLT indirildi: ${a.download} · ${stats.totalElements} element (${stats.bindingsCount} XML binding)`
+            `📥 XSLT indirildi: ${fileName} · ${exportPreview.stats.totalElements} element (${exportPreview.stats.bindingsCount} XML binding)`
         );
     };
 
@@ -286,7 +300,7 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
                     onSetTool={ds.setTool}
                     activeTool={ds.state.activeTool}
                     onSave={handleSaveDesign}
-                    onExport={handleExportXslt}
+                    onExport={handlePreviewExport}
                 />
             </div>
 
@@ -389,6 +403,16 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
                     {inlineEditNotice}
                 </div>
             )}
+
+            {/* Sprint 3 Aşama 3 — Export önizleme modalı */}
+            <ExportPreviewModal
+                isOpen={exportPreview.isOpen}
+                content={exportPreview.content}
+                fileName={exportPreview.fileName}
+                stats={exportPreview.stats}
+                onClose={() => setExportPreview((prev) => ({ ...prev, isOpen: false }))}
+                onDownload={handleDownloadFromPreview}
+            />
         </div>
     );
 };
