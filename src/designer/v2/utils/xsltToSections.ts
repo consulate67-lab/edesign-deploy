@@ -71,6 +71,10 @@ function inferSectionId(el: DesignElement, index: number, total: number): Sectio
  * @returns SectionsMap (5 section hepsi dolu)
  */
 export function xsltToSections(xsltString: string): SectionsMap {
+    // Sprint 4 ACİL — UTF-8 BOM strip (üçüncü katman koruma — fetch + render + xsltToState'de de var)
+    if (xsltString.charCodeAt(0) === 0xFEFF) {
+        xsltString = xsltString.slice(1);
+    }
     let parsed;
     try {
         parsed = xsltToState(xsltString);

@@ -50,8 +50,14 @@ function xpathToLabel(xpath: string): string {
 }
 
 export const xsltToState = (xsltString: string): DesignState => {
+    // Sprint 4 ACİL — UTF-8 BOM strip (XSLT dosyaları BOM ile başlıyor,
+    // DOMParser ilk karakteri BOM olarak alıyor → parse hatası)
+    if (xsltString.charCodeAt(0) === 0xFEFF) {
+        xsltString = xsltString.slice(1);
+    }
     const parser = new DOMParser();
-    const doc = parser.parseFromString(xsltString, 'text/xml');
+    // application/xml daha güvenilir encoding handling (text/xml'den daha iyi)
+    const doc = parser.parseFromString(xsltString, 'application/xml');
 
     const parseError = doc.querySelector('parsererror');
     if (parseError) {
