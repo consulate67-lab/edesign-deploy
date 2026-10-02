@@ -16,7 +16,8 @@
  */
 import React, { useEffect, useState } from 'react';
 import { DesignerToolbar } from './DesignerToolbar';
-import { DesignerSidebar } from './DesignerSidebar';
+import { DesignerSectionTree } from './DesignerSectionTree';
+import { DesignerXmlFields } from './DesignerXmlFields';
 import { DesignerCanvas } from './DesignerCanvas';
 import { DesignerProperties } from './DesignerProperties';
 import { DesignerStatusBar } from './DesignerStatusBar';
@@ -228,7 +229,7 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
             style={{
                 display: 'grid',
                 gridTemplateRows: '64px 1fr 32px',
-                gridTemplateColumns: '300px 1fr 320px',
+                gridTemplateColumns: '320px 1fr 320px',
                 gridTemplateAreas: `
                     "toolbar toolbar toolbar"
                     "sidebar canvas properties"
@@ -257,16 +258,20 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
                 />
             </div>
 
-            <div style={{ gridArea: 'sidebar', borderRight: '1px solid #1e293b', overflow: 'hidden' }}>
-                <DesignerSidebar
-                    sections={ds.state.sections}
-                    activeSectionId={ds.state.activeSectionId}
-                    selectedElementId={ds.state.selectedElementId}
-                    onSelectSection={ds.setActiveSection}
-                    onSelectElement={ds.selectElement}
-                    onAddElement={handlePlaceElement}
-                    onDeleteElement={ds.deleteElement}
-                />
+            <div style={{ gridArea: 'sidebar', borderRight: '1px solid #1e293b', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+                    <DesignerSectionTree
+                        sections={ds.state.sections}
+                        activeSectionId={ds.state.activeSectionId}
+                        selectedElementId={ds.state.selectedElementId}
+                        onSelectSection={ds.setActiveSection}
+                        onSelectElement={ds.selectElement}
+                        onDeleteElement={ds.deleteElement}
+                    />
+                </div>
+                <div style={{ flex: 1, minHeight: 0, borderTop: '1px solid #1e293b', display: 'flex', flexDirection: 'column' }}>
+                    <DesignerXmlFields />
+                </div>
             </div>
 
             <div style={{ gridArea: 'canvas', overflow: 'auto', background: '#1e293b' }}>
