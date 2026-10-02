@@ -147,10 +147,53 @@ export const initDb = async () => {
 
         // Useful indexes for the auth query path.
         await probe.query(`CREATE INDEX IF NOT EXISTS idx_users_username ON users (username)`);
+
+        // Sprint 1 (2026-10-02) — Designs tablosu (kullanici tasarimlarini DB'de sakla)
+        await probe.query(`
+            CREATE TABLE IF NOT EXISTS designs (
+                id                SERIAL PRIMARY KEY,
+                user_id           INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                name              TEXT NOT NULL,
+                module_id         TEXT NOT NULL,
+                xslt_content      TEXT,
+                custom_content    TEXT,
+                theme_color       TEXT,
+                sections_json     JSONB,
+                status            TEXT NOT NULL DEFAULT 'draft',
+                created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                updated_at        TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            )
+        `);
+
+        // Sprint 1 — designs tablosu icin idempotent column migration
+        await ensureDesignsColumn(probe, 'theme_color', 'TEXT');
+        await ensureDesignsColumn(probe, 'sections_json', 'JSONB');
+        await ensureDesignsColumn(probe, 'status', "TEXT NOT NULL DEFAULT 'draft'");
+
+        await probe.query(`CREATE INDEX IF NOT EXISTS idx_designs_user_id ON designs (user_id)`);
+        await probe.query(`CREATE INDEX IF NOT EXISTS idx_designs_updated_at ON designs (updated_at DESC)`);
     } finally {
         probe.release();
     }
 
     console.log('[db] Connected to Postgres');
     return new PostgresAdapter(pool);
+};
+
+/**
+ * Idempotent designs tablosu kolon ekleme (ensureColumn'in designs versiyonu).
+ */
+const ensureDesignsColumn = async (client, column, definition) => {
+    const { rows } = await client.query(
+        `SELECT column_name
+           FROM information_schema.columns
+          WHERE table_schema = 'public'
+            AND table_name   = 'designs'
+            AND column_name  = $1`,
+        [column]
+    );
+    if (rows.length > 0) return false;
+    console.log(`[db] Migration: adding column designs.${column}`);
+    await client.query(`ALTER TABLE designs ADD COLUMN ${column} ${definition}`);
+    return true;
 };

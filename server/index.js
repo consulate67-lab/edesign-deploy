@@ -292,3 +292,140 @@ app.post('/api/_dev/add-credits', async (req, res) => {
         res.status(500).json({ error: e.message });
     }
 });
+
+// ============================================================================
+// Sprint 1 (2026-10-02) — Designs CRUD API
+// Kullanici tasarimlarini DB'de saklama, listeleme, guncelleme, silme.
+// user_id JWT'den gelir — kullanicilar sadece kendi tasarimlarini gormeli/persist.
+// ============================================================================
+
+const serializeDesign = (row) => row ? ({
+    id: row.id,
+    user_id: row.user_id,
+    name: row.name,
+    module_id: row.module_id,
+    xslt_content: row.xslt_content,
+    custom_content: row.custom_content,
+    theme_color: row.theme_color,
+    sections: row.sections_json || null,   // JSONB -> otomatik parse
+    status: row.status,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+}) : null;
+
+// POST /api/designs — Yeni tasarim olustur
+app.post('/api/designs', authenticateToken, async (req, res) => {
+    const { name, module_id, xslt_content, custom_content, theme_color, sections } = req.body || {};
+
+    if (!name || !module_id) {
+        return res.status(400).json({ error: 'name ve module_id zorunludur.' });
+    }
+    if (name.length > 200) {
+        return res.status(400).json({ error: 'Tasarim adi 200 karakteri asmamali.' });
+    }
+
+    try {
+        const sectionsJson = sections ? JSON.stringify(sections) : null;
+        const result = await db.run(
+            `INSERT INTO designs (user_id, name, module_id, xslt_content, custom_content, theme_color, sections_json)
+             VALUES (?, ?, ?, ?, ?, ?, ?::jsonb)`,
+            [req.user.id, name, module_id, xslt_content || null, custom_content || null, theme_color || null, sectionsJson]
+        );
+        const created = await db.get('SELECT * FROM designs WHERE id = ?', [result.lastID]);
+        // eslint-disable-next-line no-console
+        console.log(`[designs] user=${req.user.id} created design #${result.lastID} (${name})`);
+        res.json({ success: true, design: serializeDesign(created) });
+    } catch (e) {
+        console.error('[designs] create error:', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// GET /api/designs — Kullanicinin tum tasarimlari (en yeni ustte)
+app.get('/api/designs', authenticateToken, async (req, res) => {
+    try {
+        const rows = await db.all(
+            `SELECT * FROM designs WHERE user_id = ? ORDER BY updated_at DESC LIMIT 200`,
+            [req.user.id]
+        );
+        res.json({ designs: rows.map(serializeDesign) });
+    } catch (e) {
+        console.error('[designs] list error:', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// GET /api/designs/:id — Tek tasarim (sadece sahibi)
+app.get('/api/designs/:id', authenticateToken, async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    if (!Number.isInteger(id) || id <= 0) {
+        return res.status(400).json({ error: 'Gecersiz tasarim id.' });
+    }
+    try {
+        const row = await db.get('SELECT * FROM designs WHERE id = ?', [id]);
+        if (!row) return res.status(404).json({ error: 'Tasarim bulunamadi.' });
+        if (row.user_id !== req.user.id) return res.status(403).json({ error: 'Bu tasarima erisim yetkiniz yok.' });
+        res.json({ design: serializeDesign(row) });
+    } catch (e) {
+        console.error('[designs] get error:', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// PUT /api/designs/:id — Guncelle (sadece sahibi)
+app.put('/api/designs/:id', authenticateToken, async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    if (!Number.isInteger(id) || id <= 0) {
+        return res.status(400).json({ error: 'Gecersiz tasarim id.' });
+    }
+    const { name, xslt_content, custom_content, theme_color, sections, status } = req.body || {};
+    try {
+        const existing = await db.get('SELECT * FROM designs WHERE id = ?', [id]);
+        if (!existing) return res.status(404).json({ error: 'Tasarim bulunamadi.' });
+        if (existing.user_id !== req.user.id) return res.status(403).json({ error: 'Bu tasarimi guncelleme yetkiniz yok.' });
+
+        const updates = [];
+        const params = [];
+        if (name !== undefined) { updates.push('name = ?'); params.push(name); }
+        if (xslt_content !== undefined) { updates.push('xslt_content = ?'); params.push(xslt_content); }
+        if (custom_content !== undefined) { updates.push('custom_content = ?'); params.push(custom_content); }
+        if (theme_color !== undefined) { updates.push('theme_color = ?'); params.push(theme_color); }
+        if (sections !== undefined) { updates.push('sections_json = ?::jsonb'); params.push(JSON.stringify(sections)); }
+        if (status !== undefined) { updates.push('status = ?'); params.push(status); }
+        if (updates.length === 0) {
+            return res.status(400).json({ error: 'Guncellenecek alan belirtilmedi.' });
+        }
+        updates.push('updated_at = NOW()');
+        params.push(id);
+
+        await db.run(`UPDATE designs SET ${updates.join(', ')} WHERE id = ?`, params);
+        const updated = await db.get('SELECT * FROM designs WHERE id = ?', [id]);
+        // eslint-disable-next-line no-console
+        console.log(`[designs] user=${req.user.id} updated design #${id}`);
+        res.json({ success: true, design: serializeDesign(updated) });
+    } catch (e) {
+        console.error('[designs] update error:', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// DELETE /api/designs/:id — Sil (sadece sahibi)
+app.delete('/api/designs/:id', authenticateToken, async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    if (!Number.isInteger(id) || id <= 0) {
+        return res.status(400).json({ error: 'Gecersiz tasarim id.' });
+    }
+    try {
+        const existing = await db.get('SELECT * FROM designs WHERE id = ?', [id]);
+        if (!existing) return res.status(404).json({ error: 'Tasarim bulunamadi.' });
+        if (existing.user_id !== req.user.id) return res.status(403).json({ error: 'Bu tasarimi silme yetkiniz yok.' });
+
+        await db.run('DELETE FROM designs WHERE id = ?', [id]);
+        // eslint-disable-next-line no-console
+        console.log(`[designs] user=${req.user.id} deleted design #${id} (${existing.name})`);
+        res.json({ success: true, message: 'Tasarim silindi.' });
+    } catch (e) {
+        console.error('[designs] delete error:', e);
+        res.status(500).json({ error: e.message });
+    }
+});
