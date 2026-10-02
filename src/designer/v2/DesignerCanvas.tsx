@@ -20,7 +20,7 @@ import { isReadonlyField } from '../../readonlyFields';
 
 interface DesignerCanvasProps {
     state: DesignerStateV2;
-    onPlaceElement: (element: DesignElement) => void;
+    onPlaceElement: (element: DesignElement, sectionId?: SectionId) => void;
     /**
      * Phase 18.1 — iframe içi inline editing bildirimi.
      * Kullanıcı iframe'de bir element'e çift tıklayıp düzenlediğinde çağrılır.
@@ -97,16 +97,50 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
     }, [state.activeTool, state.snapToGrid, state.gridSize, onPlaceElement]);
 
     /**
-     * Sprint 2 Aşama 4 — HTML5 drag-drop: XML alanını canvas'a bırak.
+     * Sprint 4 Aşama 1 — HTML5 drag-drop: XML alanını canvas'a bırak.
      * drop event → alan path parse → text element oluştur (binding=path, content=alan adı).
+     * Drop Y koordinatına göre section otomatik hesaplanır (5 orantılı bant).
      * Drop koordinatı A4 sheet'in içine clamp edilir (sheet dışına taşmasın).
      * snap-to-grid uygulanır.
      */
+    const [hoverSectionId, setHoverSectionId] = React.useState<SectionId | null>(null);
+
+    /**
+     * Drop Y koordinatına göre sectionId hesapla (5 orantılı bant).
+     * 0-20% → reportHeader
+     * 20-40% → partyHeader
+     * 40-70% → masterData
+     * 70-85% → totals
+     * 85-100% → reportFooter
+     */
+    const inferSectionFromY = useCallback((y: number): SectionId => {
+        const h = state.canvasHeight;
+        const ratio = Math.max(0, Math.min(1, y / h));
+        if (ratio < 0.20) return 'reportHeader';
+        if (ratio < 0.40) return 'partyHeader';
+        if (ratio < 0.70) return 'masterData';
+        if (ratio < 0.85) return 'totals';
+        return 'reportFooter';
+    }, [state.canvasHeight]);
+
     const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
         if (e.dataTransfer.types.includes('application/json') || e.dataTransfer.types.includes('text/x-ubl-field')) {
             e.preventDefault();
             e.dataTransfer.dropEffect = 'copy';
+
+            // Hover sırasında aktif section'ı hesapla (kullanıcıya görsel feedback)
+            const containerRect = canvasRef.current!.getBoundingClientRect();
+            const y = e.clientY - containerRect.top + canvasRef.current!.scrollTop - 32;
+            const clampedY = Math.max(0, Math.min(y, state.canvasHeight));
+            const sectionId = inferSectionFromY(clampedY);
+            if (sectionId !== hoverSectionId) {
+                setHoverSectionId(sectionId);
+            }
         }
+    }, [state.canvasHeight, inferSectionFromY, hoverSectionId]);
+
+    const handleDragLeave = useCallback(() => {
+        setHoverSectionId(null);
     }, []);
 
     const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
@@ -141,6 +175,10 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
             y = Math.round(y / state.gridSize) * state.gridSize;
         }
 
+        // Section otomatik hesapla (Y koordinatına göre)
+        const targetSectionId = inferSectionFromY(y);
+        setHoverSectionId(null);
+
         const id = `field-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
         const el: DesignElement = {
             id,
@@ -156,9 +194,12 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
                 color: '#000',
                 fontFamily: 'system-ui, sans-serif',
             },
+            sectionId: targetSectionId,
         } as DesignElement;
-        onPlaceElement(el);
-    }, [state.canvasWidth, state.canvasHeight, state.snapToGrid, state.gridSize, onPlaceElement]);
+        // onPlaceElement signature: (element) — DesignerApp handlePlaceElement uses activeSectionId
+        // Caller (DesignerApp) needs section override; use new callback with sectionId
+        onPlaceElement(el, targetSectionId);
+    }, [state.canvasWidth, state.canvasHeight, state.snapToGrid, state.gridSize, onPlaceElement, inferSectionFromY]);
 
     /**
      * Sprint 2 Aşama 2 — köşe resize drag handler.
@@ -333,6 +374,7 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
             data-mode={state.activeTool}
             onClick={handleCanvasClick}
             onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             style={{
                 position: 'relative',
@@ -415,7 +457,8 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
                         sectionId={section.id}
                         title={section.title}
                         elementCount={section.elements.length}
-                        isActive={state.activeSectionId === section.id}
+                        isActive={state.activeSectionId === section.id || hoverSectionId === section.id}
+                        isHover={hoverSectionId === section.id}
                     />
                 ))}
 
@@ -624,44 +667,54 @@ interface SectionOverlayProps {
     title: string;
     elementCount: number;
     isActive: boolean;
+    isHover?: boolean;
 }
+
+/**
+ * Sprint 4 Aşama 1 — 5 orantılı bant hesaplaması.
+ * reportHeader %0-20, partyHeader %20-40, masterData %40-70, totals %70-85, reportFooter %85-100.
+ */
+const SECTION_BANDS: Record<SectionId, { topPct: number; heightPct: number }> = {
+    reportHeader: { topPct: 0, heightPct: 20 },
+    partyHeader: { topPct: 20, heightPct: 20 },
+    masterData: { topPct: 40, heightPct: 30 },
+    totals: { topPct: 70, heightPct: 15 },
+    reportFooter: { topPct: 85, heightPct: 15 },
+};
 
 const SectionOverlay: React.FC<SectionOverlayProps> = ({
     sectionId,
     title,
     elementCount,
     isActive,
+    isHover,
 }) => {
+    const band = SECTION_BANDS[sectionId];
+    const isHighlight = isActive || isHover;
     return (
         <div
             style={{
                 position: 'absolute',
-                top: `${SECTION_ORDER[sectionId] * 200}px`,
+                top: `${band.topPct}%`,
                 left: 0,
                 right: 0,
-                height: '200px',
+                height: `${band.heightPct}%`,
                 pointerEvents: 'none',
-                border: `2px dashed ${isActive ? '#6366f1' : '#334155'}`,
+                border: `2px dashed ${isHover ? '#10b981' : isActive ? '#6366f1' : '#334155'}`,
                 borderRadius: '4px',
                 padding: '8px',
-                color: isActive ? '#a5b4fc' : '#475569',
+                color: isHighlight ? (isHover ? '#10b981' : '#a5b4fc') : '#475569',
                 fontSize: '12px',
                 fontWeight: 700,
-                opacity: isActive ? 1 : 0.4,
+                opacity: isHighlight ? 0.9 : 0.3,
+                background: isHover ? 'rgba(16, 185, 129, 0.08)' : 'transparent',
+                transition: 'border-color 0.1s, background 0.1s, opacity 0.1s',
                 zIndex: 5,
             }}
         >
-            {title} ({elementCount})
+            {title} ({elementCount}){isHover ? ' ↓ drop here' : ''}
         </div>
     );
-};
-
-const SECTION_ORDER: Record<SectionId, number> = {
-    reportHeader: 0,
-    partyHeader: 1,
-    masterData: 2,
-    totals: 3,
-    reportFooter: 4,
 };
 
 function buildPlaceholderHtml(state: DesignerStateV2): string {

@@ -93,9 +93,15 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
         }
     };
 
-    const handlePlaceElement = (element: DesignElement) => {
+    const handlePlaceElement = (element: DesignElement, overrideSectionId?: SectionId) => {
         ds.pushHistory();
-        ds.placeElement(ds.state.activeSectionId, element);
+        // Sprint 4 Aşama 1 — overrideSectionId varsa (drop koordinatından otomatik hesaplanan),
+        // o section'a ekle VE aktif section'ı da değiştir (kullanıcı feedback)
+        const targetSectionId = overrideSectionId || ds.state.activeSectionId;
+        ds.placeElement(targetSectionId, element);
+        if (targetSectionId !== ds.state.activeSectionId) {
+            ds.setActiveSection(targetSectionId);
+        }
     };
 
     /**
