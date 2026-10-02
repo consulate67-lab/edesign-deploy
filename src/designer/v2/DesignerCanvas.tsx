@@ -427,7 +427,9 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
                     {sizeLabel}
                 </div>
 
-                {/* iframe — gerçek XSLT render */}
+                {/* iframe — gerçek XSLT render. Sprint 4 Acil fix: pointer-events:none
+                    → drag-drop A4 sheet'e düşsün (iframe'in kendisi drop'u yakalamasın).
+                    ElementOverlay/SectionOverlay hâlâ görünür (pointer-events:none zaten). */}
                 <iframe
                     ref={iframeRef}
                     data-designer-iframe
@@ -437,6 +439,7 @@ export const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
                         height: '100%',
                         border: 'none',
                         background: 'white',
+                        pointerEvents: 'none',
                     }}
                     title="Designer Preview"
                 />

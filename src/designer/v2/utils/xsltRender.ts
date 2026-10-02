@@ -35,9 +35,9 @@ export function renderXslt(xsltString: string, xmlString: string): XsltRenderRes
     }
 
     try {
-        // 1. Parse XSLT
+        // 1. Parse XSLT (Sprint 4 Acil fix: application/xml daha güvenilir encoding handling)
         const xsltParser = new DOMParser();
-        const xsltDoc = xsltParser.parseFromString(xsltString, 'text/xml');
+        const xsltDoc = xsltParser.parseFromString(xsltString, 'application/xml');
         const xsltError = xsltDoc.querySelector('parsererror');
         if (xsltError) {
             return {
@@ -49,7 +49,7 @@ export function renderXslt(xsltString: string, xmlString: string): XsltRenderRes
 
         // 2. Parse XML
         const xmlParser = new DOMParser();
-        const xmlDoc = xmlParser.parseFromString(xmlString, 'text/xml');
+        const xmlDoc = xmlParser.parseFromString(xmlString, 'application/xml');
         const xmlError = xmlDoc.querySelector('parsererror');
         if (xmlError) {
             return {

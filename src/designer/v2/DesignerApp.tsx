@@ -257,6 +257,11 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
 
             setXsltSource(source);
             setXsltError(source === 'none' ? lastError : null);
+            // Sprint 4 Acil fix — debug log (Selim konsolu paylaşabilsin)
+            // eslint-disable-next-line no-console
+            console.log(
+                `[DesignerApp] XSLT load: source=${source} length=${xslt.length} module=${currentModuleId || 'fallback'}${lastError ? ` lastError=${lastError}` : ''}`
+            );
             ds.setCurrentXslt(xslt);
             ds.setXml(SAMPLE_FATURA_XML);
             if (xslt) {
@@ -269,11 +274,6 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
                     setXsltError(`XSLT parse hatası: ${(parseErr as Error).message?.slice(0, 100)}`);
                 }
             }
-
-            // eslint-disable-next-line no-console
-            console.log(
-                `[DesignerApp] XSLT (${source}): ${xslt.length} chars · module=${moduleId || 'fallback'}${lastError ? ` · lastError=${lastError}` : ''}`
-            );
             setXsltLoading(false);
         }
         loadXslt();
