@@ -4,6 +4,10 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  // Sprint 1.4 (2026-10-02): custom domain (api.edesign-deploy.com + edesign-deploy.com)
+  // icin base path root. GitHub Pages eski '/edesign-deploy/' subpath'i hala destekler
+  // cunku CNAME otomatik root'a yonlendirir. Apex domain'e geciste
+  // GitHub Pages repo ayarlarindan 'custom domain' eklenecek.
   base: '/edesign-deploy/',
   build: {
     rollupOptions: {

@@ -19,8 +19,9 @@ if (!SECRET_KEY) {
 const EFFECTIVE_SECRET = SECRET_KEY || 'dev-only-insecure-fallback-do-not-use-in-production';
 
 // Allowed CORS origins. Comma-separated. Defaults to local dev hosts.
+// Sprint 1.4 (2026-10-02): production domain'ler eklendi (api.edesign-deploy.com, edesign-deploy.com).
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS
-    || 'http://localhost:5173,http://localhost:3002,http://127.0.0.1:5173,http://127.0.0.1:3002')
+    || 'http://localhost:5173,http://localhost:3002,http://127.0.0.1:5173,http://127.0.0.1:3002,https://edesign-deploy.com,https://www.edesign-deploy.com,https://api.edesign-deploy.com')
     .split(',')
     .map((o) => o.trim())
     .filter(Boolean);
