@@ -1,0 +1,42 @@
+# Files / directories that should NOT be copied into the Docker image.
+# Keeps the image small and avoids baking secrets / build artifacts in.
+
+# Build artifacts
+dist
+node_modules
+.cache
+.vite
+
+# Dev / OS files
+.git
+.gitignore
+.github
+.vscode
+.idea
+.DS_Store
+*.log
+npm-debug.log*
+
+# Environment (real .env must never enter the image)
+.env
+.env.*
+!.env.example
+
+# Local-only scratch dirs
+.trash-*
+.trash-2026-08-27
+.trash-2026-09-23
+
+# Helper Python scripts and their outputs
+*.py
+*_output.txt
+check_*.txt
+binary_check.txt
+malformed_check.txt
+
+# Documentation that doesn't belong in production
+README.md
+
+# Local SQLite file (Railway mounts a volume at /data)
+server/database.sqlite
+server/database.sqlite-journal
