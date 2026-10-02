@@ -157,49 +157,63 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
     };
 
     /**
-     * Sprint 1.2 (2026-10-02) — XSLT load pipeline + loading state.
-     * Selim "veriler yok" / debug badge EMPTY rapor etti.
-     * Bu version: 3 katmanlı fallback + explicit loading.
+     * Sprint 2 Aşama 5 (2026-10-02) — XSLT load pipeline (4 katmanlı, fetch öncelikli).
      *
-     * Pipeline:
-     * 1. customContent dolu → onu kullan
-     * 2. customContent boş → inline XSLT (build-time embed)
-     * 3. inline boşsa → public/.../*.xslt fetch
-     * 4. Hicbiri yoksa → placeholder devam (kullaniciya bildir)
+     * Selim "EMPTY (inline)" gördü → generated.ts encoding bozuktu. Şimdi:
+     * 1. customContent dolu → onu kullan (kullanıcı override)
+     * 2. customContent boş → public/.../*.xslt fetch (UTF-8 garantili, git-tracked)
+     * 3. fetch başarısız → inline XSLT (build-time embed, generated.ts)
+     * 4. Hiçbiri yoksa → placeholder (kullanıcıya bildir)
+     *
+     * Sıralama değişikliği nedeni: generated.ts build artifact, encoding bug'larına
+     * açık. public/*.xslt ise git-tracked ve UTF-8 doğru.
      */
     const [xsltLoading, setXsltLoading] = useState(true);
     const [xsltSource, setXsltSource] = useState<'custom' | 'inline' | 'fetched' | 'none'>('none');
+    const [xsltError, setXsltError] = useState<string | null>(null);
 
     useEffect(() => {
         let cancelled = false;
         setXsltLoading(true);
+        setXsltError(null);
         async function loadXslt() {
             let xslt = customContent?.trim() || '';
             let source: 'custom' | 'inline' | 'fetched' | 'none' = 'none';
+            let lastError: string | null = null;
 
             if (xslt) {
                 source = 'custom';
             } else {
-                // Katman 1: inline (build-time embed, aninda)
-                const inline = getDefaultXsltInline(moduleId);
-                if (inline && inline.length > 100) {
-                    xslt = inline;
-                    source = 'inline';
-                } else {
-                    // Katman 2: public/.../*.xslt fetch (coklu base URL)
+                // Katman 1: public/.../*.xslt fetch (UTF-8 garantili, tercih edilen)
+                try {
                     const fetched = await fetchDefaultXslt(moduleId);
                     if (cancelled) return;
-                    if (fetched) {
+                    if (fetched && fetched.length > 100) {
                         xslt = fetched;
                         source = 'fetched';
+                    } else {
+                        lastError = 'fetch boş döndü';
                     }
-                    // Katman 3: hicbiri yoksa placeholder (xslt bos kalir)
+                } catch (err) {
+                    lastError = `fetch hatası: ${(err as Error).message}`;
+                }
+
+                // Katman 2: fetch başarısız → inline fallback (build-time embed)
+                if (source === 'none') {
+                    const inline = getDefaultXsltInline(moduleId);
+                    if (inline && inline.length > 100) {
+                        xslt = inline;
+                        source = 'inline';
+                    } else {
+                        lastError = `${lastError || ''} + inline boş`;
+                    }
                 }
             }
 
             if (cancelled) return;
 
             setXsltSource(source);
+            setXsltError(source === 'none' ? lastError : null);
             ds.setCurrentXslt(xslt);
             ds.setXml(SAMPLE_FATURA_XML);
             if (xslt) {
@@ -209,12 +223,13 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
                 } catch (parseErr) {
                     // eslint-disable-next-line no-console
                     console.error('[DesignerApp] xsltToSections failed:', parseErr);
+                    setXsltError(`XSLT parse hatası: ${(parseErr as Error).message?.slice(0, 100)}`);
                 }
             }
 
             // eslint-disable-next-line no-console
             console.log(
-                `[DesignerApp] XSLT (${source}): ${xslt.length} chars · module=${moduleId || 'fallback'}`
+                `[DesignerApp] XSLT (${source}): ${xslt.length} chars · module=${moduleId || 'fallback'}${lastError ? ` · lastError=${lastError}` : ''}`
             );
             setXsltLoading(false);
         }
@@ -299,7 +314,7 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
                 <DesignerStatusBar state={ds.state} />
             </div>
 
-            {/* Sprint 1.2 DEBUG — runtime state badge (xsltLoading + source + sections total) */}
+            {/* Sprint 2 Aşama 5 DEBUG — runtime state badge (renk + emoji + anlamlı mesaj) */}
             <div
                 data-designer-debug
                 style={{
@@ -307,20 +322,30 @@ export const DesignerApp: React.FC<DesignerAppProps> = ({
                     top: 76,
                     left: 16,
                     padding: '6px 12px',
-                    background: xsltLoading ? 'rgba(245, 158, 11, 0.92)' : 'rgba(15, 23, 42, 0.92)',
+                    background: xsltLoading
+                        ? 'rgba(245, 158, 11, 0.92)' // amber — loading
+                        : xsltSource === 'none'
+                            ? 'rgba(239, 68, 68, 0.92)' // red — error
+                            : 'rgba(16, 185, 129, 0.92)', // green — success
                     border: '1px solid #475569',
                     borderRadius: '6px',
-                    color: '#e2e8f0',
+                    color: 'white',
                     fontSize: '10px',
                     fontFamily: 'monospace',
+                    fontWeight: 700,
                     zIndex: 99,
                     pointerEvents: 'none',
+                    maxWidth: '420px',
                 }}
             >
-                {xsltLoading ? '⏳ XSLT yukleniyor...' : (
+                {xsltLoading ? (
+                    <>⏳ XSLT yükleniyor...</>
+                ) : xsltSource === 'none' ? (
+                    <>⚠ XSLT yüklenemedi ({xsltError || 'bilinmeyen hata'})</>
+                ) : (
                     <>
-                        xslt: {ds.state.currentXslt ? `${ds.state.currentXslt.length}c` : 'EMPTY'} ({xsltSource})
-                        · sections: {Object.values(ds.state.sections).reduce((s, sec) => s + sec.elements.length, 0)} elements
+                        ✅ XSLT {(ds.state.currentXslt.length / 1024).toFixed(1)}kB ({xsltSource})
+                        {' · '}sections: {Object.values(ds.state.sections).reduce((s, sec) => s + sec.elements.length, 0)} elements
                     </>
                 )}
             </div>
