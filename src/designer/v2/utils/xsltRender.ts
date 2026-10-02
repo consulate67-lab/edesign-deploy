@@ -30,14 +30,25 @@ export interface XsltRenderResult {
 export function renderXslt(xsltString: string, xmlString: string): XsltRenderResult {
     const start = performance.now();
 
-    if (!xsltString.trim() || !xmlString.trim()) {
+    // Sprint 4 ACİL — UTF-8 BOM strip (text/xml + application/xml güvenli olsa da,
+    // XSLT dosyaları BOM ile başlıyor → DOMParser ilk karakteri BOM olarak alıyor)
+    let xslt = xsltString;
+    if (xslt.charCodeAt(0) === 0xFEFF) {
+        xslt = xslt.slice(1);
+    }
+    let xml = xmlString;
+    if (xml.charCodeAt(0) === 0xFEFF) {
+        xml = xml.slice(1);
+    }
+
+    if (!xslt.trim() || !xml.trim()) {
         return { html: '', error: 'XSLT veya XML boş', durationMs: 0 };
     }
 
     try {
         // 1. Parse XSLT (Sprint 4 Acil fix: application/xml daha güvenilir encoding handling)
         const xsltParser = new DOMParser();
-        const xsltDoc = xsltParser.parseFromString(xsltString, 'application/xml');
+        const xsltDoc = xsltParser.parseFromString(xslt, 'application/xml');
         const xsltError = xsltDoc.querySelector('parsererror');
         if (xsltError) {
             return {
@@ -49,7 +60,7 @@ export function renderXslt(xsltString: string, xmlString: string): XsltRenderRes
 
         // 2. Parse XML
         const xmlParser = new DOMParser();
-        const xmlDoc = xmlParser.parseFromString(xmlString, 'application/xml');
+        const xmlDoc = xmlParser.parseFromString(xml, 'application/xml');
         const xmlError = xmlDoc.querySelector('parsererror');
         if (xmlError) {
             return {

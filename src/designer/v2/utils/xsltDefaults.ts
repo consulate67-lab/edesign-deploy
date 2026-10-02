@@ -61,7 +61,12 @@ export async function fetchDefaultXslt(moduleId?: string): Promise<string | null
                 console.warn(`[xsltDefaults] fetch ${r.status}: ${url}`);
                 continue;
             }
-            const text = await r.text();
+            let text = await r.text();
+            // Sprint 4 ACİL — UTF-8 BOM strip (XSLT dosyaları EF BB BF ile başlıyor,
+            // DOMParser ilk karakteri '<' olarak görmüyor → parse hatası)
+            if (text.charCodeAt(0) === 0xFEFF) {
+                text = text.slice(1);
+            }
             if (text && text.length > 100) {
                 // eslint-disable-next-line no-console
                 console.log(`[xsltDefaults] fetched ${text.length} chars from ${url}`);
