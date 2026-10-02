@@ -9,8 +9,6 @@ import { useUiStore } from './store/uiStore';
 interface SelectionProps {
     onSelect: (moduleId: string, template: string, moduleName: string, customContent?: string, themeColor?: string) => void;
     onLogout: () => void;
-    /** Designer 2.0 (Beta) — sıfırdan yeniden tasarlanmış editöre geçiş. */
-    onSelectDesignerV2?: () => void;
 }
 
 interface Module {
@@ -98,7 +96,7 @@ const modules: Module[] = [
     // 2026-09-25: e-Sigorta Komisyon, e-Döviz, e-Kıymetli Maden modülleri kaldırıldı (12→9 modül).
 ];
 
-export const Selection: React.FC<SelectionProps> = ({ onSelect, onLogout, onSelectDesignerV2 }) => {
+export const Selection: React.FC<SelectionProps> = ({ onSelect, onLogout }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [showProfileModal, setShowProfileModal] = useState(false);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -378,67 +376,6 @@ export const Selection: React.FC<SelectionProps> = ({ onSelect, onLogout, onSele
                                 Dosya Seç ve Yükle &rsaquo;
                             </div>
                         </div>
-
-                        {/* Phase 17.2 — Designer 2.0 Beta kartı */}
-                        {onSelectDesignerV2 && (
-                            <div
-                                onClick={onSelectDesignerV2}
-                                title="Designer 2.0 (Beta) — sıfırdan yeniden tasarlanmış tasarım editörü"
-                                style={{
-                                    background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.1))',
-                                    border: '1px solid rgba(99,102,241,0.35)',
-                                    borderRadius: '24px', padding: '2rem', cursor: 'pointer',
-                                    display: 'flex', flexDirection: 'column', gap: '1.5rem',
-                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                    backdropFilter: 'blur(10px)',
-                                    position: 'relative',
-                                    overflow: 'hidden',
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.borderColor = 'rgba(99,102,241,0.7)';
-                                    e.currentTarget.style.transform = 'translateY(-2px)';
-                                    e.currentTarget.style.boxShadow = '0 12px 32px rgba(99,102,241,0.2)';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.borderColor = 'rgba(99,102,241,0.35)';
-                                    e.currentTarget.style.transform = 'translateY(0)';
-                                    e.currentTarget.style.boxShadow = 'none';
-                                }}
-                            >
-                                <div style={{
-                                    position: 'absolute', top: 12, right: 12,
-                                    padding: '4px 10px',
-                                    background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                                    borderRadius: '999px',
-                                    fontSize: '0.65rem', fontWeight: 800, letterSpacing: '1px',
-                                    color: 'white',
-                                }}>
-                                    BETA
-                                </div>
-                                <div style={{
-                                    width: '56px', height: '56px',
-                                    background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                                    borderRadius: '16px',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white'
-                                }}>
-                                    <Sparkles size={28} />
-                                </div>
-                                <div>
-                                    <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '0.5rem', color: 'white' }}>
-                                        Designer 2.0
-                                    </h2>
-                                    <p style={{ color: '#cbd5e1', fontSize: '0.9rem', lineHeight: '1.5' }}>
-                                        Sıfırdan yeniden tasarlanmış tasarım editörü. Tıkla-yerleştir, FastReport section mimarisi, canlı XSLT önizleme — sıfır karmaşa.
-                                    </p>
-                                </div>
-                                <div style={{
-                                    color: '#a5b4fc', fontWeight: 'bold', fontSize: '0.9rem',
-                                    display: 'flex', alignItems: 'center', gap: '6px',
-                                }}>
-                                    Yeni Tasarım Başlat &rsaquo;
-                                </div>
-                            </div>
-                        )}
                     </div>
                 </div>
 
