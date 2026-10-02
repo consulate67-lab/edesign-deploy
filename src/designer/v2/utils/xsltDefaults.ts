@@ -61,18 +61,13 @@ export async function fetchDefaultXslt(moduleId?: string): Promise<string | null
                 console.warn(`[xsltDefaults] fetch ${r.status}: ${url}`);
                 continue;
             }
-            // Sprint 4 ACİL v3 — arrayBuffer ile raw bytes → TextDecoder utf-8
-            // (response.text() bazı browser'larda BOM'u tam strip etmiyor olabilir;
-            // TextDecoder daha güvenilir)
-            const buffer = await r.arrayBuffer();
-            const bytes = new Uint8Array(buffer);
-            // Manuel BOM strip (raw bytes): EF BB BF
-            let startIdx = 0;
-            if (bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) {
-                startIdx = 3;
-            }
-            const decoder = new TextDecoder('utf-8', { fatal: false, ignoreBOM: false });
-            const text = decoder.decode(bytes.slice(startIdx));
+            // Sprint 4 ACİL v4 — ÇÖZÜM:
+            // Server UTF-8 BOM (EF BB BF) gönderiyor ama browser response.text()
+            // CP1254 (Türkçe Windows default) ile decode ediyor → ï»¿ (U+00EF U+00BB U+00BF)
+            // Bu decode edilmiş halini de strip etmek gerekiyor.
+            let text = await r.text();
+            // Üç katmanlı: BOM (U+FEFF) + Latin-1 BOM (U+00EF U+00BB U+00BF) + whitespace/invisible
+            text = text.replace(/^[\u00EF\u00BB\u00BF\uFEFF\u200B\u00A0\s]+/, '');
             if (text && text.length > 100) {
                 // eslint-disable-next-line no-console
                 console.log(

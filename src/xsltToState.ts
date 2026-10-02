@@ -50,10 +50,10 @@ function xpathToLabel(xpath: string): string {
 }
 
 export const xsltToState = (xsltString: string): DesignState => {
-    // Sprint 4 ACİL v3 — agresif BOM + invisible strip + debug log
-    // Selim console'unda BOM strip sonrası hâlâ parse hatası var,
-    // bu yüzden raw bytes yaklaşımına geçiyoruz.
-    let cleaned = xsltString.replace(/^[\s\uFEFF\u200B\u00A0]+/, '');
+    // Sprint 4 ACİL v4 — Server UTF-8 BOM gönderiyor ama browser CP1254 ile decode ediyor
+    // → "ï»¿" (U+00EF U+00BB U+00BF) decode edilmiş hali DOMParser'ı bozuyor.
+    // Bu decode edilmiş BOM karakterlerini de strip et:
+    let cleaned = xsltString.replace(/^[\u00EF\u00BB\u00BF\uFEFF\u200B\u00A0\s]+/, '');
     // eslint-disable-next-line no-console
     console.log(
         `[xsltToState] first 30 chars: ${JSON.stringify(cleaned.slice(0, 30))} · original length: ${xsltString.length} · cleaned length: ${cleaned.length}`
