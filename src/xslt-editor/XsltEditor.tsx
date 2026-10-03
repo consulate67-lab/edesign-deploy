@@ -1514,20 +1514,25 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         </div>
                     )}
 
-                    {/* iframe — Sprint 10 Aşama 2c: natural height + overflow:hidden.
-                        iframe.style.height KALDIRILDI → content'in doğal yüksekliği
-                        (scrollHeight). iframe kendi scroll'u YOK (overflow:hidden)
-                        → container overflow:auto hem yatay hem dikey scroll'u
-                        tetikler. transform: scale(zoom) uygulandıktan sonra
-                        scaled yükseklik container'ı aşarsa scroll bar görünür. */}
+                    {/* iframe — Sprint 11 Aşama 1 (2026-10-03): scaled render TAMAMEN YENIDEN.
+                        transform: scale KALDIRILDI (3 farklı yaklaşım denendi, hepsi
+                        container overflow:auto + flex layout quirks'ına takıldı).
+
+                        Yeni yaklaşım: scaledWidth/scaledHeight iframe'in GERÇEK
+                        width/height'i olarak set edilir (CSS zoom property kullanmadan,
+                        yani transform'suz). iframe natural layout'a scaled boyutuyla
+                        katılır → container overflow:auto scroll DOĞAL tetikler.
+
+                        scaledWidth = previewZoom × 100% (container'ın yüzdesi)
+                        scaledHeight = iframeContentHeight × previewZoom (px)
+
+                        Container block layout'a geçti (flex center yerine), iframe
+                        display:block + margin:0 auto ile ortalanır. */}
                     <div style={{
                         flex: 1, minHeight: 0, position: 'relative',
                         background: '#475569',  // koyu gri — ofis zemini
                         backgroundImage: 'radial-gradient(at 50% 50%, #64748b 0%, #1e293b 100%)',  // subtle vignette
-                        overflow: 'auto',  // Sprint 9 A2f — auto (hidden yerine) → dikey scroll
-                        display: 'flex',
-                        alignItems: 'flex-start',
-                        justifyContent: 'center',
+                        overflow: 'auto',  // scroll DOĞAL — iframe scaledHeight container'ı aşarsa scroll
                         padding: '48px 24px',
                     }}>
                         {previewHtml ? (
@@ -1540,15 +1545,17 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     background: 'white',
                                     boxShadow: '0 25px 50px -12px rgba(0,0,0,0.55), 0 12px 24px -8px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,0,0,0.04)',
                                     borderRadius: '2px',  // hafif köşe yumuşama (kağıt kenarı)
+                                    // Sprint 11.1: scaledWidth = previewZoom × 100% (container yüzdesi).
+                                    // Antrepo 700px scaled 0.60 → 420px. Container ~800px → sığar.
                                     width: `${(100 / previewZoom) * 0.95}%`,
                                     maxWidth: '1100px',
                                     minWidth: '500px',
-                                    // Sprint 10 Aşama 2c: height kaldırıldı (natural height),
-                                    // overflow:hidden (iframe kendi scroll yok) →
-                                    // container overflow:auto hem yatay hem dikey scroll
-                                    transform: `scale(${previewZoom})`,
-                                    transformOrigin: 'center top',  // top — scroll üstten başlar
-                                    overflow: 'hidden',  // kendi scroll YOK → container scroll
+                                    // scaledHeight = iframeContentHeight × previewZoom.
+                                    // iframe.contentDocument.body.scrollHeight 3 zaman
+                                    // noktasında ölçülüyor (handleIframeLoad).
+                                    height: `${Math.round(iframeContentHeight * previewZoom)}px`,
+                                    display: 'block',
+                                    margin: '0 auto',  // yatay ortala
                                 }}
                                 title="XSLT Render Preview"
                             />
