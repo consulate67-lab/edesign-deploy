@@ -36,6 +36,7 @@ import {
 } from 'lucide-react';
 import { transformXmlWithXslt } from '../xsltTransformer';
 import { getInlineXslt } from '../xsltContent';
+import { getAntrepoTemplateById } from './antrepoTemplates';
 import { api } from '../api';
 import {
     SNIPPETS, SNIPPET_CATEGORIES, getSnippetsByCategory, getCategoryCounts,
@@ -50,11 +51,16 @@ import { XSLT_ELEMENTS, UBL_XPATHS, lintXslt } from './xsltSchema';
 interface ModuleDef {
     id: string;
     label: string;
-    /** xsltContent.ts INLINE_XSLT_CONTENT key (modüle göre inline XSLT) */
-    inlineKey: string;
+    /** xsltContent.ts INLINE_XSLT_CONTENT key (modüle göre inline XSLT) — minimal şablonlar için */
+    inlineKey?: string;
+    /** Sprint 9 — Antrepo template ID'si (büyük gerçek XSLT'ler için) */
+    antrepoId?: string;
+    /** Sprint 9 — Antrepo ise true (dropdown'da "Antrepo" badge gösterir) */
+    isAntrepo?: boolean;
 }
 
 const MODULES: ModuleDef[] = [
+    // Minimal şablonlar (gib/v2/ veya community/)
     { id: 'fatura',        label: 'e-Fatura',          inlineKey: 'gib/v2/e-Fatura-Sablon.xslt' },
     { id: 'arsiv',         label: 'e-Arşiv',           inlineKey: 'gib/v2/e-Arsiv-Sablon.xslt' },
     { id: 'irsaliye',      label: 'e-İrsaliye',        inlineKey: 'community/IRPTeam-eWaybill-Irsaliye-Aracli.xslt' },
@@ -64,6 +70,10 @@ const MODULES: ModuleDef[] = [
     { id: 'mustahsil',     label: 'e-Müstahsil',       inlineKey: 'community/hzkucuk-eFatura-mustahsil.xslt' },
     { id: 'bilet',         label: 'e-Bilet',           inlineKey: 'community/hzkucuk-eFatura-bilet.xslt' },
     { id: 'makbuz',        label: 'e-Makbuz',          inlineKey: 'community/hzkucuk-eFatura-makbuz.xslt' },
+
+    // Sprint 9 — Antrepo profesyonel şablonlar (public/ altından, ?raw inline)
+    { id: 'antrepo-fatura', label: 'Antrepo e-Fatura',  antrepoId: 'antrepo-fatura', isAntrepo: true },
+    { id: 'antrepo-arsiv',  label: 'Antrepo e-Arşiv',   antrepoId: 'antrepo-arsiv',  isAntrepo: true },
 ];
 
 // ============================================================================
@@ -183,7 +193,22 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             setXsltContent(initialXslt);
             return;
         }
-        const inline = getInlineXslt(currentModule.inlineKey);
+        // Sprint 9 — Antrepo ise antrepoTemplates'tan al
+        if (currentModule.antrepoId) {
+            const tmpl = getAntrepoTemplateById(currentModule.antrepoId);
+            if (tmpl) {
+                setXsltContent(tmpl.xslt);
+                console.log(
+                    `[XSLTEditor] Module switch → ${currentModule.id} loaded Antrepo ${tmpl.xslt.length} chars`
+                );
+                return;
+            }
+            console.warn(`[XSLTEditor] Antrepo template bulunamadı: ${currentModule.antrepoId}`);
+            setXsltContent('<!-- Antrepo template bulunamadı -->');
+            return;
+        }
+        // Minimal şablonlar — xsltContent'ten al
+        const inline = getInlineXslt(currentModule.inlineKey || '');
         if (inline) {
             setXsltContent(inline);
             console.log(
@@ -193,7 +218,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             console.warn(`[XSLTEditor] Inline XSLT yok: ${currentModule.inlineKey}`);
             setXsltContent('<!-- Bu modül için inline XSLT bulunamadı -->');
         }
-    }, [moduleId, currentModule.inlineKey, initialXslt, initialModuleId]);
+    }, [moduleId, currentModule.antrepoId, currentModule.inlineKey, initialXslt, initialModuleId]);
 
     // ------------------------------------------------------------------------
     // Canlı preview — 500ms debounce
