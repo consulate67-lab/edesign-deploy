@@ -696,14 +696,23 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
 
     /**
      * iframe yüklendiğinde:
-     * 1. Content height ölç → state set → iframe minHeight ile scaled boyut
-     *    container'ı aşarsa dikey scroll bar görünür (Sprint 10 Aşama 2a).
+     * 1. Content height ölç → 3 zaman noktasında (hemen + 50ms + 300ms)
+     *    font/image yüklendikten sonra doğru scrollHeight. setIframeContentHeight
+     *    debug amaçlı (style'a bağlanmadı — Sprint 10 A2c).
      * 2. Click listener bağla → preview click → editör scroll/highlight
      *    (Sprint 10 Aşama 2b, defensive: capture:true + setTimeout retry).
      *
      * iframe.contentDocument.body bazen ilk render'da null olabiliyor
      * (React render race). Bu yüzden useEffect yerine iframe onLoad event'i
      * kullanıyoruz — srcDoc her değiştiğinde tetiklenir.
+     *
+     * Sprint 10 Aşama 2c (2026-10-03): iframe.style.height artık KALDIRILDI.
+     * iframe natural height (content'in gerçek yüksekliği) kullanılıyor;
+     * iframe.style.overflow = 'hidden' → iframe kendi scroll'u yok,
+     * container overflow:auto hem yatay hem dikey scroll'u tetikler.
+     * Önceki yaklaşım (iframe.style.height = scrollHeight + iframe kendi
+     * scroll) container'a scroll geçirmiyordu — Selim'in test ekranında
+     * sağ ve alt kesik görünüyordu.
      */
     const handleIframeLoad = useCallback(() => {
         const iframe = iframeRef.current;
@@ -719,10 +728,18 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 return;
             }
 
-            // (1) İçerik yüksekliğini ölç
-            const scrollH = body.scrollHeight || body.offsetHeight || 800;
-            setIframeContentHeight(scrollH);
-            console.log(`[XSLTEditor] iframe loaded — body.scrollHeight=${scrollH}px, zoom=${previewZoom}`);
+            // (1) İçerik yüksekliğini ölç — 3 zaman noktası:
+            // - hemen (ilk DOM hazır)
+            // - 50ms (paint sonrası font/layout)
+            // - 300ms (image/font async yüklendikten sonra)
+            const measureHeight = () => {
+                const h = body.scrollHeight || body.offsetHeight || 800;
+                setIframeContentHeight(h);
+                console.log(`[XSLTEditor] iframe measured — body.scrollHeight=${h}px`);
+            };
+            measureHeight();
+            setTimeout(measureHeight, 50);
+            setTimeout(measureHeight, 300);
 
             // (2) Click listener bağla (capture:true → draggable content'te bile click yakalanır)
             body.addEventListener('click', handleIframeBodyClick, { capture: true });
@@ -730,7 +747,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         };
 
         bindListener();
-    }, [handleIframeBodyClick, previewZoom]);
+    }, [handleIframeBodyClick]);
 
     /**
      * iframe onLoad → handleIframeLoad. previewHtml değiştiğinde iframe
@@ -1497,10 +1514,12 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         </div>
                     )}
 
-                    {/* iframe — Sprint 10 Aşama 2: aspectRatio kaldırıldı, doğal yükseklik +
-                        scrollHeight → iframe scaled boyutu container'dan büyükse dikey
-                        scroll bar görünür (fatura toplamları, dipnotlar görünür).
-                        Sayfa hissi korunur, tüm içerik erişilebilir. */}
+                    {/* iframe — Sprint 10 Aşama 2c: natural height + overflow:hidden.
+                        iframe.style.height KALDIRILDI → content'in doğal yüksekliği
+                        (scrollHeight). iframe kendi scroll'u YOK (overflow:hidden)
+                        → container overflow:auto hem yatay hem dikey scroll'u
+                        tetikler. transform: scale(zoom) uygulandıktan sonra
+                        scaled yükseklik container'ı aşarsa scroll bar görünür. */}
                     <div style={{
                         flex: 1, minHeight: 0, position: 'relative',
                         background: '#475569',  // koyu gri — ofis zemini
@@ -1521,18 +1540,15 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     background: 'white',
                                     boxShadow: '0 25px 50px -12px rgba(0,0,0,0.55), 0 12px 24px -8px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,0,0,0.04)',
                                     borderRadius: '2px',  // hafif köşe yumuşama (kağıt kenarı)
-                                    // Sprint 10 Aşama 2: aspectRatio kaldırıldı. İframe
-                                    // doğal yüksekliği + iframeContentHeight (scrollHeight)
-                                    // scaledHeight = iframeHeight × previewZoom. Container
-                                    // height'i aşarsa container overflow:auto → dikey scroll.
                                     width: `${(100 / previewZoom) * 0.95}%`,
                                     maxWidth: '1100px',
                                     minWidth: '500px',
-                                    height: `${iframeContentHeight}px`,  // scrollHeight (natural)
-                                    // iframe kendi scroll'u — XSLT body'si büyükse
-                                    overflow: 'auto',
+                                    // Sprint 10 Aşama 2c: height kaldırıldı (natural height),
+                                    // overflow:hidden (iframe kendi scroll yok) →
+                                    // container overflow:auto hem yatay hem dikey scroll
                                     transform: `scale(${previewZoom})`,
                                     transformOrigin: 'center top',  // top — scroll üstten başlar
+                                    overflow: 'hidden',  // kendi scroll YOK → container scroll
                                 }}
                                 title="XSLT Render Preview"
                             />
