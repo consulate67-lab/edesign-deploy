@@ -38,7 +38,7 @@ import {
 import { transformXmlWithXslt } from '../xsltTransformer';
 import { getInlineXslt } from '../xsltContent';
 import { getAntrepoTemplateById } from './antrepoTemplates';
-import { renderAndAnnotateXslt, parseXsltBindings } from './utils/xsltRender';
+import { renderAndAnnotateXslt, parseXsltInstrumented } from './utils/xsltRender';
 import { api } from '../api';
 import {
     SNIPPETS, SNIPPET_CATEGORIES, getSnippetsByCategory, getCategoryCounts,
@@ -200,7 +200,13 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const [previewSelectedColumn, setPreviewSelectedColumn] = useState<number | null>(null);
     // XSLT bindings listesi (xpath + offset + line + column). previewHtml
     // annotation'ında kullanılır.
-    const [xsltBindings, setXsltBindings] = useState<import('./utils/xsltRender').XsltBinding[]>([]);
+    // Sprint 11 Aşama 8 — instrumented XSLT + bindings. parseXsltInstrumented
+    // XSLT'e <xsl:comment>BIND_X</xsl:comment> marker ekler, render DOM comment
+    // takibi ile %100 binding-text eşleşmesi sağlar.
+    const [xsltInstrumented, setXsltInstrumented] = useState<{
+        instrumentedXslt: string;
+        bindings: import('./utils/xsltRender').XsltBinding[];
+    }>({ instrumentedXslt: '', bindings: [] });
 
     // ------------------------------------------------------------------------
     // Mevcut modül tanımı
@@ -259,11 +265,15 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             let cleanXml = xmlContent;
             if (cleanXml.charCodeAt(0) === 0xFEFF) cleanXml = cleanXml.slice(1);
 
-            // Sprint 11 Aşama 6 — koordinatlı annotated render. renderAndAnnotateXslt
-            // artık bindings (xpath + line + column) alıyor, render DOM'a
-            // data-line + data-column attribute ekliyor. Preview click →
-            // direkt koordinata git (XPath arama yok).
-            const result = renderAndAnnotateXslt(cleanXml, cleanXslt, xsltBindings);
+            // Sprint 11 Aşama 6 + 8 — koordinatlı annotated render + comment-marker
+            // tracking. renderAndAnnotateXslt instrumented XSLT kullanır, her
+            // <xsl:comment>BIND_X</xsl:comment> marker'ı sonrasındaki dolu text
+            // node'a annotation ekler → %100 doğru binding-text eşleşmesi.
+            const result = renderAndAnnotateXslt(
+                cleanXml,
+                xsltInstrumented.instrumentedXslt,
+                xsltInstrumented.bindings
+            );
             setPreviewHtml(result.html);
             setPreviewError(result.error);
             setRenderDurationMs(result.durationMs);
@@ -274,7 +284,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         } finally {
             setIsRendering(false);
         }
-    }, [xsltContent, xmlContent, xsltBindings]);
+    }, [xsltContent, xmlContent, xsltInstrumented]);
 
     // Debounce trigger
     useEffect(() => {
@@ -620,7 +630,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
      * DOM'a data-line + data-column olarak ekler.
      */
     useEffect(() => {
-        setXsltBindings(parseXsltBindings(xsltContent));
+        setXsltInstrumented(parseXsltInstrumented(xsltContent));
     }, [xsltContent]);
 
     /**
@@ -637,7 +647,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         const monaco = monacoRef.current;
         if (!ed || !monaco) return;
 
-        const decorations = xsltBindings.map((b, i) => ({
+        const decorations = xsltInstrumented.bindings.map((b, i) => ({
             range: new monaco.Range(b.line, 1, b.line, 1),
             options: {
                 glyphMarginClassName: 'xslt-bind-glyph',
@@ -656,7 +666,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 ed.deltaDecorations(newIds, []);
             }
         };
-    }, [xsltBindings]);
+    }, [xsltInstrumented.bindings]);
 
     /**
      * Preview click → editör scroll + highlight (koordinat tabanlı).

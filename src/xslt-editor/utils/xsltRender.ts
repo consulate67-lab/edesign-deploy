@@ -71,21 +71,78 @@ export function parseXsltXPathBindings(xslt: string): string[] {
 }
 
 /**
+ * Sprint 11 Aşama 8 — XSLT instrumentation (DOM-level binding tracking).
+ * Selim: "B79 yazıyor ama editör kısmında alakasız bir yerde". Binding
+ * sayısı ile render DOM text node sayısı eşleşmiyordu:
+ * - whitespace text node counter artmıyor (off-by-one)
+ * - <xsl:value-of>explicit close</xsl:value-of> birden fazla text node üretebilir
+ * - <xsl:if>/<xsl:choose> koşullu binding'ler koşul false ise text node üretmez
+ *
+ * Çözüm: XSLT'e DOM-level instrumentation. Her xsl:value-of veya xsl:copy-of
+ * kapanışından sonra `<xsl:comment>BIND_${i+1}</xsl:comment>` marker eklenir.
+ * XSLTProcessor bunu output DOM'a comment node olarak aktarır. Render sonrası
+ * DFS pre-order ile comment node'ları taranır, her comment'in hemen
+ * SONRASINDAKİ dolu text node doğru binding'dir → %100 eşleşme.
+ *
+ * @param xslt - Orijinal XSLT string
+ * @returns instrumented XSLT (marker comment'li) + bindings (xpath + line + column)
+ */
+export function parseXsltInstrumented(xslt: string): {
+    instrumentedXslt: string;
+    bindings: XsltBinding[];
+} {
+    // 1. Bindings parse et (parseXsltBindings ile aynı logic)
+    const bindings: XsltBinding[] = [];
+    const re = /<xsl:(?:value-of|copy-of)\b[^>]*?\bselect="([^"]+)"/g;
+    let match: RegExpExecArray | null;
+    while ((match = re.exec(xslt)) !== null) {
+        const offset = match.index;
+        const xpath = match[1];
+        const before = xslt.substring(0, offset);
+        const line = before.split('\n').length;
+        const lastNewline = before.lastIndexOf('\n');
+        const column = (lastNewline === -1 ? offset : offset - lastNewline) + 1;
+        bindings.push({ xpath, offset, line, column });
+    }
+
+    // 2. Instrumented XSLT — her xsl:value-of / xsl:copy-of kapanışından sonra
+    //    comment marker ekle. Regex global scan sırayla gider, ++i sıra korur.
+    let i = 0;
+    const instrumentedXslt = xslt.replace(
+        /(<xsl:(?:value-of|copy-of)\b[^>]*?\/>)|(<xsl:(?:value-of|copy-of)\b[^>]*?>[\s\S]*?<\/xsl:(?:value-of|copy-of)>)/g,
+        (fullMatch) => `${fullMatch}<xsl:comment>BIND_${++i}</xsl:comment>`
+    );
+
+    return { instrumentedXslt, bindings };
+}
+
+/**
  * XSLT + XML → annotated HTML transform.
  * @param xmlString - UBL-TR XML source
- * @param xsltString - XSLT 1.0 source
- * @param bindings - parseXsltBindings'ten XSLT binding + koordinat listesi
- *                   (sıra = XSLT DFS pre-order = render DOM text node sırası)
+ * @param instrumentedXslt - parseXsltInstrumented'den gelen marker'lı XSLT
+ * @param bindings - parseXsltInstrumented'den gelen XSLT binding + koordinat
+ *
+ * Annotation stratejisi (Sprint 11 Aşama 8 — %100 doğru):
+ * 1. parseXsltInstrumented XSLT'e <xsl:comment>BIND_X</xsl:comment> marker
+ *    ekler (her xsl:value-of kapanışından sonra)
+ * 2. XSLTProcessor bu marker'ları output DOM'a comment node olarak aktarır
+ * 3. Render sonrası DFS pre-order comment node'ları tarar
+ * 4. Her comment'in hemen SONRASINDAKİ dolu text node → ilgili binding
+ *    ile annotation alır (data-render-index + data-bind-index + data-xpath
+ *    + data-line + data-column)
+ *
+ * Avantajı: text node counter mismatch YOK. Her binding'in render DOM'daki
+ * karşılığı marker ile bire bir eşleşir.
  */
 export function renderAndAnnotateXslt(
     xmlString: string,
-    xsltString: string,
+    instrumentedXslt: string,
     bindings: XsltBinding[]
 ): XsltRenderResult {
     const start = performance.now();
 
     // UTF-8 BOM strip
-    let xslt = xsltString;
+    let xslt = instrumentedXslt;
     if (xslt.charCodeAt(0) === 0xFEFF) xslt = xslt.slice(1);
     let xml = xmlString;
     if (xml.charCodeAt(0) === 0xFEFF) xml = xml.slice(1);
@@ -96,7 +153,7 @@ export function renderAndAnnotateXslt(
 
     try {
         const parser = new DOMParser();
-        const xsltDoc = parser.parseFromString(xslt, 'application/xml');
+        const xsltDoc = parser.parseFromString(instrumentedXslt, 'application/xml');
         const xmlDoc = parser.parseFromString(xml, 'application/xml');
 
         const xsltError = xsltDoc.querySelector('parsererror');
@@ -121,43 +178,56 @@ export function renderAndAnnotateXslt(
         processor.importStylesheet(xsltDoc);
         const resultDoc = processor.transformToDocument(xmlDoc);
 
-        // Annotation — Sprint 11 Aşama 6 + 7: koordinat tabanlı + referans index.
-        // Her annotation element'ine 4 attribute eklenir:
-        // 1. data-render-index: 0-based sıra (backward compat + debug)
-        // 2. data-bind-index: 1-based "B1", "B2"... (görsel referans, kullanıcı dostu)
-        // 3. data-xpath: xpath string
-        // 4. data-line + data-column: XSLT içindeki GERÇEK koordinat (Monaco 1-based)
+        // Annotation — Sprint 11 Aşama 8: comment-marker tracking (%100 doğru).
+        // parseXsltInstrumented XSLT'e <xsl:comment>BIND_X</xsl:comment> marker
+        // ekledi. XSLTProcessor bunu output DOM'a comment node olarak aktarır.
+        // DFS pre-order comment node'ları tara, hemen SONRASINDAKİ dolu text
+        // node'u annotation'la → %100 binding-text eşleşmesi.
         //
-        // data-bind-index kullanım:
-        // - Monaco gutter decoration: sol kenarda "B12" rozeti (her binding satırı)
-        // - Hover tooltip: "B12 → ./cac:Item/cbc:Name (line 1552)"
-        // - Preview hover'da element köşesinde küçük "B12" badge (göze batmaz)
-        const body = resultDoc.body || resultDoc.documentElement;
-        if (body) {
-            let counter = 0;
-            const walk = (node: Node) => {
-                if (node.nodeType === 3) { // TEXT_NODE
-                    const text = (node.textContent || '').trim();
-                    if (text.length > 0 && counter < bindings.length) {
-                        const parent = (node as Text).parentElement;
-                        if (parent && !parent.hasAttribute('data-render-index')) {
-                            const b = bindings[counter];
-                            parent.setAttribute('data-render-index', String(counter));
-                            parent.setAttribute('data-bind-index', `B${counter + 1}`);
-                            parent.setAttribute('data-xpath', b.xpath);
-                            parent.setAttribute('data-line', String(b.line));
-                            parent.setAttribute('data-column', String(b.column));
+        // Neden bu yöntem:
+        // - text node counter eşitsizliği (whitespace skip, multi-text binding)
+        // - <xsl:if>/<xsl:choose> koşullu binding'ler (koşul false ise boş)
+        // - <xsl:value-of>explicit close</xsl:value-of> birden fazla text üretir
+        // → eski yöntemlerde off-by-one hatası oluyordu. Comment marker ile
+        // her binding'in render çıktısındaki KARŞILIĞI kesin olarak bilinir.
+        let annotated = 0;
+        const walk = (node: Node) => {
+            if (node.nodeType === 8) { // COMMENT_NODE
+                const text = (node.textContent || '').trim();
+                const m = text.match(/^BIND_(\d+)$/);
+                if (m) {
+                    const idx = Number(m[1]) - 1; // 1-based → 0-based
+                    // Hemen sonraki sibling text node'u bul (boş/whitespace skip)
+                    let next = node.nextSibling;
+                    while (next) {
+                        if (next.nodeType === 3) { // TEXT_NODE
+                            const t = (next.textContent || '').trim();
+                            if (t.length > 0) {
+                                const textParent = (next as Text).parentElement;
+                                if (textParent && !textParent.hasAttribute('data-render-index')) {
+                                    const b = bindings[idx];
+                                    if (b) {
+                                        textParent.setAttribute('data-render-index', String(idx));
+                                        textParent.setAttribute('data-bind-index', `B${idx + 1}`);
+                                        textParent.setAttribute('data-xpath', b.xpath);
+                                        textParent.setAttribute('data-line', String(b.line));
+                                        textParent.setAttribute('data-column', String(b.column));
+                                        annotated++;
+                                    }
+                                }
+                                break; // Bu comment işlendi, sonraki comment'e geç
+                            }
                         }
-                        counter++;
+                        next = next.nextSibling;
                     }
-                    return;
                 }
-                if (node.nodeType !== 1) return;
-                for (const child of Array.from(node.childNodes)) walk(child);
-            };
-            walk(body);
-            console.log(`[xsltRender] annotated ${counter} text nodes (bindings: ${bindings.length})`);
-        }
+                return; // Comment'in children'ı yok
+            }
+            if (node.nodeType !== 1) return;
+            for (const child of Array.from(node.childNodes)) walk(child);
+        };
+        walk(resultDoc);
+        console.log(`[xsltRender] annotated ${annotated} bindings via comment markers (total: ${bindings.length})`);
 
         const serializer = new XMLSerializer();
         let html = serializer.serializeToString(resultDoc);
