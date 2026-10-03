@@ -1,15 +1,4 @@
-const P=(f,i)=>{console.log("🔄 transformXmlWithXslt INPUT (First 100 chars):",i?i.substring(0,100):"NULL/UNDEFINED");try{const A=new DOMParser,F=A.parseFromString(f,"application/xml"),o=A.parseFromString(i,"application/xml"),K=F.querySelector("parsererror");if(K)throw new Error(`XML Parse Error: ${K.textContent}`);const t=o.querySelector("parsererror");if(t)throw new Error(`XSLT Parse Error: ${t.textContent}`);const U=new XSLTProcessor;U.importStylesheet(o);let R=U.transformToDocument(F);const r=new XMLSerializer;if(!R){console.warn("transformToDocument returned null, trying transformToFragment...");const n=U.transformToFragment(F,document);if(n)return r.serializeToString(n);throw new Error("XSLT transformation produced null result. Possible causes: Invalid XSLT syntax, missing templates, or runtime errors (e.g. format-number pattern mismatch).")}return r.serializeToString(R)}catch(A){console.error("XSLT Transformation Error:",A);let F="",o=A instanceof Error?A.message.match(/line (\d+)/):null;if(o){const K=parseInt(o[1]),t=i.split(`
-`),U=Math.max(0,K-10),R=Math.min(t.length,K+10);F=t.slice(U,R).map((r,n)=>`${U+n+1}: ${r}`).join(`
-`)}return`<div style="padding:20px; color:red; background:#fee; border:1px solid red; font-family: sans-serif;">
-            <h3 style="margin-top:0;">Hata: XSLT Dönüşümü başarısız oldu</h3>
-            <pre style="white-space: pre-wrap; font-weight: bold;">${A instanceof Error?A.message:A}</pre>
-            ${F?`
-                <div style="margin-top: 15px;">
-                    <div style="font-weight: bold; margin-bottom: 5px; color: #721c24;">Hata Çevresi (Satır ${o[1]}):</div>
-                    <pre style="background:#fff; padding:10px; border:1px solid #ddd; overflow:auto; max-height: 400px; font-size: 12px; line-height: 1.4; color: #333;">${F.replace(/</g,"&lt;").replace(/>/g,"&gt;")}</pre>
-                </div>
-            `:""}
-        </div>`}},e=`ï»¿<?xml version="1.0" encoding="UTF-8"?>
+const F=`ï»¿<?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="1.0"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
@@ -598,7 +587,7 @@ const P=(f,i)=>{console.log("🔄 transformXmlWithXslt INPUT (First 100 chars):"
 
 </xsl:stylesheet>
 
-`,a=`ï»¿<?xml version="1.0" encoding="UTF-8"?>
+`,o=`ï»¿<?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="1.0"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
@@ -823,7 +812,7 @@ const P=(f,i)=>{console.log("🔄 transformXmlWithXslt INPUT (First 100 chars):"
     </xsl:template>
 
 </xsl:stylesheet>
-`,C=`<?xml version="1.0" encoding="UTF-8"?>\r
+`,U=`<?xml version="1.0" encoding="UTF-8"?>\r
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ccts="urn:un:unece:uncefact:documentation:2" xmlns:clm54217="urn:un:unece:uncefact:codelist:specification:54217:2001" xmlns:clm5639="urn:un:unece:uncefact:codelist:specification:5639:1988" xmlns:clm66411="urn:un:unece:uncefact:codelist:specification:66411:2001" xmlns:clmIANAMIMEMediaType="urn:un:unece:uncefact:codelist:specification:IANAMIMEMediaType:2003" xmlns:fn="http://www.w3.org/2005/xpath-functions" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:n1="urn:oasis:names:specification:ubl:schema:xsd:DespatchAdvice-2" xmlns:qdt="urn:oasis:names:specification:ubl:schema:xsd:QualifiedDatatypes-2" xmlns:udt="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" xmlns:xbrldi="http://xbrl.org/2006/xbrldi" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:xdt="http://www.w3.org/2005/xpath-datatypes" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" exclude-result-prefixes="cac cbc ccts clm54217 clm5639 clm66411 clmIANAMIMEMediaType fn link n1 qdt udt xbrldi xbrli xdt xlink xs xsd xsi">\r
 	<xsl:decimal-format name="european" decimal-separator="," grouping-separator="." NaN=""/>\r
 	<xsl:output method="html" encoding="utf-8" indent="yes"/>\r
@@ -2909,7 +2898,7 @@ const P=(f,i)=>{console.log("🔄 transformXmlWithXslt INPUT (First 100 chars):"
 		</xsl:choose>\r
 	</xsl:template>\r
 </xsl:stylesheet>\r
-`,B=`<?xml version="1.0" encoding="UTF-8"?>\r
+`,K=`<?xml version="1.0" encoding="UTF-8"?>\r
 <!-- Version for IRP. info@irpteam.com -->\r
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ccts="urn:un:unece:uncefact:documentation:2" xmlns:clm54217="urn:un:unece:uncefact:codelist:specification:54217:2001" xmlns:clm5639="urn:un:unece:uncefact:codelist:specification:5639:1988" xmlns:clm66411="urn:un:unece:uncefact:codelist:specification:66411:2001" xmlns:clmIANAMIMEMediaType="urn:un:unece:uncefact:codelist:specification:IANAMIMEMediaType:2003" xmlns:fn="http://www.w3.org/2005/xpath-functions" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:n1="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:qdt="urn:oasis:names:specification:ubl:schema:xsd:QualifiedDatatypes-2" xmlns:udt="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" xmlns:xbrldi="http://xbrl.org/2006/xbrldi" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:xdt="http://www.w3.org/2005/xpath-datatypes" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" exclude-result-prefixes="cac cbc ccts clm54217 clm5639 clm66411 clmIANAMIMEMediaType fn link n1 qdt udt xbrldi xbrli xdt xlink xs xsd xsi ext ds xades">\r
 	<xsl:decimal-format name="european" decimal-separator="," grouping-separator="." NaN=""/>\r
@@ -5490,7 +5479,7 @@ const P=(f,i)=>{console.log("🔄 transformXmlWithXslt INPUT (First 100 chars):"
 		</xsl:choose>\r
 	</xsl:template>\r
 </xsl:stylesheet>\r
-`,w=`\uFEFF<?xml version="1.0" encoding="UTF-8"?>\r
+`,t=`\uFEFF<?xml version="1.0" encoding="UTF-8"?>\r
 <xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"\r
 	xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"\r
 	xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"\r
@@ -7355,7 +7344,7 @@ const P=(f,i)=>{console.log("🔄 transformXmlWithXslt INPUT (First 100 chars):"
       </xsl:choose>\r
     </xsl:if>\r
   </xsl:template>\r
-</xsl:stylesheet>`,l=`\uFEFF<?xml version="1.0" encoding="UTF-8"?>\r
+</xsl:stylesheet>`,i=`\uFEFF<?xml version="1.0" encoding="UTF-8"?>\r
 <xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"\r
 	xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"\r
 	xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"\r
@@ -9220,7 +9209,7 @@ const P=(f,i)=>{console.log("🔄 transformXmlWithXslt INPUT (First 100 chars):"
       </xsl:choose>\r
     </xsl:if>\r
   </xsl:template>\r
-</xsl:stylesheet>`,v=`\uFEFF<?xml version="1.0" encoding="UTF-8"?>\r
+</xsl:stylesheet>`,R=`\uFEFF<?xml version="1.0" encoding="UTF-8"?>\r
 <xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"\r
 	xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"\r
 	xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"\r
@@ -11085,7 +11074,7 @@ const P=(f,i)=>{console.log("🔄 transformXmlWithXslt INPUT (First 100 chars):"
       </xsl:choose>\r
     </xsl:if>\r
   </xsl:template>\r
-</xsl:stylesheet>`,g=`\uFEFF<?xml version="1.0" encoding="UTF-8"?>\r
+</xsl:stylesheet>`,r=`\uFEFF<?xml version="1.0" encoding="UTF-8"?>\r
 <xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"\r
 	xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"\r
 	xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"\r
@@ -12952,4 +12941,4 @@ const P=(f,i)=>{console.log("🔄 transformXmlWithXslt INPUT (First 100 chars):"
       </xsl:choose>\r
     </xsl:if>\r
   </xsl:template>\r
-</xsl:stylesheet>`,x={"gib/v2/e-Fatura-Sablon.xslt":e,"gib/v2/e-Arsiv-Sablon.xslt":a,"community/IRPTeam-eWaybill-Irsaliye-Aracli.xslt":C,"community/IRPTeam-eFatura.xslt":B,"community/hzkucuk-eFatura-smm.xslt":w,"community/hzkucuk-eFatura-mustahsil.xslt":l,"community/hzkucuk-eFatura-bilet.xslt":v,"community/hzkucuk-eFatura-makbuz.xslt":g},s=f=>x[f];export{s as g,P as t};
+</xsl:stylesheet>`,n={"gib/v2/e-Fatura-Sablon.xslt":F,"gib/v2/e-Arsiv-Sablon.xslt":o,"community/IRPTeam-eWaybill-Irsaliye-Aracli.xslt":U,"community/IRPTeam-eFatura.xslt":K,"community/hzkucuk-eFatura-smm.xslt":t,"community/hzkucuk-eFatura-mustahsil.xslt":i,"community/hzkucuk-eFatura-bilet.xslt":R,"community/hzkucuk-eFatura-makbuz.xslt":r},f=A=>n[A];export{f as g};
