@@ -32,7 +32,7 @@ import Editor from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
 import {
     ArrowLeft, Save, Download, ChevronDown, FileCode, FileCode2,
-    AlertCircle, Eye, RefreshCw, CheckCircle2, Sparkles, Search,
+    AlertCircle, Eye, RefreshCw, CheckCircle2, Sparkles, Search, ZoomIn, ZoomOut,
 } from 'lucide-react';
 import { transformXmlWithXslt } from '../xsltTransformer';
 import { getInlineXslt } from '../xsltContent';
@@ -160,6 +160,9 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const [activeTab, setActiveTab] = useState<'xslt' | 'xml'>('xslt');
     const [previewHtml, setPreviewHtml] = useState<string>('');
     const [previewError, setPreviewError] = useState<string | null>(null);
+    // Sprint 9 Aşama 2a (2026-10-03) — Preview zoom slider. Antrepo XSLT gibi
+    // fixed-width (700px) içerikler için varsayılan zoom 0.65 ile sığdır.
+    const [previewZoom, setPreviewZoom] = useState<number>(0.65);
     const [renderDurationMs, setRenderDurationMs] = useState<number>(0);
     const [isRendering, setIsRendering] = useState<boolean>(false);
     const [moduleMenuOpen, setModuleMenuOpen] = useState<boolean>(false);
@@ -1123,6 +1126,90 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 <CheckCircle2 size={11} /> {renderDurationMs.toFixed(1)}ms
                             </span>
                         )}
+
+                        {/* Sprint 9 Aşama 2a — Zoom butonları (küçük) */}
+                        <span style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '2px',
+                            padding: '0 4px',
+                            marginLeft: '8px',
+                            borderLeft: '1px solid #334155',
+                        }}>
+                            <button
+                                onClick={() => setPreviewZoom(z => Math.max(0.25, Math.round((z - 0.1) * 100) / 100))}
+                                title="Zoom out (-10%)"
+                                style={{
+                                    padding: '2px 4px',
+                                    background: 'transparent',
+                                    border: 'none',
+                                    color: '#94a3b8',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.color = '#a5b4fc'}
+                                onMouseLeave={(e) => e.currentTarget.style.color = '#94a3b8'}
+                            >
+                                <ZoomOut size={11} />
+                            </button>
+                            <span style={{
+                                fontSize: '10px',
+                                fontFamily: 'monospace',
+                                color: '#cbd5e1',
+                                minWidth: '34px',
+                                textAlign: 'center',
+                                padding: '0 2px',
+                            }}>
+                                {Math.round(previewZoom * 100)}%
+                            </span>
+                            <button
+                                onClick={() => setPreviewZoom(z => Math.min(2.0, Math.round((z + 0.1) * 100) / 100))}
+                                title="Zoom in (+10%)"
+                                style={{
+                                    padding: '2px 4px',
+                                    background: 'transparent',
+                                    border: 'none',
+                                    color: '#94a3b8',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.color = '#a5b4fc'}
+                                onMouseLeave={(e) => e.currentTarget.style.color = '#94a3b8'}
+                            >
+                                <ZoomIn size={11} />
+                            </button>
+                            <button
+                                onClick={() => setPreviewZoom(0.65)}
+                                title="Default zoom (65%)"
+                                style={{
+                                    padding: '1px 5px',
+                                    background: 'transparent',
+                                    border: '1px solid #334155',
+                                    borderRadius: '2px',
+                                    color: '#94a3b8',
+                                    fontSize: '9px',
+                                    fontWeight: 700,
+                                    cursor: 'pointer',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.3px',
+                                    marginLeft: '2px',
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.background = 'rgba(99, 102, 241, 0.15)';
+                                    e.currentTarget.style.borderColor = 'rgba(99, 102, 241, 0.5)';
+                                    e.currentTarget.style.color = '#a5b4fc';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = 'transparent';
+                                    e.currentTarget.style.borderColor = '#334155';
+                                    e.currentTarget.style.color = '#94a3b8';
+                                }}
+                            >
+                                Fit
+                            </button>
+                        </span>
                     </div>
 
                     {/* Hata banner */}
@@ -1149,17 +1236,30 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         </div>
                     )}
 
-                    {/* iframe */}
-                    <div style={{ flex: 1, minHeight: 0, position: 'relative', background: 'white' }}>
+                    {/* iframe — Sprint 9 Aşama 2a zoom + overflow hidden. Antrepo fixed-width
+                        içerikler (700px) container'a sığsın diye scale uygulanır.
+                        iframe kendi width/zoom yer tutar (örn: 153.8% zoom 0.65'te),
+                        transform: scale(zoom) ile görünür %100'e düşürülür.
+                        Container overflow:hidden → kırpılır, dikey scroll doğal. */}
+                    <div style={{
+                        flex: 1, minHeight: 0, position: 'relative',
+                        background: 'white',
+                        overflow: 'hidden',
+                    }}>
                         {previewHtml ? (
                             <iframe
                                 ref={iframeRef}
                                 srcDoc={previewHtml}
                                 style={{
-                                    width: '100%',
-                                    height: '100%',
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    width: `${100 / previewZoom}%`,
+                                    height: `${100 / previewZoom}%`,
                                     border: 'none',
                                     background: 'white',
+                                    transform: `scale(${previewZoom})`,
+                                    transformOrigin: 'top left',
                                 }}
                                 title="XSLT Render Preview"
                             />
