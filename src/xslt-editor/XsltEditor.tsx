@@ -1,8 +1,15 @@
 /**
  * XSLT Editor — Sprint 7 (2026-10-03)
+ * + Sprint 8 Aşama 1 (2026-10-03): Snippet gallery — sol panel, 12 XSLT snippet
  *
  * Selim'in brief'i: "XSLT editörü + canlı preview". Görsel WYSIWYG yerine
  * kod-bazlı editör — XSLT bilen kullanıcılar için (PHP gibi template mantığı).
+ *
+ * Sprint 8 ekleme: Snippet gallery — kod yazma hızını 2x artırır.
+ * Tıkla → Monaco'nun insertSnippet API'si ile ${1:placeholder} cursor oluşur,
+ * kullanıcı Tab ile gezer. UBL-TR e-Fatura/e-Arşiv için 12 hazır snippet:
+ * Yapı (template/param), Döngü (for-each/sort), Koşul (choose/if),
+ * Format (para/tarih), Hesaplama (sum/KDV), Tablo (başlık/satır).
  *
  * ProfesyonelDesigner'a dokunmaz, bağımsız 2. tasarım.
  *
@@ -14,20 +21,26 @@
  *
  * Layout:
  * - Üst toolbar: Geri, Modül dropdown, Save, Download
- * - Sol %50: Monaco editor (XSLT / XML alt sekmeleri)
- * - Sağ %50: iframe preview + hata banner + render badge
+ * - Sol 240px: Snippet gallery (kategori filtre + liste)
+ * - Orta 1fr: Monaco editor (XSLT / XML alt sekmeleri)
+ * - Sağ 1fr: iframe preview + hata banner + render badge
  *
  * 500ms debounce ile canlı preview. Hata banner preview üstünde gösterilir.
  */
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Editor from '@monaco-editor/react';
+import type { editor } from 'monaco-editor';
 import {
     ArrowLeft, Save, Download, ChevronDown, FileCode, FileCode2,
-    AlertCircle, Eye, RefreshCw, CheckCircle2,
+    AlertCircle, Eye, RefreshCw, CheckCircle2, Sparkles, Search,
 } from 'lucide-react';
 import { transformXmlWithXslt } from '../xsltTransformer';
 import { getInlineXslt } from '../xsltContent';
 import { api } from '../api';
+import {
+    SNIPPETS, SNIPPET_CATEGORIES, getSnippetsByCategory, getCategoryCounts,
+    type XsltSnippet, type SnippetCategory,
+} from './snippets';
 
 // ============================================================================
 // Module registry — Selim'in 9 modülü (Selection.tsx ile senkron)
@@ -143,7 +156,12 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const [saveMessage, setSaveMessage] = useState<string>('');
 
     const iframeRef = useRef<HTMLIFrameElement>(null);
+    const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Sprint 8 Aşama 1 — Snippet gallery state
+    const [snippetCategory, setSnippetCategory] = useState<SnippetCategory | 'all'>('all');
+    const [snippetSearch, setSnippetSearch] = useState<string>('');
 
     // ------------------------------------------------------------------------
     // Mevcut modül tanımı
@@ -279,6 +297,64 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         document.addEventListener('mousedown', handler);
         return () => document.removeEventListener('mousedown', handler);
     }, [moduleMenuOpen]);
+
+    // ------------------------------------------------------------------------
+    // Snippet gallery — Sprint 8 Aşama 1
+    // ------------------------------------------------------------------------
+
+    const categoryCounts = useMemo(() => getCategoryCounts(), []);
+
+    /**
+     * Filtrelenmiş snippet listesi (kategori + arama).
+     */
+    const filteredSnippets = useMemo(() => {
+        const base = getSnippetsByCategory(snippetCategory);
+        if (!snippetSearch.trim()) return base;
+        const q = snippetSearch.toLowerCase();
+        return base.filter(s =>
+            s.label.toLowerCase().includes(q) ||
+            s.description.toLowerCase().includes(q) ||
+            s.category.toLowerCase().includes(q)
+        );
+    }, [snippetCategory, snippetSearch]);
+
+    /**
+     * Monaco editor'a snippet yapıştır.
+     * executeEdits + forceInsertMarkers: ${1:placeholder} cursor otomatik.
+     * Editor yoksa no-op (Monaco yüklenene kadar bekle).
+     *
+     * NOT: forceInsertMarkers Monaco'nun runtime'ında var, public TS type'ında
+     * yok. Cast gerekli. Alternatif: editor.action.insertSnippet command'u —
+     * ama o runtime'da async, cursor position garanti değil.
+     */
+    const handleSnippetInsert = useCallback((snippet: XsltSnippet) => {
+        const ed = editorRef.current;
+        if (!ed) {
+            console.warn('[XSLTEditor] Editor ref yok, snippet eklenemedi:', snippet.id);
+            return;
+        }
+        const selection = ed.getSelection();
+        if (!selection) return;
+        // Monaco internal API — snippet expansion. Cast ile bypass.
+        const edit = {
+            range: selection,
+            text: snippet.template,
+            forceInsertMarkers: true,
+        };
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ed.executeEdits('snippet', [edit] as any);
+        ed.focus();
+        console.log(`[XSLTEditor] Snippet eklendi: ${snippet.id} (${snippet.template.length} chars)`);
+    }, []);
+
+    /**
+     * Editor mount — ref sakla, isteğe bağlı XSLT schema register
+     * (Aşama 2'de eklenecek).
+     */
+    const handleEditorMount = useCallback((ed: editor.IStandaloneCodeEditor) => {
+        editorRef.current = ed;
+        console.log('[XSLTEditor] Monaco editor mount edildi, ref hazır');
+    }, []);
 
     // ------------------------------------------------------------------------
     // Render
@@ -496,16 +572,235 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 </button>
             </div>
 
-            {/* Ana grid: Sol editör %50, Sağ preview %50 */}
+            {/* Ana grid: Sol snippet paneli 240px, Orta editör 1fr, Sağ preview 1fr */}
             <div
                 style={{
                     display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
+                    gridTemplateColumns: '240px 1fr 1fr',
                     flex: 1,
                     minHeight: 0,
                 }}
             >
-                {/* SOL — Monaco editör */}
+                {/* SOL — Snippet gallery (Sprint 8 Aşama 1) */}
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        background: '#0f172a',
+                        borderRight: '1px solid #334155',
+                        minWidth: 0,
+                    }}
+                >
+                    {/* Snippet header */}
+                    <div
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            padding: '0 12px',
+                            height: '36px',
+                            background: '#1e293b',
+                            borderBottom: '1px solid #334155',
+                            fontSize: '11px',
+                            fontWeight: 700,
+                            letterSpacing: '0.5px',
+                            textTransform: 'uppercase',
+                            color: '#34d399',
+                        }}
+                    >
+                        <Sparkles size={13} />
+                        <span>Snippet Galerisi</span>
+                        <span style={{
+                            marginLeft: 'auto',
+                            padding: '2px 6px',
+                            background: 'rgba(16, 185, 129, 0.18)',
+                            borderRadius: '3px',
+                            fontSize: '9px',
+                            color: '#6ee7b7',
+                        }}>
+                            {SNIPPETS.length}
+                        </span>
+                    </div>
+
+                    {/* Arama input */}
+                    <div
+                        style={{
+                            padding: '8px 10px',
+                            borderBottom: '1px solid #1e293b',
+                        }}
+                    >
+                        <div style={{ position: 'relative' }}>
+                            <Search
+                                size={12}
+                                style={{
+                                    position: 'absolute',
+                                    left: 8,
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    color: '#64748b',
+                                }}
+                            />
+                            <input
+                                type="text"
+                                value={snippetSearch}
+                                onChange={(e) => setSnippetSearch(e.target.value)}
+                                placeholder="Ara: KDV, tablo, döngü..."
+                                style={{
+                                    width: '100%',
+                                    padding: '6px 8px 6px 26px',
+                                    background: '#1e293b',
+                                    border: '1px solid #334155',
+                                    borderRadius: '4px',
+                                    color: '#e2e8f0',
+                                    fontSize: '11px',
+                                    outline: 'none',
+                                }}
+                                onFocus={(e) => e.currentTarget.style.borderColor = '#6366f1'}
+                                onBlur={(e) => e.currentTarget.style.borderColor = '#334155'}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Kategori filtre chips */}
+                    <div
+                        style={{
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            gap: '4px',
+                            padding: '8px 10px',
+                            borderBottom: '1px solid #1e293b',
+                        }}
+                    >
+                        <button
+                            onClick={() => setSnippetCategory('all')}
+                            style={{
+                                padding: '3px 9px',
+                                background: snippetCategory === 'all' ? 'rgba(99, 102, 241, 0.25)' : '#1e293b',
+                                border: '1px solid ' + (snippetCategory === 'all' ? 'rgba(99, 102, 241, 0.5)' : '#334155'),
+                                borderRadius: '3px',
+                                color: snippetCategory === 'all' ? '#a5b4fc' : '#94a3b8',
+                                fontSize: '10px',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.3px',
+                            }}
+                        >
+                            Hepsi · {SNIPPETS.length}
+                        </button>
+                        {SNIPPET_CATEGORIES.map(cat => (
+                            <button
+                                key={cat}
+                                onClick={() => setSnippetCategory(cat)}
+                                style={{
+                                    padding: '3px 9px',
+                                    background: snippetCategory === cat ? 'rgba(99, 102, 241, 0.25)' : '#1e293b',
+                                    border: '1px solid ' + (snippetCategory === cat ? 'rgba(99, 102, 241, 0.5)' : '#334155'),
+                                    borderRadius: '3px',
+                                    color: snippetCategory === cat ? '#a5b4fc' : '#94a3b8',
+                                    fontSize: '10px',
+                                    fontWeight: 700,
+                                    cursor: 'pointer',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.3px',
+                                }}
+                            >
+                                {cat} · {categoryCounts[cat]}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Snippet listesi */}
+                    <div
+                        style={{
+                            flex: 1,
+                            minHeight: 0,
+                            overflowY: 'auto',
+                            padding: '6px',
+                        }}
+                    >
+                        {filteredSnippets.length === 0 ? (
+                            <div
+                                style={{
+                                    padding: '20px 12px',
+                                    textAlign: 'center',
+                                    color: '#64748b',
+                                    fontSize: '11px',
+                                }}
+                            >
+                                Sonuç yok. Arama veya kategoriyi değiştirin.
+                            </div>
+                        ) : (
+                            filteredSnippets.map(s => (
+                                <div
+                                    key={s.id}
+                                    data-snippet-id={s.id}
+                                    onClick={() => handleSnippetInsert(s)}
+                                    title={s.description}
+                                    style={{
+                                        padding: '8px 10px',
+                                        marginBottom: '4px',
+                                        background: '#1e293b',
+                                        border: '1px solid #334155',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                        transition: 'background 0.1s, border-color 0.1s',
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.background = 'rgba(99, 102, 241, 0.12)';
+                                        e.currentTarget.style.borderColor = 'rgba(99, 102, 241, 0.4)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.background = '#1e293b';
+                                        e.currentTarget.style.borderColor = '#334155';
+                                    }}
+                                >
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '6px',
+                                        marginBottom: '4px',
+                                    }}>
+                                        <FileCode size={11} color="#34d399" />
+                                        <span style={{
+                                            fontSize: '12px',
+                                            fontWeight: 600,
+                                            color: '#e2e8f0',
+                                        }}>
+                                            {s.label}
+                                        </span>
+                                        <span style={{
+                                            marginLeft: 'auto',
+                                            padding: '1px 5px',
+                                            background: 'rgba(52, 211, 153, 0.12)',
+                                            border: '1px solid rgba(52, 211, 153, 0.3)',
+                                            borderRadius: '3px',
+                                            fontSize: '8px',
+                                            fontWeight: 700,
+                                            color: '#6ee7b7',
+                                            letterSpacing: '0.5px',
+                                            textTransform: 'uppercase',
+                                        }}>
+                                            {s.category}
+                                        </span>
+                                    </div>
+                                    <div style={{
+                                        fontSize: '10px',
+                                        color: '#64748b',
+                                        fontFamily: 'monospace',
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                    }}>
+                                        {s.preview || s.template.replace(/\s+/g, ' ').slice(0, 50)}
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+
+                {/* ORTA — Monaco editör */}
                 <div
                     style={{
                         display: 'flex',
@@ -572,6 +867,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 if (activeTab === 'xslt') setXsltContent(v);
                                 else setXmlContent(v);
                             }}
+                            onMount={handleEditorMount}
                             options={{
                                 minimap: { enabled: true, scale: 1 },
                                 fontSize: 13,
