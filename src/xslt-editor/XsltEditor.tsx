@@ -1295,30 +1295,37 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         </div>
                     )}
 
-                    {/* iframe — Sprint 9 Aşama 2a zoom + overflow hidden. Antrepo fixed-width
-                        içerikler (700px) container'a sığsın diye scale uygulanır.
-                        iframe kendi width/zoom yer tutar (örn: 153.8% zoom 0.65'te),
-                        transform: scale(zoom) ile görünür %100'e düşürülür.
-                        Container overflow:hidden → kırpılır, dikey scroll doğal. */}
+                    {/* iframe — Sprint 9 Aşama 2d: A4 sheet görünümü.
+                        Container koyu gri zemin (ofis zemini hissi) + flex center
+                        ile sayfa ortalanmış. iframe box-shadow ile sayfa gölgesi
+                        + scale ile zoom. Antrepo 700px içerik zoom %65 ile
+                        container'a sığar, sayfa hissi verir. */}
                     <div style={{
                         flex: 1, minHeight: 0, position: 'relative',
-                        background: 'white',
+                        background: '#475569',  // koyu gri — ofis zemini
+                        backgroundImage: 'radial-gradient(at 50% 50%, #64748b 0%, #1e293b 100%)',  // subtle vignette
                         overflow: 'hidden',
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        justifyContent: 'center',
+                        padding: '24px',
                     }}>
                         {previewHtml ? (
                             <iframe
                                 ref={iframeRef}
                                 srcDoc={previewHtml}
                                 style={{
-                                    position: 'absolute',
-                                    top: 0,
-                                    left: 0,
+                                    border: '1px solid rgba(255,255,255,0.15)',
+                                    background: 'white',
+                                    boxShadow: '0 12px 40px rgba(0,0,0,0.45), 0 4px 12px rgba(0,0,0,0.25), inset 0 0 0 1px rgba(0,0,0,0.05)',
+                                    borderRadius: '2px',  // çok hafif köşe yuvarlaklığı (kağıt kenarı)
+                                    // Zoom — scaled boyutu 1/zoom, transform scale(zoom) ile görünür %zoom
                                     width: `${100 / previewZoom}%`,
                                     height: `${100 / previewZoom}%`,
-                                    border: 'none',
-                                    background: 'white',
+                                    maxWidth: '100%',
+                                    maxHeight: '100%',
                                     transform: `scale(${previewZoom})`,
-                                    transformOrigin: 'top left',
+                                    transformOrigin: 'center center',
                                 }}
                                 title="XSLT Render Preview"
                             />
