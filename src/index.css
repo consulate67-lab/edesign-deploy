@@ -280,3 +280,19 @@ aside::-webkit-scrollbar-thumb:hover {
   box-shadow: 0 0 0 1px rgba(252, 211, 77, 0.7) inset;
   transition: background-color 0.3s ease-out;
 }
+
+/* Sprint 11 Aşama 6 (2026-10-03) — XsltEditor preview kutu işaretleme.
+   Her data-render-index'li element etrafında ince kesikli çerçeve → kullanıcı
+   hangi elementlerin tıklanabilir olduğunu görür. Hover'da kalın renkli
+   çerçeve + hafif arka plan → tıklama geri bildirimi. */
+[data-render-index] {
+  outline: 1px dashed rgba(99, 102, 241, 0.35);
+  outline-offset: 1px;
+  cursor: pointer;
+  transition: outline-color 0.15s ease-out, background-color 0.15s ease-out;
+}
+[data-render-index]:hover {
+  outline: 2px solid rgba(99, 102, 241, 0.85);
+  outline-offset: 0;
+  background-color: rgba(99, 102, 241, 0.06);
+}

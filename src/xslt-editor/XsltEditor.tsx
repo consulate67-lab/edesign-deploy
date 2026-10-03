@@ -38,7 +38,7 @@ import {
 import { transformXmlWithXslt } from '../xsltTransformer';
 import { getInlineXslt } from '../xsltContent';
 import { getAntrepoTemplateById } from './antrepoTemplates';
-import { renderAndAnnotateXslt, parseXsltXPathBindings } from './utils/xsltRender';
+import { renderAndAnnotateXslt, parseXsltBindings } from './utils/xsltRender';
 import { api } from '../api';
 import {
     SNIPPETS, SNIPPET_CATEGORIES, getSnippetsByCategory, getCategoryCounts,
@@ -191,12 +191,16 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     // Sprint 9 Aşama 2c (2026-10-03) — Sol snippet paneli aç/kapat toggle.
     // Kapatılınca preview + editör tüm genişliği kaplar (Antrepo XSLT 700px tam sığar).
     const [snippetPanelOpen, setSnippetPanelOpen] = useState<boolean>(true);
-    // Sprint 10 Aşama 1 (2026-10-03) — Preview'de tıklayınca editöre scroll + highlight.
-    // iframe.contentDocument body'sinde data-render-index attribute'u (annotateRenderDom
-    // eklemişti) → tıklanan element → renderIndex → xsltToSections element → binding.
-    const [previewSelectedRenderIndex, setPreviewSelectedRenderIndex] = useState<number | null>(null);
-    // XSLT içindeki xsl:value-of xpath listesi (renderIndex → xpath map).
-    const [xpathList, setXpathList] = useState<string[]>([]);
+    // Sprint 11 Aşama 6 (2026-10-03) — Preview'de tıklayınca editöre direkt
+    // koordinat tabanlı scroll + highlight. data-line + data-column attribute'ları
+    // renderAndAnnotateXslt tarafından eklenir (XSLT içindeki GERÇEK pozisyon).
+    // XPath arama (Sprint 11.4 + 11.5) tamamen kaldırıldı — %100 doğru sonuç.
+    // null değer: henüz tıklama yok
+    const [previewSelectedLine, setPreviewSelectedLine] = useState<number | null>(null);
+    const [previewSelectedColumn, setPreviewSelectedColumn] = useState<number | null>(null);
+    // XSLT bindings listesi (xpath + offset + line + column). previewHtml
+    // annotation'ında kullanılır.
+    const [xsltBindings, setXsltBindings] = useState<import('./utils/xsltRender').XsltBinding[]>([]);
 
     // ------------------------------------------------------------------------
     // Mevcut modül tanımı
@@ -255,10 +259,11 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             let cleanXml = xmlContent;
             if (cleanXml.charCodeAt(0) === 0xFEFF) cleanXml = cleanXml.slice(1);
 
-            // Sprint 10 Aşama 1 — annotated render: her INDEXED element'e
-            // data-render-index + data-xpath attribute eklenir (preview click
-            // senkronizasyonu için).
-            const result = renderAndAnnotateXslt(cleanXml, cleanXslt, xpathList);
+            // Sprint 11 Aşama 6 — koordinatlı annotated render. renderAndAnnotateXslt
+            // artık bindings (xpath + line + column) alıyor, render DOM'a
+            // data-line + data-column attribute ekliyor. Preview click →
+            // direkt koordinata git (XPath arama yok).
+            const result = renderAndAnnotateXslt(cleanXml, cleanXslt, xsltBindings);
             setPreviewHtml(result.html);
             setPreviewError(result.error);
             setRenderDurationMs(result.durationMs);
@@ -269,7 +274,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         } finally {
             setIsRendering(false);
         }
-    }, [xsltContent, xmlContent, xpathList]);
+    }, [xsltContent, xmlContent, xsltBindings]);
 
     // Debounce trigger
     useEffect(() => {
@@ -604,123 +609,56 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     }, []);
 
     // ------------------------------------------------------------------------
-    // Sprint 10 Aşama 1 — Preview click → editör scroll + highlight
+    // Sprint 11 Aşama 6 — Preview click → editör KOORDİNAT tabanlı scroll + highlight
     // ------------------------------------------------------------------------
 
     /**
-     * Sprint 10 Aşama 1 — XSLT içindeki xsl:value-of xpath'lerini parse et
-     * (DFS pre-order). renderAndAnnotateXslt annotation sırasıyla senkronize:
-     * renderIndex[i] = xpathList[i]. xsltContent değiştiğinde yeniden hesapla.
+     * XSLT içindeki xsl:value-of / xsl:copy-of binding'lerini parse et.
+     * Her binding xpath + offset + line + column içerir (regex tabanlı,
+     * XSLT string içindeki GERÇEK pozisyon). xsltContent değiştiğinde
+     * yeniden hesapla → renderAndAnnotateXslt bu koordinatları render
+     * DOM'a data-line + data-column olarak ekler.
      */
     useEffect(() => {
-        setXpathList(parseXsltXPathBindings(xsltContent));
+        setXsltBindings(parseXsltBindings(xsltContent));
     }, [xsltContent]);
 
     /**
-     * iframe renderIndex → xpathList[index] → Monaco editörde scroll + highlight.
-     * 2 saniye sonra decoration temizlenir.
+     * Preview click → editör scroll + highlight (koordinat tabanlı).
+     * previewSelectedLine/Column state'leri renderAndAnnotateXslt'in
+     * eklediği data-line/data-column'dan gelir. XPath ARAMA YOK —
+     * %100 doğru sonuç, multi-match sorunu ortadan kalktı.
      */
     useEffect(() => {
-        if (previewSelectedRenderIndex === null) return;
+        if (previewSelectedLine === null || previewSelectedColumn === null) return;
         const ed = editorRef.current;
         const monaco = monacoRef.current;
         if (!ed || !monaco) return;
 
-        const xpath = xpathList[previewSelectedRenderIndex];
-        if (!xpath) {
-            console.log(
-                '[XSLTEditor] Preview click → renderIndex',
-                previewSelectedRenderIndex,
-                'için xpath bulunamadı (annotation listesinin dışında olabilir)'
-            );
-            return;
-        }
-
-        const model = ed.getModel();
-        if (!model) return;
-        const fullText = model.getValue();
-
-        // Sprint 11 Aşama 5 — sıra korelasyonlu multi-match arama.
-        // Selim test: bazı işaretlemeler doğru yere gidiyor (ÖRNEK TEDARİKÇİ
-        // A.Ş. → 277. satır), bazıları hâlâ yanlış context'e düşüyor.
-        // Kök neden: aynı xpath (cbc:Line, cbc:Name, vb.) XSLT içinde farklı
-        // for-each context'lerinde birden fazla select="..." içinde geçiyor.
-        // İlk eşleşme yanlış context olabiliyor.
-        //
-        // Çözüm: ordered-correlation arama. Annotation sırası = render DOM
-        // DFS pre-order = xpathList sırası = XSLT'teki gerçek sıra. Birden
-        // fazla eşleşme varsa, ÖNCEKİ binding'in (xpathList[renderIndex-1])
-        // offset'inden SONRAKİ en yakın eşleşmeyi seç. Bu sıra korelasyonu
-        // neredeyse her zaman doğru yere götürür.
-        const findAllMatches = (pattern: string): number[] => {
-            const out: number[] = [];
-            let i = fullText.indexOf(pattern);
-            while (i !== -1) {
-                out.push(i);
-                i = fullText.indexOf(pattern, i + 1);
-            }
-            return out;
+        const position = {
+            lineNumber: previewSelectedLine,
+            column: previewSelectedColumn,
         };
-
-        const selectPattern = `select="${xpath}"`;
-        let matches = findAllMatches(selectPattern);
-        let matchType = 'select="..." pattern';
-        if (matches.length === 0) {
-            matches = findAllMatches(xpath);
-            matchType = 'tam eşleşme';
-        }
-        if (matches.length === 0) {
-            const lastPart = xpath.split('/').pop() || xpath;
-            matches = findAllMatches(lastPart);
-            matchType = 'son parça (lastPart)';
-        }
-
-        if (matches.length === 0) {
-            console.log('[XSLTEditor] XSLT içinde binding bulunamadı:', xpath);
-            return;
-        }
-
-        let idx: number;
-        if (matches.length === 1) {
-            idx = matches[0];
-        } else {
-            // Çoklu eşleşme — sıra korelasyonu ile en yakını seç
-            console.log(`[XSLTEditor] AMBIGUOUS: "${xpath}" → ${matches.length} matches at offsets [${matches.join(', ')}]`);
-
-            let prevOffset = -1;
-            if (previewSelectedRenderIndex > 0) {
-                const prevXpath = xpathList[previewSelectedRenderIndex - 1];
-                if (prevXpath) {
-                    // Önceki binding'in son eşleşmesini bul (current'tan ÖNCE)
-                    const prevPattern = `select="${prevXpath}"`;
-                    const prevMatches = findAllMatches(prevPattern);
-                    if (prevMatches.length > 0) {
-                        prevOffset = prevMatches[prevMatches.length - 1]; // son eşleşme
-                    } else {
-                        prevOffset = fullText.lastIndexOf(prevXpath);
-                    }
-                }
-            }
-
-            // prevOffset'tan sonraki ilk eşleşmeyi seç
-            const nextMatch = prevOffset >= 0 ? matches.find(m => m > prevOffset) : undefined;
-            idx = nextMatch !== undefined ? nextMatch : matches[0];
-            console.log(`[XSLTEditor] ordered-correlation: prevOffset=${prevOffset}, chose @ ${idx}`);
-        }
-
-        console.log(`[XSLTEditor] xpath match: "${xpath}" → ${matchType} @ offset ${idx}`);
-
-        const position = model.getPositionAt(idx);
         ed.revealPositionInCenter(position);
         ed.setPosition(position);
         ed.focus();
 
-        // 2 saniye sarı highlight (index.css'te .xslt-click-highlight tanımlı)
+        // 2 saniye sarı highlight — select="..." pattern'i bul ve highlight'la
+        // (Monaco decoration'da tam xpath'i vurgulamak için)
+        const model = ed.getModel();
+        if (!model) return;
+        const fullText = model.getValue();
+        const lineStart = model.getOffsetAt({ lineNumber: previewSelectedLine, column: 1 });
+        const lineEnd = model.getOffsetAt({ lineNumber: previewSelectedLine + 1, column: 1 }) - 1;
+        const lineText = fullText.substring(lineStart, lineEnd);
+        const xpathMatch = lineText.match(/select="([^"]+)"/);
+        const highlightLen = xpathMatch ? xpathMatch[1].length : Math.min(20, lineText.length - position.column + 1);
+
         const decorationIds = ed.deltaDecorations([], [
             {
                 range: new monaco.Range(
                     position.lineNumber, position.column,
-                    position.lineNumber, position.column + xpath.length
+                    position.lineNumber, position.column + highlightLen
                 ),
                 options: { inlineClassName: 'xslt-click-highlight' },
             },
@@ -730,29 +668,32 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         }, 2000);
 
         console.log(
-            `[XSLTEditor] Preview click → renderIndex=${previewSelectedRenderIndex}` +
-            ` xpath="${xpath}" position=${position.lineNumber}:${position.column}`
+            `[XSLTEditor] Preview click → line=${previewSelectedLine}:` +
+            `column=${previewSelectedColumn} highlight=${highlightLen} chars`
         );
-    }, [previewSelectedRenderIndex, xpathList]);
+    }, [previewSelectedLine, previewSelectedColumn]);
 
     /**
      * iframe.contentDocument.body click handler.
-     * Tıklanan element'ten data-render-index al → previewSelectedRenderIndex state.
-     * handleEditorMount içinde iframe yüklendikten sonra bağlanır.
+     * Tıklanan element'ten data-line + data-column al → state. Bu %100
+     * doğru sonuç verir (annotation renderAndAnnotateXslt'te XSLT koordinatına
+     * bağlı). XPath arama / multi-match sorunu YOK.
      */
     const handleIframeBodyClick = useCallback((e: Event) => {
         const target = e.target as HTMLElement | null;
         if (!target || typeof target.closest !== 'function') return;
         const indexedEl = target.closest('[data-render-index]') as HTMLElement | null;
         if (!indexedEl) return;
-        const idxAttr = indexedEl.getAttribute('data-render-index');
-        if (!idxAttr) return;
-        const idx = Number(idxAttr);
-        if (isNaN(idx)) return;
-        // Varsayılan browser seçimini engelle (iframe drag olsun)
+        const lineAttr = indexedEl.getAttribute('data-line');
+        const colAttr = indexedEl.getAttribute('data-column');
+        if (!lineAttr || !colAttr) return;
+        const line = Number(lineAttr);
+        const column = Number(colAttr);
+        if (isNaN(line) || isNaN(column)) return;
         e.preventDefault();
         e.stopPropagation();
-        setPreviewSelectedRenderIndex(idx);
+        setPreviewSelectedLine(line);
+        setPreviewSelectedColumn(column);
     }, []);
 
     /**

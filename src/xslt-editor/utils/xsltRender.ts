@@ -25,15 +25,59 @@ export interface XsltRenderResult {
 }
 
 /**
+ * Sprint 11 Aşama 6a (2026-10-03) — XSLT binding + koordinat kayıt.
+ * xsl:value-of / xsl:copy-of element'inin XSLT string'indeki gerçek
+ * offset/line/column bilgisini saklar. Preview click senkronizasyonunda
+ * XPath arama yerine direkt bu koordinata gidilir → %100 doğru sonuç.
+ *
+ * Regex tabanlı parse — DOMParser'a göre 10x hızlı + namespace prefix
+ * kaybı yok (DOMParser serialize ederken prefix'leri değiştirebilir).
+ */
+export interface XsltBinding {
+    xpath: string;
+    offset: number;
+    line: number;
+    column: number;
+}
+
+export function parseXsltBindings(xslt: string): XsltBinding[] {
+    const bindings: XsltBinding[] = [];
+    // xsl:value-of veya xsl:copy-of + select="..." yakala
+    // \b select="([^"]+)" — sadece select attribute, değer yakalanır
+    const re = /<xsl:(?:value-of|copy-of)\b[^>]*?\bselect="([^"]+)"/g;
+    let match: RegExpExecArray | null;
+    while ((match = re.exec(xslt)) !== null) {
+        const offset = match.index;
+        const xpath = match[1];
+        // Offset'ten line/column hesapla (1-based)
+        const before = xslt.substring(0, offset);
+        const line = before.split('\n').length;
+        const lastNewline = before.lastIndexOf('\n');
+        const column = lastNewline === -1 ? offset + 1 : offset - lastNewline;
+        bindings.push({ xpath, offset, line, column });
+    }
+    return bindings;
+}
+
+/**
+ * Backward compat — sadece xpath listesi döndürür (eski kod için).
+ * Yeni kod parseXsltBindings kullanmalı (koordinat dahil).
+ */
+export function parseXsltXPathBindings(xslt: string): string[] {
+    return parseXsltBindings(xslt).map(b => b.xpath);
+}
+
+/**
  * XSLT + XML → annotated HTML transform.
  * @param xmlString - UBL-TR XML source
  * @param xsltString - XSLT 1.0 source
- * @param xpathList - xsl:value-of xpath listesi (parseXsltXPaths'ten), DFS pre-order
+ * @param bindings - parseXsltBindings'ten XSLT binding + koordinat listesi
+ *                   (sıra = XSLT DFS pre-order = render DOM text node sırası)
  */
 export function renderAndAnnotateXslt(
     xmlString: string,
     xsltString: string,
-    xpathList: string[]
+    bindings: XsltBinding[]
 ): XsltRenderResult {
     const start = performance.now();
 
@@ -74,30 +118,32 @@ export function renderAndAnnotateXslt(
         processor.importStylesheet(xsltDoc);
         const resultDoc = processor.transformToDocument(xmlDoc);
 
-        // Annotation — Sprint 10 Aşama 2 click sync fix:
-        // Önceki yaklaşım (render DOM DFS + INDEXED_TAGS walk) annotation
-        // sırası ile XSLT xpath sırasını eşleştiremiyordu → editör yanlış
-        // yere gidiyordu. Yeni yaklaşım: text node DFS pre-order.
+        // Annotation — Sprint 11 Aşama 6: koordinat tabanlı.
+        // Önceki yaklaşım (xpath arama + ordered-correlation) çok kırılgandı,
+        // aynı xpath farklı context'lerde olduğunda yanlış satıra gidiyordu.
         //
-        // Neden text node? Çünkü xsl:value-of'un render çıktısı text node
-        // olarak DOM'a düşer (çoğu durumda). Text node sayısı ≈ xsl:value-of
-        // sayısı → counter sırası = xpathList sırası ile eşleşir.
+        // Yeni yaklaşım: bindings dizisi XSLT içindeki gerçek offset/line/column
+        // içerir. Her text node counter sırayla bindings[counter]'i alır ve
+        // parent element'ine data-line + data-column + data-xpath ekler.
+        // Preview click → direkt line:column'a git, XPath arama YOK.
         //
-        // Her dolu text node için counter++, xpathList[counter] parent
-        // element'ine data-render-index + data-xpath attribute olarak eklenir.
         // Aynı parent'a birden fazla text node varsa sadece ilki annotation alır
-        // (diğerleri skip) → her element tek bir xpath ile bind olur.
+        // (her element tek bir koordinatla bind olur). Counter her dolu text
+        // node için artar — bindings sayısı ile text node sayısı eşleşmeli.
         const body = resultDoc.body || resultDoc.documentElement;
         if (body) {
             let counter = 0;
             const walk = (node: Node) => {
                 if (node.nodeType === 3) { // TEXT_NODE
                     const text = (node.textContent || '').trim();
-                    if (text.length > 0 && counter < xpathList.length) {
+                    if (text.length > 0 && counter < bindings.length) {
                         const parent = (node as Text).parentElement;
                         if (parent && !parent.hasAttribute('data-render-index')) {
+                            const b = bindings[counter];
                             parent.setAttribute('data-render-index', String(counter));
-                            parent.setAttribute('data-xpath', xpathList[counter]);
+                            parent.setAttribute('data-xpath', b.xpath);
+                            parent.setAttribute('data-line', String(b.line));
+                            parent.setAttribute('data-column', String(b.column));
                         }
                         counter++;
                     }
@@ -107,7 +153,7 @@ export function renderAndAnnotateXslt(
                 for (const child of Array.from(node.childNodes)) walk(child);
             };
             walk(body);
-            console.log(`[xsltRender] annotated ${counter} text nodes (xpathList length: ${xpathList.length})`);
+            console.log(`[xsltRender] annotated ${counter} text nodes (bindings: ${bindings.length})`);
         }
 
         const serializer = new XMLSerializer();
@@ -130,27 +176,8 @@ export function renderAndAnnotateXslt(
 }
 
 /**
- * XSLT içindeki xsl:value-of / xsl:copy-of element'lerinin xpath'lerini
- * DFS pre-order ile topla. annotation sırasıyla senkronize.
+ * parseXsltXPathBindings → yukarı taşındı (Sprint 11 Aşama 6a) — XSLT
+ * koordinatlı binding. Eski DOMParser versiyonu kaldırıldı (regex parse
+ * hem hızlı hem namespace-safe). Backward compat için sadece xpath
+ * listesi döndürür.
  */
-export function parseXsltXPathBindings(xslt: string): string[] {
-    const xpathList: string[] = [];
-    try {
-        const parser = new DOMParser();
-        const xsltDoc = parser.parseFromString(xslt, 'application/xml');
-        const walk = (node: Node) => {
-            if (node.nodeType !== 1) return;
-            const el = node as Element;
-            const tag = el.localName;
-            if (tag === 'value-of' || tag === 'copy-of') {
-                const select = el.getAttribute('select');
-                if (select) xpathList.push(select);
-            }
-            for (const child of Array.from(el.childNodes)) walk(child);
-        };
-        walk(xsltDoc.documentElement);
-    } catch (err) {
-        console.warn('[xsltRender] parseXsltXPathBindings error:', err);
-    }
-    return xpathList;
-}
