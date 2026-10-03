@@ -1295,15 +1295,15 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         </div>
                     )}
 
-                    {/* iframe — Sprint 9 Aşama 2d: A4 sheet görünümü.
-                        Container flex center + büyük padding ile sayfa merkezde.
-                        iframe aspectRatio A4 (1:1.414) + box-shadow büyük → gerçek
-                        kağıt hissi. Zoom scale + transformOrigin center center. */}
+                    {/* iframe — Sprint 9 Aşama 2f: A4 sheet + dikey scroll.
+                        Container overflow:auto → iframe scaled boyutu container'dan
+                        büyükse dikey scroll bar görünür (fatura toplamları, dipnotlar
+                        görünür). Sayfa hissi korunur, tüm içerik erişilebilir. */}
                     <div style={{
                         flex: 1, minHeight: 0, position: 'relative',
                         background: '#475569',  // koyu gri — ofis zemini
                         backgroundImage: 'radial-gradient(at 50% 50%, #64748b 0%, #1e293b 100%)',  // subtle vignette
-                        overflow: 'hidden',
+                        overflow: 'auto',  // Sprint 9 A2f — auto (hidden yerine) → dikey scroll
                         display: 'flex',
                         alignItems: 'flex-start',
                         justifyContent: 'center',
@@ -1325,6 +1325,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     maxWidth: '1100px',
                                     minWidth: '500px',
                                     height: 'auto',
+                                    // iframe kendi scroll'u — XSLT body'si büyükse
+                                    overflow: 'auto',
                                     transform: `scale(${previewZoom})`,
                                     transformOrigin: 'center center',
                                 }}
