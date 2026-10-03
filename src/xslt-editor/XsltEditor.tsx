@@ -38,6 +38,7 @@ import {
 import { transformXmlWithXslt } from '../xsltTransformer';
 import { getInlineXslt } from '../xsltContent';
 import { getAntrepoTemplateById } from './antrepoTemplates';
+import { renderAndAnnotateXslt, parseXsltXPathBindings } from './utils/xsltRender';
 import { api } from '../api';
 import {
     SNIPPETS, SNIPPET_CATEGORIES, getSnippetsByCategory, getCategoryCounts,
@@ -182,6 +183,12 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     // Sprint 9 Aşama 2c (2026-10-03) — Sol snippet paneli aç/kapat toggle.
     // Kapatılınca preview + editör tüm genişliği kaplar (Antrepo XSLT 700px tam sığar).
     const [snippetPanelOpen, setSnippetPanelOpen] = useState<boolean>(true);
+    // Sprint 10 Aşama 1 (2026-10-03) — Preview'de tıklayınca editöre scroll + highlight.
+    // iframe.contentDocument body'sinde data-render-index attribute'u (annotateRenderDom
+    // eklemişti) → tıklanan element → renderIndex → xsltToSections element → binding.
+    const [previewSelectedRenderIndex, setPreviewSelectedRenderIndex] = useState<number | null>(null);
+    // XSLT içindeki xsl:value-of xpath listesi (renderIndex → xpath map).
+    const [xpathList, setXpathList] = useState<string[]>([]);
 
     // ------------------------------------------------------------------------
     // Mevcut modül tanımı
@@ -234,17 +241,19 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         setIsRendering(true);
         const start = performance.now();
         try {
-            // BOM temizle (transformXmlWithXslt kendi yapar ama garanti olsun)
+            // BOM temizle (xsltRender kendi yapar ama garanti olsun)
             let cleanXslt = xsltContent;
             if (cleanXslt.charCodeAt(0) === 0xFEFF) cleanXslt = cleanXslt.slice(1);
             let cleanXml = xmlContent;
             if (cleanXml.charCodeAt(0) === 0xFEFF) cleanXml = cleanXml.slice(1);
 
-            const html = transformXmlWithXslt(cleanXml, cleanXslt);
-            const dur = performance.now() - start;
-            setPreviewHtml(html);
-            setPreviewError(null);
-            setRenderDurationMs(dur);
+            // Sprint 10 Aşama 1 — annotated render: her INDEXED element'e
+            // data-render-index + data-xpath attribute eklenir (preview click
+            // senkronizasyonu için).
+            const result = renderAndAnnotateXslt(cleanXml, cleanXslt, xpathList);
+            setPreviewHtml(result.html);
+            setPreviewError(result.error);
+            setRenderDurationMs(result.durationMs);
         } catch (err) {
             setPreviewError((err as Error).message || 'Bilinmeyen render hatası');
             setPreviewHtml('');
@@ -252,7 +261,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         } finally {
             setIsRendering(false);
         }
-    }, [xsltContent, xmlContent]);
+    }, [xsltContent, xmlContent, xpathList]);
 
     // Debounce trigger
     useEffect(() => {
@@ -557,6 +566,114 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             },
         });
     }, []);
+
+    // ------------------------------------------------------------------------
+    // Sprint 10 Aşama 1 — Preview click → editör scroll + highlight
+    // ------------------------------------------------------------------------
+
+    /**
+     * Sprint 10 Aşama 1 — XSLT içindeki xsl:value-of xpath'lerini parse et
+     * (DFS pre-order). renderAndAnnotateXslt annotation sırasıyla senkronize:
+     * renderIndex[i] = xpathList[i]. xsltContent değiştiğinde yeniden hesapla.
+     */
+    useEffect(() => {
+        setXpathList(parseXsltXPathBindings(xsltContent));
+    }, [xsltContent]);
+
+    /**
+     * iframe renderIndex → xpathList[index] → Monaco editörde scroll + highlight.
+     * 2 saniye sonra decoration temizlenir.
+     */
+    useEffect(() => {
+        if (previewSelectedRenderIndex === null) return;
+        const ed = editorRef.current;
+        const monaco = monacoRef.current;
+        if (!ed || !monaco) return;
+
+        const xpath = xpathList[previewSelectedRenderIndex];
+        if (!xpath) {
+            console.log(
+                '[XSLTEditor] Preview click → renderIndex',
+                previewSelectedRenderIndex,
+                'için xpath bulunamadı (annotation listesinin dışında olabilir)'
+            );
+            return;
+        }
+
+        const model = ed.getModel();
+        if (!model) return;
+        const fullText = model.getValue();
+
+        // XSLT içinde xpath'i ara — tam eşleşme veya son parça (cac:Party vs /Invoice/cac:Party/cbc:Name)
+        let idx = fullText.indexOf(xpath);
+        if (idx === -1) {
+            const lastPart = xpath.split('/').pop() || xpath;
+            idx = fullText.indexOf(lastPart);
+        }
+        if (idx === -1) {
+            console.log('[XSLTEditor] XSLT içinde binding bulunamadı:', xpath);
+            return;
+        }
+
+        const position = model.getPositionAt(idx);
+        ed.revealPositionInCenter(position);
+        ed.setPosition(position);
+        ed.focus();
+
+        // 2 saniye sarı highlight (index.css'te .xslt-click-highlight tanımlı)
+        const decorationIds = ed.deltaDecorations([], [
+            {
+                range: new monaco.Range(
+                    position.lineNumber, position.column,
+                    position.lineNumber, position.column + xpath.length
+                ),
+                options: { inlineClassName: 'xslt-click-highlight' },
+            },
+        ]);
+        setTimeout(() => {
+            ed.deltaDecorations(decorationIds, []);
+        }, 2000);
+
+        console.log(
+            `[XSLTEditor] Preview click → renderIndex=${previewSelectedRenderIndex}` +
+            ` xpath="${xpath}" position=${position.lineNumber}:${position.column}`
+        );
+    }, [previewSelectedRenderIndex, xpathList]);
+
+    /**
+     * iframe.contentDocument.body click handler.
+     * Tıklanan element'ten data-render-index al → previewSelectedRenderIndex state.
+     * handleEditorMount içinde iframe yüklendikten sonra bağlanır.
+     */
+    const handleIframeBodyClick = useCallback((e: Event) => {
+        const target = e.target as HTMLElement | null;
+        if (!target || typeof target.closest !== 'function') return;
+        const indexedEl = target.closest('[data-render-index]') as HTMLElement | null;
+        if (!indexedEl) return;
+        const idxAttr = indexedEl.getAttribute('data-render-index');
+        if (!idxAttr) return;
+        const idx = Number(idxAttr);
+        if (isNaN(idx)) return;
+        // Varsayılan browser seçimini engelle (iframe drag olsun)
+        e.preventDefault();
+        e.stopPropagation();
+        setPreviewSelectedRenderIndex(idx);
+    }, []);
+
+    /**
+     * iframe.contentDocument.body click listener bağla.
+     * previewHtml her değiştiğinde iframe yeniden yüklenir → listener'ı
+     * yeniden bağla (cleanup'ta removeEventListener).
+     */
+    useEffect(() => {
+        const iframe = iframeRef.current;
+        if (!iframe) return;
+        const doc = iframe.contentDocument;
+        if (!doc || !doc.body) return;
+
+        doc.body.addEventListener('click', handleIframeBodyClick);
+        return () => doc.body.removeEventListener('click', handleIframeBodyClick);
+    }, [previewHtml, handleIframeBodyClick]);
 
     // ------------------------------------------------------------------------
     // Render

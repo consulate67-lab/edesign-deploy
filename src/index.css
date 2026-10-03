@@ -271,3 +271,12 @@ aside::-webkit-scrollbar-thumb:hover {
 .animate-modal-enter {
   animation: modalEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* Sprint 10 Aşama 1 (2026-10-03) — XsltEditor preview click highlight.
+   iframe.renderIndex → Monaco editor binding satırında 2 saniye highlight. */
+.xslt-click-highlight {
+  background-color: rgba(252, 211, 77, 0.45) !important;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(252, 211, 77, 0.7) inset;
+  transition: background-color 0.3s ease-out;
+}
