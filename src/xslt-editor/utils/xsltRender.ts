@@ -74,25 +74,40 @@ export function renderAndAnnotateXslt(
         processor.importStylesheet(xsltDoc);
         const resultDoc = processor.transformToDocument(xmlDoc);
 
-        // Annotation — her INDEXED element'e data-render-index + data-xpath
+        // Annotation — Sprint 10 Aşama 2 click sync fix:
+        // Önceki yaklaşım (render DOM DFS + INDEXED_TAGS walk) annotation
+        // sırası ile XSLT xpath sırasını eşleştiremiyordu → editör yanlış
+        // yere gidiyordu. Yeni yaklaşım: text node DFS pre-order.
+        //
+        // Neden text node? Çünkü xsl:value-of'un render çıktısı text node
+        // olarak DOM'a düşer (çoğu durumda). Text node sayısı ≈ xsl:value-of
+        // sayısı → counter sırası = xpathList sırası ile eşleşir.
+        //
+        // Her dolu text node için counter++, xpathList[counter] parent
+        // element'ine data-render-index + data-xpath attribute olarak eklenir.
+        // Aynı parent'a birden fazla text node varsa sadece ilki annotation alır
+        // (diğerleri skip) → her element tek bir xpath ile bind olur.
         const body = resultDoc.body || resultDoc.documentElement;
         if (body) {
             let counter = 0;
             const walk = (node: Node) => {
-                if (node.nodeType !== 1) return;
-                const el = node as Element;
-                const tag = el.tagName.toLowerCase();
-                if (INDEXED_TAGS.has(tag)) {
-                    el.setAttribute('data-render-index', String(counter));
-                    const xpath = xpathList[counter];
-                    if (xpath) {
-                        el.setAttribute('data-xpath', xpath);
+                if (node.nodeType === 3) { // TEXT_NODE
+                    const text = (node.textContent || '').trim();
+                    if (text.length > 0 && counter < xpathList.length) {
+                        const parent = (node as Text).parentElement;
+                        if (parent && !parent.hasAttribute('data-render-index')) {
+                            parent.setAttribute('data-render-index', String(counter));
+                            parent.setAttribute('data-xpath', xpathList[counter]);
+                        }
+                        counter++;
                     }
-                    counter++;
+                    return;
                 }
-                for (const child of Array.from(el.childNodes)) walk(child);
+                if (node.nodeType !== 1) return;
+                for (const child of Array.from(node.childNodes)) walk(child);
             };
             walk(body);
+            console.log(`[xsltRender] annotated ${counter} text nodes (xpathList length: ${xpathList.length})`);
         }
 
         const serializer = new XMLSerializer();
