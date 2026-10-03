@@ -226,7 +226,11 @@ export function renderAndAnnotateXslt(
             if (node.nodeType !== 1) return;
             for (const child of Array.from(node.childNodes)) walk(child);
         };
-        walk(resultDoc);
+        // Sprint 11 Aşama 8 fix — walk root'tan başlamalı. resultDoc (Document)
+        // nodeType === 9 → mevcut walk DOCUMENT_NODE'u handle etmiyor,
+        // child DFS yapılmıyor → comment marker'lar bulunamıyor → annotation
+        // hiç oluşmuyor. documentElement'ten başlat.
+        walk(resultDoc.documentElement || resultDoc);
         console.log(`[xsltRender] annotated ${annotated} bindings via comment markers (total: ${bindings.length})`);
 
         const serializer = new XMLSerializer();
