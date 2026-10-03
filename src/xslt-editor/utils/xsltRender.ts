@@ -91,14 +91,16 @@ export function parseXsltInstrumented(xslt: string): {
     instrumentedXslt: string;
     bindings: XsltBinding[];
 } {
-    // Sprint 11 Aşama 9c — Sprint 11 kapatılıyor. Pass 2 (plain text) bazı
-    // XSLT'lerde XSLT parse hatasına neden oluyor (line 254 "StartTag: invalid
-    // element name" — Pass 2 <style> veya <script> içindeki düz metne marker
-    // eklediğinde XSLT yapısı bozuluyor).
+    // Sprint 12 — DOM tabanlı statik text annotation.
+    // Sprint 11'deki <xsl:comment> marker XSLT parse hatasına neden oluyordu
+    // (Selim "StartTag: invalid element name" hatası, line 254 column 7).
+    // Çözüm: marker formatı XML/HTML comment <!-- ... --> olarak değiştirildi.
+    // XSLT 1.0 spec: HTML/XML comment'ler XSLT içinde geçerli ve XSLTProcessor
+    // tarafından output'a comment node olarak aktarılır (HTML comment
+    // <!-- -->). XSLT namespace element syntax'ı bozulmaz.
     //
-    // Aşama 8 kanıtlanmış Pass 1 korundu (xsl:value-of + xsl:copy-of). Statik
-    // text desteği Sprint 12'ye ertelendi (daha güvenli DOM tabanlı parsing
-    // gerekiyor).
+    // 3 pass: Pass 1 (xsl:value-of + xsl:copy-of) + Pass 2 (xsl:text content)
+    // + Pass 3 (plain text element body). Tüm marker'lar HTML comment.
     const bindings: XsltBinding[] = [];
     let counter = 0;
 
@@ -115,15 +117,45 @@ export function parseXsltInstrumented(xslt: string): {
         bindings.push({ xpath, offset, line, column });
     };
 
-    // Pass 1 (kanıtlanmış): xsl:value-of + xsl:copy-of (self-close + open-close)
-    const instrumentedXslt = xslt.replace(
+    const marker = () => `<!--BIND_${++counter}-->`;
+
+    // Pass 1: xsl:value-of + xsl:copy-of (kanıtlanmış Aşama 8)
+    let instrumentedXslt = xslt.replace(
         /(<xsl:(?:value-of|copy-of)\b[^>]*?\/>)|(<xsl:(?:value-of|copy-of)\b[^>]*?>[\s\S]*?<\/xsl:(?:value-of|copy-of)>)/g,
         (fullMatch, m1, m2, offset) => {
             const xpathMatch = m1 || m2;
             const xpath = (xpathMatch.match(/select="([^"]+)"/) || [])[1];
             if (!xpath) return fullMatch;
             pushBinding(offset, xpath);
-            return `${fullMatch}<xsl:comment>BIND_${++counter}</xsl:comment>`;
+            return `${fullMatch}${marker()}`;
+        }
+    );
+
+    // Pass 2: xsl:text content (Statik metin annotation)
+    instrumentedXslt = instrumentedXslt.replace(
+        /<xsl:text>([\s\S]*?)<\/xsl:text>/g,
+        (fullMatch, text, offset) => {
+            const t = text.trim();
+            if (t.length === 0) return fullMatch;
+            pushBinding(offset, `static: ${t}`);
+            return `${fullMatch}${marker()}`;
+        }
+    );
+
+    // Pass 3: Plain text >...< (element body text — dipnot, başlık).
+    // <style>, <xsl:text>, <xsl:comment> gibi content edilen elementlerin
+    // body'si skip edilir (içeriklerini bozmamak için) — Sprint 11 Aşama 9c
+    // hatası bu yüzdendi. Basit yaklaşım: marker formatı XML comment
+    // (<!-- -->), XSLT syntax sorun çıkarmaz. <style> içindeki CSS XSLT
+    // comment olarak yorumlanır (XSLT spec), output'a HTML comment olarak
+    // geçer.
+    instrumentedXslt = instrumentedXslt.replace(
+        />([^<]+)</g,
+        (fullMatch, text, offset) => {
+            const t = text.trim();
+            if (t.length === 0) return fullMatch;
+            pushBinding(offset, `static: ${t}`);
+            return `${fullMatch}${marker()}`;
         }
     );
 
