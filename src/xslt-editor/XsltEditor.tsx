@@ -162,9 +162,15 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const [activeTab, setActiveTab] = useState<'xslt' | 'xml'>('xslt');
     const [previewHtml, setPreviewHtml] = useState<string>('');
     const [previewError, setPreviewError] = useState<string | null>(null);
-    // Sprint 9 Aşama 2a (2026-10-03) — Preview zoom slider. Antrepo XSLT gibi
-    // fixed-width (700px) içerikler için varsayılan zoom 0.65 ile sığdır.
-    const [previewZoom, setPreviewZoom] = useState<number>(0.65);
+    // Sprint 10 Aşama 2 (2026-10-03) — Zoom default 0.60 (önceki 0.65).
+    // iframe aspectRatio kaldırıldı → doğal yükseklik + scrollHeight minHeight
+    // → container overflow tetiklenir. 0.60 default Antrepo için ideal:
+    // çoğu içerik tek sayfada görünür, uzun faturalarda dikey scroll çıkar.
+    const [previewZoom, setPreviewZoom] = useState<number>(0.60);
+    // Sprint 10 Aşama 2 (2026-10-03) — iframe içeriğinin doğal yüksekliği (px).
+    // iframe onLoad'ta iframe.contentDocument.body.scrollHeight ölçülerek set edilir.
+    // scaledHeight = iframeHeight × previewZoom → container overflow doğal tetiklenir.
+    const [iframeContentHeight, setIframeContentHeight] = useState<number>(800);
     const [renderDurationMs, setRenderDurationMs] = useState<number>(0);
     const [isRendering, setIsRendering] = useState<boolean>(false);
     const [moduleMenuOpen, setModuleMenuOpen] = useState<boolean>(false);
@@ -370,9 +376,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
      * NOT: forceInsertMarkers Monaco'nun runtime'ında var, public TS type'ında
      * yok. Cast gerekli. Alternatif: editor.action.insertSnippet command'u —
      * ama o runtime'da async, cursor position garanti değil.
+     *
+     * Sprint 10 Aşama 2c (2026-10-03): snippet eklendikten sonra cursor
+     * position → editor.revealPositionInCenter + deltaDecorations (sarı
+     * highlight 2s). Kullanıcı snippet'ın nereye eklendiğini görsün.
      */
     const handleSnippetInsert = useCallback((snippet: XsltSnippet) => {
         const ed = editorRef.current;
+        const monaco = monacoRef.current;
         if (!ed) {
             console.warn('[XSLTEditor] Editor ref yok, snippet eklenemedi:', snippet.id);
             return;
@@ -388,6 +399,29 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ed.executeEdits('snippet', [edit] as any);
         ed.focus();
+
+        // Sprint 10 Aşama 2c — snippet eklenen yere scroll + highlight
+        const cursorPos = ed.getPosition();
+        if (cursorPos && monaco) {
+            ed.revealPositionInCenter(cursorPos);
+            const decorationIds = ed.deltaDecorations([], [
+                {
+                    range: new monaco.Range(
+                        cursorPos.lineNumber, cursorPos.column,
+                        cursorPos.lineNumber, cursorPos.column + Math.max(1, snippet.template.length)
+                    ),
+                    options: { inlineClassName: 'xslt-click-highlight' },
+                },
+            ]);
+            setTimeout(() => {
+                ed.deltaDecorations(decorationIds, []);
+            }, 2000);
+            console.log(
+                `[XSLTEditor] Snippet highlight: ${snippet.id} → ` +
+                `${cursorPos.lineNumber}:${cursorPos.column} (${snippet.template.length} chars)`
+            );
+        }
+
         console.log(`[XSLTEditor] Snippet eklendi: ${snippet.id} (${snippet.template.length} chars)`);
     }, []);
 
@@ -661,9 +695,47 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     }, []);
 
     /**
-     * iframe.contentDocument.body click listener bağla.
-     * previewHtml her değiştiğinde iframe yeniden yüklenir → listener'ı
-     * yeniden bağla (cleanup'ta removeEventListener).
+     * iframe yüklendiğinde:
+     * 1. Content height ölç → state set → iframe minHeight ile scaled boyut
+     *    container'ı aşarsa dikey scroll bar görünür (Sprint 10 Aşama 2a).
+     * 2. Click listener bağla → preview click → editör scroll/highlight
+     *    (Sprint 10 Aşama 2b, defensive: capture:true + setTimeout retry).
+     *
+     * iframe.contentDocument.body bazen ilk render'da null olabiliyor
+     * (React render race). Bu yüzden useEffect yerine iframe onLoad event'i
+     * kullanıyoruz — srcDoc her değiştiğinde tetiklenir.
+     */
+    const handleIframeLoad = useCallback(() => {
+        const iframe = iframeRef.current;
+        if (!iframe) return;
+        const doc = iframe.contentDocument;
+        if (!doc) return;
+
+        const bindListener = () => {
+            const body = doc.body;
+            if (!body) {
+                console.warn('[XSLTEditor] iframe.body null — 100ms sonra retry');
+                setTimeout(bindListener, 100);
+                return;
+            }
+
+            // (1) İçerik yüksekliğini ölç
+            const scrollH = body.scrollHeight || body.offsetHeight || 800;
+            setIframeContentHeight(scrollH);
+            console.log(`[XSLTEditor] iframe loaded — body.scrollHeight=${scrollH}px, zoom=${previewZoom}`);
+
+            // (2) Click listener bağla (capture:true → draggable content'te bile click yakalanır)
+            body.addEventListener('click', handleIframeBodyClick, { capture: true });
+            console.log('[XSLTEditor] iframe click listener attached (capture:true)');
+        };
+
+        bindListener();
+    }, [handleIframeBodyClick, previewZoom]);
+
+    /**
+     * iframe onLoad → handleIframeLoad. previewHtml değiştiğinde iframe
+     * yeniden yüklenir → onLoad yeniden tetiklenir.
+     * Eski useEffect [previewHtml] kaldırıldı (race condition + cleanup karışıktı).
      */
     useEffect(() => {
         const iframe = iframeRef.current;
@@ -671,8 +743,21 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         const doc = iframe.contentDocument;
         if (!doc || !doc.body) return;
 
-        doc.body.addEventListener('click', handleIframeBodyClick);
-        return () => doc.body.removeEventListener('click', handleIframeBodyClick);
+        // Önceki listener varsa temizle
+        doc.body.removeEventListener('click', handleIframeBodyClick, { capture: true });
+        // Yeniden bağla (previewHtml değişti, yeni body)
+        const body = doc.body;
+        const scrollH = body.scrollHeight || body.offsetHeight || 800;
+        setIframeContentHeight(scrollH);
+        body.addEventListener('click', handleIframeBodyClick, { capture: true });
+        console.log(`[XSLTEditor] iframe listener re-bound (previewHtml changed, scrollHeight=${scrollH})`);
+
+        return () => {
+            const curDoc = iframe.contentDocument;
+            if (curDoc?.body) {
+                curDoc.body.removeEventListener('click', handleIframeBodyClick, { capture: true });
+            }
+        };
     }, [previewHtml, handleIframeBodyClick]);
 
     // ------------------------------------------------------------------------
@@ -1357,8 +1442,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 <ZoomIn size={11} />
                             </button>
                             <button
-                                onClick={() => setPreviewZoom(0.65)}
-                                title="Default zoom (65%)"
+                                onClick={() => setPreviewZoom(0.60)}
+                                title="Default zoom (60%)"
                                 style={{
                                     padding: '1px 5px',
                                     background: 'transparent',
@@ -1412,10 +1497,10 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         </div>
                     )}
 
-                    {/* iframe — Sprint 9 Aşama 2f: A4 sheet + dikey scroll.
-                        Container overflow:auto → iframe scaled boyutu container'dan
-                        büyükse dikey scroll bar görünür (fatura toplamları, dipnotlar
-                        görünür). Sayfa hissi korunur, tüm içerik erişilebilir. */}
+                    {/* iframe — Sprint 10 Aşama 2: aspectRatio kaldırıldı, doğal yükseklik +
+                        scrollHeight → iframe scaled boyutu container'dan büyükse dikey
+                        scroll bar görünür (fatura toplamları, dipnotlar görünür).
+                        Sayfa hissi korunur, tüm içerik erişilebilir. */}
                     <div style={{
                         flex: 1, minHeight: 0, position: 'relative',
                         background: '#475569',  // koyu gri — ofis zemini
@@ -1430,22 +1515,24 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             <iframe
                                 ref={iframeRef}
                                 srcDoc={previewHtml}
+                                onLoad={handleIframeLoad}
                                 style={{
                                     border: '1px solid rgba(0,0,0,0.12)',
                                     background: 'white',
                                     boxShadow: '0 25px 50px -12px rgba(0,0,0,0.55), 0 12px 24px -8px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,0,0,0.04)',
                                     borderRadius: '2px',  // hafif köşe yumuşama (kağıt kenarı)
-                                    // A4 aspect ratio: 1:1.414 (210mm × 297mm)
-                                    aspectRatio: '1 / 1.414',
-                                    // Container'a sığacak şekilde (scaled olurdu)
+                                    // Sprint 10 Aşama 2: aspectRatio kaldırıldı. İframe
+                                    // doğal yüksekliği + iframeContentHeight (scrollHeight)
+                                    // scaledHeight = iframeHeight × previewZoom. Container
+                                    // height'i aşarsa container overflow:auto → dikey scroll.
                                     width: `${(100 / previewZoom) * 0.95}%`,
                                     maxWidth: '1100px',
                                     minWidth: '500px',
-                                    height: 'auto',
+                                    height: `${iframeContentHeight}px`,  // scrollHeight (natural)
                                     // iframe kendi scroll'u — XSLT body'si büyükse
                                     overflow: 'auto',
                                     transform: `scale(${previewZoom})`,
-                                    transformOrigin: 'center center',
+                                    transformOrigin: 'center top',  // top — scroll üstten başlar
                                 }}
                                 title="XSLT Render Preview"
                             />
