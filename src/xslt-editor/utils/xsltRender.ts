@@ -197,28 +197,33 @@ export function renderAndAnnotateXslt(
                 const m = text.match(/^BIND_(\d+)$/);
                 if (m) {
                     const idx = Number(m[1]) - 1; // 1-based → 0-based
-                    // Hemen sonraki sibling text node'u bul (boş/whitespace skip)
+                    const b = bindings[idx];
+                    if (!b) return;
+                    // Annotation target: önce hemen sonraki dolu text node'un parent'ı.
+                    // Bulunamazsa (comment parent'ın son child'ı, veya sadece whitespace
+                    // varsa) comment'in parent element'ini annotation yap.
+                    let target: Element | null = null;
                     let next = node.nextSibling;
                     while (next) {
                         if (next.nodeType === 3) { // TEXT_NODE
                             const t = (next.textContent || '').trim();
                             if (t.length > 0) {
-                                const textParent = (next as Text).parentElement;
-                                if (textParent && !textParent.hasAttribute('data-render-index')) {
-                                    const b = bindings[idx];
-                                    if (b) {
-                                        textParent.setAttribute('data-render-index', String(idx));
-                                        textParent.setAttribute('data-bind-index', `B${idx + 1}`);
-                                        textParent.setAttribute('data-xpath', b.xpath);
-                                        textParent.setAttribute('data-line', String(b.line));
-                                        textParent.setAttribute('data-column', String(b.column));
-                                        annotated++;
-                                    }
-                                }
-                                break; // Bu comment işlendi, sonraki comment'e geç
+                                target = (next as Text).parentElement;
+                                break;
                             }
                         }
                         next = next.nextSibling;
+                    }
+                    if (!target) {
+                        target = node.parentElement;
+                    }
+                    if (target && !target.hasAttribute('data-render-index')) {
+                        target.setAttribute('data-render-index', String(idx));
+                        target.setAttribute('data-bind-index', `B${idx + 1}`);
+                        target.setAttribute('data-xpath', b.xpath);
+                        target.setAttribute('data-line', String(b.line));
+                        target.setAttribute('data-column', String(b.column));
+                        annotated++;
                     }
                 }
                 return; // Comment'in children'ı yok
