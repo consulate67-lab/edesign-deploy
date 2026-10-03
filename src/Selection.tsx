@@ -1,10 +1,11 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { FileText, ShoppingCart, Globe, Plane, Package, Zap, Upload, LogOut, User, X, CreditCard, Building2, Phone, Mail, Sparkles, Layout, Truck, Briefcase, Sprout, Ticket, Receipt, Plus, FileSignature, Code2, Copy, Check } from 'lucide-react';
+import { FileText, ShoppingCart, Globe, Plane, Package, Zap, Upload, LogOut, User, X, CreditCard, Building2, Phone, Mail, Sparkles, Layout, Truck, Briefcase, Sprout, Ticket, Receipt, Plus, FileSignature, Code2, Copy, Check, FileCode } from 'lucide-react';
 import { api } from './api';
 import { PaymentModal } from './PaymentModal.tsx';
 import { getModuleHints, getModuleConfig } from './templateConfig';
 import { getSnippetsForModule, Snippet } from './snippets';
 import { useUiStore } from './store/uiStore';
+import { TEMPLATES, type XsltTemplate } from './xslt-editor/templates';
 
 interface SelectionProps {
     onSelect: (moduleId: string, template: string, moduleName: string, customContent?: string, themeColor?: string) => void;
@@ -441,6 +442,107 @@ export const Selection: React.FC<SelectionProps> = ({ onSelect, onLogout, onSele
                                 </div>
                             </div>
                         )}
+                    </div>
+                </div>
+
+                {/* Sprint 8 Aşama 3 (2026-10-03) — Şablon Galerisi.
+                    5 minimal XSLT şablonu — tıkla → doğrudan XsltEditor'da açılır,
+                    üzerinde değişiklik yap, indir. "Kod yazarak tasarım" için hızlı başlangıç. */}
+                <div style={{ width: '100%', marginBottom: '2rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1.5rem' }}>
+                        <div style={{ height: '1px', flex: 1, background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.1))' }}></div>
+                        <span style={{ fontSize: '0.8rem', color: '#34d399', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '2px' }}>
+                            Hazır Şablonlarla Başla · XSLT Editör
+                        </span>
+                        <div style={{ height: '1px', flex: 1, background: 'linear-gradient(to left, transparent, rgba(255,255,255,0.1))' }}></div>
+                    </div>
+
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                        gap: '14px',
+                    }}>
+                        {TEMPLATES.map((template: XsltTemplate) => (
+                            <div
+                                key={template.id}
+                                onClick={() => onSelectXsltEditor?.(template.moduleId, template.xslt, template.docName)}
+                                title={`${template.label} — ${template.description}`}
+                                data-template-id={template.id}
+                                style={{
+                                    padding: '14px 16px',
+                                    background: 'rgba(16, 185, 129, 0.06)',
+                                    border: '1px solid rgba(16, 185, 129, 0.25)',
+                                    borderRadius: '12px',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'flex-start',
+                                    gap: '12px',
+                                    transition: 'all 0.2s ease',
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.background = 'rgba(16, 185, 129, 0.12)';
+                                    e.currentTarget.style.borderColor = 'rgba(16, 185, 129, 0.5)';
+                                    e.currentTarget.style.transform = 'translateY(-1px)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = 'rgba(16, 185, 129, 0.06)';
+                                    e.currentTarget.style.borderColor = 'rgba(16, 185, 129, 0.25)';
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                }}
+                            >
+                                <div style={{
+                                    width: '36px',
+                                    height: '36px',
+                                    background: template.moduleId === 'arsiv'
+                                        ? 'linear-gradient(135deg, #059669, #10b981)'
+                                        : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                                    borderRadius: '8px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: 'white',
+                                    flexShrink: 0,
+                                }}>
+                                    <FileCode size={18} />
+                                </div>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '6px',
+                                        marginBottom: '4px',
+                                    }}>
+                                        <span style={{
+                                            fontSize: '0.95rem',
+                                            fontWeight: 700,
+                                            color: '#e2e8f0',
+                                        }}>
+                                            {template.label}
+                                        </span>
+                                        <span style={{
+                                            padding: '1px 6px',
+                                            background: 'rgba(52, 211, 153, 0.15)',
+                                            border: '1px solid rgba(52, 211, 153, 0.3)',
+                                            borderRadius: '3px',
+                                            fontSize: '0.6rem',
+                                            fontWeight: 700,
+                                            color: '#6ee7b7',
+                                            letterSpacing: '0.5px',
+                                            textTransform: 'uppercase',
+                                        }}>
+                                            {template.moduleId === 'arsiv' ? 'e-Arşiv' : 'e-Fatura'}
+                                        </span>
+                                    </div>
+                                    <div style={{
+                                        fontSize: '0.75rem',
+                                        color: '#94a3b8',
+                                        lineHeight: 1.4,
+                                    }}>
+                                        {template.description}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
 
