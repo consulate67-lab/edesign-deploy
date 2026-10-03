@@ -165,6 +165,37 @@ export function renderAndAnnotateXslt(
             html = html.replace(/<head([^>]*)>/i, `<head$1><meta charset="utf-8">`);
         }
 
+        // Sprint 11 Aşama 6e — Inline annotation CSS (iframe scope fix).
+        // iframe kendi document scope'una sahip → parent index.css içindeki
+        // [data-render-index] seçicisi iframe içinde ÇALIŞMAZ. Bu yüzden
+        // annotation CSS'i iframe HTML'inin <head>'ine inline <style> olarak
+        // enjekte edilir.
+        const annotationCss = `
+<style>
+[data-render-index] {
+    outline: 2px solid rgba(99, 102, 241, 0.5);
+    outline-offset: 1px;
+    cursor: pointer;
+    transition: outline-color 0.15s ease-out, background-color 0.15s ease-out;
+}
+[data-render-index]:hover {
+    outline: 2px solid rgba(99, 102, 241, 0.95);
+    outline-offset: 0;
+    background-color: rgba(99, 102, 241, 0.08);
+}
+[data-render-index][data-xpath-active="true"] {
+    outline: 2px solid rgba(252, 211, 77, 0.9) !important;
+    background-color: rgba(252, 211, 77, 0.15) !important;
+}
+</style>`;
+
+        if (/<head([^>]*)>/i.test(html)) {
+            html = html.replace(/<head([^>]*)>/i, `<head$1>${annotationCss}`);
+        } else {
+            // <html> var ama <head> yok → body'sinden önce ekle
+            html = html.replace(/<body([^>]*)>/i, `${annotationCss}<body$1>`);
+        }
+
         return { html, error: null, durationMs: performance.now() - start };
     } catch (err) {
         return {
