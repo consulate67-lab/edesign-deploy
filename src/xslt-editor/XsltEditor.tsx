@@ -1296,10 +1296,9 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                     )}
 
                     {/* iframe — Sprint 9 Aşama 2d: A4 sheet görünümü.
-                        Container koyu gri zemin (ofis zemini hissi) + flex center
-                        ile sayfa ortalanmış. iframe box-shadow ile sayfa gölgesi
-                        + scale ile zoom. Antrepo 700px içerik zoom %65 ile
-                        container'a sığar, sayfa hissi verir. */}
+                        Container flex center + büyük padding ile sayfa merkezde.
+                        iframe aspectRatio A4 (1:1.414) + box-shadow büyük → gerçek
+                        kağıt hissi. Zoom scale + transformOrigin center center. */}
                     <div style={{
                         flex: 1, minHeight: 0, position: 'relative',
                         background: '#475569',  // koyu gri — ofis zemini
@@ -1308,22 +1307,24 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         display: 'flex',
                         alignItems: 'flex-start',
                         justifyContent: 'center',
-                        padding: '24px',
+                        padding: '48px 24px',
                     }}>
                         {previewHtml ? (
                             <iframe
                                 ref={iframeRef}
                                 srcDoc={previewHtml}
                                 style={{
-                                    border: '1px solid rgba(255,255,255,0.15)',
+                                    border: '1px solid rgba(0,0,0,0.12)',
                                     background: 'white',
-                                    boxShadow: '0 12px 40px rgba(0,0,0,0.45), 0 4px 12px rgba(0,0,0,0.25), inset 0 0 0 1px rgba(0,0,0,0.05)',
-                                    borderRadius: '2px',  // çok hafif köşe yuvarlaklığı (kağıt kenarı)
-                                    // Zoom — scaled boyutu 1/zoom, transform scale(zoom) ile görünür %zoom
-                                    width: `${100 / previewZoom}%`,
-                                    height: `${100 / previewZoom}%`,
-                                    maxWidth: '100%',
-                                    maxHeight: '100%',
+                                    boxShadow: '0 25px 50px -12px rgba(0,0,0,0.55), 0 12px 24px -8px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,0,0,0.04)',
+                                    borderRadius: '2px',  // hafif köşe yumuşama (kağıt kenarı)
+                                    // A4 aspect ratio: 1:1.414 (210mm × 297mm)
+                                    aspectRatio: '1 / 1.414',
+                                    // Container'a sığacak şekilde (scaled olurdu)
+                                    width: `${(100 / previewZoom) * 0.95}%`,
+                                    maxWidth: '1100px',
+                                    minWidth: '500px',
+                                    height: 'auto',
                                     transform: `scale(${previewZoom})`,
                                     transformOrigin: 'center center',
                                 }}
