@@ -640,16 +640,30 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         if (!model) return;
         const fullText = model.getValue();
 
-        // XSLT içinde xpath'i ara — tam eşleşme veya son parça (cac:Party vs /Invoice/cac:Party/cbc:Name)
+        // XSLT içinde xpath'i ara — 3 katmanlı strateji:
+        // 1. Tam eşleşme (fullText.indexOf(xpath))
+        // 2. select="xpath" pattern'i (unique, çoğu durumda doğru yere götürür)
+        //    Not: Selim test etti — "cbc:Name" XSLT içinde birden fazla yerde
+        //    geçiyor (xsd schema + gerçek kullanım). İlk eşleşme yanlış satıra
+        //    düşüyordu. select="..." pattern daha güvenilir.
+        // 3. Son parça (cbc:Name gibi) son çare
         let idx = fullText.indexOf(xpath);
+        let matchType = 'tam eşleşme';
+        if (idx === -1) {
+            const selectPattern = `select="${xpath}"`;
+            idx = fullText.indexOf(selectPattern);
+            matchType = 'select="..." pattern';
+        }
         if (idx === -1) {
             const lastPart = xpath.split('/').pop() || xpath;
             idx = fullText.indexOf(lastPart);
+            matchType = 'son parça (lastPart)';
         }
         if (idx === -1) {
             console.log('[XSLTEditor] XSLT içinde binding bulunamadı:', xpath);
             return;
         }
+        console.log(`[XSLTEditor] xpath match: "${xpath}" → ${matchType} @ offset ${idx}`);
 
         const position = model.getPositionAt(idx);
         ed.revealPositionInCenter(position);
