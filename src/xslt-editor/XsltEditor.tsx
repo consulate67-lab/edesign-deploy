@@ -640,29 +640,74 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         if (!model) return;
         const fullText = model.getValue();
 
-        // XSLT içinde xpath'i ara — 3 katmanlı strateji:
-        // 1. Tam eşleşme (fullText.indexOf(xpath))
-        // 2. select="xpath" pattern'i (unique, çoğu durumda doğru yere götürür)
-        //    Not: Selim test etti — "cbc:Name" XSLT içinde birden fazla yerde
-        //    geçiyor (xsd schema + gerçek kullanım). İlk eşleşme yanlış satıra
-        //    düşüyordu. select="..." pattern daha güvenilir.
-        // 3. Son parça (cbc:Name gibi) son çare
-        let idx = fullText.indexOf(xpath);
-        let matchType = 'tam eşleşme';
-        if (idx === -1) {
-            const selectPattern = `select="${xpath}"`;
-            idx = fullText.indexOf(selectPattern);
-            matchType = 'select="..." pattern';
+        // Sprint 11 Aşama 5 — sıra korelasyonlu multi-match arama.
+        // Selim test: bazı işaretlemeler doğru yere gidiyor (ÖRNEK TEDARİKÇİ
+        // A.Ş. → 277. satır), bazıları hâlâ yanlış context'e düşüyor.
+        // Kök neden: aynı xpath (cbc:Line, cbc:Name, vb.) XSLT içinde farklı
+        // for-each context'lerinde birden fazla select="..." içinde geçiyor.
+        // İlk eşleşme yanlış context olabiliyor.
+        //
+        // Çözüm: ordered-correlation arama. Annotation sırası = render DOM
+        // DFS pre-order = xpathList sırası = XSLT'teki gerçek sıra. Birden
+        // fazla eşleşme varsa, ÖNCEKİ binding'in (xpathList[renderIndex-1])
+        // offset'inden SONRAKİ en yakın eşleşmeyi seç. Bu sıra korelasyonu
+        // neredeyse her zaman doğru yere götürür.
+        const findAllMatches = (pattern: string): number[] => {
+            const out: number[] = [];
+            let i = fullText.indexOf(pattern);
+            while (i !== -1) {
+                out.push(i);
+                i = fullText.indexOf(pattern, i + 1);
+            }
+            return out;
+        };
+
+        const selectPattern = `select="${xpath}"`;
+        let matches = findAllMatches(selectPattern);
+        let matchType = 'select="..." pattern';
+        if (matches.length === 0) {
+            matches = findAllMatches(xpath);
+            matchType = 'tam eşleşme';
         }
-        if (idx === -1) {
+        if (matches.length === 0) {
             const lastPart = xpath.split('/').pop() || xpath;
-            idx = fullText.indexOf(lastPart);
+            matches = findAllMatches(lastPart);
             matchType = 'son parça (lastPart)';
         }
-        if (idx === -1) {
+
+        if (matches.length === 0) {
             console.log('[XSLTEditor] XSLT içinde binding bulunamadı:', xpath);
             return;
         }
+
+        let idx: number;
+        if (matches.length === 1) {
+            idx = matches[0];
+        } else {
+            // Çoklu eşleşme — sıra korelasyonu ile en yakını seç
+            console.log(`[XSLTEditor] AMBIGUOUS: "${xpath}" → ${matches.length} matches at offsets [${matches.join(', ')}]`);
+
+            let prevOffset = -1;
+            if (previewSelectedRenderIndex > 0) {
+                const prevXpath = xpathList[previewSelectedRenderIndex - 1];
+                if (prevXpath) {
+                    // Önceki binding'in son eşleşmesini bul (current'tan ÖNCE)
+                    const prevPattern = `select="${prevXpath}"`;
+                    const prevMatches = findAllMatches(prevPattern);
+                    if (prevMatches.length > 0) {
+                        prevOffset = prevMatches[prevMatches.length - 1]; // son eşleşme
+                    } else {
+                        prevOffset = fullText.lastIndexOf(prevXpath);
+                    }
+                }
+            }
+
+            // prevOffset'tan sonraki ilk eşleşmeyi seç
+            const nextMatch = prevOffset >= 0 ? matches.find(m => m > prevOffset) : undefined;
+            idx = nextMatch !== undefined ? nextMatch : matches[0];
+            console.log(`[XSLTEditor] ordered-correlation: prevOffset=${prevOffset}, chose @ ${idx}`);
+        }
+
         console.log(`[XSLTEditor] xpath match: "${xpath}" → ${matchType} @ offset ${idx}`);
 
         const position = model.getPositionAt(idx);
