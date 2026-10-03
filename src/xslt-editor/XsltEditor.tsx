@@ -41,6 +41,7 @@ import {
     SNIPPETS, SNIPPET_CATEGORIES, getSnippetsByCategory, getCategoryCounts,
     type XsltSnippet, type SnippetCategory,
 } from './snippets';
+import { XSLT_ELEMENTS, UBL_XPATHS, lintXslt } from './xsltSchema';
 
 // ============================================================================
 // Module registry — Selim'in 9 modülü (Selection.tsx ile senkron)
@@ -157,6 +158,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
 
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
+    // Sprint 8 Aşama 2 — Monaco API instance (provider kayıt + marker set için)
+    const monacoRef = useRef<typeof import('monaco-editor') | null>(null);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // Sprint 8 Aşama 1 — Snippet gallery state
@@ -348,12 +351,179 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     }, []);
 
     /**
-     * Editor mount — ref sakla, isteğe bağlı XSLT schema register
-     * (Aşama 2'de eklenecek).
+     * Editor mount — ref + Monaco API sakla, XSLT autocomplete provider kayıt.
+     * 2 provider: XSLT element + UBL-TR XPath (select="..." içinde).
+     * (handleEditorMount detayı Sprint 8 Aşama 2 bloğunda — aşağıda).
      */
-    const handleEditorMount = useCallback((ed: editor.IStandaloneCodeEditor) => {
+
+    // ------------------------------------------------------------------------
+    // Sprint 8 Aşama 2 — XSLT autocomplete + lint
+    // ------------------------------------------------------------------------
+
+    /**
+     * Lint runner — xsltContent değişince 800ms debounce ile lint et,
+     * Monaco'ya marker yaz. Tag balance, deprecated, format-number uyarıları.
+     */
+    useEffect(() => {
+        if (activeTab !== 'xslt') return; // sadece XSLT tab'ında lint et
+        const monaco = monacoRef.current;
+        if (!monaco) return;
+
+        const t = setTimeout(() => {
+            const ed = editorRef.current;
+            if (!ed) return;
+            const model = ed.getModel();
+            if (!model) return;
+
+            const issues = lintXslt(xsltContent);
+            const markers = issues.map(issue => ({
+                severity: issue.severity === 'error'
+                    ? monaco.MarkerSeverity.Error
+                    : issue.severity === 'warning'
+                        ? monaco.MarkerSeverity.Warning
+                        : monaco.MarkerSeverity.Info,
+                message: issue.message,
+                startLineNumber: issue.lineNumber,
+                startColumn: issue.column,
+                endLineNumber: issue.endLineNumber,
+                endColumn: issue.endColumn,
+            }));
+            monaco.editor.setModelMarkers(model, 'xslt-lint', markers);
+        }, 800);
+
+        return () => clearTimeout(t);
+    }, [xsltContent, activeTab]);
+
+    /**
+     * Editor mount — ref + Monaco API sakla, XSLT autocomplete provider kayıt.
+     * 2 provider: XSLT element + UBL-TR XPath (select="..." içinde).
+     */
+    const handleEditorMount = useCallback((ed: editor.IStandaloneCodeEditor, monaco: typeof import('monaco-editor')) => {
         editorRef.current = ed;
-        console.log('[XSLTEditor] Monaco editor mount edildi, ref hazır');
+        monacoRef.current = monaco;
+        console.log('[XSLTEditor] Monaco editor mount edildi, XSLT provider kayıt ediliyor');
+
+        // ── Provider 1: XSLT element + attribute ─────────────────────────
+        // Trigger: < (yeni tag),  (attribute space), = (attribute value start)
+        monaco.languages.registerCompletionItemProvider('xml', {
+            triggerCharacters: ['<', ' ', '='],
+            provideCompletionItems: (model, position) => {
+                const line = model.getLineContent(position.lineNumber);
+                const beforeCursor = line.substring(0, position.column - 1);
+
+                const word = model.getWordUntilPosition(position);
+                const range = {
+                    startLineNumber: position.lineNumber,
+                    endLineNumber: position.lineNumber,
+                    startColumn: word.startColumn,
+                    endColumn: word.endColumn,
+                };
+
+                // 1. "xsl:" prefix'i — XSLT element öner
+                if (beforeCursor.match(/<\s*xsl:$/)) {
+                    return {
+                        suggestions: XSLT_ELEMENTS.map(el => ({
+                            label: el.fullName,
+                            kind: monaco.languages.CompletionItemKind.Function,
+                            insertText: el.empty
+                                ? `${el.name} $1/>$0`
+                                : `${el.name} $1>$0</${el.fullName}>`,
+                            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                            documentation: {
+                                value: `**${el.fullName}**\n\n${el.description}\n\nCommon attrs: ${el.commonAttrs.join(', ') || 'yok'}`,
+                                isTrusted: true,
+                            },
+                            detail: el.fullName,
+                            range,
+                        })),
+                    };
+                }
+
+                // 2. "<" — herhangi bir tag açılışı (xsl: veya diğer)
+                if (beforeCursor.endsWith('<') || beforeCursor.match(/<\s*$/)) {
+                    const suggestions = [
+                        ...XSLT_ELEMENTS.map(el => ({
+                            label: el.fullName,
+                            kind: monaco.languages.CompletionItemKind.Function,
+                            insertText: el.empty
+                                ? `${el.name} $1/>$0`
+                                : `${el.name} $1>$0</${el.fullName}>`,
+                            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                            documentation: { value: `${el.description}` },
+                            detail: el.fullName,
+                            range,
+                        })),
+                        // HTML template root için
+                        {
+                            label: 'html',
+                            kind: monaco.languages.CompletionItemKind.Snippet,
+                            insertText: 'html>$1</html>',
+                            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                            documentation: 'HTML kök element',
+                            range,
+                        },
+                    ];
+                    return { suggestions };
+                }
+
+                // 3. Attribute space (xsl:for-each gibi tag'in içi) — XSLT attribute öner
+                if (beforeCursor.match(/<\s*xsl:\w+\s+$/)) {
+                    const tagMatch = beforeCursor.match(/<\s*xsl:(\w+)/);
+                    const tagName = tagMatch?.[1];
+                    const elDef = XSLT_ELEMENTS.find(e => e.name === tagName);
+                    if (!elDef) return { suggestions: [] };
+                    return {
+                        suggestions: elDef.commonAttrs.map(attr => ({
+                            label: attr,
+                            kind: monaco.languages.CompletionItemKind.Property,
+                            insertText: `${attr}="$1"`,
+                            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                            documentation: `${elDef.fullName} @${attr}`,
+                            range,
+                        })),
+                    };
+                }
+
+                return { suggestions: [] };
+            },
+        });
+
+        // ── Provider 2: UBL-TR XPath (select="..." içinde) ─────────────
+        // Trigger: " (select attribute value start)
+        monaco.languages.registerCompletionItemProvider('xml', {
+            triggerCharacters: ['"', ':', '/'],
+            provideCompletionItems: (model, position) => {
+                const line = model.getLineContent(position.lineNumber);
+                const beforeCursor = line.substring(0, position.column - 1);
+
+                // select="..." içinde miyiz?
+                // Yaklaşık tespit: son olarak select=" açıldı ve henüz " kapanmadı
+                const lastQuoteIdx = beforeCursor.lastIndexOf('"');
+                const lastOpenIdx = beforeCursor.lastIndexOf('select="');
+                if (lastOpenIdx === -1 || lastQuoteIdx > lastOpenIdx) {
+                    return { suggestions: [] };
+                }
+
+                const word = model.getWordUntilPosition(position);
+                const range = {
+                    startLineNumber: position.lineNumber,
+                    endLineNumber: position.lineNumber,
+                    startColumn: word.startColumn,
+                    endColumn: word.endColumn,
+                };
+
+                return {
+                    suggestions: UBL_XPATHS.map(x => ({
+                        label: x.xpath,
+                        kind: monaco.languages.CompletionItemKind.Field,
+                        insertText: x.xpath,
+                        documentation: { value: x.description },
+                        detail: 'UBL-TR XPath',
+                        range,
+                    })),
+                };
+            },
+        });
     }, []);
 
     // ------------------------------------------------------------------------
