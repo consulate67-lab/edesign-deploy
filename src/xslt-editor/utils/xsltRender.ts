@@ -91,10 +91,14 @@ export function parseXsltInstrumented(xslt: string): {
     instrumentedXslt: string;
     bindings: XsltBinding[];
 } {
-    // Sprint 11 Aşama 9b — 7-alternation regex catastrophic backtracking +
-    // TS replace callback signature strict bug nedeniyle 0 binding döndürüyordu.
-    // Çözüm: 2 ayrı basit pass — (a) xsl:value-of + xsl:copy-of (Aşama 8 kanıtlanmış),
-    // (b) plain text (Fatura Tipi başlığı, dipnot).
+    // Sprint 11 Aşama 9c — Sprint 11 kapatılıyor. Pass 2 (plain text) bazı
+    // XSLT'lerde XSLT parse hatasına neden oluyor (line 254 "StartTag: invalid
+    // element name" — Pass 2 <style> veya <script> içindeki düz metne marker
+    // eklediğinde XSLT yapısı bozuluyor).
+    //
+    // Aşama 8 kanıtlanmış Pass 1 korundu (xsl:value-of + xsl:copy-of). Statik
+    // text desteği Sprint 12'ye ertelendi (daha güvenli DOM tabanlı parsing
+    // gerekiyor).
     const bindings: XsltBinding[] = [];
     let counter = 0;
 
@@ -111,25 +115,14 @@ export function parseXsltInstrumented(xslt: string): {
         bindings.push({ xpath, offset, line, column });
     };
 
-    // Pass 1: xsl:value-of + xsl:copy-of (Aşama 8 kanıtlanmış regex)
-    let instrumentedXslt = xslt.replace(
+    // Pass 1 (kanıtlanmış): xsl:value-of + xsl:copy-of (self-close + open-close)
+    const instrumentedXslt = xslt.replace(
         /(<xsl:(?:value-of|copy-of)\b[^>]*?\/>)|(<xsl:(?:value-of|copy-of)\b[^>]*?>[\s\S]*?<\/xsl:(?:value-of|copy-of)>)/g,
         (fullMatch, m1, m2, offset) => {
             const xpathMatch = m1 || m2;
             const xpath = (xpathMatch.match(/select="([^"]+)"/) || [])[1];
             if (!xpath) return fullMatch;
             pushBinding(offset, xpath);
-            return `${fullMatch}<xsl:comment>BIND_${++counter}</xsl:comment>`;
-        }
-    );
-
-    // Pass 2: Plain text — element body içinde >...< arası (Fatura Tipi başlığı, dipnot)
-    instrumentedXslt = instrumentedXslt.replace(
-        />([^<]+)</g,
-        (fullMatch, text, offset) => {
-            const t = text.trim();
-            if (t.length === 0) return fullMatch;
-            pushBinding(offset, `static: ${t}`);
             return `${fullMatch}<xsl:comment>BIND_${++counter}</xsl:comment>`;
         }
     );
