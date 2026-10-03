@@ -12,6 +12,11 @@ const Selection = lazy(() => import('./Selection.tsx').then((m) => ({ default: m
 const ProfessionalDesigner = lazy(() =>
     import('./ProfessionalDesigner.tsx').then((m) => ({ default: m.ProfessionalDesigner }))
 );
+// Sprint 7 (2026-10-03) — XSLT Editor: bagimsiz 2. tasarim, Monaco + canli preview.
+// ProfesyonelDesigner'a dokunmaz, ayri route. vendor-monaco chunk lazy load.
+const XSLTEditor = lazy(() =>
+    import('./xslt-editor/XsltEditor').then((m) => ({ default: m.XSLTEditor }))
+);
 
 const ScreenFallback: React.FC = () => (
     <div
@@ -28,7 +33,7 @@ const ScreenFallback: React.FC = () => (
     </div>
 );
 
-type View = 'landing' | 'auth' | 'selection' | 'designer';
+type View = 'landing' | 'auth' | 'selection' | 'designer' | 'xslt-editor';
 type AuthMode = 'login' | 'register';
 
 const App: React.FC = () => {
@@ -74,6 +79,22 @@ const App: React.FC = () => {
 
     const handleBack = () => setView('selection');
 
+    /**
+     * Sprint 7 — XSLT Editor'a gecis. Selection.tsx'teki "XSLT Editor (Beta)" kartindan tetiklenir.
+     * ProfesyonelDesigner'dan bagimsiz; XSLT bilen kullanicilar (Selim gibi) icin dogrudan
+     * Monaco + canli preview. Modul dropdown ile 9 e-belge modulu destekler.
+     */
+    const handleSelectXsltEditor = (moduleId?: string, initialXslt?: string, docName?: string) => {
+        setSelectedDoc({
+            moduleId: moduleId || 'fatura',
+            moduleName: docName || 'XSLT Tasarim',
+            template: 'XsltEditor',
+            customContent: initialXslt,
+            themeColor: '#1e3a8a',
+        });
+        setView('xslt-editor');
+    };
+
     return (
         <>
             <ToastHost />
@@ -94,6 +115,7 @@ const App: React.FC = () => {
                     <Selection
                         onSelect={handleDocSelect}
                         onLogout={handleLogout}
+                        onSelectXsltEditor={handleSelectXsltEditor}
                     />
                 )}
                 {view === 'designer' && selectedDoc && (
@@ -103,6 +125,14 @@ const App: React.FC = () => {
                         themeColor={selectedDoc.themeColor}
                         docName={selectedDoc.moduleName}
                         moduleId={selectedDoc.moduleId}
+                        onBack={handleBack}
+                    />
+                )}
+                {view === 'xslt-editor' && selectedDoc && (
+                    <XSLTEditor
+                        initialModuleId={selectedDoc.moduleId}
+                        initialXslt={selectedDoc.customContent}
+                        docName={selectedDoc.moduleName}
                         onBack={handleBack}
                     />
                 )}

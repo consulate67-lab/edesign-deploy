@@ -9,6 +9,8 @@ import { useUiStore } from './store/uiStore';
 interface SelectionProps {
     onSelect: (moduleId: string, template: string, moduleName: string, customContent?: string, themeColor?: string) => void;
     onLogout: () => void;
+    /** Sprint 7 (2026-10-03) — XSLT Editor (Monaco + canlı preview) — bağımsız 2. tasarım. */
+    onSelectXsltEditor?: (moduleId?: string, initialXslt?: string, docName?: string) => void;
 }
 
 interface Module {
@@ -96,7 +98,7 @@ const modules: Module[] = [
     // 2026-09-25: e-Sigorta Komisyon, e-Döviz, e-Kıymetli Maden modülleri kaldırıldı (12→9 modül).
 ];
 
-export const Selection: React.FC<SelectionProps> = ({ onSelect, onLogout }) => {
+export const Selection: React.FC<SelectionProps> = ({ onSelect, onLogout, onSelectXsltEditor }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [showProfileModal, setShowProfileModal] = useState(false);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -376,6 +378,69 @@ export const Selection: React.FC<SelectionProps> = ({ onSelect, onLogout }) => {
                                 Dosya Seç ve Yükle &rsaquo;
                             </div>
                         </div>
+
+                        {/* Sprint 7 (2026-10-03) — XSLT Editör (Beta) kartı.
+                            ProfesyonelDesigner'a dokunmadan bağımsız 2. tasarım.
+                            Monaco editor + canlı preview, XSLT bilen kullanıcılar için. */}
+                        {onSelectXsltEditor && (
+                            <div
+                                onClick={() => onSelectXsltEditor()}
+                                title="XSLT Editör — Monaco + canlı preview. XSLT bilen kullanıcılar için."
+                                style={{
+                                    background: 'linear-gradient(135deg, rgba(16,185,129,0.12), rgba(52,211,153,0.08))',
+                                    border: '1px solid rgba(16,185,129,0.35)',
+                                    borderRadius: '24px', padding: '2rem', cursor: 'pointer',
+                                    display: 'flex', flexDirection: 'column', gap: '1.5rem',
+                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                    backdropFilter: 'blur(10px)',
+                                    position: 'relative',
+                                    overflow: 'hidden',
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.borderColor = 'rgba(16,185,129,0.7)';
+                                    e.currentTarget.style.transform = 'translateY(-2px)';
+                                    e.currentTarget.style.boxShadow = '0 12px 32px rgba(16,185,129,0.18)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.borderColor = 'rgba(16,185,129,0.35)';
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                    e.currentTarget.style.boxShadow = 'none';
+                                }}
+                            >
+                                <div style={{
+                                    position: 'absolute', top: 12, right: 12,
+                                    padding: '4px 10px',
+                                    background: 'linear-gradient(135deg, #10b981, #34d399)',
+                                    borderRadius: '999px',
+                                    fontSize: '0.65rem', fontWeight: 800, letterSpacing: '1px',
+                                    color: 'white',
+                                }}>
+                                    BETA
+                                </div>
+                                <div style={{
+                                    width: '56px', height: '56px',
+                                    background: 'linear-gradient(135deg, #10b981, #34d399)',
+                                    borderRadius: '16px',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white'
+                                }}>
+                                    <Code2 size={28} />
+                                </div>
+                                <div>
+                                    <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '0.5rem', color: 'white' }}>
+                                        XSLT Editör
+                                    </h2>
+                                    <p style={{ color: '#cbd5e1', fontSize: '0.9rem', lineHeight: '1.5' }}>
+                                        Direkt XSLT kod yaz, canlı önizle. Monaco editör (VS Code altyapısı, syntax highlight, autocomplete) + sağda anlık HTML render. PHP gibi template mantığına alışkın kullanıcılar için.
+                                    </p>
+                                </div>
+                                <div style={{
+                                    color: '#6ee7b7', fontWeight: 'bold', fontSize: '0.9rem',
+                                    display: 'flex', alignItems: 'center', gap: '6px',
+                                }}>
+                                    Kod Yazmaya Başla &rsaquo;
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 

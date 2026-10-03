@@ -19,6 +19,9 @@ export default defineConfig({
           'vendor-icons': ['lucide-react'],
           'vendor-i18n': ['i18next', 'react-i18next', 'i18next-browser-languagedetector'],
           'vendor-state': ['zustand'],
+          // Sprint 7 (2026-10-03): Monaco editor — lazy load only when xslt-editor route opens.
+          // Bundle is ~3.5 MB minified (~250 KB gzip with @monaco-editor/react) — pay only when used.
+          'vendor-monaco': ['@monaco-editor/react', '@monaco-editor/loader'],
         },
       },
     },
