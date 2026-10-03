@@ -91,27 +91,77 @@ export function parseXsltInstrumented(xslt: string): {
     instrumentedXslt: string;
     bindings: XsltBinding[];
 } {
-    // 1. Bindings parse et (parseXsltBindings ile aynı logic)
+    // Sprint 11 Aşama 9 — Tüm editable text'leri yakala. Selim: "fatura türü
+    // yazısının başlığını değiştirebilmeliyim veya alt kısımda yazılı olan
+    // sabit yazıyı değiştirebilmeliyim". Statik text'ler de annotation almalı.
+    //
+    // Tek regex ile 7 tip binding'i sırayla yakala (alternation, soldan sağa):
+    // 1. <xsl:value-of ... /> (self-close)
+    // 2. <xsl:value-of ...>...</xsl:value-of> (open-close)
+    // 3. <xsl:copy-of ... /> (self-close)
+    // 4. <xsl:copy-of ...>...</xsl:copy-of> (open-close)
+    // 5. <xsl:text>STATIC</xsl:text> (open-close)
+    // 6. <xsl:text /> (self-close)
+    // 7. Plain text — element body içinde >...< arası (Fatura Tipi başlığı, dipnot vb.)
+    const bindingRegex = new RegExp(
+        [
+            '<xsl:value-of\\b[^>]*?\\bselect="([^"]+)"[^>]*?\\/>',
+            '|<xsl:value-of\\b[^>]*?\\bselect="([^"]+)"[^>]*?>[\\s\\S]*?<\\/xsl:value-of>',
+            '|<xsl:copy-of\\b[^>]*?\\bselect="([^"]+)"[^>]*?\\/>',
+            '|<xsl:copy-of\\b[^>]*?\\bselect="([^"]+)"[^>]*?>[\\s\\S]*?<\\/xsl:copy-of>',
+            '|<xsl:text>([^]*?)<\\/xsl:text>',
+            '|<xsl:text\\s*\\/>',
+            '|>([^<]+)<',
+        ].join(''),
+        'g'
+    );
+
     const bindings: XsltBinding[] = [];
-    const re = /<xsl:(?:value-of|copy-of)\b[^>]*?\bselect="([^"]+)"/g;
-    let match: RegExpExecArray | null;
-    while ((match = re.exec(xslt)) !== null) {
-        const offset = match.index;
-        const xpath = match[1];
+    let i = 0;
+    const instrumentedXslt = xslt.replace(bindingRegex, (fullMatch, ...rest) => {
+        // Son 2 parametre: offset ve full string (TS replace signature)
+        const offset = rest[rest.length - 2];
+
+        // Hangi alternation match etti? İlk truthy group → tip
+        let xpath: string;
+        if (rest[0]) {
+            // 1. xsl:value-of self-close
+            xpath = rest[0];
+        } else if (rest[1]) {
+            // 2. xsl:value-of open-close
+            xpath = rest[1];
+        } else if (rest[2]) {
+            // 3. xsl:copy-of self-close
+            xpath = rest[2];
+        } else if (rest[3]) {
+            // 4. xsl:copy-of open-close
+            xpath = rest[3];
+        } else if (rest[4] !== undefined) {
+            // 5. xsl:text content (boş olabilir)
+            const t = rest[4];
+            if (t.trim().length === 0) return fullMatch;
+            xpath = `static: ${t.trim()}`;
+        } else if (rest[5] !== undefined) {
+            // 6. xsl:text self-close (boş)
+            return fullMatch;
+        } else if (rest[6] !== undefined) {
+            // 7. Plain text
+            const t = rest[6].trim();
+            if (t.length === 0) return fullMatch;
+            xpath = `static: ${t}`;
+        } else {
+            return fullMatch;
+        }
+
+        // Offset'ten line/column hesapla (1-based, Monaco)
         const before = xslt.substring(0, offset);
         const line = before.split('\n').length;
         const lastNewline = before.lastIndexOf('\n');
         const column = (lastNewline === -1 ? offset : offset - lastNewline) + 1;
         bindings.push({ xpath, offset, line, column });
-    }
 
-    // 2. Instrumented XSLT — her xsl:value-of / xsl:copy-of kapanışından sonra
-    //    comment marker ekle. Regex global scan sırayla gider, ++i sıra korur.
-    let i = 0;
-    const instrumentedXslt = xslt.replace(
-        /(<xsl:(?:value-of|copy-of)\b[^>]*?\/>)|(<xsl:(?:value-of|copy-of)\b[^>]*?>[\s\S]*?<\/xsl:(?:value-of|copy-of)>)/g,
-        (fullMatch) => `${fullMatch}<xsl:comment>BIND_${++i}</xsl:comment>`
-    );
+        return `${fullMatch}<xsl:comment>BIND_${++i}</xsl:comment>`;
+    });
 
     return { instrumentedXslt, bindings };
 }
