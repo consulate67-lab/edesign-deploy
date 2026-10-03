@@ -33,6 +33,7 @@ import type { editor } from 'monaco-editor';
 import {
     ArrowLeft, Save, Download, ChevronDown, FileCode, FileCode2,
     AlertCircle, Eye, RefreshCw, CheckCircle2, Sparkles, Search, ZoomIn, ZoomOut,
+    PanelLeftClose, PanelLeftOpen, X,
 } from 'lucide-react';
 import { transformXmlWithXslt } from '../xsltTransformer';
 import { getInlineXslt } from '../xsltContent';
@@ -178,6 +179,9 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     // Sprint 8 Aşama 1 — Snippet gallery state
     const [snippetCategory, setSnippetCategory] = useState<SnippetCategory | 'all'>('all');
     const [snippetSearch, setSnippetSearch] = useState<string>('');
+    // Sprint 9 Aşama 2c (2026-10-03) — Sol snippet paneli aç/kapat toggle.
+    // Kapatılınca preview + editör tüm genişliği kaplar (Antrepo XSLT 700px tam sığar).
+    const [snippetPanelOpen, setSnippetPanelOpen] = useState<boolean>(true);
 
     // ------------------------------------------------------------------------
     // Mevcut modül tanımı
@@ -605,6 +609,32 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                     Geri
                 </button>
 
+                {/* Sprint 9 Aşama 2c — Sol snippet paneli aç/kapat toggle.
+                    Kapatıldığında preview + editör tüm genişliği kaplar. */}
+                <button
+                    onClick={() => setSnippetPanelOpen(!snippetPanelOpen)}
+                    title={snippetPanelOpen ? 'Snippet panelini kapat (preview genişler)' : 'Snippet panelini aç'}
+                    data-toggle-snippet-panel
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '6px 10px',
+                        background: snippetPanelOpen ? 'rgba(16, 185, 129, 0.15)' : 'rgba(99, 102, 241, 0.15)',
+                        border: '1px solid ' + (snippetPanelOpen ? 'rgba(16, 185, 129, 0.4)' : 'rgba(99, 102, 241, 0.4)'),
+                        borderRadius: '6px',
+                        color: snippetPanelOpen ? '#6ee7b7' : '#a5b4fc',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                    }}
+                >
+                    {snippetPanelOpen
+                        ? <PanelLeftClose size={14} />
+                        : <PanelLeftOpen size={14} />}
+                    {snippetPanelOpen ? 'Panel' : 'Panel Aç'}
+                </button>
+
                 {/* Tasarım adı */}
                 <div
                     style={{
@@ -770,13 +800,15 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 </button>
             </div>
 
-            {/* Ana grid: Sol snippet paneli 240px, Orta editör 1fr, Sağ preview 1fr */}
+            {/* Ana grid: snippet panel varsa 240px, yoksa 0 (preview + editör tüm alanı kaplar).
+                Sol snippet paneli aç/kapat toggle — Sprint 9 Aşama 2c. */}
             <div
                 style={{
                     display: 'grid',
-                    gridTemplateColumns: '240px 1fr 1fr',
+                    gridTemplateColumns: snippetPanelOpen ? '240px 1fr 1fr' : '0px 1fr 1fr',
                     flex: 1,
                     minHeight: 0,
+                    transition: 'grid-template-columns 0.2s ease',
                 }}
             >
                 {/* SOL — Snippet gallery (Sprint 8 Aşama 1) */}
@@ -818,6 +850,33 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         }}>
                             {SNIPPETS.length}
                         </span>
+                        {/* Sprint 9 Aşama 2c — Panel kapat butonu (X) */}
+                        <button
+                            onClick={() => setSnippetPanelOpen(false)}
+                            title="Snippet panelini kapat (preview alanı genişler)"
+                            data-close-snippet-panel
+                            style={{
+                                marginLeft: '6px',
+                                padding: '2px 4px',
+                                background: 'transparent',
+                                border: 'none',
+                                color: '#64748b',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                borderRadius: '3px',
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)';
+                                e.currentTarget.style.color = '#fca5a5';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.background = 'transparent';
+                                e.currentTarget.style.color = '#64748b';
+                            }}
+                        >
+                            <X size={12} />
+                        </button>
                     </div>
 
                     {/* Arama input */}
