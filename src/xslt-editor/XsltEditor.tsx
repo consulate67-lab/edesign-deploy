@@ -624,6 +624,41 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     }, [xsltContent]);
 
     /**
+     * Sprint 11 Aşama 7 — Monaco sol kenarda glyphMargin decoration.
+     * Her binding için XSLT satırında küçük mor rozet + hover tooltip
+     * (B1 → ./cac:Item/cbc:Name). Kullanıcı editörde hangi satırın
+     * annotation'lı olduğunu net görür → haritalama netleşir.
+     * glyphMarginWidth: 18 ile sol kenarda ~4px glyph + boşluk bırakılır.
+     */
+    const bindDecorationIdsRef = useRef<string[]>([]);
+
+    useEffect(() => {
+        const ed = editorRef.current;
+        const monaco = monacoRef.current;
+        if (!ed || !monaco) return;
+
+        const decorations = xsltBindings.map((b, i) => ({
+            range: new monaco.Range(b.line, 1, b.line, 1),
+            options: {
+                glyphMarginClassName: 'xslt-bind-glyph',
+                glyphMarginHoverMessage: {
+                    value: `**B${i + 1}** → \`${b.xpath}\` _(line ${b.line}:${b.column})_`,
+                },
+            },
+        }));
+
+        const oldIds = bindDecorationIdsRef.current;
+        const newIds = ed.deltaDecorations(oldIds, decorations);
+        bindDecorationIdsRef.current = newIds;
+
+        return () => {
+            if (ed && newIds.length > 0) {
+                ed.deltaDecorations(newIds, []);
+            }
+        };
+    }, [xsltBindings]);
+
+    /**
      * Preview click → editör scroll + highlight (koordinat tabanlı).
      * previewSelectedLine/Column state'leri renderAndAnnotateXslt'in
      * eklediği data-line/data-column'dan gelir. XPath ARAMA YOK —
@@ -1354,6 +1389,9 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 automaticLayout: true,
                                 tabSize: 2,
                                 lineNumbers: 'on',
+                                // Sprint 11 Aşama 7 — Sol glyphMargin açık
+                                // (annotation referans rozetleri için).
+                                glyphMargin: true,
                                 renderLineHighlight: 'all',
                                 scrollBeyondLastLine: false,
                                 folding: true,

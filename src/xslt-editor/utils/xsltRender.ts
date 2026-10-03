@@ -121,18 +121,17 @@ export function renderAndAnnotateXslt(
         processor.importStylesheet(xsltDoc);
         const resultDoc = processor.transformToDocument(xmlDoc);
 
-        // Annotation — Sprint 11 Aşama 6: koordinat tabanlı.
-        // Önceki yaklaşım (xpath arama + ordered-correlation) çok kırılgandı,
-        // aynı xpath farklı context'lerde olduğunda yanlış satıra gidiyordu.
+        // Annotation — Sprint 11 Aşama 6 + 7: koordinat tabanlı + referans index.
+        // Her annotation element'ine 4 attribute eklenir:
+        // 1. data-render-index: 0-based sıra (backward compat + debug)
+        // 2. data-bind-index: 1-based "B1", "B2"... (görsel referans, kullanıcı dostu)
+        // 3. data-xpath: xpath string
+        // 4. data-line + data-column: XSLT içindeki GERÇEK koordinat (Monaco 1-based)
         //
-        // Yeni yaklaşım: bindings dizisi XSLT içindeki gerçek offset/line/column
-        // içerir. Her text node counter sırayla bindings[counter]'i alır ve
-        // parent element'ine data-line + data-column + data-xpath ekler.
-        // Preview click → direkt line:column'a git, XPath arama YOK.
-        //
-        // Aynı parent'a birden fazla text node varsa sadece ilki annotation alır
-        // (her element tek bir koordinatla bind olur). Counter her dolu text
-        // node için artar — bindings sayısı ile text node sayısı eşleşmeli.
+        // data-bind-index kullanım:
+        // - Monaco gutter decoration: sol kenarda "B12" rozeti (her binding satırı)
+        // - Hover tooltip: "B12 → ./cac:Item/cbc:Name (line 1552)"
+        // - Preview hover'da element köşesinde küçük "B12" badge (göze batmaz)
         const body = resultDoc.body || resultDoc.documentElement;
         if (body) {
             let counter = 0;
@@ -144,6 +143,7 @@ export function renderAndAnnotateXslt(
                         if (parent && !parent.hasAttribute('data-render-index')) {
                             const b = bindings[counter];
                             parent.setAttribute('data-render-index', String(counter));
+                            parent.setAttribute('data-bind-index', `B${counter + 1}`);
                             parent.setAttribute('data-xpath', b.xpath);
                             parent.setAttribute('data-line', String(b.line));
                             parent.setAttribute('data-column', String(b.column));
@@ -168,23 +168,44 @@ export function renderAndAnnotateXslt(
             html = html.replace(/<head([^>]*)>/i, `<head$1><meta charset="utf-8">`);
         }
 
-        // Sprint 11 Aşama 6e — Inline annotation CSS (iframe scope fix).
+        // Sprint 11 Aşama 6e + 7 — Inline annotation CSS (iframe scope fix + bind index badge).
         // iframe kendi document scope'una sahip → parent index.css içindeki
         // [data-render-index] seçicisi iframe içinde ÇALIŞMAZ. Bu yüzden
         // annotation CSS'i iframe HTML'inin <head>'ine inline <style> olarak
         // enjekte edilir.
+        //
+        // Sprint 11 Aşama 7: data-bind-index değeri hover'da küçük rozet
+        // olarak görünür (::after pseudo). Normal durumda görünmez (göze
+        // batmaz), inspect için DOM attribute olarak her zaman mevcut.
         const annotationCss = `
 <style>
 [data-render-index] {
     outline: 2px solid rgba(99, 102, 241, 0.5);
     outline-offset: 1px;
     cursor: pointer;
+    position: relative;
     transition: outline-color 0.15s ease-out, background-color 0.15s ease-out;
 }
 [data-render-index]:hover {
     outline: 2px solid rgba(99, 102, 241, 0.95);
     outline-offset: 0;
     background-color: rgba(99, 102, 241, 0.08);
+}
+[data-render-index]:hover::after {
+    content: attr(data-bind-index);
+    position: absolute;
+    top: -10px;
+    right: -2px;
+    background: #6366f1;
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    pointer-events: none;
+    z-index: 999;
+    letter-spacing: 0.3px;
 }
 [data-render-index][data-xpath-active="true"] {
     outline: 2px solid rgba(252, 211, 77, 0.9) !important;
