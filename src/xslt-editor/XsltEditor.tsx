@@ -162,11 +162,13 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const [activeTab, setActiveTab] = useState<'xslt' | 'xml'>('xslt');
     const [previewHtml, setPreviewHtml] = useState<string>('');
     const [previewError, setPreviewError] = useState<string | null>(null);
-    // Sprint 10 Aşama 2 (2026-10-03) — Zoom default 0.60 (önceki 0.65).
-    // iframe aspectRatio kaldırıldı → doğal yükseklik + scrollHeight minHeight
-    // → container overflow tetiklenir. 0.60 default Antrepo için ideal:
-    // çoğu içerik tek sayfada görünür, uzun faturalarda dikey scroll çıkar.
-    const [previewZoom, setPreviewZoom] = useState<number>(0.60);
+    // Sprint 11 Aşama 2 (2026-10-03) — Zoom default 1.00 (önceki 0.60).
+    // Selim'in test ekranında scaledHeight = scrollHeight × 0.60 = 600px, container
+    // ~640px → sığıyor → scroll YOK → alt içerik kesik (HESAP BİLGİLERİMİZ,
+    // dipnot metni görünmüyor). Zoom 1.0 = scaledHeight = scrollHeight = container'dan
+    // büyük → native scroll tetiklenir, tüm içerik erişilebilir. Zoom slider ile
+    // küçültme hâlâ mümkün (%50-200%).
+    const [previewZoom, setPreviewZoom] = useState<number>(1.00);
     // Sprint 10 Aşama 2 (2026-10-03) — iframe içeriğinin doğal yüksekliği (px).
     // iframe onLoad'ta iframe.contentDocument.body.scrollHeight ölçülerek set edilir.
     // scaledHeight = iframeHeight × previewZoom → container overflow doğal tetiklenir.
@@ -1459,8 +1461,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 <ZoomIn size={11} />
                             </button>
                             <button
-                                onClick={() => setPreviewZoom(0.60)}
-                                title="Default zoom (60%)"
+                                onClick={() => setPreviewZoom(1.00)}
+                                title="Default zoom (100%)"
                                 style={{
                                     padding: '1px 5px',
                                     background: 'transparent',
