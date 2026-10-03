@@ -49,11 +49,14 @@ export function parseXsltBindings(xslt: string): XsltBinding[] {
     while ((match = re.exec(xslt)) !== null) {
         const offset = match.index;
         const xpath = match[1];
-        // Offset'ten line/column hesapla (1-based)
+        // Offset'ten line/column hesapla (1-based — Monaco editor column 1-based istiyor)
         const before = xslt.substring(0, offset);
         const line = before.split('\n').length;
         const lastNewline = before.lastIndexOf('\n');
-        const column = lastNewline === -1 ? offset + 1 : offset - lastNewline;
+        // Monaco column 1-based. offset 0-based, lastNewline dahil edildiğinde
+        // (offset - lastNewline) 0-based → +1 ile 1-based'e çevir.
+        // lastNewline === -1 durumunda da +1.
+        const column = (lastNewline === -1 ? offset : offset - lastNewline) + 1;
         bindings.push({ xpath, offset, line, column });
     }
     return bindings;
