@@ -952,8 +952,11 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             setTimeout(measureHeight, 300);
 
             // (2) Click listener bağla (capture:true → draggable content'te bile click yakalanır)
-            body.addEventListener('click', handleIframeBodyClick, { capture: true });
-            console.log('[XSLTEditor] iframe click listener attached (capture:true)');
+            // Sprint 16 — Event delegation: doc.addEventListener (body yerine).
+            // Büyük XSLT'lerde body yavaş hazırlanıyor → body.addEventListener
+            // kayboluyor. doc.addEventListener her zaman aktif.
+            doc.addEventListener('click', handleIframeBodyClick, { capture: true });
+            console.log('[XSLTEditor] iframe click listener attached (doc, capture:true)');
         };
 
         bindListener();
@@ -971,12 +974,16 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         if (!doc || !doc.body) return;
 
         // Önceki listener varsa temizle
-        doc.body.removeEventListener('click', handleIframeBodyClick, { capture: true });
+        doc.removeEventListener('click', handleIframeBodyClick, { capture: true });
         // Yeniden bağla (previewHtml değişti, yeni body)
         const body = doc.body;
         const scrollH = body.scrollHeight || body.offsetHeight || 800;
         setIframeContentHeight(scrollH);
-        body.addEventListener('click', handleIframeBodyClick, { capture: true });
+        // Sprint 16 — Event delegation: doc.addEventListener (body yerine).
+        // Büyük XSLT'lerde (Antrepo 130k chars) body yavaş hazırlanıyor veya
+        // re-render'da body'si değişebiliyor → body'sine bind listener kayboluyor.
+        // document'te bind → her zaman çalışır, body değişse bile.
+        doc.addEventListener('click', handleIframeBodyClick, { capture: true });
         // Sprint 15 Aşama 2 — HTML5 drag-drop listener (drop handler).
         const dragOverHandler = (e: DragEvent) => {
             if (e.dataTransfer?.types.includes('text/x-xslt-element')) {
@@ -1001,8 +1008,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
 
         return () => {
             const curDoc = iframe.contentDocument;
-            if (curDoc?.body) {
-                curDoc.body.removeEventListener('click', handleIframeBodyClick, { capture: true });
+            if (curDoc) {
+                curDoc.removeEventListener('click', handleIframeBodyClick, { capture: true });
                 curDoc.body.removeEventListener('dragover', dragOverHandler);
                 curDoc.body.removeEventListener('drop', dropHandler);
             }
