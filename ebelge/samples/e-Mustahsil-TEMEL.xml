@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  e-Müstahsil Makbuzu örnek XML
+  UBL-TR 1.2.1 SelfBilledInvoice
+  Resmi GİB paketi: eMustahsilPaketi.zip
+  URL: https://ebelge.gibelge.gov.tr/dosyalar/kilavuzlar/eMustahsilPaketi.zip
+  Şema: eMustahsil.xsd (SelfBilledInvoice özelleştirmesi)
+  Hukuki dayanak: 213 sayılı VUK Md. 235, GİB 507 sıra no'lu tebliğ
+
+  Özellikler:
+  - Birinci sınıf tüccar / sanayici / çiftçi tarafından çiftçiden (müstahsilden) alınan ürün
+  - Müstahsil: gerçek kişi çiftçi (TCKN)
+  - Stopaj (GVK Md. 94) zorunlu - çiftçiden alınan zirai üründe
+  - Zirai ürün bilgisi, kütle, fiyat, fire
+-->
+<Invoice
+    xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+    xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2"
+    xmlns:ubltr="urn:oasis:names:specification:ubl:schema:xsd:TurkishCustomizationExtensionComponents">
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>e-Müstahsil</cbc:ProfileID>
+    <cbc:ID>MST2026000000001</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>22222222-3333-4444-5555-666666666666</cbc:UUID>
+    <cbc:IssueDate>2026-09-25</cbc:IssueDate>
+    <cbc:IssueTime>11:45:00</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>MUSTAHSIL</cbc:InvoiceTypeCode>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>2</cbc:LineCountNumeric>
+
+    <!-- Müşteri (alıcı kurum) — Fatura kesen kurum -->
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">9876543210</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Tarım Ürünleri Ticaret Ltd. Şti.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Atatürk Bulvarı</cbc:StreetName>
+                <cbc:BuildingNumber>78</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Konak</cbc:CitySubdivisionName>
+                <cbc:CityName>İzmir</cbc:CityName>
+                <cbc:PostalZone>35220</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:ID>0001</cbc:ID>
+                    <cbc:Name>Konak</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+
+    <!-- Tedarikçi (müstahsil / çiftçi — gerçek kişi) -->
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">98765432109</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Mehmet ÇİFTÇİ</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Köy İçi</cbc:StreetName>
+                <cbc:CitySubdivisionName>Sandıklı</cbc:CitySubdivisionName>
+                <cbc:CityName>Afyonkarahisar</cbc:CityName>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:ID>0010</cbc:ID>
+                    <cbc:Name>Sandıklı</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Person>
+                <cbc:FirstName>Mehmet</cbc:FirstName>
+                <cbc:FamilyName>ÇİFTÇİ</cbc:FamilyName>
+            </cac:Person>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+
+    <!-- Stopaj + KDV İstisna (çiftçiden alınan ürün KDV'den müstesna) -->
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">0.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">15000.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">0.00</cbc:TaxAmount>
+            <cac:TaxCategory>
+                <cbc:ID>0015</cbc:ID>
+                <cbc:Name>KDV İstisna (Çiftçi)</cbc:Name>
+                <cbc:TaxExemptionReasonCode>13/a</cbc:TaxExemptionReasonCode>
+                <cbc:TaxExemptionReason>Çiftçiden satın alınan zirai ürün KDV'den müstesna (213 sayılı VUK Md. 13/a)</cbc:TaxExemptionReason>
+                <cac:TaxScheme>
+                    <cbc:ID>0015</cbc:ID>
+                    <cbc:Name>KDV</cbc:Name>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">15000.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">2250.00</cbc:TaxAmount>
+            <cac:TaxCategory>
+                <cbc:ID>0001</cbc:ID>
+                <cbc:Name>Zirai Ürün Stopajı (%2'si nispetinde — brüt 15000'in %2'si bazda, gösterim için)</cbc:Name>
+                <cbc:Percent>15.00</cbc:Percent>
+                <cac:TaxScheme>
+                    <cbc:ID>0001</cbc:ID>
+                    <cbc:Name>Gelir Vergisi Stopajı</cbc:Name>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+
+    <!-- Toplamlar: BRÜT 15000 - Stopaj 2250 = NET 12750 -->
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">15000.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">15000.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">15000.00</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="TRY">0.00</cbc:AllowanceTotalAmount>
+        <cbc:PayableAmount currencyID="TRY">12750.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+
+    <!-- Satır 1: Buğday -->
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="KGM">5000</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">12500.00</cbc:LineExtensionAmount>
+        <cac:Item>
+            <cbc:Description>Anadolu Kırmızı Sert Buğday — A2 kalite</cbc:Description>
+            <cbc:Name>Buğday</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">2.50</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+
+    <!-- Satır 2: Arpa -->
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="KGM">1000</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">2500.00</cbc:LineExtensionAmount>
+        <cac:Item>
+            <cbc:Description>Arpa — yemlik</cbc:Description>
+            <cbc:Name>Arpa</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">2.50</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>

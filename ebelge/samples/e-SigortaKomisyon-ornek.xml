@@ -1,0 +1,293 @@
+<?xml-stylesheet type="text/xsl" href="sigortakomisyongiderBelgesi.xslt"?>
+<CreditNote xmlns="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2"
+  xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+  xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+  xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+  xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2"
+  xmlns:ns10="urn:oasis:names:specification:ubl:schema:xsd:DespatchAdvice-2"
+  xmlns:ns11="urn:oasis:names:specification:ubl:schema:xsd:ReceiptAdvice-2"
+  xmlns:ns8="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+  xmlns:ns9="urn:oasis:names:specification:ubl:schema:xsd:ApplicationResponse-2"
+  xmlns:xades="http://uri.etsi.org/01903/v1.3.2#"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <ext:UBLExtensions>
+    <ext:UBLExtension>
+      <ext:ExtensionContent>
+        <ds:Signature Id="SIG-00000-00001">
+          <ds:SignedInfo>
+            <ds:CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
+            <ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+            <ds:Reference Id="Reference-Id-1681505f-217c-42cc-9a54-86d3d0bef281"
+              Type="http://uri.etsi.org/01903#SignedProperties"
+              URI="#Signed-Properties-Id-5b3a62ad-48ea-46c3-a4dc-75da97fc41b6">
+              <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+              <ds:DigestValue>MDiQlG3saF8svfSuU4+sHt6IT78Ya9F7P6ou64sba7w=</ds:DigestValue>
+            </ds:Reference>
+            <ds:Reference Id="Reference-Id-0eb3e8a4-fd70-4015-b078-0a1067f0568f" URI="">
+              <ds:Transforms>
+                <ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+              </ds:Transforms>
+              <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+              <ds:DigestValue>CYDqivh9Iw+92QKdOxwnuU5cODbWsCDYEC9y4HgyFow=</ds:DigestValue>
+            </ds:Reference>
+          </ds:SignedInfo>
+          <ds:SignatureValue Id="Signature-Value-Id-2b218bee-06d6-4c2a-994b-d1a8d0614541"
+            >NCC/cNtIWHwnYcqTQHBlW2kdZfOkemDG0j+uIYl9hNUHNj/NHUgUsoVrRbUdzrLSPCTq5TQrXfA4
+            wCXM+wUvTEAyJLUKlVuQBrkUKth9Iz0KmIrc1WbzrUK1o74s8kRsSYf9sy9hh6AAZgNwqeqKWGFr
+            VwTyvXprQYruSHhhQ6r+lU91WYf9w1i52x6Ql8EzZP0e2hmnCTfTmHSyLUB+0dF1IZzwsxszw79u
+            OgnOxCYj75ymUe7+aitsNyy2wheUZ0RgLQwoPyfMNQnsBEMf7PcMfGyRena+0E1NntFZYGwWQTHl
+            Svnx6/ZQNJevFzaCxS5+QYVPKR9cEfArNpC/8w==</ds:SignatureValue>
+          <ds:KeyInfo>
+            <ds:X509Data>
+              <ds:X509Certificate>MIIFqzCCBJOgAwIBAgIIAPk1zPgNtykwDQYJKoZIhvcNAQELBQAwXDELMAkGA1UEBhMCVFIxTTBL
+                BgNVBAMMRE1hbGkgTcO8aMO8ciBFbGVrdHJvbmlrIFNlcnRpZmlrYSBIaXptZXQgU2HEn2xhecSx
+                Y8Sxc8SxIC0gU8O8csO8bSAyMB4XDTIwMDcyMjA4NTUzOFoXDTIzMDcyMjA4NTUzOFowUjETMBEG
+                A1UEBRMKNDY5MDU2NzE4NjE7MDkGA1UEAwwySUNFIELEsEzEsMWexLBNIFRFS05PTE9KxLBMRVLE
+                sCBBTk9OxLBNIMWexLBSS0VUxLAwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC7Bvsd
+                ozGkSyz1frH+v8t7k03wOB7DI5L+KORclndVdPs+9K6TmMV/+2f0VVONLEngXZ1uX+cVerdnJyYR
+                P65ouLTInHX7k8d0h0JBnJT/geayGp8z++0RUiyVDzAJ1Erw0c4dyNySA0RBKfJLhtLIZ1D0mHcR
+                8jFtHBc/+J/LRCSPHxmRJ52N/eszowIZdTUW+oONdGVF4ND8At8AhvwqO/2JqMY1e3wgd7zbmhfp
+                aiIz4q7DEYoSILMFgGja7qPLOg7GNLSW9ItQJUeAw1bv6OYf3fMT982PmLJ7oKuEK5P6PMx3wQTx
+                Jq0iux1f4qd60pc9paRKNbU0CIlxTjfDAgMBAAGjggJ5MIICdTAfBgNVHSMEGDAWgBQDhPqXMef0
+                hxkvZSvhtBtjp691vjAdBgNVHQ4EFgQUrBQR10/MkAuC/EhlBD5RFKMJI+QwDgYDVR0PAQH/BAQD
+                AgeAMIIBMwYDVR0gBIIBKjCCASYwggEiBgtghhgBAgEBBQcEATCCAREwKgYIKwYBBQUHAgEWHmh0
+                dHA6Ly9kZXBvLmthbXVzbS5nb3YudHIvaWxrZTCB4gYIKwYBBQUHAgIwgdUegdIAQgB1ACAAcwBl
+                AHIAdABpAGYAaQBrAGEAIABpAGwAZQAgAGkAbABnAGkAbABpACAAcwBlAHIAdABpAGYAaQBrAGEA
+                IAB1AHkAZwB1AGwAYQBtAGEAIABlAHMAYQBzAGwAYQByATEAbgExACAAbwBrAHUAbQBhAGsAIABp
+                AOcAaQBuACAAYgBlAGwAaQByAHQAaQBsAGUAbgAgAHcAZQBiACAAcwBpAHQAZQBzAGkAbgBpACAA
+                egBpAHkAYQByAGUAdAAgAGUAZABpAG4AaQB6AC4wDAYDVR0TAQH/BAIwADAWBgNVHSUEDzANBgtg
+                hhgBAgEBBQcyATBBBgNVHR8EOjA4MDagNKAyhjBodHRwOi8vZGVwby5rYW11c20uZ292LnRyL2t1
+                cnVtc2FsL21tZXNocy1zMi5jcmwwgYIGCCsGAQUFBwEBBHYwdDA8BggrBgEFBQcwAoYwaHR0cDov
+                L2RlcG8ua2FtdXNtLmdvdi50ci9rdXJ1bXNhbC9tbWVzaHMtczIuY3J0MDQGCCsGAQUFBzABhiho
+                dHRwOi8vY2lzZHVwbW1zMi5rdXJ1bXNhbC5rYW11c20uZ292LnRyMA0GCSqGSIb3DQEBCwUAA4IB
+                AQC7phk88VaIcnLpXN/L/fkAdlU9HUGlBNXu1R25Jf6lv/N5M0hMeLbHLCONGR1/w53oyaVA0C60
+                w1xcR7BWnxSTrQvsovy5na/FDkaNZ3D/3bPdFmHRtXkEMeqRNeBbvF5EVlFkHAOn4pByI0RxBguE
+                6lH+w3izJQmsrV4SOXE3JAHBQ8aE/isfFDnVGhZWvs1BRTx8b9gPHEFNHKSPqP2qK4ZeqFS9hoh+
+                XYPkgIqng8CZCEyjwOOqkvHBATAWD0sHXGHH71tGJHZ3jpYUm0gB/AfPS/eY3eHOv6bcjRXS7CJm
+                Nxf/8DjFBGt5bqXsnkEDPsSbZetBdZ93kGwBg/j8</ds:X509Certificate>
+            </ds:X509Data>
+            <ds:KeyValue>
+              <ds:RSAKeyValue>
+                <ds:Modulus>ALsG+x2jMaRLLPV+sf6/y3uTTfA4HsMjkv4o5FyWd1V0+z70rpOYxX/7Z/RVU40sSeBdnW5f5xV6
+                  t2cnJhE/rmi4tMicdfuTx3SHQkGclP+B5rIanzP77RFSLJUPMAnUSvDRzh3I3JIDREEp8kuG0shn
+                  UPSYdxHyMW0cFz/4n8tEJI8fGZEnnY396zOjAhl1NRb6g410ZUXg0PwC3wCG/Co7/YmoxjV7fCB3
+                  vNuaF+lqIjPirsMRihIgswWAaNruo8s6DsY0tJb0i1AlR4DDVu/o5h/d8xP3zY+Ysnugq4Qrk/o8
+                  zHfBBPEmrSK7HV/ip3rSlz2lpEo1tTQIiXFON8M=</ds:Modulus>
+                <ds:Exponent>AQAB</ds:Exponent>
+              </ds:RSAKeyValue>
+            </ds:KeyValue>
+          </ds:KeyInfo>
+          <ds:Object Id="Object-Id-8f7a2f00-1746-43fe-8b42-e1bd51e339ed">
+            <xades:QualifyingProperties Target="SIG-00000-00001">
+              <xades:SignedProperties Id="Signed-Properties-Id-5b3a62ad-48ea-46c3-a4dc-75da97fc41b6">
+                <xades:SignedSignatureProperties>
+                  <xades:SigningTime>2022-03-17T23:20:22.669+03:00</xades:SigningTime>
+                  <xades:SigningCertificate>
+                    <xades:Cert>
+                      <xades:CertDigest>
+                        <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                        <ds:DigestValue>dY6d7vJvANPLl7pQbuPimqVeHs8Rxd0+gGxVsT1SCfQ=</ds:DigestValue>
+                      </xades:CertDigest>
+                      <xades:IssuerSerial>
+                        <ds:X509IssuerName>CN=Mali Mühür Elektronik Sertifika Hizmet Sağlayıcısı -
+                          Sürüm 2,C=TR</ds:X509IssuerName>
+                        <ds:X509SerialNumber>70146423652202281</ds:X509SerialNumber>
+                      </xades:IssuerSerial>
+                    </xades:Cert>
+                  </xades:SigningCertificate>
+                  <xades:SignerRole>
+                    <xades:ClaimedRoles>
+                      <xades:ClaimedRole>Supplier</xades:ClaimedRole>
+                    </xades:ClaimedRoles>
+                  </xades:SignerRole>
+                </xades:SignedSignatureProperties>
+                <xades:SignedDataObjectProperties>
+                  <xades:DataObjectFormat
+                    ObjectReference="#Reference-Id-0eb3e8a4-fd70-4015-b078-0a1067f0568f">
+                    <xades:MimeType>text/xml</xades:MimeType>
+                  </xades:DataObjectFormat>
+                </xades:SignedDataObjectProperties>
+              </xades:SignedProperties>
+            </xades:QualifyingProperties>
+          </ds:Object>
+        </ds:Signature>
+      </ext:ExtensionContent>
+    </ext:UBLExtension>
+  </ext:UBLExtensions>
+  <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+  <cbc:CustomizationID>TR1.2.1</cbc:CustomizationID>
+  <cbc:ProfileID>EARSIVBELGE</cbc:ProfileID>
+  <cbc:ID>GIB2022000000001</cbc:ID>
+  <cbc:CopyIndicator>false</cbc:CopyIndicator>
+  <cbc:UUID>7ef629d7-5fea-4102-86d4-6620c963b071</cbc:UUID>
+  <cbc:IssueDate>2022-03-17</cbc:IssueDate>
+  <cbc:IssueTime>19:27:07</cbc:IssueTime>
+  <cbc:CreditNoteTypeCode>SIGORTAKOMISYONGIDERBELGESI</cbc:CreditNoteTypeCode>
+  <cbc:Note>Ekstra Bilgi eklemek için kullanılır</cbc:Note>
+  <cbc:Note>Not 2</cbc:Note>
+  <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+  <cac:InvoicePeriod>
+    <cbc:StartDate>2022-03-01</cbc:StartDate>
+    <cbc:EndDate>2022-03-31</cbc:EndDate>
+    <cbc:Description>MART - 2022</cbc:Description>
+  </cac:InvoicePeriod>
+  <cac:Signature>
+    <cbc:ID schemeID="VKN_TCKN">51850742664</cbc:ID>
+    <cac:SignatoryParty>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="VKN">51850742664</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PostalAddress>
+        <cbc:Room/>
+        <cbc:StreetName>Fevzi Çakmak Cad. Ömerbey Plaza. No: 1</cbc:StreetName>
+        <cbc:BuildingNumber/>
+        <cbc:CitySubdivisionName>Maltepe</cbc:CitySubdivisionName>
+        <cbc:CityName>İstanbul</cbc:CityName>
+        <cac:Country>
+          <cbc:Name>Türkiye</cbc:Name>
+        </cac:Country>
+      </cac:PostalAddress>
+    </cac:SignatoryParty>
+    <cac:DigitalSignatureAttachment>
+      <cac:ExternalReference>
+        <cbc:URI>#Signature_A992022000000017</cbc:URI>
+      </cac:ExternalReference>
+    </cac:DigitalSignatureAttachment>
+  </cac:Signature>
+  <cac:AccountingSupplierParty>
+    <cac:Party>
+      <cbc:WebsiteURI>https://ebelge.gib.gov.tr</cbc:WebsiteURI>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="VKN">1234567890</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="TICARETSICILNO">123456</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyName>
+        <cbc:Name>E-Belge Test</cbc:Name>
+      </cac:PartyName>
+      <cac:PostalAddress>
+        <cbc:Room/>
+        <cbc:StreetName>Etlik Caddesi</cbc:StreetName>
+        <cbc:BuildingNumber/>
+        <cbc:CitySubdivisionName>Altındağ</cbc:CitySubdivisionName>
+        <cbc:CityName>Ankara</cbc:CityName>
+        <cac:Country>
+          <cbc:Name>Türkiye</cbc:Name>
+        </cac:Country>
+      </cac:PostalAddress>
+      <cac:PartyTaxScheme>
+        <cac:TaxScheme>
+          <cbc:Name>Altındağ</cbc:Name>
+        </cac:TaxScheme>
+      </cac:PartyTaxScheme>
+      <cac:Contact>
+        <cbc:Telephone>(001)456-504</cbc:Telephone>
+        <cbc:Telefax/>
+        <cbc:ElectronicMail/>
+      </cac:Contact>
+    </cac:Party>
+  </cac:AccountingSupplierParty>
+  <cac:AccountingCustomerParty>
+    <cac:Party>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="VKN">1234567890</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyName>
+        <cbc:Name>E-Belge</cbc:Name>
+      </cac:PartyName>
+      <cac:PostalAddress>
+        <cbc:Room/>
+        <cbc:StreetName/>
+        <cbc:BuildingNumber/>
+        <cbc:CitySubdivisionName/>
+        <cbc:CityName/>
+        <cac:Country>
+          <cbc:Name/>
+        </cac:Country>
+      </cac:PostalAddress>
+      <cac:PartyTaxScheme>
+        <cac:TaxScheme>
+          <cbc:Name/>
+        </cac:TaxScheme>
+      </cac:PartyTaxScheme>
+      <cac:Contact>
+        <cbc:Telephone>(___)___-____</cbc:Telephone>
+        <cbc:Telefax/>
+        <cbc:ElectronicMail/>
+      </cac:Contact>
+    </cac:Party>
+  </cac:AccountingCustomerParty>
+  <cac:LegalMonetaryTotal>
+    <cbc:LineExtensionAmount currencyID="TRY">0</cbc:LineExtensionAmount>
+    <cbc:TaxExclusiveAmount currencyID="TRY">0</cbc:TaxExclusiveAmount>
+    <cbc:TaxInclusiveAmount currencyID="TRY">0</cbc:TaxInclusiveAmount>
+    <cbc:AllowanceTotalAmount currencyID="TRY">910</cbc:AllowanceTotalAmount>
+    <cbc:ChargeTotalAmount currencyID="TRY">220</cbc:ChargeTotalAmount>
+    <cbc:PayableAmount currencyID="TRY">0</cbc:PayableAmount>
+  </cac:LegalMonetaryTotal>
+  <cac:CreditNoteLine>
+    <cbc:ID>1</cbc:ID>
+    <cac:AllowanceCharge>
+      <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+      <cbc:AllowanceChargeReason>IPTAL</cbc:AllowanceChargeReason>
+      <cbc:Amount currencyID="TRY">40</cbc:Amount>
+    </cac:AllowanceCharge>
+    <cac:AllowanceCharge>
+      <cbc:ChargeIndicator>true</cbc:ChargeIndicator>
+      <cbc:AllowanceChargeReason>Istihsal</cbc:AllowanceChargeReason>
+      <cbc:Amount currencyID="TRY">50</cbc:Amount>
+    </cac:AllowanceCharge>
+    <cac:Item>
+      <cbc:Name>Kara Aracı</cbc:Name>
+    </cac:Item>
+  </cac:CreditNoteLine>
+  <cac:CreditNoteLine>
+    <cbc:ID>2</cbc:ID>
+    <cac:AllowanceCharge>
+      <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+      <cbc:AllowanceChargeReason>IPTAL</cbc:AllowanceChargeReason>
+      <cbc:Amount currencyID="TRY">100</cbc:Amount>
+    </cac:AllowanceCharge>
+    <cac:AllowanceCharge>
+      <cbc:ChargeIndicator>true</cbc:ChargeIndicator>
+      <cbc:AllowanceChargeReason>Istihsal</cbc:AllowanceChargeReason>
+      <cbc:Amount currencyID="TRY">500</cbc:Amount>
+    </cac:AllowanceCharge>
+    <cac:Item>
+      <cbc:Name>Su Araçları</cbc:Name>
+    </cac:Item>
+  </cac:CreditNoteLine>
+  <cac:CreditNoteLine>
+    <cbc:ID>3</cbc:ID>
+    <cac:AllowanceCharge>
+      <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+      <cbc:AllowanceChargeReason>IPTAL</cbc:AllowanceChargeReason>
+      <cbc:Amount currencyID="TRY">0</cbc:Amount>
+    </cac:AllowanceCharge>
+    <cac:AllowanceCharge>
+      <cbc:ChargeIndicator>true</cbc:ChargeIndicator>
+      <cbc:AllowanceChargeReason>Istihsal</cbc:AllowanceChargeReason>
+      <cbc:Amount currencyID="TRY">200</cbc:Amount>
+    </cac:AllowanceCharge>
+    <cac:Item>
+      <cbc:Name>Yangın Ve Doğal Afetler</cbc:Name>
+    </cac:Item>
+  </cac:CreditNoteLine>
+  <cac:CreditNoteLine>
+    <cbc:ID>4</cbc:ID>
+    <cac:AllowanceCharge>
+      <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+      <cbc:AllowanceChargeReason>IPTAL</cbc:AllowanceChargeReason>
+      <cbc:Amount currencyID="TRY">80</cbc:Amount>
+    </cac:AllowanceCharge>
+    <cac:AllowanceCharge>
+      <cbc:ChargeIndicator>true</cbc:ChargeIndicator>
+      <cbc:AllowanceChargeReason>Istihsal</cbc:AllowanceChargeReason>
+      <cbc:Amount currencyID="TRY">160</cbc:Amount>
+    </cac:AllowanceCharge>
+    <cac:Item>
+      <cbc:Name>Finansal Kayıplar</cbc:Name>
+    </cac:Item>
+  </cac:CreditNoteLine>
+</CreditNote>

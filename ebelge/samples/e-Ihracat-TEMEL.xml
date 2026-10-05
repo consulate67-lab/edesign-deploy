@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  e-İhracat (Export Invoice) minimal örnek XML
+  Resmi GİB paketi: eIhracatPaketi.zip
+  URL: https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/eIhracatPaketi.zip
+  Şema: Invoice-2 (UBL-TR Customization ID: TR1.2_IHRACAT)
+  GİB XSLT viewer: EBelgeGoruntuleyici.jar içinde ihracat-specific şablon
+-->
+<Invoice
+    xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+    xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2"
+    xmlns:ubltr="urn:oasis:names:specification:ubl:schema:xsd:TurkishCustomizationExtensionComponents">
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2_IHRACAT</cbc:CustomizationID>
+    <cbc:ProfileID>e-Ihracat-Fatura</cbc:ProfileID>
+    <cbc:ID>IHR2026000000001</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>cccccccc-dddd-eeee-ffff-111111111111</cbc:UUID>
+    <cbc:IssueDate>2026-09-23</cbc:IssueDate>
+    <cbc:IssueTime>09:00:00</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>IHRACAT</cbc:InvoiceTypeCode>
+    <cbc:DocumentCurrencyCode>USD</cbc:DocumentCurrencyCode>
+    <cbc:PricingCurrencyCode>EUR</cbc:PricingCurrencyCode>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cac:PartyIdentification><cbc:ID schemeID="VKN">1111111111</cbc:ID></cac:PartyIdentification>
+            <cac:PartyName><cbc:Name>İhracatçı Firma A.Ş.</cbc:Name></cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>İhracatçı Adresi</cbc:StreetName>
+                <cbc:CitySubdivisionName>İlçe</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cac:Country><cbc:Name>Türkiye</cbc:Name></cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme><cbc:ID>0001</cbc:ID></cac:TaxScheme>
+            </cac:PartyTaxScheme>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification><cbc:ID schemeID="GLN">1234567890123</cbc:ID></cac:PartyIdentification>
+            <cac:PartyName><cbc:Name>Yabancı Alıcı</cbc:Name></cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Buyer Address</cbc:StreetName>
+                <cbc:CityName>Berlin</cbc:CityName>
+                <cac:Country>
+                    <cbc:IdentificationCode>DE</cbc:IdentificationCode>
+                    <cbc:Name>Germany</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="USD">0.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="USD">10000.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="USD">0.00</cbc:TaxAmount>
+            <cac:TaxCategory>
+                <cac:TaxScheme><cbc:Name>KDV</cbc:Name><cbc:TaxTypeCode>0015</cbc:TaxTypeCode></cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="USD">10000.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="USD">10000.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="USD">10000.00</cbc:TaxInclusiveAmount>
+        <cbc:PayableAmount currencyID="USD">10000.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">100</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="USD">10000.00</cbc:LineExtensionAmount>
+        <cac:Item>
+            <cbc:Description>Export product</cbc:Description>
+            <cbc:Name>Product name</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="USD">100.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>
