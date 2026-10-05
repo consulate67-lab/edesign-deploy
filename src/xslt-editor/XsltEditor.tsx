@@ -889,9 +889,40 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         // kullan → tüm element'lere drawer aç.
         const indexedEl = target.closest('[data-render-index]') as HTMLElement | null
             || target;
-        const lineAttr = indexedEl.getAttribute('data-line');
-        const colAttr = indexedEl.getAttribute('data-column');
-        const renderIndex = indexedEl.getAttribute('data-render-index');
+        let lineAttr = indexedEl.getAttribute('data-line');
+        let colAttr = indexedEl.getAttribute('data-column');
+        let renderIndex = indexedEl.getAttribute('data-render-index');
+
+        // Sprint 16 Aşama 5b — Statik element'e tıklayınca Monaco scroll.
+        // indexedEl data-line yoksa (statik div/td/başlık), en yakın
+        // data-render-index'li element'i bul → onun line'ına git.
+        // Strateji: (1) parent'ları yukarı tara, (2) yoksa child querySelector.
+        // Hiç bulunamazsa scroll yapma (sadece style paneli).
+        if (!lineAttr || !colAttr) {
+            // (1) Parent'ları yukarı tara
+            let p: HTMLElement | null = target.parentElement;
+            while (p) {
+                const pLine = p.getAttribute('data-line');
+                const pCol = p.getAttribute('data-column');
+                if (pLine && pCol) {
+                    lineAttr = pLine;
+                    colAttr = pCol;
+                    renderIndex = p.getAttribute('data-render-index');
+                    break;
+                }
+                p = p.parentElement;
+            }
+            // (2) Hala yoksa child'larda querySelector (ilk data-render-index)
+            if ((!lineAttr || !colAttr) && typeof target.querySelector === 'function') {
+                const child = target.querySelector('[data-render-index]');
+                if (child) {
+                    lineAttr = child.getAttribute('data-line');
+                    colAttr = child.getAttribute('data-column');
+                    renderIndex = child.getAttribute('data-render-index');
+                }
+            }
+        }
+
         if (lineAttr && colAttr) {
             const line = Number(lineAttr);
             const column = Number(colAttr);
@@ -1901,7 +1932,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         background: '#475569',  // koyu gri — ofis zemini
                         backgroundImage: 'radial-gradient(at 50% 50%, #64748b 0%, #1e293b 100%)',  // subtle vignette
                         overflow: 'auto',  // scroll DOĞAL — iframe scaledHeight container'ı aşarsa scroll
-                        padding: '48px 24px',
+                        padding: '16px 8px',  // Sprint 16 Aşama 5a — preview iframe'i büyütmek için padding azaltıldı (48px 24px → 16px 8px)
                     }}>
                         {previewHtml ? (
                             <iframe
@@ -1913,11 +1944,12 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     background: 'white',
                                     boxShadow: '0 25px 50px -12px rgba(0,0,0,0.55), 0 12px 24px -8px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,0,0,0.04)',
                                     borderRadius: '2px',  // hafif köşe yumuşama (kağıt kenarı)
-                                    // Sprint 11.1: scaledWidth = previewZoom × 100% (container yüzdesi).
-                                    // Antrepo 700px scaled 0.60 → 420px. Container ~800px → sığar.
-                                    width: `${(100 / previewZoom) * 0.95}%`,
-                                    maxWidth: '1100px',
-                                    minWidth: '500px',
+                                    // Sprint 16 Aşama 5a — iframe width: container'ı tam doldur.
+                                    // Eski formül (100/zoom)*0.95 yanlıştı: zoom > 1 daha küçültüyordu.
+                                    // Şimdi width: 100%, zoom sadece height scaling için kullanılıyor.
+                                    width: '100%',
+                                    maxWidth: 'none',
+                                    minWidth: '0',
                                     // scaledHeight = iframeContentHeight × previewZoom.
                                     // iframe.contentDocument.body.scrollHeight 3 zaman
                                     // noktasında ölçülüyor (handleIframeLoad).
