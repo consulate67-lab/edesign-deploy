@@ -91,23 +91,49 @@ export function parseXsltInstrumented(xslt: string): {
     instrumentedXslt: string;
     bindings: XsltBinding[];
 } {
-    // Sprint 13 Aşama 1 (2026-10-04) — <style>/<script> body exclude.
-    // Sprint 12 Pass 3 düz metin annotation'ı bu elementlerin body'si içine
-    // <!--BIND_X--> marker enjekte ediyordu → XML strict parser
-    // "StartTag: invalid element name" hatası (Selim: line 260 column 7,
-    // e-Fatura-Sablon.xslt 9316 char <style> bloğu içinde).
+    // Sprint 13 Aşama 2 (2026-10-05) — Pass 3 kaldırıldı, UTF-16 mojibake
+    // strip eklendi. Selim'in brief'i: "fatura türü yazısının başlığını
+    // değiştirebilmeliyim / alt kısımda sabit yazıyı değiştirebilmeliyim /
+    // xmden gelen veriler".
     //
-    // Çözüm: Pass 3 öncesi instrumentedXslt üzerinde <style>/<script>
-    // aralıklarını bul, bu aralıklara denk gelen >...< çiftlerini skip et.
+    // Sprint 12 Pass 3 (düz metin >...<) iki ayrı soruna neden oluyordu:
+    // 1. <style> body içine marker enjekte → XML strict parser
+    //    "StartTag: invalid element name" (Selim: line 260 col 7).
+    //    → Aşama 1 <style>/<script> skip ranges ile çözüldü.
+    // 2. Pass 3 marker'ı orijinal element/closing tag'in < karakteri ile
+    //    çakışıyordu → "<<!--BIND_X--></xsl:template>" gibi yapılar
+    //    üretiyor → "unexpected < in tag name" parse hatası
+    //    (xmldom line 15 col 5 raporladı).
+    // → Çözüm: Pass 3 kaldırıldı (Sprint 11 Aşama 9c yaklaşımı). Pass 1
+    //   (xsl:value-of/copy-of) + Pass 2 (xsl:text content) yeterli:
+    //   - Tüm dinamik veri (fatura no, tarih, tutar) xsl:value-of ile gelir
+    //     → Pass 1 tarafından işlenir.
+    //   - Statik metinler genelde <xsl:text>...</xsl:text> ile sarılı
+    //     (başlık, dipnot, "fatura türü" etiketi) → Pass 2 tarafından
+    //     işlenir.
+    //   - <xsl:text>'siz düz metin annotation almayacak (kullanıcı
+    //     bunları <xsl:text> ile sarmalayabilir veya Sprint 14'te daha
+    //     akıllı Pass 3 eklenebilir).
     //
-    // Marker formatı korunur: HTML/XML comment (<!--BIND_X-->). XSLT 1.0
+    // UTF-16 LE BOM mojibake strip: Selim'in e-Fatura-Sablon.xslt dosyası
+    // UTF-16 LE olarak kaydedilmiş, Node.js / browser bunu UTF-8 decode
+    // ederken "ï»¿" (\u00EF\u00BB\u00BF) mojibake üretiyor. Bu 3 karakter
+    // <?xml ?> öncesinde text olarak parse edilince "StartTag" hatasına
+    // neden oluyor. Strip ile XSLT dosyası temiz başlar → parse OK.
+    //
+    // Marker formatı korunur: HTML/XML comment <!--BIND_X-->. XSLT 1.0
     // spec'te geçerli, XSLTProcessor output'a comment node olarak aktarır.
     //
-    // 3 pass: Pass 1 (xsl:value-of + xsl:copy-of, orijinal xslt üzerinde)
-    // + Pass 2 (xsl:text content, instrumentedXslt üzerinde) + Pass 3
-    // (plain text, instrumentedXslt üzerinde + <style>/<script> skip).
+    // 2 pass: Pass 1 (xsl:value-of + xsl:copy-of) + Pass 2 (xsl:text content).
     // Her pass kendi source'undan line/column hesaplar (pushBinding(source, ...))
-    // → önceki pass'ların eklediği marker'lar offset kaymasına neden olmaz.
+    // → önceki pass'ların marker'ları offset kaymasına neden olmaz.
+
+    // UTF-16 LE BOM mojibake strip (ï»¿) + U+FEFF BOM strip.
+    // Browser/Node fs.readFileSync utf8 BOM'u otomatik strip eder ama UTF-16
+    // LE BOM'un mojibake'i (ï»¿) otomatik strip edilmez.
+    if (xslt.charCodeAt(0) === 0xFEFF) xslt = xslt.slice(1);
+    if (xslt.startsWith('\u00EF\u00BB\u00BF')) xslt = xslt.slice(3);
+
     const bindings: XsltBinding[] = [];
     let counter = 0;
 
@@ -139,38 +165,13 @@ export function parseXsltInstrumented(xslt: string): {
     );
 
     // Pass 2: xsl:text content (instrumentedXslt üzerinde — Pass 1 marker'ları sonrası)
+    // Sprint 11 Aşama 9b 2-pass regex: xsl:text content trim boş değilse
+    // annotation. Bu Pass tüm statik metinleri (Başlık, dipnot, etiket)
+    // annotation'lar, kullanıcı "sabit yazıyı değiştirebilmeliyim"
+    // gereksinimini karşılar.
     instrumentedXslt = instrumentedXslt.replace(
         /<xsl:text>([\s\S]*?)<\/xsl:text>/g,
         (fullMatch, text, offset) => {
-            const t = text.trim();
-            if (t.length === 0) return fullMatch;
-            pushBinding(instrumentedXslt, offset, `static: ${t}`);
-            return `${fullMatch}${marker()}`;
-        }
-    );
-
-    // Pass 3 öncesi: <style>...</style> ve <script>...</script> aralıklarını
-    // instrumentedXslt üzerinde bul. Bu aralıklar Pass 1+2 marker'larından
-    // ETKİLENMEZ (xsl:value-of, xsl.text body'leri <style>/<script> dışında).
-    // Skip ranges Pass 3 callback'inde offset kontrolü için kullanılır.
-    const skipRanges: Array<[number, number]> = [];
-    const skipRe = /<(style|script)\b[^>]*>[\s\S]*?<\/\1>/g;
-    let skipMatch: RegExpExecArray | null;
-    while ((skipMatch = skipRe.exec(instrumentedXslt)) !== null) {
-        skipRanges.push([skipMatch.index, skipMatch.index + skipMatch[0].length]);
-    }
-
-    // Pass 3: Plain text >...< — <style>/<script> body skip.
-    // Skip ranges içindeki >...< çiftleri Pass 3'e dokunmaz → CSS/JS body'si
-    // bozulmaz, XSLT parse hatası çözülür.
-    instrumentedXslt = instrumentedXslt.replace(
-        />([^<]+)</g,
-        (fullMatch, text, offset) => {
-            for (const [start, end] of skipRanges) {
-                if (offset >= start && offset < end) {
-                    return fullMatch; // <style>/<script> body — skip
-                }
-            }
             const t = text.trim();
             if (t.length === 0) return fullMatch;
             pushBinding(instrumentedXslt, offset, `static: ${t}`);
@@ -206,11 +207,15 @@ export function renderAndAnnotateXslt(
 ): XsltRenderResult {
     const start = performance.now();
 
-    // UTF-8 BOM strip
+    // UTF-8 BOM strip + UTF-16 LE BOM mojibake strip (ï»¿)
+    // parseXsltInstrumented zaten strip ediyor ama renderAndAnnotateXslt
+    // bağımsız çalışabilmeli (test/headless senaryolar için).
     let xslt = instrumentedXslt;
     if (xslt.charCodeAt(0) === 0xFEFF) xslt = xslt.slice(1);
+    if (xslt.startsWith('\u00EF\u00BB\u00BF')) xslt = xslt.slice(3);
     let xml = xmlString;
     if (xml.charCodeAt(0) === 0xFEFF) xml = xml.slice(1);
+    if (xml.startsWith('\u00EF\u00BB\u00BF')) xml = xml.slice(3);
 
     if (!xslt.trim() || !xml.trim()) {
         return { html: '', error: 'XSLT veya XML boş', durationMs: 0 };
