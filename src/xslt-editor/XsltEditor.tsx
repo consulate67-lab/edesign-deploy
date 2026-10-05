@@ -1309,12 +1309,15 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 </button>
             </div>
 
-            {/* Ana grid: snippet panel varsa 240px, yoksa 0 (preview + editör tüm alanı kaplar).
-                Sol snippet paneli aç/kapat toggle — Sprint 9 Aşama 2c. */}
+            {/* Ana grid: snippet panel varsa 240px, yoksa 0 + Preview (1fr).
+                Sprint 16 Aşama 5d — Monaco editör kaldırıldı (Xslt Tasarım ekranında
+                sadece preview + snippet panel + drawer). Önceki 3-kolon
+                (snippet | Monaco | Preview) yerine 2-kolon (snippet | Preview 1fr).
+                Property Drawer position: absolute right:0 ile overlay (Sprint 14 A2). */}
             <div
                 style={{
                     display: 'grid',
-                    gridTemplateColumns: snippetPanelOpen ? '240px 1fr 1fr' : '0px 1fr 1fr',
+                    gridTemplateColumns: snippetPanelOpen ? '240px 1fr' : '0px 1fr',
                     flex: 1,
                     minHeight: 0,
                     position: 'relative',  // Sprint 14 Aşama 2 — property drawer absolute right:0
@@ -1672,95 +1675,15 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                     </div>
                 </div>
 
-                {/* ORTA — Monaco editör */}
-                <div
-                    style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        background: '#1e1e1e',
-                        borderRight: '1px solid #334155',
-                        minWidth: 0,
-                    }}
-                >
-                    {/* Sekme header */}
-                    <div
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            padding: '0 12px',
-                            height: '36px',
-                            background: '#0f172a',
-                            borderBottom: '1px solid #334155',
-                        }}
-                    >
-                        {(['xslt', 'xml'] as const).map(tab => (
-                            <button
-                                key={tab}
-                                onClick={() => setActiveTab(tab)}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '6px',
-                                    padding: '4px 12px',
-                                    background: activeTab === tab ? '#1e293b' : 'transparent',
-                                    border: 'none',
-                                    borderBottom: activeTab === tab ? '2px solid #6366f1' : '2px solid transparent',
-                                    color: activeTab === tab ? '#a5b4fc' : '#94a3b8',
-                                    fontSize: '12px',
-                                    fontWeight: activeTab === tab ? 700 : 500,
-                                    cursor: 'pointer',
-                                    textTransform: 'uppercase',
-                                    letterSpacing: '0.5px',
-                                }}
-                            >
-                                {tab === 'xslt' ? <FileCode size={13} /> : <FileCode2 size={13} />}
-                                {tab.toUpperCase()} · {(activeTab === tab ? (tab === 'xslt' ? xsltContent.length : xmlContent.length) : 0).toLocaleString()} chars
-                            </button>
-                        ))}
-                        <div style={{ flex: 1 }} />
-                        <div style={{ fontSize: '10px', color: '#64748b', fontFamily: 'monospace' }}>
-                            {activeTab === 'xslt'
-                                ? `XSLT · ${(xsltContent.length / 1024).toFixed(1)} kB`
-                                : `XML · ${(xmlContent.length / 1024).toFixed(1)} kB`
-                            }
-                        </div>
-                    </div>
-
-                    {/* Monaco editör alanı */}
-                    <div style={{ flex: 1, minHeight: 0, position: 'relative' }}>
-                        <Editor
-                            height="100%"
-                            language="xml"
-                            theme="vs-dark"
-                            value={activeTab === 'xslt' ? xsltContent : xmlContent}
-                            onChange={(value) => {
-                                const v = value || '';
-                                if (activeTab === 'xslt') setXsltContent(v);
-                                else setXmlContent(v);
-                            }}
-                            onMount={handleEditorMount}
-                            options={{
-                                minimap: { enabled: true, scale: 1 },
-                                fontSize: 13,
-                                fontFamily: '"Fira Code", "Cascadia Code", Menlo, Monaco, Consolas, monospace',
-                                wordWrap: 'on',
-                                automaticLayout: true,
-                                tabSize: 2,
-                                lineNumbers: 'on',
-                                // Sprint 11 Aşama 7 — Sol glyphMargin açık
-                                // (annotation referans rozetleri için).
-                                glyphMargin: true,
-                                renderLineHighlight: 'all',
-                                scrollBeyondLastLine: false,
-                                folding: true,
-                                bracketPairColorization: { enabled: true },
-                                formatOnPaste: true,
-                                cursorBlinking: 'smooth',
-                            }}
-                        />
-                    </div>
-                </div>
+                {/* ORTA — Preview (Sprint 16 Aşama 5d — Monaco editör kaldırıldı)
+                    Önceki yapı: 3-kolon snippet | Monaco | Preview.
+                    Şimdi: 2-kolon snippet | Preview 1fr. Monaco editör ve tab
+                    header tamamen kaldırıldı (Selim: "ortadaki editör penceresini
+                    kaldırabilirsin" + "preview sayfayı doldursun").
+                    xsltContent/xmlContent state'leri preview render için hâlâ
+                    gerekli (Sprint 16 A5b scroll highlight + Sprint 15 drawer).
+                    Monaco/activeTab/handleEditorMount kodları kullanılmıyor
+                    ama ileride geri eklenebilir diye state korunur. */}
 
                 {/* SAĞ — Preview */}
                 <div
