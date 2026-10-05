@@ -39,6 +39,11 @@ import { transformXmlWithXslt } from '../xsltTransformer';
 import { getInlineXslt } from '../xsltContent';
 import { getAntrepoTemplateById } from './antrepoTemplates';
 import { renderAndAnnotateXslt, parseXsltInstrumented, updateXSLTBinding, removeXsltBinding, insertXsltElement } from './utils/xsltRender';
+import type { XsltBinding } from './utils/xsltRender';
+import {
+    findBindingSourceOffset, findEnclosingLiteralTag, findImgTagBySrc,
+    setTagAttribute, setTagStyleProperty, type SourceTag,
+} from './utils/xsltStyleEdit';
 import { api } from '../api';
 import { XSLT_ELEMENTS, UBL_XPATHS, lintXslt } from './xsltSchema';
 
@@ -147,41 +152,77 @@ interface XsltEditorProps {
 // Component dışında tanımlı (her render'da yeniden oluşmaz, performans +).
 // FieldText: kısa text input (örn. src, alt, font-size).
 // FieldSelect: dropdown (örn. font-weight, text-align, object-fit).
-const FieldText: React.FC<{ label: string; currentValue: string; onChange: (v: string) => void; placeholder?: string }> = ({ label, currentValue, onChange, placeholder }) => (
+// Değer yerel state'te tutulur: currentValue yalnızca ilk değerdir, seçim
+// değişince çağıran taraf `key` ile alanı sıfırlar. Kontrollü (value=computed
+// style) input yazarken değeri geri sıçratıyordu.
+const fieldLabelStyle: React.CSSProperties = {
+    display: 'block',
+    fontSize: '10px', fontWeight: 700, color: '#94a3b8',
+    letterSpacing: '0.4px', textTransform: 'uppercase',
+    marginBottom: '4px',
+};
+const fieldInputStyle: React.CSSProperties = {
+    width: '100%', padding: '6px 8px',
+    background: '#1e293b', border: '1px solid #334155',
+    borderRadius: '4px', color: '#e2e8f0',
+    fontSize: '12px', fontFamily: 'monospace', outline: 'none',
+};
+const FieldText: React.FC<{ label: string; currentValue: string; onChange: (v: string) => void; placeholder?: string }> = ({ label, currentValue, onChange, placeholder }) => {
+    const [value, setValue] = useState(currentValue);
+    return (
+        <div style={{ marginBottom: '10px' }}>
+            <label style={fieldLabelStyle}>{label}</label>
+            <input
+                type="text"
+                value={value}
+                placeholder={placeholder}
+                onChange={(e) => { setValue(e.target.value); onChange(e.target.value); }}
+                style={fieldInputStyle}
+                onFocus={(e) => e.currentTarget.style.borderColor = '#6366f1'}
+                onBlur={(e) => e.currentTarget.style.borderColor = '#334155'}
+            />
+        </div>
+    );
+};
+const cssColorToHex = (color: string): string => {
+    const m = color.match(/rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)/);
+    if (m) return '#' + [m[1], m[2], m[3]].map(n => Number(n).toString(16).padStart(2, '0')).join('');
+    return /^#[0-9a-f]{6}$/i.test(color) ? color : '#000000';
+};
+const FieldColor: React.FC<{ label: string; currentValue: string; onChange: (v: string) => void }> = ({ label, currentValue, onChange }) => {
+    const [value, setValue] = useState(currentValue);
+    const update = (v: string) => { setValue(v); onChange(v); };
+    return (
+        <div style={{ marginBottom: '10px' }}>
+            <label style={fieldLabelStyle}>{label}</label>
+            <div style={{ display: 'flex', gap: '6px' }}>
+                <input
+                    type="color"
+                    value={cssColorToHex(value)}
+                    onChange={(e) => update(e.target.value)}
+                    style={{ width: '34px', height: '30px', padding: 0, border: '1px solid #334155', borderRadius: '4px', background: '#1e293b', cursor: 'pointer' }}
+                />
+                <input
+                    type="text"
+                    value={value}
+                    onChange={(e) => update(e.target.value)}
+                    style={{ ...fieldInputStyle, flex: 1 }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = '#6366f1'}
+                    onBlur={(e) => e.currentTarget.style.borderColor = '#334155'}
+                />
+            </div>
+        </div>
+    );
+};
+const FieldSelect: React.FC<{ label: string; currentValue: string; options: string[]; onChange: (v: string) => void }> = ({ label, currentValue, options, onChange }) => {
+    const [value, setValue] = useState(currentValue);
+    const allOptions = value && !options.includes(value) ? [value, ...options] : options;
+    return (
     <div style={{ marginBottom: '10px' }}>
-        <label style={{
-            display: 'block',
-            fontSize: '10px', fontWeight: 700, color: '#94a3b8',
-            letterSpacing: '0.4px', textTransform: 'uppercase',
-            marginBottom: '4px',
-        }}>{label}</label>
-        <input
-            type="text"
-            value={currentValue}
-            placeholder={placeholder}
-            onChange={(e) => onChange(e.target.value)}
-            style={{
-                width: '100%', padding: '6px 8px',
-                background: '#1e293b', border: '1px solid #334155',
-                borderRadius: '4px', color: '#e2e8f0',
-                fontSize: '12px', fontFamily: 'monospace', outline: 'none',
-            }}
-            onFocus={(e) => e.currentTarget.style.borderColor = '#6366f1'}
-            onBlur={(e) => e.currentTarget.style.borderColor = '#334155'}
-        />
-    </div>
-);
-const FieldSelect: React.FC<{ label: string; currentValue: string; options: string[]; onChange: (v: string) => void }> = ({ label, currentValue, options, onChange }) => (
-    <div style={{ marginBottom: '10px' }}>
-        <label style={{
-            display: 'block',
-            fontSize: '10px', fontWeight: 700, color: '#94a3b8',
-            letterSpacing: '0.4px', textTransform: 'uppercase',
-            marginBottom: '4px',
-        }}>{label}</label>
+        <label style={fieldLabelStyle}>{label}</label>
         <select
-            value={currentValue}
-            onChange={(e) => onChange(e.target.value)}
+            value={value}
+            onChange={(e) => { setValue(e.target.value); onChange(e.target.value); }}
             style={{
                 width: '100%', padding: '6px 8px',
                 background: '#1e293b', border: '1px solid #334155',
@@ -191,12 +232,13 @@ const FieldSelect: React.FC<{ label: string; currentValue: string; options: stri
             onFocus={(e) => e.currentTarget.style.borderColor = '#6366f1'}
             onBlur={(e) => e.currentTarget.style.borderColor = '#334155'}
         >
-            {options.map(opt => (
+            {allOptions.map(opt => (
                 <option key={opt || '(none)'} value={opt}>{opt || '(default)'}</option>
             ))}
         </select>
     </div>
-);
+    );
+};
 
 export const XSLTEditor: React.FC<XsltEditorProps> = ({
     initialModuleId = 'fatura',
@@ -210,7 +252,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const [moduleId, setModuleId] = useState<string>(initialModuleId);
     const [xsltContent, setXsltContent] = useState<string>('');
     const [xmlContent, setXmlContent] = useState<string>(SAMPLE_XML);
-    const [activeTab, setActiveTab] = useState<'xslt' | 'xml'>('xslt');
+    const [activeTab] = useState<'xslt' | 'xml'>('xslt');
     const [previewHtml, setPreviewHtml] = useState<string>('');
     const [previewError, setPreviewError] = useState<string | null>(null);
     // Sprint 11 Aşama 2 (2026-10-03) — Zoom default 1.00 (önceki 0.60).
@@ -247,32 +289,30 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     // preview HTML element. Drawer source'a göre farklı form render eder.
     // - xslt: xpath/text/attribute inline edit (Sprint 14 Aşama 2)
     // - preview: tip-spesifik stil özellikleri (Sprint 15 Aşama 1)
-    type SelectedObject =
-        | { source: 'xslt'; binding: import('./utils/xsltRender').XsltBinding }
-        | { source: 'preview'; element: HTMLElement; tagName: string; renderIndex: string | null }
-        | { source: 'both'; binding: import('./utils/xsltRender').XsltBinding; previewElement: HTMLElement | null }
-        | null;
+    // Seçim: binding (sol panel / binding'li önizleme öğesi) ve/veya önizleme
+    // öğesi. locator, iframe yeniden render edildiğinde öğeyi yeni dokümanda
+    // tekrar bulmak ve XSLT kaynağındaki etiketi çözmek için kullanılır.
+    type PreviewLocator =
+        | { kind: 'bind'; index: number }
+        | { kind: 'img'; src: string; ordinal: number };
+    type SelectedObject = {
+        id: number;
+        binding: XsltBinding | null;
+        element: HTMLElement | null;
+        locator: PreviewLocator | null;
+    } | null;
     const [selectedObject, setSelectedObject] = useState<SelectedObject>(null);
+    const selectionIdRef = useRef(0);
+    const pendingStyleRef = useRef<Record<string, string>>({});
+    const pendingAttrRef = useRef<Record<string, string>>({});
+    const sourceEditDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const previewScrollRef = useRef<number>(0);
+    const resetPreviewScrollRef = useRef<boolean>(false);
     // Draft state — source'a göre alanlar:
     // - xslt: { value: string; attrName?: string }
     // - preview: Record<string, string> (örn: { 'font-weight': 'bold', color: '#9a3412' })
     const [propertyDraft, setPropertyDraft] = useState<Record<string, string>>({});
     const propertyDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-    // Sprint 14 Aşama 2 — Property drawer Esc handler.
-    // Drawer açıkken Esc basılırsa drawer'ı kapat. useEffect document keydown
-    // listener ekler, cleanup'ta kaldırır.
-    useEffect(() => {
-        if (!selectedObject) return;
-        const onKey = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') {
-                setSelectedObject(null);
-                e.stopPropagation();
-            }
-        };
-        document.addEventListener('keydown', onKey);
-        return () => document.removeEventListener('keydown', onKey);
-    }, [selectedObject]);
 
     // Sprint 14 Aşama 1 — Sol panel XSLT alanları 3-gruplu liste.
     // parseXsltInstrumented Pass 1 (dropdown), Pass 2 (static), Pass 3 (element)
@@ -323,6 +363,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     // Modül değişimi → inline XSLT yükle
     // ------------------------------------------------------------------------
     useEffect(() => {
+        resetPreviewScrollRef.current = true;
+        setSelectedObject(null);
         if (initialXslt && moduleId === initialModuleId) {
             // İlk yükleme, kullanıcı verisi varsa onu kullan
             setXsltContent(initialXslt);
@@ -377,6 +419,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 xsltInstrumented.instrumentedXslt,
                 xsltInstrumented.bindings
             );
+            // Stil/metin düzenlemesi sonrası yeniden render'da önizleme başa
+            // atlamasın — yeni doküman yüklenince bu konuma dönülür.
+            if (resetPreviewScrollRef.current) {
+                previewScrollRef.current = 0;
+                resetPreviewScrollRef.current = false;
+            } else {
+                previewScrollRef.current = iframeRef.current?.contentWindow?.scrollY ?? 0;
+            }
             setPreviewHtml(result.html);
             setPreviewError(result.error);
             setRenderDurationMs(result.durationMs);
@@ -502,103 +552,186 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
      * position → editor.revealPositionInCenter + deltaDecorations (sarı
      * highlight 2s). Kullanıcı snippet'ın nereye eklendiğini görsün.
      */
-    // Sprint 14 Aşama 1 + Aşama 2 + Sprint 15 Aşama 1 — handleBindingClick:
-    // sol panelden bir XSLT alanına tıklayınca:
-    // 1) Monaco editöre scroll + sarı highlight (previewSelectedLine/Column)
-    // 2) Sağ property drawer'ı aç (source='xslt') + draft state'i başlat
-    // Inline edit → updateXSLTBinding → xsltContent güncellenir → preview
-    // re-render tetiklenir.
-    const handleBindingClick = useCallback((b: import('./utils/xsltRender').XsltBinding) => {
-        setPreviewSelectedLine(b.line);
-        setPreviewSelectedColumn(b.column);
-        // Editor'ü focus et — aktif tab'a geç
-        if (activeTab !== 'xslt') setActiveTab('xslt');
-        const ed = editorRef.current;
-        if (ed) ed.focus();
-        // Sprint 14 Aşama 2 + Sprint 15 Aşama 3 — Property drawer'ı aç + draft başlat.
-        // Eğer iframe'de son tıklanan preview element varsa, drawer birleşik
-        // gösterir (XSLT bölüm + Preview font/stil bölümü).
-        const previewEl = lastPreviewElementRef.current;
-        setSelectedObject({
-            source: previewEl ? 'both' : 'xslt',
-            binding: b,
-            previewElement: previewEl,
-        });
-        // Editable draft: kind'e göre mevcut değeri çıkar
-        let draftValue = '';
-        let attrName: string | undefined;
-        if (b.kind === 'dropdown') {
-            draftValue = b.xpath;
-            attrName = 'select';
-        } else if (b.kind === 'static') {
-            draftValue = b.xpath.replace(/^static:\s*/, '');
-            attrName = undefined;
-        } else if (b.kind === 'element') {
-            // xpath formatı: <xsl:if test="..."> → test="..." parçasını al
-            const m = b.xpath.match(/(\w+)="([^"]*)"/);
-            if (m) { attrName = m[1]; draftValue = m[2]; }
-            else { attrName = 'select'; draftValue = ''; }
+    const selectedObjectRef = useRef(selectedObject);
+    useEffect(() => { selectedObjectRef.current = selectedObject; }, [selectedObject]);
+    const bindingsRef = useRef(xsltInstrumented.bindings);
+    bindingsRef.current = xsltInstrumented.bindings;
+    const xsltContentRef = useRef(xsltContent);
+    xsltContentRef.current = xsltContent;
+
+    /** Seçili öğe önizlemede turuncu çerçeveyle işaretlenir. */
+    useEffect(() => {
+        const doc = iframeRef.current?.contentDocument;
+        if (!doc) return;
+        doc.querySelectorAll('[data-xslt-selected]').forEach(n => n.removeAttribute('data-xslt-selected'));
+        selectedObject?.element?.setAttribute('data-xslt-selected', 'true');
+    }, [selectedObject]);
+
+    const findPreviewElement = useCallback((locator: PreviewLocator | null): HTMLElement | null => {
+        const doc = iframeRef.current?.contentDocument;
+        if (!doc || !locator) return null;
+        if (locator.kind === 'bind') {
+            return doc.querySelector<HTMLElement>(`[data-render-indexes~="${locator.index}"]`);
         }
-        const draft: Record<string, string> = {};
-        if (attrName) draft['__attr__'] = attrName;
-        draft['value'] = draftValue;
-        setPropertyDraft(draft);
-        console.log(`[XSLTEditor] Sol panel binding click → line=${b.line}:${b.column} kind=${b.kind || 'dropdown'} draft="${draftValue}"`);
-    }, [activeTab]);
+        const imgs = Array.from(doc.querySelectorAll('img')).filter(img => img.getAttribute('src') === locator.src);
+        return imgs[locator.ordinal] ?? null;
+    }, []);
+
+    const resolveSourceTag = useCallback((xslt: string, locator: PreviewLocator | null): SourceTag | null => {
+        if (!locator) return null;
+        if (locator.kind === 'img') return findImgTagBySrc(xslt, locator.src, locator.ordinal);
+        const bindings = bindingsRef.current;
+        const b = bindings[locator.index];
+        if (!b) return null;
+        const offset = findBindingSourceOffset(xslt, bindings, b);
+        return offset === null ? null : findEnclosingLiteralTag(xslt, offset);
+    }, []);
+
+    const selectedSourceTagFound = useMemo(
+        () => selectedObject?.locator ? resolveSourceTag(xsltContent, selectedObject.locator) !== null : false,
+        [selectedObject, xsltContent, resolveSourceTag]
+    );
 
     /**
-     * Sprint 14 Aşama 2 — Property panel inline edit handler (XSLT source).
-     * Her input değişikliğinde 300ms debounce ile XSLT güncellenir → Monaco
-     * editöre yazılır → preview re-render tetiklenir.
+     * Bekleyen stil / attribute değişikliklerini seçili öğenin XSLT'deki
+     * etiketine yazar. Etiket bulunamazsa değişiklik sadece önizlemede kalır.
+     */
+    const flushSourceEdits = useCallback(() => {
+        if (sourceEditDebounceRef.current) {
+            clearTimeout(sourceEditDebounceRef.current);
+            sourceEditDebounceRef.current = null;
+        }
+        const styles = pendingStyleRef.current;
+        const attrs = pendingAttrRef.current;
+        pendingStyleRef.current = {};
+        pendingAttrRef.current = {};
+        const sel = selectedObjectRef.current;
+        if (!sel?.locator) return;
+        let locator = sel.locator;
+        let next = xsltContentRef.current;
+        for (const [prop, value] of Object.entries(styles)) {
+            const tag = resolveSourceTag(next, locator);
+            if (!tag) return;
+            next = setTagStyleProperty(next, tag, prop, value);
+        }
+        for (const [attr, value] of Object.entries(attrs)) {
+            const tag = resolveSourceTag(next, locator);
+            if (!tag) return;
+            next = setTagAttribute(next, tag, attr, value);
+            if (attr === 'src' && locator.kind === 'img') locator = { ...locator, src: value };
+        }
+        if (locator !== sel.locator) {
+            const updated = { ...sel, locator };
+            selectedObjectRef.current = updated;
+            setSelectedObject(updated);
+        }
+        if (next !== xsltContentRef.current) {
+            setXsltContent(next);
+            console.log(`[XSLTEditor] Özellik XSLT'ye yazıldı → ${[...Object.keys(styles), ...Object.keys(attrs)].join(', ')}`);
+        }
+    }, [resolveSourceTag]);
+
+    const scheduleSourceFlush = useCallback(() => {
+        if (sourceEditDebounceRef.current) clearTimeout(sourceEditDebounceRef.current);
+        sourceEditDebounceRef.current = setTimeout(flushSourceEdits, 600);
+    }, [flushSourceEdits]);
+
+    /** CSS özelliği: önizlemeye anında uygulanır, 600ms sonra XSLT'ye yazılır. */
+    const handleStyleChange = useCallback((prop: string, value: string) => {
+        const sel = selectedObjectRef.current;
+        if (!sel) return;
+        const v = value.trim();
+        if (sel.element) {
+            if (v) sel.element.style.setProperty(prop, v);
+            else sel.element.style.removeProperty(prop);
+        }
+        if (!sel.locator) return;
+        pendingStyleRef.current[prop] = v;
+        scheduleSourceFlush();
+    }, [scheduleSourceFlush]);
+
+    /** HTML attribute (resim src / alt): önizleme + XSLT. */
+    const handleAttrChange = useCallback((attr: string, value: string) => {
+        const sel = selectedObjectRef.current;
+        if (!sel) return;
+        sel.element?.setAttribute(attr, value);
+        if (!sel.locator) return;
+        pendingAttrRef.current[attr] = value;
+        scheduleSourceFlush();
+    }, [scheduleSourceFlush]);
+
+    const openSelection = useCallback((binding: XsltBinding | null, element: HTMLElement | null, locator: PreviewLocator | null) => {
+        flushSourceEdits();
+        selectionIdRef.current += 1;
+        setSelectedObject({ id: selectionIdRef.current, binding, element, locator });
+        let draftValue = '';
+        let attrName: string | undefined;
+        if (binding?.kind === 'static') {
+            draftValue = binding.xpath.replace(/^static:\s*/, '');
+        } else if (binding?.kind === 'element') {
+            // xpath formatı: <xsl:if test="..."> → test="..." parçasını al
+            const m = binding.xpath.match(/(\w+)="([^"]*)"/);
+            if (m) { attrName = m[1]; draftValue = m[2]; }
+            else { attrName = 'select'; draftValue = ''; }
+        } else if (binding) {
+            draftValue = binding.xpath;
+            attrName = 'select';
+        }
+        const draft: Record<string, string> = { value: draftValue };
+        if (attrName) draft['__attr__'] = attrName;
+        setPropertyDraft(draft);
+    }, [flushSourceEdits]);
+
+    const closeSelection = useCallback(() => {
+        flushSourceEdits();
+        setSelectedObject(null);
+    }, [flushSourceEdits]);
+
+    useEffect(() => {
+        if (!selectedObject) return;
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                closeSelection();
+                e.stopPropagation();
+            }
+        };
+        document.addEventListener('keydown', onKey);
+        return () => document.removeEventListener('keydown', onKey);
+    }, [selectedObject, closeSelection]);
+
+    // Sol panelden alan tıklanınca: önizlemedeki karşılığına kaydır, çerçevele
+    // ve özellik panelini o öğenin tüm özellikleriyle aç.
+    const handleBindingClick = useCallback((b: XsltBinding) => {
+        setPreviewSelectedLine(b.line);
+        setPreviewSelectedColumn(b.column);
+        const index = xsltInstrumented.bindings.indexOf(b);
+        const locator: PreviewLocator | null = (b.kind || 'dropdown') !== 'element' && index >= 0
+            ? { kind: 'bind', index }
+            : null;
+        const el = findPreviewElement(locator);
+        el?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        openSelection(b, el, locator);
+    }, [xsltInstrumented.bindings, findPreviewElement, openSelection]);
+
+    /**
+     * Statik metin / element attribute düzenleme (300ms debounce). Dinamik
+     * veri alanlarının XPath'i salt okunurdur — veri XML'den gelir.
      */
     const handleXsltPropertyChange = useCallback((newValue: string) => {
         setPropertyDraft(prev => ({ ...prev, value: newValue }));
         if (propertyDebounceRef.current) clearTimeout(propertyDebounceRef.current);
         propertyDebounceRef.current = setTimeout(() => {
-            const sel = selectedObjectRef.current;
-            if (!sel || sel.source !== 'xslt') return;
-            const updated = updateXSLTBinding(xsltContent, sel.binding, newValue);
-            if (updated !== xsltContent) {
+            const b = selectedObjectRef.current?.binding;
+            if (!b || (b.kind || 'dropdown') === 'dropdown') return;
+            const current = xsltContentRef.current;
+            const updated = updateXSLTBinding(current, b, newValue);
+            if (updated !== current) {
                 setXsltContent(updated);
-                console.log(`[XSLTEditor] XSLT property update → line=${sel.binding.line} new="${newValue.substring(0, 40)}${newValue.length > 40 ? '...' : ''}"`);
             } else {
-                console.warn(`[XSLTEditor] XSLT property update no-op (line=${sel.binding.line}) — tag multi-line olabilir`);
+                console.warn(`[XSLTEditor] XSLT property update no-op (line=${b.line}) — tag multi-line olabilir`);
             }
         }, 300);
-    }, [xsltContent]);
-
-    /**
-     * Sprint 15 Aşama 1 — Preview element tip-spesifik stil property handler.
-     * Render-only inline style: iframe.contentDocument içindeki element'in
-     * style.xxx özelliğini set eder. XSLT kaynak kodu değişmez, sadece
-     * görsel önizleme güncellenir.
-     */
-    const handlePreviewPropertyChange = useCallback((styleKey: string, styleValue: string) => {
-        setPropertyDraft(prev => ({ ...prev, [styleKey]: styleValue }));
-        const sel = selectedObjectRef.current;
-        if (!sel || sel.source !== 'preview') return;
-        const el = sel.element;
-        // CSS özelliğini uygula
-        if (styleValue === '' || styleValue == null) {
-            el.style.removeProperty(styleKey);
-        } else {
-            el.style.setProperty(styleKey, styleValue);
-        }
-        console.log(`[XSLTEditor] Preview style update → ${styleKey}: ${styleValue}`);
     }, []);
-
-    /**
-     * selectedObject için ref — handlePropertyChange closure'da güncel değeri
-     * görmek için (useCallback dependency'yi minimize eder).
-     */
-    const selectedObjectRef = useRef(selectedObject);
-    useEffect(() => { selectedObjectRef.current = selectedObject; }, [selectedObject]);
-
-    // Sprint 15 Aşama 3 — Son tıklanan preview element ref. handleBindingClick
-    // bu ref'i okuyarak selectedObject'e previewElement ekler → XSLT drawer'da
-    // hem XSLT binding (xpath/text/attr) hem preview element (font/renk/kalınlık)
-    // birleşik görünür. Selim'in brief'i: "font/kalınlık/çizgili ekrana gelmedi".
-    const lastPreviewElementRef = useRef<HTMLElement | null>(null);
 
     /**
      * Editor mount — ref + Monaco API sakla, XSLT autocomplete provider kayıt.
@@ -939,27 +1072,24 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         }
         e.preventDefault();
         e.stopPropagation();
-        // Sprint 15 Aşama 1 + Sprint 16 Aşama 3 — Preview drawer aç
-        // (tip-spesifik stil + sil butonları). renderIndex null ise XSLT
-        // bağlantısı yok → drawer sadece style paneli gösterir.
-        setSelectedObject({
-            source: 'preview',
-            element: indexedEl,
-            tagName: indexedEl.tagName,
-            renderIndex,
-        });
-        // Draft state'i mevcut style/computed değerleriyle başlat
-        const draft: Record<string, string> = {};
-        const cs = window.getComputedStyle(indexedEl);
-        ['font-weight', 'font-style', 'text-decoration-line', 'font-size', 'color', 'text-align', 'font-family', 'object-fit'].forEach(k => {
-            draft[k] = cs.getPropertyValue(k) || '';
-        });
-        setPropertyDraft(draft);
-        // Sprint 15 Aşama 3 — Son tıklanan preview element ref'i güncelle.
-        // handleBindingClick bu ref'i okuyarak drawer'ı birleşik gösterebilir.
-        lastPreviewElementRef.current = indexedEl;
+        // renderIndex yukarıda parent/child taramasıyla doldurulmuş olabilir;
+        // seçimin XSLT karşılığı yalnızca öğenin kendi annotation'ından çözülür.
+        const ownIndex = indexedEl.getAttribute('data-render-index');
+        let locator: PreviewLocator | null = null;
+        let binding: XsltBinding | null = null;
+        if (ownIndex !== null) {
+            const index = Number(ownIndex);
+            locator = { kind: 'bind', index };
+            binding = bindingsRef.current[index] ?? null;
+        } else if (indexedEl.tagName.toLowerCase() === 'img') {
+            const src = indexedEl.getAttribute('src') || '';
+            const sameSrc = Array.from(indexedEl.ownerDocument.querySelectorAll('img'))
+                .filter(img => img.getAttribute('src') === src);
+            locator = { kind: 'img', src, ordinal: sameSrc.indexOf(indexedEl as HTMLImageElement) };
+        }
+        openSelection(binding, indexedEl, locator);
         console.log(`[XSLTEditor] Preview click → ${indexedEl.tagName} render-index=${renderIndex ?? '(yok — sadece stil paneli)'}`);
-    }, []);
+    }, [openSelection]);
 
     /**
      * iframe yüklendiğinde:
@@ -993,7 +1123,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         if (doc.head && !doc.getElementById('__xslt-preview-layout')) {
             const style = doc.createElement('style');
             style.id = '__xslt-preview-layout';
-            style.textContent = 'body{margin-left:auto !important;margin-right:auto !important;}';
+            style.textContent = 'body{margin-left:auto !important;margin-right:auto !important;}'
+                + '[data-xslt-selected]{outline:2px solid #f59e0b !important;outline-offset:2px;}';
             doc.head.appendChild(style);
         }
         doc.documentElement.style.setProperty('zoom', String(zoom));
@@ -1080,6 +1211,18 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             // hemen uygula (titreme olmasın), auto-fit açıksa 350ms sonra
             // (measureHeight 300ms + 50ms pay) genişliğe göre yeniden sığdır.
             applyPreviewZoom(previewZoomRef.current);
+            // Yeniden render sonrası seçili öğeyi yeni dokümanda tekrar bul
+            // ve önceki kaydırma konumuna dön.
+            const sel = selectedObjectRef.current;
+            if (sel?.locator) {
+                const el = findPreviewElement(sel.locator);
+                if (el !== sel.element) {
+                    const updated = { ...sel, element: el };
+                    selectedObjectRef.current = updated;
+                    setSelectedObject(updated);
+                }
+            }
+            doc.defaultView?.scrollTo(0, previewScrollRef.current);
             setTimeout(() => {
                 if (!autoFitRef.current) return;
                 const zoom = fitZoomToContainer();
@@ -1090,7 +1233,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         };
 
         bindListener();
-    }, [handleIframeBodyClick, fitZoomToContainer, applyPreviewZoom]);
+    }, [handleIframeBodyClick, fitZoomToContainer, applyPreviewZoom, findPreviewElement]);
 
     /**
      * iframe onLoad → handleIframeLoad. previewHtml değiştiğinde iframe
@@ -1513,6 +1656,18 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 onBlur={(e) => e.currentTarget.style.borderColor = '#334155'}
                             />
                         </div>
+                        {renderedBindingIndexes.size > 0 && (
+                            <div style={{ display: 'flex', gap: '10px', marginTop: '6px', fontSize: '9px', color: '#94a3b8' }}>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <span style={{ width: '9px', height: '9px', borderRadius: '2px', background: 'rgba(16, 185, 129, 0.35)', borderLeft: '3px solid #10b981' }} />
+                                    Tasarımda görünen
+                                </span>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '4px', opacity: 0.7 }}>
+                                    <span style={{ width: '9px', height: '9px', borderRadius: '2px', background: '#1e293b', borderLeft: '3px solid #475569' }} />
+                                    Görünmeyen
+                                </span>
+                            </div>
+                        )}
                     </div>
 
                     {/* Sprint 14 Aşama 1 — 3-gruplu XSLT alanları listesi */}
@@ -1547,6 +1702,12 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 const groupBg = group === 'dropdown' ? 'rgba(99, 102, 241, 0.18)'
                                     : group === 'static' ? 'rgba(16, 185, 129, 0.18)'
                                     : 'rgba(252, 211, 77, 0.18)';
+                                // Element Yapısı (xsl:if/for-each...) önizlemede tek bir
+                                // öğeye karşılık gelmez — render durumu gösterilmez.
+                                const groupHasRenderStatus = group !== 'element' && renderedBindingIndexes.size > 0;
+                                const renderedCount = groupHasRenderStatus
+                                    ? list.filter(b => renderedBindingIndexes.has(xsltInstrumented.bindings.indexOf(b))).length
+                                    : 0;
                                 return (
                                     <div key={group} style={{ marginBottom: '8px' }}>
                                         <button
@@ -1578,8 +1739,10 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                 fontSize: '9px',
                                                 fontWeight: 700,
                                                 color: groupColor,
-                                            }}>
-                                                {list.length}
+                                            }}
+                                                title={groupHasRenderStatus ? `${renderedCount} alan tasarımda görünüyor / toplam ${list.length}` : undefined}
+                                            >
+                                                {groupHasRenderStatus ? `${renderedCount}/${list.length}` : list.length}
                                             </span>
                                         </button>
                                         {xsltGroupExpanded[group] && list.length > 0 && (
@@ -1591,8 +1754,22 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                     // var) yeşil, görünmüyorsa kırmızı, render
                                                     // henüz yapılmadıysa / hata varsa renksiz.
                                                     const isRendered = renderedBindingIndexes.has(globalIndex - 1);
-                                                    const renderStatusColor = isRendered ? '#10b981' : '#ef4444';
-                                                    const showRenderStatus = renderedBindingIndexes.size > 0;
+                                                    const showRenderStatus = groupHasRenderStatus;
+                                                    const isSelected = selectedObject?.binding === b
+                                                        || (selectedObject?.locator?.kind === 'bind' && selectedObject.locator.index === globalIndex - 1);
+                                                    // Tasarımda görünen alanlar yeşil zeminle öne çıkar,
+                                                    // görünmeyenler soluklaşır; seçili alan mor çerçeveli.
+                                                    const itemBg = isSelected ? 'rgba(99, 102, 241, 0.28)'
+                                                        : showRenderStatus && isRendered ? 'rgba(16, 185, 129, 0.16)'
+                                                        : '#1e293b';
+                                                    const itemBorder = isSelected ? 'rgba(129, 140, 248, 0.9)'
+                                                        : showRenderStatus && isRendered ? 'rgba(16, 185, 129, 0.45)'
+                                                        : '#334155';
+                                                    const itemBorderLeft = showRenderStatus
+                                                        ? `3px solid ${isRendered ? '#10b981' : '#475569'}`
+                                                        : `1px solid ${itemBorder}`;
+                                                    const itemTextColor = showRenderStatus && isRendered ? '#d1fae5' : '#e2e8f0';
+                                                    const itemOpacity = showRenderStatus && !isRendered && !isSelected ? 0.55 : 1;
                                                     const displayText = b.kind === 'dropdown'
                                                         ? b.xpath
                                                         : b.kind === 'static'
@@ -1605,27 +1782,29 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                             data-bind-line={b.line}
                                                             data-bind-col={b.column}
                                                             onClick={() => handleBindingClick(b)}
-                                                            title={`Satır ${b.line}, col ${b.column} — ${b.xpath}${showRenderStatus ? (isRendered ? '  ✓ Render\'da görünüyor' : '  ✗ Render\'da görünmüyor') : ''}`}
+                                                            data-rendered={showRenderStatus ? String(isRendered) : undefined}
+                                                            title={`Satır ${b.line}, col ${b.column} — ${b.xpath}${showRenderStatus ? (isRendered ? '  ✓ Tasarımda görünüyor' : '  ✗ Tasarımda görünmüyor') : ''}`}
                                                             style={{
                                                                 display: 'flex',
                                                                 alignItems: 'center',
                                                                 gap: '6px',
                                                                 padding: '5px 8px 5px 11px',
                                                                 marginBottom: '2px',
-                                                                background: '#1e293b',
-                                                                border: '1px solid #334155',
-                                                                borderLeft: showRenderStatus ? `3px solid ${renderStatusColor}` : '1px solid #334155',
+                                                                background: itemBg,
+                                                                border: `1px solid ${itemBorder}`,
+                                                                borderLeft: itemBorderLeft,
                                                                 borderRadius: '3px',
                                                                 cursor: 'pointer',
-                                                                transition: 'background 0.1s, border-color 0.1s',
+                                                                opacity: itemOpacity,
+                                                                transition: 'background 0.1s, border-color 0.1s, opacity 0.1s',
                                                             }}
                                                             onMouseEnter={(e) => {
-                                                                e.currentTarget.style.background = 'rgba(99, 102, 241, 0.12)';
-                                                                e.currentTarget.style.borderColor = 'rgba(99, 102, 241, 0.4)';
+                                                                e.currentTarget.style.background = 'rgba(99, 102, 241, 0.2)';
+                                                                e.currentTarget.style.opacity = '1';
                                                             }}
                                                             onMouseLeave={(e) => {
-                                                                e.currentTarget.style.background = '#1e293b';
-                                                                e.currentTarget.style.borderColor = '#334155';
+                                                                e.currentTarget.style.background = itemBg;
+                                                                e.currentTarget.style.opacity = String(itemOpacity);
                                                             }}
                                                         >
                                                             <span style={{
@@ -1645,7 +1824,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                             <span style={{
                                                                 flex: 1,
                                                                 fontSize: '10px',
-                                                                color: '#e2e8f0',
+                                                                color: itemTextColor,
                                                                 fontFamily: 'monospace',
                                                                 whiteSpace: 'nowrap',
                                                                 overflow: 'hidden',
@@ -1670,8 +1849,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                                 yapmadığını anlar. */}
                                                             <span
                                                                 title={showRenderStatus
-                                                                    ? (isRendered ? 'Render\'da görünüyor' : 'Render\'da görünmüyor (xsl:if false vb.)')
-                                                                    : 'Render henüz yapılmadı / XML yükle'}
+                                                                    ? (isRendered ? 'Tasarımda görünüyor' : 'Tasarımda görünmüyor (xsl:if koşulu sağlanmıyor vb.)')
+                                                                    : group === 'element' ? 'Yapı elemanı — önizlemede tek bir öğeye karşılık gelmez' : 'Render henüz yapılmadı / XML yükle'}
                                                                 style={{
                                                                     fontSize: '12px',
                                                                     fontWeight: 700,
@@ -2022,345 +2201,59 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         boxShadow: selectedObject ? '-4px 0 16px rgba(0,0,0,0.5)' : 'none',
                     }}
                 >
-                    {/* XSLT source drawer (Sprint 14 Aşama 2) */}
-                    {selectedObject?.source === 'xslt' && (() => {
-                        const b = selectedObject.binding;
-                        const kindDisplay = b.kind === 'dropdown' ? 'Dinamik Veri'
-                            : b.kind === 'static' ? 'Statik Metin'
-                            : 'Element Yapısı';
-                        const kindColor = b.kind === 'dropdown' ? '#a5b4fc'
-                            : b.kind === 'static' ? '#6ee7b7'
-                            : '#fcd34d';
-                        const globalIndex = xsltInstrumented.bindings.indexOf(b) + 1;
-                        const fieldLabel = b.kind === 'dropdown' ? 'XPath (select)'
-                            : b.kind === 'static' ? 'Metin İçeriği'
-                            : `Attribute (${propertyDraft['__attr__'] || 'select'})`;
-                        return (
-                            <>
-                                <div style={{
-                                    padding: '12px 14px',
-                                    background: '#0a1024',
-                                    borderBottom: '1px solid #1e293b',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '8px',
-                                }}>
-                                    <div style={{
-                                        minWidth: '34px',
-                                        padding: '2px 6px',
-                                        background: 'rgba(99, 102, 241, 0.2)',
-                                        border: '1px solid rgba(99, 102, 241, 0.5)',
-                                        borderRadius: '4px',
-                                        fontSize: '11px',
-                                        fontWeight: 700,
-                                        color: '#a5b4fc',
-                                        textAlign: 'center',
-                                        fontFamily: 'monospace',
-                                    }}>
-                                        B{globalIndex}
-                                    </div>
-                                    <div style={{ flex: 1 }}>
-                                        <div style={{ fontSize: '12px', fontWeight: 700, color: '#e2e8f0', letterSpacing: '0.4px' }}>
-                                            Property · XSLT
-                                        </div>
-                                        <div style={{ fontSize: '10px', color: kindColor, fontWeight: 600, letterSpacing: '0.3px' }}>
-                                            {kindDisplay}{b.elementType ? ` · xsl:${b.elementType}` : ''}
-                                        </div>
-                                    </div>
-                                    <button
-                                        onClick={() => setSelectedObject(null)}
-                                        title="Kapat (Esc)"
-                                        data-close-property-drawer
-                                        style={{ padding: '4px 8px', background: 'transparent', border: '1px solid #334155', borderRadius: '4px', color: '#94a3b8', cursor: 'pointer', fontSize: '11px' }}
-                                        onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)'; e.currentTarget.style.color = '#fca5a5'; }}
-                                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#94a3b8'; }}
-                                    >
-                                        ✕
-                                    </button>
-                                </div>
-                                <div style={{ flex: 1, padding: '14px', overflowY: 'auto' }}>
-                                    <label style={{ display: 'block', fontSize: '10px', fontWeight: 700, color: '#94a3b8', letterSpacing: '0.4px', textTransform: 'uppercase', marginBottom: '6px' }}>
-                                        {fieldLabel}
-                                    </label>
-                                    <textarea
-                                        data-property-input
-                                        value={propertyDraft.value || ''}
-                                        onChange={(e) => handleXsltPropertyChange(e.target.value)}
-                                        spellCheck={false}
-                                        style={{
-                                            width: '100%', minHeight: '60px', maxHeight: '300px',
-                                            padding: '8px 10px', background: '#1e293b',
-                                            border: '1px solid #334155', borderRadius: '4px',
-                                            color: '#e2e8f0', fontSize: '12px', fontFamily: 'monospace',
-                                            resize: 'vertical', outline: 'none',
-                                        }}
-                                        onFocus={(e) => e.currentTarget.style.borderColor = '#6366f1'}
-                                        onBlur={(e) => e.currentTarget.style.borderColor = '#334155'}
-                                    />
-                                    <div style={{
-                                        marginTop: '14px', padding: '10px 12px',
-                                        background: 'rgba(99, 102, 241, 0.08)', border: '1px solid rgba(99, 102, 241, 0.25)',
-                                        borderRadius: '4px', fontSize: '10px', color: '#94a3b8', lineHeight: 1.5,
-                                    }}>
-                                        ℹ XSLT satırına yazılır (300ms debounce). Monaco editör + preview re-render.
-                                    </div>
-
-                                    {/* Sprint 15 Aşama 3b — Font/stil bölümü (her zaman göster).
-                                        Preview'da anında değişiklik için önce sağdaki
-                                        önizlemeden bir element tıklayın → preview element
-                                        font/stil değerleri buraya dolar + uygulanır.
-                                        Selim'in brief'i: "font/kalınlık/çizgili için bir
-                                        şey gelmiyor" → preview click gerek kalmadan da
-                                        font bölümü görünsün, kullanıcı hint'ten preview
-                                        tıklamasını öğrensin. */}
-                                    <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px solid #1e293b' }}>
-                                        <div style={{ fontSize: '10px', fontWeight: 700, color: '#fcd34d', letterSpacing: '0.4px', textTransform: 'uppercase', marginBottom: '8px' }}>
-                                            Önizleme Stilleri
-                                        </div>
-                                        {lastPreviewElementRef.current ? (
-                                            <>
-                                                <FieldSelect label="font-weight (kalınlık)" currentValue={window.getComputedStyle(lastPreviewElementRef.current).fontWeight} options={['normal', 'bold', '100', '200', '300', '400', '500', '600', '700', '800', '900']} onChange={(v) => handlePreviewPropertyChange('font-weight', v)} />
-                                                <FieldSelect label="font-style (eğik)" currentValue={window.getComputedStyle(lastPreviewElementRef.current).fontStyle} options={['normal', 'italic', 'oblique']} onChange={(v) => handlePreviewPropertyChange('font-style', v)} />
-                                                <FieldSelect label="text-decoration (çizgili)" currentValue={window.getComputedStyle(lastPreviewElementRef.current).textDecorationLine} options={['none', 'underline', 'line-through', 'overline']} onChange={(v) => handlePreviewPropertyChange('text-decoration-line', v)} />
-                                                <FieldText label="font-size" currentValue={window.getComputedStyle(lastPreviewElementRef.current).fontSize} onChange={(v) => handlePreviewPropertyChange('font-size', v)} />
-                                                <FieldText label="color" currentValue={window.getComputedStyle(lastPreviewElementRef.current).color} onChange={(v) => handlePreviewPropertyChange('color', v)} />
-                                                <FieldSelect label="text-align" currentValue={window.getComputedStyle(lastPreviewElementRef.current).textAlign} options={['left', 'right', 'center', 'justify']} onChange={(v) => handlePreviewPropertyChange('text-align', v)} />
-                                                <FieldText label="font-family (font tipi)" currentValue={window.getComputedStyle(lastPreviewElementRef.current).fontFamily} onChange={(v) => handlePreviewPropertyChange('font-family', v)} />
-                                            </>
-                                        ) : (
-                                            <div style={{
-                                                padding: '12px 14px',
-                                                background: 'rgba(252, 211, 77, 0.06)',
-                                                border: '1px dashed rgba(252, 211, 77, 0.3)',
-                                                borderRadius: '4px',
-                                                fontSize: '10px',
-                                                color: '#fcd34d',
-                                                lineHeight: 1.5,
-                                            }}>
-                                                <strong>ℹ Önizleme'den bir element tıklayın</strong> — sağdaki 'CANLI ÖNİZLEME' panelinde bir text/resim/tablo tıklayın, font/kalınlık/çizgili alanları dolar. Şu an sadece XSLT satırı seçili.
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                                <div style={{
-                                    padding: '10px 14px', background: '#0a1024',
-                                    borderTop: '1px solid #1e293b', fontSize: '10px',
-                                    color: '#64748b', fontFamily: 'monospace',
-                                    display: 'flex', justifyContent: 'space-between',
-                                }}>
-                                    <span>Line {b.line}:col {b.column}</span>
-                                    <span style={{ color: kindColor }}>{fieldLabel}</span>
-                                </div>
-                            </>
-                        );
-                    })()}
-
-                    {/* Preview source drawer (Sprint 15 Aşama 1) */}
-                    {selectedObject?.source === 'preview' && (() => {
-                        const el = selectedObject.element;
-                        const tag = selectedObject.tagName.toLowerCase();
-                        const ri = selectedObject.renderIndex;
-                        const cs = window.getComputedStyle(el);
-                        // Tip-spesifik stil alanları
+                    {selectedObject && (() => {
+                        const sel = selectedObject;
+                        const b = sel.binding;
+                        const el = sel.element;
+                        const kind = b ? (b.kind || 'dropdown') : null;
+                        const tag = el ? el.tagName.toLowerCase() : '';
+                        const view = el?.ownerDocument.defaultView;
+                        const cs = el && view ? view.getComputedStyle(el) : null;
                         const isImg = tag === 'img';
-                        const isText = ['p', 'div', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'td', 'th', 'b', 'i', 'strong', 'em'].includes(tag);
-                        const isTable = tag === 'table' || tag === 'tr';
                         const isInput = ['input', 'button', 'textarea', 'select'].includes(tag);
-                        return (
-                            <>
-                                <div style={{
-                                    padding: '12px 14px',
-                                    background: '#0a1024',
-                                    borderBottom: '1px solid #1e293b',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '8px',
-                                }}>
-                                    <div style={{
-                                        minWidth: '34px',
-                                        padding: '2px 6px',
-                                        background: 'rgba(252, 211, 77, 0.2)',
-                                        border: '1px solid rgba(252, 211, 77, 0.5)',
-                                        borderRadius: '4px',
-                                        fontSize: '11px',
-                                        fontWeight: 700,
-                                        color: '#fcd34d',
-                                        textAlign: 'center',
-                                        fontFamily: 'monospace',
-                                    }}>
-                                        P{ri || '?'}
-                                    </div>
-                                    <div style={{ flex: 1 }}>
-                                        <div style={{ fontSize: '12px', fontWeight: 700, color: '#e2e8f0', letterSpacing: '0.4px' }}>
-                                            Property · Preview
-                                        </div>
-                                        <div style={{ fontSize: '10px', color: '#fcd34d', fontWeight: 600, letterSpacing: '0.3px' }}>
-                                            &lt;{tag}&gt; {isImg ? '· Resim' : isText ? '· Text' : isTable ? '· Tablo' : isInput ? '· Input' : '· Element'}
-                                        </div>
-                                    </div>
-                                    <button
-                                        onClick={() => setSelectedObject(null)}
-                                        title="Kapat (Esc)"
-                                        data-close-property-drawer
-                                        style={{ padding: '4px 8px', background: 'transparent', border: '1px solid #334155', borderRadius: '4px', color: '#94a3b8', cursor: 'pointer', fontSize: '11px' }}
-                                        onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)'; e.currentTarget.style.color = '#fca5a5'; }}
-                                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#94a3b8'; }}
-                                    >
-                                        ✕
-                                    </button>
-                                </div>
-                                <div style={{ flex: 1, padding: '14px', overflowY: 'auto' }}>
-                                    {/* Tip-spesifik stil alanları */}
-                                    {isImg && (
-                                        <>
-                                            <FieldText label="src (URL)" currentValue={el.getAttribute('src') || ''} onChange={(v) => el.setAttribute('src', v)} />
-                                            <FieldText label="alt" currentValue={el.getAttribute('alt') || ''} onChange={(v) => el.setAttribute('alt', v)} />
-                                            <FieldText label="width" currentValue={el.getAttribute('width') || cs.width} onChange={(v) => { el.style.setProperty('width', v); }} />
-                                            <FieldText label="height" currentValue={el.getAttribute('height') || cs.height} onChange={(v) => { el.style.setProperty('height', v); }} />
-                                            <FieldSelect label="object-fit" currentValue={cs.objectFit} options={['', 'contain', 'cover', 'fill', 'scale-down', 'none']} onChange={(v) => handlePreviewPropertyChange('object-fit', v)} />
-                                        </>
-                                    )}
-                                    {isText && (
-                                        <>
-                                            <FieldSelect label="font-weight (kalınlık)" currentValue={cs.fontWeight} options={['normal', 'bold', '100', '200', '300', '400', '500', '600', '700', '800', '900']} onChange={(v) => handlePreviewPropertyChange('font-weight', v)} />
-                                            <FieldSelect label="font-style (eğik)" currentValue={cs.fontStyle} options={['normal', 'italic', 'oblique']} onChange={(v) => handlePreviewPropertyChange('font-style', v)} />
-                                            <FieldSelect label="text-decoration (çizgili)" currentValue={cs.textDecorationLine} options={['none', 'underline', 'line-through', 'overline']} onChange={(v) => handlePreviewPropertyChange('text-decoration-line', v)} />
-                                            <FieldText label="font-size" currentValue={cs.fontSize} onChange={(v) => handlePreviewPropertyChange('font-size', v)} />
-                                            <FieldText label="color" currentValue={cs.color} onChange={(v) => handlePreviewPropertyChange('color', v)} />
-                                            <FieldSelect label="text-align" currentValue={cs.textAlign} options={['left', 'right', 'center', 'justify']} onChange={(v) => handlePreviewPropertyChange('text-align', v)} />
-                                            <FieldText label="font-family (font tipi)" currentValue={cs.fontFamily} onChange={(v) => handlePreviewPropertyChange('font-family', v)} />
-                                        </>
-                                    )}
-                                    {isTable && (
-                                        <>
-                                            <FieldText label="border" currentValue={cs.border} onChange={(v) => handlePreviewPropertyChange('border', v)} />
-                                            {tag === 'table' && <FieldText label="cellpadding" currentValue={el.getAttribute('cellpadding') || ''} onChange={(v) => el.setAttribute('cellpadding', v)} />}
-                                            {tag === 'table' && <FieldText label="cellspacing" currentValue={el.getAttribute('cellspacing') || ''} onChange={(v) => el.setAttribute('cellspacing', v)} />}
-                                            <FieldText label="width" currentValue={cs.width} onChange={(v) => handlePreviewPropertyChange('width', v)} />
-                                            <FieldText label="height" currentValue={cs.height} onChange={(v) => handlePreviewPropertyChange('height', v)} />
-                                        </>
-                                    )}
-                                    {isInput && (
-                                        <>
-                                            <FieldText label="type" currentValue={el.getAttribute('type') || 'text'} onChange={(v) => el.setAttribute('type', v)} />
-                                            <FieldText label="placeholder" currentValue={el.getAttribute('placeholder') || ''} onChange={(v) => el.setAttribute('placeholder', v)} />
-                                            <FieldText label="value" currentValue={el.getAttribute('value') || ''} onChange={(v) => el.setAttribute('value', v)} />
-                                            <FieldText label="font-size" currentValue={cs.fontSize} onChange={(v) => handlePreviewPropertyChange('font-size', v)} />
-                                            <FieldText label="color" currentValue={cs.color} onChange={(v) => handlePreviewPropertyChange('color', v)} />
-                                        </>
-                                    )}
-                                    {!isImg && !isText && !isTable && !isInput && (
-                                        <div style={{ fontSize: '11px', color: '#94a3b8' }}>
-                                            Bu element tipi için özel stil alanı yok. Genel CSS özellikleri yakında eklenecek.
-                                        </div>
-                                    )}
-                                    <div style={{
-                                        marginTop: '14px', padding: '10px 12px',
-                                        background: 'rgba(252, 211, 77, 0.08)', border: '1px solid rgba(252, 211, 77, 0.25)',
-                                        borderRadius: '4px', fontSize: '10px', color: '#94a3b8', lineHeight: 1.5,
-                                    }}>
-                                        ℹ Render-only inline style — XSLT değişmez. Sadece görsel önizleme güncellenir (Sprint 16'da XSLT'ye yansıtma).
-                                    </div>
-                                </div>
-                                <div style={{
-                                    padding: '10px 14px', background: '#0a1024',
-                                    borderTop: '1px solid #1e293b', fontSize: '10px',
-                                    color: '#64748b', fontFamily: 'monospace',
-                                    display: 'flex', justifyContent: 'space-between', gap: '6px',
-                                }}>
-                                    <button
-                                        onClick={() => { el.style.display = el.style.display === 'none' ? '' : 'none'; setSelectedObject(null); }}
-                                        title="Sadece preview'dan gizle"
-                                        data-hide-preview-element
-                                        style={{
-                                            flex: 1, padding: '6px 8px',
-                                            background: 'rgba(252, 211, 77, 0.15)',
-                                            border: '1px solid rgba(252, 211, 77, 0.4)',
-                                            borderRadius: '4px', color: '#fcd34d',
-                                            fontSize: '10px', fontWeight: 700, cursor: 'pointer',
-                                        }}
-                                    >
-                                        👁 Gizle
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            // Sprint 15 Aşama 2 — XSLT'ten sil. selectedObject
-                                            // içindeki element'in data-line'ından binding'i
-                                            // bul, removeXsltBinding ile XSLT string'ten
-                                            // kaldır. Multi-line tag ve explicit close
-                                            // durumlarında no-op döner.
-                                            if (selectedObject.source !== 'preview') return;
-                                            const el = selectedObject.element;
-                                            const lineAttr = el.getAttribute('data-line');
-                                            const colAttr = el.getAttribute('data-column');
-                                            if (!lineAttr || !colAttr) {
-                                                console.warn('[XSLTEditor] XSLT\'ten sil: data-line/data-column bulunamadı');
-                                                return;
-                                            }
-                                            const line = Number(lineAttr);
-                                            const column = Number(colAttr);
-                                            if (isNaN(line) || isNaN(column)) {
-                                                console.warn('[XSLTEditor] XSLT\'ten sil: line/column NaN');
-                                                return;
-                                            }
-                                            const fakeBinding = {
-                                                xpath: '', offset: 0, line, column, kind: 'dropdown' as const,
-                                            };
-                                            const updated = removeXsltBinding(xsltContent, fakeBinding);
-                                            if (updated !== xsltContent) {
-                                                setXsltContent(updated);
-                                                console.log(`[XSLTEditor] XSLT\'ten sil: line=${line}`);
-                                                setSelectedObject(null);
-                                            } else {
-                                                console.warn(`[XSLTEditor] XSLT\'ten sil no-op (line=${line}, multi-line olabilir)`);
-                                            }
-                                        }}
-                                        title="XSLT kaynak kodundan tamamen kaldır (geri alınamaz)"
-                                        data-remove-from-xslt
-                                        style={{
-                                            flex: 1, padding: '6px 8px',
-                                            background: 'rgba(239, 68, 68, 0.15)',
-                                            border: '1px solid rgba(239, 68, 68, 0.4)',
-                                            borderRadius: '4px', color: '#fca5a5',
-                                            fontSize: '10px', fontWeight: 700, cursor: 'pointer',
-                                        }}
-                                    >
-                                        🗑 XSLT'ten Sil
-                                    </button>
-                                </div>
-                            </>
-                        );
-                    })()}
-
-                    {/* Sprint 15 Aşama 3 — Both source drawer (XSLT + Preview birleşik).
-                        Sol panelden XSLT binding tıklanırken iframe'de son tıklanan
-                        preview element varsa bu blok açılır. Üst kısımda XSLT
-                        bölümü (xpath/text/attr), alt kısımda Preview bölümü
-                        (font/renk/kalınlık/çizgili/eğik/boyut) gösterilir.
-                        Selim'in brief'i: "font/kalınlık/çizgili ekrana gelmedi". */}
-                    {selectedObject?.source === 'both' && (() => {
-                        const b = selectedObject.binding;
-                        const previewEl = selectedObject.previewElement;
-                        if (!previewEl) return null;
-                        const tag = previewEl.tagName.toLowerCase();
-                        const cs = window.getComputedStyle(previewEl);
-                        const isImg = tag === 'img';
-                        const isText = ['p', 'div', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'td', 'th', 'b', 'i', 'strong', 'em'].includes(tag);
-                        const isTable = tag === 'table' || tag === 'tr';
-                        const isInput = ['input', 'button', 'textarea', 'select'].includes(tag);
-                        const kindDisplay = b.kind === 'dropdown' ? 'Dinamik Veri'
-                            : b.kind === 'static' ? 'Statik Metin'
-                            : 'Element Yapısı';
-                        const kindColor = b.kind === 'dropdown' ? '#a5b4fc'
-                            : b.kind === 'static' ? '#6ee7b7'
+                        const bindingIndex = sel.locator?.kind === 'bind'
+                            ? sel.locator.index
+                            : (b ? xsltInstrumented.bindings.indexOf(b) : -1);
+                        const kindDisplay = kind === 'dropdown' ? 'Dinamik Veri'
+                            : kind === 'static' ? 'Statik Metin'
+                            : kind === 'element' ? 'Element Yapısı'
+                            : isImg ? 'Resim' : 'Önizleme Öğesi';
+                        const kindColor = kind === 'dropdown' ? '#a5b4fc'
+                            : kind === 'static' ? '#6ee7b7'
                             : '#fcd34d';
-                        const globalIndex = xsltInstrumented.bindings.indexOf(b) + 1;
-                        const fieldLabel = b.kind === 'dropdown' ? 'XPath (select)'
-                            : b.kind === 'static' ? 'Metin İçeriği'
-                            : `Attribute (${propertyDraft['__attr__'] || 'select'})`;
+                        const canPersist = !!el && selectedSourceTagFound;
+                        const fieldKey = (name: string) => `${sel.id}-${name}`;
+                        const transparentToEmpty = (c: string) => (c === 'rgba(0, 0, 0, 0)' || c === 'transparent' ? '' : c);
+                        const sectionTitle = (text: string, color = '#94a3b8') => (
+                            <div style={{ fontSize: '10px', fontWeight: 700, color, letterSpacing: '0.4px', textTransform: 'uppercase', margin: '14px 0 8px', paddingTop: '12px', borderTop: '1px solid #1e293b' }}>
+                                {text}
+                            </div>
+                        );
+                        const noteBox = (text: React.ReactNode, tone: 'info' | 'ok' | 'warn') => {
+                            const c = tone === 'ok' ? ['rgba(16, 185, 129, 0.08)', 'rgba(16, 185, 129, 0.3)', '#6ee7b7']
+                                : tone === 'warn' ? ['rgba(252, 211, 77, 0.06)', 'rgba(252, 211, 77, 0.3)', '#fcd34d']
+                                : ['rgba(99, 102, 241, 0.08)', 'rgba(99, 102, 241, 0.25)', '#94a3b8'];
+                            return (
+                                <div style={{ marginTop: '10px', padding: '10px 12px', background: c[0], border: `1px solid ${c[1]}`, borderRadius: '4px', fontSize: '10px', color: c[2], lineHeight: 1.5 }}>
+                                    {text}
+                                </div>
+                            );
+                        };
+                        const removable = !!b || (sel.locator?.kind === 'img' && canPersist);
+                        const handleRemove = () => {
+                            if (b) {
+                                const updated = removeXsltBinding(xsltContent, b);
+                                if (updated !== xsltContent) { setXsltContent(updated); closeSelection(); }
+                                else console.warn(`[XSLTEditor] XSLT'ten sil no-op (line=${b.line}, multi-line olabilir)`);
+                                return;
+                            }
+                            const tagRange = resolveSourceTag(xsltContent, sel.locator);
+                            if (!tagRange) return;
+                            setXsltContent(xsltContent.slice(0, tagRange.start) + xsltContent.slice(tagRange.end));
+                            closeSelection();
+                        };
                         return (
                             <>
-                                {/* Header — both badge */}
                                 <div style={{
                                     padding: '12px 14px', background: '#0a1024',
                                     borderBottom: '1px solid #1e293b',
@@ -2370,122 +2263,175 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                         minWidth: '34px', padding: '2px 6px',
                                         background: 'rgba(99, 102, 241, 0.2)',
                                         border: '1px solid rgba(99, 102, 241, 0.5)',
-                                        borderRadius: '4px', fontSize: '11px',
-                                        fontWeight: 700, color: '#a5b4fc',
-                                        textAlign: 'center', fontFamily: 'monospace',
-                                    }}>B{globalIndex}</div>
-                                    <div style={{ flex: 1 }}>
+                                        borderRadius: '4px', fontSize: '11px', fontWeight: 700,
+                                        color: '#a5b4fc', textAlign: 'center', fontFamily: 'monospace',
+                                    }}>
+                                        {bindingIndex >= 0 ? `B${bindingIndex + 1}` : `<${tag || '?'}>`}
+                                    </div>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
                                         <div style={{ fontSize: '12px', fontWeight: 700, color: '#e2e8f0', letterSpacing: '0.4px' }}>
-                                            Property · XSLT + Preview
+                                            Alan Özellikleri
                                         </div>
                                         <div style={{ fontSize: '10px', color: kindColor, fontWeight: 600, letterSpacing: '0.3px' }}>
-                                            {kindDisplay}{b.elementType ? ` · xsl:${b.elementType}` : ''} + &lt;{tag}&gt;
+                                            {kindDisplay}{b?.elementType ? ` · xsl:${b.elementType}` : ''}{tag ? ` · <${tag}>` : ''}
                                         </div>
                                     </div>
                                     <button
-                                        onClick={() => setSelectedObject(null)}
+                                        onClick={closeSelection}
                                         title="Kapat (Esc)"
                                         data-close-property-drawer
                                         style={{ padding: '4px 8px', background: 'transparent', border: '1px solid #334155', borderRadius: '4px', color: '#94a3b8', cursor: 'pointer', fontSize: '11px' }}
                                         onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)'; e.currentTarget.style.color = '#fca5a5'; }}
                                         onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#94a3b8'; }}
-                                    >✕</button>
+                                    >
+                                        ✕
+                                    </button>
                                 </div>
-                                <div style={{ flex: 1, padding: '14px', overflowY: 'auto' }}>
-                                    {/* XSLT bölümü */}
-                                    <label style={{ display: 'block', fontSize: '10px', fontWeight: 700, color: '#a5b4fc', letterSpacing: '0.4px', textTransform: 'uppercase', marginBottom: '6px' }}>
-                                        {fieldLabel}
-                                    </label>
-                                    <textarea
-                                        data-property-input
-                                        value={propertyDraft.value || ''}
-                                        onChange={(e) => handleXsltPropertyChange(e.target.value)}
-                                        spellCheck={false}
-                                        style={{
-                                            width: '100%', minHeight: '50px', maxHeight: '150px',
-                                            padding: '8px 10px', background: '#1e293b',
-                                            border: '1px solid #334155', borderRadius: '4px',
-                                            color: '#e2e8f0', fontSize: '12px', fontFamily: 'monospace',
-                                            resize: 'vertical', outline: 'none',
-                                        }}
-                                        onFocus={(e) => e.currentTarget.style.borderColor = '#6366f1'}
-                                        onBlur={(e) => e.currentTarget.style.borderColor = '#334155'}
-                                    />
-                                    <div style={{
-                                        marginTop: '6px', fontSize: '9px', color: '#64748b', fontFamily: 'monospace',
-                                    }}>Line {b.line}:col {b.column}</div>
-                                    {/* Preview bölümü — font/stil */}
-                                    <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px solid #1e293b' }}>
-                                        <div style={{ fontSize: '10px', fontWeight: 700, color: '#fcd34d', letterSpacing: '0.4px', textTransform: 'uppercase', marginBottom: '8px' }}>
-                                            Önizleme Stilleri
-                                        </div>
-                                        {isImg && (
-                                            <>
-                                                <FieldText label="src (URL)" currentValue={previewEl.getAttribute('src') || ''} onChange={(v) => previewEl.setAttribute('src', v)} />
-                                                <FieldText label="alt" currentValue={previewEl.getAttribute('alt') || ''} onChange={(v) => previewEl.setAttribute('alt', v)} />
-                                                <FieldText label="width" currentValue={previewEl.getAttribute('width') || cs.width} onChange={(v) => previewEl.style.setProperty('width', v)} />
-                                                <FieldText label="height" currentValue={previewEl.getAttribute('height') || cs.height} onChange={(v) => previewEl.style.setProperty('height', v)} />
-                                                <FieldSelect label="object-fit" currentValue={cs.objectFit} options={['', 'contain', 'cover', 'fill', 'scale-down', 'none']} onChange={(v) => handlePreviewPropertyChange('object-fit', v)} />
-                                            </>
-                                        )}
-                                        {isText && (
-                                            <>
-                                                <FieldSelect label="font-weight (kalınlık)" currentValue={cs.fontWeight} options={['normal', 'bold', '100', '200', '300', '400', '500', '600', '700', '800', '900']} onChange={(v) => handlePreviewPropertyChange('font-weight', v)} />
-                                                <FieldSelect label="font-style (eğik)" currentValue={cs.fontStyle} options={['normal', 'italic', 'oblique']} onChange={(v) => handlePreviewPropertyChange('font-style', v)} />
-                                                <FieldSelect label="text-decoration (çizgili)" currentValue={cs.textDecorationLine} options={['none', 'underline', 'line-through', 'overline']} onChange={(v) => handlePreviewPropertyChange('text-decoration-line', v)} />
-                                                <FieldText label="font-size" currentValue={cs.fontSize} onChange={(v) => handlePreviewPropertyChange('font-size', v)} />
-                                                <FieldText label="color" currentValue={cs.color} onChange={(v) => handlePreviewPropertyChange('color', v)} />
-                                                <FieldSelect label="text-align" currentValue={cs.textAlign} options={['left', 'right', 'center', 'justify']} onChange={(v) => handlePreviewPropertyChange('text-align', v)} />
-                                                <FieldText label="font-family (font tipi)" currentValue={cs.fontFamily} onChange={(v) => handlePreviewPropertyChange('font-family', v)} />
-                                            </>
-                                        )}
-                                        {isTable && (
-                                            <>
-                                                <FieldText label="border" currentValue={cs.border} onChange={(v) => handlePreviewPropertyChange('border', v)} />
-                                                {tag === 'table' && <FieldText label="cellpadding" currentValue={previewEl.getAttribute('cellpadding') || ''} onChange={(v) => previewEl.setAttribute('cellpadding', v)} />}
-                                                {tag === 'table' && <FieldText label="cellspacing" currentValue={previewEl.getAttribute('cellspacing') || ''} onChange={(v) => previewEl.setAttribute('cellspacing', v)} />}
-                                                <FieldText label="width" currentValue={cs.width} onChange={(v) => handlePreviewPropertyChange('width', v)} />
-                                                <FieldText label="height" currentValue={cs.height} onChange={(v) => handlePreviewPropertyChange('height', v)} />
-                                            </>
-                                        )}
-                                        {isInput && (
-                                            <>
-                                                <FieldText label="type" currentValue={previewEl.getAttribute('type') || 'text'} onChange={(v) => previewEl.setAttribute('type', v)} />
-                                                <FieldText label="placeholder" currentValue={previewEl.getAttribute('placeholder') || ''} onChange={(v) => previewEl.setAttribute('placeholder', v)} />
-                                                <FieldText label="value" currentValue={previewEl.getAttribute('value') || ''} onChange={(v) => previewEl.setAttribute('value', v)} />
-                                                <FieldText label="font-size" currentValue={cs.fontSize} onChange={(v) => handlePreviewPropertyChange('font-size', v)} />
-                                                <FieldText label="color" currentValue={cs.color} onChange={(v) => handlePreviewPropertyChange('color', v)} />
-                                            </>
-                                        )}
-                                    </div>
+
+                                <div style={{ flex: 1, padding: '0 14px 14px', overflowY: 'auto' }}>
+                                    {kind === 'dropdown' && b && (
+                                        <>
+                                            {sectionTitle('Veri Alanı (XML)', '#a5b4fc')}
+                                            <div
+                                                data-readonly-xpath
+                                                style={{
+                                                    padding: '8px 10px', background: '#0b1222',
+                                                    border: '1px dashed #334155', borderRadius: '4px',
+                                                    color: '#cbd5e1', fontSize: '12px', fontFamily: 'monospace',
+                                                    wordBreak: 'break-all',
+                                                }}
+                                            >
+                                                {b.xpath}
+                                            </div>
+                                            {el && (
+                                                <div style={{ marginTop: '8px', fontSize: '11px', color: '#94a3b8' }}>
+                                                    Önizlemedeki değer:{' '}
+                                                    <span style={{ color: '#e2e8f0', fontWeight: 600 }}>
+                                                        {(el.textContent || '').trim().slice(0, 120) || '(boş)'}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            {noteBox('🔒 Veri XML\'den gelir; bu alanın kaynağı değiştirilemez. Görünüm özelliklerini aşağıdan düzenleyebilirsiniz.', 'info')}
+                                        </>
+                                    )}
+
+                                    {kind === 'static' && (
+                                        <>
+                                            {sectionTitle('Metin İçeriği', '#6ee7b7')}
+                                            <textarea
+                                                data-property-input
+                                                value={propertyDraft.value || ''}
+                                                onChange={(e) => handleXsltPropertyChange(e.target.value)}
+                                                spellCheck={false}
+                                                style={{
+                                                    width: '100%', minHeight: '60px', maxHeight: '220px',
+                                                    padding: '8px 10px', background: '#1e293b',
+                                                    border: '1px solid #334155', borderRadius: '4px',
+                                                    color: '#e2e8f0', fontSize: '12px', fontFamily: 'monospace',
+                                                    resize: 'vertical', outline: 'none',
+                                                }}
+                                                onFocus={(e) => e.currentTarget.style.borderColor = '#6366f1'}
+                                                onBlur={(e) => e.currentTarget.style.borderColor = '#334155'}
+                                            />
+                                        </>
+                                    )}
+
+                                    {kind === 'element' && b && (
+                                        <>
+                                            {sectionTitle(`Koşul / Seçim (${propertyDraft['__attr__'] || 'select'})`, '#fcd34d')}
+                                            <textarea
+                                                data-property-input
+                                                value={propertyDraft.value || ''}
+                                                onChange={(e) => handleXsltPropertyChange(e.target.value)}
+                                                spellCheck={false}
+                                                style={{
+                                                    width: '100%', minHeight: '60px', maxHeight: '220px',
+                                                    padding: '8px 10px', background: '#1e293b',
+                                                    border: '1px solid #334155', borderRadius: '4px',
+                                                    color: '#e2e8f0', fontSize: '12px', fontFamily: 'monospace',
+                                                    resize: 'vertical', outline: 'none',
+                                                }}
+                                                onFocus={(e) => e.currentTarget.style.borderColor = '#6366f1'}
+                                                onBlur={(e) => e.currentTarget.style.borderColor = '#334155'}
+                                            />
+                                            {noteBox('Yapı elemanı (xsl:if / for-each vb.) önizlemede tek bir öğeye karşılık gelmez; görünüm özellikleri yoktur.', 'info')}
+                                        </>
+                                    )}
+
+                                    {b && kind !== 'element' && !el && noteBox(
+                                        'Bu alan şu anki önizlemede görünmüyor (ör. xsl:if koşulu sağlanmıyor). Görünüm özellikleri yalnızca tasarımda görünen alanlar için düzenlenebilir.',
+                                        'warn'
+                                    )}
+
+                                    {el && cs && isImg && (
+                                        <>
+                                            {sectionTitle('Resim', '#fcd34d')}
+                                            <FieldText key={fieldKey('src')} label="Resim URL (src)" placeholder="https://... veya data:image/..." currentValue={el.getAttribute('src') || ''} onChange={(v) => handleAttrChange('src', v)} />
+                                            <FieldText key={fieldKey('alt')} label="Alternatif metin (alt)" currentValue={el.getAttribute('alt') || ''} onChange={(v) => handleAttrChange('alt', v)} />
+                                            <FieldText key={fieldKey('width')} label="Genişlik (width)" currentValue={el.style.width || el.getAttribute('width') || cs.width} onChange={(v) => handleStyleChange('width', v)} />
+                                            <FieldText key={fieldKey('height')} label="Yükseklik (height)" currentValue={el.style.height || el.getAttribute('height') || ''} placeholder="auto" onChange={(v) => handleStyleChange('height', v)} />
+                                            <FieldSelect key={fieldKey('object-fit')} label="Sığdırma (object-fit)" currentValue={el.style.objectFit || ''} options={['', 'contain', 'cover', 'fill', 'scale-down', 'none']} onChange={(v) => handleStyleChange('object-fit', v)} />
+                                        </>
+                                    )}
+
+                                    {el && cs && !isImg && (
+                                        <>
+                                            {sectionTitle('Yazı', '#fcd34d')}
+                                            <FieldText key={fieldKey('font-family')} label="Yazı tipi (font-family)" currentValue={cs.fontFamily} onChange={(v) => handleStyleChange('font-family', v)} />
+                                            <FieldText key={fieldKey('font-size')} label="Boyut (font-size)" currentValue={cs.fontSize} onChange={(v) => handleStyleChange('font-size', v)} />
+                                            <FieldSelect key={fieldKey('font-weight')} label="Kalınlık (font-weight)" currentValue={cs.fontWeight} options={['normal', 'bold', '100', '200', '300', '400', '500', '600', '700', '800', '900']} onChange={(v) => handleStyleChange('font-weight', v)} />
+                                            <FieldSelect key={fieldKey('font-style')} label="Eğik (font-style)" currentValue={cs.fontStyle} options={['normal', 'italic', 'oblique']} onChange={(v) => handleStyleChange('font-style', v)} />
+                                            <FieldSelect key={fieldKey('text-decoration-line')} label="Çizgi (text-decoration)" currentValue={cs.textDecorationLine} options={['none', 'underline', 'line-through', 'overline']} onChange={(v) => handleStyleChange('text-decoration-line', v)} />
+                                            <FieldColor key={fieldKey('color')} label="Yazı rengi (color)" currentValue={cs.color} onChange={(v) => handleStyleChange('color', v)} />
+                                            <FieldSelect key={fieldKey('text-align')} label="Hizalama (text-align)" currentValue={cs.textAlign} options={['left', 'right', 'center', 'justify', 'start', 'end']} onChange={(v) => handleStyleChange('text-align', v)} />
+
+                                            {sectionTitle('Kutu', '#fcd34d')}
+                                            <FieldColor key={fieldKey('background-color')} label="Arka plan (background-color)" currentValue={transparentToEmpty(cs.backgroundColor)} onChange={(v) => handleStyleChange('background-color', v)} />
+                                            <FieldText key={fieldKey('padding')} label="İç boşluk (padding)" currentValue={cs.padding} onChange={(v) => handleStyleChange('padding', v)} />
+                                            <FieldText key={fieldKey('border')} label="Kenarlık (border)" currentValue={el.style.border || ''} placeholder="ör. 1px solid #000" onChange={(v) => handleStyleChange('border', v)} />
+                                            <FieldText key={fieldKey('width')} label="Genişlik (width)" currentValue={el.style.width || ''} placeholder={cs.width} onChange={(v) => handleStyleChange('width', v)} />
+                                            <FieldText key={fieldKey('height')} label="Yükseklik (height)" currentValue={el.style.height || ''} placeholder={cs.height} onChange={(v) => handleStyleChange('height', v)} />
+
+                                            {isInput && (
+                                                <>
+                                                    {sectionTitle('Input', '#fcd34d')}
+                                                    <FieldText key={fieldKey('placeholder')} label="placeholder" currentValue={el.getAttribute('placeholder') || ''} onChange={(v) => handleAttrChange('placeholder', v)} />
+                                                    <FieldText key={fieldKey('value')} label="value" currentValue={el.getAttribute('value') || ''} onChange={(v) => handleAttrChange('value', v)} />
+                                                </>
+                                            )}
+                                        </>
+                                    )}
+
+                                    {el && (canPersist
+                                        ? noteBox('✓ Değişiklikler XSLT\'ye yazılır; Kaydet ve İndir\'e dahil edilir.', 'ok')
+                                        : noteBox('⚠ Bu öğenin XSLT\'de doğrudan karşılığı bulunamadı (ör. değeri değişkenden geliyor). Değişiklikler sadece önizlemede kalır.', 'warn'))}
                                 </div>
+
                                 <div style={{
                                     padding: '10px 14px', background: '#0a1024',
-                                    borderTop: '1px solid #1e293b', fontSize: '10px',
-                                    color: '#64748b', fontFamily: 'monospace',
+                                    borderTop: '1px solid #1e293b',
                                     display: 'flex', justifyContent: 'space-between', gap: '6px',
                                 }}>
-                                    <button
-                                        onClick={() => { previewEl.style.display = previewEl.style.display === 'none' ? '' : 'none'; setSelectedObject(null); }}
-                                        title="Sadece preview'dan gizle"
-                                        data-hide-preview-element
-                                        style={{ flex: 1, padding: '6px 8px', background: 'rgba(252, 211, 77, 0.15)', border: '1px solid rgba(252, 211, 77, 0.4)', borderRadius: '4px', color: '#fcd34d', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
-                                    >👁 Gizle</button>
-                                    <button
-                                        onClick={() => {
-                                            const lineAttr = previewEl.getAttribute('data-line');
-                                            const colAttr = previewEl.getAttribute('data-column');
-                                            if (!lineAttr || !colAttr) return;
-                                            const line = Number(lineAttr); const column = Number(colAttr);
-                                            if (isNaN(line) || isNaN(column)) return;
-                                            const fakeBinding = { xpath: '', offset: 0, line, column, kind: 'dropdown' as const };
-                                            const updated = removeXsltBinding(xsltContent, fakeBinding);
-                                            if (updated !== xsltContent) { setXsltContent(updated); setSelectedObject(null); }
-                                        }}
-                                        title="XSLT kaynak kodundan tamamen kaldır"
-                                        data-remove-from-xslt
-                                        style={{ flex: 1, padding: '6px 8px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)', borderRadius: '4px', color: '#fca5a5', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
-                                    >🗑 XSLT'ten Sil</button>
+                                    {el && (
+                                        <button
+                                            onClick={() => { el.style.display = el.style.display === 'none' ? '' : 'none'; closeSelection(); }}
+                                            title="Sadece önizlemeden gizle"
+                                            data-hide-preview-element
+                                            style={{ flex: 1, padding: '6px 8px', background: 'rgba(252, 211, 77, 0.15)', border: '1px solid rgba(252, 211, 77, 0.4)', borderRadius: '4px', color: '#fcd34d', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
+                                        >
+                                            👁 Gizle
+                                        </button>
+                                    )}
+                                    {removable && (
+                                        <button
+                                            onClick={handleRemove}
+                                            title="XSLT kaynak kodundan tamamen kaldır"
+                                            data-remove-from-xslt
+                                            style={{ flex: 1, padding: '6px 8px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)', borderRadius: '4px', color: '#fca5a5', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
+                                        >
+                                            🗑 XSLT'ten Sil
+                                        </button>
+                                    )}
                                 </div>
                             </>
                         );

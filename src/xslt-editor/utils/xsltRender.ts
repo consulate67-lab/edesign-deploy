@@ -164,9 +164,30 @@ export function parseXsltInstrumented(xslt: string): {
         bindings.push({ xpath, offset, line, column, kind, elementType });
     };
 
-    const marker = () => `<!--BIND_${++counter}-->`;
+    // Stylesheet'teki düz <!-- --> yorumlarını XSLT işlemcisi çıktıya
+    // aktarmaz; marker'ın render DOM'a ulaşması için xsl:comment gerekir.
+    // Yorum düğümü oluşturulamayan / görünür metne dönüşen bağlamlarda
+    // (xsl:attribute, style, title...) marker eklenmez ama sayaç ilerler ki
+    // BIND_n ↔ bindings[n-1] eşleşmesi bozulmasın.
+    const marker = () => `<xsl:comment>BIND_${++counter}</xsl:comment>`;
+    const noMarkerRanges = (source: string): Array<[number, number]> => {
+        const ranges: Array<[number, number]> = [];
+        const re = /<(xsl:attribute|xsl:comment|xsl:processing-instruction|style|script|title|textarea)\b[^>]*?(\/?)>/g;
+        let m: RegExpExecArray | null;
+        while ((m = re.exec(source)) !== null) {
+            if (m[2] === '/') continue;
+            const close = source.indexOf(`</${m[1]}>`, re.lastIndex);
+            if (close < 0) continue;
+            ranges.push([m.index, close]);
+            re.lastIndex = close;
+        }
+        return ranges;
+    };
+    const inRanges = (ranges: Array<[number, number]>, offset: number) =>
+        ranges.some(([s, e]) => offset > s && offset < e);
 
     // Pass 1: xsl:value-of + xsl:copy-of (orijinal xslt üzerinde — kanıtlanmış Aşama 8)
+    const pass1Skip = noMarkerRanges(xslt);
     let instrumentedXslt = xslt.replace(
         /(<xsl:(?:value-of|copy-of)\b[^>]*?\/>)|(<xsl:(?:value-of|copy-of)\b[^>]*?>[\s\S]*?<\/xsl:(?:value-of|copy-of)>)/g,
         (fullMatch, m1, m2, offset) => {
@@ -174,6 +195,7 @@ export function parseXsltInstrumented(xslt: string): {
             const xpath = (xpathMatch.match(/select="([^"]+)"/) || [])[1];
             if (!xpath) return fullMatch;
             pushBinding(xslt, offset, xpath, 'dropdown');
+            if (inRanges(pass1Skip, offset)) { ++counter; return fullMatch; }
             return `${fullMatch}${marker()}`;
         }
     );
@@ -183,12 +205,14 @@ export function parseXsltInstrumented(xslt: string): {
     // annotation. Bu Pass tüm statik metinleri (Başlık, dipnot, etiket)
     // annotation'lar, kullanıcı "sabit yazıyı değiştirebilmeliyim"
     // gereksinimini karşılar.
+    const pass2Skip = noMarkerRanges(instrumentedXslt);
     instrumentedXslt = instrumentedXslt.replace(
         /<xsl:text>([\s\S]*?)<\/xsl:text>/g,
         (fullMatch, text, offset) => {
             const t = text.trim();
             if (t.length === 0) return fullMatch;
             pushBinding(instrumentedXslt, offset, `static: ${t}`, 'static');
+            if (inRanges(pass2Skip, offset)) { ++counter; return fullMatch; }
             return `${fullMatch}${marker()}`;
         }
     );
@@ -418,13 +442,21 @@ export function renderAndAnnotateXslt(
                     if (!target) {
                         target = node.parentElement;
                     }
-                    if (target && !target.hasAttribute('data-render-index')) {
-                        target.setAttribute('data-render-index', String(idx));
-                        target.setAttribute('data-bind-index', `B${idx + 1}`);
-                        target.setAttribute('data-xpath', b.xpath);
-                        target.setAttribute('data-line', String(b.line));
-                        target.setAttribute('data-column', String(b.column));
-                        annotated++;
+                    if (target) {
+                        // Aynı öğedeki tüm binding'ler data-render-indexes'te
+                        // tutulur (sol panelden ikinci/üçüncü binding'e
+                        // tıklayınca da öğe bulunsun); ilk binding öğenin
+                        // birincil annotation'ı olur.
+                        const all = target.getAttribute('data-render-indexes');
+                        target.setAttribute('data-render-indexes', all ? `${all} ${idx}` : String(idx));
+                        if (!target.hasAttribute('data-render-index')) {
+                            target.setAttribute('data-render-index', String(idx));
+                            target.setAttribute('data-bind-index', `B${idx + 1}`);
+                            target.setAttribute('data-xpath', b.xpath);
+                            target.setAttribute('data-line', String(b.line));
+                            target.setAttribute('data-column', String(b.column));
+                            annotated++;
+                        }
                         // Sprint 16 Aşama 4 — Render DOM'da görünen
                         // binding index'i → sol panel yeşil gösterir
                         renderedBindings.add(idx);
@@ -463,7 +495,7 @@ export function renderAndAnnotateXslt(
         const annotationCss = `
 <style>
 [data-render-index] {
-    outline: 2px solid rgba(99, 102, 241, 0.5);
+    outline: 2px solid transparent;
     outline-offset: 1px;
     cursor: pointer;
     position: relative;
