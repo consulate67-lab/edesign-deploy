@@ -299,6 +299,12 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         bindings: import('./utils/xsltRender').XsltBinding[];
     }>({ instrumentedXslt: '', bindings: [] });
 
+    // Sprint 16 Aşama 4 — Render edilen binding index'leri (0-based, bindings
+    // array'inde pozisyon). xsl:if koşul false / xsl:choose boş / Pass 3
+    // marker eklenmemiş elementler burada OLMAMAZ → sol panel kırmızı
+    // gösterir. Hata varsa boş Set → renklendirme yapılmaz (default görünüm).
+    const [renderedBindingIndexes, setRenderedBindingIndexes] = useState<Set<number>>(new Set());
+
     // ------------------------------------------------------------------------
     // Mevcut modül tanımı
     // ------------------------------------------------------------------------
@@ -368,10 +374,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             setPreviewHtml(result.html);
             setPreviewError(result.error);
             setRenderDurationMs(result.durationMs);
+            // Sprint 16 Aşama 4 — Render edilen binding index'leri.
+            // Hata varsa boş Set (renklendirme yapılmaz, default görünüm).
+            setRenderedBindingIndexes(result.renderedBindings ?? new Set());
         } catch (err) {
             setPreviewError((err as Error).message || 'Bilinmeyen render hatası');
             setPreviewHtml('');
             setRenderDurationMs(performance.now() - start);
+            setRenderedBindingIndexes(new Set()); // hata → renklendirme YOK
         } finally {
             setIsRendering(false);
         }
@@ -1458,6 +1468,13 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                             <div style={{ marginTop: '4px' }}>
                                                 {list.map((b, idx) => {
                                                     const globalIndex = xsltInstrumented.bindings.indexOf(b) + 1;
+                                                    // Sprint 16 Aşama 4 — Render durumu rengi.
+                                                    // Render DOM'da görünüyorsa (renderedBindingIndexes'te
+                                                    // var) yeşil, görünmüyorsa kırmızı, render
+                                                    // henüz yapılmadıysa / hata varsa renksiz.
+                                                    const isRendered = renderedBindingIndexes.has(globalIndex - 1);
+                                                    const renderStatusColor = isRendered ? '#10b981' : '#ef4444';
+                                                    const showRenderStatus = renderedBindingIndexes.size > 0;
                                                     const displayText = b.kind === 'dropdown'
                                                         ? b.xpath
                                                         : b.kind === 'static'
@@ -1470,15 +1487,16 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                             data-bind-line={b.line}
                                                             data-bind-col={b.column}
                                                             onClick={() => handleBindingClick(b)}
-                                                            title={`Satır ${b.line}, col ${b.column} — ${b.xpath}`}
+                                                            title={`Satır ${b.line}, col ${b.column} — ${b.xpath}${showRenderStatus ? (isRendered ? '  ✓ Render\'da görünüyor' : '  ✗ Render\'da görünmüyor') : ''}`}
                                                             style={{
                                                                 display: 'flex',
                                                                 alignItems: 'center',
                                                                 gap: '6px',
-                                                                padding: '5px 8px',
+                                                                padding: '5px 8px 5px 11px',
                                                                 marginBottom: '2px',
                                                                 background: '#1e293b',
                                                                 border: '1px solid #334155',
+                                                                borderLeft: showRenderStatus ? `3px solid ${renderStatusColor}` : '1px solid #334155',
                                                                 borderRadius: '3px',
                                                                 cursor: 'pointer',
                                                                 transition: 'background 0.1s, border-color 0.1s',

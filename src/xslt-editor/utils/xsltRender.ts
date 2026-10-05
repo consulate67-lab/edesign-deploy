@@ -22,6 +22,13 @@ export interface XsltRenderResult {
     html: string;
     error: string | null;
     durationMs: number;
+    /**
+     * Sprint 16 Aşama 4 — Render edilen binding index'leri (0-based, bindings
+     * array'inde pozisyon). xsl:if/choose koşul false ise veya Pass 3 marker
+     * eklenmemiş elementler burada OLMAMAZ → sol panel kırmızı gösterir.
+     * Hata varsa boş Set döner → renklendirme yapılmaz.
+     */
+    renderedBindings?: Set<number>;
 }
 
 /**
@@ -381,6 +388,10 @@ export function renderAndAnnotateXslt(
         // → eski yöntemlerde off-by-one hatası oluyordu. Comment marker ile
         // her binding'in render çıktısındaki KARŞILIĞI kesin olarak bilinir.
         let annotated = 0;
+        // Sprint 16 Aşama 4 — Render edilen binding index'leri. Hangi
+        // binding'lerin gerçekten DOM'a yansıdığını (görünür olduğunu)
+        // tutarız → sol panelde yeşil/kırmızı renklendirme için.
+        const renderedBindings = new Set<number>();
         const walk = (node: Node) => {
             if (node.nodeType === 8) { // COMMENT_NODE
                 const text = (node.textContent || '').trim();
@@ -414,6 +425,9 @@ export function renderAndAnnotateXslt(
                         target.setAttribute('data-line', String(b.line));
                         target.setAttribute('data-column', String(b.column));
                         annotated++;
+                        // Sprint 16 Aşama 4 — Render DOM'da görünen
+                        // binding index'i → sol panel yeşil gösterir
+                        renderedBindings.add(idx);
                     }
                 }
                 return; // Comment'in children'ı yok
@@ -516,7 +530,7 @@ a:not([data-render-index]):hover {
             html = html.replace(/<body([^>]*)>/i, `${annotationCss}<body$1>`);
         }
 
-        return { html, error: null, durationMs: performance.now() - start };
+        return { html, error: null, durationMs: performance.now() - start, renderedBindings };
     } catch (err) {
         return {
             html: '',
