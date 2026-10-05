@@ -1988,6 +1988,43 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     }}>
                                         ℹ XSLT satırına yazılır (300ms debounce). Monaco editör + preview re-render.
                                     </div>
+
+                                    {/* Sprint 15 Aşama 3b — Font/stil bölümü (her zaman göster).
+                                        Preview'da anında değişiklik için önce sağdaki
+                                        önizlemeden bir element tıklayın → preview element
+                                        font/stil değerleri buraya dolar + uygulanır.
+                                        Selim'in brief'i: "font/kalınlık/çizgili için bir
+                                        şey gelmiyor" → preview click gerek kalmadan da
+                                        font bölümü görünsün, kullanıcı hint'ten preview
+                                        tıklamasını öğrensin. */}
+                                    <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px solid #1e293b' }}>
+                                        <div style={{ fontSize: '10px', fontWeight: 700, color: '#fcd34d', letterSpacing: '0.4px', textTransform: 'uppercase', marginBottom: '8px' }}>
+                                            Önizleme Stilleri
+                                        </div>
+                                        {lastPreviewElementRef.current ? (
+                                            <>
+                                                <FieldSelect label="font-weight (kalınlık)" currentValue={window.getComputedStyle(lastPreviewElementRef.current).fontWeight} options={['normal', 'bold', '100', '200', '300', '400', '500', '600', '700', '800', '900']} onChange={(v) => handlePreviewPropertyChange('font-weight', v)} />
+                                                <FieldSelect label="font-style (eğik)" currentValue={window.getComputedStyle(lastPreviewElementRef.current).fontStyle} options={['normal', 'italic', 'oblique']} onChange={(v) => handlePreviewPropertyChange('font-style', v)} />
+                                                <FieldSelect label="text-decoration (çizgili)" currentValue={window.getComputedStyle(lastPreviewElementRef.current).textDecorationLine} options={['none', 'underline', 'line-through', 'overline']} onChange={(v) => handlePreviewPropertyChange('text-decoration-line', v)} />
+                                                <FieldText label="font-size" currentValue={window.getComputedStyle(lastPreviewElementRef.current).fontSize} onChange={(v) => handlePreviewPropertyChange('font-size', v)} />
+                                                <FieldText label="color" currentValue={window.getComputedStyle(lastPreviewElementRef.current).color} onChange={(v) => handlePreviewPropertyChange('color', v)} />
+                                                <FieldSelect label="text-align" currentValue={window.getComputedStyle(lastPreviewElementRef.current).textAlign} options={['left', 'right', 'center', 'justify']} onChange={(v) => handlePreviewPropertyChange('text-align', v)} />
+                                                <FieldText label="font-family (font tipi)" currentValue={window.getComputedStyle(lastPreviewElementRef.current).fontFamily} onChange={(v) => handlePreviewPropertyChange('font-family', v)} />
+                                            </>
+                                        ) : (
+                                            <div style={{
+                                                padding: '12px 14px',
+                                                background: 'rgba(252, 211, 77, 0.06)',
+                                                border: '1px dashed rgba(252, 211, 77, 0.3)',
+                                                borderRadius: '4px',
+                                                fontSize: '10px',
+                                                color: '#fcd34d',
+                                                lineHeight: 1.5,
+                                            }}>
+                                                <strong>ℹ Önizleme'den bir element tıklayın</strong> — sağdaki 'CANLI ÖNİZLEME' panelinde bir text/resim/tablo tıklayın, font/kalınlık/çizgili alanları dolar. Şu an sadece XSLT satırı seçili.
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                                 <div style={{
                                     padding: '10px 14px', background: '#0a1024',
