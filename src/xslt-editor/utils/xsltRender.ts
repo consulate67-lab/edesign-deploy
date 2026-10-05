@@ -500,22 +500,127 @@ export function renderAndAnnotateXslt(
 }
 
 /**
- * Sprint 15 Aşama 2 — XSLT'ten binding kaldır (sil).
- * line bazlı: self-closing tag tek satır → satırı sil; explicit close iki satır
- * → start + end satırları sil; <xsl:value-of>...</xsl:value-of> tek satır →
- * satırı sil.
- * Sprint 16'da multi-line tag (explicit close farklı satırlarda) için
- * gelişmiş parser eklenecek.
+ * Sprint 16 Aşama 2 — Multi-line tag silme (bracket counter).
+ * XSLT tag'i 3+ satıra yayılmışsa (örn. <xsl:if> + içerik + </xsl:if> farklı
+ * satırlarda) mevcut single-line pattern'ler çalışmıyordu. Bu fonksiyon
+ * b.line'dan başlayıp sonraki satırlarda:
+ *  - <xsl:elementType ...> (self-closing değil) → depth++
+ *  - <xsl:elementType .../> (self-closing) → depth değişmez
+ *  - </xsl:elementType> → depth--  (sadece hedef element, iç içe değil)
+ *  - Diğer xsl: kapanışları (örn. </xsl:when>, </xsl:otherwise>) → depth--
+ *  - <!-- ... --> → içerideki tag'ler skip (depth etkilenmez)
+ * Bracket counter ile explicit close satırını bulur, start..end satırları
+ * silinir. Self-closing veya 1-2 satırlık tag'lerde null döner → çağıran
+ * single-line handler'a düşer.
+ *
+ * @returns Yeni XSLT string (multi-line silindi) veya null (multi-line değil)
+ */
+function removeXsltBindingMulti(xslt: string, b: XsltBinding): string | null {
+    const lines = xslt.split('\n');
+    const startLineIdx = b.line - 1;
+    if (startLineIdx < 0 || startLineIdx >= lines.length) return null;
+
+    const startLine = lines[startLineIdx];
+    // Açılış tag pattern: <xsl:elementType ...>  satır sonu (self-closing değil)
+    // Self-closing (<xsl:if .../>) tek satır → multi-line değil
+    const openMatch = startLine.match(/<xsl:(\w+)\b[^>]*?>\s*$/);
+    if (!openMatch) return null;
+    const elementType = openMatch[1];
+
+    // depth=1 ile başla (start tag sayıldı), sonraki satırları tara
+    let depth = 1;
+    let endLineIdx = -1;
+    for (let i = startLineIdx + 1; i < lines.length; i++) {
+        const line = lines[i];
+        // Comment içindeki tag'leri skip et (depth etkilenmesin)
+        // <!-- ... --> tek satır veya multi-line olabilir
+        let cleaned = '';
+        let cursor = 0;
+        while (cursor < line.length) {
+            const cStart = line.indexOf('<!--', cursor);
+            if (cStart < 0) {
+                cleaned += line.substring(cursor);
+                break;
+            }
+            cleaned += line.substring(cursor, cStart);
+            const cEnd = line.indexOf('-->', cStart + 4);
+            if (cEnd < 0) {
+                // comment satır sonuna kadar → bu satırı tamamen atla
+                cleaned = '';
+                break;
+            }
+            cursor = cEnd + 3;
+        }
+
+        // TÜM xsl: açılış/kapanış tag'leri say (sadece hedef element değil —
+        // iç içe xsl:when / xsl:otherwise vb. de bracket balance'ı bozar)
+        // Self-closing tag'ler (/> ile biten) depth değiştirmez
+        const allOpenTags = cleaned.match(/<xsl:\w+\b[^>]*?>/g) || [];
+        let opens = 0;
+        for (const t of allOpenTags) {
+            if (t.endsWith('/>')) continue;
+            // Açılış tag (<xsl:if ...>) — kapanış tag'i (</xsl:if>) farklı format
+            opens++;
+        }
+        // TÜM xsl: kapanışları (hedef + diğer) — bracket balance
+        const closes = (cleaned.match(/<\/xsl:\w+>/g) || []).length;
+        depth += opens - closes;
+        if (depth === 0) {
+            endLineIdx = i;
+            break;
+        }
+    }
+
+    if (endLineIdx < 0) return null; // explicit close bulunamadı
+
+    // startLineIdx..endLineIdx (inclusive) satırları sil
+    lines.splice(startLineIdx, endLineIdx - startLineIdx + 1);
+    return lines.join('\n');
+}
+
+/**
+ * Sprint 15 Aşama 2 + Sprint 16 Aşama 2 — XSLT'ten binding kaldır (sil).
+ *
+ * Sıralama:
+ * 1. Önce single-line pattern'ler dene (self-closing, 1-2 satır tag'ler)
+ * 2. Başarısızsa multi-line bracket counter (3+ satır Pass 3 element)
+ *
+ * Single-line pattern'ler:
+ *  - Pass 1 explicit close tek satır: <xsl:value-of ...>...</xsl:value-of> → satır sil
+ *  - Self-closing tek satır: <xsl:value-of ... />  veya  <xsl:if .../> → satır sil
+ *  - Tek satır element: <xsl:if test="...">  + next line </xsl:if> → 2 satır sil
+ *  - Tek satır element + same line explicit close → satır sil
+ *  - Hiçbir pattern yoksa orijinal (no-op)
+ *
+ * Multi-line pattern (Sprint 16 Aşama 2):
+ *  - <xsl:elementType ...> (3+ satıra yayılmış) → bracket counter ile
+ *    start..end satırları sil. İç içe xsl:choose/when/otherwise vb. doğru
+ *    takip edilir (TÜM xsl: tag'leri sayılır, self-closing skip).
+ *  - Yorum içindeki tag'ler (<!-- ... -->) skip edilir.
  */
 export function removeXsltBinding(xslt: string, b: XsltBinding): string {
+    // Önce single-line pattern'ler
     const lines = xslt.split('\n');
     const lineIdx = b.line - 1;
-    if (lineIdx < 0 || lineIdx >= lines.length) return xslt;
+    if (lineIdx < 0 || lineIdx >= lines.length) {
+        // line invalid → multi-line de deneyebilir ama mantıksız, no-op
+        return xslt;
+    }
 
     const line = lines[lineIdx];
 
     // Pass 1 explicit close tek satır: <xsl:value-of ...>...</xsl:value-of>
     if (line.match(/<xsl:(?:value-of|copy-of)\b[^>]*?>[\s\S]*?<\/xsl:(?:value-of|copy-of)>\s*$/)) {
+        lines.splice(lineIdx, 1);
+        return lines.join('\n');
+    }
+
+    // Aynı satırda açılış + içerik + kapanış: <xsl:if test="x">val</xsl:if>
+    // (Sprint 16 Aşama 2 — önceki kod bu pattern'i kaçırıyordu, sadece
+    // start tag silip orphan closing bırakıyordu)
+    // NOT: <\/\1> JS regex'te backreference NULL döner — <\/xsl:\1> kullan
+    const sameLineOpenClose = line.match(/<xsl:(\w+)\b[^>]*?>([\s\S]*?)<\/xsl:\1>\s*$/);
+    if (sameLineOpenClose) {
         lines.splice(lineIdx, 1);
         return lines.join('\n');
     }
@@ -529,7 +634,7 @@ export function removeXsltBinding(xslt: string, b: XsltBinding): string {
     // Tek satır element: <xsl:if test="...">  (aynı satırda kapanışsız)
     if (line.match(/<xsl:\w+\b[^>]*?>\s*$/)) {
         // explicit close var mı kontrol (next line veya same line)
-        const explicitCloseOnSameLine = line.match(/<xsl:(\w+)\b[^>]*?>([\s\S]*?)<\/\1>\s*$/);
+        const explicitCloseOnSameLine = line.match(/<xsl:(\w+)\b[^>]*?>([\s\S]*?)<\/xsl:\1>\s*$/);
         if (explicitCloseOnSameLine) {
             lines.splice(lineIdx, 1);
             return lines.join('\n');
@@ -540,12 +645,24 @@ export function removeXsltBinding(xslt: string, b: XsltBinding): string {
             lines.splice(lineIdx, 2);
             return lines.join('\n');
         }
-        // Sadece start tag → tek satır kaldır
+        // Tek satır start tag var ama next line kapanış değil → multi-line
+        // olabilir (3+ satıra yayılmış tag). Bracket counter dene.
+        if (b.kind === 'element' || (!b.kind && b.elementType)) {
+            const multi = removeXsltBindingMulti(xslt, b);
+            if (multi !== null) return multi;
+        }
+        // Multi-line de çalışmadı → start tag'i sil (orphan closing bırakılır)
         lines.splice(lineIdx, 1);
         return lines.join('\n');
     }
 
-    // Hiçbir pattern eşleşmedi → orijinal döndür (no-op)
+    // Single-line pattern'ler çalışmadı → multi-line bracket counter
+    if (b.kind === 'element' || (!b.kind && b.elementType)) {
+        const multi = removeXsltBindingMulti(xslt, b);
+        if (multi !== null) return multi;
+    }
+
+    // Hiçbir pattern eşleşmedi → çııktıyı orijinal olarak döndür (no-op)
     return xslt;
 }
 
