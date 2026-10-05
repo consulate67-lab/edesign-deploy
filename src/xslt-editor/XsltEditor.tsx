@@ -220,6 +220,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     // büyük → native scroll tetiklenir, tüm içerik erişilebilir. Zoom slider ile
     // küçültme hâlâ mümkün (%50-200%).
     const [previewZoom, setPreviewZoom] = useState<number>(1.00);
+    const previewZoomRef = useRef<number>(previewZoom);
+    previewZoomRef.current = previewZoom;
     // Sprint 10 Aşama 2 (2026-10-03) — iframe içeriğinin doğal yüksekliği (px).
     // iframe onLoad'ta iframe.contentDocument.body.scrollHeight ölçülerek set edilir.
     // scaledHeight = iframeHeight × previewZoom → container overflow doğal tetiklenir.
@@ -231,6 +233,10 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const [saveMessage, setSaveMessage] = useState<string>('');
 
     const iframeRef = useRef<HTMLIFrameElement>(null);
+    const previewContainerRef = useRef<HTMLDivElement>(null);
+    // Kullanıcı +/- ile zoom'u elle değiştirirse false olur; resize/re-render
+    // sonrası otomatik sığdırma yalnızca true iken yapılır. "Fit" tekrar açar.
+    const autoFitRef = useRef<boolean>(true);
     const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
     // Sprint 8 Aşama 2 — Monaco API instance (provider kayıt + marker set için)
     const monacoRef = useRef<typeof import('monaco-editor') | null>(null);
@@ -975,30 +981,66 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
      * scroll) container'a scroll geçirmiyordu — Selim'in test ekranında
      * sağ ve alt kesik görünüyordu.
      */
+    /**
+     * Zoom'u iframe dokümanına uygular. Antrepo XSLT'lerinde body sabit
+     * genişlikte (793px) olduğu için zoom uygulanmazsa sayfa geniş önizleme
+     * alanında dar bir şerit olarak sola yaslı kalıyordu. Body ayrıca yatayda
+     * ortalanır.
+     */
+    const applyPreviewZoom = useCallback((zoom: number) => {
+        const doc = iframeRef.current?.contentDocument;
+        if (!doc || !doc.documentElement) return;
+        if (doc.head && !doc.getElementById('__xslt-preview-layout')) {
+            const style = doc.createElement('style');
+            style.id = '__xslt-preview-layout';
+            style.textContent = 'body{margin-left:auto !important;margin-right:auto !important;}';
+            doc.head.appendChild(style);
+        }
+        doc.documentElement.style.setProperty('zoom', String(zoom));
+    }, []);
+
     const fitZoomToContainer = useCallback(() => {
-        // Sprint 16 Aşama 5e + 5f — Gerçek fit-to-screen: container boyutlarına
-        // (width + height) göre zoom hesapla, içerik hem yatay hem dikey
-        // sığsın. Selim: "fatura canlı izle ekranında neden scroll çıkıyor".
-        // e-Fatura A4 (595×842) container (örn. 840×650) → zoom = min(840/595,
-        // 650/842) = min(1.41, 0.77) = 0.77 (yükseklik sınırlayıcı).
+        // Genişliğe sığdır: fatura önizleme alanını yatayda doldurur, dikeyde
+        // iframe içinde kaydırılır. Genişlik+yükseklik birlikte sığdırıldığında
+        // (eski min(scaleW, scaleH)) A4 sayfa okunamayacak kadar küçülüyordu.
         const iframe = iframeRef.current;
         if (!iframe) return 1.0;
         const doc = iframe.contentDocument;
-        if (!doc || !doc.body) return 1.0;
-        const container = iframe.parentElement;
-        if (!container) return 1.0;
-        const containerWidth = container.clientWidth;
-        const containerHeight = container.clientHeight;
-        const contentWidth = doc.body.scrollWidth;
-        const contentHeight = doc.body.scrollHeight;
-        if (contentWidth <= 0 || containerWidth <= 0) return 1.0;
-        // Hem width hem height sığdır (min)
-        const scaleW = containerWidth / contentWidth;
-        const scaleH = contentHeight > 0 ? containerHeight / contentHeight : Infinity;
-        const scale = Math.min(scaleW, scaleH);
-        // Min 0.25, max 2.0
-        return Math.min(2.0, Math.max(0.25, scale));
+        if (!doc || !doc.body || !doc.documentElement) return 1.0;
+        const root = doc.documentElement;
+        const prevZoom = root.style.getPropertyValue('zoom');
+        root.style.setProperty('zoom', '1');
+        const body = doc.body;
+        const contentWidth = Math.max(body.scrollWidth, body.offsetWidth);
+        if (prevZoom) root.style.setProperty('zoom', prevZoom);
+        else root.style.removeProperty('zoom');
+        // 20px dikey scrollbar payı + her iki yanda 16px kenar boşluğu
+        const availableWidth = iframe.clientWidth - 20;
+        const naturalWidth = contentWidth + 32;
+        if (naturalWidth <= 0 || availableWidth <= 0) return 1.0;
+        const scale = availableWidth / naturalWidth;
+        return Math.min(2.0, Math.max(0.25, Math.round(scale * 100) / 100));
     }, []);
+
+    useEffect(() => {
+        applyPreviewZoom(previewZoom);
+    }, [previewZoom, applyPreviewZoom]);
+
+    useEffect(() => {
+        const container = previewContainerRef.current;
+        if (!container || typeof ResizeObserver === 'undefined') return;
+        let frame = 0;
+        const observer = new ResizeObserver(() => {
+            if (!autoFitRef.current) return;
+            cancelAnimationFrame(frame);
+            frame = requestAnimationFrame(() => setPreviewZoom(fitZoomToContainer()));
+        });
+        observer.observe(container);
+        return () => {
+            cancelAnimationFrame(frame);
+            observer.disconnect();
+        };
+    }, [fitZoomToContainer]);
 
     const handleIframeLoad = useCallback(() => {
         const iframe = iframeRef.current;
@@ -1034,18 +1076,21 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             doc.addEventListener('click', handleIframeBodyClick, { capture: true });
             console.log('[XSLTEditor] iframe click listener attached (doc, capture:true)');
 
-            // (3) Sprint 16 Aşama 5e — İlk render'da auto-fit zoom.
-            // measureHeight(300ms) sonrası içerik genişliği kesin, fit zoom uygula.
-            // 350ms: 300ms measureHeight + 50ms güvenlik payı
+            // (3) srcDoc her değiştiğinde yeni doküman gelir — mevcut zoom'u
+            // hemen uygula (titreme olmasın), auto-fit açıksa 350ms sonra
+            // (measureHeight 300ms + 50ms pay) genişliğe göre yeniden sığdır.
+            applyPreviewZoom(previewZoomRef.current);
             setTimeout(() => {
+                if (!autoFitRef.current) return;
                 const zoom = fitZoomToContainer();
                 setPreviewZoom(zoom);
+                applyPreviewZoom(zoom);
                 console.log(`[XSLTEditor] auto-fit zoom=${zoom.toFixed(2)}`);
             }, 350);
         };
 
         bindListener();
-    }, [handleIframeBodyClick, fitZoomToContainer]);
+    }, [handleIframeBodyClick, fitZoomToContainer, applyPreviewZoom]);
 
     /**
      * iframe onLoad → handleIframeLoad. previewHtml değiştiğinde iframe
@@ -1771,7 +1816,10 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             borderLeft: '1px solid #334155',
                         }}>
                             <button
-                                onClick={() => setPreviewZoom(z => Math.max(0.25, Math.round((z - 0.1) * 100) / 100))}
+                                onClick={() => {
+                                    autoFitRef.current = false;
+                                    setPreviewZoom(z => Math.max(0.25, Math.round((z - 0.1) * 100) / 100));
+                                }}
                                 title="Zoom out (-10%)"
                                 style={{
                                     padding: '2px 4px',
@@ -1798,7 +1846,10 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 {Math.round(previewZoom * 100)}%
                             </span>
                             <button
-                                onClick={() => setPreviewZoom(z => Math.min(2.0, Math.round((z + 0.1) * 100) / 100))}
+                                onClick={() => {
+                                    autoFitRef.current = false;
+                                    setPreviewZoom(z => Math.min(2.0, Math.round((z + 0.1) * 100) / 100));
+                                }}
                                 title="Zoom in (+10%)"
                                 style={{
                                     padding: '2px 4px',
@@ -1816,12 +1867,10 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             </button>
                             <button
                                 onClick={() => {
-                                    // Sprint 16 Aşama 5e — Gerçek fit-to-screen.
-                                    // Container genişliğine sığacak zoom hesapla.
-                                    const zoom = fitZoomToContainer();
-                                    setPreviewZoom(zoom);
+                                    autoFitRef.current = true;
+                                    setPreviewZoom(fitZoomToContainer());
                                 }}
-                                title="Fit to screen"
+                                title="Genişliğe sığdır"
                                 style={{
                                     padding: '1px 5px',
                                     background: 'transparent',
@@ -1889,7 +1938,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
 
                         Container block layout'a geçti (flex center yerine), iframe
                         display:block + margin:0 auto ile ortalanır. */}
-                    <div style={{
+                    <div ref={previewContainerRef} style={{
                         flex: 1, minHeight: 0, position: 'relative',
                         // Sprint 16 Aşama 5c — Container background/padding kaldırıldı.
                         // Eski: '#475569' + radial-gradient (ofis zemini) + padding 16px 8px.
