@@ -211,6 +211,98 @@ export function parseXsltInstrumented(xslt: string): {
 }
 
 /**
+ * Sprint 14 Aşama 2 (2026-10-05) — Property panel inline edit.
+ * Sağ drawer'dan bir XSLT binding'in editable değeri değiştirildiğinde,
+ * XSLT string'i günceller. line/column kullanarak tek satır üzerinde
+ * regex replace yapar (çoğu XSLT attribute/value tek satırda yazılır).
+ *
+ * Pass 1 (dropdown): <xsl:value-of select="OLD"/> içindeki select="OLD"
+ *   → select="NEW". Eski değer b.xpath, yeni dikdörtgen parametresi.
+ * Pass 2 (static): <xsl:text>OLD</xsl:text> içeriği → NEW. trim korunmaz
+ *   (kullanıcı tam içeriği yazar, whitespace bilinçli).
+ * Pass 3 (element): <xsl:if test="OLD"> attribute → test="NEW" veya
+ *   <xsl:forEach select="OLD"> → select="NEW". Bulunan ilk test/select/
+ *   match/name attribute'ünü değiştirir.
+ *
+ * Başarısız olursa (multi-line tag, attribute bulunamadı) orijinal
+ * xslt döner → Monaco'da değişiklik olmaz, drawer hata mesajı gösterir.
+ */
+export function updateXSLTBinding(
+    xslt: string,
+    b: XsltBinding,
+    newValue: string
+): string {
+    const lines = xslt.split('\n');
+    const lineIdx = b.line - 1; // 1-based → 0-based
+    if (lineIdx < 0 || lineIdx >= lines.length) return xslt;
+
+    if (b.kind === 'dropdown' || (!b.kind && b.xpath && !b.elementType)) {
+        // Pass 1 — <xsl:(?:value-of|copy-of)[^>]*\bselect="OLD"...>
+        const line = lines[lineIdx];
+        const newLine = line.replace(
+            /(<xsl:(?:value-of|copy-of)\b[^>]*?\bselect=")([^"]*)(")/,
+            (m, before, _v, after) => before + newValue + after
+        );
+        if (newLine === line) return xslt;
+        lines[lineIdx] = newLine;
+        return lines.join('\n');
+    }
+
+    if (b.kind === 'static') {
+        // Pass 2 — <xsl:text>OLD</xsl:text>
+        const line = lines[lineIdx];
+        const newLine = line.replace(
+            /(<xsl:text>)([\s\S]*?)(<\/xsl:text>)/,
+            (m, before, _v, after) => before + newValue + after
+        );
+        if (newLine === line) return xslt;
+        lines[lineIdx] = newLine;
+        return lines.join('\n');
+    }
+
+    if (b.kind === 'element') {
+        // Pass 3 — <xsl:element ... attribute="OLD" ...>
+        const line = lines[lineIdx];
+        // Önceki attribute'ü koru (test/select/match/name hangisi varsa)
+        const attrMatch = line.match(/\b(test|select|match|name)="([^"]*)"/);
+        if (!attrMatch) {
+            // attribute yoksa (örn: `<xsl:otherwise>` veya `<xsl:template>` name/match olmadan)
+            // element adı + boşluk + ilk attribute'ü oluştur
+            const elementMatch = line.match(/<xsl:(\w+)(\s*[^>]*?)(>|\/>)/);
+            if (!elementMatch) return xslt;
+            // Kullanıcının girdiği değeri select attribute'ü olarak ekle (en yaygın)
+            // — Sprint 15'te daha akıllı attribute tipi eklenebilir
+            const newLine = line.replace(
+                /(<xsl:(\w+)(\s*[^>]*?)(>|\/>))/,
+                (m, _whole, name, attrs, endTag) =>
+                    `<xsl:${name}${attrs} select="${newValue}"${endTag}`
+            );
+            if (newLine === line) return xslt;
+            lines[lineIdx] = newLine;
+            return lines.join('\n');
+        }
+        const attrName = attrMatch[1];
+        const newLine = line.replace(
+            new RegExp(`(\\b${attrName}=")([^"]*)(")`),
+            (m, before, _v, after) => before + newValue + after
+        );
+        if (newLine === line) return xslt;
+        // Splice into result: may have failed silently if attr not in this line
+        // Fallback: take attrMatch position, replace original value
+        const idx = line.indexOf(`${attrName}="`);
+        if (idx < 0) return xslt;
+        const valueStart = idx + attrName.length + 2;
+        const valueEnd = line.indexOf('"', valueStart);
+        if (valueEnd < 0) return xslt;
+        const updated = line.substring(0, valueStart) + newValue + line.substring(valueEnd);
+        lines[lineIdx] = updated;
+        return lines.join('\n');
+    }
+
+    return xslt;
+}
+
+/**
  * XSLT + XML → annotated HTML transform.
  * @param xmlString - UBL-TR XML source
  * @param instrumentedXslt - parseXsltInstrumented'den gelen marker'lı XSLT

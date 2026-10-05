@@ -38,7 +38,7 @@ import {
 import { transformXmlWithXslt } from '../xsltTransformer';
 import { getInlineXslt } from '../xsltContent';
 import { getAntrepoTemplateById } from './antrepoTemplates';
-import { renderAndAnnotateXslt, parseXsltInstrumented } from './utils/xsltRender';
+import { renderAndAnnotateXslt, parseXsltInstrumented, updateXSLTBinding } from './utils/xsltRender';
 import { api } from '../api';
 import { XSLT_ELEMENTS, UBL_XPATHS, lintXslt } from './xsltSchema';
 
@@ -180,6 +180,29 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     // Sprint 8 Aşama 2 — Monaco API instance (provider kayıt + marker set için)
     const monacoRef = useRef<typeof import('monaco-editor') | null>(null);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Sprint 14 Aşama 2 — Property panel state (sağ drawer).
+    // Sol panelden bir binding tıklanınca açılır. Inline apply: her değişiklik
+    // 300ms debounce ile XSLT string'i günceller → Monaco editöre yazılır →
+    // preview re-render tetiklenir.
+    const [selectedBinding, setSelectedBinding] = useState<import('./utils/xsltRender').XsltBinding | null>(null);
+    const [propertyDraft, setPropertyDraft] = useState<{ value: string; attrName?: string }>({ value: '' });
+    const propertyDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Sprint 14 Aşama 2 — Property drawer Esc handler.
+    // Drawer açıkken Esc basılırsa drawer'ı kapat. useEffect document keydown
+    // listener ekler, cleanup'ta kaldırır.
+    useEffect(() => {
+        if (!selectedBinding) return;
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                setSelectedBinding(null);
+                e.stopPropagation();
+            }
+        };
+        document.addEventListener('keydown', onKey);
+        return () => document.removeEventListener('keydown', onKey);
+    }, [selectedBinding]);
 
     // Sprint 14 Aşama 1 — Sol panel XSLT alanları 3-gruplu liste.
     // parseXsltInstrumented Pass 1 (dropdown), Pass 2 (static), Pass 3 (element)
@@ -399,11 +422,12 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
      * position → editor.revealPositionInCenter + deltaDecorations (sarı
      * highlight 2s). Kullanıcı snippet'ın nereye eklendiğini görsün.
      */
-    // Sprint 14 Aşama 1 — handleBindingClick: sol panelden bir XSLT alanına
-    // tıklayınca Monaco editöre scroll + sarı highlight. Mevcut useEffect
-    // (previewSelectedLine/Column değişimini dinliyor) zaten bunu yapıyor — bu
-    // fonksiyon sadece state'leri set eder. Sprint 15'te preview tarafına
-    // vurgu eklenecek (data-render-index üzerinden).
+    // Sprint 14 Aşama 1 + Aşama 2 — handleBindingClick: sol panelden bir XSLT
+    // alanına tıklayınca:
+    // 1) Monaco editöre scroll + sarı highlight (previewSelectedLine/Column)
+    // 2) Sağ property drawer'ı aç + draft state'i başlat
+    // Inline edit → updateXSLTBinding → xsltContent güncellenir → preview
+    // re-render tetiklenir.
     const handleBindingClick = useCallback((b: import('./utils/xsltRender').XsltBinding) => {
         setPreviewSelectedLine(b.line);
         setPreviewSelectedColumn(b.column);
@@ -411,8 +435,55 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         if (activeTab !== 'xslt') setActiveTab('xslt');
         const ed = editorRef.current;
         if (ed) ed.focus();
-        console.log(`[XSLTEditor] Sol panel binding click → line=${b.line}:${b.column} kind=${b.kind || 'dropdown'}`);
+        // Sprint 14 Aşama 2 — Property drawer'ı aç + draft başlat.
+        setSelectedBinding(b);
+        // Editable draft: kind'e göre mevcut değeri çıkar
+        let draftValue = '';
+        let attrName: string | undefined;
+        if (b.kind === 'dropdown') {
+            draftValue = b.xpath;
+            attrName = 'select';
+        } else if (b.kind === 'static') {
+            draftValue = b.xpath.replace(/^static:\s*/, '');
+            attrName = undefined;
+        } else if (b.kind === 'element') {
+            // xpath formatı: <xsl:if test="..."> → test="..." parçasını al
+            const m = b.xpath.match(/(\w+)="([^"]*)"/);
+            if (m) { attrName = m[1]; draftValue = m[2]; }
+            else { attrName = 'select'; draftValue = ''; }
+        }
+        setPropertyDraft({ value: draftValue, attrName });
+        console.log(`[XSLTEditor] Sol panel binding click → line=${b.line}:${b.column} kind=${b.kind || 'dropdown'} draft="${draftValue}"`);
     }, [activeTab]);
+
+    /**
+     * Sprint 14 Aşama 2 — Property panel inline edit handler.
+     * Her input değişikliğinde 300ms debounce ile XSLT güncellenir → Monaco
+     * editöre yazılır → preview re-render tetiklenir (mevcut renderPreview
+     * useEffect'i xsltContent değişimini dinler).
+     */
+    const handlePropertyChange = useCallback((newValue: string) => {
+        setPropertyDraft(prev => ({ ...prev, value: newValue }));
+        if (propertyDebounceRef.current) clearTimeout(propertyDebounceRef.current);
+        propertyDebounceRef.current = setTimeout(() => {
+            const b = selectedBindingRef.current;
+            if (!b) return;
+            const updated = updateXSLTBinding(xsltContent, b, newValue);
+            if (updated !== xsltContent) {
+                setXsltContent(updated);
+                console.log(`[XSLTEditor] Property update → line=${b.line} new="${newValue.substring(0, 40)}${newValue.length > 40 ? '...' : ''}"`);
+            } else {
+                console.warn(`[XSLTEditor] Property update no-op (line=${b.line}) — tag multi-line olabilir`);
+            }
+        }, 300);
+    }, [xsltContent]);
+
+    /**
+     * selectedBinding için ref — handlePropertyChange closure'da güncel değeri
+     * görmek için (useCallback dependency'yi minimize eder).
+     */
+    const selectedBindingRef = useRef(selectedBinding);
+    useEffect(() => { selectedBindingRef.current = selectedBinding; }, [selectedBinding]);
 
     /**
      * Editor mount — ref + Monaco API sakla, XSLT autocomplete provider kayıt.
@@ -1046,6 +1117,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                     gridTemplateColumns: snippetPanelOpen ? '240px 1fr 1fr' : '0px 1fr 1fr',
                     flex: 1,
                     minHeight: 0,
+                    position: 'relative',  // Sprint 14 Aşama 2 — property drawer absolute right:0
                     transition: 'grid-template-columns 0.2s ease',
                 }}
             >
@@ -1607,6 +1679,168 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             </div>
                         )}
                     </div>
+                </div>
+
+                {/* Sprint 14 Aşama 2 — Property Drawer (sağ slide-in, 360px).
+                    Sol panelden bir binding tıklanınca açılır. Seçili binding'in
+                    kind'ine göre editable input gösterir (xpath / text / test/select).
+                    Inline apply: her değişiklik 300ms debounce → xsltContent set
+                    → preview re-render tetiklenir. Esc / X ile kapat. */}
+                <div
+                    data-property-drawer
+                    style={{
+                        position: 'absolute',
+                        right: 0,
+                        top: 0,
+                        bottom: 0,
+                        width: '360px',
+                        background: '#0f172a',
+                        borderLeft: '1px solid #334155',
+                        transform: selectedBinding ? 'translateX(0)' : 'translateX(100%)',
+                        transition: 'transform 0.25s ease',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        zIndex: 10,
+                        boxShadow: selectedBinding ? '-4px 0 16px rgba(0,0,0,0.5)' : 'none',
+                    }}
+                >
+                    {selectedBinding && (() => {
+                        const b = selectedBinding;
+                        const kindDisplay = b.kind === 'dropdown' ? 'Dinamik Veri'
+                            : b.kind === 'static' ? 'Statik Metin'
+                            : 'Element Yapısı';
+                        const kindColor = b.kind === 'dropdown' ? '#a5b4fc'
+                            : b.kind === 'static' ? '#6ee7b7'
+                            : '#fcd34d';
+                        const globalIndex = xsltInstrumented.bindings.indexOf(b) + 1;
+                        // Editable alan başlığı
+                        const fieldLabel = b.kind === 'dropdown' ? 'XPath (select)'
+                            : b.kind === 'static' ? 'Metin İçeriği'
+                            : `Attribute (${propertyDraft.attrName || 'select'})`;
+                        return (
+                            <>
+                                {/* Header */}
+                                <div style={{
+                                    padding: '12px 14px',
+                                    background: '#0a1024',
+                                    borderBottom: '1px solid #1e293b',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                }}>
+                                    <div style={{
+                                        minWidth: '34px',
+                                        padding: '2px 6px',
+                                        background: 'rgba(99, 102, 241, 0.2)',
+                                        border: '1px solid rgba(99, 102, 241, 0.5)',
+                                        borderRadius: '4px',
+                                        fontSize: '11px',
+                                        fontWeight: 700,
+                                        color: '#a5b4fc',
+                                        textAlign: 'center',
+                                        fontFamily: 'monospace',
+                                    }}>
+                                        B{globalIndex}
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ fontSize: '12px', fontWeight: 700, color: '#e2e8f0', letterSpacing: '0.4px' }}>
+                                            Property
+                                        </div>
+                                        <div style={{ fontSize: '10px', color: kindColor, fontWeight: 600, letterSpacing: '0.3px' }}>
+                                            {kindDisplay}{b.elementType ? ` · xsl:${b.elementType}` : ''}
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => setSelectedBinding(null)}
+                                        title="Kapat (Esc)"
+                                        data-close-property-drawer
+                                        style={{
+                                            padding: '4px 8px',
+                                            background: 'transparent',
+                                            border: '1px solid #334155',
+                                            borderRadius: '4px',
+                                            color: '#94a3b8',
+                                            cursor: 'pointer',
+                                            fontSize: '11px',
+                                        }}
+                                        onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)'; e.currentTarget.style.color = '#fca5a5'; }}
+                                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#94a3b8'; }}
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+
+                                {/* Body — editable inputs */}
+                                <div style={{ flex: 1, padding: '14px', overflowY: 'auto' }}>
+                                    <label style={{
+                                        display: 'block',
+                                        fontSize: '10px',
+                                        fontWeight: 700,
+                                        color: '#94a3b8',
+                                        letterSpacing: '0.4px',
+                                        textTransform: 'uppercase',
+                                        marginBottom: '6px',
+                                    }}>
+                                        {fieldLabel}
+                                    </label>
+                                    <textarea
+                                        data-property-input
+                                        value={propertyDraft.value}
+                                        onChange={(e) => handlePropertyChange(e.target.value)}
+                                        spellCheck={false}
+                                        style={{
+                                            width: '100%',
+                                            minHeight: '60px',
+                                            maxHeight: '300px',
+                                            padding: '8px 10px',
+                                            background: '#1e293b',
+                                            border: '1px solid #334155',
+                                            borderRadius: '4px',
+                                            color: '#e2e8f0',
+                                            fontSize: '12px',
+                                            fontFamily: 'monospace',
+                                            resize: 'vertical',
+                                            outline: 'none',
+                                        }}
+                                        onFocus={(e) => e.currentTarget.style.borderColor = '#6366f1'}
+                                        onBlur={(e) => e.currentTarget.style.borderColor = '#334155'}
+                                    />
+                                    {b.kind === 'element' && propertyDraft.attrName && (
+                                        <div style={{ marginTop: '8px', fontSize: '10px', color: '#64748b', fontFamily: 'monospace' }}>
+                                            Element: <span style={{ color: kindColor, fontWeight: 700 }}>&lt;xsl:{b.elementType}{` ${propertyDraft.attrName}="..."`}&gt;</span>
+                                        </div>
+                                    )}
+                                    <div style={{
+                                        marginTop: '14px',
+                                        padding: '10px 12px',
+                                        background: 'rgba(99, 102, 241, 0.08)',
+                                        border: '1px solid rgba(99, 102, 241, 0.25)',
+                                        borderRadius: '4px',
+                                        fontSize: '10px',
+                                        color: '#94a3b8',
+                                        lineHeight: 1.5,
+                                    }}>
+                                        <strong style={{ color: '#a5b4fc' }}>ℹ</strong> Değişiklikler inline uygulanır (300ms). Monaco editör ve preview otomatik güncellenir. Çok satırlı değerler için dikkatli olun — satır-bazlı replace yapılır.
+                                    </div>
+                                </div>
+
+                                {/* Footer */}
+                                <div style={{
+                                    padding: '10px 14px',
+                                    background: '#0a1024',
+                                    borderTop: '1px solid #1e293b',
+                                    fontSize: '10px',
+                                    color: '#64748b',
+                                    fontFamily: 'monospace',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                }}>
+                                    <span>Line {b.line}:col {b.column}</span>
+                                    <span style={{ color: kindColor }}>{fieldLabel}</span>
+                                </div>
+                            </>
+                        );
+                    })()}
                 </div>
             </div>
         </div>
