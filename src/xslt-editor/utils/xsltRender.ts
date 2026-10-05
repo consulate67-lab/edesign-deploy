@@ -38,6 +38,13 @@ export interface XsltBinding {
     offset: number;
     line: number;
     column: number;
+    /** Sprint 14 Aşama 1 — Sol panel 3-gruplu liste kategorisi.
+     *  'dropdown' = Pass 1 (xsl:value-of / xsl:copy-of) — dinamik
+     *  'static'   = Pass 2 (xsl:text) — statik metin
+     *  'element'  = Pass 3 (xsl:if / forEach / template / param / variable vb.) — yapı */
+    kind?: 'dropdown' | 'static' | 'element';
+    /** Pass 3 için XSLT element tipi ('if', 'forEach', 'template' vb.). */
+    elementType?: string;
 }
 
 export function parseXsltBindings(xslt: string): XsltBinding[] {
@@ -57,7 +64,7 @@ export function parseXsltBindings(xslt: string): XsltBinding[] {
         // (offset - lastNewline) 0-based → +1 ile 1-based'e çevir.
         // lastNewline === -1 durumunda da +1.
         const column = (lastNewline === -1 ? offset : offset - lastNewline) + 1;
-        bindings.push({ xpath, offset, line, column });
+        bindings.push({ xpath, offset, line, column, kind: 'dropdown' });
     }
     return bindings;
 }
@@ -145,9 +152,9 @@ export function parseXsltInstrumented(xslt: string): {
         return { line, column };
     };
 
-    const pushBinding = (source: string, offset: number, xpath: string) => {
+    const pushBinding = (source: string, offset: number, xpath: string, kind?: 'dropdown' | 'static' | 'element', elementType?: string) => {
         const { line, column } = calcLineColumn(source, offset);
-        bindings.push({ xpath, offset, line, column });
+        bindings.push({ xpath, offset, line, column, kind, elementType });
     };
 
     const marker = () => `<!--BIND_${++counter}-->`;
@@ -159,7 +166,7 @@ export function parseXsltInstrumented(xslt: string): {
             const xpathMatch = m1 || m2;
             const xpath = (xpathMatch.match(/select="([^"]+)"/) || [])[1];
             if (!xpath) return fullMatch;
-            pushBinding(xslt, offset, xpath);
+            pushBinding(xslt, offset, xpath, 'dropdown');
             return `${fullMatch}${marker()}`;
         }
     );
@@ -174,10 +181,31 @@ export function parseXsltInstrumented(xslt: string): {
         (fullMatch, text, offset) => {
             const t = text.trim();
             if (t.length === 0) return fullMatch;
-            pushBinding(instrumentedXslt, offset, `static: ${t}`);
+            pushBinding(instrumentedXslt, offset, `static: ${t}`, 'static');
             return `${fullMatch}${marker()}`;
         }
     );
+
+    // Sprint 14 Aşama 1 — Pass 3: XSLT element yapısı binding'leri.
+    // Marker EKLEMEZ (Sprint 13 Pass 3 çakışma sorunu) — sadece bindings
+    // array'e ekler. Sol panelde "Element Yapısı" grubunda gösterilir.
+    // Desteklenen elementler: if, forEach, otherwise, when, template,
+    // param, variable, sort (xsl:choose için attribute yok, atlanır).
+    const elementRe = /<xsl:(if|forEach|otherwise|when|template|param|variable|sort)\b[^>]*?>/g;
+    let em: RegExpExecArray | null;
+    while ((em = elementRe.exec(xslt)) !== null) {
+        const type = em[1];
+        const fullTag = em[0];
+        const offset = em.index;
+        // İlgili attribute'ü çıkar (öncelik: test > select > match > name)
+        let attr = '';
+        for (const t of ['test', 'select', 'match', 'name']) {
+            const m = fullTag.match(new RegExp(`\\b${t}="([^"]*)"`));
+            if (m) { attr = `${t}="${m[1]}"`; break; }
+        }
+        const xpath = `<xsl:${type}${attr ? ' ' + attr : ''}>`;
+        pushBinding(xslt, offset, xpath, 'element', type);
+    }
 
     return { instrumentedXslt, bindings };
 }

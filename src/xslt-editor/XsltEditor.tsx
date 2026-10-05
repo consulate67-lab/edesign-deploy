@@ -40,10 +40,6 @@ import { getInlineXslt } from '../xsltContent';
 import { getAntrepoTemplateById } from './antrepoTemplates';
 import { renderAndAnnotateXslt, parseXsltInstrumented } from './utils/xsltRender';
 import { api } from '../api';
-import {
-    SNIPPETS, SNIPPET_CATEGORIES, getSnippetsByCategory, getCategoryCounts,
-    type XsltSnippet, type SnippetCategory,
-} from './snippets';
 import { XSLT_ELEMENTS, UBL_XPATHS, lintXslt } from './xsltSchema';
 
 // ============================================================================
@@ -185,11 +181,19 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const monacoRef = useRef<typeof import('monaco-editor') | null>(null);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    // Sprint 8 Aşama 1 — Snippet gallery state
-    const [snippetCategory, setSnippetCategory] = useState<SnippetCategory | 'all'>('all');
-    const [snippetSearch, setSnippetSearch] = useState<string>('');
+    // Sprint 14 Aşama 1 — Sol panel XSLT alanları 3-gruplu liste.
+    // parseXsltInstrumented Pass 1 (dropdown), Pass 2 (static), Pass 3 (element)
+    // binding'lerini kategorize gösterir. Selim'in brief'i: "xslt içindeki
+    // tüm alanları özelliklerini gruplayarak kendi başlıkları altında getirelim".
+    const [xsltSearch, setXsltSearch] = useState<string>('');
+    const [xsltGroupExpanded, setXsltGroupExpanded] = useState<Record<'dropdown' | 'static' | 'element', boolean>>({
+        dropdown: true,
+        static: true,
+        element: true,
+    });
     // Sprint 9 Aşama 2c (2026-10-03) — Sol snippet paneli aç/kapat toggle.
-    // Kapatılınca preview + editör tüm genişliği kaplar (Antrepo XSLT 700px tam sığar).
+    // Sprint 14 Aşama 1: artık 'XSLT Alanları' paneli (snippet gallery kaldırıldı).
+    // Kapatılınca preview + editör tüm genişliği kaplar.
     const [snippetPanelOpen, setSnippetPanelOpen] = useState<boolean>(true);
     // Sprint 11 Aşama 6 (2026-10-03) — Preview'de tıklayınca editöre direkt
     // koordinat tabanlı scroll + highlight. data-line + data-column attribute'ları
@@ -366,24 +370,21 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     }, [moduleMenuOpen]);
 
     // ------------------------------------------------------------------------
-    // Snippet gallery — Sprint 8 Aşama 1
+    // Sprint 14 Aşama 1 — XSLT alanları 3-gruplu liste (snippet gallery kaldırıldı)
     // ------------------------------------------------------------------------
-
-    const categoryCounts = useMemo(() => getCategoryCounts(), []);
-
-    /**
-     * Filtrelenmiş snippet listesi (kategori + arama).
-     */
-    const filteredSnippets = useMemo(() => {
-        const base = getSnippetsByCategory(snippetCategory);
-        if (!snippetSearch.trim()) return base;
-        const q = snippetSearch.toLowerCase();
-        return base.filter(s =>
-            s.label.toLowerCase().includes(q) ||
-            s.description.toLowerCase().includes(q) ||
-            s.category.toLowerCase().includes(q)
-        );
-    }, [snippetCategory, snippetSearch]);
+    // xsltInstrumented.bindings'i kind'e göre grupla + arama filtresi uygula.
+    const filteredBindingsByGroup = useMemo(() => {
+        const q = xsltSearch.trim().toLowerCase();
+        const groups: { dropdown: any[]; static: any[]; element: any[] } = {
+            dropdown: [], static: [], element: [],
+        };
+        for (const b of xsltInstrumented.bindings) {
+            const kind = b.kind || 'dropdown';
+            if (q && !b.xpath.toLowerCase().includes(q) && !(b.elementType || '').toLowerCase().includes(q)) continue;
+            groups[kind].push(b);
+        }
+        return groups;
+    }, [xsltInstrumented.bindings, xsltSearch]);
 
     /**
      * Monaco editor'a snippet yapıştır.
@@ -398,49 +399,20 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
      * position → editor.revealPositionInCenter + deltaDecorations (sarı
      * highlight 2s). Kullanıcı snippet'ın nereye eklendiğini görsün.
      */
-    const handleSnippetInsert = useCallback((snippet: XsltSnippet) => {
+    // Sprint 14 Aşama 1 — handleBindingClick: sol panelden bir XSLT alanına
+    // tıklayınca Monaco editöre scroll + sarı highlight. Mevcut useEffect
+    // (previewSelectedLine/Column değişimini dinliyor) zaten bunu yapıyor — bu
+    // fonksiyon sadece state'leri set eder. Sprint 15'te preview tarafına
+    // vurgu eklenecek (data-render-index üzerinden).
+    const handleBindingClick = useCallback((b: import('./utils/xsltRender').XsltBinding) => {
+        setPreviewSelectedLine(b.line);
+        setPreviewSelectedColumn(b.column);
+        // Editor'ü focus et — aktif tab'a geç
+        if (activeTab !== 'xslt') setActiveTab('xslt');
         const ed = editorRef.current;
-        const monaco = monacoRef.current;
-        if (!ed) {
-            console.warn('[XSLTEditor] Editor ref yok, snippet eklenemedi:', snippet.id);
-            return;
-        }
-        const selection = ed.getSelection();
-        if (!selection) return;
-        // Monaco internal API — snippet expansion. Cast ile bypass.
-        const edit = {
-            range: selection,
-            text: snippet.template,
-            forceInsertMarkers: true,
-        };
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ed.executeEdits('snippet', [edit] as any);
-        ed.focus();
-
-        // Sprint 10 Aşama 2c — snippet eklenen yere scroll + highlight
-        const cursorPos = ed.getPosition();
-        if (cursorPos && monaco) {
-            ed.revealPositionInCenter(cursorPos);
-            const decorationIds = ed.deltaDecorations([], [
-                {
-                    range: new monaco.Range(
-                        cursorPos.lineNumber, cursorPos.column,
-                        cursorPos.lineNumber, cursorPos.column + Math.max(1, snippet.template.length)
-                    ),
-                    options: { inlineClassName: 'xslt-click-highlight' },
-                },
-            ]);
-            setTimeout(() => {
-                ed.deltaDecorations(decorationIds, []);
-            }, 2000);
-            console.log(
-                `[XSLTEditor] Snippet highlight: ${snippet.id} → ` +
-                `${cursorPos.lineNumber}:${cursorPos.column} (${snippet.template.length} chars)`
-            );
-        }
-
-        console.log(`[XSLTEditor] Snippet eklendi: ${snippet.id} (${snippet.template.length} chars)`);
-    }, []);
+        if (ed) ed.focus();
+        console.log(`[XSLTEditor] Sol panel binding click → line=${b.line}:${b.column} kind=${b.kind || 'dropdown'}`);
+    }, [activeTab]);
 
     /**
      * Editor mount — ref + Monaco API sakla, XSLT autocomplete provider kayıt.
@@ -1105,7 +1077,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         }}
                     >
                         <Sparkles size={13} />
-                        <span>Snippet Galerisi</span>
+                        <span>XSLT Alanları</span>
                         <span style={{
                             marginLeft: 'auto',
                             padding: '2px 6px',
@@ -1114,7 +1086,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             fontSize: '9px',
                             color: '#6ee7b7',
                         }}>
-                            {SNIPPETS.length}
+                            {xsltInstrumented.bindings.length}
                         </span>
                         {/* Sprint 9 Aşama 2c — Panel kapat butonu (X) */}
                         <button
@@ -1165,9 +1137,9 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             />
                             <input
                                 type="text"
-                                value={snippetSearch}
-                                onChange={(e) => setSnippetSearch(e.target.value)}
-                                placeholder="Ara: KDV, tablo, döngü..."
+                                value={xsltSearch}
+                                onChange={(e) => setXsltSearch(e.target.value)}
+                                placeholder="Ara: xpath, cbc:, if, forEach..."
                                 style={{
                                     width: '100%',
                                     padding: '6px 8px 6px 26px',
@@ -1184,56 +1156,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         </div>
                     </div>
 
-                    {/* Kategori filtre chips */}
-                    <div
-                        style={{
-                            display: 'flex',
-                            flexWrap: 'wrap',
-                            gap: '4px',
-                            padding: '8px 10px',
-                            borderBottom: '1px solid #1e293b',
-                        }}
-                    >
-                        <button
-                            onClick={() => setSnippetCategory('all')}
-                            style={{
-                                padding: '3px 9px',
-                                background: snippetCategory === 'all' ? 'rgba(99, 102, 241, 0.25)' : '#1e293b',
-                                border: '1px solid ' + (snippetCategory === 'all' ? 'rgba(99, 102, 241, 0.5)' : '#334155'),
-                                borderRadius: '3px',
-                                color: snippetCategory === 'all' ? '#a5b4fc' : '#94a3b8',
-                                fontSize: '10px',
-                                fontWeight: 700,
-                                cursor: 'pointer',
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.3px',
-                            }}
-                        >
-                            Hepsi · {SNIPPETS.length}
-                        </button>
-                        {SNIPPET_CATEGORIES.map(cat => (
-                            <button
-                                key={cat}
-                                onClick={() => setSnippetCategory(cat)}
-                                style={{
-                                    padding: '3px 9px',
-                                    background: snippetCategory === cat ? 'rgba(99, 102, 241, 0.25)' : '#1e293b',
-                                    border: '1px solid ' + (snippetCategory === cat ? 'rgba(99, 102, 241, 0.5)' : '#334155'),
-                                    borderRadius: '3px',
-                                    color: snippetCategory === cat ? '#a5b4fc' : '#94a3b8',
-                                    fontSize: '10px',
-                                    fontWeight: 700,
-                                    cursor: 'pointer',
-                                    textTransform: 'uppercase',
-                                    letterSpacing: '0.3px',
-                                }}
-                            >
-                                {cat} · {categoryCounts[cat]}
-                            </button>
-                        ))}
-                    </div>
-
-                    {/* Snippet listesi */}
+                    {/* Sprint 14 Aşama 1 — 3-gruplu XSLT alanları listesi */}
                     <div
                         style={{
                             flex: 1,
@@ -1242,7 +1165,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             padding: '6px',
                         }}
                     >
-                        {filteredSnippets.length === 0 ? (
+                        {xsltInstrumented.bindings.length === 0 ? (
                             <div
                                 style={{
                                     padding: '20px 12px',
@@ -1251,74 +1174,133 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     fontSize: '11px',
                                 }}
                             >
-                                Sonuç yok. Arama veya kategoriyi değiştirin.
+                                Bu XSLT'te binding bulunamadı.
                             </div>
                         ) : (
-                            filteredSnippets.map(s => (
-                                <div
-                                    key={s.id}
-                                    data-snippet-id={s.id}
-                                    onClick={() => handleSnippetInsert(s)}
-                                    title={s.description}
-                                    style={{
-                                        padding: '8px 10px',
-                                        marginBottom: '4px',
-                                        background: '#1e293b',
-                                        border: '1px solid #334155',
-                                        borderRadius: '4px',
-                                        cursor: 'pointer',
-                                        transition: 'background 0.1s, border-color 0.1s',
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.background = 'rgba(99, 102, 241, 0.12)';
-                                        e.currentTarget.style.borderColor = 'rgba(99, 102, 241, 0.4)';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.background = '#1e293b';
-                                        e.currentTarget.style.borderColor = '#334155';
-                                    }}
-                                >
-                                    <div style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '6px',
-                                        marginBottom: '4px',
-                                    }}>
-                                        <FileCode size={11} color="#34d399" />
-                                        <span style={{
-                                            fontSize: '12px',
-                                            fontWeight: 600,
-                                            color: '#e2e8f0',
-                                        }}>
-                                            {s.label}
-                                        </span>
-                                        <span style={{
-                                            marginLeft: 'auto',
-                                            padding: '1px 5px',
-                                            background: 'rgba(52, 211, 153, 0.12)',
-                                            border: '1px solid rgba(52, 211, 153, 0.3)',
-                                            borderRadius: '3px',
-                                            fontSize: '8px',
-                                            fontWeight: 700,
-                                            color: '#6ee7b7',
-                                            letterSpacing: '0.5px',
-                                            textTransform: 'uppercase',
-                                        }}>
-                                            {s.category}
-                                        </span>
+                            (['dropdown', 'static', 'element'] as const).map(group => {
+                                const list = filteredBindingsByGroup[group];
+                                const groupLabel = group === 'dropdown' ? 'Dinamik Veri'
+                                    : group === 'static' ? 'Statik Metin'
+                                    : 'Element Yapısı';
+                                const groupColor = group === 'dropdown' ? '#a5b4fc'
+                                    : group === 'static' ? '#6ee7b7'
+                                    : '#fcd34d';
+                                const groupBg = group === 'dropdown' ? 'rgba(99, 102, 241, 0.18)'
+                                    : group === 'static' ? 'rgba(16, 185, 129, 0.18)'
+                                    : 'rgba(252, 211, 77, 0.18)';
+                                return (
+                                    <div key={group} style={{ marginBottom: '8px' }}>
+                                        <button
+                                            onClick={() => setXsltGroupExpanded(prev => ({ ...prev, [group]: !prev[group] }))}
+                                            style={{
+                                                width: '100%',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '6px',
+                                                padding: '6px 8px',
+                                                background: groupBg,
+                                                border: '1px solid ' + groupColor + '40',
+                                                borderRadius: '4px',
+                                                color: groupColor,
+                                                fontSize: '10px',
+                                                fontWeight: 700,
+                                                cursor: 'pointer',
+                                                textTransform: 'uppercase',
+                                                letterSpacing: '0.4px',
+                                            }}
+                                        >
+                                            <span>{xsltGroupExpanded[group] ? '▼' : '▶'}</span>
+                                            <span>{groupLabel}</span>
+                                            <span style={{
+                                                marginLeft: 'auto',
+                                                padding: '1px 5px',
+                                                background: '#0f172a',
+                                                borderRadius: '3px',
+                                                fontSize: '9px',
+                                                fontWeight: 700,
+                                                color: groupColor,
+                                            }}>
+                                                {list.length}
+                                            </span>
+                                        </button>
+                                        {xsltGroupExpanded[group] && list.length > 0 && (
+                                            <div style={{ marginTop: '4px' }}>
+                                                {list.map((b, idx) => {
+                                                    const globalIndex = xsltInstrumented.bindings.indexOf(b) + 1;
+                                                    const displayText = b.kind === 'dropdown'
+                                                        ? b.xpath
+                                                        : b.kind === 'static'
+                                                            ? b.xpath.replace(/^static:\s*/, '').slice(0, 36)
+                                                            : (b.elementType || '') + (b.xpath.includes('=') ? ' ' + (b.xpath.match(/(\w+)="([^"]*)"/)?.[1] || '') + '="..."' : '');
+                                                    return (
+                                                        <div
+                                                            key={idx}
+                                                            data-xslt-binding
+                                                            data-bind-line={b.line}
+                                                            data-bind-col={b.column}
+                                                            onClick={() => handleBindingClick(b)}
+                                                            title={`Satır ${b.line}, col ${b.column} — ${b.xpath}`}
+                                                            style={{
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: '6px',
+                                                                padding: '5px 8px',
+                                                                marginBottom: '2px',
+                                                                background: '#1e293b',
+                                                                border: '1px solid #334155',
+                                                                borderRadius: '3px',
+                                                                cursor: 'pointer',
+                                                                transition: 'background 0.1s, border-color 0.1s',
+                                                            }}
+                                                            onMouseEnter={(e) => {
+                                                                e.currentTarget.style.background = 'rgba(99, 102, 241, 0.12)';
+                                                                e.currentTarget.style.borderColor = 'rgba(99, 102, 241, 0.4)';
+                                                            }}
+                                                            onMouseLeave={(e) => {
+                                                                e.currentTarget.style.background = '#1e293b';
+                                                                e.currentTarget.style.borderColor = '#334155';
+                                                            }}
+                                                        >
+                                                            <span style={{
+                                                                minWidth: '24px',
+                                                                padding: '1px 4px',
+                                                                background: groupBg,
+                                                                border: '1px solid ' + groupColor + '50',
+                                                                borderRadius: '3px',
+                                                                fontSize: '9px',
+                                                                fontWeight: 700,
+                                                                color: groupColor,
+                                                                textAlign: 'center',
+                                                                fontFamily: 'monospace',
+                                                            }}>
+                                                                B{globalIndex}
+                                                            </span>
+                                                            <span style={{
+                                                                flex: 1,
+                                                                fontSize: '10px',
+                                                                color: '#e2e8f0',
+                                                                fontFamily: 'monospace',
+                                                                whiteSpace: 'nowrap',
+                                                                overflow: 'hidden',
+                                                                textOverflow: 'ellipsis',
+                                                            }}>
+                                                                {displayText}
+                                                            </span>
+                                                            <span style={{
+                                                                fontSize: '9px',
+                                                                color: '#64748b',
+                                                                fontFamily: 'monospace',
+                                                            }}>
+                                                                {b.line}:{b.column}
+                                                            </span>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
                                     </div>
-                                    <div style={{
-                                        fontSize: '10px',
-                                        color: '#64748b',
-                                        fontFamily: 'monospace',
-                                        whiteSpace: 'nowrap',
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis',
-                                    }}>
-                                        {s.preview || s.template.replace(/\s+/g, ' ').slice(0, 50)}
-                                    </div>
-                                </div>
-                            ))
+                                );
+                            })
                         )}
                     </div>
                 </div>
