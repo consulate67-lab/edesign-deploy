@@ -1929,10 +1929,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         display:block + margin:0 auto ile ortalanır. */}
                     <div style={{
                         flex: 1, minHeight: 0, position: 'relative',
-                        background: '#475569',  // koyu gri — ofis zemini
-                        backgroundImage: 'radial-gradient(at 50% 50%, #64748b 0%, #1e293b 100%)',  // subtle vignette
+                        // Sprint 16 Aşama 5c — Container background/padding kaldırıldı.
+                        // Eski: '#475569' + radial-gradient (ofis zemini) + padding 16px 8px.
+                        // iframe doğal width (örn. e-Fatura A4 ~595px) container içinde
+                        // sola yaslanır, boş gri alan olmaz. Selim'in "boşluk kısmını
+                        // doldurmuyorsun" → "bu bant içinde kalsın" geri bildirimi.
+                        background: 'transparent',
                         overflow: 'auto',  // scroll DOĞAL — iframe scaledHeight container'ı aşarsa scroll
-                        padding: '16px 8px',  // Sprint 16 Aşama 5a — preview iframe'i büyütmek için padding azaltıldı (48px 24px → 16px 8px)
+                        padding: 0,
                     }}>
                         {previewHtml ? (
                             <iframe
@@ -1955,7 +1959,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     // noktasında ölçülüyor (handleIframeLoad).
                                     height: `${Math.round(iframeContentHeight * previewZoom)}px`,
                                     display: 'block',
-                                    margin: '0 auto',  // yatay ortala
+                                    margin: '0',  // Sprint 16 Aşama 5c — sola yaslı (auto kaldırıldı, padding kalktı)
                                 }}
                                 title="XSLT Render Preview"
                             />
