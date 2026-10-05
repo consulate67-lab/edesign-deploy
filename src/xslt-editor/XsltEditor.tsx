@@ -244,6 +244,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     type SelectedObject =
         | { source: 'xslt'; binding: import('./utils/xsltRender').XsltBinding }
         | { source: 'preview'; element: HTMLElement; tagName: string; renderIndex: string | null }
+        | { source: 'both'; binding: import('./utils/xsltRender').XsltBinding; previewElement: HTMLElement | null }
         | null;
     const [selectedObject, setSelectedObject] = useState<SelectedObject>(null);
     // Draft state — source'a göre alanlar:
@@ -498,8 +499,15 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         if (activeTab !== 'xslt') setActiveTab('xslt');
         const ed = editorRef.current;
         if (ed) ed.focus();
-        // Sprint 14 Aşama 2 — Property drawer'ı aç + draft başlat.
-        setSelectedObject({ source: 'xslt', binding: b });
+        // Sprint 14 Aşama 2 + Sprint 15 Aşama 3 — Property drawer'ı aç + draft başlat.
+        // Eğer iframe'de son tıklanan preview element varsa, drawer birleşik
+        // gösterir (XSLT bölüm + Preview font/stil bölümü).
+        const previewEl = lastPreviewElementRef.current;
+        setSelectedObject({
+            source: previewEl ? 'both' : 'xslt',
+            binding: b,
+            previewElement: previewEl,
+        });
         // Editable draft: kind'e göre mevcut değeri çıkar
         let draftValue = '';
         let attrName: string | undefined;
@@ -569,6 +577,12 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
      */
     const selectedObjectRef = useRef(selectedObject);
     useEffect(() => { selectedObjectRef.current = selectedObject; }, [selectedObject]);
+
+    // Sprint 15 Aşama 3 — Son tıklanan preview element ref. handleBindingClick
+    // bu ref'i okuyarak selectedObject'e previewElement ekler → XSLT drawer'da
+    // hem XSLT binding (xpath/text/attr) hem preview element (font/renk/kalınlık)
+    // birleşik görünür. Selim'in brief'i: "font/kalınlık/çizgili ekrana gelmedi".
+    const lastPreviewElementRef = useRef<HTMLElement | null>(null);
 
     /**
      * Editor mount — ref + Monaco API sakla, XSLT autocomplete provider kayıt.
@@ -884,6 +898,9 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             draft[k] = cs.getPropertyValue(k) || '';
         });
         setPropertyDraft(draft);
+        // Sprint 15 Aşama 3 — Son tıklanan preview element ref'i güncelle.
+        // handleBindingClick bu ref'i okuyarak drawer'ı birleşik gösterebilir.
+        lastPreviewElementRef.current = indexedEl;
         console.log(`[XSLTEditor] Preview click → ${indexedEl.tagName} render-index=${renderIndex}`);
     }, []);
 
@@ -2157,6 +2174,165 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     >
                                         🗑 XSLT'ten Sil
                                     </button>
+                                </div>
+                            </>
+                        );
+                    })()}
+
+                    {/* Sprint 15 Aşama 3 — Both source drawer (XSLT + Preview birleşik).
+                        Sol panelden XSLT binding tıklanırken iframe'de son tıklanan
+                        preview element varsa bu blok açılır. Üst kısımda XSLT
+                        bölümü (xpath/text/attr), alt kısımda Preview bölümü
+                        (font/renk/kalınlık/çizgili/eğik/boyut) gösterilir.
+                        Selim'in brief'i: "font/kalınlık/çizgili ekrana gelmedi". */}
+                    {selectedObject?.source === 'both' && (() => {
+                        const b = selectedObject.binding;
+                        const previewEl = selectedObject.previewElement;
+                        if (!previewEl) return null;
+                        const tag = previewEl.tagName.toLowerCase();
+                        const cs = window.getComputedStyle(previewEl);
+                        const isImg = tag === 'img';
+                        const isText = ['p', 'div', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'td', 'th', 'b', 'i', 'strong', 'em'].includes(tag);
+                        const isTable = tag === 'table' || tag === 'tr';
+                        const isInput = ['input', 'button', 'textarea', 'select'].includes(tag);
+                        const kindDisplay = b.kind === 'dropdown' ? 'Dinamik Veri'
+                            : b.kind === 'static' ? 'Statik Metin'
+                            : 'Element Yapısı';
+                        const kindColor = b.kind === 'dropdown' ? '#a5b4fc'
+                            : b.kind === 'static' ? '#6ee7b7'
+                            : '#fcd34d';
+                        const globalIndex = xsltInstrumented.bindings.indexOf(b) + 1;
+                        const fieldLabel = b.kind === 'dropdown' ? 'XPath (select)'
+                            : b.kind === 'static' ? 'Metin İçeriği'
+                            : `Attribute (${propertyDraft['__attr__'] || 'select'})`;
+                        return (
+                            <>
+                                {/* Header — both badge */}
+                                <div style={{
+                                    padding: '12px 14px', background: '#0a1024',
+                                    borderBottom: '1px solid #1e293b',
+                                    display: 'flex', alignItems: 'center', gap: '8px',
+                                }}>
+                                    <div style={{
+                                        minWidth: '34px', padding: '2px 6px',
+                                        background: 'rgba(99, 102, 241, 0.2)',
+                                        border: '1px solid rgba(99, 102, 241, 0.5)',
+                                        borderRadius: '4px', fontSize: '11px',
+                                        fontWeight: 700, color: '#a5b4fc',
+                                        textAlign: 'center', fontFamily: 'monospace',
+                                    }}>B{globalIndex}</div>
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ fontSize: '12px', fontWeight: 700, color: '#e2e8f0', letterSpacing: '0.4px' }}>
+                                            Property · XSLT + Preview
+                                        </div>
+                                        <div style={{ fontSize: '10px', color: kindColor, fontWeight: 600, letterSpacing: '0.3px' }}>
+                                            {kindDisplay}{b.elementType ? ` · xsl:${b.elementType}` : ''} + &lt;{tag}&gt;
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => setSelectedObject(null)}
+                                        title="Kapat (Esc)"
+                                        data-close-property-drawer
+                                        style={{ padding: '4px 8px', background: 'transparent', border: '1px solid #334155', borderRadius: '4px', color: '#94a3b8', cursor: 'pointer', fontSize: '11px' }}
+                                        onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)'; e.currentTarget.style.color = '#fca5a5'; }}
+                                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#94a3b8'; }}
+                                    >✕</button>
+                                </div>
+                                <div style={{ flex: 1, padding: '14px', overflowY: 'auto' }}>
+                                    {/* XSLT bölümü */}
+                                    <label style={{ display: 'block', fontSize: '10px', fontWeight: 700, color: '#a5b4fc', letterSpacing: '0.4px', textTransform: 'uppercase', marginBottom: '6px' }}>
+                                        {fieldLabel}
+                                    </label>
+                                    <textarea
+                                        data-property-input
+                                        value={propertyDraft.value || ''}
+                                        onChange={(e) => handleXsltPropertyChange(e.target.value)}
+                                        spellCheck={false}
+                                        style={{
+                                            width: '100%', minHeight: '50px', maxHeight: '150px',
+                                            padding: '8px 10px', background: '#1e293b',
+                                            border: '1px solid #334155', borderRadius: '4px',
+                                            color: '#e2e8f0', fontSize: '12px', fontFamily: 'monospace',
+                                            resize: 'vertical', outline: 'none',
+                                        }}
+                                        onFocus={(e) => e.currentTarget.style.borderColor = '#6366f1'}
+                                        onBlur={(e) => e.currentTarget.style.borderColor = '#334155'}
+                                    />
+                                    <div style={{
+                                        marginTop: '6px', fontSize: '9px', color: '#64748b', fontFamily: 'monospace',
+                                    }}>Line {b.line}:col {b.column}</div>
+                                    {/* Preview bölümü — font/stil */}
+                                    <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px solid #1e293b' }}>
+                                        <div style={{ fontSize: '10px', fontWeight: 700, color: '#fcd34d', letterSpacing: '0.4px', textTransform: 'uppercase', marginBottom: '8px' }}>
+                                            Önizleme Stilleri
+                                        </div>
+                                        {isImg && (
+                                            <>
+                                                <FieldText label="src (URL)" currentValue={previewEl.getAttribute('src') || ''} onChange={(v) => previewEl.setAttribute('src', v)} />
+                                                <FieldText label="alt" currentValue={previewEl.getAttribute('alt') || ''} onChange={(v) => previewEl.setAttribute('alt', v)} />
+                                                <FieldText label="width" currentValue={previewEl.getAttribute('width') || cs.width} onChange={(v) => previewEl.style.setProperty('width', v)} />
+                                                <FieldText label="height" currentValue={previewEl.getAttribute('height') || cs.height} onChange={(v) => previewEl.style.setProperty('height', v)} />
+                                                <FieldSelect label="object-fit" currentValue={cs.objectFit} options={['', 'contain', 'cover', 'fill', 'scale-down', 'none']} onChange={(v) => handlePreviewPropertyChange('object-fit', v)} />
+                                            </>
+                                        )}
+                                        {isText && (
+                                            <>
+                                                <FieldSelect label="font-weight (kalınlık)" currentValue={cs.fontWeight} options={['normal', 'bold', '100', '200', '300', '400', '500', '600', '700', '800', '900']} onChange={(v) => handlePreviewPropertyChange('font-weight', v)} />
+                                                <FieldSelect label="font-style (eğik)" currentValue={cs.fontStyle} options={['normal', 'italic', 'oblique']} onChange={(v) => handlePreviewPropertyChange('font-style', v)} />
+                                                <FieldSelect label="text-decoration (çizgili)" currentValue={cs.textDecorationLine} options={['none', 'underline', 'line-through', 'overline']} onChange={(v) => handlePreviewPropertyChange('text-decoration-line', v)} />
+                                                <FieldText label="font-size" currentValue={cs.fontSize} onChange={(v) => handlePreviewPropertyChange('font-size', v)} />
+                                                <FieldText label="color" currentValue={cs.color} onChange={(v) => handlePreviewPropertyChange('color', v)} />
+                                                <FieldSelect label="text-align" currentValue={cs.textAlign} options={['left', 'right', 'center', 'justify']} onChange={(v) => handlePreviewPropertyChange('text-align', v)} />
+                                                <FieldText label="font-family (font tipi)" currentValue={cs.fontFamily} onChange={(v) => handlePreviewPropertyChange('font-family', v)} />
+                                            </>
+                                        )}
+                                        {isTable && (
+                                            <>
+                                                <FieldText label="border" currentValue={cs.border} onChange={(v) => handlePreviewPropertyChange('border', v)} />
+                                                {tag === 'table' && <FieldText label="cellpadding" currentValue={previewEl.getAttribute('cellpadding') || ''} onChange={(v) => previewEl.setAttribute('cellpadding', v)} />}
+                                                {tag === 'table' && <FieldText label="cellspacing" currentValue={previewEl.getAttribute('cellspacing') || ''} onChange={(v) => previewEl.setAttribute('cellspacing', v)} />}
+                                                <FieldText label="width" currentValue={cs.width} onChange={(v) => handlePreviewPropertyChange('width', v)} />
+                                                <FieldText label="height" currentValue={cs.height} onChange={(v) => handlePreviewPropertyChange('height', v)} />
+                                            </>
+                                        )}
+                                        {isInput && (
+                                            <>
+                                                <FieldText label="type" currentValue={previewEl.getAttribute('type') || 'text'} onChange={(v) => previewEl.setAttribute('type', v)} />
+                                                <FieldText label="placeholder" currentValue={previewEl.getAttribute('placeholder') || ''} onChange={(v) => previewEl.setAttribute('placeholder', v)} />
+                                                <FieldText label="value" currentValue={previewEl.getAttribute('value') || ''} onChange={(v) => previewEl.setAttribute('value', v)} />
+                                                <FieldText label="font-size" currentValue={cs.fontSize} onChange={(v) => handlePreviewPropertyChange('font-size', v)} />
+                                                <FieldText label="color" currentValue={cs.color} onChange={(v) => handlePreviewPropertyChange('color', v)} />
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                                <div style={{
+                                    padding: '10px 14px', background: '#0a1024',
+                                    borderTop: '1px solid #1e293b', fontSize: '10px',
+                                    color: '#64748b', fontFamily: 'monospace',
+                                    display: 'flex', justifyContent: 'space-between', gap: '6px',
+                                }}>
+                                    <button
+                                        onClick={() => { previewEl.style.display = previewEl.style.display === 'none' ? '' : 'none'; setSelectedObject(null); }}
+                                        title="Sadece preview'dan gizle"
+                                        data-hide-preview-element
+                                        style={{ flex: 1, padding: '6px 8px', background: 'rgba(252, 211, 77, 0.15)', border: '1px solid rgba(252, 211, 77, 0.4)', borderRadius: '4px', color: '#fcd34d', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
+                                    >👁 Gizle</button>
+                                    <button
+                                        onClick={() => {
+                                            const lineAttr = previewEl.getAttribute('data-line');
+                                            const colAttr = previewEl.getAttribute('data-column');
+                                            if (!lineAttr || !colAttr) return;
+                                            const line = Number(lineAttr); const column = Number(colAttr);
+                                            if (isNaN(line) || isNaN(column)) return;
+                                            const fakeBinding = { xpath: '', offset: 0, line, column, kind: 'dropdown' as const };
+                                            const updated = removeXsltBinding(xsltContent, fakeBinding);
+                                            if (updated !== xsltContent) { setXsltContent(updated); setSelectedObject(null); }
+                                        }}
+                                        title="XSLT kaynak kodundan tamamen kaldır"
+                                        data-remove-from-xslt
+                                        style={{ flex: 1, padding: '6px 8px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)', borderRadius: '4px', color: '#fca5a5', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
+                                    >🗑 XSLT'ten Sil</button>
                                 </div>
                             </>
                         );
