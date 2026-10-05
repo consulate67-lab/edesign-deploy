@@ -38,11 +38,12 @@ import {
 import { transformXmlWithXslt } from '../xsltTransformer';
 import { getInlineXslt } from '../xsltContent';
 import { getAntrepoTemplateById } from './antrepoTemplates';
-import { renderAndAnnotateXslt, parseXsltInstrumented, updateXSLTBinding, removeXsltBinding, insertXsltElement } from './utils/xsltRender';
+import { renderAndAnnotateXslt, parseXsltInstrumented, updateXSLTBinding, removeXsltBinding, insertXsltElement, nextXsltObjId } from './utils/xsltRender';
 import type { XsltBinding } from './utils/xsltRender';
 import {
-    findBindingSourceOffset, findEnclosingLiteralTag, findImgTagBySrc,
-    setTagAttribute, setTagStyleProperty, type SourceTag,
+    findBindingSourceOffset, findEnclosingLiteralTag, findImgTagBySrc, findObjTag,
+    setTagAttribute, setTagStyleProperty, replaceElementContent, removeElement, escapeXmlText,
+    type SourceTag,
 } from './utils/xsltStyleEdit';
 import { api } from '../api';
 import { XSLT_ELEMENTS, UBL_XPATHS, lintXslt } from './xsltSchema';
@@ -239,6 +240,106 @@ const FieldSelect: React.FC<{ label: string; currentValue: string; options: stri
     </div>
     );
 };
+const FieldTextArea: React.FC<{ label: string; currentValue: string; onChange: (v: string) => void }> = ({ label, currentValue, onChange }) => {
+    const [value, setValue] = useState(currentValue);
+    return (
+        <div style={{ marginBottom: '10px' }}>
+            <label style={fieldLabelStyle}>{label}</label>
+            <textarea
+                data-object-text
+                value={value}
+                spellCheck={false}
+                onChange={(e) => { setValue(e.target.value); onChange(e.target.value); }}
+                style={{ ...fieldInputStyle, minHeight: '70px', maxHeight: '240px', resize: 'vertical', fontFamily: 'inherit' }}
+                onFocus={(e) => e.currentTarget.style.borderColor = '#6366f1'}
+                onBlur={(e) => e.currentTarget.style.borderColor = '#334155'}
+            />
+        </div>
+    );
+};
+
+/** Metin → <br/> ile ayrılmış satırlar (XSLT literal içerik ve önizleme HTML'i aynı). */
+const textToMarkup = (text: string): string => text.split('\n').map(escapeXmlText).join('<br/>');
+
+type TableModel = { header: boolean; rows: string[][] };
+const readTableModel = (table: HTMLTableElement): TableModel => {
+    const rows = Array.from(table.rows);
+    const header = rows.length > 0 && Array.from(rows[0].cells).every(c => c.tagName === 'TH');
+    const cols = Math.max(1, ...rows.map(r => r.cells.length));
+    return {
+        header,
+        rows: rows.map(r => Array.from({ length: cols }, (_, i) => (r.cells[i]?.textContent || '').trim())),
+    };
+};
+const tableModelToMarkup = (m: TableModel): string => m.rows.map((r, ri) => {
+    const cell = m.header && ri === 0 ? 'th' : 'td';
+    return `<tr>${r.map(t => `<${cell}>${escapeXmlText(t)}</${cell}>`).join('')}</tr>`;
+}).join('');
+
+const MAX_TABLE_COLS = 12;
+const MAX_TABLE_ROWS = 50;
+const TableEditor: React.FC<{ table: HTMLTableElement; onChange: (markup: string) => void }> = ({ table, onChange }) => {
+    const [model, setModel] = useState<TableModel>(() => readTableModel(table));
+    const cols = model.rows[0]?.length ?? 1;
+    const bodyRows = model.rows.length - (model.header ? 1 : 0);
+    const update = (next: TableModel) => { setModel(next); onChange(tableModelToMarkup(next)); };
+    const setCols = (n: number) => {
+        const c = Math.min(MAX_TABLE_COLS, Math.max(1, n || 1));
+        update({ ...model, rows: model.rows.map((r, ri) => Array.from({ length: c }, (_, i) => r[i] ?? (model.header && ri === 0 ? `Başlık ${i + 1}` : ''))) });
+    };
+    const setBodyRows = (n: number) => {
+        const target = Math.min(MAX_TABLE_ROWS, Math.max(1, n || 1)) + (model.header ? 1 : 0);
+        const rows = model.rows.slice(0, target);
+        while (rows.length < target) rows.push(Array.from({ length: cols }, () => ''));
+        update({ ...model, rows });
+    };
+    const setHeader = (header: boolean) => {
+        if (header === model.header) return;
+        const rows = header
+            ? [Array.from({ length: cols }, (_, i) => `Başlık ${i + 1}`), ...model.rows]
+            : model.rows.slice(1);
+        update({ header, rows: rows.length ? rows : [Array.from({ length: cols }, () => '')] });
+    };
+    const setCell = (ri: number, ci: number, v: string) => {
+        update({ ...model, rows: model.rows.map((r, i) => (i === ri ? r.map((t, j) => (j === ci ? v : t)) : r)) });
+    };
+    const numberInput = (label: string, value: number, max: number, onSet: (n: number) => void, attr: string) => (
+        <div style={{ flex: 1 }}>
+            <label style={fieldLabelStyle}>{label}</label>
+            <input
+                type="number" min={1} max={max} value={value}
+                {...{ [attr]: true }}
+                onChange={(e) => onSet(Number(e.target.value))}
+                style={fieldInputStyle}
+            />
+        </div>
+    );
+    return (
+        <div data-table-editor>
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+                {numberInput('Sütun sayısı', cols, MAX_TABLE_COLS, setCols, 'data-table-cols')}
+                {numberInput('Satır sayısı', bodyRows, MAX_TABLE_ROWS, setBodyRows, 'data-table-rows')}
+            </div>
+            <label style={{ ...fieldLabelStyle, display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', marginBottom: '10px' }}>
+                <input type="checkbox" data-table-header checked={model.header} onChange={(e) => setHeader(e.target.checked)} />
+                Başlık satırı
+            </label>
+            <label style={fieldLabelStyle}>Hücre içerikleri</label>
+            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, gap: '3px', marginBottom: '10px' }}>
+                {model.rows.map((r, ri) => r.map((t, ci) => (
+                    <input
+                        key={`${ri}-${ci}`}
+                        data-table-cell={`${ri}-${ci}`}
+                        value={t}
+                        title={model.header && ri === 0 ? `Başlık ${ci + 1}` : `Satır ${ri + (model.header ? 0 : 1)}, Sütun ${ci + 1}`}
+                        onChange={(e) => setCell(ri, ci, e.target.value)}
+                        style={{ ...fieldInputStyle, padding: '4px 5px', fontSize: '11px', fontWeight: model.header && ri === 0 ? 700 : 400, minWidth: 0 }}
+                    />
+                )))}
+            </div>
+        </div>
+    );
+};
 
 export const XSLTEditor: React.FC<XsltEditorProps> = ({
     initialModuleId = 'fatura',
@@ -294,7 +395,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     // tekrar bulmak ve XSLT kaynağındaki etiketi çözmek için kullanılır.
     type PreviewLocator =
         | { kind: 'bind'; index: number }
-        | { kind: 'img'; src: string; ordinal: number };
+        | { kind: 'img'; src: string; ordinal: number }
+        | { kind: 'obj'; id: string };
     type SelectedObject = {
         id: number;
         binding: XsltBinding | null;
@@ -305,6 +407,9 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const selectionIdRef = useRef(0);
     const pendingStyleRef = useRef<Record<string, string>>({});
     const pendingAttrRef = useRef<Record<string, string>>({});
+    const pendingContentRef = useRef<string | null>(null);
+    // Ekle panelinden eklenen obje, yeni önizleme yüklenince seçilir.
+    const pendingSelectRef = useRef<PreviewLocator | null>(null);
     const sourceEditDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const previewScrollRef = useRef<number>(0);
     const pendingPreviewScrollRef = useRef<number | null>(null);
@@ -573,6 +678,9 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         if (locator.kind === 'bind') {
             return doc.querySelector<HTMLElement>(`[data-render-indexes~="${locator.index}"]`);
         }
+        if (locator.kind === 'obj') {
+            return doc.querySelector<HTMLElement>(`[data-xslt-obj="${CSS.escape(locator.id)}"]`);
+        }
         const imgs = Array.from(doc.querySelectorAll('img')).filter(img => img.getAttribute('src') === locator.src);
         return imgs[locator.ordinal] ?? null;
     }, []);
@@ -580,6 +688,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const resolveSourceTag = useCallback((xslt: string, locator: PreviewLocator | null): SourceTag | null => {
         if (!locator) return null;
         if (locator.kind === 'img') return findImgTagBySrc(xslt, locator.src, locator.ordinal);
+        if (locator.kind === 'obj') return findObjTag(xslt, locator.id);
         const bindings = bindingsRef.current;
         const b = bindings[locator.index];
         if (!b) return null;
@@ -603,8 +712,10 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         }
         const styles = pendingStyleRef.current;
         const attrs = pendingAttrRef.current;
+        const content = pendingContentRef.current;
         pendingStyleRef.current = {};
         pendingAttrRef.current = {};
+        pendingContentRef.current = null;
         const sel = selectedObjectRef.current;
         if (!sel?.locator) return;
         let locator = sel.locator;
@@ -620,6 +731,10 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             next = setTagAttribute(next, tag, attr, value);
             if (attr === 'src' && locator.kind === 'img') locator = { ...locator, src: value };
         }
+        if (content !== null) {
+            const tag = resolveSourceTag(next, locator);
+            if (tag) next = replaceElementContent(next, tag, content);
+        }
         if (locator !== sel.locator) {
             const updated = { ...sel, locator };
             selectedObjectRef.current = updated;
@@ -627,7 +742,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         }
         if (next !== xsltContentRef.current) {
             setXsltContent(next);
-            console.log(`[XSLTEditor] Özellik XSLT'ye yazıldı → ${[...Object.keys(styles), ...Object.keys(attrs)].join(', ')}`);
+            console.log(`[XSLTEditor] Özellik XSLT'ye yazıldı → ${[...Object.keys(styles), ...Object.keys(attrs), ...(content !== null ? ['içerik'] : [])].join(', ')}`);
         }
     }, [resolveSourceTag]);
 
@@ -657,6 +772,16 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         sel.element?.setAttribute(attr, value);
         if (!sel.locator) return;
         pendingAttrRef.current[attr] = value;
+        scheduleSourceFlush();
+    }, [scheduleSourceFlush]);
+
+    /** Objenin iç içeriği (metin / tablo satırları): önizleme + XSLT. */
+    const handleContentChange = useCallback((markup: string) => {
+        const sel = selectedObjectRef.current;
+        if (!sel) return;
+        if (sel.element) sel.element.innerHTML = markup;
+        if (!sel.locator) return;
+        pendingContentRef.current = markup;
         scheduleSourceFlush();
     }, [scheduleSourceFlush]);
 
@@ -1075,8 +1200,13 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         // renderIndex yukarıda parent/child taramasıyla doldurulmuş olabilir;
         // seçimin XSLT karşılığı yalnızca öğenin kendi annotation'ından çözülür.
         const ownIndex = indexedEl.getAttribute('data-render-index');
+        const objEl = target.closest<HTMLElement>('[data-xslt-obj]');
         let locator: PreviewLocator | null = null;
         let binding: XsltBinding | null = null;
+        if (objEl) {
+            openSelection(null, objEl, { kind: 'obj', id: objEl.getAttribute('data-xslt-obj') || '' });
+            return;
+        }
         if (ownIndex !== null) {
             const index = Number(ownIndex);
             locator = { kind: 'bind', index };
@@ -1124,7 +1254,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             const style = doc.createElement('style');
             style.id = '__xslt-preview-layout';
             style.textContent = 'body{margin-left:auto !important;margin-right:auto !important;}'
-                + '[data-xslt-selected]{outline:2px solid #f59e0b !important;outline-offset:2px;}';
+                + '[data-xslt-selected]{outline:2px solid #f59e0b !important;outline-offset:2px;}'
+                + '[data-xslt-obj]{cursor:pointer;}[data-xslt-obj]:hover{outline:2px dashed #6366f1;outline-offset:2px;}';
             doc.head.appendChild(style);
         }
         doc.documentElement.style.setProperty('zoom', String(zoom));
@@ -1223,6 +1354,13 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 }
             }
             doc.defaultView?.scrollTo(0, previewScrollRef.current);
+            const toSelect = pendingSelectRef.current;
+            pendingSelectRef.current = null;
+            const newEl = toSelect ? findPreviewElement(toSelect) : null;
+            if (newEl) {
+                newEl.scrollIntoView({ block: 'center' });
+                openSelection(null, newEl, toSelect);
+            }
             setTimeout(() => {
                 if (!autoFitRef.current) return;
                 const zoom = fitZoomToContainer();
@@ -1233,7 +1371,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         };
 
         bindListener();
-    }, [handleIframeBodyClick, fitZoomToContainer, applyPreviewZoom, findPreviewElement]);
+    }, [handleIframeBodyClick, fitZoomToContainer, applyPreviewZoom, findPreviewElement, openSelection]);
 
     /**
      * iframe onLoad → handleIframeLoad. previewHtml değiştiğinde iframe
@@ -1269,9 +1407,11 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             if (!type) return;
             e.preventDefault();
             e.stopPropagation();
-            const updated = insertXsltElement(xsltContent, type);
+            const id = nextXsltObjId(xsltContent);
+            const updated = insertXsltElement(xsltContent, type, id);
             if (updated !== xsltContent) {
                 pendingPreviewScrollRef.current = Number.MAX_SAFE_INTEGER;
+                pendingSelectRef.current = { kind: 'obj', id };
                 setXsltContent(updated);
                 console.log(`[XSLTEditor] Drop insert: ${type} (${updated.length - xsltContent.length} chars)`);
             }
@@ -1914,9 +2054,11 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                         e.dataTransfer.effectAllowed = 'copy';
                                     }}
                                     onClick={() => {
-                                        const updated = insertXsltElement(xsltContent, item.type);
+                                        const id = nextXsltObjId(xsltContent);
+                                        const updated = insertXsltElement(xsltContent, item.type, id);
                                         if (updated !== xsltContent) {
                                             pendingPreviewScrollRef.current = Number.MAX_SAFE_INTEGER;
+                                            pendingSelectRef.current = { kind: 'obj', id };
                                             setXsltContent(updated);
                                             console.log(`[XSLTEditor] Click insert: ${item.type}`);
                                         }
@@ -2215,12 +2357,15 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         const cs = el && view ? view.getComputedStyle(el) : null;
                         const isImg = tag === 'img';
                         const isInput = ['input', 'button', 'textarea', 'select'].includes(tag);
+                        const isObj = sel.locator?.kind === 'obj';
+                        const isTable = tag === 'table';
                         const bindingIndex = sel.locator?.kind === 'bind'
                             ? sel.locator.index
                             : (b ? xsltInstrumented.bindings.indexOf(b) : -1);
                         const kindDisplay = kind === 'dropdown' ? 'Dinamik Veri'
                             : kind === 'static' ? 'Statik Metin'
                             : kind === 'element' ? 'Element Yapısı'
+                            : isObj ? `Eklenen Obje · ${isImg ? 'Resim' : isTable ? 'Tablo' : isInput ? 'Input' : 'Metin'}`
                             : isImg ? 'Resim' : 'Önizleme Öğesi';
                         const kindColor = kind === 'dropdown' ? '#a5b4fc'
                             : kind === 'static' ? '#6ee7b7'
@@ -2243,7 +2388,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 </div>
                             );
                         };
-                        const removable = !!b || (sel.locator?.kind === 'img' && canPersist);
+                        const removable = !!b || ((sel.locator?.kind === 'img' || isObj) && canPersist);
                         const handleRemove = () => {
                             if (b) {
                                 const updated = removeXsltBinding(xsltContent, b);
@@ -2253,7 +2398,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             }
                             const tagRange = resolveSourceTag(xsltContent, sel.locator);
                             if (!tagRange) return;
-                            setXsltContent(xsltContent.slice(0, tagRange.start) + xsltContent.slice(tagRange.end));
+                            setXsltContent(removeElement(xsltContent, tagRange));
                             closeSelection();
                         };
                         return (
@@ -2365,6 +2510,20 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     {b && kind !== 'element' && !el && noteBox(
                                         'Bu alan şu anki önizlemede görünmüyor (ör. xsl:if koşulu sağlanmıyor). Görünüm özellikleri yalnızca tasarımda görünen alanlar için düzenlenebilir.',
                                         'warn'
+                                    )}
+
+                                    {isObj && el && isTable && (
+                                        <>
+                                            {sectionTitle('Tablo', '#fcd34d')}
+                                            <TableEditor key={fieldKey('table')} table={el as HTMLTableElement} onChange={handleContentChange} />
+                                        </>
+                                    )}
+
+                                    {isObj && el && !isImg && !isInput && !isTable && (
+                                        <>
+                                            {sectionTitle('Metin İçeriği', '#6ee7b7')}
+                                            <FieldTextArea key={fieldKey('text')} label="Metin" currentValue={el.innerText} onChange={(v) => handleContentChange(textToMarkup(v))} />
+                                        </>
                                     )}
 
                                     {el && cs && isImg && (

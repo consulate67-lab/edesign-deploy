@@ -92,6 +92,52 @@ export function findImgTagBySrc(xslt: string, src: string, ordinal: number): Sou
     return null;
 }
 
+/** Ekle panelinden eklenen objenin (data-xslt-obj="id") açılış etiketi. */
+export function findObjTag(xslt: string, id: string): SourceTag | null {
+    const re = new RegExp(TAG_RE.source, 'g');
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(xslt)) !== null) {
+        if (!m[2] || m[1] === '/') continue;
+        const am = (m[3] || '').match(/\sdata-xslt-obj\s*=\s*(["'])([\s\S]*?)\1/);
+        if (am && am[2] === id) return { name: m[2], start: m.index, end: m.index + m[0].length };
+    }
+    return null;
+}
+
+/** Açılış etiketinden eşleşen kapanış etiketine kadar olan iç içerik aralığı. */
+function findElementContentRange(xslt: string, tag: SourceTag): { start: number; end: number } | null {
+    if (xslt.slice(tag.start, tag.end).endsWith('/>')) return null;
+    const re = new RegExp(TAG_RE.source, 'g');
+    re.lastIndex = tag.end;
+    let depth = 1;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(xslt)) !== null) {
+        if (m[2] !== tag.name || m[4] === '/') continue;
+        depth += m[1] === '/' ? -1 : 1;
+        if (depth === 0) return { start: tag.end, end: m.index };
+    }
+    return null;
+}
+
+/** Öğenin iç içeriğini (açılış ve kapanış etiketi arası) değiştirir. */
+export function replaceElementContent(xslt: string, tag: SourceTag, inner: string): string {
+    const range = findElementContentRange(xslt, tag);
+    if (!range) return xslt;
+    return xslt.slice(0, range.start) + inner + xslt.slice(range.end);
+}
+
+/** Öğeyi açılış etiketinden kapanış etiketine kadar tümüyle siler. */
+export function removeElement(xslt: string, tag: SourceTag): string {
+    const range = findElementContentRange(xslt, tag);
+    const end = range ? xslt.indexOf('>', range.end) + 1 : tag.end;
+    return xslt.slice(0, tag.start) + xslt.slice(end);
+}
+
+/** Metin düğümü için XML kaçışı. */
+export function escapeXmlText(value: string): string {
+    return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 /** Attribute değeri için XML + XSLT AVT kaçışı. */
 function escapeAttr(value: string, quote: string): string {
     return value

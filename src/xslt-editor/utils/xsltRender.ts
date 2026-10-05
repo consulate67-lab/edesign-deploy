@@ -746,21 +746,31 @@ export function removeXsltBinding(xslt: string, b: XsltBinding): string {
     return xslt;
 }
 
+const IMAGE_PLACEHOLDER_SRC = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='100'%3E%3Crect width='100%25' height='100%25' fill='%23e2e8f0' stroke='%2394a3b8'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='13' fill='%23475569'%3EResim URL girin%3C/text%3E%3C/svg%3E";
+
+// data-xslt-obj: özellik panelinin objeyi XSLT kaynağında ve önizlemede
+// bulduğu kalıcı kimlik.
+export const XSLT_ELEMENT_SNIPPETS = {
+    image: (id: string) => `<img data-xslt-obj="${id}" src="${IMAGE_PLACEHOLDER_SRC}" alt="Yeni Resim" width="200" />`,
+    text: (id: string) => `<p data-xslt-obj="${id}">Yeni metin</p>`,
+    table: (id: string) => `<table data-xslt-obj="${id}" border="1" cellpadding="5" style="border-collapse:collapse"><tr><th>Başlık 1</th><th>Başlık 2</th></tr><tr><td>Hücre 1</td><td>Hücre 2</td></tr></table>`,
+    input: (id: string) => `<input data-xslt-obj="${id}" type="text" placeholder="Alan adı" />`,
+} as const;
+export type XsltInsertType = keyof typeof XSLT_ELEMENT_SNIPPETS;
+
+export function nextXsltObjId(xslt: string): string {
+    let max = 0;
+    for (const m of xslt.matchAll(/data-xslt-obj="obj-(\d+)"/g)) max = Math.max(max, Number(m[1]));
+    return `obj-${max + 1}`;
+}
+
 /**
  * Sprint 15 Aşama 2 — XSLT'e yeni element insert (drag-drop ile).
  * Çıktının </body> kapanışından hemen önce snippet'i ekler (4 space indent
  * ile); </body> yoksa son </xsl:template> kapanışından önce.
  */
-export const XSLT_ELEMENT_SNIPPETS = {
-    image: '<img src="yeni-resim.png" alt="Yeni Resim" width="200" />',
-    text: '<p>Yeni metin — düzenlemek için tıklayın</p>',
-    table: '<table border="1" cellpadding="5"><tr><th>Başlık</th></tr><tr><td>Hücre 1</td></tr><tr><td>Hücre 2</td></tr></table>',
-    input: '<input type="text" placeholder="Alan adı" />',
-} as const;
-export type XsltInsertType = keyof typeof XSLT_ELEMENT_SNIPPETS;
-
-export function insertXsltElement(xslt: string, type: XsltInsertType): string {
-    const snippet = XSLT_ELEMENT_SNIPPETS[type];
+export function insertXsltElement(xslt: string, type: XsltInsertType, id = nextXsltObjId(xslt)): string {
+    const snippet = XSLT_ELEMENT_SNIPPETS[type](id);
     // Literal HTML, xsl:stylesheet'in doğrudan çocuğu olamaz (XSLT derleme
     // hatası) — çıktı gövdesinin sonuna, yoksa son template'in içine eklenir.
     for (const closeTag of ['</body>', '</xsl:template>']) {
