@@ -398,6 +398,13 @@ export function renderAndAnnotateXslt(
         const processor = new XSLTProcessor();
         processor.importStylesheet(xsltDoc);
         const resultDoc = processor.transformToDocument(xmlDoc);
+        if (!resultDoc) {
+            return {
+                html: '',
+                error: 'XSLT dönüşümü sonuç üretmedi — stylesheet geçersiz (ör. xsl:template dışında HTML etiketi).',
+                durationMs: performance.now() - start,
+            };
+        }
 
         // Annotation — Sprint 11 Aşama 8: comment-marker tracking (%100 doğru).
         // parseXsltInstrumented XSLT'e <xsl:comment>BIND_X</xsl:comment> marker
