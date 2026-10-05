@@ -976,10 +976,11 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
      * sağ ve alt kesik görünüyordu.
      */
     const fitZoomToContainer = useCallback(() => {
-        // Sprint 16 Aşama 5e — Gerçek fit-to-screen: container genişliği
-        // / içerik genişliği oranını zoom olarak ayarla. Selim'in "yarım
-        // görünüyor" şikayeti — e-Fatura A4 (595px) container'da (1680px)
-        // küçük kalıyordu. Şimdi ilk render'da otomatik fit yapılır.
+        // Sprint 16 Aşama 5e + 5f — Gerçek fit-to-screen: container boyutlarına
+        // (width + height) göre zoom hesapla, içerik hem yatay hem dikey
+        // sığsın. Selim: "fatura canlı izle ekranında neden scroll çıkıyor".
+        // e-Fatura A4 (595×842) container (örn. 840×650) → zoom = min(840/595,
+        // 650/842) = min(1.41, 0.77) = 0.77 (yükseklik sınırlayıcı).
         const iframe = iframeRef.current;
         if (!iframe) return 1.0;
         const doc = iframe.contentDocument;
@@ -987,12 +988,16 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         const container = iframe.parentElement;
         if (!container) return 1.0;
         const containerWidth = container.clientWidth;
+        const containerHeight = container.clientHeight;
         const contentWidth = doc.body.scrollWidth;
+        const contentHeight = doc.body.scrollHeight;
         if (contentWidth <= 0 || containerWidth <= 0) return 1.0;
-        const scale = containerWidth / contentWidth;
-        // Min 0.5, max 2.0 (aşırı zoom'dan kaçın — e-Fatura 595px × 2.8 = 1666px
-        // çok büyük olur, scroll gerekir)
-        return Math.min(2.0, Math.max(0.5, scale));
+        // Hem width hem height sığdır (min)
+        const scaleW = containerWidth / contentWidth;
+        const scaleH = contentHeight > 0 ? containerHeight / contentHeight : Infinity;
+        const scale = Math.min(scaleW, scaleH);
+        // Min 0.25, max 2.0
+        return Math.min(2.0, Math.max(0.25, scale));
     }, []);
 
     const handleIframeLoad = useCallback(() => {
@@ -1911,10 +1916,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     width: '100%',
                                     maxWidth: 'none',
                                     minWidth: '0',
-                                    // scaledHeight = iframeContentHeight × previewZoom.
-                                    // iframe.contentDocument.body.scrollHeight 3 zaman
-                                    // noktasında ölçülüyor (handleIframeLoad).
-                                    height: `${Math.round(iframeContentHeight * previewZoom)}px`,
+                                    // Sprint 16 Aşama 5f — iframe height: 100% (container'ı kapla).
+                                    // Önceki: Math.round(iframeContentHeight * previewZoom) px
+                                    // → content yüksekliği × zoom, iframe kendi scroll'u çıkıyordu
+                                    // (Selim: "fatura canlı izle ekranında neden scroll çıkıyor").
+                                    // Yeni: iframe container'ın tüm yüksekliğini kaplar, içerik
+                                    // büyükse container scroll eder (overflow:auto zaten var).
+                                    height: '100%',
+                                    overflow: 'hidden',  // iframe kendi scroll'unu gizle — container scroll
                                     display: 'block',
                                     margin: '0',  // Sprint 16 Aşama 5c — sola yaslı (auto kaldırıldı, padding kalktı)
                                 }}
