@@ -869,8 +869,16 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const handleIframeBodyClick = useCallback((e: Event) => {
         const target = e.target as HTMLElement | null;
         if (!target || typeof target.closest !== 'function') return;
-        const indexedEl = target.closest('[data-render-index]') as HTMLElement | null;
-        if (!indexedEl) return;
+        // Sprint 16 Aşama 3 — Tüm elementlere tıklama desteği. Önceki kod
+        // sadece data-render-index olan elementlerde çalışıyordu
+        // (closest('[data-render-index]') null ise return). e-Fatura-Sablon
+        // XSLT'sinde 99 HTML element var ama sadece 38'inde data-render-index
+        // var (xsl:value-of ile gelen dinamik veriler). Statik div/table
+        // cell/başlık gibi 61 element tıklanamıyordu → Selim "hiçbir objeye
+        // tıklayamıyorum" şikayeti. closest bulamazsa target'ın kendisini
+        // kullan → tüm element'lere drawer aç.
+        const indexedEl = target.closest('[data-render-index]') as HTMLElement | null
+            || target;
         const lineAttr = indexedEl.getAttribute('data-line');
         const colAttr = indexedEl.getAttribute('data-column');
         const renderIndex = indexedEl.getAttribute('data-render-index');
@@ -884,7 +892,9 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         }
         e.preventDefault();
         e.stopPropagation();
-        // Sprint 15 Aşama 1 — Preview drawer aç (tip-spesifik stil + sil butonları).
+        // Sprint 15 Aşama 1 + Sprint 16 Aşama 3 — Preview drawer aç
+        // (tip-spesifik stil + sil butonları). renderIndex null ise XSLT
+        // bağlantısı yok → drawer sadece style paneli gösterir.
         setSelectedObject({
             source: 'preview',
             element: indexedEl,
@@ -901,7 +911,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         // Sprint 15 Aşama 3 — Son tıklanan preview element ref'i güncelle.
         // handleBindingClick bu ref'i okuyarak drawer'ı birleşik gösterebilir.
         lastPreviewElementRef.current = indexedEl;
-        console.log(`[XSLTEditor] Preview click → ${indexedEl.tagName} render-index=${renderIndex}`);
+        console.log(`[XSLTEditor] Preview click → ${indexedEl.tagName} render-index=${renderIndex ?? '(yok — sadece stil paneli)'}`);
     }, []);
 
     /**

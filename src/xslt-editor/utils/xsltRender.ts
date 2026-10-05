@@ -480,6 +480,33 @@ export function renderAndAnnotateXslt(
     outline: 2px solid rgba(252, 211, 77, 0.9) !important;
     background-color: rgba(252, 211, 77, 0.15) !important;
 }
+/* Sprint 16 Aşama 3 — Tüm INTERACTIVE elementlere cursor:pointer + hafif hover bg.
+   Önceki kod sadece [data-render-index] olan elementlerde cursor değiştiriyordu
+   → statik div/table/başlık gibi 61 element tıklanamıyordu (Selim'in "hiçbir
+   objeye tıklayamıyorum" şikayeti). Şimdi tüm elementler için cursor:pointer
+   + hover'da hafif bg-color (0.04 — annotation olmayanlar için). Render-only
+   inline style değişikliği yapılabilir olduğunu görsel olarak bildirir. */
+div, span, p, table, tr, td, th, h1, h2, h3, h4, h5, h6, img, a {
+    cursor: pointer;
+    transition: background-color 0.15s ease-out;
+}
+div:not([data-render-index]):hover,
+span:not([data-render-index]):hover,
+p:not([data-render-index]):hover,
+table:not([data-render-index]):hover,
+tr:not([data-render-index]):hover,
+td:not([data-render-index]):hover,
+th:not([data-render-index]):hover,
+h1:not([data-render-index]):hover,
+h2:not([data-render-index]):hover,
+h3:not([data-render-index]):hover,
+h4:not([data-render-index]):hover,
+h5:not([data-render-index]):hover,
+h6:not([data-render-index]):hover,
+img:not([data-render-index]):hover,
+a:not([data-render-index]):hover {
+    background-color: rgba(99, 102, 241, 0.04);
+}
 </style>`;
 
         if (/<head([^>]*)>/i.test(html)) {
