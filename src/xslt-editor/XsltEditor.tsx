@@ -1155,6 +1155,11 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             style={{
                 display: 'flex',
                 flexDirection: 'column',
+                // #root display:flex (index.css) — flex:1 olmadan editör içerik
+                // genişliğine büzülüp sayfanın sağını boş bırakıyor.
+                flex: 1,
+                width: '100%',
+                minWidth: 0,
                 height: '100vh',
                 background: '#0f172a',
                 color: '#e2e8f0',
