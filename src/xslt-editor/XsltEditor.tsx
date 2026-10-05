@@ -1542,6 +1542,31 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                             }}>
                                                                 {b.line}:{b.column}
                                                             </span>
+                                                            {/* Sprint 16 Aşama 4b — Render durumu ikonu.
+                                                                showRenderStatus (renderedBindingIndexes.size > 0):
+                                                                  ✓ (yeşil) = render DOM'da görünüyor
+                                                                  ✗ (kırmızı) = render DOM'da görünmüyor (xsl:if false vb.)
+                                                                  · (gri nokta) = render henüz yok / hata
+                                                                border-left renk çubuğuna ek olarak görsel feedback sağlar.
+                                                                XML yüklenmediğinde Set boş → tüm ·, kullanıcı render
+                                                                yapmadığını anlar. */}
+                                                            <span
+                                                                title={showRenderStatus
+                                                                    ? (isRendered ? 'Render\'da görünüyor' : 'Render\'da görünmüyor (xsl:if false vb.)')
+                                                                    : 'Render henüz yapılmadı / XML yükle'}
+                                                                style={{
+                                                                    fontSize: '12px',
+                                                                    fontWeight: 700,
+                                                                    color: showRenderStatus
+                                                                        ? (isRendered ? '#10b981' : '#ef4444')
+                                                                        : '#64748b',
+                                                                    minWidth: '12px',
+                                                                    textAlign: 'center',
+                                                                    lineHeight: '1',
+                                                                }}
+                                                            >
+                                                                {showRenderStatus ? (isRendered ? '✓' : '✗') : '·'}
+                                                            </span>
                                                         </div>
                                                     );
                                                 })}
