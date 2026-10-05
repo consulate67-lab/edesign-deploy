@@ -1279,13 +1279,12 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         body.addEventListener('drop', dropHandler);
         console.log(`[XSLTEditor] iframe listener re-bound (previewHtml changed, scrollHeight=${scrollH})`);
 
+        // srcDoc değişirken iframe.contentDocument body'si henüz null olan yeni
+        // dokümanı gösterebilir — dinleyiciler eklendikleri doc/body'den kaldırılır.
         return () => {
-            const curDoc = iframe.contentDocument;
-            if (curDoc) {
-                curDoc.removeEventListener('click', handleIframeBodyClick, { capture: true });
-                curDoc.body.removeEventListener('dragover', dragOverHandler);
-                curDoc.body.removeEventListener('drop', dropHandler);
-            }
+            doc.removeEventListener('click', handleIframeBodyClick, { capture: true });
+            body.removeEventListener('dragover', dragOverHandler);
+            body.removeEventListener('drop', dropHandler);
         };
     }, [previewHtml, handleIframeBodyClick, xsltContent]);
 
