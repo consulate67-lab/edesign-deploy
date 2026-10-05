@@ -276,9 +276,9 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
 
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const previewContainerRef = useRef<HTMLDivElement>(null);
-    // Kullanıcı +/- ile zoom'u elle değiştirirse false olur; resize/re-render
-    // sonrası otomatik sığdırma yalnızca true iken yapılır. "Fit" tekrar açar.
-    const autoFitRef = useRef<boolean>(true);
+    // Önizleme %100 açılır; resize/re-render sonrası otomatik sığdırma yalnızca
+    // "Fit" ile açıldığında yapılır, +/- ile elle zoom tekrar kapatır.
+    const autoFitRef = useRef<boolean>(false);
     const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
     // Sprint 8 Aşama 2 — Monaco API instance (provider kayıt + marker set için)
     const monacoRef = useRef<typeof import('monaco-editor') | null>(null);
@@ -307,7 +307,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const pendingAttrRef = useRef<Record<string, string>>({});
     const sourceEditDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const previewScrollRef = useRef<number>(0);
-    const resetPreviewScrollRef = useRef<boolean>(false);
+    const pendingPreviewScrollRef = useRef<number | null>(null);
     // Draft state — source'a göre alanlar:
     // - xslt: { value: string; attrName?: string }
     // - preview: Record<string, string> (örn: { 'font-weight': 'bold', color: '#9a3412' })
@@ -363,7 +363,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     // Modül değişimi → inline XSLT yükle
     // ------------------------------------------------------------------------
     useEffect(() => {
-        resetPreviewScrollRef.current = true;
+        pendingPreviewScrollRef.current = 0;
         setSelectedObject(null);
         if (initialXslt && moduleId === initialModuleId) {
             // İlk yükleme, kullanıcı verisi varsa onu kullan
@@ -421,9 +421,9 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             );
             // Stil/metin düzenlemesi sonrası yeniden render'da önizleme başa
             // atlamasın — yeni doküman yüklenince bu konuma dönülür.
-            if (resetPreviewScrollRef.current) {
-                previewScrollRef.current = 0;
-                resetPreviewScrollRef.current = false;
+            if (pendingPreviewScrollRef.current !== null) {
+                previewScrollRef.current = pendingPreviewScrollRef.current;
+                pendingPreviewScrollRef.current = null;
             } else {
                 previewScrollRef.current = iframeRef.current?.contentWindow?.scrollY ?? 0;
             }
@@ -1271,6 +1271,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             e.stopPropagation();
             const updated = insertXsltElement(xsltContent, type);
             if (updated !== xsltContent) {
+                pendingPreviewScrollRef.current = Number.MAX_SAFE_INTEGER;
                 setXsltContent(updated);
                 console.log(`[XSLTEditor] Drop insert: ${type} (${updated.length - xsltContent.length} chars)`);
             }
@@ -1544,6 +1545,9 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 style={{
                     display: 'grid',
                     gridTemplateColumns: snippetPanelOpen ? '240px 1fr' : '0px 1fr',
+                    // Satır yüksekliği içeriğe (453 alanlık sol liste) göre büyürse
+                    // sol liste ve önizleme kaydırılamaz, alt kısımları kesilir.
+                    gridTemplateRows: 'minmax(0, 1fr)',
                     flex: 1,
                     minHeight: 0,
                     position: 'relative',  // Sprint 14 Aşama 2 — property drawer absolute right:0
@@ -1912,6 +1916,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     onClick={() => {
                                         const updated = insertXsltElement(xsltContent, item.type);
                                         if (updated !== xsltContent) {
+                                            pendingPreviewScrollRef.current = Number.MAX_SAFE_INTEGER;
                                             setXsltContent(updated);
                                             console.log(`[XSLTEditor] Click insert: ${item.type}`);
                                         }

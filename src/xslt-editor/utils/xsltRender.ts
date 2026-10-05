@@ -741,10 +741,8 @@ export function removeXsltBinding(xslt: string, b: XsltBinding): string {
 
 /**
  * Sprint 15 Aşama 2 — XSLT'e yeni element insert (drag-drop ile).
- * </xsl:stylesheet> kapanışından HEMEN önce snippet'i ekler (4 space indent
- * ile). Bu basit yaklaşım tüm modüller için çalışır (root element
- * xsl:stylesheet olduğu sürece).
- * Sprint 16'da cursor pozisyonu / template-spesifik ekleme eklenebilir.
+ * Çıktının </body> kapanışından hemen önce snippet'i ekler (4 space indent
+ * ile); </body> yoksa son </xsl:template> kapanışından önce.
  */
 export const XSLT_ELEMENT_SNIPPETS = {
     image: '<img src="yeni-resim.png" alt="Yeni Resim" width="200" />',
@@ -756,10 +754,15 @@ export type XsltInsertType = keyof typeof XSLT_ELEMENT_SNIPPETS;
 
 export function insertXsltElement(xslt: string, type: XsltInsertType): string {
     const snippet = XSLT_ELEMENT_SNIPPETS[type];
-    const closeTag = '</xsl:stylesheet>';
-    const idx = xslt.lastIndexOf(closeTag);
-    if (idx < 0) return xslt + '\n' + snippet;
-    return xslt.substring(0, idx) + '    ' + snippet + '\n' + xslt.substring(idx);
+    // Literal HTML, xsl:stylesheet'in doğrudan çocuğu olamaz (XSLT derleme
+    // hatası) — çıktı gövdesinin sonuna, yoksa son template'in içine eklenir.
+    for (const closeTag of ['</body>', '</xsl:template>']) {
+        const idx = xslt.lastIndexOf(closeTag);
+        if (idx >= 0) {
+            return xslt.substring(0, idx) + '    ' + snippet + '\n' + xslt.substring(idx);
+        }
+    }
+    return xslt;
 }
 
 /**
