@@ -38,7 +38,7 @@ import {
 import { transformXmlWithXslt } from '../xsltTransformer';
 import { getInlineXslt } from '../xsltContent';
 import { getAntrepoTemplateById } from './antrepoTemplates';
-import { renderAndAnnotateXslt, parseXsltInstrumented, updateXSLTBinding } from './utils/xsltRender';
+import { renderAndAnnotateXslt, parseXsltInstrumented, updateXSLTBinding, removeXsltBinding, insertXsltElement } from './utils/xsltRender';
 import { api } from '../api';
 import { XSLT_ELEMENTS, UBL_XPATHS, lintXslt } from './xsltSchema';
 
@@ -960,15 +960,37 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         const scrollH = body.scrollHeight || body.offsetHeight || 800;
         setIframeContentHeight(scrollH);
         body.addEventListener('click', handleIframeBodyClick, { capture: true });
+        // Sprint 15 Aşama 2 — HTML5 drag-drop listener (drop handler).
+        const dragOverHandler = (e: DragEvent) => {
+            if (e.dataTransfer?.types.includes('text/x-xslt-element')) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'copy';
+            }
+        };
+        const dropHandler = (e: DragEvent) => {
+            const type = e.dataTransfer?.getData('text/x-xslt-element') as 'image' | 'text' | 'table' | 'input' | '';
+            if (!type) return;
+            e.preventDefault();
+            e.stopPropagation();
+            const updated = insertXsltElement(xsltContent, type);
+            if (updated !== xsltContent) {
+                setXsltContent(updated);
+                console.log(`[XSLTEditor] Drop insert: ${type} (${updated.length - xsltContent.length} chars)`);
+            }
+        };
+        body.addEventListener('dragover', dragOverHandler);
+        body.addEventListener('drop', dropHandler);
         console.log(`[XSLTEditor] iframe listener re-bound (previewHtml changed, scrollHeight=${scrollH})`);
 
         return () => {
             const curDoc = iframe.contentDocument;
             if (curDoc?.body) {
                 curDoc.body.removeEventListener('click', handleIframeBodyClick, { capture: true });
+                curDoc.body.removeEventListener('dragover', dragOverHandler);
+                curDoc.body.removeEventListener('drop', dropHandler);
             }
         };
-    }, [previewHtml, handleIframeBodyClick]);
+    }, [previewHtml, handleIframeBodyClick, xsltContent]);
 
     // ------------------------------------------------------------------------
     // Render
@@ -1477,6 +1499,68 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 );
                             })
                         )}
+                    </div>
+
+                    {/* Sprint 15 Aşama 2 — Ekle bölümü (HTML5 drag-drop + click insert).
+                        Sol panelden bir obje türünü sürükleyip preview'a bırak
+                        (iframe.contentDocument body'sinde drop → setXsltContent +
+                        renderPreview) veya tıkla (insertXsltElement ile aynı
+                        XSLT'e ekleme). 4 tip: image, text, table, input. */}
+                    <div
+                        data-insert-panel
+                        style={{
+                            padding: '8px 10px',
+                            borderTop: '1px solid #1e293b',
+                            background: '#0a1024',
+                        }}
+                    >
+                        <div style={{
+                            fontSize: '10px', fontWeight: 700, color: '#94a3b8',
+                            letterSpacing: '0.4px', textTransform: 'uppercase',
+                            marginBottom: '6px',
+                        }}>
+                            Ekle (sürükle veya tıkla)
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px' }}>
+                            {[
+                                { type: 'image' as const, label: '📷 Resim', color: '#a5b4fc' },
+                                { type: 'text' as const, label: 'T Text', color: '#6ee7b7' },
+                                { type: 'table' as const, label: '▦ Tablo', color: '#fcd34d' },
+                                { type: 'input' as const, label: '▢ Input', color: '#fca5a5' },
+                            ].map(item => (
+                                <div
+                                    key={item.type}
+                                    draggable
+                                    data-insert-type={item.type}
+                                    onDragStart={(e) => {
+                                        e.dataTransfer.setData('text/x-xslt-element', item.type);
+                                        e.dataTransfer.effectAllowed = 'copy';
+                                    }}
+                                    onClick={() => {
+                                        const updated = insertXsltElement(xsltContent, item.type);
+                                        if (updated !== xsltContent) {
+                                            setXsltContent(updated);
+                                            console.log(`[XSLTEditor] Click insert: ${item.type}`);
+                                        }
+                                    }}
+                                    style={{
+                                        padding: '8px',
+                                        background: '#1e293b',
+                                        border: '1px solid #334155',
+                                        borderRadius: '4px',
+                                        color: item.color,
+                                        fontSize: '10px', fontWeight: 700,
+                                        cursor: 'grab',
+                                        textAlign: 'center',
+                                        letterSpacing: '0.3px',
+                                    }}
+                                    onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(99, 102, 241, 0.15)'; e.currentTarget.style.borderColor = 'rgba(99, 102, 241, 0.5)'; }}
+                                    onMouseLeave={(e) => { e.currentTarget.style.background = '#1e293b'; e.currentTarget.style.borderColor = '#334155'; }}
+                                >
+                                    {item.label}
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
 
@@ -2030,9 +2114,36 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     </button>
                                     <button
                                         onClick={() => {
-                                            // XSLT'ten kaldır — Sprint 15 Aşama 2'de eklenecek
-                                            console.warn('[XSLTEditor] XSLT\'ten kaldır Sprint 15 Aşama 2\'de');
-                                            alert('XSLT\'ten kaldırma Sprint 15 Aşama 2\'de eklenecek');
+                                            // Sprint 15 Aşama 2 — XSLT'ten sil. selectedObject
+                                            // içindeki element'in data-line'ından binding'i
+                                            // bul, removeXsltBinding ile XSLT string'ten
+                                            // kaldır. Multi-line tag ve explicit close
+                                            // durumlarında no-op döner.
+                                            if (selectedObject.source !== 'preview') return;
+                                            const el = selectedObject.element;
+                                            const lineAttr = el.getAttribute('data-line');
+                                            const colAttr = el.getAttribute('data-column');
+                                            if (!lineAttr || !colAttr) {
+                                                console.warn('[XSLTEditor] XSLT\'ten sil: data-line/data-column bulunamadı');
+                                                return;
+                                            }
+                                            const line = Number(lineAttr);
+                                            const column = Number(colAttr);
+                                            if (isNaN(line) || isNaN(column)) {
+                                                console.warn('[XSLTEditor] XSLT\'ten sil: line/column NaN');
+                                                return;
+                                            }
+                                            const fakeBinding = {
+                                                xpath: '', offset: 0, line, column, kind: 'dropdown' as const,
+                                            };
+                                            const updated = removeXsltBinding(xsltContent, fakeBinding);
+                                            if (updated !== xsltContent) {
+                                                setXsltContent(updated);
+                                                console.log(`[XSLTEditor] XSLT\'ten sil: line=${line}`);
+                                                setSelectedObject(null);
+                                            } else {
+                                                console.warn(`[XSLTEditor] XSLT\'ten sil no-op (line=${line}, multi-line olabilir)`);
+                                            }
                                         }}
                                         title="XSLT kaynak kodundan tamamen kaldır (geri alınamaz)"
                                         data-remove-from-xslt

@@ -500,6 +500,79 @@ export function renderAndAnnotateXslt(
 }
 
 /**
+ * Sprint 15 Aşama 2 — XSLT'ten binding kaldır (sil).
+ * line bazlı: self-closing tag tek satır → satırı sil; explicit close iki satır
+ * → start + end satırları sil; <xsl:value-of>...</xsl:value-of> tek satır →
+ * satırı sil.
+ * Sprint 16'da multi-line tag (explicit close farklı satırlarda) için
+ * gelişmiş parser eklenecek.
+ */
+export function removeXsltBinding(xslt: string, b: XsltBinding): string {
+    const lines = xslt.split('\n');
+    const lineIdx = b.line - 1;
+    if (lineIdx < 0 || lineIdx >= lines.length) return xslt;
+
+    const line = lines[lineIdx];
+
+    // Pass 1 explicit close tek satır: <xsl:value-of ...>...</xsl:value-of>
+    if (line.match(/<xsl:(?:value-of|copy-of)\b[^>]*?>[\s\S]*?<\/xsl:(?:value-of|copy-of)>\s*$/)) {
+        lines.splice(lineIdx, 1);
+        return lines.join('\n');
+    }
+
+    // Self-closing: <xsl:value-of ... />  veya  <xsl:if .../>  tek satır
+    if (line.match(/<xsl:\w+\b[^>]*?\/>\s*$/)) {
+        lines.splice(lineIdx, 1);
+        return lines.join('\n');
+    }
+
+    // Tek satır element: <xsl:if test="...">  (aynı satırda kapanışsız)
+    if (line.match(/<xsl:\w+\b[^>]*?>\s*$/)) {
+        // explicit close var mı kontrol (next line veya same line)
+        const explicitCloseOnSameLine = line.match(/<xsl:(\w+)\b[^>]*?>([\s\S]*?)<\/\1>\s*$/);
+        if (explicitCloseOnSameLine) {
+            lines.splice(lineIdx, 1);
+            return lines.join('\n');
+        }
+        // Multi-line explicit close → next line
+        const nextLine = lines[lineIdx + 1];
+        if (nextLine && nextLine.match(/^\s*<\/xsl:/)) {
+            lines.splice(lineIdx, 2);
+            return lines.join('\n');
+        }
+        // Sadece start tag → tek satır kaldır
+        lines.splice(lineIdx, 1);
+        return lines.join('\n');
+    }
+
+    // Hiçbir pattern eşleşmedi → orijinal döndür (no-op)
+    return xslt;
+}
+
+/**
+ * Sprint 15 Aşama 2 — XSLT'e yeni element insert (drag-drop ile).
+ * </xsl:stylesheet> kapanışından HEMEN önce snippet'i ekler (4 space indent
+ * ile). Bu basit yaklaşım tüm modüller için çalışır (root element
+ * xsl:stylesheet olduğu sürece).
+ * Sprint 16'da cursor pozisyonu / template-spesifik ekleme eklenebilir.
+ */
+export const XSLT_ELEMENT_SNIPPETS = {
+    image: '<img src="yeni-resim.png" alt="Yeni Resim" width="200" />',
+    text: '<p>Yeni metin — düzenlemek için tıklayın</p>',
+    table: '<table border="1" cellpadding="5"><tr><th>Başlık</th></tr><tr><td>Hücre 1</td></tr><tr><td>Hücre 2</td></tr></table>',
+    input: '<input type="text" placeholder="Alan adı" />',
+} as const;
+export type XsltInsertType = keyof typeof XSLT_ELEMENT_SNIPPETS;
+
+export function insertXsltElement(xslt: string, type: XsltInsertType): string {
+    const snippet = XSLT_ELEMENT_SNIPPETS[type];
+    const closeTag = '</xsl:stylesheet>';
+    const idx = xslt.lastIndexOf(closeTag);
+    if (idx < 0) return xslt + '\n' + snippet;
+    return xslt.substring(0, idx) + '    ' + snippet + '\n' + xslt.substring(idx);
+}
+
+/**
  * parseXsltXPathBindings → yukarı taşındı (Sprint 11 Aşama 6a) — XSLT
  * koordinatlı binding. Eski DOMParser versiyonu kaldırıldı (regex parse
  * hem hızlı hem namespace-safe). Backward compat için sadece xpath
