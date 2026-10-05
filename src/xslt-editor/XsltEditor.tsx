@@ -975,6 +975,26 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
      * scroll) container'a scroll geçirmiyordu — Selim'in test ekranında
      * sağ ve alt kesik görünüyordu.
      */
+    const fitZoomToContainer = useCallback(() => {
+        // Sprint 16 Aşama 5e — Gerçek fit-to-screen: container genişliği
+        // / içerik genişliği oranını zoom olarak ayarla. Selim'in "yarım
+        // görünüyor" şikayeti — e-Fatura A4 (595px) container'da (1680px)
+        // küçük kalıyordu. Şimdi ilk render'da otomatik fit yapılır.
+        const iframe = iframeRef.current;
+        if (!iframe) return 1.0;
+        const doc = iframe.contentDocument;
+        if (!doc || !doc.body) return 1.0;
+        const container = iframe.parentElement;
+        if (!container) return 1.0;
+        const containerWidth = container.clientWidth;
+        const contentWidth = doc.body.scrollWidth;
+        if (contentWidth <= 0 || containerWidth <= 0) return 1.0;
+        const scale = containerWidth / contentWidth;
+        // Min 0.5, max 2.0 (aşırı zoom'dan kaçın — e-Fatura 595px × 2.8 = 1666px
+        // çok büyük olur, scroll gerekir)
+        return Math.min(2.0, Math.max(0.5, scale));
+    }, []);
+
     const handleIframeLoad = useCallback(() => {
         const iframe = iframeRef.current;
         if (!iframe) return;
@@ -1008,10 +1028,19 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             // kayboluyor. doc.addEventListener her zaman aktif.
             doc.addEventListener('click', handleIframeBodyClick, { capture: true });
             console.log('[XSLTEditor] iframe click listener attached (doc, capture:true)');
+
+            // (3) Sprint 16 Aşama 5e — İlk render'da auto-fit zoom.
+            // measureHeight(300ms) sonrası içerik genişliği kesin, fit zoom uygula.
+            // 350ms: 300ms measureHeight + 50ms güvenlik payı
+            setTimeout(() => {
+                const zoom = fitZoomToContainer();
+                setPreviewZoom(zoom);
+                console.log(`[XSLTEditor] auto-fit zoom=${zoom.toFixed(2)}`);
+            }, 350);
         };
 
         bindListener();
-    }, [handleIframeBodyClick]);
+    }, [handleIframeBodyClick, fitZoomToContainer]);
 
     /**
      * iframe onLoad → handleIframeLoad. previewHtml değiştiğinde iframe
@@ -1781,8 +1810,13 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 <ZoomIn size={11} />
                             </button>
                             <button
-                                onClick={() => setPreviewZoom(1.00)}
-                                title="Default zoom (100%)"
+                                onClick={() => {
+                                    // Sprint 16 Aşama 5e — Gerçek fit-to-screen.
+                                    // Container genişliğine sığacak zoom hesapla.
+                                    const zoom = fitZoomToContainer();
+                                    setPreviewZoom(zoom);
+                                }}
+                                title="Fit to screen"
                                 style={{
                                     padding: '1px 5px',
                                     background: 'transparent',
