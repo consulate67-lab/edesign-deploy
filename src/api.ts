@@ -323,7 +323,7 @@ export const api = {
     // --- IYZICO CHECKOUT (Sprint 1.3, 2026-10-02) ---
     // Plan satin alimi icin iyzico checkout form token al.
     // Backend POST /api/payment/iyzico/checkout — sandbox/prod env'den okur.
-    iyzicoCheckout: async (plan: 'pro') => {
+    iyzicoCheckout: async (plan: 'one' | 'basic' | 'pro') => {
         if (!IS_DEV) {
             return api.request('/payment/iyzico/checkout', {
                 method: 'POST',

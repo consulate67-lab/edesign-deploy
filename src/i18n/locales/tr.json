@@ -83,6 +83,8 @@
   "payment": {
     "title": "Kredi Satın Al",
     "credits": {
+      "1": "1 Kredi - 600 ₺",
+      "10": "10 Kredi - 2.500 ₺",
       "25": "25 Kredi - 4.000 ₺"
     },
     "purchase": "Satın Al",

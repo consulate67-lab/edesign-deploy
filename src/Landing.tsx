@@ -17,7 +17,7 @@ interface SssItem {
 const SSS_ITEMS: SssItem[] = [
     {
         q: 'Nasıl satın alırım?',
-        a: 'Önce üye olup giriş yapın, ardından Pro paketini satın alın. Pro paket 4.000 TL tek seferlik ödemedir ve 25 tasarım hakkı içerir; aylık abonelik yoktur. Haklarınız süresizdir.',
+        a: 'Önce üye olup giriş yapın, ardından size uygun paketi satın alın: One (600 TL, 1 tasarım hakkı), Basic (2.500 TL, 10 tasarım hakkı) veya Pro (4.000 TL, 25 tasarım hakkı). Tüm paketler tek seferlik ödemedir; aylık abonelik yoktur. Haklarınız süresizdir.',
     },
     {
         q: 'Hangi e-belge tiplerini tasarlayabilirim?',
@@ -33,7 +33,7 @@ const SSS_ITEMS: SssItem[] = [
     },
     {
         q: 'Ödeme nasıl çalışır?',
-        a: 'Giriş yaptıktan sonra Paket Al ile Pro paketini iyzico 3D Secure üzerinden satın alırsınız. Her tasarım kaydı 1 hak harcar. Ödeme sonrası haklar hesabınıza otomatik yansır; bittiğinde yeni paket alabilirsiniz.',
+        a: 'Giriş yaptıktan sonra Paket Al ile seçtiğiniz paketi iyzico 3D Secure üzerinden satın alırsınız. Her tasarım kaydı 1 hak harcar. Ödeme sonrası haklar hesabınıza otomatik yansır; bittiğinde yeni paket alabilirsiniz.',
     },
     {
         q: 'Verilerim Türkiye’de mi saklanıyor?',
@@ -374,7 +374,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                     {[
                         { v: 'GİB', l: 'UBL-TR Resmi Uyumlu', a: '#10b981' },
                         { v: '9', l: 'Belge Türü Desteği', a: '#38bdf8' },
-                        { v: '25', l: 'Tasarım Hakkı / Pro Paket', a: '#ec4899' },
+                        { v: '3', l: 'Paket Seçeneği', a: '#ec4899' },
                         { v: '%100', l: 'Web Tabanlı', a: '#a78bfa' },
                     ].map((s, i) => (
                         <div key={i} style={{ textAlign: 'center' }}>
@@ -673,22 +673,35 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                     </p>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'stretch', flexWrap: 'wrap', gap: '24px' }}>
                     {PACKAGES_PLANS.map(plan => (
                         <div
                             key={plan.id}
                             data-pricing-plan={plan.id}
                             style={{
-                                width: '100%',
-                                maxWidth: '420px',
-                                background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.10))',
+                                flex: '1 1 300px',
+                                maxWidth: '380px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                background: plan.highlight
+                                    ? 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.10))'
+                                    : 'rgba(15, 23, 42, 0.6)',
                                 backdropFilter: 'blur(10px)',
-                                border: '2px solid rgba(99, 102, 241, 0.5)',
+                                border: plan.highlight ? '2px solid rgba(99, 102, 241, 0.5)' : '1px solid rgba(148, 163, 184, 0.18)',
                                 borderRadius: '20px',
                                 padding: '32px 28px',
                                 position: 'relative',
                             }}
                         >
+                            {plan.highlight && (
+                                <div style={{
+                                    position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)',
+                                    padding: '4px 12px', borderRadius: 999, background: '#6366f1',
+                                    color: 'white', fontSize: '11px', fontWeight: 700, whiteSpace: 'nowrap',
+                                }}>
+                                    En avantajlı
+                                </div>
+                            )}
                             <h3 style={{ fontSize: '22px', fontWeight: 700, margin: '0 0 4px', color: '#f1f5f9' }}>
                                 {plan.name}
                             </h3>
@@ -703,7 +716,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                                 <span style={{ color: '#64748b', fontSize: '14px', marginLeft: '6px' }}>tek seferlik</span>
                             </div>
 
-                            <div style={{ paddingTop: '4px', borderTop: '1px solid rgba(255, 255, 255, 0.08)', marginBottom: '20px' }}>
+                            <div style={{ paddingTop: '4px', borderTop: '1px solid rgba(255, 255, 255, 0.08)', marginBottom: '20px', flex: 1 }}>
                                 <div style={{ color: '#a5b4fc', fontSize: '13px', fontWeight: 600, margin: '12px 0' }}>
                                     {plan.credits} tasarım hakkı
                                 </div>
@@ -723,9 +736,9 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                                 style={{
                                     width: '100%',
                                     height: '44px',
-                                    background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+                                    background: plan.highlight ? 'linear-gradient(135deg, #6366f1, #4f46e5)' : 'rgba(99, 102, 241, 0.15)',
                                     color: 'white',
-                                    border: '1px solid rgba(255,255,255,0.15)',
+                                    border: plan.highlight ? '1px solid rgba(255,255,255,0.15)' : '1px solid rgba(99, 102, 241, 0.5)',
                                     borderRadius: '10px',
                                     fontWeight: 700,
                                     fontSize: '14px',
@@ -893,7 +906,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                             lineHeight: 1.5,
                         }}
                     >
-                        Üye olun, Pro paketle 25 tasarım hakkı kazanın.
+                        Üye olun, 600 TL'den başlayan paketlerle tasarıma başlayın.
                     </p>
                     <button
                         type="button"

@@ -144,7 +144,9 @@ app.get('/api/me', authenticateToken, async (req, res) => {
 // Plan prices MUST stay in sync with the Landing page (Landing.tsx → PACKAGES_PLANS)
 // and the in-app PaymentModal.tsx → PACKAGES_PLANS.
 const PLAN_AMOUNT_TO_CREDITS = {
-    4000: 25,     // Pro (tek seferlik)
+    600: 1,       // One
+    2500: 10,     // Basic
+    4000: 25,     // Pro
 };
 
 app.post('/api/payment/mock', authenticateToken, async (req, res) => {
@@ -469,6 +471,8 @@ const iyzico1 = (path, body, attempt = 0) => {
 // VIP, iyzico expects string for numeric fields.
 // Tek seferlik paket; Landing.tsx ve PaymentModal.tsx → PACKAGES_PLANS ile aynı tutulmalı.
 const PACKAGE_PRICES = {
+    one: { name: 'One', price: '600', credits: 1 },
+    basic: { name: 'Basic', price: '2500', credits: 10 },
     pro: { name: 'Pro', price: '4000', credits: 25 },
 };
 

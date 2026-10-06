@@ -44,7 +44,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) =
                 border: '1px solid rgba(148, 163, 184, 0.14)',
                 padding: '2.5rem 2rem',
                 borderRadius: '1.5rem',
-                maxWidth: '520px',
+                maxWidth: '960px',
                 width: '100%',
                 position: 'relative',
                 boxShadow: '0 24px 60px rgba(0, 0, 0, 0.55)',
@@ -79,13 +79,14 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) =
                                 <Sparkles size={11} /> Kredi Yükle
                             </div>
                             <h2 style={{ color: '#f8fafc', fontSize: '1.8rem', fontWeight: 800, margin: 0, letterSpacing: '-0.02em' }}>
-                                Tasarım Paketi
+                                Tasarım Paketleri
                             </h2>
                             <p style={{ color: '#94a3b8', fontSize: '0.95rem', margin: '0.5rem 0 0' }}>
                                 Tek seferlik ödeme · abonelik yok · 3D Secure
                             </p>
                         </div>
 
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
                         {PACKAGES_PLANS.map((plan) => (
                             <button
                                 key={plan.id}
@@ -93,15 +94,23 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) =
                                 data-buy-plan={plan.id}
                                 onClick={() => handlePlanSelect(plan)}
                                 style={{
-                                    width: '100%',
-                                    background: 'linear-gradient(180deg, rgba(99,102,241,0.2), rgba(99,102,241,0.05))',
-                                    border: '2px solid #6366f1', borderRadius: '1rem',
+                                    display: 'flex', flexDirection: 'column',
+                                    background: plan.highlight
+                                        ? 'linear-gradient(180deg, rgba(99,102,241,0.2), rgba(99,102,241,0.05))'
+                                        : 'rgba(15, 23, 42, 0.6)',
+                                    border: plan.highlight ? '2px solid #6366f1' : '1px solid rgba(148, 163, 184, 0.2)',
+                                    borderRadius: '1rem',
                                     padding: '1.5rem', textAlign: 'left', cursor: 'pointer',
                                     color: '#f1f5f9', fontFamily: 'inherit',
                                 }}
                             >
-                                <div style={{ fontSize: '1rem', fontWeight: 700, color: '#a5b4fc', marginBottom: '0.25rem' }}>
-                                    {plan.name}
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                                    <span style={{ fontSize: '1rem', fontWeight: 700, color: '#a5b4fc' }}>{plan.name}</span>
+                                    {plan.highlight && (
+                                        <span style={{ fontSize: '0.65rem', fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: '#6366f1', color: 'white' }}>
+                                            En avantajlı
+                                        </span>
+                                    )}
                                 </div>
                                 <div style={{ fontSize: '2rem', fontWeight: 800, color: 'white', marginBottom: '0.25rem' }}>
                                     {formatTL(plan.price)}
@@ -109,19 +118,24 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) =
                                 <div style={{ color: '#94a3b8', fontSize: '0.85rem', marginBottom: '1rem' }}>
                                     {plan.credits} tasarım hakkı · tasarım başına {formatTL(Math.round(plan.price / plan.credits))}
                                 </div>
-                                {plan.features.map(f => (
-                                    <div key={f} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#cbd5e1', fontSize: '0.85rem', marginBottom: '0.35rem' }}>
-                                        <Check size={14} color="#10b981" /> {f}
-                                    </div>
-                                ))}
+                                <div style={{ flex: 1 }}>
+                                    {plan.features.map(f => (
+                                        <div key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', color: '#cbd5e1', fontSize: '0.8rem', marginBottom: '0.35rem' }}>
+                                            <Check size={14} color="#10b981" style={{ flexShrink: 0, marginTop: 2 }} /> {f}
+                                        </div>
+                                    ))}
+                                </div>
                                 <div style={{
                                     marginTop: '1rem', padding: '0.7rem', borderRadius: '0.6rem',
-                                    background: '#6366f1', color: 'white', fontWeight: 700, textAlign: 'center',
+                                    background: plan.highlight ? '#6366f1' : 'rgba(99, 102, 241, 0.2)',
+                                    border: plan.highlight ? 'none' : '1px solid rgba(99, 102, 241, 0.5)',
+                                    color: 'white', fontWeight: 700, textAlign: 'center',
                                 }}>
                                     Satın Al
                                 </div>
                             </button>
                         ))}
+                        </div>
 
                         <div style={{
                             marginTop: '1.5rem', padding: '1rem',
