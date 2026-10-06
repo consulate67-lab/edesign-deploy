@@ -428,7 +428,7 @@ const TableEditor: React.FC<{
         const rows = header
             ? [Array.from({ length: cols }, (_, i) => `Başlık ${i + 1}`), ...model.rows]
             : model.rows.slice(1);
-        update({ header, rows: rows.length ? rows : [Array.from({ length: cols }, () => '')] });
+        update({ ...model, header, rows: rows.length ? rows : [Array.from({ length: cols }, () => '')] });
     };
     const setCell = (ri: number, ci: number, v: string) => {
         update({ ...model, rows: model.rows.map((r, i) => (i === ri ? r.map((t, j) => (j === ci ? v : t)) : r)) });
