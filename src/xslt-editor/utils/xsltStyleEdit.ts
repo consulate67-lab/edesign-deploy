@@ -133,6 +133,77 @@ export function removeElement(xslt: string, tag: SourceTag): string {
     return xslt.slice(0, tag.start) + xslt.slice(end);
 }
 
+/**
+ * Önizleme için her literal HTML açılış etiketine kaynak sıra numarası
+ * (data-xsrc) ekler. Sadece render edilen XSLT'ye uygulanır; kaydedilen
+ * kaynakta yer almaz. Numara findLiteralTagByOrdinal ile aynı sayımı kullanır.
+ */
+export function annotateLiteralTags(xslt: string): string {
+    let n = 0;
+    return xslt.replace(new RegExp(TAG_RE.source, 'g'), (all: string, close?: string, name?: string) => {
+        if (!name || close === '/' || name.includes(':')) return all;
+        return `<${name} data-xsrc="${n++}"${all.slice(name.length + 1)}`;
+    });
+}
+
+export function findLiteralTagByOrdinal(xslt: string, ordinal: number): SourceTag | null {
+    const re = new RegExp(TAG_RE.source, 'g');
+    let n = 0;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(xslt)) !== null) {
+        if (!m[2] || m[1] === '/' || m[2].includes(':')) continue;
+        if (n === ordinal) return { name: m[2], start: m.index, end: m.index + m[0].length };
+        n++;
+    }
+    return null;
+}
+
+/** Öğenin kapanış etiketinin bittiği offset (self-closing ise açılış etiketinin sonu). */
+function elementEnd(xslt: string, tag: SourceTag): number {
+    const range = findElementContentRange(xslt, tag);
+    return range ? xslt.indexOf('>', range.end) + 1 : tag.end;
+}
+
+export type InsertPosition = 'after' | 'inside';
+
+function insertOffset(xslt: string, tag: SourceTag, position: InsertPosition): number {
+    if (position === 'inside') {
+        const range = findElementContentRange(xslt, tag);
+        if (range) return range.end;
+    }
+    return elementEnd(xslt, tag);
+}
+
+/** snippet'i öğenin altına (kapanışından sonra) veya içine (sonuna) ekler. */
+export function insertAtTag(xslt: string, tag: SourceTag, snippet: string, position: InsertPosition): string {
+    const at = insertOffset(xslt, tag, position);
+    return xslt.slice(0, at) + snippet + xslt.slice(at);
+}
+
+/** Çıktı gövdesinin sonu: </body>, yoksa son </xsl:template> öncesi. */
+export function documentEndOffset(xslt: string): number {
+    for (const closeTag of ['</body>', '</xsl:template>']) {
+        const idx = xslt.lastIndexOf(closeTag);
+        if (idx >= 0) return idx;
+    }
+    return -1;
+}
+
+/**
+ * Öğeyi hedefin altına / içine (hedef null ise gövdenin sonuna) taşır.
+ * Hedef öğenin kendi içindeyse null.
+ */
+export function moveElement(xslt: string, src: SourceTag, target: SourceTag | null, position: InsertPosition): string | null {
+    const srcEnd = elementEnd(xslt, src);
+    if (target && target.start >= src.start && target.start < srcEnd) return null;
+    const snippet = xslt.slice(src.start, srcEnd);
+    let at = target ? insertOffset(xslt, target, position) : documentEndOffset(xslt);
+    if (at < 0) return null;
+    const removed = xslt.slice(0, src.start) + xslt.slice(srcEnd);
+    if (at >= srcEnd) at -= srcEnd - src.start;
+    return removed.slice(0, at) + snippet + removed.slice(at);
+}
+
 /** Metin düğümü için XML kaçışı. */
 export function escapeXmlText(value: string): string {
     return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');

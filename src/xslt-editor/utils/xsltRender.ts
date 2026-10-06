@@ -12,6 +12,7 @@
  * Bu dosya sadece XsltEditor'da kullanılır. ProfesyonelDesigner'ın kendi
  * pipeline'ı (instrumentXslt / xsltInstrumenter) farklı, dokunulmuyor.
  */
+import { documentEndOffset } from './xsltStyleEdit';
 
 const INDEXED_TAGS = new Set([
     'div', 'span', 'p', 'table', 'tr', 'td', 'th',
@@ -753,7 +754,12 @@ const IMAGE_PLACEHOLDER_SRC = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.or
 export const XSLT_ELEMENT_SNIPPETS = {
     image: (id: string) => `<img data-xslt-obj="${id}" src="${IMAGE_PLACEHOLDER_SRC}" alt="Yeni Resim" width="200" />`,
     text: (id: string) => `<p data-xslt-obj="${id}">Yeni metin</p>`,
-    table: (id: string) => `<table data-xslt-obj="${id}" border="1" cellpadding="5" style="border-collapse:collapse"><tr><th>Başlık 1</th><th>Başlık 2</th></tr><tr><td>Hücre 1</td><td>Hücre 2</td></tr></table>`,
+    table: (id: string) => {
+        const line = '1px solid #000000';
+        return `<table data-xslt-obj="${id}" border="0" cellpadding="5" data-border-frame="1 solid #000000" data-border-inner="all 1 solid #000000" style="border-collapse:collapse;border:${line}">`
+            + `<tr><th>Başlık 1</th><th style="border-left:${line}">Başlık 2</th></tr>`
+            + `<tr><td style="border-top:${line}">Hücre 1</td><td style="border-top:${line};border-left:${line}">Hücre 2</td></tr></table>`;
+    },
     input: (id: string) => `<input data-xslt-obj="${id}" type="text" placeholder="Alan adı" />`,
 } as const;
 export type XsltInsertType = keyof typeof XSLT_ELEMENT_SNIPPETS;
@@ -773,13 +779,9 @@ export function insertXsltElement(xslt: string, type: XsltInsertType, id = nextX
     const snippet = XSLT_ELEMENT_SNIPPETS[type](id);
     // Literal HTML, xsl:stylesheet'in doğrudan çocuğu olamaz (XSLT derleme
     // hatası) — çıktı gövdesinin sonuna, yoksa son template'in içine eklenir.
-    for (const closeTag of ['</body>', '</xsl:template>']) {
-        const idx = xslt.lastIndexOf(closeTag);
-        if (idx >= 0) {
-            return xslt.substring(0, idx) + '    ' + snippet + '\n' + xslt.substring(idx);
-        }
-    }
-    return xslt;
+    const idx = documentEndOffset(xslt);
+    if (idx < 0) return xslt;
+    return xslt.substring(0, idx) + '    ' + snippet + '\n' + xslt.substring(idx);
 }
 
 /**

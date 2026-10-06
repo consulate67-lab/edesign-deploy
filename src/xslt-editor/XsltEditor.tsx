@@ -38,13 +38,56 @@ import {
 import { transformXmlWithXslt } from '../xsltTransformer';
 import { getInlineXslt } from '../xsltContent';
 import { getAntrepoTemplateById } from './antrepoTemplates';
-import { renderAndAnnotateXslt, parseXsltInstrumented, updateXSLTBinding, removeXsltBinding, insertXsltElement, nextXsltObjId } from './utils/xsltRender';
-import type { XsltBinding } from './utils/xsltRender';
+import { renderAndAnnotateXslt, parseXsltInstrumented, updateXSLTBinding, removeXsltBinding, insertXsltElement, nextXsltObjId, XSLT_ELEMENT_SNIPPETS } from './utils/xsltRender';
+import type { XsltBinding, XsltInsertType } from './utils/xsltRender';
 import {
     findBindingSourceOffset, findEnclosingLiteralTag, findImgTagBySrc, findObjTag,
     setTagAttribute, setTagStyleProperty, replaceElementContent, removeElement, escapeXmlText,
-    type SourceTag,
+    annotateLiteralTags, findLiteralTagByOrdinal, insertAtTag, moveElement,
+    type SourceTag, type InsertPosition,
 } from './utils/xsltStyleEdit';
+
+const CONTAINER_TAGS = new Set(['td', 'th', 'div', 'li', 'section', 'article', 'header', 'footer', 'main', 'aside', 'form', 'fieldset']);
+const TABLE_PARTS = new Set(['tr', 'tbody', 'thead', 'tfoot', 'colgroup', 'col', 'caption']);
+const VOID_TAGS = new Set(['img', 'input', 'br', 'hr', 'meta', 'link', 'area', 'base', 'wbr']);
+
+/**
+ * Önizlemedeki bir öğeden ekleme / taşıma hedefi: XSLT'deki literal etiketin
+ * sıra numarası (data-xsrc) ve konum. 'auto' kapsayıcılarda (hücre, div)
+ * içine, diğerlerinde altına ekler. Eklenen objeler bölünmez kabul edilir
+ * (tablo içeriği panelden yeniden üretildiği için içine eklenen kaybolur).
+ * null → gövdenin sonu.
+ */
+type InsertTarget = { el: HTMLElement; ordinal: number; position: InsertPosition };
+function resolveInsertTarget(start: Element | null, mode: 'auto' | InsertPosition): InsertTarget | null {
+    let el = start?.closest<HTMLElement>('[data-xsrc]') ?? null;
+    if (!el) return null;
+    const obj = el.closest<HTMLElement>('[data-xslt-obj]');
+    let position: InsertPosition;
+    if (obj) {
+        el = obj;
+        position = 'after';
+    } else {
+        const tag = el.tagName.toLowerCase();
+        if (tag === 'html' || tag === 'body' || tag === 'head') return null;
+        if (TABLE_PARTS.has(tag)) {
+            el = el.closest<HTMLElement>('table[data-xsrc]');
+            if (!el) return null;
+            position = 'after';
+        } else if (mode === 'auto') {
+            position = CONTAINER_TAGS.has(tag) ? 'inside' : 'after';
+        } else {
+            position = VOID_TAGS.has(tag) ? 'after' : mode;
+        }
+        // Hücrenin "altı" satırın içi olur (geçersiz HTML) — tablonun altına konur.
+        if (position === 'after' && (tag === 'td' || tag === 'th')) {
+            el = el.closest<HTMLElement>('table[data-xsrc]');
+            if (!el) return null;
+        }
+    }
+    const ordinal = Number(el.getAttribute('data-xsrc'));
+    return Number.isNaN(ordinal) ? null : { el, ordinal, position };
+}
 import { api } from '../api';
 import { XSLT_ELEMENTS, UBL_XPATHS, lintXslt } from './xsltSchema';
 
@@ -261,28 +304,115 @@ const FieldTextArea: React.FC<{ label: string; currentValue: string; onChange: (
 /** Metin → <br/> ile ayrılmış satırlar (XSLT literal içerik ve önizleme HTML'i aynı). */
 const textToMarkup = (text: string): string => text.split('\n').map(escapeXmlText).join('<br/>');
 
-type TableModel = { header: boolean; rows: string[][] };
+type BorderSpec = { width: number; style: string; color: string };
+type InnerLines = 'all' | 'horizontal' | 'vertical' | 'none';
+type TableModel = {
+    header: boolean;
+    rows: string[][];
+    frame: BorderSpec;
+    inner: BorderSpec & { lines: InnerLines };
+    padding: number;
+};
+const BORDER_STYLES = ['solid', 'dashed', 'dotted', 'double'];
+// Çizgi ayarları tabloda data-border-frame="1 solid #000000" ve
+// data-border-inner="all 1 solid #000000" olarak saklanır.
+const parseBorderSpec = (raw: string | null, fallback: BorderSpec): BorderSpec => {
+    const [w, style, color] = (raw || '').trim().split(/\s+/);
+    const width = Number(w);
+    if (!raw || Number.isNaN(width)) return fallback;
+    return { width, style: BORDER_STYLES.includes(style) ? style : 'solid', color: /^#[0-9a-f]{6}$/i.test(color || '') ? color : '#000000' };
+};
+const borderSpecToAttr = (b: BorderSpec) => `${b.width} ${b.style} ${b.color}`;
+const borderCss = (b: BorderSpec) => (b.width > 0 ? `${b.width}px ${b.style} ${b.color}` : 'none');
+
 const readTableModel = (table: HTMLTableElement): TableModel => {
     const rows = Array.from(table.rows);
     const header = rows.length > 0 && Array.from(rows[0].cells).every(c => c.tagName === 'TH');
     const cols = Math.max(1, ...rows.map(r => r.cells.length));
+    const legacyWidth = Number(table.getAttribute('border')) || 0;
+    const legacy: BorderSpec = { width: legacyWidth, style: 'solid', color: '#000000' };
+    const innerRaw = table.getAttribute('data-border-inner');
+    const innerParts = (innerRaw || '').trim().split(/\s+/);
+    const lines = (['all', 'horizontal', 'vertical', 'none'] as const).find(l => l === innerParts[0]) ?? (legacyWidth > 0 ? 'all' : 'none');
+    const padding = Number(table.getAttribute('cellpadding'));
     return {
         header,
         rows: rows.map(r => Array.from({ length: cols }, (_, i) => (r.cells[i]?.textContent || '').trim())),
+        frame: parseBorderSpec(table.getAttribute('data-border-frame'), legacy),
+        inner: { ...parseBorderSpec(innerRaw ? innerParts.slice(1).join(' ') : null, { ...legacy, width: legacyWidth || 1 }), lines },
+        padding: Number.isNaN(padding) ? 5 : padding,
     };
 };
-const tableModelToMarkup = (m: TableModel): string => m.rows.map((r, ri) => {
-    const cell = m.header && ri === 0 ? 'th' : 'td';
-    return `<tr>${r.map(t => `<${cell}>${escapeXmlText(t)}</${cell}>`).join('')}</tr>`;
-}).join('');
+const tableModelToMarkup = (m: TableModel): string => {
+    const line = borderCss(m.inner);
+    const horizontal = m.inner.lines === 'all' || m.inner.lines === 'horizontal';
+    const vertical = m.inner.lines === 'all' || m.inner.lines === 'vertical';
+    return m.rows.map((r, ri) => {
+        const cell = m.header && ri === 0 ? 'th' : 'td';
+        return `<tr>${r.map((t, ci) => {
+            const css = [
+                horizontal && ri > 0 ? `border-top:${line}` : '',
+                vertical && ci > 0 ? `border-left:${line}` : '',
+            ].filter(Boolean).join(';');
+            return `<${cell}${css ? ` style="${css}"` : ''}>${escapeXmlText(t)}</${cell}>`;
+        }).join('')}</tr>`;
+    }).join('');
+};
+
+const BorderControls: React.FC<{ spec: BorderSpec; onChange: (b: BorderSpec) => void; testId: string }> = ({ spec, onChange, testId }) => (
+    <div style={{ display: 'flex', gap: '6px', marginBottom: '10px' }} data-border-controls={testId}>
+        <input
+            type="number" min={0} max={10} value={spec.width}
+            title="Kalınlık (px)"
+            data-border-width
+            onChange={(e) => onChange({ ...spec, width: Math.min(10, Math.max(0, Number(e.target.value) || 0)) })}
+            style={{ ...fieldInputStyle, width: '58px' }}
+        />
+        <select
+            value={spec.style}
+            title="Çizgi stili"
+            data-border-style
+            onChange={(e) => onChange({ ...spec, style: e.target.value })}
+            style={{ ...fieldInputStyle, flex: 1 }}
+        >
+            <option value="solid">Düz</option>
+            <option value="dashed">Kesik</option>
+            <option value="dotted">Noktalı</option>
+            <option value="double">Çift</option>
+        </select>
+        <input
+            type="color" value={spec.color}
+            title="Renk"
+            data-border-color
+            onChange={(e) => onChange({ ...spec, color: e.target.value })}
+            style={{ width: '34px', height: '30px', padding: 0, border: '1px solid #334155', borderRadius: '4px', background: '#1e293b', cursor: 'pointer' }}
+        />
+    </div>
+);
 
 const MAX_TABLE_COLS = 12;
 const MAX_TABLE_ROWS = 50;
-const TableEditor: React.FC<{ table: HTMLTableElement; onChange: (markup: string) => void }> = ({ table, onChange }) => {
+const TableEditor: React.FC<{
+    table: HTMLTableElement;
+    onChange: (markup: string) => void;
+    onAttr: (attr: string, value: string) => void;
+    onStyle: (prop: string, value: string) => void;
+}> = ({ table, onChange, onAttr, onStyle }) => {
     const [model, setModel] = useState<TableModel>(() => readTableModel(table));
     const cols = model.rows[0]?.length ?? 1;
     const bodyRows = model.rows.length - (model.header ? 1 : 0);
     const update = (next: TableModel) => { setModel(next); onChange(tableModelToMarkup(next)); };
+    // Çerçeve tablonun kendi border'ı, iç çizgiler hücre kenarlarıdır; HTML
+    // border="1" hücrelere de çizgi verdiği için 0'a çekilir.
+    const updateLines = (next: TableModel) => {
+        update(next);
+        onAttr('border', '0');
+        onAttr('cellpadding', String(next.padding));
+        onAttr('data-border-frame', borderSpecToAttr(next.frame));
+        onAttr('data-border-inner', `${next.inner.lines} ${borderSpecToAttr(next.inner)}`);
+        onStyle('border-collapse', 'collapse');
+        onStyle('border', borderCss(next.frame));
+    };
     const setCols = (n: number) => {
         const c = Math.min(MAX_TABLE_COLS, Math.max(1, n || 1));
         update({ ...model, rows: model.rows.map((r, ri) => Array.from({ length: c }, (_, i) => r[i] ?? (model.header && ri === 0 ? `Başlık ${i + 1}` : ''))) });
@@ -324,6 +454,32 @@ const TableEditor: React.FC<{ table: HTMLTableElement; onChange: (markup: string
                 <input type="checkbox" data-table-header checked={model.header} onChange={(e) => setHeader(e.target.checked)} />
                 Başlık satırı
             </label>
+            <label style={fieldLabelStyle}>Dış çerçeve (kalınlık px · stil · renk)</label>
+            <BorderControls testId="frame" spec={model.frame} onChange={(frame) => updateLines({ ...model, frame })} />
+            <label style={fieldLabelStyle}>Hücreler arası çizgiler</label>
+            <select
+                data-inner-lines
+                value={model.inner.lines}
+                onChange={(e) => updateLines({ ...model, inner: { ...model.inner, lines: e.target.value as InnerLines } })}
+                style={{ ...fieldInputStyle, marginBottom: '6px' }}
+            >
+                <option value="all">Tümü (yatay + dikey)</option>
+                <option value="horizontal">Sadece yatay</option>
+                <option value="vertical">Sadece dikey</option>
+                <option value="none">Yok</option>
+            </select>
+            {model.inner.lines !== 'none' && (
+                <BorderControls testId="inner" spec={model.inner} onChange={(b) => updateLines({ ...model, inner: { ...b, lines: model.inner.lines } })} />
+            )}
+            <div style={{ marginBottom: '10px' }}>
+                <label style={fieldLabelStyle}>Hücre iç boşluğu (px)</label>
+                <input
+                    type="number" min={0} max={40} value={model.padding}
+                    data-table-padding
+                    onChange={(e) => updateLines({ ...model, padding: Math.min(40, Math.max(0, Number(e.target.value) || 0)) })}
+                    style={fieldInputStyle}
+                />
+            </div>
             <label style={fieldLabelStyle}>Hücre içerikleri</label>
             <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, gap: '3px', marginBottom: '10px' }}>
                 {model.rows.map((r, ri) => r.map((t, ci) => (
@@ -369,6 +525,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     // iframe onLoad'ta iframe.contentDocument.body.scrollHeight ölçülerek set edilir.
     // scaledHeight = iframeHeight × previewZoom → container overflow doğal tetiklenir.
     const [iframeContentHeight, setIframeContentHeight] = useState<number>(800);
+    // Her iframe onLoad'da artar; doküman dinleyicileri yüklenen yeni dokümana bağlanır.
+    const [iframeLoadCount, setIframeLoadCount] = useState(0);
     const [renderDurationMs, setRenderDurationMs] = useState<number>(0);
     const [isRendering, setIsRendering] = useState<boolean>(false);
     const [moduleMenuOpen, setModuleMenuOpen] = useState<boolean>(false);
@@ -410,6 +568,12 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const pendingContentRef = useRef<string | null>(null);
     // Ekle panelinden eklenen obje, yeni önizleme yüklenince seçilir.
     const pendingSelectRef = useRef<PreviewLocator | null>(null);
+    // Tıklayarak eklemede konum; 'end' gövdenin sonu, diğerleri seçili öğeye göre.
+    const [insertMode, setInsertMode] = useState<'end' | InsertPosition>('after');
+    // Taşıma modu: id'si verilen obje, önizlemede tıklanan hedefe taşınır.
+    const [moveObjId, setMoveObjId] = useState<string | null>(null);
+    const moveObjIdRef = useRef<string | null>(null);
+    moveObjIdRef.current = moveObjId;
     const sourceEditDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const previewScrollRef = useRef<number>(0);
     const pendingPreviewScrollRef = useRef<number | null>(null);
@@ -521,7 +685,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             // node'a annotation ekler → %100 doğru binding-text eşleşmesi.
             const result = renderAndAnnotateXslt(
                 cleanXml,
-                xsltInstrumented.instrumentedXslt,
+                annotateLiteralTags(xsltInstrumented.instrumentedXslt),
                 xsltInstrumented.bindings
             );
             // Stil/metin düzenlemesi sonrası yeniden render'da önizleme başa
@@ -741,6 +905,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             setSelectedObject(updated);
         }
         if (next !== xsltContentRef.current) {
+            xsltContentRef.current = next;
             setXsltContent(next);
             console.log(`[XSLTEditor] Özellik XSLT'ye yazıldı → ${[...Object.keys(styles), ...Object.keys(attrs), ...(content !== null ? ['içerik'] : [])].join(', ')}`);
         }
@@ -774,6 +939,37 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         pendingAttrRef.current[attr] = value;
         scheduleSourceFlush();
     }, [scheduleSourceFlush]);
+
+    /** Yeni objeyi hedefe göre (null → gövdenin sonu) ekler ve seçer. */
+    const insertObject = useCallback((type: XsltInsertType, target: InsertTarget | null) => {
+        const xslt = xsltContentRef.current;
+        const id = nextXsltObjId(xslt);
+        const tag = target ? findLiteralTagByOrdinal(xslt, target.ordinal) : null;
+        const updated = tag && target
+            ? insertAtTag(xslt, tag, XSLT_ELEMENT_SNIPPETS[type](id), target.position)
+            : insertXsltElement(xslt, type, id);
+        if (updated === xslt) return;
+        if (!tag) pendingPreviewScrollRef.current = Number.MAX_SAFE_INTEGER;
+        pendingSelectRef.current = { kind: 'obj', id };
+        xsltContentRef.current = updated;
+        setXsltContent(updated);
+        console.log(`[XSLTEditor] Obje eklendi: ${type} → ${target ? `<${target.el.tagName.toLowerCase()}> ${target.position === 'inside' ? 'içine' : 'altına'}` : 'sayfa sonu'}`);
+    }, []);
+
+    const moveObject = useCallback((id: string, target: InsertTarget | null) => {
+        const xslt = xsltContentRef.current;
+        const src = findObjTag(xslt, id);
+        if (!src) return;
+        const tag = target ? findLiteralTagByOrdinal(xslt, target.ordinal) : null;
+        if (target && !tag) return;
+        const updated = moveElement(xslt, src, tag, target?.position ?? 'after');
+        if (!updated || updated === xslt) return;
+        console.log(`[XSLTEditor] Obje taşındı: ${id} → ${tag ? `<${tag.name}> ${target?.position === 'inside' ? 'içine' : 'altına'}` : 'sayfa sonu'}`);
+        if (!tag) pendingPreviewScrollRef.current = Number.MAX_SAFE_INTEGER;
+        pendingSelectRef.current = { kind: 'obj', id };
+        xsltContentRef.current = updated;
+        setXsltContent(updated);
+    }, []);
 
     /** Objenin iç içeriği (metin / tablo satırları): önizleme + XSLT. */
     const handleContentChange = useCallback((markup: string) => {
@@ -816,7 +1012,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         if (!selectedObject) return;
         const onKey = (e: KeyboardEvent) => {
             if (e.key === 'Escape') {
-                closeSelection();
+                if (moveObjIdRef.current) setMoveObjId(null);
+                else closeSelection();
                 e.stopPropagation();
             }
         };
@@ -1143,6 +1340,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const handleIframeBodyClick = useCallback((e: Event) => {
         const target = e.target as HTMLElement | null;
         if (!target || typeof target.closest !== 'function') return;
+        const movingId = moveObjIdRef.current;
+        if (movingId) {
+            e.preventDefault();
+            e.stopPropagation();
+            setMoveObjId(null);
+            moveObject(movingId, resolveInsertTarget(target, 'auto'));
+            return;
+        }
         // Sprint 16 Aşama 3 — Tüm elementlere tıklama desteği. Önceki kod
         // sadece data-render-index olan elementlerde çalışıyordu
         // (closest('[data-render-index]') null ise return). e-Fatura-Sablon
@@ -1219,7 +1424,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         }
         openSelection(binding, indexedEl, locator);
         console.log(`[XSLTEditor] Preview click → ${indexedEl.tagName} render-index=${renderIndex ?? '(yok — sadece stil paneli)'}`);
-    }, [openSelection]);
+    }, [openSelection, moveObject]);
 
     /**
      * iframe yüklendiğinde:
@@ -1255,7 +1460,9 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             style.id = '__xslt-preview-layout';
             style.textContent = 'body{margin-left:auto !important;margin-right:auto !important;}'
                 + '[data-xslt-selected]{outline:2px solid #f59e0b !important;outline-offset:2px;}'
-                + '[data-xslt-obj]{cursor:pointer;}[data-xslt-obj]:hover{outline:2px dashed #6366f1;outline-offset:2px;}';
+                + '[data-xslt-obj]{cursor:pointer;}[data-xslt-obj]:hover{outline:2px dashed #6366f1;outline-offset:2px;}'
+                + '[data-xslt-drop=inside]{outline:2px dashed #10b981 !important;outline-offset:-2px;background-color:rgba(16,185,129,0.08) !important;}'
+                + '[data-xslt-drop=after]{box-shadow:0 3px 0 0 #10b981 !important;}';
             doc.head.appendChild(style);
         }
         doc.documentElement.style.setProperty('zoom', String(zoom));
@@ -1337,6 +1544,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             // kayboluyor. doc.addEventListener her zaman aktif.
             doc.addEventListener('click', handleIframeBodyClick, { capture: true });
             console.log('[XSLTEditor] iframe click listener attached (doc, capture:true)');
+            setIframeLoadCount(c => c + 1);
 
             // (3) srcDoc her değiştiğinde yeni doküman gelir — mevcut zoom'u
             // hemen uygula (titreme olmasın), auto-fit açıksa 350ms sonra
@@ -1395,29 +1603,38 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         // re-render'da body'si değişebiliyor → body'sine bind listener kayboluyor.
         // document'te bind → her zaman çalışır, body değişse bile.
         doc.addEventListener('click', handleIframeBodyClick, { capture: true });
-        // Sprint 15 Aşama 2 — HTML5 drag-drop listener (drop handler).
+        // Sürükle-bırak ve taşıma modunda bırakılacak yer önizlemede işaretlenir.
+        const markDropTarget = (t: InsertTarget | null) => {
+            doc.querySelectorAll('[data-xslt-drop]').forEach(n => {
+                if (n !== t?.el) n.removeAttribute('data-xslt-drop');
+            });
+            t?.el.setAttribute('data-xslt-drop', t.position);
+        };
         const dragOverHandler = (e: DragEvent) => {
             if (e.dataTransfer?.types.includes('text/x-xslt-element')) {
                 e.preventDefault();
                 e.dataTransfer.dropEffect = 'copy';
+                markDropTarget(resolveInsertTarget(e.target as Element, 'auto'));
             }
         };
+        const dragLeaveHandler = (e: DragEvent) => {
+            if (!e.relatedTarget) markDropTarget(null);
+        };
         const dropHandler = (e: DragEvent) => {
-            const type = e.dataTransfer?.getData('text/x-xslt-element') as 'image' | 'text' | 'table' | 'input' | '';
+            const type = e.dataTransfer?.getData('text/x-xslt-element') as XsltInsertType | '';
+            markDropTarget(null);
             if (!type) return;
             e.preventDefault();
             e.stopPropagation();
-            const id = nextXsltObjId(xsltContent);
-            const updated = insertXsltElement(xsltContent, type, id);
-            if (updated !== xsltContent) {
-                pendingPreviewScrollRef.current = Number.MAX_SAFE_INTEGER;
-                pendingSelectRef.current = { kind: 'obj', id };
-                setXsltContent(updated);
-                console.log(`[XSLTEditor] Drop insert: ${type} (${updated.length - xsltContent.length} chars)`);
-            }
+            insertObject(type, resolveInsertTarget(e.target as Element, 'auto'));
+        };
+        const moveOverHandler = (e: MouseEvent) => {
+            if (moveObjIdRef.current) markDropTarget(resolveInsertTarget(e.target as Element, 'auto'));
         };
         body.addEventListener('dragover', dragOverHandler);
+        body.addEventListener('dragleave', dragLeaveHandler);
         body.addEventListener('drop', dropHandler);
+        doc.addEventListener('mouseover', moveOverHandler);
         console.log(`[XSLTEditor] iframe listener re-bound (previewHtml changed, scrollHeight=${scrollH})`);
 
         // srcDoc değişirken iframe.contentDocument body'si henüz null olan yeni
@@ -1425,9 +1642,18 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         return () => {
             doc.removeEventListener('click', handleIframeBodyClick, { capture: true });
             body.removeEventListener('dragover', dragOverHandler);
+            body.removeEventListener('dragleave', dragLeaveHandler);
             body.removeEventListener('drop', dropHandler);
+            doc.removeEventListener('mouseover', moveOverHandler);
         };
-    }, [previewHtml, handleIframeBodyClick, xsltContent]);
+    }, [previewHtml, iframeLoadCount, handleIframeBodyClick, insertObject]);
+
+    // Taşıma modu bitince önizlemedeki hedef işareti kaldırılır.
+    useEffect(() => {
+        if (moveObjId) return;
+        iframeRef.current?.contentDocument?.querySelectorAll('[data-xslt-drop]')
+            .forEach(n => n.removeAttribute('data-xslt-drop'));
+    }, [moveObjId]);
 
     // ------------------------------------------------------------------------
     // Render
@@ -2038,6 +2264,30 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         }}>
                             Ekle (sürükle veya tıkla)
                         </div>
+                        {(() => {
+                            const selTag = selectedObject?.element?.tagName.toLowerCase();
+                            return (
+                                <div style={{ marginBottom: '6px' }}>
+                                    <select
+                                        data-insert-mode
+                                        value={insertMode}
+                                        onChange={(e) => setInsertMode(e.target.value as 'end' | InsertPosition)}
+                                        title="Tıklayarak eklenen obje nereye konsun"
+                                        style={{ ...fieldInputStyle, padding: '4px 6px', fontSize: '10px', fontFamily: 'inherit' }}
+                                    >
+                                        <option value="after">Seçili öğenin altına</option>
+                                        <option value="inside">Seçili öğenin içine</option>
+                                        <option value="end">Sayfanın sonuna</option>
+                                    </select>
+                                    <div style={{ fontSize: '9px', color: '#64748b', marginTop: '3px', lineHeight: 1.4 }}>
+                                        {insertMode === 'end'
+                                            ? 'Tıklanan obje sayfanın sonuna eklenir.'
+                                            : selTag ? `Seçili: <${selTag}>` : 'Önce önizlemede bir öğe seçin (seçim yoksa sayfa sonuna eklenir).'}
+                                        <br />Sürükleyip önizlemede istediğiniz yere de bırakabilirsiniz.
+                                    </div>
+                                </div>
+                            );
+                        })()}
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px' }}>
                             {[
                                 { type: 'image' as const, label: '📷 Resim', color: '#a5b4fc' },
@@ -2054,14 +2304,10 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                         e.dataTransfer.effectAllowed = 'copy';
                                     }}
                                     onClick={() => {
-                                        const id = nextXsltObjId(xsltContent);
-                                        const updated = insertXsltElement(xsltContent, item.type, id);
-                                        if (updated !== xsltContent) {
-                                            pendingPreviewScrollRef.current = Number.MAX_SAFE_INTEGER;
-                                            pendingSelectRef.current = { kind: 'obj', id };
-                                            setXsltContent(updated);
-                                            console.log(`[XSLTEditor] Click insert: ${item.type}`);
-                                        }
+                                        const target = insertMode === 'end'
+                                            ? null
+                                            : resolveInsertTarget(selectedObjectRef.current?.element ?? null, insertMode);
+                                        insertObject(item.type, target);
                                     }}
                                     style={{
                                         padding: '8px',
@@ -2229,6 +2475,34 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             </button>
                         </span>
                     </div>
+
+                    {moveObjId && (
+                        <div
+                            data-move-banner
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: '8px',
+                                padding: '8px 12px', background: 'rgba(16, 185, 129, 0.12)',
+                                borderBottom: '1px solid rgba(16, 185, 129, 0.4)',
+                                color: '#6ee7b7', fontSize: '11px',
+                            }}
+                        >
+                            <span style={{ flex: 1 }}>
+                                ↕ Taşıma: önizlemede hedef öğeye tıklayın — hücre / kutu ise içine, diğerlerinde altına konur. Esc ile iptal.
+                            </span>
+                            <button
+                                onClick={() => { const id = moveObjId; setMoveObjId(null); moveObject(id, null); }}
+                                style={{ padding: '4px 8px', background: 'transparent', border: '1px solid rgba(16, 185, 129, 0.5)', borderRadius: '4px', color: '#6ee7b7', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
+                            >
+                                Sayfa sonuna
+                            </button>
+                            <button
+                                onClick={() => setMoveObjId(null)}
+                                style={{ padding: '4px 8px', background: 'transparent', border: '1px solid #334155', borderRadius: '4px', color: '#94a3b8', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
+                            >
+                                İptal
+                            </button>
+                        </div>
+                    )}
 
                     {/* Hata banner */}
                     {previewError && (
@@ -2515,7 +2789,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     {isObj && el && isTable && (
                                         <>
                                             {sectionTitle('Tablo', '#fcd34d')}
-                                            <TableEditor key={fieldKey('table')} table={el as HTMLTableElement} onChange={handleContentChange} />
+                                            <TableEditor key={fieldKey('table')} table={el as HTMLTableElement} onChange={handleContentChange} onAttr={handleAttrChange} onStyle={handleStyleChange} />
                                         </>
                                     )}
 
@@ -2583,6 +2857,16 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                             style={{ flex: 1, padding: '6px 8px', background: 'rgba(252, 211, 77, 0.15)', border: '1px solid rgba(252, 211, 77, 0.4)', borderRadius: '4px', color: '#fcd34d', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
                                         >
                                             👁 Gizle
+                                        </button>
+                                    )}
+                                    {isObj && canPersist && sel.locator?.kind === 'obj' && (
+                                        <button
+                                            onClick={() => { flushSourceEdits(); setMoveObjId(sel.locator?.kind === 'obj' ? sel.locator.id : null); }}
+                                            title="Objeyi sayfada başka bir yere taşı"
+                                            data-move-object
+                                            style={{ flex: 1, padding: '6px 8px', background: moveObjId ? 'rgba(16, 185, 129, 0.3)' : 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.4)', borderRadius: '4px', color: '#6ee7b7', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
+                                        >
+                                            ↕ Taşı
                                         </button>
                                     )}
                                     {removable && (
