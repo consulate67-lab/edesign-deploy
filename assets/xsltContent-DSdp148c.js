@@ -12941,4 +12941,4 @@ const F=`ï»¿<?xml version="1.0" encoding="UTF-8"?>
       </xsl:choose>\r
     </xsl:if>\r
   </xsl:template>\r
-</xsl:stylesheet>`,n={"gib/v2/e-Fatura-Sablon.xslt":F,"gib/v2/e-Arsiv-Sablon.xslt":o,"community/IRPTeam-eWaybill-Irsaliye-Aracli.xslt":U,"community/IRPTeam-eFatura.xslt":K,"community/hzkucuk-eFatura-smm.xslt":t,"community/hzkucuk-eFatura-mustahsil.xslt":i,"community/hzkucuk-eFatura-bilet.xslt":R,"community/hzkucuk-eFatura-makbuz.xslt":r},f=A=>n[A];export{f as g};
+</xsl:stylesheet>`,n={"gib/v2/e-Fatura-Sablon.xslt":F,"gib/v2/e-Arsiv-Sablon.xslt":o,"community/IRPTeam-eWaybill-Irsaliye-Aracli.xslt":U,"community/IRPTeam-eFatura.xslt":K,"community/hzkucuk-eFatura-smm.xslt":t,"community/hzkucuk-eFatura-mustahsil.xslt":i,"community/hzkucuk-eFatura-bilet.xslt":R,"community/hzkucuk-eFatura-makbuz.xslt":r},f=A=>n[A];export{n as INLINE_XSLT_CONTENT,f as getInlineXslt};
