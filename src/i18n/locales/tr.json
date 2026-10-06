@@ -83,9 +83,7 @@
   "payment": {
     "title": "Kredi Satın Al",
     "credits": {
-      "10": "10 Kredi - 49 ₺",
-      "50": "50 Kredi - 199 ₺",
-      "100": "100 Kredi - 349 ₺"
+      "25": "25 Kredi - 4.000 ₺"
     },
     "purchase": "Satın Al",
     "cancel": "İptal",

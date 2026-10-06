@@ -186,6 +186,8 @@ interface XsltEditorProps {
     initialModuleId?: string;
     /** Başlangıç XSLT (yoksa modülün inline XSLT'si yüklenir). */
     initialXslt?: string;
+    /** Önizleme verisi (sihirbazda seçilen XML; yoksa yerleşik örnek fatura). */
+    initialXml?: string;
     /** Tasarım adı (Save için). */
     docName?: string;
     /** Geri dön (Selection sayfasına). */
@@ -627,6 +629,7 @@ const PositionEditor: React.FC<{
 export const XSLTEditor: React.FC<XsltEditorProps> = ({
     initialModuleId = 'fatura',
     initialXslt,
+    initialXml,
     docName = 'XSLT Tasarım',
     onBack,
 }) => {
@@ -635,7 +638,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     // ------------------------------------------------------------------------
     const [moduleId, setModuleId] = useState<string>(initialModuleId);
     const [xsltContent, setXsltContent] = useState<string>('');
-    const [xmlContent, setXmlContent] = useState<string>(SAMPLE_XML);
+    const [xmlContent, setXmlContent] = useState<string>(initialXml || SAMPLE_XML);
     const [activeTab] = useState<'xslt' | 'xml'>('xslt');
     const [previewHtml, setPreviewHtml] = useState<string>('');
     const [previewError, setPreviewError] = useState<string | null>(null);

@@ -40,6 +40,7 @@ const HELLO_WORLD = `<?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="1.0"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <xsl:output method="html" version="4.01" encoding="UTF-8" indent="yes"/>
+  <xsl:decimal-format name="tr_TR" decimal-separator="," grouping-separator="."/>
 
   <xsl:template match="/">
     <html>
@@ -76,6 +77,7 @@ const FATURA_MINIMAL = `<?xml version="1.0" encoding="UTF-8"?>
     xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
     xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
   <xsl:output method="html" version="4.01" encoding="UTF-8" indent="yes"/>
+  <xsl:decimal-format name="tr_TR" decimal-separator="," grouping-separator="."/>
 
   <xsl:template match="/">
     <html>
@@ -105,7 +107,7 @@ const FATURA_MINIMAL = `<?xml version="1.0" encoding="UTF-8"?>
         <div class="total-box">
           <div>Ödenecek Tutar</div>
           <div class="total-amount">
-            <xsl:value-of select="format-number(//cbc:PayableAmount, '#,##0.00', 'tr_TR')"/>
+            <xsl:value-of select="format-number(//cbc:PayableAmount, '#.##0,00', 'tr_TR')"/>
             <xsl:text> </xsl:text>
             <xsl:value-of select="//cbc:DocumentCurrencyCode"/>
           </div>
@@ -129,6 +131,7 @@ const FATURA_STANDART = `<?xml version="1.0" encoding="UTF-8"?>
     xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
     xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
   <xsl:output method="html" version="4.01" encoding="UTF-8" indent="yes"/>
+  <xsl:decimal-format name="tr_TR" decimal-separator="," grouping-separator="."/>
 
   <xsl:template match="/">
     <html>
@@ -203,10 +206,10 @@ const FATURA_STANDART = `<?xml version="1.0" encoding="UTF-8"?>
                 <td><xsl:value-of select="cac:Item/cbc:Name"/></td>
                 <td class="num"><xsl:value-of select="cbc:InvoicedQuantity"/></td>
                 <td class="num">
-                  <xsl:value-of select="format-number(cac:Price/cbc:PriceAmount, '#,##0.00', 'tr_TR')"/>
+                  <xsl:value-of select="format-number(cac:Price/cbc:PriceAmount, '#.##0,00', 'tr_TR')"/>
                 </td>
                 <td class="num">
-                  <xsl:value-of select="format-number(cbc:LineExtensionAmount, '#,##0.00', 'tr_TR')"/>
+                  <xsl:value-of select="format-number(cbc:LineExtensionAmount, '#.##0,00', 'tr_TR')"/>
                 </td>
               </tr>
             </xsl:for-each>
@@ -215,10 +218,10 @@ const FATURA_STANDART = `<?xml version="1.0" encoding="UTF-8"?>
 
         <!-- Toplamlar -->
         <div class="totals">
-          <div>Ara Toplam: <xsl:value-of select="format-number(//cac:LegalMonetaryTotal/cbc:TaxExclusiveAmount, '#,##0.00', 'tr_TR')"/></div>
-          <div>KDV: <xsl:value-of select="format-number(sum(//cac:TaxTotal/cbc:TaxAmount), '#,##0.00', 'tr_TR')"/></div>
+          <div>Ara Toplam: <xsl:value-of select="format-number(//cac:LegalMonetaryTotal/cbc:TaxExclusiveAmount, '#.##0,00', 'tr_TR')"/></div>
+          <div>KDV: <xsl:value-of select="format-number(sum(//cac:TaxTotal/cbc:TaxAmount), '#.##0,00', 'tr_TR')"/></div>
           <div class="grand-total">
-            GENEL TOPLAM: <xsl:value-of select="format-number(//cac:LegalMonetaryTotal/cbc:PayableAmount, '#,##0.00', 'tr_TR')"/>
+            GENEL TOPLAM: <xsl:value-of select="format-number(//cac:LegalMonetaryTotal/cbc:PayableAmount, '#.##0,00', 'tr_TR')"/>
             <xsl:text> </xsl:text>
             <xsl:value-of select="//cbc:DocumentCurrencyCode"/>
           </div>
@@ -242,6 +245,7 @@ const ARSIV_MINIMAL = `<?xml version="1.0" encoding="UTF-8"?>
     xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
     xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
   <xsl:output method="html" version="4.01" encoding="UTF-8" indent="yes"/>
+  <xsl:decimal-format name="tr_TR" decimal-separator="," grouping-separator="."/>
 
   <xsl:template match="/">
     <html>
@@ -270,7 +274,7 @@ const ARSIV_MINIMAL = `<?xml version="1.0" encoding="UTF-8"?>
         <div class="total-box">
           <div>Ödenecek Tutar</div>
           <div class="total-amount">
-            <xsl:value-of select="format-number(//cbc:PayableAmount, '#,##0.00', 'tr_TR')"/>
+            <xsl:value-of select="format-number(//cbc:PayableAmount, '#.##0,00', 'tr_TR')"/>
             <xsl:text> </xsl:text>
             <xsl:value-of select="//cbc:DocumentCurrencyCode"/>
           </div>
@@ -294,6 +298,7 @@ const ARSIV_STANDART = `<?xml version="1.0" encoding="UTF-8"?>
     xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
     xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
   <xsl:output method="html" version="4.01" encoding="UTF-8" indent="yes"/>
+  <xsl:decimal-format name="tr_TR" decimal-separator="," grouping-separator="."/>
 
   <xsl:template match="/">
     <html>
@@ -362,18 +367,18 @@ const ARSIV_STANDART = `<?xml version="1.0" encoding="UTF-8"?>
                 <td><xsl:value-of select="position()"/></td>
                 <td><xsl:value-of select="cac:Item/cbc:Name"/></td>
                 <td class="num"><xsl:value-of select="cbc:InvoicedQuantity"/></td>
-                <td class="num"><xsl:value-of select="format-number(cac:Price/cbc:PriceAmount, '#,##0.00', 'tr_TR')"/></td>
-                <td class="num"><xsl:value-of select="format-number(cbc:LineExtensionAmount, '#,##0.00', 'tr_TR')"/></td>
+                <td class="num"><xsl:value-of select="format-number(cac:Price/cbc:PriceAmount, '#.##0,00', 'tr_TR')"/></td>
+                <td class="num"><xsl:value-of select="format-number(cbc:LineExtensionAmount, '#.##0,00', 'tr_TR')"/></td>
               </tr>
             </xsl:for-each>
           </tbody>
         </table>
 
         <div class="totals">
-          <div>Ara Toplam: <xsl:value-of select="format-number(//cac:LegalMonetaryTotal/cbc:TaxExclusiveAmount, '#,##0.00', 'tr_TR')"/></div>
-          <div>KDV: <xsl:value-of select="format-number(sum(//cac:TaxTotal/cbc:TaxAmount), '#,##0.00', 'tr_TR')"/></div>
+          <div>Ara Toplam: <xsl:value-of select="format-number(//cac:LegalMonetaryTotal/cbc:TaxExclusiveAmount, '#.##0,00', 'tr_TR')"/></div>
+          <div>KDV: <xsl:value-of select="format-number(sum(//cac:TaxTotal/cbc:TaxAmount), '#.##0,00', 'tr_TR')"/></div>
           <div class="grand-total">
-            GENEL TOPLAM: <xsl:value-of select="format-number(//cac:LegalMonetaryTotal/cbc:PayableAmount, '#,##0.00', 'tr_TR')"/>
+            GENEL TOPLAM: <xsl:value-of select="format-number(//cac:LegalMonetaryTotal/cbc:PayableAmount, '#.##0,00', 'tr_TR')"/>
             <xsl:text> </xsl:text>
             <xsl:value-of select="//cbc:DocumentCurrencyCode"/>
           </div>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { ChevronLeft, CreditCard, ShieldCheck, X, Sparkles } from 'lucide-react';
+import { CreditCard, ShieldCheck, X, Sparkles, Check } from 'lucide-react';
 import { api } from './api';
+import { PACKAGES_PLANS, type PackagePlan } from './pricing';
 
 interface PaymentModalProps {
     isOpen: boolean;
@@ -8,53 +9,26 @@ interface PaymentModalProps {
     onSuccess: (newCredits: number) => void;
 }
 
-// Mirror of the Landing page pricing section so the two stay in sync.
-// Update Landing.tsx PACKAGES_PLANS in tandem.
-interface Plan {
-    id: 'starter' | 'pro' | 'kurumsal';
-    name: string;
-    count: number;
-    price: number;
-    perUnit: number;
-    popular: boolean;
-    accent: string;
-}
+const formatTL = (n: number) => `${n.toLocaleString('tr-TR')} TL`;
 
-const PACKAGES_PLANS: Plan[] = [
-    { id: 'starter',  name: 'Baslangic', count: 5,    price: 0,   perUnit: 0,    popular: false, accent: '#64748b' },
-    { id: 'pro',      name: 'Pro',       count: 50,   price: 49,  perUnit: 0.98, popular: true,  accent: '#6366f1' },
-    { id: 'kurumsal', name: 'Kurumsal',  count: 9999, price: 199, perUnit: 0.02, popular: false, accent: '#10b981' },
-];
-
-export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess }) => {
-    const [paymentState, setPaymentState] = useState<{ step: 'packages' | 'redirecting', isPaying?: boolean, planId?: string }>({ step: 'packages' });
+export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) => {
+    const [paymentState, setPaymentState] = useState<{ step: 'packages' | 'redirecting', planId?: string }>({ step: 'packages' });
 
     if (!isOpen) return null;
 
-    /**
-     * Sprint 1.3 (2026-10-02) — Plan secilince iyzico checkout token al,
-     * paymentPageUrl'ye yonlendir. Ucretsiz plan icin kayit/yenile auth'a gider.
-     */
-    const handlePlanSelect = async (plan: Plan) => {
-        setPaymentState({ step: 'redirecting', planId: plan.id, isPaying: true });
+    /** Paket seçilince iyzico checkout token alınır, ödeme sayfasına yönlendirilir. */
+    const handlePlanSelect = async (plan: PackagePlan) => {
+        setPaymentState({ step: 'redirecting', planId: plan.id });
         try {
             const result = await api.iyzicoCheckout(plan.id);
-            if (result.free || plan.price === 0) {
-                // Backend 'free' donerse veya ucretsiz plan secildiyse
-                onSuccess(plan.count);
-                onClose();
-                setPaymentState({ step: 'packages' });
-                return;
-            }
             if (result.paymentPageUrl) {
-                // Iyzico 3D odeme sayfasina yonlendir
                 window.location.href = result.paymentPageUrl;
             } else {
-                window.alert('Odeme baslatilamadi, lutfen tekrar deneyin.');
+                window.alert('Ödeme başlatılamadı, lütfen tekrar deneyin.');
                 setPaymentState({ step: 'packages' });
             }
         } catch (err: any) {
-            window.alert('Odeme Hatasi: ' + (err?.message ?? 'bilinmeyen'));
+            window.alert('Ödeme hatası: ' + (err?.message ?? 'bilinmeyen'));
             setPaymentState({ step: 'packages' });
         }
     };
@@ -70,7 +44,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onS
                 border: '1px solid rgba(148, 163, 184, 0.14)',
                 padding: '2.5rem 2rem',
                 borderRadius: '1.5rem',
-                maxWidth: '1040px',
+                maxWidth: '520px',
                 width: '100%',
                 position: 'relative',
                 boxShadow: '0 24px 60px rgba(0, 0, 0, 0.55)',
@@ -81,18 +55,11 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onS
                     onClick={onClose}
                     aria-label="Kapat"
                     style={{
-                        position: 'absolute',
-                        top: '1.5rem',
-                        right: '1.5rem',
+                        position: 'absolute', top: '1.5rem', right: '1.5rem',
                         background: 'rgba(255,255,255,0.04)',
                         border: '1px solid rgba(148, 163, 184, 0.18)',
-                        color: '#cbd5e1',
-                        cursor: 'pointer',
-                        padding: '0.4rem',
-                        borderRadius: '50%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
+                        color: '#cbd5e1', cursor: 'pointer', padding: '0.4rem', borderRadius: '50%',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}
                 >
                     <X size={18} />
@@ -107,85 +74,57 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onS
                                 background: 'rgba(99, 102, 241, 0.1)',
                                 border: '1px solid rgba(99, 102, 241, 0.3)',
                                 color: '#a5b4fc', fontSize: '0.7rem', fontWeight: 700,
-                                letterSpacing: '1.2px',
-                                textTransform: 'uppercase',
-                                marginBottom: '0.75rem',
+                                letterSpacing: '1.2px', textTransform: 'uppercase', marginBottom: '0.75rem',
                             }}>
-                                <Sparkles size={11} /> Kredi Yukle
+                                <Sparkles size={11} /> Kredi Yükle
                             </div>
                             <h2 style={{ color: '#f8fafc', fontSize: '1.8rem', fontWeight: 800, margin: 0, letterSpacing: '-0.02em' }}>
-                                Tasarim Paketi Secin
+                                Tasarım Paketi
                             </h2>
                             <p style={{ color: '#94a3b8', fontSize: '0.95rem', margin: '0.5rem 0 0' }}>
-                                3D Secure ile guvenli odeme. Iyzico altyapisi.
+                                Tek seferlik ödeme · abonelik yok · 3D Secure
                             </p>
                         </div>
 
-                        <div style={{
-                            display: 'grid', gap: '0.75rem',
-                            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                        }}>
-                            {PACKAGES_PLANS.map((plan) => (
-                                <button
-                                    key={plan.id}
-                                    type="button"
-                                    onClick={() => handlePlanSelect(plan)}
-                                    style={{
-                                        background: plan.popular
-                                            ? 'linear-gradient(180deg, rgba(99,102,241,0.2), rgba(99,102,241,0.05))'
-                                            : 'rgba(255,255,255,0.02)',
-                                        border: plan.popular
-                                            ? '2px solid #6366f1'
-                                            : '1px solid rgba(148, 163, 184, 0.18)',
-                                        borderRadius: '1rem',
-                                        padding: '1.25rem 1rem',
-                                        textAlign: 'left',
-                                        cursor: 'pointer',
-                                        color: '#f1f5f9',
-                                        position: 'relative',
-                                        transition: 'all 0.2s',
-                                        fontFamily: 'inherit',
-                                    }}
-                                >
-                                    {plan.popular && (
-                                        <div style={{
-                                            position: 'absolute', top: -10,
-                                            background: '#6366f1', color: 'white',
-                                            padding: '2px 10px', borderRadius: 999,
-                                            fontSize: '0.65rem', fontWeight: 800,
-                                            letterSpacing: '0.8px',
-                                        }}>
-                                            EN POPULER
-                                        </div>
-                                    )}
-                                    <div style={{
-                                        fontSize: '1rem', fontWeight: 700,
-                                        color: plan.popular ? '#a5b4fc' : '#cbd5e1',
-                                        marginBottom: '0.25rem',
-                                    }}>
-                                        {plan.name}
+                        {PACKAGES_PLANS.map((plan) => (
+                            <button
+                                key={plan.id}
+                                type="button"
+                                data-buy-plan={plan.id}
+                                onClick={() => handlePlanSelect(plan)}
+                                style={{
+                                    width: '100%',
+                                    background: 'linear-gradient(180deg, rgba(99,102,241,0.2), rgba(99,102,241,0.05))',
+                                    border: '2px solid #6366f1', borderRadius: '1rem',
+                                    padding: '1.5rem', textAlign: 'left', cursor: 'pointer',
+                                    color: '#f1f5f9', fontFamily: 'inherit',
+                                }}
+                            >
+                                <div style={{ fontSize: '1rem', fontWeight: 700, color: '#a5b4fc', marginBottom: '0.25rem' }}>
+                                    {plan.name}
+                                </div>
+                                <div style={{ fontSize: '2rem', fontWeight: 800, color: 'white', marginBottom: '0.25rem' }}>
+                                    {formatTL(plan.price)}
+                                </div>
+                                <div style={{ color: '#94a3b8', fontSize: '0.85rem', marginBottom: '1rem' }}>
+                                    {plan.credits} tasarım hakkı · tasarım başına {formatTL(Math.round(plan.price / plan.credits))}
+                                </div>
+                                {plan.features.map(f => (
+                                    <div key={f} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#cbd5e1', fontSize: '0.85rem', marginBottom: '0.35rem' }}>
+                                        <Check size={14} color="#10b981" /> {f}
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '0.5rem' }}>
-                                        <span style={{ fontSize: '1.8rem', fontWeight: 800, color: 'white' }}>
-                                            {plan.price === 0 ? 'Ucretsiz' : `${plan.price} TL`}
-                                        </span>
-                                        {plan.price > 0 && (
-                                            <span style={{ color: '#94a3b8', fontSize: '0.8rem' }}>/ ay</span>
-                                        )}
-                                    </div>
-                                    <div style={{ color: '#94a3b8', fontSize: '0.85rem', marginBottom: '0.25rem' }}>
-                                        {plan.count === 9999 ? 'Sinirsiz' : `${plan.count} tasarim hakki`}
-                                    </div>
-                                    <div style={{ color: '#64748b', fontSize: '0.75rem' }}>
-                                        Tasarim basina {(plan.price / plan.count).toFixed(2)} TL
-                                    </div>
-                                </button>
-                            ))}
-                        </div>
+                                ))}
+                                <div style={{
+                                    marginTop: '1rem', padding: '0.7rem', borderRadius: '0.6rem',
+                                    background: '#6366f1', color: 'white', fontWeight: 700, textAlign: 'center',
+                                }}>
+                                    Satın Al
+                                </div>
+                            </button>
+                        ))}
 
                         <div style={{
-                            marginTop: '1.5rem',
-                            padding: '1rem',
+                            marginTop: '1.5rem', padding: '1rem',
                             background: 'rgba(99, 102, 241, 0.06)',
                             border: '1px solid rgba(99, 102, 241, 0.2)',
                             borderRadius: '0.75rem',
@@ -194,9 +133,9 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onS
                         }}>
                             <ShieldCheck size={20} color="#10b981" style={{ flexShrink: 0 }} />
                             <div>
-                                <strong style={{ color: '#f1f5f9' }}>3D Secure ile guvenli odeme.</strong>{' '}
-                                Tum islemler Iyzico PCI-DSS sertifikali altyapida islenir.
-                                Kredi kart bilgileri sunucumuza ulasmaz.
+                                <strong style={{ color: '#f1f5f9' }}>3D Secure ile güvenli ödeme.</strong>{' '}
+                                Tüm işlemler iyzico PCI-DSS sertifikalı altyapıda işlenir.
+                                Kart bilgileri sunucumuza ulaşmaz.
                             </div>
                         </div>
                     </>
@@ -209,10 +148,10 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onS
                     }}>
                         <CreditCard size={48} color="#6366f1" />
                         <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f1f5f9', margin: 0 }}>
-                            Iyzico odeme sayfasina yonlendiriliyorsunuz...
+                            iyzico ödeme sayfasına yönlendiriliyorsunuz...
                         </h3>
                         <p style={{ color: '#94a3b8', fontSize: '0.9rem', margin: 0 }}>
-                            Lutfen bekleyin, odeme sayfasi acilacak.
+                            Lütfen bekleyin, ödeme sayfası açılacak.
                         </p>
                     </div>
                 )}

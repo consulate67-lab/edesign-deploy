@@ -323,7 +323,7 @@ export const api = {
     // --- IYZICO CHECKOUT (Sprint 1.3, 2026-10-02) ---
     // Plan satin alimi icin iyzico checkout form token al.
     // Backend POST /api/payment/iyzico/checkout — sandbox/prod env'den okur.
-    iyzicoCheckout: async (plan: 'starter' | 'pro' | 'kurumsal') => {
+    iyzicoCheckout: async (plan: 'pro') => {
         if (!IS_DEV) {
             return api.request('/payment/iyzico/checkout', {
                 method: 'POST',
@@ -338,7 +338,6 @@ export const api = {
             token: `mock-token-${plan}-${Date.now()}`,
             paymentPageUrl: `/?payment=mock-${plan}`,
             conversationId: `mock-conv-${Date.now()}`,
-            free: plan === 'starter',
         };
     },
 

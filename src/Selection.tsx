@@ -6,12 +6,13 @@ import { getModuleHints, getModuleConfig } from './templateConfig';
 import { getSnippetsForModule, Snippet } from './snippets';
 import { useUiStore } from './store/uiStore';
 import { TEMPLATES, type XsltTemplate } from './xslt-editor/templates';
+import { DesignWizard } from './wizard/DesignWizard';
 
 interface SelectionProps {
     onSelect: (moduleId: string, template: string, moduleName: string, customContent?: string, themeColor?: string) => void;
     onLogout: () => void;
     /** Sprint 7 (2026-10-03) — XSLT Editor (Monaco + canlı preview) — bağımsız 2. tasarım. */
-    onSelectXsltEditor?: (moduleId?: string, initialXslt?: string, docName?: string) => void;
+    onSelectXsltEditor?: (moduleId?: string, initialXslt?: string, docName?: string, xml?: string) => void;
 }
 
 interface Module {
@@ -106,6 +107,7 @@ export const Selection: React.FC<SelectionProps> = ({ onSelect, onLogout, onSele
     const [showSnippetsModal, setShowSnippetsModal] = useState<string | null>(null);
     const [copiedSnippetId, setCopiedSnippetId] = useState<string | null>(null);
     const [userInfo, setUserInfo] = useState<any>(null);
+    const [showMoreOptions, setShowMoreOptions] = useState(false);
 
     useEffect(() => {
         api.getMe().then(setUserInfo).catch(console.error);
@@ -182,6 +184,19 @@ export const Selection: React.FC<SelectionProps> = ({ onSelect, onLogout, onSele
                 position: 'absolute', top: '2rem', right: '2rem',
                 display: 'flex', gap: '1rem', zIndex: 50
             }}>
+                {userInfo && (
+                    <div
+                        data-credit-badge
+                        title="Kalan tasarım hakkı"
+                        style={{
+                            display: 'flex', alignItems: 'center', gap: '6px', padding: '0.6rem 1rem',
+                            borderRadius: '12px', border: '1px solid rgba(16,185,129,0.3)',
+                            background: 'rgba(16,185,129,0.1)', color: '#6ee7b7', fontSize: '0.85rem', fontWeight: 700,
+                        }}
+                    >
+                        <CreditCard size={16} /> {userInfo.credits ?? 0} tasarım hakkı
+                    </div>
+                )}
                 <button
                     onClick={() => setShowPaymentModal(true)}
                     style={{
@@ -330,12 +345,31 @@ export const Selection: React.FC<SelectionProps> = ({ onSelect, onLogout, onSele
                     }}>
                         E-Belge Tasarımcı
                     </h1>
-                    <p style={{ color: '#94a3b8', fontSize: '1.1rem', maxWidth: '600px' }}>
-                        Türkiyenın en gelişmiş e-belge tasarım platformuna hoş geldiniz.
-                        Hazır şablonlarla başlayın veya kendi tasarımınızı oluşturun.
+                    <p style={{ color: '#94a3b8', fontSize: '1.1rem', maxWidth: '600px', margin: '0 auto' }}>
+                        Yeni bir tasarım için adımları izleyin: belge türü, şablon ve veri.
                     </p>
                 </div>
 
+                <div style={{ width: '100%', marginBottom: '2rem' }}>
+                    <DesignWizard
+                        onFinish={(r) => onSelectXsltEditor?.(r.moduleId, r.xslt, r.docName, r.xml)}
+                    />
+                </div>
+
+                <button
+                    type="button"
+                    data-toggle-more-options
+                    onClick={() => setShowMoreOptions(v => !v)}
+                    style={{
+                        background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 999,
+                        color: '#94a3b8', padding: '8px 18px', cursor: 'pointer', fontSize: '0.85rem',
+                        marginBottom: '2rem', fontFamily: 'inherit',
+                    }}
+                >
+                    {showMoreOptions ? 'Diğer seçenekleri gizle' : 'Diğer başlangıç seçenekleri (klasik tasarımcı, hazır şablonlar)'}
+                </button>
+
+                {showMoreOptions && (<>
                 {/* Main Action Group */}
                 <div style={{
                     display: 'grid',
@@ -712,6 +746,7 @@ export const Selection: React.FC<SelectionProps> = ({ onSelect, onLogout, onSele
                         })}
                     </div>
                 </div>
+                </>)}
             </div>
 
             <PaymentModal

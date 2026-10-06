@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ArrowRight, MessageCircle, Sparkles, Zap, FileText, Globe, Layers, ChevronDown, Check, Star } from 'lucide-react';
 import { KVKKModal, KullaniciSozlesmesiModal, CerezPolitikasiModal } from './legal/Legal';
 import { api } from './api';
+import { PACKAGES_PLANS, type PackagePlan } from './pricing';
 
 interface LandingProps {
     onRegister: () => void;
@@ -13,61 +14,10 @@ interface SssItem {
     a: string;
 }
 
-/**
- * Sprint 1 (2026-10-02) — Pricing bölümü paketleri.
- * Backend PLAN_AMOUNT_TO_CREDITS (server/index.js) ile ayni kalmali.
- */
-export const PACKAGES_PLANS = [
-    {
-        id: 'starter',
-        name: 'Başlangıç',
-        price: 0,
-        credits: 5,
-        popular: false,
-        features: [
-            '5 ücretsiz tasarım hakkı',
-            '9 belge türü (e-Fatura, e-Arşiv, ...)',
-            'XSLT yükleme & indirme',
-            'Topluluk şablonları',
-            'KVKK uyumlu veri saklama',
-        ],
-    },
-    {
-        id: 'pro',
-        name: 'Pro',
-        price: 49,
-        credits: 50,
-        popular: true,
-        features: [
-            '50 tasarım / ay',
-            '9 belge türü (e-Fatura, e-Arşiv, ...)',
-            'XSLT yükleme & indirme',
-            'Tüm hazır şablonlar',
-            'Öncelikli e-posta desteği',
-            'Tasarım kütüphanesi (sınırsız)',
-        ],
-    },
-    {
-        id: 'kurumsal',
-        name: 'Kurumsal',
-        price: 199,
-        credits: 9999,
-        popular: false,
-        features: [
-            'Sınırsız tasarım',
-            '9+ özel şablon',
-            'XSLT export & API erişimi',
-            'Çoklu kullanıcı (5 hesap)',
-            '7/24 telefon desteği',
-            'Özel entegrasyon desteği',
-        ],
-    },
-];
-
 const SSS_ITEMS: SssItem[] = [
     {
-        q: 'e-Belge Tasarımcı ücretsiz mi?',
-        a: 'Evet — yeni hesap açtığınızda beş ücretsiz tasarım hakkı otomatik tanımlanır. Kredi kartı bilgisi gerekmez. Haklar bittiğinde uygun bir paket seçerek tasarım üretmeye devam edebilirsiniz.',
+        q: 'Nasıl satın alırım?',
+        a: 'Önce üye olup giriş yapın, ardından Pro paketini satın alın. Pro paket 4.000 TL tek seferlik ödemedir ve 25 tasarım hakkı içerir; aylık abonelik yoktur. Haklarınız süresizdir.',
     },
     {
         q: 'Hangi e-belge tiplerini tasarlayabilirim?',
@@ -83,7 +33,7 @@ const SSS_ITEMS: SssItem[] = [
     },
     {
         q: 'Ödeme nasıl çalışır?',
-        a: 'Paket Al bölümünden bir plan seçip kredi yüklemesi yaparsınız. Her tasarım kaydı 1 kredi harcar. Satın alma sonrası krediler hesabınıza otomatik yansır; ihtiyaca göre yeni paketler ekleyebilirsiniz.',
+        a: 'Giriş yaptıktan sonra Paket Al ile Pro paketini iyzico 3D Secure üzerinden satın alırsınız. Her tasarım kaydı 1 hak harcar. Ödeme sonrası haklar hesabınıza otomatik yansır; bittiğinde yeni paket alabilirsiniz.',
     },
     {
         q: 'Verilerim Türkiye’de mi saklanıyor?',
@@ -106,20 +56,14 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
     const [openSss, setOpenSss] = useState<string | null>(null);
     const [legalModal, setLegalModal] = useState<'kvkk' | 'sozlesme' | 'cerez' | null>(null);
 
-    const handleBuyPlan = async (plan: typeof PACKAGES_PLANS[number]) => {
-        // Sprint 1.3 — Iyzico Checkout Form entegrasyonu
-        if (plan.price === 0) {
-            // Ucretsiz plan — register ekranina
-            onRegister();
+    const handleBuyPlan = async (plan: PackagePlan) => {
+        // Satın alma yalnızca üyeler için — giriş yoksa giriş ekranına.
+        if (!api.getToken()) {
+            onLogin();
             return;
         }
         try {
-            const result = await api.iyzicoCheckout(plan.id as 'starter' | 'pro' | 'kurumsal');
-            if (result.free) {
-                // Backend "free" donerse (starter icin fallback)
-                onRegister();
-                return;
-            }
+            const result = await api.iyzicoCheckout(plan.id);
             if (result.paymentPageUrl) {
                 // Iyzico 3D odeme sayfasina yonlendir
                 window.location.href = result.paymentPageUrl;
@@ -263,7 +207,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                                 boxShadow: '0 6px 20px rgba(99,102,241,0.35)',
                             }}
                         >
-                            Ücretsiz başla <ArrowRight size={14} />
+                            Üye ol <ArrowRight size={14} />
                         </button>
                     </div>
                 </div>
@@ -369,10 +313,11 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                                 boxShadow: '0 8px 28px rgba(99,102,241,0.45)',
                             }}
                         >
-                            Ücretsiz hesap aç <ArrowRight size={16} />
+                            Hesap aç <ArrowRight size={16} />
                         </button>
                         <button
                             type="button"
+                            onClick={() => document.getElementById('fiyatlar')?.scrollIntoView({ behavior: 'smooth' })}
                             style={{
                                 padding: '14px 26px',
                                 background: 'rgba(255,255,255,0.06)',
@@ -429,7 +374,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                     {[
                         { v: 'GİB', l: 'UBL-TR Resmi Uyumlu', a: '#10b981' },
                         { v: '9', l: 'Belge Türü Desteği', a: '#38bdf8' },
-                        { v: '5', l: 'Ücretsiz Tasarım Hakkı', a: '#ec4899' },
+                        { v: '25', l: 'Tasarım Hakkı / Pro Paket', a: '#ec4899' },
                         { v: '%100', l: 'Web Tabanlı', a: '#a78bfa' },
                     ].map((s, i) => (
                         <div key={i} style={{ textAlign: 'center' }}>
@@ -714,134 +659,6 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                 style={{
                     position: 'relative',
                     zIndex: 1,
-                    padding: '64px 32px 32px',
-                    maxWidth: 1280,
-                    margin: '0 auto',
-                }}
-            >
-                <div style={{ textAlign: 'center', marginBottom: 40 }}>
-                    <h2
-                        style={{
-                            fontSize: 'clamp(28px, 3.5vw, 40px)',
-                            fontWeight: 800,
-                            letterSpacing: '-0.02em',
-                            margin: '0 0 8px',
-                            color: '#f8fafc',
-                        }}
-                    >
-                        Fiyatlandırma
-                    </h2>
-                    <p style={{ fontSize: 15, color: '#94a3b8', margin: 0 }}>
-                        İhtiyacınıza uygun paketi seçin.
-                    </p>
-                </div>
-
-                <div
-                    style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))',
-                        gap: 14,
-                    }}
-                >
-                    {[
-                        { name: 'Starter', count: 1, price: 400, perUnit: 400, popular: false, accent: '#64748b' },
-                        { name: 'Basic', count: 10, price: 3000, perUnit: 300, popular: false, accent: '#0ea5e9' },
-                        { name: 'Pro', count: 30, price: 5500, perUnit: 183, popular: true, accent: '#6366f1' },
-                        { name: 'Business', count: 50, price: 4500, perUnit: 90, popular: false, accent: '#10b981' },
-                        { name: 'Enterprise', count: 100, price: 6000, perUnit: 60, popular: false, accent: '#ec4899' },
-                    ].map((p) => (
-                        <div
-                            key={p.name}
-                            style={{
-                                position: 'relative',
-                                padding: 22,
-                                background: p.popular
-                                    ? 'linear-gradient(135deg, rgba(99,102,241,0.18) 0%, rgba(14,165,233,0.10) 100%)'
-                                    : 'rgba(255,255,255,0.04)',
-                                border: p.popular
-                                    ? '2px solid #6366f1'
-                                    : '1px solid rgba(248,250,252,0.08)',
-                                borderRadius: 16,
-                                transition: 'transform 0.2s, border-color 0.2s',
-                                boxShadow: p.popular ? '0 16px 40px rgba(99,102,241,0.25)' : 'none',
-                            }}
-                        >
-                            {p.popular && (
-                                <div
-                                    style={{
-                                        position: 'absolute',
-                                        top: -10,
-                                        left: '50%',
-                                        transform: 'translateX(-50%)',
-                                        padding: '3px 10px',
-                                        background: 'linear-gradient(90deg, #6366f1, #0ea5e9)',
-                                        color: '#fff',
-                                        fontSize: 10,
-                                        fontWeight: 700,
-                                        borderRadius: 999,
-                                        letterSpacing: 1.5,
-                                    }}
-                                >
-                                    EN POPÜLER
-                                </div>
-                            )}
-                            <div
-                                style={{
-                                    fontSize: 11,
-                                    fontWeight: 700,
-                                    color: p.accent,
-                                    textTransform: 'uppercase',
-                                    letterSpacing: 1.5,
-                                    marginBottom: 8,
-                                }}
-                            >
-                                {p.name}
-                            </div>
-                            <div
-                                style={{
-                                    fontSize: 28,
-                                    fontWeight: 800,
-                                    color: '#f8fafc',
-                                    marginBottom: 2,
-                                    letterSpacing: '-0.02em',
-                                }}
-                            >
-                                {p.price.toLocaleString('tr-TR')} <span style={{ fontSize: 16, color: '#94a3b8', fontWeight: 600 }}>TL</span>
-                            </div>
-                            <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 14 }}>
-                                {p.count} tasarım hakkı · {p.perUnit} TL / tasarım
-                            </div>
-                            <button
-                                type="button"
-                                onClick={onRegister}
-                                style={{
-                                    width: '100%',
-                                    padding: '9px 14px',
-                                    background: p.popular
-                                        ? 'linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)'
-                                        : 'rgba(255,255,255,0.06)',
-                                    color: '#fff',
-                                    border: p.popular ? 'none' : '1px solid rgba(248,250,252,0.16)',
-                                    borderRadius: 10,
-                                    fontSize: 13,
-                                    fontWeight: 600,
-                                    cursor: 'pointer',
-                                    fontFamily: 'inherit',
-                                }}
-                            >
-                                Seç
-                            </button>
-                        </div>
-                    ))}
-                </div>
-            </section>
-
-            {/* ====================== PRICING (Sprint 1, 2026-10-02) ====================== */}
-            <section
-                id="fiyatlar"
-                style={{
-                    position: 'relative',
-                    zIndex: 1,
                     padding: '64px 32px',
                     maxWidth: 1280,
                     margin: '0 auto',
@@ -852,74 +669,43 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                         Fiyatlandırma
                     </h2>
                     <p style={{ color: '#94a3b8', fontSize: '16px', maxWidth: '600px', margin: '0 auto' }}>
-                        İhtiyacınıza uygun paketi seçin. 5 ücretsiz tasarımla başlayın, büyüdükçe Pro'ya geçin.
+                        Tek seferlik ödeme, abonelik yok. Üye olup giriş yaptıktan sonra satın alabilirsiniz.
                     </p>
                 </div>
 
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                    gap: '24px',
-                    maxWidth: '1100px',
-                    margin: '0 auto',
-                }}>
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
                     {PACKAGES_PLANS.map(plan => (
                         <div
                             key={plan.id}
+                            data-pricing-plan={plan.id}
                             style={{
-                                background: plan.popular
-                                    ? 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.10))'
-                                    : 'rgba(30, 41, 59, 0.6)',
+                                width: '100%',
+                                maxWidth: '420px',
+                                background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.10))',
                                 backdropFilter: 'blur(10px)',
-                                border: plan.popular
-                                    ? '2px solid rgba(99, 102, 241, 0.5)'
-                                    : '1px solid rgba(255, 255, 255, 0.08)',
+                                border: '2px solid rgba(99, 102, 241, 0.5)',
                                 borderRadius: '20px',
                                 padding: '32px 28px',
                                 position: 'relative',
-                                transition: 'transform 0.2s',
                             }}
                         >
-                            {plan.popular && (
-                                <div style={{
-                                    position: 'absolute',
-                                    top: -14,
-                                    right: 20,
-                                    background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                                    color: 'white',
-                                    padding: '4px 14px',
-                                    borderRadius: '999px',
-                                    fontSize: '11px',
-                                    fontWeight: 800,
-                                    letterSpacing: '1px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '4px',
-                                    boxShadow: '0 4px 12px rgba(99, 102, 241, 0.4)',
-                                }}>
-                                    <Star size={11} /> EN POPÜLER
-                                </div>
-                            )}
-
                             <h3 style={{ fontSize: '22px', fontWeight: 700, margin: '0 0 4px', color: '#f1f5f9' }}>
                                 {plan.name}
                             </h3>
                             <p style={{ color: '#94a3b8', fontSize: '13px', margin: '0 0 20px' }}>
-                                {plan.price === 0 ? 'Ücretsiz başlangıç' : `Tasarım başına ₺${(plan.price / Math.max(plan.credits, 1)).toFixed(2)}`}
+                                Tasarım başına ₺{Math.round(plan.price / plan.credits).toLocaleString('tr-TR')}
                             </p>
 
                             <div style={{ marginBottom: '20px' }}>
-                                <span style={{ fontSize: '40px', fontWeight: 800, color: plan.popular ? '#a5b4fc' : '#f1f5f9' }}>
-                                    {plan.price === 0 ? '₺0' : `₺${plan.price}`}
+                                <span style={{ fontSize: '40px', fontWeight: 800, color: '#a5b4fc' }}>
+                                    ₺{plan.price.toLocaleString('tr-TR')}
                                 </span>
-                                {plan.price > 0 && (
-                                    <span style={{ color: '#64748b', fontSize: '14px', marginLeft: '6px' }}>/ ay</span>
-                                )}
+                                <span style={{ color: '#64748b', fontSize: '14px', marginLeft: '6px' }}>tek seferlik</span>
                             </div>
 
                             <div style={{ paddingTop: '4px', borderTop: '1px solid rgba(255, 255, 255, 0.08)', marginBottom: '20px' }}>
-                                <div style={{ color: '#a5b4fc', fontSize: '13px', fontWeight: 600, marginBottom: '12px' }}>
-                                    {plan.credits === 9999 ? 'Sınırsız' : `${plan.credits} tasarım hakkı`}
+                                <div style={{ color: '#a5b4fc', fontSize: '13px', fontWeight: 600, margin: '12px 0' }}>
+                                    {plan.credits} tasarım hakkı
                                 </div>
                                 <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                     {plan.features.map((feat, i) => (
@@ -933,30 +719,31 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
 
                             <button
                                 onClick={() => handleBuyPlan(plan)}
+                                data-buy-plan={plan.id}
                                 style={{
                                     width: '100%',
                                     height: '44px',
-                                    background: plan.popular
-                                        ? 'linear-gradient(135deg, #6366f1, #4f46e5)'
-                                        : 'rgba(99, 102, 241, 0.12)',
+                                    background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
                                     color: 'white',
-                                    border: plan.popular ? '1px solid rgba(255,255,255,0.15)' : '1px solid rgba(99, 102, 241, 0.4)',
+                                    border: '1px solid rgba(255,255,255,0.15)',
                                     borderRadius: '10px',
                                     fontWeight: 700,
                                     fontSize: '14px',
                                     cursor: 'pointer',
                                     marginTop: '12px',
-                                    transition: 'transform 0.15s',
                                 }}
                             >
-                                {plan.price === 0 ? 'Ücretsiz Başla' : 'Pakete Geç'}
+                                Satın Al
                             </button>
+                            <p style={{ textAlign: 'center', color: '#64748b', fontSize: '12px', margin: '10px 0 0' }}>
+                                Satın almak için üye girişi gerekir.
+                            </p>
                         </div>
                     ))}
                 </div>
 
                 <p style={{ textAlign: 'center', color: '#64748b', fontSize: '13px', marginTop: '32px' }}>
-                    Tüm fiyatlara KDV dahildir. Yıllık abonelikte %15 indirim.
+                    Fiyata KDV dahildir.
                 </p>
             </section>
 
@@ -1106,7 +893,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                             lineHeight: 1.5,
                         }}
                     >
-                        Beş ücretsiz tasarım hakkı.
+                        Üye olun, Pro paketle 25 tasarım hakkı kazanın.
                     </p>
                     <button
                         type="button"
@@ -1126,7 +913,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                             boxShadow: '0 8px 24px rgba(0,0,0,0.25)',
                         }}
                     >
-                        Ücretsiz hesap aç <ArrowRight size={16} />
+                        Hesap aç <ArrowRight size={16} />
                     </button>
                 </div>
             </section>

@@ -2,6 +2,7 @@ import React, { Suspense, lazy, useState, useEffect } from 'react';
 import './index.css';
 import { api } from './api';
 import { ToastHost } from './store/ToastHost.tsx';
+import { useUiStore } from './store/uiStore';
 import { Landing } from './Landing.tsx';
 
 // Route-level code splitting: each screen ships in its own chunk so the
@@ -41,15 +42,24 @@ const App: React.FC = () => {
     // After successful auth, move to selection. After selecting a doc, designer.
     const [view, setView] = useState<View>('landing');
     const [authMode, setAuthMode] = useState<AuthMode>('login');
-    const [selectedDoc, setSelectedDoc] = useState<{ moduleId: string, moduleName: string, template: string, customContent?: string, themeColor?: string } | null>(null);
+    const [selectedDoc, setSelectedDoc] = useState<{ moduleId: string, moduleName: string, template: string, customContent?: string, themeColor?: string, xml?: string } | null>(null);
 
-    // If a token already exists in sessionStorage (returning user), skip Landing.
+    // iyzico ödeme sonrası backend ?payment=success|fail|error|invalid ile geri yönlendirir.
     useEffect(() => {
-        const token = api.getToken();
-        if (token) {
-            // Stay on Landing — user will click Giriş Yap, then token is validated
-            // via /api/me. If invalid, Auth clears it.
-        }
+        const params = new URLSearchParams(window.location.search);
+        const payment = params.get('payment');
+        if (!payment) return;
+        params.delete('payment');
+        const query = params.toString();
+        window.history.replaceState(null, '', window.location.pathname + (query ? `?${query}` : '') + window.location.hash);
+        const ok = payment === 'success';
+        useUiStore.getState().pushToast({
+            kind: ok ? 'success' : 'error',
+            title: ok ? 'Ödeme başarılı' : 'Ödeme tamamlanamadı',
+            description: ok ? 'Tasarım haklarınız hesabınıza yüklendi.' : 'Kartınızdan çekim yapılmadıysa tekrar deneyebilirsiniz.',
+            ttl: 8000,
+        });
+        if (api.getToken()) setView('selection');
     }, []);
 
     const handleLogin = () => {
@@ -84,13 +94,14 @@ const App: React.FC = () => {
      * ProfesyonelDesigner'dan bagimsiz; XSLT bilen kullanicilar (Selim gibi) icin dogrudan
      * Monaco + canli preview. Modul dropdown ile 9 e-belge modulu destekler.
      */
-    const handleSelectXsltEditor = (moduleId?: string, initialXslt?: string, docName?: string) => {
+    const handleSelectXsltEditor = (moduleId?: string, initialXslt?: string, docName?: string, xml?: string) => {
         setSelectedDoc({
             moduleId: moduleId || 'fatura',
             moduleName: docName || 'XSLT Tasarim',
             template: 'XsltEditor',
             customContent: initialXslt,
             themeColor: '#1e3a8a',
+            xml,
         });
         setView('xslt-editor');
     };
@@ -132,6 +143,7 @@ const App: React.FC = () => {
                     <XSLTEditor
                         initialModuleId={selectedDoc.moduleId}
                         initialXslt={selectedDoc.customContent}
+                        initialXml={selectedDoc.xml}
                         docName={selectedDoc.moduleName}
                         onBack={handleBack}
                     />

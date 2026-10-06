@@ -83,9 +83,7 @@
   "payment": {
     "title": "Buy Credits",
     "credits": {
-      "10": "10 Credits - 49 TRY",
-      "50": "50 Credits - 199 TRY",
-      "100": "100 Credits - 349 TRY"
+      "25": "25 Credits - 4,000 TRY"
     },
     "purchase": "Purchase",
     "cancel": "Cancel",

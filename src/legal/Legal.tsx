@@ -114,8 +114,8 @@ export const KullaniciSozlesmesiModal: React.FC<{ onClose: () => void }> = ({ on
 
         <h2 style={sectionTitleStyle}>2. Üyelik ve Kredi Sistemi</h2>
         <ul style={baseTextStyle}>
-            <li>Yeni üyelere 5 ücretsiz tasarım hakkı tanımlanır.</li>
-            <li>Ücretsiz haklar bittiğinde ücretli paket satın alınabilir.</li>
+            <li>Tasarım hakkı (kredi) yalnızca üye girişi yapılmış hesaplarla satın alınabilir.</li>
+            <li>Pro paket tek seferlik ödemedir; 25 tasarım hakkı içerir ve süresizdir.</li>
             <li>Krediler iade edilmez, başka hesaplara aktarılamaz.</li>
             <li>Tasarım kayıtları hesap aktif olduğu sürece korunur.</li>
         </ul>

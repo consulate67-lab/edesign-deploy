@@ -37,6 +37,7 @@ app.use(cors({
     credentials: true,
 }));
 app.use(express.json()); // Body parser
+app.use(express.urlencoded({ extended: false })); // iyzico callback form-encoded POST eder
 
 let db;
 
@@ -143,14 +144,12 @@ app.get('/api/me', authenticateToken, async (req, res) => {
 // Plan prices MUST stay in sync with the Landing page (Landing.tsx → PACKAGES_PLANS)
 // and the in-app PaymentModal.tsx → PACKAGES_PLANS.
 const PLAN_AMOUNT_TO_CREDITS = {
-    400: 1,       // Starter
-    3000: 10,     // Basic
-    5500: 30,     // Pro (en popüler)
-    4500: 50,     // Business
-    6000: 100,    // Enterprise
+    4000: 25,     // Pro (tek seferlik)
 };
 
 app.post('/api/payment/mock', authenticateToken, async (req, res) => {
+    // Odemesiz kredi ekler — canli ortamda kapali.
+    if (process.env.NODE_ENV === 'production') return res.sendStatus(404);
     const { amount } = req.body;
     let creditsToAdd = 0;
 
@@ -179,12 +178,6 @@ app.post('/api/design/consume-credit', authenticateToken, async (req, res) => {
 
         if (user.role === 'admin') {
             return res.json({ success: true, message: 'Admin bypass', credits: user.credits });
-        }
-
-        if (!user.free_design_used) {
-            // Use free trial
-            await db.run('UPDATE users SET free_design_used = 1 WHERE id = ?', [req.user.id]);
-            return res.json({ success: true, message: 'Free trial used', credits: user.credits });
         }
 
         if (user.credits > 0) {
@@ -474,23 +467,22 @@ const iyzico1 = (path, body, attempt = 0) => {
 
 // Plan -> Iyzico tutar mapping (TRY cents? No, regular TRY)
 // VIP, iyzico expects string for numeric fields.
+// Tek seferlik paket; Landing.tsx ve PaymentModal.tsx → PACKAGES_PLANS ile aynı tutulmalı.
 const PACKAGE_PRICES = {
-    starter: { name: 'Baslangic', price: '0',    credits: 5,    free: true  },
-    pro:     { name: 'Pro',       price: '49',   credits: 50,   free: false },
-    kurumsal:{ name: 'Kurumsal',  price: '199',  credits: 9999, free: false },
+    pro: { name: 'Pro', price: '4000', credits: 25 },
 };
+
+// Odeme sonrasi kullanicinin donecegi on yuz (GitHub Pages).
+const FRONTEND_URL = (process.env.FRONTEND_URL || 'https://consulate67-lab.github.io/edesign-deploy/').replace(/\/?$/, '/');
+const paymentRedirect = (status) => `${FRONTEND_URL}?payment=${status}`;
 
 // POST /api/payment/iyzico/checkout — Plan satin alimi icin iyzico token uretir.
 // Auth gerekli. response: { token, paymentPageUrl }
-{
+app.post('/api/payment/iyzico/checkout', authenticateToken, async (req, res) => {
     const planId = req.body?.plan;
     const plan = PACKAGE_PRICES[planId];
     if (!plan) {
         return res.status(400).json({ error: 'Gecersiz plan.' });
-    }
-    if (plan.free) {
-        // Ucretsiz plan — direkt register/yonlendir
-        return res.json({ free: true, planId, credits: plan.credits });
     }
 
     const conversationId = `designer-${planId}-${req.user.id}-${Date.now()}`;
@@ -563,7 +555,7 @@ app.post('/api/payment/iyzico/callback', async (req, res) => {
     const token = req.body?.token || req.query?.token;
     if (!token) {
         // Iyzico POST etti ama token yoksa browser redirect ile hata sayfasina gonder
-        return res.redirect('/?payment=invalid');
+        return res.redirect(paymentRedirect('invalid'));
     }
     try {
         // Iyzico API ile token'i kontrol et (güvenlik)
@@ -587,26 +579,25 @@ app.post('/api/payment/iyzico/callback', async (req, res) => {
                     console.log(`[iyzico] payment success user=${payment.user_id} credits+${plan.credits}`);
                 }
             }
-            return res.redirect('/?payment=success');
+            return res.redirect(paymentRedirect('success'));
         } else {
             // eslint-disable-next-line no-console
             console.warn('[iyzico] payment failed', result.paymentStatus);
-            res.redirect('/?payment=fail');
+            res.redirect(paymentRedirect('fail'));
         }
     } catch (e) {
         // eslint-disable-next-line no-console
         console.error('[iyzico] callback error:', e);
-        res.redirect('/?payment=error');
+        res.redirect(paymentRedirect('error'));
     }
 });
 
-// GET /api/payment/iyzico/test-signature — Paketler (frontend testable).
-{
+// GET /api/payment/packages — Paketler (frontend testable).
+app.get('/api/payment/packages', (_req, res) => {
     res.json({ packages: Object.entries(PACKAGE_PRICES).map(([id, p]) => ({
         id,
         name: p.name,
         price: p.price,
         credits: p.credits,
-        free: p.free,
     })) });
 });
