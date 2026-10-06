@@ -159,7 +159,7 @@ export function findLiteralTagByOrdinal(xslt: string, ordinal: number): SourceTa
 }
 
 /** Öğenin kapanış etiketinin bittiği offset (self-closing ise açılış etiketinin sonu). */
-function elementEnd(xslt: string, tag: SourceTag): number {
+export function elementEnd(xslt: string, tag: SourceTag): number {
     const range = findElementContentRange(xslt, tag);
     return range ? xslt.indexOf('>', range.end) + 1 : tag.end;
 }

@@ -7,12 +7,13 @@ import { getSnippetsForModule, Snippet } from './snippets';
 import { useUiStore } from './store/uiStore';
 import { TEMPLATES, type XsltTemplate } from './xslt-editor/templates';
 import { DesignWizard } from './wizard/DesignWizard';
+import { MyDesigns } from './MyDesigns';
 
 interface SelectionProps {
     onSelect: (moduleId: string, template: string, moduleName: string, customContent?: string, themeColor?: string) => void;
     onLogout: () => void;
     /** Sprint 7 (2026-10-03) — XSLT Editor (Monaco + canlı preview) — bağımsız 2. tasarım. */
-    onSelectXsltEditor?: (moduleId?: string, initialXslt?: string, docName?: string, xml?: string) => void;
+    onSelectXsltEditor?: (moduleId?: string, initialXslt?: string, docName?: string, xml?: string, designId?: number) => void;
 }
 
 interface Module {
@@ -349,6 +350,10 @@ export const Selection: React.FC<SelectionProps> = ({ onSelect, onLogout, onSele
                         Yeni bir tasarım için adımları izleyin: belge türü, şablon ve veri.
                     </p>
                 </div>
+
+                <MyDesigns
+                    onOpen={(d) => onSelectXsltEditor?.(d.module_id, d.xslt_content ?? undefined, d.name, d.xml_content ?? undefined, d.id)}
+                />
 
                 <div style={{ width: '100%', marginBottom: '2rem' }}>
                     <DesignWizard

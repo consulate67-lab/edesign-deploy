@@ -169,6 +169,13 @@ export const initDb = async () => {
         await ensureDesignsColumn(probe, 'theme_color', 'TEXT');
         await ensureDesignsColumn(probe, 'sections_json', 'JSONB');
         await ensureDesignsColumn(probe, 'status', "TEXT NOT NULL DEFAULT 'draft'");
+        // İndirilen (kredi harcanmış) tasarım: anahtar dosyaya yazılır, tekrar
+        // yüklendiğinde aynı tasarıma ücretsiz devam edilir.
+        await ensureDesignsColumn(probe, 'design_key', 'TEXT');
+        await ensureDesignsColumn(probe, 'xml_content', 'TEXT');
+        await ensureDesignsColumn(probe, 'paid_at', 'TIMESTAMPTZ');
+        await ensureDesignsColumn(probe, 'download_count', 'INTEGER NOT NULL DEFAULT 0');
+        await probe.query(`CREATE UNIQUE INDEX IF NOT EXISTS idx_designs_design_key ON designs (design_key) WHERE design_key IS NOT NULL`);
 
         await probe.query(`CREATE INDEX IF NOT EXISTS idx_designs_user_id ON designs (user_id)`);
         await probe.query(`CREATE INDEX IF NOT EXISTS idx_designs_updated_at ON designs (updated_at DESC)`);

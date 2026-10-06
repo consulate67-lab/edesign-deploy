@@ -23,6 +23,31 @@ const TOKEN_STORAGE = (() => {
 
 const IS_DEV = import.meta.env.DEV;
 
+export interface SavedDesign {
+    id: number;
+    name: string;
+    module_id: string;
+    xslt_content: string | null;
+    xml_content: string | null;
+    design_key: string | null;
+    paid: boolean;
+    paid_at: string | null;
+    status: string;
+    download_count: number;
+    created_at: string;
+    updated_at: string;
+}
+
+/** server/index.js embedDesignKey ile aynı biçim. */
+export const DESIGN_KEY_RE = /edesign-key:([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i;
+export const designKeyOf = (xslt: string | null | undefined) => xslt?.match(DESIGN_KEY_RE)?.[1] ?? null;
+const embedDesignKey = (xslt: string, key: string) => {
+    const clean = xslt.replace(/<!--\s*edesign-key:[^>]*?-->[ \t]*\r?\n?/gi, '');
+    const comment = `<!-- edesign-key:${key} | Bu satiri silmeyin: dosyayi tekrar yuklediginizde tasariminiza ek tasarim hakki harcamadan devam edersiniz. -->\n`;
+    const decl = clean.match(/^\uFEFF?\s*<\?xml[^?]*\?>[ \t]*\r?\n?/);
+    return decl ? clean.slice(0, decl[0].length) + comment + clean.slice(decl[0].length) : comment + clean;
+};
+
 // --- DEV-ONLY MOCK DATABASE ---
 // Only seeded when running the Vite dev server. In production builds the
 // mock layer is entirely disabled — the client only talks to the real API.
@@ -89,30 +114,37 @@ export const api = {
             ...options.headers
         };
 
+        let res: Response;
         try {
-            // Attempt real API call first
+            // Dev'de backend yoksa mock'a hızlı düşmek için kısa zaman aşımı.
             const controller = new AbortController();
-            const id = setTimeout(() => controller.abort(), 800); // Short timeout for local check
-
-            const res = await fetch(`${API_URL}${endpoint}`, {
+            const id = setTimeout(() => controller.abort(), IS_DEV ? 800 : 60000);
+            res = await fetch(`${API_URL}${endpoint}`, {
                 ...options,
                 headers,
                 signal: controller.signal
-            }).catch(e => { throw e; });
-
+            });
             clearTimeout(id);
+        } catch {
+            res = null as unknown as Response;
+        }
 
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || 'API Request Failed');
+        if (res) {
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                throw Object.assign(new Error(data.error || `İstek başarısız (${res.status})`), {
+                    status: res.status,
+                    paymentRequired: !!data.paymentRequired,
+                });
+            }
             return data;
+        }
 
-        } catch (err) {
+        {
             // Production builds must never fall back to a local mock database.
             // The fallback below is only useful for offline dev work.
             if (!IS_DEV) {
-                throw new Error(
-                    `Backend API is unavailable (${endpoint}). Lütfen daha sonra tekrar deneyin.`
-                );
+                throw new Error(`Sunucuya ulaşılamadı (${endpoint}). Lütfen daha sonra tekrar deneyin.`);
             }
 
             console.warn(`⚠️ API Unreachable (${endpoint}). Using DEV-only mock logic.`);
@@ -263,6 +295,7 @@ export const api = {
         name: string;
         module_id: string;
         xslt_content?: string;
+        xml_content?: string;
         custom_content?: string;
         theme_color?: string;
         sections?: any;
@@ -290,8 +323,72 @@ export const api = {
         return { success: true, design: created };
     },
 
+    /**
+     * Tasarımı indirmek için: daha önce indirilmiş tasarım ücretsiz, değilse
+     * 1 tasarım hakkı düşer. Dönen xslt_content tasarım anahtarını içerir.
+     */
+    exportDesign: async (payload: {
+        design_id?: number;
+        design_key?: string;
+        name: string;
+        module_id: string;
+        xslt_content: string;
+        xml_content?: string;
+    }): Promise<{ success: boolean; charged: boolean; credits: number; design: SavedDesign }> => {
+        if (!IS_DEV) return api.request('/designs/export', { method: 'POST', body: JSON.stringify(payload) });
+        const designs: SavedDesign[] = JSON.parse(localStorage.getItem('mock_designs') || '[]');
+        const keyInFile = payload.xslt_content.match(DESIGN_KEY_RE)?.[1];
+        const existing = designs.find(d => (payload.design_id && d.id === payload.design_id)
+            || (payload.design_key && d.design_key === payload.design_key)
+            || (keyInFile && d.design_key === keyInFile));
+        const users = getUsers();
+        const user = users.find((u: any) => u.token === api.getToken());
+        if (!user) throw new Error('Oturum geçersiz.');
+        let charged = false;
+        if (!existing?.paid && user.role !== 'admin') {
+            if (user.credits <= 0) {
+                throw Object.assign(new Error('Tasarımı indirmek için tasarım hakkınız kalmadı.'), { status: 402, paymentRequired: true });
+            }
+            user.credits -= 1;
+            saveUsers(users);
+            charged = true;
+        }
+        const key = existing?.design_key || crypto.randomUUID();
+        const now = new Date().toISOString();
+        const design: SavedDesign = {
+            ...(existing ?? { id: Date.now(), created_at: now, download_count: 0 }),
+            name: payload.name,
+            module_id: payload.module_id,
+            xslt_content: embedDesignKey(payload.xslt_content, key),
+            xml_content: payload.xml_content ?? existing?.xml_content ?? null,
+            design_key: key,
+            paid: true,
+            paid_at: existing?.paid_at ?? now,
+            status: 'downloaded',
+            download_count: (existing?.download_count ?? 0) + 1,
+            updated_at: now,
+        } as SavedDesign;
+        localStorage.setItem('mock_designs', JSON.stringify([design, ...designs.filter(d => d.id !== design.id)]));
+        return { success: true, charged, credits: user.credits, design };
+    },
+
+    /** Yüklenen dosyadaki anahtarın kullanıcıya ait tasarımı; yoksa null. */
+    getDesignByKey: async (key: string): Promise<SavedDesign | null> => {
+        if (!IS_DEV) {
+            try {
+                return (await api.request(`/designs/by-key/${encodeURIComponent(key)}`)).design ?? null;
+            } catch (e) {
+                if ((e as { status?: number }).status === 404) return null;
+                throw e;
+            }
+        }
+        const designs: SavedDesign[] = JSON.parse(localStorage.getItem('mock_designs') || '[]');
+        return designs.find(d => d.design_key === key) ?? null;
+    },
+
     updateDesign: async (id: number, patch: Partial<{
         name: string;
+        xml_content: string;
         xslt_content: string;
         custom_content: string;
         theme_color: string;

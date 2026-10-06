@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, Check, AlertTriangle, XCircle, Upload, FileCode, Database, FileText, Loader2 } from 'lucide-react';
 import { WIZARD_DOC_TYPES, FAMILY_INFO, loadSampleXml, type WizardDocType } from './docTypes';
 import { validateXslt, validateXml, stripBom, type ValidationResult } from './validate';
+import { designKeyOf } from '../api';
 
 export interface WizardResult {
     moduleId: string;
@@ -269,6 +270,14 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
                     </button>
                     {xsltChoice === 'own' && (
                         <FilePanel accept=".xslt,.xsl" hint=".xslt veya .xsl · en fazla 5 MB" file={ownXslt} busy={busy} onFile={(f) => loadOwn(f, 'xslt')} />
+                    )}
+                    {xsltChoice === 'own' && ownXslt && designKeyOf(ownXslt.text) && (
+                        <div data-design-key-note style={{
+                            marginTop: 10, padding: '10px 12px', borderRadius: 10, fontSize: 12, lineHeight: 1.5,
+                            background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.35)', color: '#a7f3d0',
+                        }}>
+                            Bu dosya daha önce indirilmiş bir tasarım. Tasarım sizin hesabınıza aitse düzenleme ve tekrar indirme ücretsizdir.
+                        </div>
                     )}
                 </>
             )}

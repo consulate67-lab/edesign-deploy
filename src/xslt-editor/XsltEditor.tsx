@@ -34,7 +34,7 @@ import {
     ArrowLeft, Save, Download, ChevronDown, FileCode, FileCode2,
     AlertCircle, Eye, RefreshCw, CheckCircle2, Sparkles, Search, ZoomIn, ZoomOut,
     PanelLeftClose, PanelLeftOpen, X,
-    Image as ImageIcon, Type, Table2, TextCursorInput, Calculator, Plus,
+    Image as ImageIcon, Type, Table2, TextCursorInput, Calculator, Plus, Columns3, Wallpaper,
 } from 'lucide-react';
 import {
     getCatalog, docRootOf, detectInXslt, xsltLocalNameSet, bindingLabel, contextPathResolver, evaluateField,
@@ -53,6 +53,11 @@ import {
     annotateLiteralTags, findLiteralTagByOrdinal, insertAtTag, moveElement, documentEndOffset,
     type SourceTag, type InsertPosition,
 } from './utils/xsltStyleEdit';
+import { findLineTableCell, addColumnAfterCell } from './utils/tableColumns';
+import { BG_FITS, readPageBackground, writePageBackground, imageFileToDataUrl, type PageBackground } from './utils/pageBackground';
+
+/** Satır formülü kolonunun varsayılan alanı (ilk bulunan). */
+const LINE_FORMULA_KEYS = ['Invoice/InvoiceLine/LineExtensionAmount', 'DespatchAdvice/DespatchLine/DeliveredQuantity'];
 
 const CONTAINER_TAGS = new Set(['td', 'th', 'div', 'li', 'section', 'article', 'header', 'footer', 'main', 'aside', 'form', 'fieldset']);
 const TABLE_PARTS = new Set(['tr', 'tbody', 'thead', 'tfoot', 'colgroup', 'col', 'caption']);
@@ -95,7 +100,8 @@ function resolveInsertTarget(start: Element | null, mode: 'auto' | InsertPositio
     const ordinal = Number(el.getAttribute('data-xsrc'));
     return Number.isNaN(ordinal) ? null : { el, ordinal, position };
 }
-import { api } from '../api';
+import { api, designKeyOf } from '../api';
+import { PaymentModal } from '../PaymentModal';
 import { XSLT_ELEMENTS, UBL_XPATHS, lintXslt } from './xsltSchema';
 
 // ============================================================================
@@ -197,6 +203,8 @@ interface XsltEditorProps {
     initialXml?: string;
     /** Tasarım adı (Save için). */
     docName?: string;
+    /** Hesaptaki kayıtlı tasarımdan açıldıysa id'si (Kaydet onu günceller). */
+    initialDesignId?: number;
     /** Geri dön (Selection sayfasına). */
     onBack: () => void;
 }
@@ -745,6 +753,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     initialXslt,
     initialXml,
     docName = 'XSLT Tasarım',
+    initialDesignId,
     onBack,
 }) => {
     // ------------------------------------------------------------------------
@@ -975,12 +984,44 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     }, []);
 
     // ------------------------------------------------------------------------
-    // Save — POST /api/designs
+    // Hesaptaki tasarım: kaydedilince id, indirilince (kredi harcanınca) anahtar
+    // alır. Anahtarlı dosya tekrar yüklendiğinde tasarıma ücretsiz devam edilir.
+    // ------------------------------------------------------------------------
+    const flushSourceEditsRef = useRef<() => void>(() => {});
+    const [design, setDesign] = useState<{ id?: number; key?: string; paid: boolean; paidAt?: string | null }>(
+        { id: initialDesignId, paid: false }
+    );
+    const [showPayment, setShowPayment] = useState(false);
+    useEffect(() => {
+        const key = designKeyOf(initialXslt);
+        if (!key) return;
+        let cancelled = false;
+        api.getDesignByKey(key).then(d => {
+            if (cancelled || !d) return;
+            setDesign({ id: d.id, key: d.design_key ?? key, paid: d.paid, paidAt: d.paid_at });
+            if (d.paid) {
+                setSaveStatus('saved');
+                setSaveMessage('Satın alınmış tasarım — düzenleyip tekrar indirmeniz ücretsiz');
+            }
+        }).catch(err => console.warn('[XSLTEditor] Tasarım anahtarı sorgulanamadı:', err));
+        return () => { cancelled = true; };
+    }, [initialXslt]);
+
+    // ------------------------------------------------------------------------
+    // Save — hesaptaki tasarımı günceller, yoksa yeni taslak oluşturur
     // ------------------------------------------------------------------------
     const handleSave = useCallback(async () => {
+        flushSourceEditsRef.current();
+        const content = xsltContentRef.current;
         setSaveStatus('saving');
         setSaveMessage('Kaydediliyor...');
         try {
+            if (design.id) {
+                await api.updateDesign(design.id, { xslt_content: content, xml_content: xmlContent });
+                setSaveStatus('saved');
+                setSaveMessage('✅ Kaydedildi');
+                return;
+            }
             const designName = window.prompt?.('Tasarım adı:', docName) ?? docName;
             if (!designName || !designName.trim()) {
                 setSaveStatus('idle');
@@ -990,38 +1031,68 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             const result = await api.saveDesign({
                 name: designName.trim(),
                 module_id: moduleId,
-                xslt_content: xsltContent,
+                xslt_content: content,
+                xml_content: xmlContent,
                 custom_content: undefined,
                 theme_color: '#1e3a8a',
                 sections: {},
                 status: 'draft',
             });
+            setDesign(prev => ({ ...prev, id: result.design.id }));
             setSaveStatus('saved');
-            setSaveMessage(`✅ Kaydedildi (#${result.design.id}) — "${result.design.name}"`);
-            console.log('[XSLTEditor] Saved:', result.design);
+            setSaveMessage(`✅ Kaydedildi — "${result.design.name}"`);
         } catch (err) {
             setSaveStatus('error');
             setSaveMessage(`⚠ Kayıt hatası: ${(err as Error).message}`);
         }
-    }, [docName, moduleId, xsltContent]);
+    }, [design.id, docName, moduleId, xmlContent]);
 
     // ------------------------------------------------------------------------
-    // Download .xslt
+    // Download .xslt — ilk indirmede 1 tasarım hakkı, sonrakiler ücretsiz
     // ------------------------------------------------------------------------
-    const handleDownload = useCallback(() => {
-        const fileName = `${docName.replace(/\s+/g, '_')}_${moduleId}.xslt`;
-        const blob = new Blob([xsltContent], { type: 'application/xml;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        setSaveStatus('idle');
-        setSaveMessage(`📥 İndirildi: ${fileName} · ${(xsltContent.length / 1024).toFixed(1)} kB`);
-    }, [xsltContent, moduleId, docName]);
+    const handleDownload = useCallback(async () => {
+        flushSourceEditsRef.current();
+        if (!design.paid && !window.confirm(
+            'İndirme 1 tasarım hakkı kullanır.\n\nTasarım hesabınıza kaydedilir: daha sonra düzenleyip tekrar indirmeniz '
+            + 'veya indirdiğiniz dosyayı yeniden yükleyip devam etmeniz ücretsizdir.\n\nDevam edilsin mi?'
+        )) return;
+        setSaveStatus('saving');
+        setSaveMessage('İndirme hazırlanıyor...');
+        try {
+            const r = await api.exportDesign({
+                design_id: design.id,
+                design_key: design.key,
+                name: docName,
+                module_id: moduleId,
+                xslt_content: xsltContentRef.current,
+                xml_content: xmlContent,
+            });
+            const out = r.design.xslt_content ?? xsltContentRef.current;
+            if (out !== xsltContentRef.current) {
+                xsltContentRef.current = out;
+                setXsltContent(out);
+            }
+            setDesign({ id: r.design.id, key: r.design.design_key ?? undefined, paid: true, paidAt: r.design.paid_at });
+            const fileName = `${docName.replace(/\s+/g, '_')}_${moduleId}.xslt`;
+            const url = URL.createObjectURL(new Blob([out], { type: 'application/xml;charset=utf-8' }));
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            setSaveStatus('saved');
+            setSaveMessage(r.charged
+                ? `📥 İndirildi · 1 tasarım hakkı kullanıldı (kalan ${r.credits}). Tekrar indirmek ücretsiz.`
+                : '📥 İndirildi · ücretsiz (satın alınmış tasarım)');
+        } catch (err) {
+            const e = err as Error & { paymentRequired?: boolean };
+            setSaveStatus('error');
+            setSaveMessage(`⚠ ${e.message}`);
+            if (e.paymentRequired) setShowPayment(true);
+        }
+    }, [design, docName, moduleId, xmlContent]);
 
     // ------------------------------------------------------------------------
     // Module dropdown kapat (dış tıklama)
@@ -1194,6 +1265,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             console.log(`[XSLTEditor] Özellik XSLT'ye yazıldı → ${[...Object.keys(styles), ...Object.keys(attrs), ...(content !== null ? ['içerik'] : [])].join(', ')}`);
         }
     }, [resolveSourceTag]);
+    flushSourceEditsRef.current = flushSourceEdits;
 
     const scheduleSourceFlush = useCallback(() => {
         if (sourceEditDebounceRef.current) clearTimeout(sourceEditDebounceRef.current);
@@ -1269,6 +1341,78 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         const f = catalogRef.current.find(x => x.key === key);
         if (f) insertSnippet((id, inLine) => fieldSnippet(id, f, inLine), target, f.label);
     }, [insertSnippet]);
+
+    /**
+     * Seçili hücre satır (kalem) tablosundaysa, sağına yeni kolon ekler:
+     * kalem satırına alan / satır formülü / boş hücre, başlığa kolon adı.
+     * Seçim satır tablosunda değilse false.
+     */
+    const insertColumn = useCallback((what: 'field' | 'formula' | 'empty', key?: string): boolean => {
+        const xslt = xsltContentRef.current;
+        const ctx = findLineTableCell(selectedObjectRef.current?.element ?? null, xslt);
+        if (!ctx) return false;
+        const cat = catalogRef.current;
+        const id = nextXsltObjId(xslt);
+        let header = 'Yeni Kolon';
+        let line = '';
+        if (what === 'field') {
+            const f = cat.find(x => x.key === key);
+            if (!f) return false;
+            header = f.label;
+            line = fieldSnippet(id, f, true);
+        } else if (what === 'formula') {
+            const a = cat.find(f => LINE_FORMULA_KEYS.includes(f.key))?.key
+                ?? cat.find(f => isLineField(f) && isNumericField(f))?.key
+                ?? DEFAULT_FORMULA.a;
+            header = 'Hesaplanan';
+            line = formulaSnippet(id, { ...DEFAULT_FORMULA, a, label: '', suffix: '' }, cat, true);
+        }
+        let updated = addColumnAfterCell(xslt, ctx, kind => kind === 'line'
+            ? line
+            : kind === 'header' ? `<span style="font-weight:bold;"><xsl:text>${escapeXmlText(header)}</xsl:text></span>` : '');
+        if (!updated) return false;
+        if (line.includes('format-number(')) updated = ensureDecimalFormat(updated);
+        if (line) pendingSelectRef.current = { kind: 'obj', id };
+        xsltContentRef.current = updated;
+        setXsltContent(updated);
+        console.log(`[XSLTEditor] Kolon eklendi: ${header} → seçili kolonun sağına`);
+        return true;
+    }, []);
+
+    // Arka plan resmi (sayfa veya seçili çerçeve)
+    const [bgOpen, setBgOpen] = useState(false);
+    const [bgError, setBgError] = useState<string | null>(null);
+    const pageBg = useMemo(() => readPageBackground(xsltContent), [xsltContent]);
+    /** patch.target === 'element' verilirse seçili öğe çerçeve olarak işaretlenir. */
+    const applyBackground = useCallback((patch: Partial<PageBackground> | null) => {
+        flushSourceEditsRef.current();
+        const xslt = xsltContentRef.current;
+        let next: string | null;
+        if (patch === null) {
+            next = writePageBackground(xslt, null);
+        } else {
+            const bg: PageBackground = { image: '', target: 'page', fit: 'width', opacity: 1, ...readPageBackground(xslt), ...patch };
+            if (!bg.image) return;
+            const el = patch.target === 'element' ? selectedObjectRef.current?.element?.closest('[data-xsrc]') : null;
+            if (patch.target === 'element' && !el) {
+                setBgError('Önce önizlemede çerçeve olacak öğeyi (ör. dış tablo) seçin.');
+                return;
+            }
+            next = writePageBackground(xslt, bg, el ? Number(el.getAttribute('data-xsrc')) : undefined);
+        }
+        if (next === null) {
+            setBgError('Arka plan eklenecek yer bulunamadı.');
+            return;
+        }
+        setBgError(null);
+        if (next === xslt) return;
+        xsltContentRef.current = next;
+        setXsltContent(next);
+    }, []);
+    const selectedLineCell = useMemo(
+        () => findLineTableCell(selectedObject?.element ?? null, xsltContent),
+        [selectedObject, xsltContent],
+    );
 
     const moveObject = useCallback((id: string, target: InsertTarget | null) => {
         const xslt = xsltContentRef.current;
@@ -2333,6 +2477,11 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 {/* Download butonu */}
                 <button
                     onClick={handleDownload}
+                    data-download
+                    disabled={saveStatus === 'saving'}
+                    title={design.paid
+                        ? 'Bu tasarım daha önce satın alındı — tekrar indirmek ücretsiz.'
+                        : 'İlk indirme 1 tasarım hakkı kullanır; sonraki indirmeler ve düzenlemeler ücretsizdir.'}
                     style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -2350,8 +2499,15 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 >
                     <Download size={14} />
                     İndir .xslt
+                    <span style={{
+                        padding: '1px 6px', borderRadius: 999, fontSize: '10px', fontWeight: 700,
+                        background: design.paid ? 'rgba(16, 185, 129, 0.9)' : 'rgba(255, 255, 255, 0.2)',
+                    }}>
+                        {design.paid ? 'ücretsiz' : '1 hak'}
+                    </span>
                 </button>
             </div>
+            <PaymentModal isOpen={showPayment} onClose={() => setShowPayment(false)} onSuccess={() => setShowPayment(false)} />
 
             {/* Ana grid: snippet panel varsa 240px, yoksa 0 + Preview (1fr).
                 Sprint 16 Aşama 5d — Monaco editör kaldırıldı (Xslt Tasarım ekranında
@@ -2729,9 +2885,12 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                             const existing = inXslt
                                                 ? xsltInstrumented.bindings.find(b => (b.kind || 'dropdown') === 'dropdown' && bindingLabels.get(b) === f.label)
                                                 : undefined;
-                                            const insertHere = () => insertField(f.key, insertMode === 'end'
-                                                ? null
-                                                : resolveInsertTarget(selectedObjectRef.current?.element ?? null, insertMode));
+                                            const insertHere = () => {
+                                                if (isLineField(f) && insertMode === 'after' && insertColumn('field', f.key)) return;
+                                                insertField(f.key, insertMode === 'end'
+                                                    ? null
+                                                    : resolveInsertTarget(selectedObjectRef.current?.element ?? null, insertMode));
+                                            };
                                             return (
                                                 <div
                                                     key={f.key}
@@ -2957,9 +3116,12 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     e.dataTransfer.setData('text/x-xslt-element', type);
                                     e.dataTransfer.effectAllowed = 'copy';
                                 }}
-                                onClick={() => insertObject(type, insertMode === 'end'
-                                    ? null
-                                    : resolveInsertTarget(selectedObjectRef.current?.element ?? null, insertMode))}
+                                onClick={() => {
+                                    if (type === 'formula' && insertMode === 'after' && insertColumn('formula')) return;
+                                    insertObject(type, insertMode === 'end'
+                                        ? null
+                                        : resolveInsertTarget(selectedObjectRef.current?.element ?? null, insertMode));
+                                }}
                                 style={{
                                     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px',
                                     width: '68px', height: '56px', background: '#1e293b', border: `1px solid ${color}55`,
@@ -2972,6 +3134,39 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 {label}
                             </div>
                         ))}
+                        <button
+                            type="button"
+                            data-insert-column
+                            disabled={!selectedLineCell}
+                            onClick={() => insertColumn('empty')}
+                            title={selectedLineCell
+                                ? 'Seçili kolonun sağına boş kolon ekler; içine alan veya formül koyabilirsiniz.'
+                                : 'Önce önizlemede satır (kalem) tablosundan bir kolon seçin.'}
+                            style={{
+                                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px',
+                                width: '68px', height: '56px', background: '#1e293b', border: '1px solid #67e8f955',
+                                borderRadius: '8px', color: '#67e8f9', fontSize: '11px', fontWeight: 700, fontFamily: 'inherit',
+                                cursor: selectedLineCell ? 'pointer' : 'not-allowed', opacity: selectedLineCell ? 1 : 0.45,
+                            }}
+                        >
+                            <Columns3 size={22} />
+                            Kolon
+                        </button>
+                        <button
+                            type="button"
+                            data-bg-toggle
+                            onClick={() => setBgOpen(v => !v)}
+                            title="Sayfaya veya seçili çerçeveye arka plan resmi"
+                            style={{
+                                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px',
+                                width: '68px', height: '56px', background: bgOpen || pageBg ? '#c4b5fd22' : '#1e293b',
+                                border: `1px solid ${bgOpen ? '#c4b5fd' : '#c4b5fd55'}`,
+                                borderRadius: '8px', color: '#c4b5fd', fontSize: '11px', fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer',
+                            }}
+                        >
+                            <Wallpaper size={22} />
+                            Arka Plan
+                        </button>
                         <div style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'column', gap: '3px', minWidth: '190px' }}>
                             <select
                                 data-insert-mode
@@ -2991,7 +3186,110 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 {' · '}Sürükleyip bırakabilirsiniz.
                             </span>
                         </div>
+                        {selectedLineCell && insertMode === 'after' && (
+                            <div data-line-column-hint style={{
+                                flexBasis: '100%', fontSize: '10px', color: '#67e8f9', padding: '4px 8px',
+                                background: 'rgba(103, 232, 249, 0.08)', border: '1px solid rgba(103, 232, 249, 0.25)', borderRadius: '4px',
+                            }}>
+                                Satır tablosunda kolon seçili: soldaki listeden eklenen <b>satır alanları</b> ve <b>Formül</b>, seçili kolonun sağına
+                                yeni kolon olarak eklenir; formül her satır için ayrı hesaplanır. Hücrenin içine koymak için "Seçili öğenin içine"yi seçin.
+                            </div>
+                        )}
                     </div>
+
+                    {bgOpen && (
+                        <div
+                            data-bg-panel
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px', flexWrap: 'wrap',
+                                background: '#0d1430', borderBottom: '1px solid #1e293b', fontSize: '11px', color: '#cbd5e1',
+                            }}
+                        >
+                            <div style={{
+                                width: '56px', height: '72px', borderRadius: '4px', border: '1px solid #334155', flexShrink: 0,
+                                background: pageBg ? `#fff url("${pageBg.image}") center top / 100% auto no-repeat` : '#111827',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569', fontSize: '9px', textAlign: 'center',
+                            }}>
+                                {!pageBg && 'Resim yok'}
+                            </div>
+                            <label style={{
+                                padding: '6px 10px', borderRadius: '6px', cursor: 'pointer', fontWeight: 700,
+                                background: 'rgba(196, 181, 253, 0.15)', border: '1px solid rgba(196, 181, 253, 0.5)', color: '#ddd6fe',
+                            }}>
+                                {pageBg ? 'Resmi değiştir' : 'Resim seç'}
+                                <input
+                                    type="file"
+                                    accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                                    data-bg-file
+                                    style={{ display: 'none' }}
+                                    onChange={async (e) => {
+                                        const file = e.target.files?.[0];
+                                        e.target.value = '';
+                                        if (!file) return;
+                                        if (file.size > 8 * 1024 * 1024) { setBgError('Resim en fazla 8 MB olabilir.'); return; }
+                                        try {
+                                            applyBackground({ image: await imageFileToDataUrl(file) });
+                                        } catch (err) {
+                                            setBgError((err as Error).message);
+                                        }
+                                    }}
+                                />
+                            </label>
+                            <label style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                                <span style={{ color: '#94a3b8' }}>Uygulanacak yer</span>
+                                <select
+                                    data-bg-target
+                                    value={pageBg?.target ?? 'page'}
+                                    disabled={!pageBg}
+                                    onChange={(e) => applyBackground({ target: e.target.value as PageBackground['target'] })}
+                                    style={{ ...fieldInputStyle, padding: '5px 8px', fontSize: '11px', fontFamily: 'inherit' }}
+                                >
+                                    <option value="page">Tüm sayfa</option>
+                                    <option value="element">Seçili öğe (çerçeve)</option>
+                                </select>
+                            </label>
+                            <label style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                                <span style={{ color: '#94a3b8' }}>Yerleşim</span>
+                                <select
+                                    data-bg-fit
+                                    value={pageBg?.fit ?? 'width'}
+                                    disabled={!pageBg}
+                                    onChange={(e) => applyBackground({ fit: e.target.value as PageBackground['fit'] })}
+                                    style={{ ...fieldInputStyle, padding: '5px 8px', fontSize: '11px', fontFamily: 'inherit' }}
+                                >
+                                    {BG_FITS.map(f => <option key={f.id} value={f.id}>{f.label}</option>)}
+                                </select>
+                            </label>
+                            <label style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                                <span style={{ color: '#94a3b8' }}>Opaklık</span>
+                                <select
+                                    data-bg-opacity
+                                    value={String(pageBg?.opacity ?? 1)}
+                                    disabled={!pageBg}
+                                    onChange={(e) => applyBackground({ opacity: Number(e.target.value) })}
+                                    style={{ ...fieldInputStyle, padding: '5px 8px', fontSize: '11px', fontFamily: 'inherit' }}
+                                >
+                                    {[1, 0.75, 0.5, 0.3, 0.15].map(o => <option key={o} value={String(o)}>%{Math.round(o * 100)}</option>)}
+                                </select>
+                            </label>
+                            {pageBg && (
+                                <button
+                                    type="button"
+                                    data-bg-remove
+                                    onClick={() => applyBackground(null)}
+                                    style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #7f1d1d', background: 'transparent', color: '#fca5a5', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+                                >
+                                    Kaldır
+                                </button>
+                            )}
+                            <span style={{ flex: 1, minWidth: '200px', color: bgError ? '#fca5a5' : '#64748b', fontSize: '10px', lineHeight: 1.4 }}>
+                                {bgError ?? (pageBg?.target === 'element'
+                                    ? 'Resim işaretli öğenin (çerçevenin) genişliğine göre yerleşir. Başka öğe için önce onu seçip yeniden "Seçili öğe"yi seçin.'
+                                    : 'Resim XSLT dosyasının içine gömülür (harici bağlantı gerekmez). Çerçeve için önce dış tabloyu seçip "Seçili öğe"yi kullanın.')}
+                                {pageBg && ` · ${(pageBg.image.length / 1024).toFixed(0)} kB`}
+                            </span>
+                        </div>
+                    )}
 
                     {moveObjId && (
                         <div

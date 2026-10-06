@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { randomUUID } from 'node:crypto';
 import { initDb } from './db.js';
 
 const app = express();
@@ -36,7 +37,8 @@ app.use(cors({
     },
     credentials: true,
 }));
-app.use(express.json()); // Body parser
+// Tasarımlar gömülü resimlerle (base64) birkaç MB olabilir.
+app.use(express.json({ limit: '15mb' }));
 app.use(express.urlencoded({ extended: false })); // iyzico callback form-encoded POST eder
 
 let db;
@@ -305,13 +307,18 @@ const serializeDesign = (row) => row ? ({
     theme_color: row.theme_color,
     sections: row.sections_json || null,   // JSONB -> otomatik parse
     status: row.status,
+    design_key: row.design_key || null,
+    xml_content: row.xml_content || null,
+    paid: !!row.paid_at,
+    paid_at: row.paid_at || null,
+    download_count: row.download_count || 0,
     created_at: row.created_at,
     updated_at: row.updated_at,
 }) : null;
 
 // POST /api/designs — Yeni tasarim olustur
 app.post('/api/designs', authenticateToken, async (req, res) => {
-    const { name, module_id, xslt_content, custom_content, theme_color, sections } = req.body || {};
+    const { name, module_id, xslt_content, custom_content, theme_color, sections, xml_content } = req.body || {};
 
     if (!name || !module_id) {
         return res.status(400).json({ error: 'name ve module_id zorunludur.' });
@@ -323,9 +330,9 @@ app.post('/api/designs', authenticateToken, async (req, res) => {
     try {
         const sectionsJson = sections ? JSON.stringify(sections) : null;
         const result = await db.run(
-            `INSERT INTO designs (user_id, name, module_id, xslt_content, custom_content, theme_color, sections_json)
-             VALUES (?, ?, ?, ?, ?, ?, ?::jsonb)`,
-            [req.user.id, name, module_id, xslt_content || null, custom_content || null, theme_color || null, sectionsJson]
+            `INSERT INTO designs (user_id, name, module_id, xslt_content, custom_content, theme_color, sections_json, xml_content)
+             VALUES (?, ?, ?, ?, ?, ?, ?::jsonb, ?)`,
+            [req.user.id, name, module_id, xslt_content || null, custom_content || null, theme_color || null, sectionsJson, xml_content || null]
         );
         const created = await db.get('SELECT * FROM designs WHERE id = ?', [result.lastID]);
         // eslint-disable-next-line no-console
@@ -374,7 +381,7 @@ app.put('/api/designs/:id', authenticateToken, async (req, res) => {
     if (!Number.isInteger(id) || id <= 0) {
         return res.status(400).json({ error: 'Gecersiz tasarim id.' });
     }
-    const { name, xslt_content, custom_content, theme_color, sections, status } = req.body || {};
+    const { name, xslt_content, custom_content, theme_color, sections, status, xml_content } = req.body || {};
     try {
         const existing = await db.get('SELECT * FROM designs WHERE id = ?', [id]);
         if (!existing) return res.status(404).json({ error: 'Tasarim bulunamadi.' });
@@ -388,6 +395,7 @@ app.put('/api/designs/:id', authenticateToken, async (req, res) => {
         if (theme_color !== undefined) { updates.push('theme_color = ?'); params.push(theme_color); }
         if (sections !== undefined) { updates.push('sections_json = ?::jsonb'); params.push(JSON.stringify(sections)); }
         if (status !== undefined) { updates.push('status = ?'); params.push(status); }
+        if (xml_content !== undefined) { updates.push('xml_content = ?'); params.push(xml_content); }
         if (updates.length === 0) {
             return res.status(400).json({ error: 'Guncellenecek alan belirtilmedi.' });
         }
@@ -423,6 +431,101 @@ app.delete('/api/designs/:id', authenticateToken, async (req, res) => {
     } catch (e) {
         console.error('[designs] delete error:', e);
         res.status(500).json({ error: e.message });
+    }
+});
+
+// İndirilen XSLT'ye yazılan tasarım anahtarı. Dosya tekrar yüklendiğinde
+// sahibinin aynı tasarıma ek kredi harcamadan devam etmesini sağlar.
+const DESIGN_KEY_RE = /edesign-key:([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i;
+const DESIGN_KEY_COMMENT_RE = /<!--\s*edesign-key:[^>]*?-->[ \t]*\r?\n?/gi;
+const embedDesignKey = (xslt, key) => {
+    const clean = xslt.replace(DESIGN_KEY_COMMENT_RE, '');
+    const comment = `<!-- edesign-key:${key} | Bu satiri silmeyin: dosyayi tekrar yuklediginizde tasariminiza ek tasarim hakki harcamadan devam edersiniz. -->\n`;
+    const decl = clean.match(/^\uFEFF?\s*<\?xml[^?]*\?>[ \t]*\r?\n?/);
+    return decl ? clean.slice(0, decl[0].length) + comment + clean.slice(decl[0].length) : comment + clean;
+};
+
+// GET /api/designs/by-key/:key — Yüklenen dosyadaki anahtarın tasarımı (sadece sahibi)
+app.get('/api/designs/by-key/:key', authenticateToken, async (req, res) => {
+    const key = String(req.params.key || '');
+    if (!DESIGN_KEY_RE.test(`edesign-key:${key}`)) return res.status(400).json({ error: 'Gecersiz tasarim anahtari.' });
+    try {
+        const row = await db.get('SELECT * FROM designs WHERE design_key = ? AND user_id = ?', [key, req.user.id]);
+        if (!row) return res.status(404).json({ error: 'Bu anahtara ait tasariminiz bulunamadi.' });
+        res.json({ design: serializeDesign(row) });
+    } catch (e) {
+        console.error('[designs] by-key error:', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// POST /api/designs/export — Tasarımı indirmek için. Tasarım daha önce
+// indirilmişse (paid_at dolu) ücretsizdir; değilse 1 tasarım hakkı düşer.
+// İçerik ve önizleme XML'i saklanır, anahtar XSLT'ye yazılıp geri döner.
+app.post('/api/designs/export', authenticateToken, async (req, res) => {
+    const { design_id, design_key, name, module_id, xslt_content, xml_content } = req.body || {};
+    if (typeof xslt_content !== 'string' || !xslt_content.trim()) {
+        return res.status(400).json({ error: 'xslt_content zorunludur.' });
+    }
+    if (!module_id) return res.status(400).json({ error: 'module_id zorunludur.' });
+    const designName = String(name || 'Tasarim').slice(0, 200);
+    const xml = typeof xml_content === 'string' ? xml_content : null;
+
+    const client = await db.pool.connect();
+    try {
+        await client.query('BEGIN');
+        const user = (await client.query('SELECT id, role, credits FROM users WHERE id = $1 FOR UPDATE', [req.user.id])).rows[0];
+        if (!user) {
+            await client.query('ROLLBACK');
+            return res.status(404).json({ error: 'Kullanici bulunamadi.' });
+        }
+
+        const findBy = async (column, value) => (await client.query(
+            `SELECT * FROM designs WHERE ${column} = $1 AND user_id = $2 FOR UPDATE`, [value, user.id]
+        )).rows[0] || null;
+        let existing = null;
+        const id = Number(design_id);
+        if (Number.isInteger(id) && id > 0) existing = await findBy('id', id);
+        const keyInFile = xslt_content.match(DESIGN_KEY_RE)?.[1];
+        for (const k of [design_key, keyInFile]) {
+            if (!existing && typeof k === 'string' && k) existing = await findBy('design_key', k);
+        }
+
+        let credits = user.credits;
+        let charged = false;
+        if (!existing?.paid_at && user.role !== 'admin') {
+            if (user.credits <= 0) {
+                await client.query('ROLLBACK');
+                return res.status(402).json({ error: 'Tasarimi indirmek icin tasarim hakkiniz kalmadi.', paymentRequired: true });
+            }
+            credits = (await client.query('UPDATE users SET credits = credits - 1 WHERE id = $1 RETURNING credits', [user.id])).rows[0].credits;
+            charged = true;
+        }
+
+        const key = existing?.design_key || randomUUID();
+        const content = embedDesignKey(xslt_content, key);
+        const row = existing
+            ? (await client.query(
+                `UPDATE designs SET name = $1, module_id = $2, xslt_content = $3, xml_content = COALESCE($4, xml_content),
+                        design_key = $5, paid_at = COALESCE(paid_at, NOW()), status = 'downloaded',
+                        download_count = download_count + 1, updated_at = NOW()
+                  WHERE id = $6 RETURNING *`,
+                [designName, module_id, content, xml, key, existing.id]
+            )).rows[0]
+            : (await client.query(
+                `INSERT INTO designs (user_id, name, module_id, xslt_content, xml_content, design_key, paid_at, status, download_count)
+                 VALUES ($1, $2, $3, $4, $5, $6, NOW(), 'downloaded', 1) RETURNING *`,
+                [user.id, designName, module_id, content, xml, key]
+            )).rows[0];
+        await client.query('COMMIT');
+        console.log(`[designs] user=${user.id} export design #${row.id} charged=${charged}`);
+        res.json({ success: true, charged, credits, design: serializeDesign(row) });
+    } catch (e) {
+        await client.query('ROLLBACK').catch(() => {});
+        console.error('[designs] export error:', e);
+        res.status(500).json({ error: e.message });
+    } finally {
+        client.release();
     }
 });
 

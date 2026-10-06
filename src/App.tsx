@@ -42,7 +42,7 @@ const App: React.FC = () => {
     // After successful auth, move to selection. After selecting a doc, designer.
     const [view, setView] = useState<View>('landing');
     const [authMode, setAuthMode] = useState<AuthMode>('login');
-    const [selectedDoc, setSelectedDoc] = useState<{ moduleId: string, moduleName: string, template: string, customContent?: string, themeColor?: string, xml?: string } | null>(null);
+    const [selectedDoc, setSelectedDoc] = useState<{ moduleId: string, moduleName: string, template: string, customContent?: string, themeColor?: string, xml?: string, designId?: number } | null>(null);
 
     // iyzico ödeme sonrası backend ?payment=success|fail|error|invalid ile geri yönlendirir.
     useEffect(() => {
@@ -94,7 +94,7 @@ const App: React.FC = () => {
      * ProfesyonelDesigner'dan bagimsiz; XSLT bilen kullanicilar (Selim gibi) icin dogrudan
      * Monaco + canli preview. Modul dropdown ile 9 e-belge modulu destekler.
      */
-    const handleSelectXsltEditor = (moduleId?: string, initialXslt?: string, docName?: string, xml?: string) => {
+    const handleSelectXsltEditor = (moduleId?: string, initialXslt?: string, docName?: string, xml?: string, designId?: number) => {
         setSelectedDoc({
             moduleId: moduleId || 'fatura',
             moduleName: docName || 'XSLT Tasarim',
@@ -102,6 +102,7 @@ const App: React.FC = () => {
             customContent: initialXslt,
             themeColor: '#1e3a8a',
             xml,
+            designId,
         });
         setView('xslt-editor');
     };
@@ -145,6 +146,7 @@ const App: React.FC = () => {
                         initialXslt={selectedDoc.customContent}
                         initialXml={selectedDoc.xml}
                         docName={selectedDoc.moduleName}
+                        initialDesignId={selectedDoc.designId}
                         onBack={handleBack}
                     />
                 )}
