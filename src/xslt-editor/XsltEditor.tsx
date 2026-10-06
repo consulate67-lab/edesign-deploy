@@ -497,6 +497,133 @@ const TableEditor: React.FC<{
     );
 };
 
+type PositionMode = 'static' | 'relative' | 'absolute';
+type PositionUnit = 'px' | 'mm';
+const PX_PER_MM = 96 / 25.4;
+const readPositionMode = (el: HTMLElement): PositionMode =>
+    el.style.position === 'absolute' ? 'absolute' : el.style.position === 'relative' ? 'relative' : 'static';
+const parseLength = (raw: string): { px: number; unit: PositionUnit } => {
+    const m = raw.trim().match(/^(-?\d*\.?\d+)(px|mm)?$/);
+    if (!m) return { px: 0, unit: 'px' };
+    const n = parseFloat(m[1]);
+    return m[2] === 'mm' ? { px: n * PX_PER_MM, unit: 'mm' } : { px: n, unit: 'px' };
+};
+const pxToUnit = (px: number, unit: PositionUnit) => (unit === 'mm' ? Math.round((px / PX_PER_MM) * 10) / 10 : Math.round(px));
+const formatLength = (px: number, unit: PositionUnit) => `${pxToUnit(px, unit)}${unit}`;
+
+/** Ekran (client) birimi / CSS px oranı — önizleme zoom'u ölçülerek bulunur. */
+function clientScale(el: HTMLElement): number {
+    const view = el.ownerDocument.defaultView;
+    const prev = el.style.left;
+    const base = parseFloat(view?.getComputedStyle(el).left || '') || 0;
+    const a = el.getBoundingClientRect().left;
+    el.style.left = `${base + 100}px`;
+    const b = el.getBoundingClientRect().left;
+    el.style.left = prev;
+    return (b - a) / 100 || 1;
+}
+
+/**
+ * Öğeyi bulunduğu yerde mutlak konuma sabitler (zıplamadan). Koordinatlar
+ * body'ye göre olsun diye önizlemede body'ye position:relative verilir.
+ */
+function pinAbsolute(el: HTMLElement): { left: number; top: number } {
+    const doc = el.ownerDocument;
+    const body = doc.body;
+    if (body && doc.defaultView?.getComputedStyle(body).position === 'static') body.style.position = 'relative';
+    const before = el.getBoundingClientRect();
+    el.style.position = 'absolute';
+    el.style.left = '0px';
+    el.style.top = '0px';
+    const origin = el.getBoundingClientRect();
+    const scale = clientScale(el);
+    const left = (before.left - origin.left) / scale;
+    const top = (before.top - origin.top) / scale;
+    el.style.left = `${left}px`;
+    el.style.top = `${top}px`;
+    return { left, top };
+}
+
+const PositionEditor: React.FC<{
+    el: HTMLElement;
+    onStyle: (prop: string, value: string) => void;
+    onCommit: (mode: PositionMode, left: string, top: string) => void;
+}> = ({ el, onStyle, onCommit }) => {
+    const [mode, setMode] = useState<PositionMode>(() => readPositionMode(el));
+    const [unit, setUnit] = useState<PositionUnit>(() => parseLength(el.style.left || '').unit);
+    const [pos, setPos] = useState(() => ({ x: parseLength(el.style.left || '0').px, y: parseLength(el.style.top || '0').px }));
+    const [text, setText] = useState(() => ({ x: String(pxToUnit(pos.x, unit)), y: String(pxToUnit(pos.y, unit)) }));
+    const show = (p: { x: number; y: number }, u: PositionUnit) => {
+        setPos(p);
+        setText({ x: String(pxToUnit(p.x, u)), y: String(pxToUnit(p.y, u)) });
+    };
+    const changeMode = (next: PositionMode) => {
+        setMode(next);
+        if (next === 'static') {
+            show({ x: 0, y: 0 }, unit);
+            onCommit('static', '', '');
+            return;
+        }
+        const p = next === 'absolute' ? (() => { const r = pinAbsolute(el); return { x: r.left, y: r.top }; })() : { x: 0, y: 0 };
+        show(p, unit);
+        onCommit(next, formatLength(p.x, unit), formatLength(p.y, unit));
+    };
+    const changeUnit = (next: PositionUnit) => {
+        setUnit(next);
+        show(pos, next);
+        if (mode === 'static') return;
+        onStyle('left', formatLength(pos.x, next));
+        onStyle('top', formatLength(pos.y, next));
+    };
+    const changeAxis = (axis: 'x' | 'y', raw: string) => {
+        setText(t => ({ ...t, [axis]: raw }));
+        const n = parseFloat(raw.replace(',', '.'));
+        if (!Number.isFinite(n)) return;
+        const px = unit === 'mm' ? n * PX_PER_MM : n;
+        setPos(p => ({ ...p, [axis]: px }));
+        onStyle(axis === 'x' ? 'left' : 'top', `${n}${unit}`);
+    };
+    const hint = mode === 'absolute'
+        ? 'Sayfanın sol üst köşesine göre konum. Önizlemede objeyi sürükleyerek de taşıyabilirsiniz.'
+        : mode === 'relative'
+            ? 'Obje yerini korur, X/Y kadar kaydırılarak gösterilir. Sürükleyerek de kaydırabilirsiniz.'
+            : 'Obje sayfa akışında durur. Önizlemede sürüklerseniz "Sayfada sabit" konuma geçer.';
+    return (
+        <div data-position-editor>
+            <label style={fieldLabelStyle}>Konumlandırma</label>
+            <select data-position-mode value={mode} onChange={(e) => changeMode(e.target.value as PositionMode)} style={{ ...fieldInputStyle, marginBottom: '10px' }}>
+                <option value="static">Normal (sayfa akışında)</option>
+                <option value="relative">Yerinden kaydır</option>
+                <option value="absolute">Sayfada sabit konum</option>
+            </select>
+            {mode !== 'static' && (
+                <div style={{ display: 'flex', gap: '6px', marginBottom: '10px' }}>
+                    {(['x', 'y'] as const).map(axis => (
+                        <div key={axis} style={{ flex: 1 }}>
+                            <label style={fieldLabelStyle}>{axis === 'x' ? 'X (soldan)' : 'Y (üstten)'}</label>
+                            <input
+                                type="number" step={unit === 'mm' ? 0.5 : 1}
+                                data-position-axis={axis}
+                                value={text[axis]}
+                                onChange={(e) => changeAxis(axis, e.target.value)}
+                                style={fieldInputStyle}
+                            />
+                        </div>
+                    ))}
+                    <div style={{ width: '64px' }}>
+                        <label style={fieldLabelStyle}>Birim</label>
+                        <select data-position-unit value={unit} onChange={(e) => changeUnit(e.target.value as PositionUnit)} style={fieldInputStyle}>
+                            <option value="px">px</option>
+                            <option value="mm">mm</option>
+                        </select>
+                    </div>
+                </div>
+            )}
+            <div style={{ fontSize: '10px', color: '#64748b', lineHeight: 1.5, marginBottom: '6px' }}>{hint}</div>
+        </div>
+    );
+};
+
 export const XSLTEditor: React.FC<XsltEditorProps> = ({
     initialModuleId = 'fatura',
     initialXslt,
@@ -574,6 +701,9 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const [moveObjId, setMoveObjId] = useState<string | null>(null);
     const moveObjIdRef = useRef<string | null>(null);
     moveObjIdRef.current = moveObjId;
+    /** Önizlemede sürükleme bitince Konum alanlarını yeniden okutmak için. */
+    const [positionRev, setPositionRev] = useState(0);
+    const suppressClickUntilRef = useRef(0);
     const sourceEditDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const previewScrollRef = useRef<number>(0);
     const pendingPreviewScrollRef = useRef<number | null>(null);
@@ -971,6 +1101,41 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         setXsltContent(updated);
     }, []);
 
+    /**
+     * Konumlandırmayı (position/left/top) önizlemeye ve hemen XSLT'ye yazar.
+     * Mutlak konum body'ye göre olsun diye XSLT'deki <body>'ye de
+     * position:relative eklenir (zaten bir position yoksa).
+     */
+    const commitPosition = useCallback((el: HTMLElement, locator: PreviewLocator, mode: PositionMode, left: string, top: string) => {
+        flushSourceEdits();
+        const values: [string, string][] = [
+            ['position', mode === 'static' ? '' : mode],
+            ['left', mode === 'static' ? '' : left],
+            ['top', mode === 'static' ? '' : top],
+        ];
+        for (const [prop, v] of values) {
+            if (v) el.style.setProperty(prop, v);
+            else el.style.removeProperty(prop);
+        }
+        let next = xsltContentRef.current;
+        const body = el.ownerDocument.body;
+        if (mode === 'absolute' && body?.hasAttribute('data-xsrc')) {
+            const bodyTag = findLiteralTagByOrdinal(next, Number(body.getAttribute('data-xsrc')));
+            if (bodyTag && bodyTag.name.toLowerCase() === 'body' && !/position\s*:/.test(next.slice(bodyTag.start, bodyTag.end))) {
+                next = setTagStyleProperty(next, bodyTag, 'position', 'relative');
+            }
+        }
+        for (const [prop, v] of values) {
+            const tag = resolveSourceTag(next, locator);
+            if (!tag) return;
+            next = setTagStyleProperty(next, tag, prop, v);
+        }
+        if (next === xsltContentRef.current) return;
+        xsltContentRef.current = next;
+        setXsltContent(next);
+        console.log(`[XSLTEditor] Konum XSLT'ye yazıldı → ${mode}${mode === 'static' ? '' : ` ${left}, ${top}`}`);
+    }, [flushSourceEdits, resolveSourceTag]);
+
     /** Objenin iç içeriği (metin / tablo satırları): önizleme + XSLT. */
     const handleContentChange = useCallback((markup: string) => {
         const sel = selectedObjectRef.current;
@@ -1340,6 +1505,11 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const handleIframeBodyClick = useCallback((e: Event) => {
         const target = e.target as HTMLElement | null;
         if (!target || typeof target.closest !== 'function') return;
+        if (Date.now() < suppressClickUntilRef.current) {
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+        }
         const movingId = moveObjIdRef.current;
         if (movingId) {
             e.preventDefault();
@@ -1460,7 +1630,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             style.id = '__xslt-preview-layout';
             style.textContent = 'body{margin-left:auto !important;margin-right:auto !important;}'
                 + '[data-xslt-selected]{outline:2px solid #f59e0b !important;outline-offset:2px;}'
-                + '[data-xslt-obj]{cursor:pointer;}[data-xslt-obj]:hover{outline:2px dashed #6366f1;outline-offset:2px;}'
+                + '[data-xslt-obj],img[data-xslt-selected]{cursor:move;}[data-xslt-obj]:hover{outline:2px dashed #6366f1;outline-offset:2px;}'
+                + '[data-xslt-dragging]{opacity:0.85;outline:2px solid #10b981 !important;}'
                 + '[data-xslt-drop=inside]{outline:2px dashed #10b981 !important;outline-offset:-2px;background-color:rgba(16,185,129,0.08) !important;}'
                 + '[data-xslt-drop=after]{box-shadow:0 3px 0 0 #10b981 !important;}';
             doc.head.appendChild(style);
@@ -1631,10 +1802,74 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         const moveOverHandler = (e: MouseEvent) => {
             if (moveObjIdRef.current) markDropTarget(resolveInsertTarget(e.target as Element, 'auto'));
         };
+        // Eklenen objeler (ve seçili resim) önizlemede sürüklenerek konumlandırılır.
+        type DragState = {
+            el: HTMLElement; locator: PreviewLocator; sx: number; sy: number; started: boolean;
+            mode: PositionMode; unit: PositionUnit; left: number; top: number; scale: number;
+        };
+        let drag: DragState | null = null;
+        const endDrag = () => {
+            const d = drag;
+            drag = null;
+            if (!d?.started) return;
+            d.el.removeAttribute('data-xslt-dragging');
+            suppressClickUntilRef.current = Date.now() + 300;
+            const left = formatLength(parseFloat(d.el.style.left) || 0, d.unit);
+            const top = formatLength(parseFloat(d.el.style.top) || 0, d.unit);
+            commitPosition(d.el, d.locator, d.mode, left, top);
+            if (selectedObjectRef.current?.element !== d.el) openSelection(null, d.el, d.locator);
+            setPositionRev(r => r + 1);
+        };
+        const mouseDownHandler = (e: MouseEvent) => {
+            if (e.button !== 0 || moveObjIdRef.current) return;
+            const target = e.target as HTMLElement;
+            const obj = target.closest?.('[data-xslt-obj]') as HTMLElement | null;
+            const sel = selectedObjectRef.current;
+            let el: HTMLElement | null = null;
+            let locator: PreviewLocator | null = null;
+            if (obj) {
+                el = obj;
+                locator = { kind: 'obj', id: obj.getAttribute('data-xslt-obj') || '' };
+            } else if (sel?.element && sel.locator?.kind === 'img' && sel.element.contains(target)) {
+                el = sel.element;
+                locator = sel.locator;
+            }
+            if (!el || !locator) return;
+            e.preventDefault();
+            drag = { el, locator, sx: e.clientX, sy: e.clientY, started: false, mode: 'absolute', unit: 'px', left: 0, top: 0, scale: 1 };
+        };
+        const mouseMoveHandler = (e: MouseEvent) => {
+            if (!drag) return;
+            if ((e.buttons & 1) === 0) { endDrag(); return; }
+            const dx = e.clientX - drag.sx;
+            const dy = e.clientY - drag.sy;
+            if (!drag.started) {
+                if (Math.abs(dx) < 4 && Math.abs(dy) < 4) return;
+                const el = drag.el;
+                drag.started = true;
+                drag.unit = parseLength(el.style.left || '').unit;
+                drag.mode = readPositionMode(el);
+                if (drag.mode === 'static') {
+                    pinAbsolute(el);
+                    drag.mode = 'absolute';
+                }
+                const cs = doc.defaultView?.getComputedStyle(el);
+                drag.left = parseFloat(cs?.left || '') || 0;
+                drag.top = parseFloat(cs?.top || '') || 0;
+                drag.scale = clientScale(el);
+                el.setAttribute('data-xslt-dragging', '');
+            }
+            e.preventDefault();
+            drag.el.style.left = `${drag.left + dx / drag.scale}px`;
+            drag.el.style.top = `${drag.top + dy / drag.scale}px`;
+        };
         body.addEventListener('dragover', dragOverHandler);
         body.addEventListener('dragleave', dragLeaveHandler);
         body.addEventListener('drop', dropHandler);
         doc.addEventListener('mouseover', moveOverHandler);
+        doc.addEventListener('mousedown', mouseDownHandler, { capture: true });
+        doc.addEventListener('mousemove', mouseMoveHandler);
+        doc.addEventListener('mouseup', endDrag);
         console.log(`[XSLTEditor] iframe listener re-bound (previewHtml changed, scrollHeight=${scrollH})`);
 
         // srcDoc değişirken iframe.contentDocument body'si henüz null olan yeni
@@ -1645,8 +1880,11 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             body.removeEventListener('dragleave', dragLeaveHandler);
             body.removeEventListener('drop', dropHandler);
             doc.removeEventListener('mouseover', moveOverHandler);
+            doc.removeEventListener('mousedown', mouseDownHandler, { capture: true });
+            doc.removeEventListener('mousemove', mouseMoveHandler);
+            doc.removeEventListener('mouseup', endDrag);
         };
-    }, [previewHtml, iframeLoadCount, handleIframeBodyClick, insertObject]);
+    }, [previewHtml, iframeLoadCount, handleIframeBodyClick, insertObject, commitPosition, openSelection]);
 
     // Taşıma modu bitince önizlemedeki hedef işareti kaldırılır.
     useEffect(() => {
@@ -2797,6 +3035,21 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                         <>
                                             {sectionTitle('Metin İçeriği', '#6ee7b7')}
                                             <FieldTextArea key={fieldKey('text')} label="Metin" currentValue={el.innerText} onChange={(v) => handleContentChange(textToMarkup(v))} />
+                                        </>
+                                    )}
+
+                                    {el && canPersist && sel.locator && (isObj || sel.locator.kind === 'img') && (
+                                        <>
+                                            {sectionTitle('Konum', '#6ee7b7')}
+                                            <PositionEditor
+                                                key={fieldKey(`position-${positionRev}`)}
+                                                el={el}
+                                                onStyle={handleStyleChange}
+                                                onCommit={(mode, left, top) => {
+                                                    const cur = selectedObjectRef.current;
+                                                    if (cur?.element && cur.locator) commitPosition(cur.element, cur.locator, mode, left, top);
+                                                }}
+                                            />
                                         </>
                                     )}
 
