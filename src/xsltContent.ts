@@ -17,6 +17,9 @@
 // 2026-09-26: v2 path — fallback path'lerin tumunu inline embed ettik.
 // Default template'ler + topluluk fallback'leri dahil.
 // eger yeni XSLT eklenirse buraya da eklenmeli.
+// GİB resmi görselleştirme dosyaları (UBL-TR 1.2.1 paketi, ebelge.gib.gov.tr)
+import gibGeneralRaw from '../public/ebelge/gib/general.xslt?raw';
+import gibIrsaliyeRaw from '../public/ebelge/gib/irsaliye.xslt?raw';
 import eFaturaSablonRaw from '../public/ebelge/gib/v2/e-Fatura-Sablon.xslt?raw';
 import eArsivSablonRaw from '../public/ebelge/gib/v2/e-Arsiv-Sablon.xslt?raw';
 // Topluluk fallback'leri — 7 modul icin (Faz A.1.2)
@@ -28,6 +31,8 @@ import biletRaw from '../public/ebelge/community/hzkucuk-eFatura-bilet.xslt?raw'
 import makbuzRaw from '../public/ebelge/community/hzkucuk-eFatura-makbuz.xslt?raw';
 
 export const INLINE_XSLT_CONTENT: Record<string, string> = {
+    'gib/general.xslt': gibGeneralRaw,
+    'gib/irsaliye.xslt': gibIrsaliyeRaw,
     // Faz A.1 — minimal XSLT'ler (gib/v2/)
     'gib/v2/e-Fatura-Sablon.xslt': eFaturaSablonRaw,
     'gib/v2/e-Arsiv-Sablon.xslt': eArsivSablonRaw,

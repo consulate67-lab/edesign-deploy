@@ -21,13 +21,13 @@
     xmlns:ubltr="urn:oasis:names:specification:ubl:schema:xsd:TurkishCustomizationExtensionComponents">
     <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
     <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
-    <cbc:ProfileID>e-Müstahsil</cbc:ProfileID>
+    <cbc:ProfileID>EARSIVBELGE</cbc:ProfileID>
     <cbc:ID>MST2026000000001</cbc:ID>
     <cbc:CopyIndicator>false</cbc:CopyIndicator>
     <cbc:UUID>22222222-3333-4444-5555-666666666666</cbc:UUID>
     <cbc:IssueDate>2026-09-25</cbc:IssueDate>
     <cbc:IssueTime>11:45:00</cbc:IssueTime>
-    <cbc:InvoiceTypeCode>MUSTAHSIL</cbc:InvoiceTypeCode>
+    <cbc:InvoiceTypeCode>MUSTAHSILMAKBUZ</cbc:InvoiceTypeCode>
     <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
     <cbc:LineCountNumeric>2</cbc:LineCountNumeric>
 

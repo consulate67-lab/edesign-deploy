@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowRight, MessageCircle, Sparkles, Zap, FileText, Globe, Layers, ChevronDown, Check, Star } from 'lucide-react';
 import { KVKKModal, KullaniciSozlesmesiModal, CerezPolitikasiModal } from './legal/Legal';
 import { api } from './api';
@@ -40,6 +40,45 @@ const SSS_ITEMS: SssItem[] = [
         a: 'Evet. Tüm kullanıcı ve şablon verileri Türkiye’deki (Railway) PostgreSQL veritabanında, KVKK kapsamında saklanır. XSLT dosyaları statik olarak GitHub Pages üzerinden sunulur.',
     },
 ];
+
+const DOC_TYPES = [
+    { label: 'e-Fatura', code: '01', a: '#3b82f6' },
+    { label: 'e-Arşiv', code: '02', a: '#8b5cf6' },
+    { label: 'e-İrsaliye', code: '03', a: '#0ea5e9' },
+    { label: 'e-İhracat', code: '04', a: '#10b981' },
+    { label: 'e-Mikro İhracat', code: '05', a: '#22d3ee' },
+    { label: 'e-SMM', code: '06', a: '#ec4899' },
+    { label: 'e-Müstahsil', code: '07', a: '#84cc16' },
+    { label: 'e-Bilet', code: '08', a: '#f97316' },
+    { label: 'e-Makbuz', code: '09', a: '#14b8a6' },
+];
+
+/** Başlıkta belge türleri arasında dönen kelime. */
+const RotatingDocType: React.FC = () => {
+    const [i, setI] = useState(0);
+    useEffect(() => {
+        if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+        const t = window.setInterval(() => setI(n => (n + 1) % DOC_TYPES.length), 2200);
+        return () => window.clearInterval(t);
+    }, []);
+    const dt = DOC_TYPES[i];
+    return (
+        <span data-rotating-doctype style={{ display: 'inline-block', whiteSpace: 'nowrap' }}>
+            <style>{`@keyframes edesign-word-in{from{opacity:0;transform:translateY(0.35em)}to{opacity:1;transform:none}}`}</style>
+            <span
+                key={dt.label}
+                style={{
+                    display: 'inline-block',
+                    color: dt.a,
+                    textShadow: `0 0 40px ${dt.a}55`,
+                    animation: 'edesign-word-in 0.45s ease-out',
+                }}
+            >
+                {dt.label}
+            </span>
+        </span>
+    );
+};
 
 /**
  * Landing — "Dark Modern Bento" tarzı.
@@ -257,7 +296,8 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                             color: '#f8fafc',
                         }}
                     >
-                        e-Fatura tasarımı{' '}
+                        <RotatingDocType /> tasarımı
+                        <br />
                         <span
                             style={{
                                 background: 'linear-gradient(135deg, #38bdf8 0%, #818cf8 100%)',
@@ -594,17 +634,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                         gap: 10,
                     }}
                 >
-                    {[
-                        { label: 'e-Fatura', code: '01', a: '#3b82f6' },
-                        { label: 'e-Arşiv', code: '02', a: '#8b5cf6' },
-                        { label: 'e-İrsaliye', code: '03', a: '#0ea5e9' },
-                        { label: 'e-İhracat', code: '04', a: '#10b981' },
-                        { label: 'e-Mikro İhracat', code: '05', a: '#22d3ee' },
-                        { label: 'e-SMM', code: '06', a: '#ec4899' },
-                        { label: 'e-Müstahsil', code: '07', a: '#84cc16' },
-                        { label: 'e-Bilet', code: '08', a: '#f97316' },
-                        { label: 'e-Makbuz', code: '09', a: '#14b8a6' },
-                    ].map((dt) => (
+                    {DOC_TYPES.map((dt) => (
                         <button
                             type="button"
                             key={dt.code}
