@@ -370,7 +370,11 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
 
             {error && <div style={{ marginTop: 14, color: '#fca5a5', fontSize: 13 }}>{error}</div>}
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 24 }}>
+            <div data-wizard-footer style={{
+                display: 'flex', justifyContent: 'space-between', marginTop: 24,
+                position: 'sticky', bottom: 0, zIndex: 5, padding: '14px 0 12px',
+                background: 'linear-gradient(180deg, rgba(15,23,42,0) 0%, #111a2e 28%)',
+            }}>
                 <button type="button" data-wizard-back disabled={step === 0} onClick={() => { setError(null); setStep(s => Math.max(0, s - 1)); }}
                     style={{ padding: '10px 18px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.12)', background: 'transparent', color: step === 0 ? '#475569' : '#cbd5e1', cursor: step === 0 ? 'default' : 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'inherit' }}>
                     <ArrowLeft size={16} /> Geri

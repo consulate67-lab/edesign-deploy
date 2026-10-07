@@ -167,12 +167,11 @@ export const Selection: React.FC<SelectionProps> = ({ onSelect, onLogout, onSele
     };
 
     return (
-        <div style={{
-            minHeight: '100vh',
+        <div data-selection-scroll style={{
+            height: '100vh',
+            overflowY: 'auto',
             width: '100%',
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
             background: '#0f172a',
             fontFamily: 'Inter, sans-serif',
             color: 'white',
@@ -329,6 +328,7 @@ export const Selection: React.FC<SelectionProps> = ({ onSelect, onLogout, onSele
             <div style={{
                 width: '100%',
                 maxWidth: '1000px',
+                margin: 'auto',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center'

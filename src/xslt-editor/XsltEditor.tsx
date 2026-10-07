@@ -31,7 +31,7 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import Editor from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
 import {
-    ArrowLeft, Save, Download, ChevronDown, FileCode, FileCode2,
+    ArrowLeft, Save, Download, FileCode2,
     AlertCircle, Eye, RefreshCw, CheckCircle2, Sparkles, Search, ZoomIn, ZoomOut,
     PanelLeftClose, PanelLeftOpen, X, Lock, Undo2, Redo2,
     Image as ImageIcon, Type, Table2, TextCursorInput, Calculator, Plus, Columns3, Wallpaper, QrCode,
@@ -785,7 +785,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     // ------------------------------------------------------------------------
     // State
     // ------------------------------------------------------------------------
-    const [moduleId, setModuleId] = useState<string>(initialModuleId);
+    const [moduleId] = useState<string>(initialModuleId);
     const [xsltContent, setXsltContent] = useState<string>('');
     const [xmlContent, setXmlContent] = useState<string>(initialXml || SAMPLE_XML);
     const [activeTab] = useState<'xslt' | 'xml'>('xslt');
@@ -808,7 +808,6 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const [iframeLoadCount, setIframeLoadCount] = useState(0);
     const [renderDurationMs, setRenderDurationMs] = useState<number>(0);
     const [isRendering, setIsRendering] = useState<boolean>(false);
-    const [moduleMenuOpen, setModuleMenuOpen] = useState<boolean>(false);
     const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
     const [saveMessage, setSaveMessage] = useState<string>('');
 
@@ -1224,21 +1223,6 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             throw e;
         }
     }, [design, moduleId, xmlContent, downloadXslt, resetHistory]);
-
-    // ------------------------------------------------------------------------
-    // Module dropdown kapat (dış tıklama)
-    // ------------------------------------------------------------------------
-    useEffect(() => {
-        if (!moduleMenuOpen) return;
-        const handler = (e: MouseEvent) => {
-            const target = e.target as HTMLElement;
-            if (!target.closest('[data-module-menu]')) {
-                setModuleMenuOpen(false);
-            }
-        };
-        document.addEventListener('mousedown', handler);
-        return () => document.removeEventListener('mousedown', handler);
-    }, [moduleMenuOpen]);
 
     // ------------------------------------------------------------------------
     // Sprint 14 Aşama 1 — XSLT alanları 3-gruplu liste (snippet gallery kaldırıldı)
@@ -2578,71 +2562,6 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                     }}
                 >
                     {docName}
-                </div>
-
-                {/* Modül dropdown */}
-                <div data-module-menu style={{ position: 'relative' }}>
-                    <button
-                        onClick={() => setModuleMenuOpen(!moduleMenuOpen)}
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            padding: '6px 12px',
-                            background: 'rgba(16, 185, 129, 0.12)',
-                            border: '1px solid rgba(16, 185, 129, 0.4)',
-                            borderRadius: '6px',
-                            color: '#34d399',
-                            fontSize: '13px',
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                        }}
-                    >
-                        <FileCode size={14} />
-                        {currentModule.label}
-                        <ChevronDown size={14} />
-                    </button>
-                    {moduleMenuOpen && (
-                        <div
-                            style={{
-                                position: 'absolute',
-                                top: 'calc(100% + 4px)',
-                                left: 0,
-                                minWidth: '220px',
-                                background: '#1e293b',
-                                border: '1px solid #334155',
-                                borderRadius: '6px',
-                                boxShadow: '0 12px 32px rgba(0,0,0,0.5)',
-                                padding: '4px',
-                                zIndex: 50,
-                            }}
-                        >
-                            {MODULES.map(m => (
-                                <div
-                                    key={m.id}
-                                    onClick={() => { setModuleId(m.id); setModuleMenuOpen(false); }}
-                                    style={{
-                                        padding: '8px 12px',
-                                        borderRadius: '4px',
-                                        cursor: 'pointer',
-                                        background: m.id === moduleId ? 'rgba(99, 102, 241, 0.2)' : 'transparent',
-                                        color: m.id === moduleId ? '#a5b4fc' : '#cbd5e1',
-                                        fontSize: '13px',
-                                        fontWeight: m.id === moduleId ? 700 : 500,
-                                        transition: 'background 0.1s',
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        if (m.id !== moduleId) e.currentTarget.style.background = 'rgba(99, 102, 241, 0.08)';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        if (m.id !== moduleId) e.currentTarget.style.background = 'transparent';
-                                    }}
-                                >
-                                    {m.label}
-                                </div>
-                            ))}
-                        </div>
-                    )}
                 </div>
 
                 {/* Geri al / ileri al */}
