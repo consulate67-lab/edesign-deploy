@@ -1,4 +1,4 @@
-import { FAMILY_INFO, type DocFamily, type WizardDocType } from './docTypes';
+import { FAMILY_INFO, EFATURA_PROFILE_IDS, type DocFamily, type WizardDocType } from './docTypes';
 
 export type CheckLevel = 'ok' | 'warn' | 'error';
 export interface Check { level: CheckLevel; text: string }
@@ -212,6 +212,77 @@ function despatchRuleChecks(root: Element, profile: string, typeCode: string): s
     return issues;
 }
 
+const YTB_EARSIV_TYPES = ['YTBSATIS', 'YTBISTISNA', 'YTBIADE', 'YTBTEVKIFAT', 'YTBTEVKIFATIADE'];
+const IADE_PROFILES = ['TEMELFATURA', 'EARSIVFATURA', 'ILAC_TIBBICIHAZ', 'YATIRIMTESVIK', 'IDIS', 'KAMU'];
+const KDV_ZERO_OK_TYPES = ['IADE', 'YTBIADE', 'IHRACKAYITLI', 'OZELMATRAH', 'SGK', 'KONAKLAMAVERGISI'];
+const GUID_RE = /^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$/;
+
+/** GİB e-Fatura / e-Arşiv şematron kuralları (UBL-TR 1.2.1, e-Fatura Paketi). */
+function invoiceRuleChecks(root: Element, profile: string, typeCode: string): string[] {
+    const issues: string[] = [];
+    const p = profile.toUpperCase();
+    const t = typeCode.toUpperCase();
+    const id = childText(root, 'ID');
+    if (id && !DOC_ID_RE.test(id)) issues.push(`Belge no (${id}) 16 karakter olmalı: 3 harf/rakam seri + yıl + 9 haneli sıra.`);
+
+    const ids = (party: string) => pathAll(root, `${party}/Party/PartyIdentification/ID`);
+    const scheme = (e: Element) => (e.getAttribute('schemeID') || '').toUpperCase();
+    for (const [party, label] of [['AccountingSupplierParty', 'Satıcı'], ['AccountingCustomerParty', 'Alıcı']] as const) {
+        if (!ids(party).some(e => ['VKN', 'TCKN'].includes(scheme(e)) && e.textContent?.trim())) {
+            issues.push(`${label} için schemeID'si VKN veya TCKN olan kimlik numarası yok; karekod içeriği bu alandan üretilir.`);
+        }
+    }
+
+    const currency = childText(root, 'DocumentCurrencyCode').toUpperCase();
+    if (currency && currency !== 'TRY' && !pathText(root, 'PricingExchangeRate/CalculationRate')) {
+        issues.push(`Para birimi ${currency}; TRY dışındaki belgelerde döviz kuru (PricingExchangeRate/CalculationRate) zorunlu.`);
+    }
+    if (t === 'IADE' && p && !IADE_PROFILES.includes(p)) {
+        issues.push(`IADE tipi ${p} senaryosunda kullanılamaz; geçerli senaryolar: ${IADE_PROFILES.join(', ')}.`);
+    }
+    if (!KDV_ZERO_OK_TYPES.includes(t)) {
+        const zeroKdv = pathAll(root, 'TaxTotal/TaxSubtotal').filter(s =>
+            pathText(s, 'TaxCategory/TaxScheme/TaxTypeCode') === '0015' && Number(pathText(s, 'TaxAmount')) === 0);
+        if (zeroKdv.some(s => !pathText(s, 'TaxCategory/TaxExemptionReason'))) {
+            issues.push('KDV tutarı 0 olan satırda muafiyet / istisna sebebi (TaxExemptionReason) zorunlu.');
+        }
+    }
+
+    const lines = pathAll(root, 'InvoiceLine');
+    const lineIds = (line: Element) => pathAll(line, 'Item/AdditionalItemIdentification/ID').map(scheme);
+    if (t === 'TEKNOLOJIDESTEK') {
+        if (!ids('AccountingCustomerParty').some(e => scheme(e) === 'TCKN')) issues.push('TEKNOLOJIDESTEK faturasında alıcı kimliği TCKN olmalı.');
+        if (lines.some(l => !lineIds(l).some(s => s === 'TELEFON' || s === 'TABLET_PC'))) {
+            issues.push('TEKNOLOJIDESTEK faturasında her kalemde TELEFON (IMEI) veya TABLET_PC numarası zorunlu.');
+        }
+    }
+    if (t === 'SARJ' || t === 'SARJANLIK') {
+        const plates = ids('AccountingCustomerParty').filter(e => scheme(e) === 'PLAKA');
+        if (plates.length !== 1 || !/^[A-Z0-9_-]+$/.test(plates[0].textContent?.trim() ?? '')) {
+            issues.push(`${t} faturasında alıcı altında 1 adet geçerli araç plakası (schemeID PLAKA) zorunlu.`);
+        }
+        const periods = pathAll(root, 'InvoicePeriod');
+        if (!periods.length || periods.some(x => ['StartDate', 'StartTime', 'EndDate', 'EndTime'].some(f => !pathText(x, f)))) {
+            issues.push(`${t} faturasında şarj başlangıç/bitiş tarih ve saati (InvoicePeriod) zorunlu.`);
+        }
+        if (t === 'SARJ' && !pathAll(root, 'AdditionalDocumentReference').some(r =>
+            pathAll(r, 'ID').some(e => e.getAttribute('schemeID') === 'ESURaporID' && GUID_RE.test(e.textContent?.trim() ?? '')) && pathText(r, 'IssueDate'))) {
+            issues.push('SARJ faturasında ESÜ rapor ID (GUID) ve tarihi (AdditionalDocumentReference, schemeID ESURaporID) zorunlu.');
+        }
+        if (t === 'SARJANLIK' && lines.some(l => !pathText(l, 'Item/ItemInstance/SerialID'))) {
+            issues.push('SARJANLIK faturasında her kalemde seri numarası (Item/ItemInstance/SerialID) zorunlu.');
+        }
+    }
+    if (p === 'YATIRIMTESVIK' || (p === 'EARSIVFATURA' && YTB_EARSIV_TYPES.includes(t))) {
+        const ytb = pathAll(root, 'ContractDocumentReference/ID').find(e => e.getAttribute('schemeID') === 'YTBNO')?.textContent?.trim() ?? '';
+        if (!/^[0-9]{6}$/.test(ytb)) issues.push('Yatırım teşvik faturasında 6 haneli yatırım teşvik belge numarası (YTBNO) zorunlu.');
+        if (lines.some(l => !pathText(l, 'Item/CommodityClassification/ItemClassificationCode'))) {
+            issues.push('Yatırım teşvik faturasında her kalemde harcama tipi (ItemClassificationCode) zorunlu.');
+        }
+    }
+    return issues;
+}
+
 /** GİB e-İrsaliye Yanıtı kuralları. */
 function receiptAdviceRuleChecks(root: Element): string[] {
     const issues: string[] = [];
@@ -279,12 +350,14 @@ export function validateXml(text: string, docType: WizardDocType, xslt: string |
     info.push(...rows.filter(([, v]) => v));
     if (!lines) checks.push({ level: 'warn', text: 'Belgede kalem (satır) bulunamadı; satır tablosu boş görünür.' });
 
+    const ublInvoice = docType.family === 'invoice' && (docType.profileIds ?? []).some(p => p === 'EARSIVFATURA' || EFATURA_PROFILE_IDS.includes(p));
     const gibIssues = docType.family === 'despatch' ? despatchRuleChecks(root, profile, typeCode)
-        : docType.family === 'receiptAdvice' ? receiptAdviceRuleChecks(root) : [];
+        : docType.family === 'receiptAdvice' ? receiptAdviceRuleChecks(root)
+        : ublInvoice ? invoiceRuleChecks(root, profile, typeCode) : [];
     if (gibIssues.length) {
         checks.push(...gibIssues.map(text => ({ level: 'warn' as const, text: `GİB kuralı: ${text}` })));
-    } else if (despatchLike) {
-        checks.push({ level: 'ok', text: 'GİB e-İrsaliye zorunlu alan kontrolleri geçti' });
+    } else if (despatchLike || ublInvoice) {
+        checks.push({ level: 'ok', text: despatchLike ? 'GİB e-İrsaliye zorunlu alan kontrolleri geçti' : 'GİB fatura kural kontrolleri geçti' });
     }
 
     if (xslt) {

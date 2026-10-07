@@ -133,6 +133,9 @@ export const WIZARD_DOC_TYPES: WizardDocType[] = [
             gibSample('YTB_Iade_EArsiv.xml', 'Yatırım teşvik iade', 'EARSIVFATURA · YTBIADE'),
             gibSample('YTB_IadeIstisna_EArsiv.xml', 'Yatırım teşvik istisna iade', 'EARSIVFATURA · YTBIADE'),
             gibSample('TEKNOLOJI_DESTEK.xml', 'Teknoloji destek (telefon / tablet)', 'EARSIVFATURA · TEKNOLOJIDESTEK'),
+            gibSample('EArsiv_InternetSatis.xml', 'İnternet satışı (taşıyıcı + ödeme, türetilmiş)', 'EARSIVFATURA · SATIS'),
+            gibSample('EArsiv_SARJ.xml', 'Elektrikli araç şarj (türetilmiş)', 'EARSIVFATURA · SARJ'),
+            gibSample('EArsiv_SARJANLIK.xml', 'Anlık şarj (türetilmiş)', 'EARSIVFATURA · SARJANLIK'),
         ],
         defaults: [
             {

@@ -229,6 +229,14 @@ const INVOICE_FIELDS = build('Invoice', [
         ['Teslimat İli', 'Delivery/DeliveryAddress/CityName'],
         ['Teslimat Ülkesi', 'Delivery/DeliveryAddress/Country/Name'],
     ]],
+    ['İnternet Satışı (e-Arşiv)', [
+        ['Gönderiyi Taşıyan Unvanı', 'Delivery/CarrierParty/PartyName/Name'],
+        ['Gönderiyi Taşıyan Adı', 'Delivery/CarrierParty/Person/FirstName'],
+        ['Gönderiyi Taşıyan Soyadı', 'Delivery/CarrierParty/Person/FamilyName'],
+        ['Gönderiyi Taşıyan VKN/TCKN', 'Delivery/CarrierParty/PartyIdentification/ID'],
+        ['Gönderim Tarihi', 'Delivery/Despatch/ActualDespatchDate', 'date'],
+        ['Gönderim Saati', 'Delivery/Despatch/ActualDespatchTime'],
+    ]],
     ['Satır (Kalem)', [
         ['Ürün / Hizmet Adı', 'InvoiceLine/Item/Name'],
         ['Ürün Açıklaması', 'InvoiceLine/Item/Description'],

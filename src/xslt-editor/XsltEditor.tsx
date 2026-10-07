@@ -34,8 +34,9 @@ import {
     ArrowLeft, Save, Download, ChevronDown, FileCode, FileCode2,
     AlertCircle, Eye, RefreshCw, CheckCircle2, Sparkles, Search, ZoomIn, ZoomOut,
     PanelLeftClose, PanelLeftOpen, X, Lock,
-    Image as ImageIcon, Type, Table2, TextCursorInput, Calculator, Plus, Columns3, Wallpaper,
+    Image as ImageIcon, Type, Table2, TextCursorInput, Calculator, Plus, Columns3, Wallpaper, QrCode,
 } from 'lucide-react';
+import { karekodSnippet, hasQrLibrary } from './karekod';
 import {
     getCatalog, docRootOf, detectInXslt, xsltLocalNameSet, bindingLabel, contextPathResolver, evaluateField,
     ensureDecimalFormat, isInLineContext, isLineField, fieldSnippet, fieldContent, formulaSnippet, formulaContent, formulaAttrs,
@@ -1377,7 +1378,11 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         console.log(`[XSLTEditor] Obje eklendi: ${what} → ${target ? `<${target.el.tagName.toLowerCase()}> ${target.position === 'inside' ? 'içine' : 'altına'}` : 'sayfa sonu'}`);
     }, []);
 
-    const insertObject = useCallback((type: XsltInsertType | 'formula', target: InsertTarget | null) => {
+    const insertObject = useCallback((type: XsltInsertType | 'formula' | 'karekod', target: InsertTarget | null) => {
+        if (type === 'karekod') {
+            insertSnippet((id) => karekodSnippet(id, !hasQrLibrary(xsltContentRef.current)), target, 'karekod');
+            return;
+        }
         if (type !== 'formula') {
             insertSnippet((id) => XSLT_ELEMENT_SNIPPETS[type](id), target, type);
             return;
@@ -2197,7 +2202,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             if (!e.relatedTarget) markDropTarget(null);
         };
         const dropHandler = (e: DragEvent) => {
-            const type = e.dataTransfer?.getData('text/x-xslt-element') as XsltInsertType | 'formula' | '';
+            const type = e.dataTransfer?.getData('text/x-xslt-element') as XsltInsertType | 'formula' | 'karekod' | '';
             const fieldKey = e.dataTransfer?.getData('text/x-xslt-field') ?? '';
             markDropTarget(null);
             if (!type && !fieldKey) return;
@@ -3244,6 +3249,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             { type: 'table', label: 'Tablo', Icon: Table2, color: '#fcd34d' },
                             { type: 'formula', label: 'Formül', Icon: Calculator, color: '#f9a8d4' },
                             { type: 'input', label: 'Kutu', Icon: TextCursorInput, color: '#fca5a5' },
+                            { type: 'karekod', label: 'Karekod', Icon: QrCode, color: '#93c5fd' },
                         ] as const).map(({ type, label, Icon, color }) => (
                             <div
                                 key={type}
@@ -3589,13 +3595,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         const objKind = isObj ? el?.getAttribute('data-obj-kind') : null;
                         const isFormula = objKind === 'formula';
                         const isField = objKind === 'field';
+                        const isKarekod = objKind === 'karekod';
                         const bindingIndex = sel.locator?.kind === 'bind'
                             ? sel.locator.index
                             : (b ? xsltInstrumented.bindings.indexOf(b) : -1);
                         const kindDisplay = kind === 'dropdown' ? 'Dinamik Veri'
                             : kind === 'static' ? 'Statik Metin'
                             : kind === 'element' ? 'Element Yapısı'
-                            : isObj ? `Eklenen Obje · ${isFormula ? 'Formül' : isField ? 'Veri Alanı' : isImg ? 'Resim' : isTable ? 'Tablo' : isInput ? 'Input' : 'Metin'}`
+                            : isObj ? `Eklenen Obje · ${isFormula ? 'Formül' : isField ? 'Veri Alanı' : isKarekod ? 'Karekod' : isImg ? 'Resim' : isTable ? 'Tablo' : isInput ? 'Input' : 'Metin'}`
                             : isImg ? 'Resim' : 'Önizleme Öğesi';
                         const kindColor = kind === 'dropdown' ? '#a5b4fc'
                             : kind === 'static' ? '#6ee7b7'
@@ -3774,7 +3781,15 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                         </>
                                     )}
 
-                                    {isObj && el && !isImg && !isInput && !isTable && !isFormula && !isField && (
+                                    {isObj && el && isKarekod && (
+                                        <>
+                                            {sectionTitle('Karekod', '#93c5fd')}
+                                            <FieldText key={fieldKey('qr-size')} label="Boyut (genişlik = yükseklik)" currentValue={el.style.width || '120px'} onChange={(v) => { handleStyleChange('width', v); handleStyleChange('height', v); }} />
+                                            {noteBox('GİB Karekod Standardı (v1.2) içeriği belgeden otomatik üretilir: fatura ve e-Arşivde VKN/TCKN, senaryo, tip, tarih, no, ETTN, tutarlar ve KDV oranları; irsaliyede sevk tarihi/saati, taşıyıcı VKN ve plaka. Karekod belgenin sağ üst köşesinde yer almalıdır. Boyut değişikliği önizleme yenilenince uygulanır.', 'info')}
+                                        </>
+                                    )}
+
+                                    {isObj && el && !isImg && !isInput && !isTable && !isFormula && !isField && !isKarekod && (
                                         <>
                                             {sectionTitle('Metin İçeriği', '#6ee7b7')}
                                             <FieldTextArea key={fieldKey('text')} label="Metin" currentValue={el.innerText} onChange={(v) => handleContentChange(textToMarkup(v))} />

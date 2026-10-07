@@ -1,3 +1,12 @@
+/**
+ * XMLSerializer script gövdesindeki `<`, `>`, `&` karakterlerini kaçışlar; HTML
+ * olarak yüklenince script çalışmaz (ör. GİB şablonlarındaki karekod). Script
+ * içeriği HTML'de ham metindir, kaçışlar geri alınır.
+ */
+export const restoreScriptText = (html: string): string =>
+    html.replace(/(<script\b[^>]*>)([\s\S]*?)(<\/script>)/gi, (_, open: string, body: string, close: string) =>
+        open + body.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&') + close);
+
 export const transformXmlWithXslt = (xmlString: string, xsltString: string): string => {
     // DEBUG LOG
     console.log('🔄 transformXmlWithXslt INPUT (First 100 chars):', xsltString ? xsltString.substring(0, 100) : 'NULL/UNDEFINED');
@@ -29,12 +38,12 @@ export const transformXmlWithXslt = (xmlString: string, xsltString: string): str
             console.warn('transformToDocument returned null, trying transformToFragment...');
             const resultFragment = processor.transformToFragment(xmlDoc, document);
             if (resultFragment) {
-                return serializer.serializeToString(resultFragment);
+                return restoreScriptText(serializer.serializeToString(resultFragment));
             }
             throw new Error('XSLT transformation produced null result. Possible causes: Invalid XSLT syntax, missing templates, or runtime errors (e.g. format-number pattern mismatch).');
         }
 
-        return serializer.serializeToString(resultDoc);
+        return restoreScriptText(serializer.serializeToString(resultDoc));
     } catch (error) {
         console.error("XSLT Transformation Error:", error);
 
