@@ -2,7 +2,7 @@
  * Tasarım sihirbazı belge türleri. Her tür bir UBL kök elemanına (family)
  * bağlıdır; kullanıcının yüklediği XSLT/XML bu aileye uymak zorundadır.
  */
-export type DocFamily = 'invoice' | 'despatch' | 'receiptAdvice' | 'receipt';
+export type DocFamily = 'invoice' | 'despatch' | 'receiptAdvice' | 'receipt' | 'creditNote' | 'ebiletReport' | 'ebiletPassengerList';
 
 export interface DefaultXsltOption {
     id: string;
@@ -27,6 +27,8 @@ export interface WizardDocType {
     sampleXml: string;
     /** GİB resmi paketlerindeki (UBL-TR 1.2.1, e-Fatura Paketi) örnek belgeler. */
     officialSamples?: OfficialSample[];
+    /** Örnek belgelerin kaynağını anlatan kısa not (varsayılan: UBL-TR / e-Fatura paketi). */
+    officialNote?: string;
     defaults: DefaultXsltOption[];
 }
 
@@ -40,6 +42,8 @@ export interface OfficialSample {
 
 const gibSample = (name: string, label: string, tag: string): OfficialSample =>
     ({ file: `ebelge/samples/gib/${name}`, label, tag });
+const biletSample = (name: string, label: string, tag: string): OfficialSample =>
+    ({ file: `ebelge/samples/bilet/${name}`, label, tag });
 
 /** GİB kod listesi (UBL-TR_Codelist.xml, e-Fatura Paketi 29) — ProfileIDType. */
 export const EFATURA_PROFILE_IDS = [
@@ -60,6 +64,10 @@ export const FAMILY_INFO: Record<DocFamily, { root: string; ns: string; label: s
     despatch: { root: 'DespatchAdvice', ns: 'urn:oasis:names:specification:ubl:schema:xsd:DespatchAdvice-2', label: 'İrsaliye (DespatchAdvice)' },
     receiptAdvice: { root: 'ReceiptAdvice', ns: 'urn:oasis:names:specification:ubl:schema:xsd:ReceiptAdvice-2', label: 'İrsaliye Yanıtı (ReceiptAdvice)' },
     receipt: { root: 'Receipt', ns: 'urn:oasis:names:specification:ubl:schema:xsd:Receipt-2', label: 'Makbuz (Receipt)' },
+    creditNote: { root: 'CreditNote', ns: 'urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2', label: 'Müstahsil Makbuzu (CreditNote)' },
+    // e-Bilet paketi (ebilet.xsd): iki kök aynı namespace'i paylaşır, aile kök adıyla ayrılır.
+    ebiletReport: { root: 'eBilet', ns: 'http://ebilet.efatura.gov.tr', label: 'e-Bilet Raporu (eBilet)' },
+    ebiletPassengerList: { root: 'eYolcuListesi', ns: 'http://ebilet.efatura.gov.tr', label: 'e-Yolcu Listesi (eYolcuListesi)' },
 };
 
 const inline = (key: string) => async () => (await import('../xsltContent')).getInlineXslt(key) ?? '';
@@ -195,29 +203,85 @@ export const WIZARD_DOC_TYPES: WizardDocType[] = [
     },
     {
         id: 'smm', label: 'e-SMM', description: 'Serbest meslek makbuzu', color: '#14b8a6',
-        family: 'invoice', profileIds: ['EARSIVBELGE'],
+        family: 'invoice', profileIds: ['EARSIVBELGE'], typeCodes: ['SERBESTMESLEKMAKBUZU'],
         sampleXml: 'ebelge/samples/e-SMM-TEMEL.xml',
+        officialSamples: [
+            gibSample('ESMM-Stopaj-KDV.xml', 'Avukat, stopaj + KDV (türetilmiş)', 'EARSIVBELGE · GV stopajı %20'),
+            gibSample('ESMM-KDV-Tevkifat.xml', 'KDV tevkifatlı (türetilmiş)', 'EARSIVBELGE · 602 tevkifat 9/10'),
+            gibSample('ESMM-Nihai-Tuketici.xml', 'Mükellef olmayan hasta, kartla tahsilat (türetilmiş)', 'EARSIVBELGE · TCKN, stopajsız'),
+            gibSample('ESMM-Doviz-Istisna.xml', 'Döviz, hizmet ihracatı istisnası (türetilmiş)', 'EARSIVBELGE · USD · 302'),
+        ],
         defaults: [
+            {
+                id: 'gib-smm-karekod', label: 'e-SMM (GİB karekod standardı)',
+                description: 'Brüt/net ücret, stopaj, KDV tevkifatı ve e-SMM karekodu', moduleId: 'smm', load: inline('gib/v2/e-SMM-Sablon.xslt'),
+            },
             gibOption('smm'),
-            { id: 'smm', label: 'e-SMM Şablonu', description: 'Stopaj ve hizmet bilgili', moduleId: 'smm', load: inline('community/hzkucuk-eFatura-smm.xslt') },
+            { id: 'smm', label: 'e-SMM Topluluk Şablonu', description: 'Fatura düzeninde topluluk şablonu (hzkucuk)', moduleId: 'smm', load: inline('community/hzkucuk-eFatura-smm.xslt') },
         ],
     },
     {
         id: 'mustahsil', label: 'e-Müstahsil', description: 'Müstahsil makbuzu', color: '#84cc16',
-        family: 'invoice', profileIds: ['EARSIVBELGE'],
-        sampleXml: 'ebelge/samples/e-Mustahsil-TEMEL.xml',
+        family: 'creditNote', profileIds: ['EARSIVBELGE'], typeCodes: ['MUSTAHSILMAKBUZ'],
+        sampleXml: 'ebelge/samples/gib/Mustahsil-Kesintili.xml',
+        officialSamples: [
+            gibSample('Mustahsil-Kilavuz.xml', 'Kılavuz V1.1 örneği: büyükbaş hayvan (türetilmiş)', 'EARSIVBELGE · GV stopajı %2'),
+            gibSample('Mustahsil-Kesintili.xml', 'Hububat, tüm kesintiler (türetilmiş)', 'EARSIVBELGE · stopaj, borsa, mera, SGK'),
+            gibSample('Mustahsil-Hayvansal.xml', 'Çiğ süt, dönemlik alım (türetilmiş)', 'EARSIVBELGE · stopaj %1, SGK'),
+        ],
         defaults: [
-            gibOption('mustahsil'),
-            { id: 'mustahsil', label: 'e-Müstahsil Şablonu', description: 'Müstahsil / stopaj bilgili', moduleId: 'mustahsil', load: inline('community/hzkucuk-eFatura-mustahsil.xslt') },
+            {
+                id: 'gib-mustahsil-makbuzu', label: 'e-Müstahsil Makbuzu (GİB kılavuzu V1.1)',
+                description: 'CreditNote yapısı, kesintiler, SMS doğrulama ve e-MM karekodu', moduleId: 'mustahsil', load: inline('gib/v2/e-Mustahsil-Makbuzu.xslt'),
+            },
         ],
     },
     {
         id: 'bilet', label: 'e-Bilet', description: 'Yolcu / etkinlik bileti', color: '#f97316',
         family: 'invoice',
         sampleXml: 'ebelge/samples/e-Bilet-TEMEL.xml',
+        // GİB e-Bilet için UBL yayımlamaz; görsel bilet UBL Invoice taşıyıcısıyla tasarlanır.
+        officialSamples: [
+            biletSample('e-Bilet-Karayolu.xml', 'Otobüs bileti, gider gösteren mükellefli (türetilmiş)', 'Karayolu · 509 IV.7.3.1.1'),
+            biletSample('e-Bilet-Havayolu.xml', 'Uçak bileti + ek bagaj, IATA 13 haneli no (türetilmiş)', 'Havayolu · 509 IV.7.3.2.1'),
+            biletSample('e-Bilet-Etkinlik.xml', 'Tiyatro bileti, etkinlik yeri ve koltuk (türetilmiş)', 'Etkinlik · 509 IV.7.3.3.1'),
+            biletSample('e-Bilet-Iade.xml', 'Ücret iadesi e-Bileti (türetilmiş)', 'Havayolu · IADE'),
+        ],
+        officialNote: 'GİB e-Bilet için UBL yayımlamaz; örnekler 509 s. VUK GT IV.7.3 zorunlu bilgileriyle UBL-TR yapısında türetildi.',
         defaults: [
+            {
+                id: 'bilet-509', label: 'e-Bilet (509 zorunlu bilgiler)',
+                description: 'Yolcu, seyahat / etkinlik zamanı ve yeri, hizmetin nevi, ödeme türü', moduleId: 'bilet', load: inline('ebilet/ebilet-gorsel.xslt'),
+            },
             gibOption('bilet'),
             { id: 'bilet', label: 'e-Bilet Şablonu', description: 'Yolcu, sefer ve koltuk bilgili', moduleId: 'bilet', load: inline('community/hzkucuk-eFatura-bilet.xslt') },
+        ],
+    },
+    {
+        id: 'bilet-rapor', label: 'e-Bilet Raporu', description: 'Aylık GİB e-Bilet raporu (eBilet XML)', color: '#ea580c',
+        family: 'ebiletReport',
+        sampleXml: 'ebelge/samples/gib/eBilet-Rapor-Karayolu.xml',
+        officialSamples: [
+            gibSample('eBilet-Rapor-Karayolu.xml', 'Otobüs / feribot: açık bilet, iptal, tazminat (kılavuzdan derlenmiş)', 'ebilet.xsd · 16 haneli bilet no'),
+            gibSample('eBilet-Rapor-Havayolu.xml', 'Havayolu: döviz, mil, bagaj, iade + XAdES-A (kılavuzdan derlenmiş)', 'ebilet.xsd · 13 haneli bilet no'),
+            gibSample('eBilet-Rapor-Etkinlik.xml', 'Sinema, tiyatro, maç: eğlence vergisi, bedelsiz (kılavuzdan derlenmiş)', 'ebilet.xsd · etkinlikZamani'),
+        ],
+        officialNote: 'e-Bilet paketinde örnek XML yok; örnekler teknik kılavuzlardan derlendi ve ebilet.xsd ile doğrulandı.',
+        defaults: [
+            { id: 'bilet-rapor', label: 'e-Bilet Raporu Görünümü', description: 'Dönem özeti, bilet ve iptal tabloları', moduleId: 'bilet-rapor', load: inline('ebilet/ebilet-rapor.xslt') },
+        ],
+    },
+    {
+        id: 'bilet-yolcu', label: 'e-Yolcu Listesi', description: 'Sefer yolcu listesi (eYolcuListesi XML)', color: '#c2410c',
+        family: 'ebiletPassengerList',
+        sampleXml: 'ebelge/samples/gib/eYolcuListesi-YurtIci.xml',
+        officialSamples: [
+            gibSample('eYolcuListesi-YurtIci.xml', 'Yurt içi otobüs seferi, taşıtı işleten bilgili (kılavuzdan derlenmiş)', 'ebilet.xsd · TCKN'),
+            gibSample('eYolcuListesi-Uluslararasi.xml', 'Uluslararası sefer, pasaportlu yolcular (kılavuzdan derlenmiş)', 'ebilet.xsd · pasaport no'),
+        ],
+        officialNote: 'e-Bilet paketinde örnek XML yok; örnekler e-Yolcu Listesi kılavuzundan derlendi ve ebilet.xsd ile doğrulandı.',
+        defaults: [
+            { id: 'bilet-yolcu', label: 'e-Yolcu Listesi Görünümü', description: 'Sefer, koltuk ve yolcu tablosu', moduleId: 'bilet-yolcu', load: inline('ebilet/ebilet-yolcu-listesi.xslt') },
         ],
     },
 ];

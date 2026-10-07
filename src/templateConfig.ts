@@ -126,7 +126,7 @@ export const MODULE_CONFIGS: Record<string, TemplateConfig> = {
         hasPassenger: false,
         hasService: true,
         specialFields: ['logo', 'stamp', 'bank', 'service_table', 'gross_net', 'vat_exemption', 'stoppage', 'identity_no'],
-        defaultTemplate: 'community/hzkucuk-eFatura-smm.xslt',
+        defaultTemplate: 'gib/v2/e-SMM-Sablon.xslt',
         recommendedSample: 'samples/e-SMM-TEMEL.xml',
         description: 'e-SMM — Serbest Meslek Makbuzu, hizmet bilgileri, BRÜT/Net ayrımı, KDV istisna, stopaj, TCKN mükellef.',
     },

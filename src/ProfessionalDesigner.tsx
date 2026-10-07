@@ -354,6 +354,8 @@ export const ProfessionalDesigner: React.FC<ProfessionalDesignerProps> = ({ temp
             'smm': 'e-SMM-TEMEL.xml',
             'mustahsil': 'e-Mustahsil-TEMEL.xml',
             'bilet': 'e-Bilet-TEMEL.xml',
+            'bilet-rapor': 'gib/eBilet-Rapor-Karayolu.xml',
+            'bilet-yolcu': 'gib/eYolcuListesi-YurtIci.xml',
             'makbuz': 'e-Makbuz-TEMEL.xml',
             // Legacy alias (eski ID'ler — geriye uyumluluk)
             'mikro': 'e-Arsiv-TEMEL.xml',

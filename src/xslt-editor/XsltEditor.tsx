@@ -60,7 +60,7 @@ import { addTestWatermark, stripTestWatermark, stripLeadingBom } from './utils/t
 import { ApproveDialog } from './ApproveDialog';
 
 /** Satır formülü kolonunun varsayılan alanı (ilk bulunan). */
-const LINE_FORMULA_KEYS = ['Invoice/InvoiceLine/LineExtensionAmount', 'DespatchAdvice/DespatchLine/DeliveredQuantity', 'ReceiptAdvice/ReceiptLine/ReceivedQuantity'];
+const LINE_FORMULA_KEYS = ['Invoice/InvoiceLine/LineExtensionAmount', 'DespatchAdvice/DespatchLine/DeliveredQuantity', 'ReceiptAdvice/ReceiptLine/ReceivedQuantity', 'CreditNote/CreditNoteLine/LineExtensionAmount', 'eBilet/bilet/tutar', 'eYolcuListesi/yolcuListesi/koltukListesi/koltuk/tutar'];
 
 const CONTAINER_TAGS = new Set(['td', 'th', 'div', 'li', 'section', 'article', 'header', 'footer', 'main', 'aside', 'form', 'fieldset']);
 const TABLE_PARTS = new Set(['tr', 'tbody', 'thead', 'tfoot', 'colgroup', 'col', 'caption']);
@@ -130,9 +130,11 @@ const MODULES: ModuleDef[] = [
     { id: 'irsaliye-yanit', label: 'e-İrsaliye Yanıtı', inlineKey: 'gib/irsaliye-yaniti.xslt' },
     { id: 'ihracat',       label: 'e-İhracat',         inlineKey: 'community/IRPTeam-eFatura.xslt' },
     { id: 'mikro_ihracat', label: 'e-Mikro İhracat',   inlineKey: 'community/IRPTeam-eFatura.xslt' },
-    { id: 'smm',           label: 'e-SMM',             inlineKey: 'community/hzkucuk-eFatura-smm.xslt' },
-    { id: 'mustahsil',     label: 'e-Müstahsil',       inlineKey: 'community/hzkucuk-eFatura-mustahsil.xslt' },
+    { id: 'smm',           label: 'e-SMM',             inlineKey: 'gib/v2/e-SMM-Sablon.xslt' },
+    { id: 'mustahsil',     label: 'e-Müstahsil',       inlineKey: 'gib/v2/e-Mustahsil-Makbuzu.xslt' },
     { id: 'bilet',         label: 'e-Bilet',           inlineKey: 'community/hzkucuk-eFatura-bilet.xslt' },
+    { id: 'bilet-rapor',   label: 'e-Bilet Raporu',    inlineKey: 'ebilet/ebilet-rapor.xslt' },
+    { id: 'bilet-yolcu',   label: 'e-Yolcu Listesi',   inlineKey: 'ebilet/ebilet-yolcu-listesi.xslt' },
     { id: 'makbuz',        label: 'e-Makbuz',          inlineKey: 'community/hzkucuk-eFatura-makbuz.xslt' },
 
     // Sprint 9 — Antrepo profesyonel şablonlar (public/ altından, ?raw inline)

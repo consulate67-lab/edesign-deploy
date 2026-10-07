@@ -20,8 +20,13 @@ function parseXml(text: string): { doc: Document; error: string | null } {
     return { doc, error: err ? (err.textContent || 'ayrıştırma hatası').split('\n')[0].slice(0, 160) : null };
 }
 
-const familyOfNs = (uri: string | null): DocFamily | null =>
-    (Object.keys(FAMILY_INFO) as DocFamily[]).find(f => FAMILY_INFO[f].ns === uri) ?? null;
+const familiesOfNs = (uri: string | null): DocFamily[] =>
+    (Object.keys(FAMILY_INFO) as DocFamily[]).filter(f => FAMILY_INFO[f].ns === uri);
+/** e-Bilet raporu ile e-Yolcu Listesi aynı namespace'i kullanır; kök adı ayırır. */
+const familyOfRoot = (root: Element): DocFamily | null => {
+    const families = familiesOfNs(root.namespaceURI);
+    return families.find(f => FAMILY_INFO[f].root === root.localName) ?? families[0] ?? null;
+};
 
 function tryTransform(xsltDoc: Document, xmlDoc: Document): string | null {
     try {
@@ -61,8 +66,7 @@ export function validateXslt(text: string, docType: WizardDocType, sampleXml: st
     // adları (ör. irsaliye XSLT'sinde InvoiceLine) yalnızca namespace yoksa sayılır.
     const families = new Set<DocFamily>();
     for (const m of text.matchAll(/xmlns(?::[\w.-]+)?\s*=\s*["']([^"']+)["']/g)) {
-        const f = familyOfNs(m[1]);
-        if (f) families.add(f);
+        for (const f of familiesOfNs(m[1])) families.add(f);
     }
     const count = (re: RegExp) => (text.match(re) || []).length;
     const usage: Record<DocFamily, number> = {
@@ -70,9 +74,12 @@ export function validateXslt(text: string, docType: WizardDocType, sampleXml: st
         despatch: count(/\bDespatch(Advice|Line)\b/g),
         receiptAdvice: count(/\bReceiptAdvice\b|\bReceivedQuantity\b/g),
         receipt: count(/\bReceipt(Line)?\b/g),
+        ebiletReport: count(/\beBilet\b|\bodemeSekli\b|\bbiletIptal\b/g),
+        ebiletPassengerList: count(/\beYolcuListesi\b|\bkoltukNo\b|\bseferNumarasi\b/g),
+        creditNote: count(/\bCreditNote(Line)?\b/g),
     };
     const candidates = families.size ? [...families] : (Object.keys(usage) as DocFamily[]).filter(f => usage[f] > 0);
-    const primary = candidates.sort((a, b) => usage[b] - usage[a])[0] ?? null;
+    const primary = candidates.sort((a, b) => usage[b] - usage[a] || Number(b === docType.family) - Number(a === docType.family))[0] ?? null;
     const expected = FAMILY_INFO[docType.family];
     if (primary && primary !== docType.family) {
         checks.push({ level: 'error', text: `Bu XSLT ${FAMILY_INFO[primary].label} için hazırlanmış; ${docType.label} için ${expected.label} yapısında bir XSLT gerekli.` });
@@ -114,7 +121,7 @@ const childText = (parent: Element, localName: string, ns = CBC_NS): string => {
 function partyName(root: Element, partyTag: string): string {
     const party = Array.from(root.children).find(c => c.localName === partyTag);
     if (!party) return '';
-    const name = party.getElementsByTagNameNS(CBC_NS, 'Name')[0]?.textContent?.trim();
+    const name = Array.from(party.getElementsByTagNameNS(CBC_NS, 'Name')).find(n => n.parentElement?.localName === 'PartyName')?.textContent?.trim();
     if (name) return name;
     const first = party.getElementsByTagNameNS(CBC_NS, 'FirstName')[0]?.textContent?.trim() ?? '';
     const family = party.getElementsByTagNameNS(CBC_NS, 'FamilyName')[0]?.textContent?.trim() ?? '';
@@ -283,6 +290,125 @@ function invoiceRuleChecks(root: Element, profile: string, typeCode: string): st
     return issues;
 }
 
+/** e-Arşiv rapor şeması (EArsiv.xsd vergiKodEnum) vergi / kesinti kodları. */
+const EARSIV_TAX_CODES = [
+    '0003', '0011', '0015', '0021', '0022', '0059', '0061', '0071', '0073', '0074', '0075', '0076', '0077',
+    '1047', '1048', '4071', '4080', '4081', '4171', '8001', '8002', '8004', '8005', '8006', '8007', '8008',
+    '9015', '9021', '9040', '9064', '9077', '9944', 'SGK_PRIM',
+];
+const MUSTAHSIL_KESINTI: Record<string, string> = { '0003': 'GV stopajı', '8001': 'Borsa tescil ücreti', '9040': 'Mera fonu', SGK_PRIM: 'SGK prim kesintisi' };
+
+/**
+ * e-Müstahsil Makbuzu: Müstahsil Makbuzu Kılavuzu V1.1 (SMS doğrulama dahil), 509 Sıra No'lu
+ * VUK Genel Tebliği IV.5.3, Karekod Standardı Kılavuzu 2.5 ve e-Arşiv Teknik Kılavuzu 3.3.4.
+ */
+function mustahsilRuleChecks(root: Element): string[] {
+    const issues: string[] = [];
+    const version = childText(root, 'UBLVersionID');
+    if (version && version !== '2.1') issues.push(`UBL sürümü (UBLVersionID) 2.1 olmalı; belgede ${version}.`);
+    const customization = childText(root, 'CustomizationID');
+    if (customization !== 'TR1.2.1') issues.push(`Özelleştirme no (CustomizationID) TR1.2.1 olmalı${customization ? `; belgede ${customization}` : ''}.`);
+    if (!childText(root, 'ProfileID')) issues.push('Senaryo (ProfileID) zorunlu; EARSIVBELGE yazılmalı.');
+    const id = childText(root, 'ID');
+    if (!id) issues.push('Makbuz numarası (ID) zorunlu.');
+    else if (!DOC_ID_RE.test(id)) issues.push(`Makbuz no (${id}) 16 karakter olmalı: 3 haneli alfanümerik birim kod + yıl + 9 haneli sıra.`);
+    if (!/^(true|false)$/.test(childText(root, 'CopyIndicator'))) issues.push('Asıl / suret bilgisi (CopyIndicator) zorunlu: asıl için false, suret için true.');
+    const uuid = childText(root, 'UUID');
+    if (!GUID_RE.test(uuid)) issues.push(uuid ? `ETTN (${uuid}) GUID biçiminde olmalı.` : 'ETTN (UUID) zorunlu; karekodda yer alır.');
+    if (!childText(root, 'IssueDate') || !/^[0-9]{2}:[0-9]{2}/.test(childText(root, 'IssueTime'))) {
+        issues.push('Belgenin tarihi ile saat ve dakika olarak düzenlenme zamanı (IssueDate, IssueTime) zorunlu.');
+    }
+    if (!childText(root, 'CreditNoteTypeCode')) issues.push('Belge tipi (CreditNoteTypeCode) MUSTAHSILMAKBUZ olarak yazılmalı.');
+    if (!childText(root, 'DocumentCurrencyCode')) issues.push('Para birimi (DocumentCurrencyCode) zorunlu; karekodda ve e-Arşiv raporunda yer alır.');
+    if (!pathAll(root, 'Signature').length) issues.push('Mali mühür / imza bilgisi (Signature) zorunlu.');
+
+    const hasAddress = (p: Element) => !!(pathText(p, 'PostalAddress/StreetName') || pathText(p, 'PostalAddress/CitySubdivisionName')) && !!pathText(p, 'PostalAddress/CityName');
+    const checkId = (p: Element, label: string, qrKey: string) => {
+        const el = pathAll(p, 'PartyIdentification/ID').find(e => ['VKN', 'TCKN'].includes((e.getAttribute('schemeID') || '').toUpperCase()) && e.textContent?.trim());
+        if (!el) {
+            issues.push(`${label} için schemeID'si VKN veya TCKN olan kimlik numarası zorunlu (karekod "${qrKey}").`);
+            return;
+        }
+        const scheme = (el.getAttribute('schemeID') || '').toUpperCase();
+        const value = el.textContent?.trim() ?? '';
+        if (!(scheme === 'VKN' ? /^[0-9]{10}$/ : /^[0-9]{11}$/).test(value)) issues.push(`${label} ${scheme} değeri (${value}) ${scheme === 'VKN' ? 10 : 11} haneli olmalı.`);
+    };
+
+    const supplier = pathAll(root, 'AccountingSupplierParty/Party')[0];
+    if (!supplier) {
+        issues.push('Makbuzu düzenleyen (AccountingSupplierParty) bilgisi yok.');
+    } else {
+        checkId(supplier, 'Makbuzu düzenleyen', 'vkntckn');
+        if (!pathText(supplier, 'PartyName/Name') && !pathText(supplier, 'Person/FamilyName')) issues.push('Makbuzu düzenleyenin adı soyadı veya unvanı zorunlu.');
+        if (!pathText(supplier, 'PartyTaxScheme/TaxScheme/Name')) issues.push('Makbuzu düzenleyenin vergi dairesi (PartyTaxScheme/TaxScheme/Name) zorunlu.');
+        if (!hasAddress(supplier)) issues.push('Makbuzu düzenleyenin adresi (cadde/sokak veya ilçe ile il) zorunlu.');
+        const provider = pathAll(supplier, 'Contact/OtherCommunication')
+            .find(o => pathAll(o, 'ChannelCode').some(c => c.getAttribute('name') === 'SMS_PROVIDER'));
+        if (!provider || !pathText(provider, 'ChannelCode') || !pathText(provider, 'Value')) {
+            issues.push('SMS gönderen operatör bilgisi yazılmalı: düzenleyen Contact/OtherCommunication altında ChannelCode name="SMS_PROVIDER" (uygulama adı) ve Value (operatör VKN).');
+        }
+    }
+    const farmer = pathAll(root, 'AccountingCustomerParty/Party')[0];
+    if (!farmer) {
+        issues.push('Malı satan üretici / çiftçi (AccountingCustomerParty) bilgisi yok.');
+    } else {
+        checkId(farmer, 'Üretici / çiftçi', 'avkntckn');
+        if (!(pathText(farmer, 'Person/FirstName') && pathText(farmer, 'Person/FamilyName')) && !pathText(farmer, 'PartyName/Name')) {
+            issues.push('Malı satan çiftçinin adı ve soyadı (Person/FirstName, FamilyName) zorunlu.');
+        }
+        if (!hasAddress(farmer)) issues.push('Çiftçinin ikametgah adresi (cadde/sokak veya ilçe ile il) zorunlu.');
+        const sms = pathAll(farmer, 'Contact').find(c => pathText(c, 'Name').toUpperCase() === 'SMS');
+        if (!sms || !pathText(sms, 'ID') || !pathText(sms, 'Telephone')) {
+            issues.push('Islak imza yerine çiftçinin telefonuna gönderilen SMS kodu yazılmalı: Contact altında Name "SMS", ID = SMS kodu, Telephone = SMS gönderilen telefon.');
+        }
+    }
+
+    const num = (s: string) => Number(s) || 0;
+    const near = (a: number, b: number) => Math.abs(a - b) <= 0.05;
+    const fmt = (n: number) => n.toFixed(2);
+    const subs = pathAll(root, 'TaxTotal/TaxSubtotal');
+    if (!subs.length) issues.push('Vergi / kesinti bilgisi (TaxTotal) zorunlu; gelir vergisi stopajı ve varsa diğer kesintiler gösterilmeli.');
+    for (const s of subs) {
+        const code = pathText(s, 'TaxCategory/TaxScheme/TaxTypeCode');
+        const name = MUSTAHSIL_KESINTI[code] ?? (pathText(s, 'TaxCategory/TaxScheme/Name') || 'Kesinti');
+        if (!EARSIV_TAX_CODES.includes(code)) {
+            issues.push(`Kesinti kodu "${code || 'boş'}" geçerli değil; GV stopajı 0003, borsa tescil ücreti 8001, mera fonu 9040, SGK prim kesintisi SGK_PRIM.`);
+        }
+        const pct = pathText(s, 'Percent');
+        if (!pct) {
+            issues.push(`${name} satırında oran (Percent) yazılmalı; e-Arşiv raporunda vergi oranı zorunlu.`);
+        } else if (pathText(s, 'TaxableAmount') && !near(num(pathText(s, 'TaxableAmount')) * Number(pct) / 100, num(pathText(s, 'TaxAmount')))) {
+            issues.push(`${name} tutarı ${pathText(s, 'TaxAmount')}, matrah × %${pct} = ${fmt(num(pathText(s, 'TaxableAmount')) * Number(pct) / 100)} ile uyuşmuyor.`);
+        }
+    }
+
+    const lines = pathAll(root, 'CreditNoteLine');
+    if (lines.some(l => !pathText(l, 'Item/Name'))) issues.push('Her kalemde satın alınan malın cinsi (Item/Name) zorunlu.');
+    if (lines.some(l => !pathText(l, 'CreditedQuantity') || !pathAll(l, 'CreditedQuantity')[0]?.getAttribute('unitCode'))) {
+        issues.push('Her kalemde miktar ve birim kodu (CreditedQuantity/@unitCode) zorunlu.');
+    }
+    if (lines.some(l => !pathText(l, 'LineExtensionAmount') || !pathText(l, 'Price/PriceAmount'))) {
+        issues.push('Her kalemde birim fiyat ve bedel (Price/PriceAmount, LineExtensionAmount) zorunlu.');
+    }
+    const total = (tag: string) => pathText(root, `LegalMonetaryTotal/${tag}`);
+    if (!total('LineExtensionAmount') || !total('PayableAmount')) {
+        issues.push('Mal hizmet toplam tutarı ve ödenecek tutar (LegalMonetaryTotal/LineExtensionAmount, PayableAmount) zorunlu; karekodda yer alır.');
+    } else {
+        const lineSum = lines.reduce((t, l) => t + num(pathText(l, 'LineExtensionAmount')), 0);
+        if (lines.length && !near(lineSum, num(total('LineExtensionAmount')))) {
+            issues.push(`Kalem bedelleri toplamı ${fmt(lineSum)}, mal hizmet toplam tutarı ${total('LineExtensionAmount')} ile uyuşmuyor.`);
+        }
+        const kesinti = subs.reduce((t, s) => t + num(pathText(s, 'TaxAmount')), 0);
+        const declared = pathAll(root, 'TaxTotal').reduce((t, x) => t + num(pathText(x, 'TaxAmount')), 0);
+        if (!near(kesinti, declared)) issues.push(`Toplam kesinti (TaxTotal/TaxAmount) ${fmt(declared)}, kesinti satırları toplamı ${fmt(kesinti)} ile uyuşmuyor.`);
+        const expected = num(total('LineExtensionAmount')) - num(total('AllowanceTotalAmount')) + num(total('ChargeTotalAmount')) - kesinti + num(total('PayableRoundingAmount'));
+        if (!near(expected, num(total('PayableAmount')))) {
+            issues.push(`Ödenecek tutar ${total('PayableAmount')}; mal hizmet toplamı ${total('LineExtensionAmount')} − kesintiler ${fmt(kesinti)} = ${fmt(expected)} olmalı.`);
+        }
+    }
+    return issues;
+}
+
 /** GİB e-İrsaliye Yanıtı kuralları. */
 function receiptAdviceRuleChecks(root: Element): string[] {
     const issues: string[] = [];
@@ -293,6 +419,354 @@ function receiptAdviceRuleChecks(root: Element): string[] {
         issues.push('Her yanıt satırında satır no ve ürün adı zorunlu.');
     }
     return issues;
+}
+
+const SMM_STOPAJ_CODES = ['0003', '0011'];
+const WITHHOLDING_CODE_RE = /^(60[1-9]|61[0-9]|62[0-7]|80[1-9]|81[0-9]|82[0-5])$/;
+
+/**
+ * e-SMM zorunlu bilgileri: 509 Sıra No'lu VUK Genel Tebliği IV.4.3, Karekod Standardı
+ * Kılavuzu 2.4 (vkntckn, avkntckn, ettn, brüt/net ücret, KDV, tevkifat, stopaj, tahsilat),
+ * e-Arşiv Teknik Kılavuzu 3.3.6 (döviz kuru, vergi kodu/oranı).
+ */
+function smmRuleChecks(root: Element): string[] {
+    const issues: string[] = [];
+    const id = childText(root, 'ID');
+    if (!id) issues.push('Makbuz numarası (ID) zorunlu.');
+    else if (!DOC_ID_RE.test(id)) issues.push(`Makbuz no (${id}) 16 karakter olmalı: 3 harf/rakam seri + yıl + 9 haneli sıra.`);
+    if (!childText(root, 'IssueDate') || !/^[0-9]{2}:[0-9]{2}/.test(childText(root, 'IssueTime'))) {
+        issues.push('Düzenlenme tarihi ile saat ve dakika olarak düzenlenme zamanı (IssueDate, IssueTime) zorunlu.');
+    }
+    if (!childText(root, 'UUID')) issues.push('ETTN (UUID) zorunlu; karekodda yer alır.');
+
+    const partyInfo = (tag: string, label: string, qrKey: string) => {
+        const party = pathAll(root, `${tag}/Party`)[0];
+        if (!party) {
+            issues.push(`${label} bilgisi (${tag}) yok.`);
+            return null;
+        }
+        const idEl = pathAll(party, 'PartyIdentification/ID').find(e => ['VKN', 'TCKN'].includes((e.getAttribute('schemeID') || '').toUpperCase()));
+        const scheme = (idEl?.getAttribute('schemeID') || '').toUpperCase();
+        const value = idEl?.textContent?.trim() ?? '';
+        if (!value) issues.push(`${label} için schemeID'si VKN veya TCKN olan kimlik numarası zorunlu (karekod "${qrKey}").`);
+        else if (!(scheme === 'VKN' ? /^[0-9]{10}$/ : /^[0-9]{11}$/).test(value)) issues.push(`${label} ${scheme} değeri (${value}) ${scheme === 'VKN' ? 10 : 11} haneli olmalı.`);
+        if (!pathText(party, 'PartyName/Name') && !pathText(party, 'Person/FamilyName')) issues.push(`${label} adı soyadı veya unvanı zorunlu.`);
+        if (!pathText(party, 'PostalAddress/StreetName') && !pathText(party, 'PostalAddress/CityName')) issues.push(`${label} adresi zorunlu.`);
+        return { scheme, value, office: pathText(party, 'PartyTaxScheme/TaxScheme/Name') };
+    };
+    const supplier = partyInfo('AccountingSupplierParty', 'Serbest meslek erbabı', 'vkntckn');
+    if (supplier && !supplier.office) issues.push('Serbest meslek erbabının vergi dairesi zorunlu.');
+    const customer = partyInfo('AccountingCustomerParty', 'Müşteri', 'avkntckn');
+    if (customer?.scheme === 'VKN' && customer.value !== '2222222222' && !customer.office) {
+        issues.push('Müşteri vergi mükellefi (VKN) ise vergi dairesi zorunlu.');
+    }
+
+    const currency = childText(root, 'DocumentCurrencyCode').toUpperCase();
+    if (currency && currency !== 'TRY' && !(Number(pathText(root, 'PricingExchangeRate/CalculationRate')) > 0)) {
+        issues.push(`Para birimi ${currency}; döviz cinsinden e-SMM'de döviz kuru (PricingExchangeRate/CalculationRate) zorunlu.`);
+    }
+
+    const code = (s: Element) => pathText(s, 'TaxCategory/TaxScheme/TaxTypeCode');
+    const num = (el: Element, path: string) => Number(pathText(el, path)) || 0;
+    const sum = (rows: Element[]) => rows.reduce((t, s) => t + num(s, 'TaxAmount'), 0);
+    const near = (a: number, b: number) => Math.abs(a - b) <= 0.05;
+    const fmt = (n: number) => n.toFixed(2);
+    const subs = pathAll(root, 'TaxTotal/TaxSubtotal');
+    const whts = pathAll(root, 'WithholdingTaxTotal/TaxSubtotal');
+    const kdvRows = subs.filter(s => code(s) === '0015');
+    const stopajRows = [...subs, ...whts].filter(s => SMM_STOPAJ_CODES.includes(code(s)));
+    const tevkifatRows = [...whts.filter(s => !SMM_STOPAJ_CODES.includes(code(s))), ...subs.filter(s => code(s) === '9015')];
+    const otherRows = subs.filter(s => !['0015', '9015', ...SMM_STOPAJ_CODES].includes(code(s)));
+
+    if (!kdvRows.length) issues.push('KDV (vergi kodu 0015) bilgisi yok; KDV tutarı ayrıntılı gösterilmeli, KDV yoksa 0 tutar ve istisna sebebiyle yazılmalı.');
+    if (kdvRows.some(s => num(s, 'TaxAmount') === 0 && !pathText(s, 'TaxCategory/TaxExemptionReason') && !pathText(s, 'TaxCategory/TaxExemptionReasonCode'))) {
+        issues.push('KDV tutarı 0 ise istisna / muafiyet sebebi (TaxExemptionReasonCode, TaxExemptionReason) yazılmalı.');
+    }
+    for (const s of [...kdvRows, ...stopajRows]) {
+        const pct = pathText(s, 'Percent');
+        if (!pct || !pathText(s, 'TaxableAmount')) {
+            issues.push(`${SMM_STOPAJ_CODES.includes(code(s)) ? 'Stopaj' : 'KDV'} satırında matrah ve oran (TaxableAmount, Percent) zorunlu.`);
+            continue;
+        }
+        const expected = num(s, 'TaxableAmount') * Number(pct) / 100;
+        if (!near(expected, num(s, 'TaxAmount'))) {
+            issues.push(`${SMM_STOPAJ_CODES.includes(code(s)) ? 'Stopaj' : 'KDV'} tutarı ${fmt(num(s, 'TaxAmount'))}, matrah × %${pct} = ${fmt(expected)} ile uyuşmuyor.`);
+        }
+    }
+    for (const s of whts.filter(x => !SMM_STOPAJ_CODES.includes(code(x)))) {
+        if (!WITHHOLDING_CODE_RE.test(code(s))) issues.push(`KDV tevkifat kodu "${code(s) || 'boş'}" GİB tevkifat kodları listesinde yok (601-627, 801-825).`);
+        const pct = Number(pathText(s, 'Percent'));
+        if (pathText(s, 'TaxableAmount') && pct && !near(num(s, 'TaxableAmount') * pct / 100, num(s, 'TaxAmount'))) {
+            issues.push(`KDV tevkifat tutarı ${fmt(num(s, 'TaxAmount'))}, tevkifat matrahı (KDV) × %${pct} ile uyuşmuyor.`);
+        }
+    }
+    const kdv = sum(kdvRows);
+    const stopaj = sum(stopajRows);
+    const tevkifat = sum(tevkifatRows);
+    if (tevkifat > kdv + 0.05) issues.push(`KDV tevkifatı (${fmt(tevkifat)}) hesaplanan KDV'den (${fmt(kdv)}) büyük olamaz.`);
+    if (stopaj > 0 && customer?.scheme === 'TCKN' && !customer.office) {
+        issues.push('Stopaj yapılmış ama müşteri vergi dairesi olmadan TCKN ile yazılmış; stopaj yalnızca vergi kesintisi yapmakla sorumlu (mükellef) müşteride yapılır, müşteri mükellefse vergi dairesini ekleyin.');
+    }
+
+    const total = (tag: string) => pathText(root, `LegalMonetaryTotal/${tag}`);
+    const brut = Number(total('TaxExclusiveAmount') || total('LineExtensionAmount')) || 0;
+    if (!total('PayableAmount')) {
+        issues.push('Tahsil edilecek tutar (LegalMonetaryTotal/PayableAmount) zorunlu; karekodda "tahsilat" olarak yer alır.');
+    } else {
+        const expected = brut - stopaj + kdv - tevkifat + sum(otherRows) + (Number(total('PayableRoundingAmount')) || 0);
+        if (!near(Number(total('PayableAmount')), expected)) {
+            issues.push(`Tahsil edilen tutar ${total('PayableAmount')}; brüt ücret ${fmt(brut)} − stopaj ${fmt(stopaj)} + KDV ${fmt(kdv)} − KDV tevkifatı ${fmt(tevkifat)} = ${fmt(expected)} olmalı.`);
+        }
+    }
+    return issues;
+}
+
+// ---------------------------------------------------------------------------
+// e-Bilet: ebilet.xsd, ebiletSchematron.sch / ebiletCodelist.sch (e-Bilet Paketi 2023),
+// e-Bilet Raporu ve e-Yolcu Listesi teknik kılavuzları, 509 s. VUK GT IV.7.
+// ---------------------------------------------------------------------------
+const EBILET_CURRENCIES = new Set(('AED,AFN,ALL,AMD,ANG,AOA,ARS,AUD,AWG,AZN,BAM,BBD,BDT,BGN,BHD,BIF,BMD,BND,BOB,BOV,BRL,BSD,BTN,BWP,BYN,BYR,BZD,'
+    + 'CAD,CDF,CHE,CHF,CHW,CLF,CLP,CNY,COP,COU,CRC,CUC,CUP,CVE,CZK,DJF,DKK,DOP,DZD,EEK,EGP,ERN,ETB,EUR,FJD,FKP,GBP,GEL,GHS,GIP,GMD,GNF,'
+    + 'GTQ,GWP,GYD,HKD,HNL,HRK,HTG,HUF,IDR,ILS,INR,IQD,IRR,ISK,JMD,JOD,JPY,KES,KGS,KHR,KMF,KPW,KRW,KWD,KYD,KZT,LAK,LBP,LKR,LRD,LSL,LTL,'
+    + 'LVL,LYD,MAD,MDL,MGA,MKD,MMK,MNT,MOP,MRO,MUR,MVR,MWK,MXN,MXV,MYR,MZN,NAD,NGN,NIO,NOK,NPR,NZD,OMR,PAB,PEN,PGK,PHP,PKR,PLN,PYG,QAR,'
+    + 'RON,RSD,RUB,RWF,SAR,SBD,SCR,SDG,SEK,SGD,SHP,SLL,SOS,SSP,SRD,STD,SVC,SYP,SZL,THB,TJS,TMT,TND,TOP,TRY,TTD,TWD,TZS,UAH,UGX,USD,USN,'
+    + 'USS,UYI,UYU,UZS,VEF,VND,VUV,WST,XAF,XAG,XAU,XBA,XBB,XBC,XBD,XCD,XDR,XFU,XOF,XPD,XPF,XPT,XSU,XTS,XUA,XXX,YER,ZAR,ZMK,ZMW,ZWL').split(','));
+const EBILET_PAYMENTS = ['BANKAKARTI', 'BEDELSIZ', 'COKLU', 'KREDIKARTI', 'PUAN', 'MAHSUP', 'MAHSUPPUAN', 'MIL', 'NAKIT', 'PASS', 'PROMOSYON', 'ULASIMKARTI', 'DIGER'];
+const EBILET_SERVICES = ['SEYAHAT', 'BAGAJ', 'IPTALDEGISIKLIKTAZMINATI', 'CEZA', 'YEMEK', 'KOLTUKSECIMI', 'DIGER'];
+const EBILET_ID_RE = /^[A-Za-z0-9]{13}([A-Za-z0-9]{3})?$/;
+const EBILET_ID16_RE = /^[A-Za-z0-9]{3}20[0-9]{11}$/;
+const EBILET_AMOUNT_RE = /^-?[0-9]{1,16}(\.[0-9]{1,2})?$/;
+const EBILET_GUID_RE = /^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$/;
+const ISO_DATE_RE = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/;
+/** Kılavuz: açık bilette sefer / etkinlik zamanı bu sabit değerle yazılır. */
+const EBILET_OPEN_TIME = '1111-11-11T11:11:11';
+const XADES_A_PROPS = ['ArchiveTimeStamp', 'CertificateValues', 'RevocationValues', 'SignatureTimeStamp', 'SigAndRefsTimeStamp', 'CompleteCertificateRefs', 'CompleteRevocationRefs'];
+
+const descendants = (el: Element, localName: string) => Array.from(el.getElementsByTagName('*')).filter(e => e.localName === localName);
+
+/** Uyarılarda en fazla birkaç bilet numarası listelenir. */
+function listed(items: string[]): string {
+    const head = items.slice(0, 3).join(', ');
+    return items.length > 3 ? `${head} ve ${items.length - 3} diğer` : head;
+}
+
+function ebiletHeaderChecks(root: Element): string[] {
+    const issues: string[] = [];
+    const baslik = pathAll(root, 'baslik')[0];
+    if (!baslik) return ['Başlık (baslik) zorunlu: gönderen VKN/TCKN, dönem tarihleri, versiyon, uuid ve imza.'];
+    const vkn = pathText(baslik, 'gonderen/vkn');
+    const tckn = pathText(baslik, 'gonderen/tckn');
+    if (!vkn && !tckn) issues.push('Gönderen VKN veya TCKN (baslik/gonderen) zorunlu.');
+    else if (vkn ? !/^[0-9]{10}$/.test(vkn) : !/^[0-9]{11}$/.test(tckn)) issues.push(`Gönderen ${vkn ? `VKN (${vkn}) 10` : `TCKN (${tckn}) 11`} haneli olmalı.`);
+    const start = pathText(baslik, 'baslangicTarihi');
+    const end = pathText(baslik, 'bitisTarihi');
+    const today = new Date().toISOString().slice(0, 10);
+    if (!ISO_DATE_RE.test(start) || !ISO_DATE_RE.test(end)) {
+        issues.push('Rapor dönemi başlangıç ve bitiş tarihi (baslangicTarihi, bitisTarihi; YYYY-AA-GG) zorunlu.');
+    } else {
+        if (end < start) issues.push('Dönem bitiş tarihi başlangıç tarihinden küçük olamaz.');
+        if (start.slice(0, 7) !== end.slice(0, 7)) issues.push('Başlangıç ve bitiş tarihi aynı döneme (aya) ait olmalı; paket adı VKN-YYYYAA-EB-000000.zip biçimindedir.');
+        if (start > today || end > today) issues.push('Dönem başlangıç / bitiş tarihi bugünden ileri bir tarih olamaz.');
+    }
+    const version = pathText(baslik, 'versiyon');
+    if (version !== '1.0') issues.push(`Versiyon "1.0" olmalı (bulunan: ${version || 'boş'}).`);
+    if (!EBILET_GUID_RE.test(pathText(baslik, 'uuid'))) issues.push('UUID GUID biçiminde olmalı (8-4-4-4-12 onaltılık karakter).');
+    if (!pathAll(baslik, 'Signature').length) issues.push('Mali mühür / NES imzası (baslik/ds:Signature) zorunlu; rapor zaman damgalı XAdES ile imzalanır.');
+    return issues;
+}
+
+function ebiletReportRuleChecks(root: Element): string[] {
+    const issues = ebiletHeaderChecks(root);
+    const bilets = pathAll(root, 'bilet');
+    const iptals = pathAll(root, 'biletIptal');
+    if (!bilets.length && !iptals.length) issues.push('Raporda bilet veya iptal (biletIptal) kaydı yok.');
+    const start = pathText(root, 'baslik/baslangicTarihi');
+    const end = pathText(root, 'baslik/bitisTarihi');
+
+    const bad = new Map<string, string[]>();
+    const flag = (msg: string, no: string) => bad.set(msg, [...(bad.get(msg) ?? []), no || '(numarasız)']);
+    const seen = new Set<string>();
+    for (const b of bilets) {
+        const no = pathText(b, 'biletNo');
+        const type = pathText(b, 'belgeTip');
+        if (!EBILET_ID_RE.test(no)) flag('Bilet numarası 13 (havayolu, IATA kodlu) veya 16 karakter (3 karakter birim kodu + yıl + 9 haneli sıra) olmalı', no);
+        else if (no.length === 16 && !EBILET_ID16_RE.test(no)) flag('16 karakterli bilet numarası ^[A-Za-z0-9]{3}20[0-9]{11}$ biçiminde olmalı (birim kodu + 20YY + sıra no)', no);
+        if (no.length === 13 && !type) flag('13 karakterli (havayolu) bilet numarasında belge tipi (belgeTip: SATIS / IADE) zorunlu', no);
+        if (type && type !== 'SATIS' && type !== 'IADE') flag('Belge tipi yalnızca SATIS veya IADE olabilir', no);
+        if (no.length === 16 && !pathText(b, 'seferZamani') && !pathText(b, 'etkinlikZamani')) flag('16 karakterli bilet numarasında sefer zamanı veya etkinlik zamanı zorunlu (açık bilette 1111-11-11T11:11:11)', no);
+        const key = `${type}|${no}`;
+        if (no && seen.has(key)) flag(`Aynı bilet numarası aynı belge tipinde (${type || 'tipsiz'}) birden fazla kez raporlanamaz`, no);
+        seen.add(key);
+        if (pathText(b, 'ozetDeger').length !== 64) flag('Özet değer (ozetDeger) 64 karakter (SHA-256 onaltılık) olmalı', no);
+        const issued = pathText(b, 'duzenlenmeTarihi');
+        if (!ISO_DATE_RE.test(issued)) flag('Düzenlenme tarihi (duzenlenmeTarihi, YYYY-AA-GG) zorunlu', no);
+        else if (ISO_DATE_RE.test(start) && ISO_DATE_RE.test(end) && (issued < start || issued > end)) flag('Düzenlenme tarihi rapor dönemi dışında; rapor yalnızca o döneme ait biletleri içerir', no);
+        const payment = pathText(b, 'odemeSekli');
+        if (!EBILET_PAYMENTS.includes(payment)) flag(`Ödeme şekli (odemeSekli) kod listesinde olmalı: ${EBILET_PAYMENTS.join(', ')}`, no);
+        const amount = pathAll(b, 'tutar')[0];
+        if (!amount || !EBILET_AMOUNT_RE.test(amount.textContent?.trim() ?? '')) flag('Tutar zorunlu; en fazla 2 ondalıklı sayı olmalı', no);
+        const currency = amount?.getAttribute('paraBirim');
+        if (currency) {
+            if (!amount?.getAttribute('kur')) flag('Para birimi (paraBirim) yazılmışsa döviz kuru (kur) boş olamaz', no);
+            if (!EBILET_CURRENCIES.has(currency)) flag(`Para birimi ISO 4217 kod listesinde olmalı (bulunan: ${currency})`, no);
+        }
+        if (!EBILET_AMOUNT_RE.test(pathText(b, 'kdv'))) flag('KDV tutarı (kdv) zorunlu; KDV yoksa 0 yazılır', no);
+        for (const v of pathAll(b, 'digerVergiler/vergi')) {
+            if (pathText(v, 'vergiKodu').length !== 4) flag('Diğer vergilerde vergi kodu 4 karakter olmalı (ör. eğlence vergisi 9142)', no);
+            if (!EBILET_AMOUNT_RE.test(pathText(v, 'tutar'))) flag('Diğer vergilerde vergi tutarı zorunlu', no);
+        }
+        const yer = pathAll(b, 'yer')[0];
+        if (yer) {
+            const il = pathText(yer, 'ilkod');
+            if (!/^(0[1-9]|[1-7][0-9]|8[01])$/.test(il)) flag('Etkinlik yeri il kodu (ilkod) 01-81 arasında olmalı', no);
+            if (!pathText(yer, 'belediye')) flag('Etkinlik yerinde belediye adı zorunlu', no);
+        } else if (pathText(b, 'etkinlikZamani')) {
+            flag('Etkinlik biletinde etkinliğin yapıldığı yer (yer: il kodu, belediye) bulunmalı (509 IV.7.3.3.1)', no);
+        }
+        const org = pathText(b, 'organizator');
+        if (org && !/^[0-9]{10,11}$/.test(org)) flag('Organizatör VKN (10) veya TCKN (11) haneli olmalı', no);
+        const exp = pathAll(b, 'giderGosteren')[0];
+        if (exp && !/^[0-9]{10}$/.test(pathText(exp, 'vkn')) && !/^[0-9]{11}$/.test(pathText(exp, 'tckn'))) flag('Gider gösteren için 10 haneli VKN veya 11 haneli TCKN yazılmalı', no);
+        const service = pathAll(b, 'hizmetinNevi')[0];
+        if (service) {
+            const tur = pathText(service, 'tur');
+            if (!EBILET_SERVICES.includes(tur)) flag(`Hizmetin nevi (tur) kod listesinde olmalı: ${EBILET_SERVICES.join(', ')}`, no);
+            if (tur === 'DIGER' && !pathText(service, 'aciklama')) flag('Hizmetin nevi DIGER ise açıklama boş olamaz', no);
+        }
+        if (no.length === 13 && type === 'IADE' && !pathAll(b, 'referanslar/referans').length) flag('Havayolu iade biletinde asıl bilete referans (referanslar/referans) girilmeli', no);
+        const url = pathText(b, 'ebiletUrl');
+        if (!url) flag(pathAll(b, 'biletUrl').length
+            ? 'Bilet URL\'si ebilet.xsd\'de ebiletUrl adıyla yazılmalı (kılavuzdaki biletUrl adı şemada yok)'
+            : 'e-Biletin PDF dosyasına ulaşılabilecek URL (ebiletUrl) yok; kılavuz 2.3 (02/2023) ile zorunlu', no);
+        else if (url.length > 255) flag('Bilet URL\'si en fazla 255 karakter olabilir', no);
+    }
+    for (const [msg, nos] of bad) issues.push(`${msg} — ${listed(nos)}.`);
+
+    const iptalSeen = new Set<string>();
+    for (const c of iptals) {
+        const no = pathText(c, 'biletNo');
+        if (!EBILET_ID_RE.test(no) || (no.length === 16 && !EBILET_ID16_RE.test(no))) issues.push(`İptal edilen bilet numarası (${no || 'boş'}) bilet numarası biçiminde olmalı.`);
+        if (iptalSeen.has(no)) issues.push(`İptal kaydında bilet numarası tekil olmalı: ${no} birden fazla kez iptal edilmiş.`);
+        iptalSeen.add(no);
+        if (!pathText(c, 'iptalZamani')) issues.push(`İptal kaydında iptal zamanı (iptalZamani) zorunlu — ${no}.`);
+        if (!EBILET_AMOUNT_RE.test(pathText(c, 'tutar')) || !EBILET_AMOUNT_RE.test(pathText(c, 'kdv'))) issues.push(`İptal kaydında tutar ve KDV zorunlu — ${no}.`);
+    }
+
+    if (bilets.some(b => pathText(b, 'biletNo').length === 13)) {
+        const missing = XADES_A_PROPS.filter(p => !descendants(root, p).length);
+        if (missing.length) issues.push(`Havayolu raporunda imza XAdES-A olmalı; UnsignedSignatureProperties altında eksik: ${missing.join(', ')}.`);
+    }
+    return issues;
+}
+
+function ebiletPassengerListRuleChecks(root: Element): string[] {
+    const issues = ebiletHeaderChecks(root);
+    const lists = pathAll(root, 'yolcuListesi');
+    if (!lists.length) issues.push('En az bir yolcu listesi (yolcuListesi) olmalı.');
+    const seen = new Set<string>();
+    for (const l of lists) {
+        const no = pathText(l, 'yolcuListesiNo');
+        const at = no || '(numarasız liste)';
+        if (!EBILET_ID_RE.test(no) || (no.length === 16 && !EBILET_ID16_RE.test(no))) issues.push(`Yolcu listesi numarası (${no || 'boş'}) 16 karakter olmalı: birim kodu + yıl + 9 haneli sıra.`);
+        if (seen.has(no)) issues.push(`Yolcu listesi numarası tekil olmalı: ${no}.`);
+        seen.add(no);
+        if (pathText(l, 'ozetDeger').length !== 64) issues.push(`Özet değer (ozetDeger) 64 karakter olmalı — ${at}.`);
+        const missing = [['haraketZamani', 'hareket saati'], ['hareketNoktasi', 'hareket noktası'], ['seferNumarasi', 'sefer numarası'], ['seferTarihi', 'sefer tarihi'], ['aracPlakasi', 'taşıt plakası']]
+            .filter(([tag]) => !pathText(l, tag)).map(([, label]) => label);
+        if (missing.length) issues.push(`Zorunlu sefer bilgisi eksik (509 IV.7.3.1.2): ${missing.join(', ')} — ${at}.`);
+        const seats = pathAll(l, 'koltukListesi/koltuk');
+        if (!seats.length) issues.push(`Listede koltuk / yolcu kaydı yok — ${at}.`);
+        const noIdentity = seats.filter(s => !pathText(s, 'adSoyad') || (!pathText(s, 'tcknYkn') && !pathText(s, 'pasaportNo'))).map(s => pathText(s, 'koltukNo'));
+        if (noIdentity.length) issues.push(`Yolcunun adı soyadı ile TCKN'si (uluslararası seferde TCKN veya pasaport no) bulunmalı (509 IV.7.3.1.2-f) — koltuk ${listed(noIdentity)}.`);
+        const badTckn = seats.map(s => pathText(s, 'tcknYkn')).filter(t => t && !/^[0-9]{11}$/.test(t));
+        if (badTckn.length) issues.push(`Yolcu TCKN / YKN 11 haneli olmalı — ${listed(badTckn)}.`);
+        const noTicket = seats.filter(s => !EBILET_ID_RE.test(pathText(s, 'biletNo'))).map(s => pathText(s, 'koltukNo'));
+        if (noTicket.length) issues.push(`Her koltukta e-Bilet numarası (biletNo) bulunmalı — koltuk ${listed(noTicket)}.`);
+        const total = Number(pathText(l, 'toplamHasilat'));
+        const sum = seats.reduce((t, s) => t + (Number(pathText(s, 'tutar')) || 0), 0);
+        if (!pathText(l, 'toplamHasilat')) issues.push(`KDV dahil toplam hasılat (toplamHasilat) zorunlu — ${at}.`);
+        else if (seats.length && Math.abs(total - sum) > 0.01) issues.push(`Toplam hasılat ${total.toFixed(2)}, koltuk bilet tutarları toplamı ${sum.toFixed(2)} ile uyuşmuyor — ${at}.`);
+        const op = pathAll(l, 'aracIsleten')[0];
+        if (op) {
+            if (!/^[0-9]{10}$/.test(pathText(op, 'vkn')) && !/^[0-9]{11}$/.test(pathText(op, 'tckn'))) issues.push(`Taşıtı işleten için 10 haneli VKN veya 11 haneli TCKN yazılmalı — ${at}.`);
+            if (!pathText(op, 'komisyonTutar') || !pathText(op, 'komisyonKDV')) issues.push(`Taşıtı işletene ödenen komisyon tutarı ve KDV'si yazılmalı — ${at}.`);
+        }
+    }
+    return issues;
+}
+
+function ebiletXmlChecks(root: Element, family: DocFamily, checks: Check[], info: [string, string][]): void {
+    const report = family === 'ebiletReport';
+    const bilets = pathAll(root, 'bilet');
+    const lists = pathAll(root, 'yolcuListesi');
+    const seats = lists.flatMap(l => pathAll(l, 'koltukListesi/koltuk'));
+    const kind = !report ? ''
+        : bilets.some(b => pathText(b, 'etkinlikZamani')) ? 'Etkinlik'
+        : bilets.some(b => pathText(b, 'biletNo').length === 13) ? 'Havayolu' : 'Karayolu / Denizyolu';
+    const start = pathText(root, 'baslik/baslangicTarihi');
+    const end = pathText(root, 'baslik/bitisTarihi');
+    const rows: [string, string][] = [
+        ['Gönderen', pathText(root, 'baslik/gonderen/vkn') || pathText(root, 'baslik/gonderen/tckn')],
+        ['Dönem', start && end ? `${start} – ${end}` : ''],
+        ['UUID', pathText(root, 'baslik/uuid')],
+        ...(report ? [
+            ['Rapor türü', kind],
+            ['Bilet sayısı', String(bilets.length)],
+            ['İade sayısı', String(bilets.filter(b => pathText(b, 'belgeTip') === 'IADE').length)],
+            ['İptal sayısı', String(pathAll(root, 'biletIptal').length)],
+            ['Açık bilet', String(bilets.filter(b => [pathText(b, 'seferZamani'), pathText(b, 'etkinlikZamani')].includes(EBILET_OPEN_TIME)).length)],
+        ] as [string, string][] : [
+            ['Yolcu listesi sayısı', String(lists.length)],
+            ['Sefer', lists.map(l => pathText(l, 'seferNumarasi')).filter(Boolean).join(', ')],
+            ['Plaka', lists.map(l => pathText(l, 'aracPlakasi')).filter(Boolean).join(', ')],
+            ['Yolcu sayısı', String(seats.length)],
+        ] as [string, string][]),
+    ];
+    info.push(...rows.filter(([, v]) => v));
+    const issues = report ? ebiletReportRuleChecks(root) : ebiletPassengerListRuleChecks(root);
+    checks.push(...(issues.length
+        ? issues.map(text => ({ level: 'warn' as const, text: `GİB kuralı: ${text}` }))
+        : [{ level: 'ok' as const, text: report ? 'GİB e-Bilet raporu şema / şematron kontrolleri geçti' : 'GİB e-Yolcu Listesi zorunlu bilgi kontrolleri geçti' }]));
+}
+
+/**
+ * UBL taşıyıcılı görsel e-Bilet: 509 s. VUK GT IV.7.3.1.1 (kara/deniz), IV.7.3.2.1 (hava),
+ * IV.7.3.3.1 (etkinlik) zorunlu bilgileri ve V.4 belge numarası.
+ */
+function biletInvoiceRuleChecks(root: Element): string[] {
+    const issues: string[] = [];
+    const id = childText(root, 'ID');
+    if (!DOC_ID_RE.test(id) && !/^[A-Za-z0-9]{13}$/.test(id)) {
+        issues.push(`e-Bilet numarası (${id || 'boş'}) 16 karakter (3 karakter birim kodu + yıl + 9 haneli sıra) ya da havayolunda IATA kodlu 13 karakter olmalı.`);
+    }
+    const supplier = pathAll(root, 'AccountingSupplierParty/Party')[0];
+    if (!supplier) {
+        issues.push('Bileti düzenleyenin bilgileri (AccountingSupplierParty) yok.');
+    } else {
+        if (!pathText(supplier, 'PartyName/Name') && !pathText(supplier, 'Person/FamilyName')) issues.push('Bileti düzenleyenin adı soyadı / unvanı zorunlu.');
+        if (!pathAll(supplier, 'PartyIdentification/ID').some(e => ['VKN', 'TCKN'].includes((e.getAttribute('schemeID') || '').toUpperCase()))) issues.push('Bileti düzenleyenin VKN / TCKN\'si zorunlu.');
+        if (!pathText(supplier, 'PartyTaxScheme/TaxScheme/Name')) issues.push('Bileti düzenleyenin bağlı olduğu vergi dairesi zorunlu (kara / deniz ve etkinlik biletleri).');
+        if (!pathText(supplier, 'PostalAddress/CityName') && !pathText(supplier, 'PostalAddress/StreetName')) issues.push('Bileti düzenleyenin adresi zorunlu (kara / deniz biletleri).');
+    }
+    const person = [...pathAll(root, 'BuyerCustomerParty/Party/Person'), ...pathAll(root, 'AccountingCustomerParty/Party/Person')][0];
+    if (!person || !pathText(person, 'FirstName') || !pathText(person, 'FamilyName')) {
+        issues.push('Yolcunun / izleyicinin adı soyadı (AccountingCustomerParty ya da gider gösteren varsa BuyerCustomerParty altında Person) yazılmalı.');
+    }
+    if (!childText(root, 'IssueDate')) issues.push('Düzenlenme tarihi (IssueDate) zorunlu.');
+    if (!pathText(root, 'InvoicePeriod/StartDate')) issues.push('Seyahat / etkinlik tarihi yok; tasarımcıda InvoicePeriod/StartDate (saat: StartTime) alanında taşınır.');
+    if (!pathText(root, 'PaymentMeans/PaymentMeansCode')) issues.push('Ödeme türü (PaymentMeans/PaymentMeansCode) zorunlu; kara / deniz biletinde ödeme tarihi (PaymentDueDate) de yazılır.');
+    if (!pathAll(root, 'TaxTotal/TaxSubtotal').some(s => pathText(s, 'TaxCategory/TaxScheme/TaxTypeCode') === '0015')) issues.push('KDV tutarı (TaxTotal, vergi kodu 0015) gösterilmeli.');
+    if (!pathText(root, 'LegalMonetaryTotal/PayableAmount')) issues.push('Bilet tutarı (LegalMonetaryTotal/PayableAmount) zorunlu.');
+    if (!pathAll(root, 'InvoiceLine/Item/Name').some(e => e.textContent?.trim())) issues.push('Hizmetin nevi (seyahat, bagaj, etkinlik adı vb.) satırda (InvoiceLine/Item/Name) yazılmalı.');
+    return issues;
+}
+
+function xsltRunCheck(xslt: string, doc: Document): Check {
+    const x = parseXml(xslt);
+    const err = x.error ? `XSLT okunamadı: ${x.error}` : tryTransform(x.doc, doc);
+    return err
+        ? { level: 'error', text: `Seçilen XSLT bu veriyle çalıştırılamadı: ${err}` }
+        : { level: 'ok', text: 'Seçilen XSLT bu veriyle başarıyla çalıştı' };
 }
 
 function receiptAdviceStatus(root: Element): string {
@@ -311,13 +785,18 @@ export function validateXml(text: string, docType: WizardDocType, xslt: string |
     if (error) return result([{ level: 'error', text: `Dosya geçerli bir XML değil: ${error}` }], info);
 
     const root = doc.documentElement;
-    const family = familyOfNs(root.namespaceURI);
+    const family = familyOfRoot(root);
     const expected = FAMILY_INFO[docType.family];
     if (family !== docType.family) {
         const found = family ? FAMILY_INFO[family].label : `<${root.localName}>`;
         return result([{ level: 'error', text: `Bu XML bir ${found} belgesi; ${docType.label} için ${expected.label} belgesi gerekli.` }], info);
     }
     checks.push({ level: 'ok', text: `Belge yapısı uygun: ${expected.label}` });
+    if (family === 'ebiletReport' || family === 'ebiletPassengerList') {
+        ebiletXmlChecks(root, family, checks, info);
+        if (xslt) checks.push(xsltRunCheck(xslt, doc));
+        return result(checks, info);
+    }
 
     const profile = childText(root, 'ProfileID');
     const norm = (s: string) => s.toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -326,9 +805,10 @@ export function validateXml(text: string, docType: WizardDocType, xslt: string |
     }
 
     const despatchLike = docType.family === 'despatch' || docType.family === 'receiptAdvice';
-    const lineTag = docType.family === 'despatch' ? 'DespatchLine' : docType.family === 'receipt' || docType.family === 'receiptAdvice' ? 'ReceiptLine' : 'InvoiceLine';
+    const creditNote = docType.family === 'creditNote';
+    const lineTag = docType.family === 'despatch' ? 'DespatchLine' : docType.family === 'receipt' || docType.family === 'receiptAdvice' ? 'ReceiptLine' : creditNote ? 'CreditNoteLine' : 'InvoiceLine';
     const lines = Array.from(root.children).filter(c => c.localName === lineTag).length;
-    const typeCode = childText(root, 'InvoiceTypeCode') || childText(root, 'DespatchAdviceTypeCode') || childText(root, 'ReceiptAdviceTypeCode');
+    const typeCode = childText(root, 'InvoiceTypeCode') || childText(root, 'DespatchAdviceTypeCode') || childText(root, 'ReceiptAdviceTypeCode') || childText(root, 'CreditNoteTypeCode');
     if (docType.typeCodes && typeCode && !docType.typeCodes.includes(typeCode.trim().toUpperCase())) {
         checks.push({ level: 'warn', text: `Belge tipi ${typeCode} GİB kod listesinde yok; ${docType.label} için geçerli tipler: ${docType.typeCodes.join(', ')}.` });
     }
@@ -340,12 +820,15 @@ export function validateXml(text: string, docType: WizardDocType, xslt: string |
         ['Profil', profile],
         ['Tip', typeCode],
         ['Para birimi', childText(root, 'DocumentCurrencyCode')],
-        ['Gönderen', supplier],
-        ['Alıcı', customer],
+        [creditNote ? 'Düzenleyen (alıcı)' : 'Gönderen', supplier],
+        [creditNote ? 'Üretici / çiftçi' : 'Alıcı', customer],
         ['Satır sayısı', String(lines)],
     ];
     if (docType.family === 'receiptAdvice') {
         rows.push(['Yanıtlanan irsaliye', pathText(root, 'DespatchDocumentReference/ID')], ['Yanıt durumu', receiptAdviceStatus(root)]);
+    }
+    if (creditNote) {
+        rows.push(['Toplam kesinti', pathText(root, 'TaxTotal/TaxAmount')], ['Ödenecek tutar', pathText(root, 'LegalMonetaryTotal/PayableAmount')]);
     }
     info.push(...rows.filter(([, v]) => v));
     if (!lines) checks.push({ level: 'warn', text: 'Belgede kalem (satır) bulunamadı; satır tablosu boş görünür.' });
@@ -353,11 +836,24 @@ export function validateXml(text: string, docType: WizardDocType, xslt: string |
     const ublInvoice = docType.family === 'invoice' && (docType.profileIds ?? []).some(p => p === 'EARSIVFATURA' || EFATURA_PROFILE_IDS.includes(p));
     const gibIssues = docType.family === 'despatch' ? despatchRuleChecks(root, profile, typeCode)
         : docType.family === 'receiptAdvice' ? receiptAdviceRuleChecks(root)
+        : creditNote ? mustahsilRuleChecks(root)
         : ublInvoice ? invoiceRuleChecks(root, profile, typeCode) : [];
     if (gibIssues.length) {
         checks.push(...gibIssues.map(text => ({ level: 'warn' as const, text: `GİB kuralı: ${text}` })));
-    } else if (despatchLike || ublInvoice) {
-        checks.push({ level: 'ok', text: despatchLike ? 'GİB e-İrsaliye zorunlu alan kontrolleri geçti' : 'GİB fatura kural kontrolleri geçti' });
+    } else if (despatchLike || ublInvoice || creditNote) {
+        checks.push({ level: 'ok', text: despatchLike ? 'GİB e-İrsaliye zorunlu alan kontrolleri geçti' : creditNote ? 'GİB e-Müstahsil zorunlu bilgi kontrolleri geçti' : 'GİB fatura kural kontrolleri geçti' });
+    }
+    if (docType.id === 'smm') {
+        const smmIssues = smmRuleChecks(root);
+        checks.push(...(smmIssues.length
+            ? smmIssues.map(text => ({ level: 'warn' as const, text: `GİB kuralı: ${text}` }))
+            : [{ level: 'ok' as const, text: 'GİB e-SMM zorunlu bilgi kontrolleri geçti' }]));
+    }
+    if (docType.id === 'bilet') {
+        const biletIssues = biletInvoiceRuleChecks(root);
+        checks.push(...(biletIssues.length
+            ? biletIssues.map(text => ({ level: 'warn' as const, text: `GİB kuralı: ${text}` }))
+            : [{ level: 'ok' as const, text: 'GİB e-Bilet zorunlu bilgi kontrolleri geçti (509 IV.7.3)' }]));
     }
 
     if (xslt) {

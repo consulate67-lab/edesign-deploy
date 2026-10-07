@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  e-Yolcu Listesi — yurt içi otobüs seferi (ebilet.xsd eYolcuListesi, e-Bilet Paketi 14.02.2023)
+  GİB e-Yolcu Listesi Raporu Teknik Kılavuzu örnek parçalarından derlenmiştir; imza değerleri temsilidir.
+  Aracı işleten mükellef (komisyon tutarı ve KDV'si) bilgisi içerir. 509 s. VUK GT IV.7.3.1.2:
+  yolcu listesinin kâğıt nüshası sefer sonuna kadar taşıtta bulundurulur.
+-->
+<ebilet:eYolcuListesi xmlns:ebilet="http://ebilet.efatura.gov.tr" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" xmlns:xades141="http://uri.etsi.org/01903/v1.4.1#">
+    <ebilet:baslik>
+        <ebilet:gonderen>
+            <ebilet:vkn>1234567890</ebilet:vkn>
+        </ebilet:gonderen>
+        <ebilet:baslangicTarihi>2026-09-05</ebilet:baslangicTarihi>
+        <ebilet:bitisTarihi>2026-09-05</ebilet:bitisTarihi>
+        <ebilet:versiyon>1.0</ebilet:versiyon>
+        <ebilet:uuid>A1B2C3D4-E5F6-4A7B-8C9D-0E1F2A3B4C5D</ebilet:uuid>
+        <ds:Signature Id="Signature_1">
+            <ds:SignedInfo>
+                <ds:CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
+                <ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+                <ds:Reference URI="">
+                    <ds:Transforms>
+                        <ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+                    </ds:Transforms>
+                    <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                    <ds:DigestValue>D5spG4+BfC7kEsONq5pPuD5110x4OzevGhU4z7oElQQ=</ds:DigestValue>
+                </ds:Reference>
+                <ds:Reference Type="http://uri.etsi.org/01903#SignedProperties" URI="#SignedProperties_1">
+                    <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                    <ds:DigestValue>C5kubmJpzWO2zhzYrll0iLiHWGvN1RjHqSSvoI7zpMg=</ds:DigestValue>
+                </ds:Reference>
+            </ds:SignedInfo>
+            <ds:SignatureValue>PRO1YCGhS4x17jbC/QfrhTWJk/v33yx6fLCj7+I2xuhuvHAL3OfCtXYXAOwHu4UBeb6xM14MP6ses5c3rVMUgg==</ds:SignatureValue>
+            <ds:KeyInfo>
+                <ds:X509Data>
+                    <ds:X509Certificate>MIIFlDCCBHygAwIBAgIGAIiEmAELMA0GCSqGSIb3DQEBCwUAMFwxCzAJBgNVBAYTAlRS</ds:X509Certificate>
+                </ds:X509Data>
+            </ds:KeyInfo>
+            <ds:Object>
+                <xades:QualifyingProperties Target="#Signature_1">
+                    <xades:SignedProperties Id="SignedProperties_1">
+                        <xades:SignedSignatureProperties>
+                            <xades:SigningTime>2026-09-05T08:45:00+03:00</xades:SigningTime>
+                            <xades:SigningCertificate>
+                                <xades:Cert>
+                                    <xades:CertDigest>
+                                        <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                                        <ds:DigestValue>+VSgWjpP9XlNGk6EM7WYWzHXQ2xrzUZLas1QR+IS7Rc=</ds:DigestValue>
+                                    </xades:CertDigest>
+                                    <xades:IssuerSerial>
+                                        <ds:X509IssuerName>CN=Mali Mühür Elektronik Sertifika Hizmet Sağlayıcısı - Sürüm 1,C=TR</ds:X509IssuerName>
+                                        <ds:X509SerialNumber>586340106507</ds:X509SerialNumber>
+                                    </xades:IssuerSerial>
+                                </xades:Cert>
+                            </xades:SigningCertificate>
+                        </xades:SignedSignatureProperties>
+                    </xades:SignedProperties>
+                </xades:QualifyingProperties>
+            </ds:Object>
+        </ds:Signature>
+    </ebilet:baslik>
+    <ebilet:yolcuListesi>
+        <ebilet:yolcuListesiNo>IST2026000000501</ebilet:yolcuListesiNo>
+        <ebilet:ozetDeger>de7565181938ca02440ff1a9933f421254bb4e88c51b2ba95d488a188b61edd3</ebilet:ozetDeger>
+        <ebilet:haraketZamani>2026-09-05T09:30:00</ebilet:haraketZamani>
+        <ebilet:hareketNoktasi>İstanbul Esenler Otogarı</ebilet:hareketNoktasi>
+        <ebilet:seferNumarasi>ES-0930-ANK</ebilet:seferNumarasi>
+        <ebilet:seferTarihi>2026-09-05</ebilet:seferTarihi>
+        <ebilet:aracPlakasi>34ABC123</ebilet:aracPlakasi>
+        <ebilet:toplamHasilat>2350.00</ebilet:toplamHasilat>
+        <ebilet:aracIsleten>
+            <ebilet:vkn>5556667778</ebilet:vkn>
+            <ebilet:komisyonTutar>180.00</ebilet:komisyonTutar>
+            <ebilet:komisyonKDV>36.00</ebilet:komisyonKDV>
+        </ebilet:aracIsleten>
+        <ebilet:koltukListesi>
+                <ebilet:koltuk>
+                    <ebilet:koltukNo>1</ebilet:koltukNo>
+                    <ebilet:biletNo>IST2026000000097</ebilet:biletNo>
+                    <ebilet:tutar>600.00</ebilet:tutar>
+                    <ebilet:adSoyad>Ayşe Yılmaz</ebilet:adSoyad>
+                    <ebilet:tcknYkn>12345678950</ebilet:tcknYkn>
+                </ebilet:koltuk>
+                <ebilet:koltuk>
+                    <ebilet:koltukNo>2</ebilet:koltukNo>
+                    <ebilet:biletNo>IST2026000000098</ebilet:biletNo>
+                    <ebilet:tutar>600.00</ebilet:tutar>
+                    <ebilet:adSoyad>Mehmet Kaya</ebilet:adSoyad>
+                    <ebilet:tcknYkn>23456789014</ebilet:tcknYkn>
+                </ebilet:koltuk>
+                <ebilet:koltuk>
+                    <ebilet:koltukNo>14</ebilet:koltukNo>
+                    <ebilet:biletNo>IST2026000000101</ebilet:biletNo>
+                    <ebilet:tutar>600.00</ebilet:tutar>
+                    <ebilet:adSoyad>Selin Demir</ebilet:adSoyad>
+                    <ebilet:tcknYkn>34567890178</ebilet:tcknYkn>
+                </ebilet:koltuk>
+                <ebilet:koltuk>
+                    <ebilet:koltukNo>15</ebilet:koltukNo>
+                    <ebilet:biletNo>IST2026000000103</ebilet:biletNo>
+                    <ebilet:tutar>550.00</ebilet:tutar>
+                    <ebilet:adSoyad>Can Öztürk</ebilet:adSoyad>
+                    <ebilet:tcknYkn>45678901232</ebilet:tcknYkn>
+                </ebilet:koltuk>
+        </ebilet:koltukListesi>
+    </ebilet:yolcuListesi>
+</ebilet:eYolcuListesi>

@@ -325,7 +325,7 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
                                     <Landmark size={16} /> GİB resmi örnek belgeler ({docType.officialSamples.length})
                                 </div>
                                 <div style={{ color: '#94a3b8', fontSize: 12, marginTop: 3 }}>
-                                    UBL-TR 1.2.1 ve e-Fatura paketindeki senaryo / tip örnekleri; tasarımınızı özel durumlarla deneyin.
+                                    {docType.officialNote ?? 'UBL-TR 1.2.1 ve e-Fatura paketindeki senaryo / tip örnekleri; tasarımınızı özel durumlarla deneyin.'}
                                 </div>
                             </button>
                             {xmlChoice === 'gib' && (

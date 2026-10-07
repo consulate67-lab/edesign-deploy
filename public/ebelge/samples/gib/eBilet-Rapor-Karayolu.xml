@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  e-Bilet Raporu — Karayolu / Denizyolu (ebilet.xsd, e-Bilet Paketi 14.02.2023)
+  GİB e-Bilet Raporu Teknik Kılavuzu (Karayolu/Denizyolu) v2.3 örnek parçalarından derlenmiştir;
+  imza değerleri temsilidir (geçerli bir mali mühür içermez).
+  Senaryolar: kredi kartlı sefer bileti + gider gösteren mükellef, açık bilet (1111-11-11T11:11:11),
+  feribot (deniz yolu) bileti, iptal/değişiklik tazminatı, iptal edilen bilet (biletIptal).
+-->
+<ebilet:eBilet xmlns:ebilet="http://ebilet.efatura.gov.tr" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" xmlns:xades141="http://uri.etsi.org/01903/v1.4.1#">
+    <ebilet:baslik>
+        <ebilet:gonderen>
+            <ebilet:vkn>1234567890</ebilet:vkn>
+        </ebilet:gonderen>
+        <ebilet:baslangicTarihi>2026-09-01</ebilet:baslangicTarihi>
+        <ebilet:bitisTarihi>2026-09-30</ebilet:bitisTarihi>
+        <ebilet:versiyon>1.0</ebilet:versiyon>
+        <ebilet:uuid>8FB13EBF-C958-4C8E-8E0F-317332AD7610</ebilet:uuid>
+        <ds:Signature Id="Signature_1">
+            <ds:SignedInfo>
+                <ds:CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
+                <ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+                <ds:Reference URI="">
+                    <ds:Transforms>
+                        <ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+                    </ds:Transforms>
+                    <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                    <ds:DigestValue>D5spG4+BfC7kEsONq5pPuD5110x4OzevGhU4z7oElQQ=</ds:DigestValue>
+                </ds:Reference>
+                <ds:Reference Type="http://uri.etsi.org/01903#SignedProperties" URI="#SignedProperties_1">
+                    <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                    <ds:DigestValue>C5kubmJpzWO2zhzYrll0iLiHWGvN1RjHqSSvoI7zpMg=</ds:DigestValue>
+                </ds:Reference>
+            </ds:SignedInfo>
+            <ds:SignatureValue>PRO1YCGhS4x17jbC/QfrhTWJk/v33yx6fLCj7+I2xuhuvHAL3OfCtXYXAOwHu4UBeb6xM14MP6ses5c3rVMUgg==</ds:SignatureValue>
+            <ds:KeyInfo>
+                <ds:X509Data>
+                    <ds:X509Certificate>MIIFlDCCBHygAwIBAgIGAIiEmAELMA0GCSqGSIb3DQEBCwUAMFwxCzAJBgNVBAYTAlRS</ds:X509Certificate>
+                </ds:X509Data>
+            </ds:KeyInfo>
+            <ds:Object>
+                <xades:QualifyingProperties Target="#Signature_1">
+                    <xades:SignedProperties Id="SignedProperties_1">
+                        <xades:SignedSignatureProperties>
+                            <xades:SigningTime>2026-10-02T10:15:30+03:00</xades:SigningTime>
+                            <xades:SigningCertificate>
+                                <xades:Cert>
+                                    <xades:CertDigest>
+                                        <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                                        <ds:DigestValue>+VSgWjpP9XlNGk6EM7WYWzHXQ2xrzUZLas1QR+IS7Rc=</ds:DigestValue>
+                                    </xades:CertDigest>
+                                    <xades:IssuerSerial>
+                                        <ds:X509IssuerName>CN=Mali Mühür Elektronik Sertifika Hizmet Sağlayıcısı - Sürüm 1,C=TR</ds:X509IssuerName>
+                                        <ds:X509SerialNumber>586340106507</ds:X509SerialNumber>
+                                    </xades:IssuerSerial>
+                                </xades:Cert>
+                            </xades:SigningCertificate>
+                        </xades:SignedSignatureProperties>
+                    </xades:SignedProperties>
+                </xades:QualifyingProperties>
+            </ds:Object>
+        </ds:Signature>
+    </ebilet:baslik>
+    <ebilet:bilet>
+        <ebilet:biletNo>IST2026000000101</ebilet:biletNo>
+        <ebilet:ozetDeger>1f4475ca76f994d9903b9950b8def10cca391d5e029a756a52fa01bd1e0b016f</ebilet:ozetDeger>
+        <ebilet:duzenlenmeTarihi>2026-09-03</ebilet:duzenlenmeTarihi>
+        <ebilet:seferZamani>2026-09-05T09:30:00</ebilet:seferZamani>
+        <ebilet:odemeSekli>KREDIKARTI</ebilet:odemeSekli>
+        <ebilet:tutar>545.45</ebilet:tutar>
+        <ebilet:kdv>54.55</ebilet:kdv>
+        <ebilet:giderGosteren>
+            <ebilet:vkn>9876543210</ebilet:vkn>
+        </ebilet:giderGosteren>
+        <ebilet:hizmetinNevi>
+            <ebilet:tur>SEYAHAT</ebilet:tur>
+            <ebilet:aciklama>İstanbul (Esenler) - Ankara (AŞTİ) otobüs seferi, koltuk 14</ebilet:aciklama>
+        </ebilet:hizmetinNevi>
+        <ebilet:ebiletUrl>https://bilet.ornekfirma.com.tr/e-bilet/IST2026000000101.pdf</ebilet:ebiletUrl>
+    </ebilet:bilet>
+    <ebilet:bilet>
+        <ebilet:biletNo>IST2026000000102</ebilet:biletNo>
+        <ebilet:ozetDeger>5f9981420d14f5b74420555acf88af8b1ca1420b3c0ba4af5faa387d312bfb2c</ebilet:ozetDeger>
+        <ebilet:duzenlenmeTarihi>2026-09-04</ebilet:duzenlenmeTarihi>
+        <ebilet:seferZamani>1111-11-11T11:11:11</ebilet:seferZamani>
+        <ebilet:odemeSekli>NAKIT</ebilet:odemeSekli>
+        <ebilet:tutar>454.55</ebilet:tutar>
+        <ebilet:kdv>45.45</ebilet:kdv>
+        <ebilet:hizmetinNevi>
+            <ebilet:tur>SEYAHAT</ebilet:tur>
+            <ebilet:aciklama>Açık bilet - İstanbul - İzmir</ebilet:aciklama>
+        </ebilet:hizmetinNevi>
+        <ebilet:ebiletUrl>https://bilet.ornekfirma.com.tr/e-bilet/IST2026000000102.pdf</ebilet:ebiletUrl>
+    </ebilet:bilet>
+    <ebilet:bilet>
+        <ebilet:biletNo>FRB2026000000007</ebilet:biletNo>
+        <ebilet:ozetDeger>07ecb33d55be10cfc82d7968291beb1d4a9aeb9a8f1d3566f9410115cc102eb5</ebilet:ozetDeger>
+        <ebilet:duzenlenmeTarihi>2026-09-10</ebilet:duzenlenmeTarihi>
+        <ebilet:seferZamani>2026-09-12T07:45:00</ebilet:seferZamani>
+        <ebilet:odemeSekli>BANKAKARTI</ebilet:odemeSekli>
+        <ebilet:tutar>318.18</ebilet:tutar>
+        <ebilet:kdv>31.82</ebilet:kdv>
+        <ebilet:hizmetinNevi>
+            <ebilet:tur>SEYAHAT</ebilet:tur>
+            <ebilet:aciklama>Eskihisar - Topçular feribot seferi (yolcu + araç)</ebilet:aciklama>
+        </ebilet:hizmetinNevi>
+        <ebilet:ebiletUrl>https://bilet.ornekfirma.com.tr/e-bilet/FRB2026000000007.pdf</ebilet:ebiletUrl>
+    </ebilet:bilet>
+    <ebilet:bilet>
+        <ebilet:biletNo>IST2026000000140</ebilet:biletNo>
+        <ebilet:ozetDeger>f3eb86d21b2d77eb72e1ef8254409fc49a6c921e24dec76f606bc0e0e935e287</ebilet:ozetDeger>
+        <ebilet:duzenlenmeTarihi>2026-09-20</ebilet:duzenlenmeTarihi>
+        <ebilet:seferZamani>2026-09-21T23:00:00</ebilet:seferZamani>
+        <ebilet:odemeSekli>MAHSUP</ebilet:odemeSekli>
+        <ebilet:tutar>50.00</ebilet:tutar>
+        <ebilet:kdv>5.00</ebilet:kdv>
+        <ebilet:hizmetinNevi>
+            <ebilet:tur>IPTALDEGISIKLIKTAZMINATI</ebilet:tur>
+            <ebilet:aciklama>IST2026000000101 numaralı biletin tarih değişikliği bedeli</ebilet:aciklama>
+        </ebilet:hizmetinNevi>
+        <ebilet:ebiletUrl>https://bilet.ornekfirma.com.tr/e-bilet/IST2026000000140.pdf</ebilet:ebiletUrl>
+    </ebilet:bilet>
+    <ebilet:biletIptal>
+        <ebilet:biletNo>IST2026000000118</ebilet:biletNo>
+        <ebilet:iptalZamani>2026-09-14T16:20:00</ebilet:iptalZamani>
+        <ebilet:tutar>545.45</ebilet:tutar>
+        <ebilet:kdv>54.55</ebilet:kdv>
+    </ebilet:biletIptal>
+</ebilet:eBilet>

@@ -71,8 +71,7 @@ const modules: Module[] = [
         name: 'e-SMM (Serbest Meslek)',
         icon: <Briefcase size={24} />,
         color: '#14b8a6',
-        // hzkucuk-eFatura + e-SMM hizmet bilgileri section
-        template: 'community/hzkucuk-eFatura-smm.xslt'
+        template: 'gib/v2/e-SMM-Sablon.xslt'
     },
     {
         id: 'mustahsil',

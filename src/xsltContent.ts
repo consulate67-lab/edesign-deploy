@@ -25,6 +25,8 @@ import gibIrsaliyeYanitiRaw from '../public/ebelge/gib/irsaliye-yaniti.xslt?raw'
 import gibEarsivRaw from '../public/ebelge/gib/earsiv-2026.xslt?raw';
 import eFaturaSablonRaw from '../public/ebelge/gib/v2/e-Fatura-Sablon.xslt?raw';
 import eArsivSablonRaw from '../public/ebelge/gib/v2/e-Arsiv-Sablon.xslt?raw';
+// e-SMM: GİB resmi XSLT yayımlamadığı için 509 IV.4.3 ve Karekod Standardı 2.4'e göre hazırlandı
+import eSmmSablonRaw from '../public/ebelge/gib/v2/e-SMM-Sablon.xslt?raw';
 // Topluluk fallback'leri — 7 modul icin (Faz A.1.2)
 import irsaliyeAracliRaw from '../public/ebelge/community/IRPTeam-eWaybill-Irsaliye-Aracli.xslt?raw';
 import iracatRaw from '../public/ebelge/community/IRPTeam-eFatura.xslt?raw';
@@ -32,6 +34,12 @@ import smmRaw from '../public/ebelge/community/hzkucuk-eFatura-smm.xslt?raw';
 import mustahsilRaw from '../public/ebelge/community/hzkucuk-eFatura-mustahsil.xslt?raw';
 import biletRaw from '../public/ebelge/community/hzkucuk-eFatura-bilet.xslt?raw';
 import makbuzRaw from '../public/ebelge/community/hzkucuk-eFatura-makbuz.xslt?raw';
+// e-Bilet paketi (ebilet.xsd) XSLT içermez; rapor, yolcu listesi ve görsel bilet şablonları e-Bilet kılavuzları ve 509 IV.7'ye göre hazırlandı
+import ebiletRaporRaw from '../public/ebelge/ebilet/ebilet-rapor.xslt?raw';
+import ebiletYolcuListesiRaw from '../public/ebelge/ebilet/ebilet-yolcu-listesi.xslt?raw';
+import ebiletGorselRaw from '../public/ebelge/ebilet/ebilet-gorsel.xslt?raw';
+// e-Müstahsil (CreditNote): GİB resmi XSLT yayımlamadığı için Müstahsil Makbuzu Kılavuzu V1.1 ve Karekod Standardı 2.5'e göre hazırlandı
+import eMustahsilMakbuzuRaw from '../public/ebelge/gib/v2/e-Mustahsil-Makbuzu.xslt?raw';
 
 export const INLINE_XSLT_CONTENT: Record<string, string> = {
     'gib/general.xslt': gibGeneralRaw,
@@ -41,6 +49,7 @@ export const INLINE_XSLT_CONTENT: Record<string, string> = {
     // Faz A.1 — minimal XSLT'ler (gib/v2/)
     'gib/v2/e-Fatura-Sablon.xslt': eFaturaSablonRaw,
     'gib/v2/e-Arsiv-Sablon.xslt': eArsivSablonRaw,
+    'gib/v2/e-SMM-Sablon.xslt': eSmmSablonRaw,
     // Faz A.1.2 — topluluk XSLT'leri (community/)
     // e-İrsaliye: aracli versiyon (sürücü/mal kabul yeri eklemeli)
     'community/IRPTeam-eWaybill-Irsaliye-Aracli.xslt': irsaliyeAracliRaw,
@@ -51,6 +60,10 @@ export const INLINE_XSLT_CONTENT: Record<string, string> = {
     'community/hzkucuk-eFatura-mustahsil.xslt': mustahsilRaw,
     'community/hzkucuk-eFatura-bilet.xslt': biletRaw,
     'community/hzkucuk-eFatura-makbuz.xslt': makbuzRaw,
+    'ebilet/ebilet-rapor.xslt': ebiletRaporRaw,
+    'ebilet/ebilet-yolcu-listesi.xslt': ebiletYolcuListesiRaw,
+    'ebilet/ebilet-gorsel.xslt': ebiletGorselRaw,
+    'gib/v2/e-Mustahsil-Makbuzu.xslt': eMustahsilMakbuzuRaw,
 };
 
 /**

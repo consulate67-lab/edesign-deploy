@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  e-Bilet Raporu — Etkinlik (sinema, tiyatro, konser, spor müsabakası; ebilet.xsd, e-Bilet Paketi 14.02.2023)
+  GİB e-Bilet Raporu Teknik Kılavuzu (Etkinlik) v1.3 örnek parçalarından derlenmiştir;
+  imza değerleri temsilidir. Etkinlik yeri (il kodu / belediye), organizatör ve
+  eğlence vergisi (digerVergiler, vergi kodu 9142) içerir.
+  Senaryolar: sinema (kredi kartı), tiyatro (çoklu ödeme, gider gösteren), bedelsiz davetiye,
+  maç bileti, iptal edilen bilet.
+-->
+<ebilet:eBilet xmlns:ebilet="http://ebilet.efatura.gov.tr" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" xmlns:xades141="http://uri.etsi.org/01903/v1.4.1#">
+    <ebilet:baslik>
+        <ebilet:gonderen>
+            <ebilet:vkn>4445556667</ebilet:vkn>
+        </ebilet:gonderen>
+        <ebilet:baslangicTarihi>2026-09-01</ebilet:baslangicTarihi>
+        <ebilet:bitisTarihi>2026-09-30</ebilet:bitisTarihi>
+        <ebilet:versiyon>1.0</ebilet:versiyon>
+        <ebilet:uuid>6E0D3A1C-2B4F-4E8A-9D7C-5A1B3C4D5E6F</ebilet:uuid>
+        <ds:Signature Id="Signature_1">
+            <ds:SignedInfo>
+                <ds:CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
+                <ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+                <ds:Reference URI="">
+                    <ds:Transforms>
+                        <ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+                    </ds:Transforms>
+                    <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                    <ds:DigestValue>D5spG4+BfC7kEsONq5pPuD5110x4OzevGhU4z7oElQQ=</ds:DigestValue>
+                </ds:Reference>
+                <ds:Reference Type="http://uri.etsi.org/01903#SignedProperties" URI="#SignedProperties_1">
+                    <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                    <ds:DigestValue>C5kubmJpzWO2zhzYrll0iLiHWGvN1RjHqSSvoI7zpMg=</ds:DigestValue>
+                </ds:Reference>
+            </ds:SignedInfo>
+            <ds:SignatureValue>PRO1YCGhS4x17jbC/QfrhTWJk/v33yx6fLCj7+I2xuhuvHAL3OfCtXYXAOwHu4UBeb6xM14MP6ses5c3rVMUgg==</ds:SignatureValue>
+            <ds:KeyInfo>
+                <ds:X509Data>
+                    <ds:X509Certificate>MIIFlDCCBHygAwIBAgIGAIiEmAELMA0GCSqGSIb3DQEBCwUAMFwxCzAJBgNVBAYTAlRS</ds:X509Certificate>
+                </ds:X509Data>
+            </ds:KeyInfo>
+            <ds:Object>
+                <xades:QualifyingProperties Target="#Signature_1">
+                    <xades:SignedProperties Id="SignedProperties_1">
+                        <xades:SignedSignatureProperties>
+                            <xades:SigningTime>2026-10-05T11:30:00+03:00</xades:SigningTime>
+                            <xades:SigningCertificate>
+                                <xades:Cert>
+                                    <xades:CertDigest>
+                                        <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                                        <ds:DigestValue>+VSgWjpP9XlNGk6EM7WYWzHXQ2xrzUZLas1QR+IS7Rc=</ds:DigestValue>
+                                    </xades:CertDigest>
+                                    <xades:IssuerSerial>
+                                        <ds:X509IssuerName>CN=Mali Mühür Elektronik Sertifika Hizmet Sağlayıcısı - Sürüm 1,C=TR</ds:X509IssuerName>
+                                        <ds:X509SerialNumber>586340106507</ds:X509SerialNumber>
+                                    </xades:IssuerSerial>
+                                </xades:Cert>
+                            </xades:SigningCertificate>
+                        </xades:SignedSignatureProperties>
+                    </xades:SignedProperties>
+                </xades:QualifyingProperties>
+            </ds:Object>
+        </ds:Signature>
+    </ebilet:baslik>
+    <ebilet:bilet>
+        <ebilet:biletNo>SNM2026000000001</ebilet:biletNo>
+        <ebilet:ozetDeger>5ebd1415e774b6f867a4bac8be1c74d37938526428f181785a0affe3d4253477</ebilet:ozetDeger>
+        <ebilet:duzenlenmeTarihi>2026-09-06</ebilet:duzenlenmeTarihi>
+        <ebilet:etkinlikZamani>2026-09-06T20:45:00</ebilet:etkinlikZamani>
+        <ebilet:yer>
+            <ebilet:ilkod>34</ebilet:ilkod>
+            <ebilet:belediye>Beyoğlu</ebilet:belediye>
+            <ebilet:aciklama>Atlas Sineması Salon 2 - Koltuk F12</ebilet:aciklama>
+        </ebilet:yer>
+        <ebilet:organizator>4445556667</ebilet:organizator>
+        <ebilet:odemeSekli>KREDIKARTI</ebilet:odemeSekli>
+        <ebilet:tutar>200.00</ebilet:tutar>
+        <ebilet:digerVergiler>
+            <ebilet:vergi>
+                <ebilet:vergiKodu>9142</ebilet:vergiKodu>
+                <ebilet:vergiAdi>Eğlence Vergisi</ebilet:vergiAdi>
+                <ebilet:yuzde>10</ebilet:yuzde>
+                <ebilet:tutar>20.00</ebilet:tutar>
+            </ebilet:vergi>
+        </ebilet:digerVergiler>
+        <ebilet:kdv>22.00</ebilet:kdv>
+        <ebilet:hizmetinNevi>
+            <ebilet:tur>DIGER</ebilet:tur>
+            <ebilet:aciklama>Sinema bileti - Film gösterimi</ebilet:aciklama>
+        </ebilet:hizmetinNevi>
+        <ebilet:ebiletUrl>https://bilet.ornekfirma.com.tr/e-bilet/SNM2026000000001.pdf</ebilet:ebiletUrl>
+    </ebilet:bilet>
+    <ebilet:bilet>
+        <ebilet:biletNo>TYT2026000000015</ebilet:biletNo>
+        <ebilet:ozetDeger>6d86094f45f84fd833c170be8b5452ea0f14b6e9d888b3e3c67c6ad09fb932ed</ebilet:ozetDeger>
+        <ebilet:duzenlenmeTarihi>2026-09-08</ebilet:duzenlenmeTarihi>
+        <ebilet:etkinlikZamani>2026-09-19T20:30:00</ebilet:etkinlikZamani>
+        <ebilet:yer>
+            <ebilet:ilkod>06</ebilet:ilkod>
+            <ebilet:belediye>Çankaya</ebilet:belediye>
+            <ebilet:aciklama>Şinasi Sahnesi - Balkon B4</ebilet:aciklama>
+        </ebilet:yer>
+        <ebilet:organizator>12345678901</ebilet:organizator>
+        <ebilet:odemeSekli>COKLU</ebilet:odemeSekli>
+        <ebilet:tutar>450.00</ebilet:tutar>
+        <ebilet:digerVergiler>
+            <ebilet:vergi>
+                <ebilet:vergiKodu>9142</ebilet:vergiKodu>
+                <ebilet:vergiAdi>Eğlence Vergisi</ebilet:vergiAdi>
+                <ebilet:yuzde>10</ebilet:yuzde>
+                <ebilet:tutar>45.00</ebilet:tutar>
+            </ebilet:vergi>
+        </ebilet:digerVergiler>
+        <ebilet:kdv>49.50</ebilet:kdv>
+        <ebilet:giderGosteren>
+            <ebilet:vkn>9876543210</ebilet:vkn>
+        </ebilet:giderGosteren>
+        <ebilet:hizmetinNevi>
+            <ebilet:tur>DIGER</ebilet:tur>
+            <ebilet:aciklama>Tiyatro oyunu bileti</ebilet:aciklama>
+        </ebilet:hizmetinNevi>
+        <ebilet:ebiletUrl>https://bilet.ornekfirma.com.tr/e-bilet/TYT2026000000015.pdf</ebilet:ebiletUrl>
+    </ebilet:bilet>
+    <ebilet:bilet>
+        <ebilet:biletNo>TYT2026000000016</ebilet:biletNo>
+        <ebilet:ozetDeger>ba0d45141a4e2911cba2c09880b12fe9ed8180bb428128c7a4fd3c9a7b6ed01b</ebilet:ozetDeger>
+        <ebilet:duzenlenmeTarihi>2026-09-08</ebilet:duzenlenmeTarihi>
+        <ebilet:etkinlikZamani>2026-09-19T20:30:00</ebilet:etkinlikZamani>
+        <ebilet:yer>
+            <ebilet:ilkod>06</ebilet:ilkod>
+            <ebilet:belediye>Çankaya</ebilet:belediye>
+            <ebilet:aciklama>Şinasi Sahnesi - Davetiye</ebilet:aciklama>
+        </ebilet:yer>
+        <ebilet:organizator>12345678901</ebilet:organizator>
+        <ebilet:odemeSekli>BEDELSIZ</ebilet:odemeSekli>
+        <ebilet:tutar>0.00</ebilet:tutar>
+        <ebilet:kdv>0.00</ebilet:kdv>
+        <ebilet:hizmetinNevi>
+            <ebilet:tur>DIGER</ebilet:tur>
+            <ebilet:aciklama>Basın davetiyesi</ebilet:aciklama>
+        </ebilet:hizmetinNevi>
+        <ebilet:ebiletUrl>https://bilet.ornekfirma.com.tr/e-bilet/TYT2026000000016.pdf</ebilet:ebiletUrl>
+    </ebilet:bilet>
+    <ebilet:bilet>
+        <ebilet:biletNo>MAC2026000004521</ebilet:biletNo>
+        <ebilet:ozetDeger>055ae0c2dd5cd0105c50450f705c6fd81351ae5b291043873cae66b942eb6324</ebilet:ozetDeger>
+        <ebilet:duzenlenmeTarihi>2026-09-11</ebilet:duzenlenmeTarihi>
+        <ebilet:etkinlikZamani>2026-09-27T19:00:00</ebilet:etkinlikZamani>
+        <ebilet:yer>
+            <ebilet:ilkod>35</ebilet:ilkod>
+            <ebilet:belediye>Bornova</ebilet:belediye>
+            <ebilet:aciklama>Stadyum Doğu Tribünü Blok 3 Sıra 12 Koltuk 8</ebilet:aciklama>
+        </ebilet:yer>
+        <ebilet:organizator>5556667778</ebilet:organizator>
+        <ebilet:odemeSekli>BANKAKARTI</ebilet:odemeSekli>
+        <ebilet:tutar>750.00</ebilet:tutar>
+        <ebilet:kdv>150.00</ebilet:kdv>
+        <ebilet:hizmetinNevi>
+            <ebilet:tur>DIGER</ebilet:tur>
+            <ebilet:aciklama>Futbol müsabakası giriş bileti</ebilet:aciklama>
+        </ebilet:hizmetinNevi>
+        <ebilet:ebiletUrl>https://bilet.ornekfirma.com.tr/e-bilet/MAC2026000004521.pdf</ebilet:ebiletUrl>
+    </ebilet:bilet>
+    <ebilet:biletIptal>
+        <ebilet:biletNo>SNM2026000000003</ebilet:biletNo>
+        <ebilet:iptalZamani>2026-09-06T18:10:00</ebilet:iptalZamani>
+        <ebilet:tutar>200.00</ebilet:tutar>
+        <ebilet:kdv>22.00</ebilet:kdv>
+    </ebilet:biletIptal>
+</ebilet:eBilet>

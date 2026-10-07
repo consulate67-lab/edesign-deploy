@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  e-Bilet örnek XML — havayolu yolcu bileti (yurt içi uçuş). Varsayılan tasarım verisidir.
+  e-Bilet örnek XML — şehirlerarası otobüs bileti, gider gösteren mükellef bilgili (509 s. VUK GT IV.7.3.1.1).
 
   GİB e-Bilet için UBL şeması yayımlamamıştır (e-Bilet PDF/PAdES gibi genel tanınırlığa sahip bir
   formatta düzenlenir; GİB'e yalnızca eBilet raporu gönderilir). Bu dosya tasarımcıda görsel bilet
@@ -28,38 +28,32 @@
     <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
     <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
     <cbc:ProfileID>e-Bilet</cbc:ProfileID>
-    <cbc:ID>BLT2026000000001</cbc:ID>
+    <cbc:ID>IST2026000000101</cbc:ID>
     <cbc:CopyIndicator>false</cbc:CopyIndicator>
-    <cbc:UUID>33333333-4444-5555-6666-777777777777</cbc:UUID>
-    <cbc:IssueDate>2026-09-25</cbc:IssueDate>
-    <cbc:IssueTime>09:15:00</cbc:IssueTime>
+    <cbc:UUID>0B5E9A61-3C7D-4A12-8E44-1F2D3C4B5A69</cbc:UUID>
+    <cbc:IssueDate>2026-09-03</cbc:IssueDate>
+    <cbc:IssueTime>18:42:00</cbc:IssueTime>
     <cbc:InvoiceTypeCode>SATIS</cbc:InvoiceTypeCode>
-    <cbc:Note>Yolcu: Selin Demir (TCKN 34567890178)</cbc:Note>
-    <cbc:Note>Uçuş: TK2014 İstanbul (IST) → Ankara (ESB), 25.09.2026 14:30, Koltuk 14A, Ekonomi</cbc:Note>
+    <cbc:Note>Sefer: ES-0930-ANK İstanbul (Esenler) → Ankara (AŞTİ), 05.09.2026 09:30, Koltuk 14, Plaka 34ABC123</cbc:Note>
+    <cbc:Note>Yolcu: Selin Demir (TCKN 34567890178) — bilet bedeli Mavi Yazılım A.Ş. adına gider yazılacaktır.</cbc:Note>
     <cbc:Note>e-Bilet izni kapsamında elektronik ortamda iletilmiştir.</cbc:Note>
     <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
     <cbc:LineCountNumeric>1</cbc:LineCountNumeric>
     <cac:InvoicePeriod>
-        <cbc:StartDate>2026-09-25</cbc:StartDate>
-        <cbc:StartTime>14:30:00</cbc:StartTime>
-        <cbc:Description>TK2014 İstanbul (IST) → Ankara (ESB)</cbc:Description>
+        <cbc:StartDate>2026-09-05</cbc:StartDate>
+        <cbc:StartTime>09:30:00</cbc:StartTime>
+        <cbc:Description>ES-0930-ANK İstanbul (Esenler) → Ankara (AŞTİ)</cbc:Description>
     </cac:InvoicePeriod>
-    <cac:AdditionalDocumentReference>
-        <cbc:ID>SEFER</cbc:ID>
-        <cbc:IssueDate>2026-09-25</cbc:IssueDate>
-        <cbc:DocumentType>Sefer Bilgisi</cbc:DocumentType>
-        <cbc:DocumentDescription>TK2014 IST → ESB 25.09.2026 14:30 Koltuk 14A</cbc:DocumentDescription>
-    </cac:AdditionalDocumentReference>
 
     <cac:Signature>
-        <cbc:ID schemeID="VKN_TCKN">1112223334</cbc:ID>
+        <cbc:ID schemeID="VKN_TCKN">1234567890</cbc:ID>
         <cac:SignatoryParty>
             <cac:PartyIdentification>
-                <cbc:ID schemeID="VKN">1112223334</cbc:ID>
+                <cbc:ID schemeID="VKN">1234567890</cbc:ID>
             </cac:PartyIdentification>
             <cac:PostalAddress>
-                <cbc:StreetName>Havalimanı Cad. No:1</cbc:StreetName>
-                <cbc:CitySubdivisionName>Arnavutköy</cbc:CitySubdivisionName>
+                <cbc:StreetName>Esenler Otogarı Peron 100</cbc:StreetName>
+                <cbc:CitySubdivisionName>Esenler</cbc:CitySubdivisionName>
                 <cbc:CityName>İstanbul</cbc:CityName>
                 <cac:Country>
                     <cbc:Name>Türkiye</cbc:Name>
@@ -68,22 +62,22 @@
         </cac:SignatoryParty>
         <cac:DigitalSignatureAttachment>
             <cac:ExternalReference>
-                <cbc:URI>#Signature_BLT2026000000001</cbc:URI>
+                <cbc:URI>#Signature_IST2026000000101</cbc:URI>
             </cac:ExternalReference>
         </cac:DigitalSignatureAttachment>
     </cac:Signature>
     <cac:AccountingSupplierParty>
         <cac:Party>
-            <cbc:WebsiteURI>https://www.anadoluhavayollari.com.tr</cbc:WebsiteURI>
+            <cbc:WebsiteURI>https://bilet.ornekturizm.com.tr</cbc:WebsiteURI>
             <cac:PartyIdentification>
-                <cbc:ID schemeID="VKN">1112223334</cbc:ID>
+                <cbc:ID schemeID="VKN">1234567890</cbc:ID>
             </cac:PartyIdentification>
             <cac:PartyName>
-                <cbc:Name>Anadolu Hava Yolları A.O.</cbc:Name>
+                <cbc:Name>Örnek Turizm Seyahat A.Ş.</cbc:Name>
             </cac:PartyName>
             <cac:PostalAddress>
-                <cbc:StreetName>Havalimanı Cad. No:1</cbc:StreetName>
-                <cbc:CitySubdivisionName>Arnavutköy</cbc:CitySubdivisionName>
+                <cbc:StreetName>Esenler Otogarı Peron 100</cbc:StreetName>
+                <cbc:CitySubdivisionName>Esenler</cbc:CitySubdivisionName>
                 <cbc:CityName>İstanbul</cbc:CityName>
                 <cac:Country>
                     <cbc:Name>Türkiye</cbc:Name>
@@ -91,41 +85,61 @@
             </cac:PostalAddress>
             <cac:PartyTaxScheme>
                 <cac:TaxScheme>
-                    <cbc:Name>Büyük Mükellefler</cbc:Name>
+                    <cbc:Name>Esenler</cbc:Name>
                 </cac:TaxScheme>
             </cac:PartyTaxScheme>
             <cac:Contact>
-                <cbc:Telephone>444 0 000</cbc:Telephone>
+                <cbc:Telephone>0212 000 00 00</cbc:Telephone>
+                <cbc:ElectronicMail>bilet@ornekturizm.com.tr</cbc:ElectronicMail>
             </cac:Contact>
         </cac:Party>
     </cac:AccountingSupplierParty>
     <cac:AccountingCustomerParty>
         <cac:Party>
             <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">9876543210</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Mavi Yazılım A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Kızılırmak Mah. 1443 Cad. No:22</cbc:StreetName>
+                <cbc:CitySubdivisionName>Çankaya</cbc:CitySubdivisionName>
+                <cbc:CityName>Ankara</cbc:CityName>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Çankaya</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:BuyerCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
                 <cbc:ID schemeID="TCKN">34567890178</cbc:ID>
             </cac:PartyIdentification>
             <cac:PostalAddress>
-                <cbc:StreetName>Bağdat Cad. No:5</cbc:StreetName>
                 <cbc:CitySubdivisionName>Kadıköy</cbc:CitySubdivisionName>
                 <cbc:CityName>İstanbul</cbc:CityName>
                 <cac:Country>
                     <cbc:Name>Türkiye</cbc:Name>
                 </cac:Country>
             </cac:PostalAddress>
-            <cac:Contact>
-                <cbc:ElectronicMail>selin@example.com</cbc:ElectronicMail>
-            </cac:Contact>
             <cac:Person>
                 <cbc:FirstName>Selin</cbc:FirstName>
                 <cbc:FamilyName>Demir</cbc:FamilyName>
             </cac:Person>
         </cac:Party>
-    </cac:AccountingCustomerParty>
+    </cac:BuyerCustomerParty>
     <cac:Delivery>
         <cac:DeliveryAddress>
-            <cbc:StreetName>Tayakadın Terminal Cad. No:1</cbc:StreetName>
-            <cbc:BuildingName>İstanbul Havalimanı (IST) → Esenboğa Havalimanı (ESB)</cbc:BuildingName>
-            <cbc:CitySubdivisionName>Arnavutköy</cbc:CitySubdivisionName>
+            <cbc:StreetName>Esenler Otogarı Peron 100</cbc:StreetName>
+            <cbc:BuildingName>Esenler Otogarı → Ankara AŞTİ</cbc:BuildingName>
+            <cbc:CitySubdivisionName>Esenler</cbc:CitySubdivisionName>
             <cbc:CityName>İstanbul</cbc:CityName>
             <cac:Country>
                 <cbc:Name>Türkiye</cbc:Name>
@@ -134,15 +148,15 @@
     </cac:Delivery>
     <cac:PaymentMeans>
         <cbc:PaymentMeansCode>54</cbc:PaymentMeansCode>
-        <cbc:PaymentDueDate>2026-09-25</cbc:PaymentDueDate>
+        <cbc:PaymentDueDate>2026-09-03</cbc:PaymentDueDate>
         <cbc:InstructionNote>Tek çekim</cbc:InstructionNote>
     </cac:PaymentMeans>
     <cac:TaxTotal>
-        <cbc:TaxAmount currencyID="TRY">150.00</cbc:TaxAmount>
+        <cbc:TaxAmount currencyID="TRY">54.55</cbc:TaxAmount>
         <cac:TaxSubtotal>
-            <cbc:TaxableAmount currencyID="TRY">750.00</cbc:TaxableAmount>
-            <cbc:TaxAmount currencyID="TRY">150.00</cbc:TaxAmount>
-            <cbc:Percent>20</cbc:Percent>
+            <cbc:TaxableAmount currencyID="TRY">545.45</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">54.55</cbc:TaxAmount>
+            <cbc:Percent>10</cbc:Percent>
             <cac:TaxCategory>
                 <cac:TaxScheme>
                     <cbc:Name>KDV</cbc:Name>
@@ -152,22 +166,22 @@
         </cac:TaxSubtotal>
     </cac:TaxTotal>
     <cac:LegalMonetaryTotal>
-        <cbc:LineExtensionAmount currencyID="TRY">750.00</cbc:LineExtensionAmount>
-        <cbc:TaxExclusiveAmount currencyID="TRY">750.00</cbc:TaxExclusiveAmount>
-        <cbc:TaxInclusiveAmount currencyID="TRY">900.00</cbc:TaxInclusiveAmount>
+        <cbc:LineExtensionAmount currencyID="TRY">545.45</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">545.45</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">600.00</cbc:TaxInclusiveAmount>
         <cbc:AllowanceTotalAmount currencyID="TRY">0.00</cbc:AllowanceTotalAmount>
-        <cbc:PayableAmount currencyID="TRY">900.00</cbc:PayableAmount>
+        <cbc:PayableAmount currencyID="TRY">600.00</cbc:PayableAmount>
     </cac:LegalMonetaryTotal>
     <cac:InvoiceLine>
         <cbc:ID>1</cbc:ID>
         <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
-        <cbc:LineExtensionAmount currencyID="TRY">750.00</cbc:LineExtensionAmount>
+        <cbc:LineExtensionAmount currencyID="TRY">545.45</cbc:LineExtensionAmount>
         <cac:TaxTotal>
-            <cbc:TaxAmount currencyID="TRY">150.00</cbc:TaxAmount>
+            <cbc:TaxAmount currencyID="TRY">54.55</cbc:TaxAmount>
             <cac:TaxSubtotal>
-                <cbc:TaxableAmount currencyID="TRY">750.00</cbc:TaxableAmount>
-                <cbc:TaxAmount currencyID="TRY">150.00</cbc:TaxAmount>
-                <cbc:Percent>20</cbc:Percent>
+                <cbc:TaxableAmount currencyID="TRY">545.45</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">54.55</cbc:TaxAmount>
+                <cbc:Percent>10</cbc:Percent>
                 <cac:TaxCategory>
                     <cac:TaxScheme>
                         <cbc:Name>KDV</cbc:Name>
@@ -177,11 +191,11 @@
             </cac:TaxSubtotal>
         </cac:TaxTotal>
         <cac:Item>
-            <cbc:Description>TK2014 IST → ESB, 25.09.2026 14:30, Koltuk 14A</cbc:Description>
-            <cbc:Name>Yolcu Bileti (Ekonomi Sınıfı)</cbc:Name>
+            <cbc:Description>İstanbul → Ankara, 05.09.2026 09:30, Koltuk 14</cbc:Description>
+            <cbc:Name>Otobüs Yolcu Bileti</cbc:Name>
         </cac:Item>
         <cac:Price>
-            <cbc:PriceAmount currencyID="TRY">750.00</cbc:PriceAmount>
+            <cbc:PriceAmount currencyID="TRY">545.45</cbc:PriceAmount>
         </cac:Price>
     </cac:InvoiceLine>
 </Invoice>

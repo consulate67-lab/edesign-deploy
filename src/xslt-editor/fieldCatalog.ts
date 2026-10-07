@@ -17,7 +17,7 @@ export interface CatalogField {
     format: CatalogFormat;
 }
 
-export type DocRoot = 'Invoice' | 'DespatchAdvice' | 'ReceiptAdvice';
+export type DocRoot = 'Invoice' | 'DespatchAdvice' | 'ReceiptAdvice' | 'CreditNote' | 'eBilet' | 'eYolcuListesi';
 
 type Row = [label: string, path: string, format?: CatalogFormat];
 
@@ -184,6 +184,15 @@ const INVOICE_FIELDS = build('Invoice', [
         ['Tevkifat Matrahı', 'WithholdingTaxTotal/TaxSubtotal/TaxableAmount', 'amount'],
     ]],
     ['Vergi Türleri', taxTypeRows('TaxTotal', '', true)],
+    ['Serbest Meslek Makbuzu (e-SMM)', [
+        ['Serbest Meslek Erbabı Mesleği / Unvanı', 'AccountingSupplierParty/Party/Person/Title'],
+        ['GV Stopajı Matrahı', `${taxSubtotal('TaxTotal', '0003')}/TaxableAmount`, 'amount'],
+        ['GV Stopajı Oranı (%)', `${taxSubtotal('TaxTotal', '0003')}/Percent`, 'number'],
+        ['KV Stopajı Oranı (%)', `${taxSubtotal('TaxTotal', '0011')}/Percent`, 'number'],
+        ['GV Stopajı Tutarı (tevkifat bölümünde)', `${taxSubtotal('WithholdingTaxTotal', '0003')}/TaxAmount`, 'amount'],
+        ['GV Stopajı Oranı (tevkifat bölümünde, %)', `${taxSubtotal('WithholdingTaxTotal', '0003')}/Percent`, 'number'],
+        ['KDV Tevkifatı Tutarı (9015, eski kullanım)', `${taxSubtotal('TaxTotal', '9015')}/TaxAmount`, 'amount'],
+    ]],
     ['Döviz / Kur', [
         ['Döviz Kuru', 'PricingExchangeRate/CalculationRate', 'number'],
         ['Kaynak Para Birimi', 'PricingExchangeRate/SourceCurrencyCode'],
@@ -419,10 +428,181 @@ const RECEIPT_ADVICE_FIELDS = build('ReceiptAdvice', [
     ]],
 ]);
 
+/**
+ * e-Müstahsil Makbuzu (CreditNote, MUSTAHSILMAKBUZ): Müstahsil Makbuzu Kılavuzu V1.1,
+ * 509 s. VUK GT IV.5.3 ve Karekod Standardı 2.5. Düzenleyen = malı satın alan,
+ * AccountingCustomerParty = malı satan üretici / çiftçi.
+ */
+const MUSTAHSIL_KESINTILER: [code: string, name: string][] = [
+    ['0003', 'GV Stopajı'],
+    ['8001', 'Borsa Tescil Ücreti'],
+    ['9040', 'Mera Fonu'],
+    ['SGK_PRIM', 'SGK Prim Kesintisi'],
+];
+const SMS_PROVIDER = "AccountingSupplierParty/Party/Contact/OtherCommunication[ChannelCode/@name='SMS_PROVIDER']";
+const SMS_CONTACT = "AccountingCustomerParty/Party/Contact[Name='SMS']";
+
+const CREDIT_NOTE_FIELDS = build('CreditNote', [
+    ['Belge Bilgileri', [
+        ['Makbuz No', 'ID'],
+        ['Düzenleme Tarihi', 'IssueDate', 'date'],
+        ['Düzenleme Zamanı', 'IssueTime'],
+        ['Belge Tipi (MUSTAHSILMAKBUZ)', 'CreditNoteTypeCode'],
+        ['Senaryo (Profil)', 'ProfileID'],
+        ['Özelleştirme No', 'CustomizationID'],
+        ['ETTN (UUID)', 'UUID'],
+        ['Asıl / Suret (CopyIndicator)', 'CopyIndicator'],
+        ['Para Birimi', 'DocumentCurrencyCode'],
+        ['Makbuz Notu', 'Note'],
+        ['Satır Sayısı', 'LineCountNumeric', 'number'],
+        ['Teslim Tarihi', 'Delivery/ActualDeliveryDate', 'date'],
+        ['Ek Belge No', 'AdditionalDocumentReference/ID'],
+        ['Ek Belge Tarihi', 'AdditionalDocumentReference/IssueDate', 'date'],
+        ['Ek Belge Türü', 'AdditionalDocumentReference/DocumentType'],
+    ]],
+    ['Makbuzu Düzenleyen (Malı Satın Alan)', [
+        ...party('Düzenleyen', 'AccountingSupplierParty'),
+        ['Düzenleyen Mahalle', 'AccountingSupplierParty/Party/PostalAddress/District'],
+        ['Düzenleyen Daire / Oda No', 'AccountingSupplierParty/Party/PostalAddress/Room'],
+        ['SMS Operatörü (uygulama adı)', `${SMS_PROVIDER}/ChannelCode`],
+        ['SMS Operatörü VKN', `${SMS_PROVIDER}/Value`],
+    ]],
+    ['Üretici / Çiftçi (Malı Satan)', [
+        ...party('Çiftçi', 'AccountingCustomerParty'),
+        ['Çiftçi SMS Kodu', `${SMS_CONTACT}/ID`],
+        ['Çiftçi SMS Telefonu', `${SMS_CONTACT}/Telephone`],
+    ]],
+    ['Tutarlar', [
+        ['Mal Hizmet Toplam Tutarı (brüt)', 'LegalMonetaryTotal/LineExtensionAmount', 'amount'],
+        ['Vergiler Hariç Toplam', 'LegalMonetaryTotal/TaxExclusiveAmount', 'amount'],
+        ['Vergiler Dahil Toplam', 'LegalMonetaryTotal/TaxInclusiveAmount', 'amount'],
+        ['Toplam İskonto', 'LegalMonetaryTotal/AllowanceTotalAmount', 'amount'],
+        ['Yuvarlama Tutarı', 'LegalMonetaryTotal/PayableRoundingAmount', 'amount'],
+        ['Ödenecek Tutar (net)', 'LegalMonetaryTotal/PayableAmount', 'amount'],
+    ]],
+    ['Kesintiler (Vergi ve Fonlar)', [
+        ['Toplam Kesinti', 'TaxTotal/TaxAmount', 'amount'],
+        ...MUSTAHSIL_KESINTILER.flatMap(([code, name]): Row[] => [
+            [`${name} Tutarı`, `${taxSubtotal('TaxTotal', code)}/TaxAmount`, 'amount'],
+            [`${name} Matrahı`, `${taxSubtotal('TaxTotal', code)}/TaxableAmount`, 'amount'],
+            [`${name} Oranı (%)`, `${taxSubtotal('TaxTotal', code)}/Percent`, 'number'],
+        ]),
+        ['Kesinti Adı', 'TaxTotal/TaxSubtotal/TaxCategory/TaxScheme/Name'],
+        ['Kesinti Kodu', 'TaxTotal/TaxSubtotal/TaxCategory/TaxScheme/TaxTypeCode'],
+        ['Kesinti Tutarı', 'TaxTotal/TaxSubtotal/TaxAmount', 'amount'],
+        ['Kesinti Oranı (%)', 'TaxTotal/TaxSubtotal/Percent', 'number'],
+    ]],
+    ['Satır (Mal Bilgileri)', [
+        ['Satır No', 'CreditNoteLine/ID'],
+        ['Malın Cinsi', 'CreditNoteLine/Item/Name'],
+        ['Mal Açıklaması', 'CreditNoteLine/Item/Description'],
+        ['Miktar', 'CreditNoteLine/CreditedQuantity', 'number'],
+        ['Birim', 'CreditNoteLine/CreditedQuantity/@unitCode'],
+        ['Birim Fiyat', 'CreditNoteLine/Price/PriceAmount', 'amount'],
+        ['Tutar (Bedel)', 'CreditNoteLine/LineExtensionAmount', 'amount'],
+        ['Satır Notu', 'CreditNoteLine/Note'],
+        ['Satır Kesinti Toplamı', 'CreditNoteLine/TaxTotal/TaxAmount', 'amount'],
+        ...MUSTAHSIL_KESINTILER.flatMap(([code, name]): Row[] => [
+            [`Satır ${name} Tutarı`, `${taxSubtotal('CreditNoteLine/TaxTotal', code)}/TaxAmount`, 'amount'],
+            [`Satır ${name} Oranı (%)`, `${taxSubtotal('CreditNoteLine/TaxTotal', code)}/Percent`, 'number'],
+        ]),
+    ]],
+]);
+
+/**
+ * e-Bilet paketi (ebilet.xsd, http://ebilet.efatura.gov.tr): aylık e-Bilet raporu
+ * (eBilet) ve e-Yolcu Listesi (eYolcuListesi). Eleman adları küçük harfle başlar.
+ */
+const EBILET_HEADER: Row[] = [
+    ['Gönderen VKN', 'baslik/gonderen/vkn'],
+    ['Gönderen TCKN', 'baslik/gonderen/tckn'],
+    ['Rapor Dönemi Başlangıcı', 'baslik/baslangicTarihi', 'date'],
+    ['Rapor Dönemi Bitişi', 'baslik/bitisTarihi', 'date'],
+    ['Rapor Versiyonu', 'baslik/versiyon'],
+    ['Rapor UUID', 'baslik/uuid'],
+    ['İmza Zamanı', 'baslik/Signature/Object/QualifyingProperties/SignedProperties/SignedSignatureProperties/SigningTime'],
+];
+
+const EBILET_FIELDS = build('eBilet', [
+    ['Rapor Bilgileri', EBILET_HEADER],
+    ['Bilet', [
+        ['Bilet No', 'bilet/biletNo'],
+        ['Belge Tipi (SATIS / IADE)', 'bilet/belgeTip'],
+        ['Özet Değer (SHA-256)', 'bilet/ozetDeger'],
+        ['Düzenlenme Tarihi', 'bilet/duzenlenmeTarihi', 'date'],
+        ['Sefer Zamanı', 'bilet/seferZamani'],
+        ['Etkinlik Zamanı', 'bilet/etkinlikZamani'],
+        ['Ödeme Şekli', 'bilet/odemeSekli'],
+        ['Bilet Tutarı', 'bilet/tutar', 'amount'],
+        ['Para Birimi', 'bilet/tutar/@paraBirim'],
+        ['Döviz Kuru', 'bilet/tutar/@kur', 'number'],
+        ['KDV Tutarı', 'bilet/kdv', 'amount'],
+        ['e-Bilet URL', 'bilet/ebiletUrl'],
+    ]],
+    ['Etkinlik Yeri / Organizatör', [
+        ['Etkinlik Yeri İl Kodu', 'bilet/yer/ilkod'],
+        ['Etkinlik Yeri Belediyesi', 'bilet/yer/belediye'],
+        ['Etkinlik Yeri Açıklaması', 'bilet/yer/aciklama'],
+        ['Organizatör VKN/TCKN', 'bilet/organizator'],
+    ]],
+    ['Hizmet / Gider Gösteren', [
+        ['Hizmetin Nevi', 'bilet/hizmetinNevi/tur'],
+        ['Hizmet Açıklaması', 'bilet/hizmetinNevi/aciklama'],
+        ['Gider Gösteren VKN', 'bilet/giderGosteren/vkn'],
+        ['Gider Gösteren TCKN', 'bilet/giderGosteren/tckn'],
+        ['Referans Açıklaması', 'bilet/referanslar/referans/aciklama'],
+        ['Referans No (asıl bilet)', 'bilet/referanslar/referans/no'],
+    ]],
+    ['Diğer Vergiler', [
+        ['Diğer Vergi Kodu', 'bilet/digerVergiler/vergi/vergiKodu'],
+        ['Diğer Vergi Adı', 'bilet/digerVergiler/vergi/vergiAdi'],
+        ['Diğer Vergi Oranı (%)', 'bilet/digerVergiler/vergi/yuzde', 'number'],
+        ['Diğer Vergi Tutarı', 'bilet/digerVergiler/vergi/tutar', 'amount'],
+        ['Eğlence Vergisi Tutarı (9142)', "bilet/digerVergiler/vergi[vergiKodu='9142']/tutar", 'amount'],
+    ]],
+    ['İptal Edilen Bilet', [
+        ['İptal Edilen Bilet No', 'biletIptal/biletNo'],
+        ['İptal Zamanı', 'biletIptal/iptalZamani'],
+        ['İptal Tutarı', 'biletIptal/tutar', 'amount'],
+        ['İptal KDV Tutarı', 'biletIptal/kdv', 'amount'],
+    ]],
+]);
+
+const EYOLCU_FIELDS = build('eYolcuListesi', [
+    ['Rapor Bilgileri', EBILET_HEADER],
+    ['Sefer', [
+        ['Yolcu Listesi No', 'yolcuListesi/yolcuListesiNo'],
+        ['Liste Özet Değeri', 'yolcuListesi/ozetDeger'],
+        ['Hareket Zamanı', 'yolcuListesi/haraketZamani'],
+        ['Hareket Noktası', 'yolcuListesi/hareketNoktasi'],
+        ['Sefer Numarası', 'yolcuListesi/seferNumarasi'],
+        ['Sefer Tarihi', 'yolcuListesi/seferTarihi', 'date'],
+        ['Araç Plakası', 'yolcuListesi/aracPlakasi'],
+        ['Toplam Hasılat (KDV dahil)', 'yolcuListesi/toplamHasilat', 'amount'],
+    ]],
+    ['Taşıtı İşleten', [
+        ['Taşıtı İşleten VKN', 'yolcuListesi/aracIsleten/vkn'],
+        ['Taşıtı İşleten TCKN', 'yolcuListesi/aracIsleten/tckn'],
+        ['Komisyon Tutarı', 'yolcuListesi/aracIsleten/komisyonTutar', 'amount'],
+        ['Komisyon KDV Tutarı', 'yolcuListesi/aracIsleten/komisyonKDV', 'amount'],
+    ]],
+    ['Koltuk / Yolcu', [
+        ['Koltuk No', 'yolcuListesi/koltukListesi/koltuk/koltukNo'],
+        ['Bilet No', 'yolcuListesi/koltukListesi/koltuk/biletNo'],
+        ['Bilet Tutarı', 'yolcuListesi/koltukListesi/koltuk/tutar', 'amount'],
+        ['Yolcu Adı Soyadı', 'yolcuListesi/koltukListesi/koltuk/adSoyad'],
+        ['Yolcu TCKN / YKN', 'yolcuListesi/koltukListesi/koltuk/tcknYkn'],
+        ['Yolcu Pasaport No', 'yolcuListesi/koltukListesi/koltuk/pasaportNo'],
+    ]],
+]);
+
 const CATALOGS: Record<DocRoot, CatalogField[]> = {
     Invoice: INVOICE_FIELDS,
     DespatchAdvice: DESPATCH_FIELDS,
     ReceiptAdvice: RECEIPT_ADVICE_FIELDS,
+    CreditNote: CREDIT_NOTE_FIELDS,
+    eBilet: EBILET_FIELDS,
+    eYolcuListesi: EYOLCU_FIELDS,
 };
 
 export function getCatalog(root: DocRoot): CatalogField[] {
@@ -435,8 +615,10 @@ export function docRootOf(xml: string): DocRoot {
     return name && name in CATALOGS ? name : 'Invoice';
 }
 
-/** Satır (kalem) alanı mı — yolun ikinci adımı satır elemanı. */
-export const isLineField = (f: CatalogField) => /^(Invoice\/InvoiceLine|DespatchAdvice\/DespatchLine|ReceiptAdvice\/ReceiptLine)\//.test(f.path);
+const LINE_PREFIX_RE = /^(Invoice\/InvoiceLine|DespatchAdvice\/DespatchLine|ReceiptAdvice\/ReceiptLine|CreditNote\/CreditNoteLine|eBilet\/(?:bilet|biletIptal)|eYolcuListesi\/yolcuListesi\/koltukListesi\/koltuk)\//;
+
+/** Satır (kalem) alanı mı — yol satır elemanıyla (InvoiceLine, bilet, koltuk…) başlıyor. */
+export const isLineField = (f: CatalogField) => LINE_PREFIX_RE.test(f.path);
 
 const STEP_RE = /^(@?[\w.-]+)(?:\[((?:[\w.-]+\/)*@?[\w.-]+)='([^']*)'\])?$/;
 const PRED_RE = /\[(?:[\w.-]+\/)*@?[\w.-]+='([^']*)'\]/;
@@ -460,7 +642,8 @@ function stepXPath(step: string): string {
 /** Katalog yolunu XPath'e çevirir: mutlak (`/`) ya da satır içinden göreli. */
 export function fieldXPath(f: CatalogField, relativeToLine = false): string {
     const steps = splitPath(f.path);
-    if (relativeToLine && isLineField(f)) return steps.slice(2).map(stepXPath).join('/');
+    const linePrefix = relativeToLine ? f.path.match(LINE_PREFIX_RE)?.[1] : undefined;
+    if (linePrefix) return steps.slice(linePrefix.split('/').length).map(stepXPath).join('/');
     return '/' + steps.map(stepXPath).join('/');
 }
 
@@ -472,9 +655,21 @@ const localNames = (path: string) => splitPath(path).map(s => s.match(STEP_RE)?.
  */
 export function detectInXslt(xsltLocalNames: Set<string>, xsltText: string, f: CatalogField): boolean {
     const names = localNames(f.path).slice(1).filter(n => n !== 'Party');
-    if (!names.every(n => xsltLocalNames.has(n.replace(/^@/, '')))) return false;
+    if (!names.every(n => usesName(xsltLocalNames, xsltText, n))) return false;
     const pred = f.path.match(PRED_RE);
     return !pred || xsltText.includes(pred[1]);
+}
+
+/**
+ * Küçük harfli adlar (e-Bilet: biletNo, tutar) düz metinde de sık geçtiğinden
+ * yalnızca önekli (`ebilet:tutar`), `@ad` ya da `local-name()='ad'` biçiminde sayılır.
+ */
+function usesName(xsltLocalNames: Set<string>, xsltText: string, step: string): boolean {
+    const name = step.replace(/^@/, '');
+    if (xsltLocalNames.has(name)) return true;
+    if (!/^[a-z]/.test(name)) return false;
+    const lead = step.startsWith('@') ? '@' : '[\\w.-]+:';
+    return new RegExp(`(?:${lead}|local-name\\(\\)\\s*=\\s*['"])${name}(?![\\w.-])`).test(xsltText);
 }
 
 /** XSLT'de geçen tüm yerel eleman/öznitelik adları (önekler atılarak). */
@@ -548,7 +743,15 @@ export function labelForXPath(xpath: string, catalog: CatalogField[], context = 
         else if (t !== '.') steps.push(s);
     }
     const full = steps.join('/');
-    const names = Array.from(full.replace(/\[[^\]]*\]/g, '').matchAll(/(?:[A-Za-z_][\w.-]*:)?([A-Z][A-Za-z0-9]+)/g)).map(m => m[1]);
+    // e-Bilet adları küçük harfle başlar; namespace'li eleman XPath 1.0'da önek ya da local-name() ister.
+    const lowerCase = /^[a-z]/.test(catalog[0]?.path ?? '');
+    const names = lowerCase
+        ? Array.from(full
+            .replace(/\*\[local-name\(\)\s*=\s*['"]([\w.-]+)['"]\]/g, 'x:$1')
+            .replace(/\$[\w.-]+/g, '')
+            .replace(/\[[^\]]*\]/g, '')
+            .matchAll(/[A-Za-z_][\w.-]*:([A-Za-z][\w.-]*)/g)).map(m => m[1])
+        : Array.from(full.replace(/\[[^\]]*\]/g, '').matchAll(/(?:[A-Za-z_][\w.-]*:)?([A-Z][A-Za-z0-9]+)/g)).map(m => m[1]);
     if (!names.length) return null;
     const leaf = names[names.length - 1];
     const attr = xpath.match(/@([\w.-]+)\s*\)?\s*$/)?.[1] ?? null;
@@ -630,11 +833,11 @@ export const numberPattern = (decimals: number) => (decimals > 0 ? `###.##0,${'0
 const formatted = (expr: string, decimals: number) =>
     `format-number(${expr}, '${numberPattern(decimals)}', '${DECIMAL_FORMAT_NAME}')`;
 
-/** Seçilen konum bir satır döngüsünün (InvoiceLine / DespatchLine / ReceiptLine) içinde mi? */
+/** Seçilen konum bir satır döngüsünün (InvoiceLine / DespatchLine / ReceiptLine / CreditNoteLine) içinde mi? */
 export function isInLineContext(xslt: string, offset: number): boolean {
     const { selects, match } = contextAt(xslt, offset);
     const inner = selects.length ? selects[selects.length - 1] : match;
-    return !!inner && /(InvoiceLine|DespatchLine|ReceiptLine)/.test(inner);
+    return !!inner && /(InvoiceLine|DespatchLine|ReceiptLine|CreditNoteLine|[:'"](?:bilet|biletIptal|koltuk)\b)/.test(inner);
 }
 
 const escapeText = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
