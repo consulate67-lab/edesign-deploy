@@ -33,7 +33,7 @@ import type { editor } from 'monaco-editor';
 import {
     ArrowLeft, Save, Download, ChevronDown, FileCode, FileCode2,
     AlertCircle, Eye, RefreshCw, CheckCircle2, Sparkles, Search, ZoomIn, ZoomOut,
-    PanelLeftClose, PanelLeftOpen, X,
+    PanelLeftClose, PanelLeftOpen, X, Lock,
     Image as ImageIcon, Type, Table2, TextCursorInput, Calculator, Plus, Columns3, Wallpaper,
 } from 'lucide-react';
 import {
@@ -986,8 +986,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     }, []);
 
     // ------------------------------------------------------------------------
-    // Hesaptaki tasarım: kaydedilince id, indirilince (kredi harcanınca) anahtar
-    // alır. Anahtarlı dosya tekrar yüklendiğinde tasarıma ücretsiz devam edilir.
+    // Hesaptaki tasarım: kaydedilince id, onaylanınca (kredi harcanınca) anahtar
+    // alır. Onaylı tasarım kilitlidir: düzenlenemez, yalnızca tekrar indirilir.
     // ------------------------------------------------------------------------
     const flushSourceEditsRef = useRef<() => void>(() => {});
     const [design, setDesign] = useState<{ id?: number; key?: string; paid: boolean; paidAt?: string | null; name?: string }>(
@@ -1003,7 +1003,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             setDesign({ id: d.id, key: d.design_key ?? key, paid: d.paid, paidAt: d.paid_at, name: d.name });
             if (d.paid) {
                 setSaveStatus('saved');
-                setSaveMessage('Satın alınmış tasarım — düzenleyip tekrar indirmeniz ücretsiz');
+                setSaveMessage('🔒 Onaylanmış tasarım — yalnızca indirilebilir');
             }
         }).catch(err => console.warn('[XSLTEditor] Tasarım anahtarı sorgulanamadı:', err));
         return () => { cancelled = true; };
@@ -1013,6 +1013,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     // Save — hesaptaki tasarımı günceller, yoksa yeni taslak oluşturur
     // ------------------------------------------------------------------------
     const handleSave = useCallback(async () => {
+        if (design.paid) return;
         flushSourceEditsRef.current();
         const content = xsltContentRef.current;
         setSaveStatus('saving');
@@ -1047,7 +1048,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             setSaveStatus('error');
             setSaveMessage(`⚠ Kayıt hatası: ${(err as Error).message}`);
         }
-    }, [design.id, docName, moduleId, xmlContent]);
+    }, [design.id, design.paid, docName, moduleId, xmlContent]);
 
     const downloadXslt = useCallback((content: string, suffix = '') => {
         const fileName = `${docName.replace(/\s+/g, '_')}_${moduleId}${suffix}.xslt`;
@@ -1107,6 +1108,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             setSaveMessage(r.charged
                 ? `✅ Onaylandı ve indirildi · 1 tasarım hakkı kullanıldı (kalan ${r.credits}).`
                 : '✅ İndirildi · ücretsiz (onaylı tasarım)');
+            setSelectedObject(null);
         } catch (err) {
             const e = err as Error & { paymentRequired?: boolean };
             setSaveStatus('error');
@@ -2471,7 +2473,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 )}
 
                 {/* Save butonu */}
-                <button
+                {!design.paid && <button
                     onClick={handleSave}
                     disabled={saveStatus === 'saving'}
                     style={{
@@ -2497,7 +2499,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         <Save size={14} />
                     )}
                     Kaydet
-                </button>
+                </button>}
 
                 {!design.paid && (
                     <button
@@ -2533,7 +2535,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                     data-approve
                     disabled={saveStatus === 'saving'}
                     title={design.paid
-                        ? 'Onaylı tasarım — TEST yazısız dosyayı tekrar indirmek ücretsiz.'
+                        ? 'Onaylı tasarım kilitlidir — onaylanan dosyayı tekrar indirmek ücretsiz.'
                         : 'Tasarımı onaylayın: TEST yazısı kaldırılmış dosya indirilir (1 tasarım hakkı).'}
                     style={{
                         display: 'flex',
@@ -2589,6 +2591,56 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                     transition: 'grid-template-columns 0.2s ease',
                 }}
             >
+                {design.paid && (
+                    <div
+                        data-design-locked
+                        style={{
+                            position: 'absolute', inset: 0, zIndex: 50,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            background: 'rgba(2, 6, 23, 0.55)', backdropFilter: 'blur(1px)',
+                        }}
+                    >
+                        <div style={{
+                            maxWidth: 440, padding: '24px 26px', borderRadius: 14, textAlign: 'center',
+                            background: '#0f172a', border: '1px solid rgba(16, 185, 129, 0.4)',
+                            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5)', color: '#e2e8f0',
+                        }}>
+                            <Lock size={30} color="#34d399" style={{ marginBottom: 10 }} />
+                            <div style={{ fontSize: 17, fontWeight: 800, marginBottom: 6 }}>Bu tasarım onaylandı</div>
+                            <div style={{ fontSize: 13, lineHeight: 1.6, color: '#94a3b8', marginBottom: 18 }}>
+                                Onaylanmış (satın alınmış) tasarımlar tekrar düzenlenemez. Onaylanan dosyayı
+                                istediğiniz zaman buradan veya "Tasarımlarım" bölümünden ücretsiz indirebilirsiniz.
+                            </div>
+                            <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+                                <button
+                                    type="button"
+                                    data-locked-download
+                                    onClick={() => handleApprove(design.name || docName).catch(() => {})}
+                                    style={{
+                                        display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 16px', borderRadius: 8,
+                                        border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 13, fontFamily: 'inherit',
+                                        background: 'linear-gradient(135deg, #10b981, #059669)', color: 'white',
+                                    }}
+                                >
+                                    <Download size={14} /> İndir .xslt
+                                </button>
+                                {onBack && (
+                                    <button
+                                        type="button"
+                                        onClick={onBack}
+                                        style={{
+                                            display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 16px', borderRadius: 8,
+                                            cursor: 'pointer', fontWeight: 600, fontSize: 13, fontFamily: 'inherit',
+                                            background: 'transparent', border: '1px solid rgba(148, 163, 184, 0.35)', color: '#cbd5e1',
+                                        }}
+                                    >
+                                        <ArrowLeft size={14} /> Geri
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
                 {/* SOL — Snippet gallery (Sprint 8 Aşama 1) */}
                 <div
                     style={{

@@ -386,6 +386,9 @@ app.put('/api/designs/:id', authenticateToken, async (req, res) => {
         const existing = await db.get('SELECT * FROM designs WHERE id = ?', [id]);
         if (!existing) return res.status(404).json({ error: 'Tasarim bulunamadi.' });
         if (existing.user_id !== req.user.id) return res.status(403).json({ error: 'Bu tasarimi guncelleme yetkiniz yok.' });
+        if (existing.paid_at && (xslt_content !== undefined || xml_content !== undefined || custom_content !== undefined || sections !== undefined)) {
+            return res.status(403).json({ error: 'Onaylanmis (satin alinmis) tasarim duzenlenemez; yalnizca indirilebilir.' });
+        }
 
         const updates = [];
         const params = [];
@@ -434,13 +437,13 @@ app.delete('/api/designs/:id', authenticateToken, async (req, res) => {
     }
 });
 
-// İndirilen XSLT'ye yazılan tasarım anahtarı. Dosya tekrar yüklendiğinde
-// sahibinin aynı tasarıma ek kredi harcamadan devam etmesini sağlar.
+// Onaylanan XSLT'ye yazılan tasarım anahtarı. Onaylı tasarım kilitlidir:
+// anahtarlı dosya editöre alınmaz, yalnızca saklanan hali tekrar indirilir.
 const DESIGN_KEY_RE = /edesign-key:([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i;
 const DESIGN_KEY_COMMENT_RE = /<!--\s*edesign-key:[^>]*?-->[ \t]*\r?\n?/gi;
 const embedDesignKey = (xslt, key) => {
     const clean = xslt.replace(/^(?:\uFEFF|\u00EF\u00BB\u00BF)+/, '').replace(DESIGN_KEY_COMMENT_RE, '');
-    const comment = `<!-- edesign-key:${key} | Bu satiri silmeyin: dosyayi tekrar yuklediginizde tasariminiza ek tasarim hakki harcamadan devam edersiniz. -->\n`;
+    const comment = `<!-- edesign-key:${key} | Onaylanmis tasarim. Tasarimcida tekrar duzenlenemez; hesabinizdaki Tasarimlarim bolumunden tekrar indirebilirsiniz. -->\n`;
     const decl = clean.match(/^\uFEFF?\s*<\?xml[^?]*\?>[ \t]*\r?\n?/);
     return decl ? clean.slice(0, decl[0].length) + comment + clean.slice(decl[0].length) : comment + clean;
 };
@@ -459,9 +462,9 @@ app.get('/api/designs/by-key/:key', authenticateToken, async (req, res) => {
     }
 });
 
-// POST /api/designs/export — Tasarımı indirmek için. Tasarım daha önce
-// indirilmişse (paid_at dolu) ücretsizdir; değilse 1 tasarım hakkı düşer.
-// İçerik ve önizleme XML'i saklanır, anahtar XSLT'ye yazılıp geri döner.
+// POST /api/designs/export — Onay: 1 tasarım hakkı düşer, içerik ve önizleme
+// XML'i saklanır, anahtar XSLT'ye yazılıp geri döner. Onaylı tasarımda
+// (paid_at dolu) gönderilen içerik yok sayılır, saklanan dosya ücretsiz döner.
 app.post('/api/designs/export', authenticateToken, async (req, res) => {
     const { design_id, design_key, name, module_id, xslt_content, xml_content } = req.body || {};
     if (typeof xslt_content !== 'string' || !xslt_content.trim()) {
@@ -492,8 +495,19 @@ app.post('/api/designs/export', authenticateToken, async (req, res) => {
         }
 
         let credits = user.credits;
+        if (existing?.paid_at) {
+            // Onaylı tasarım kilitli: gönderilen içerik yok sayılır, saklanan dosya verilir.
+            const row = (await client.query(
+                `UPDATE designs SET download_count = download_count + 1, updated_at = NOW() WHERE id = $1 RETURNING *`,
+                [existing.id]
+            )).rows[0];
+            await client.query('COMMIT');
+            console.log(`[designs] user=${user.id} re-download design #${row.id}`);
+            return res.json({ success: true, charged: false, credits, design: serializeDesign(row) });
+        }
+
         let charged = false;
-        if (!existing?.paid_at && user.role !== 'admin') {
+        if (user.role !== 'admin') {
             if (user.credits <= 0) {
                 await client.query('ROLLBACK');
                 return res.status(402).json({ error: 'Tasarimi indirmek icin tasarim hakkiniz kalmadi.', paymentRequired: true });

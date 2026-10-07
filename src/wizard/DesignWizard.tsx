@@ -159,7 +159,10 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
             const wasTest = kind === 'xslt' && hasTestWatermark(raw);
             const text = wasTest ? stripTestWatermark(raw) : raw;
             if (kind === 'xslt') setOwnXsltWasTest(wasTest);
-            const result = kind === 'xslt' ? validateXslt(text, docType, sampleXml) : validateXml(text, docType, xsltText);
+            const approved = kind === 'xslt' && !!designKeyOf(text);
+            const result: ValidationResult = approved
+                ? { ok: false, info: [], checks: [{ level: 'error', text: 'Bu dosya onaylanmış (satın alınmış) bir tasarım; tekrar düzenlenemez. Dosyayı "Tasarımlarım" bölümünden tekrar indirebilirsiniz.' }] }
+                : kind === 'xslt' ? validateXslt(text, docType, sampleXml) : validateXml(text, docType, xsltText);
             const loaded = { name: file.name, size: file.size, text, result };
             if (kind === 'xslt') setOwnXslt(loaded); else setOwnXml(loaded);
         } catch (e) {
@@ -282,15 +285,7 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
                             background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.35)', color: '#fde68a',
                         }}>
                             Bu bir TEST dosyası. TEST yazısı editörde kaldırıldı; tasarıma kaldığınız yerden devam edebilirsiniz.
-                            Bitirdiğinizde "Onayla" ile TEST yazısız dosyayı alırsınız.
-                        </div>
-                    )}
-                    {xsltChoice === 'own' && ownXslt && designKeyOf(ownXslt.text) && (
-                        <div data-design-key-note style={{
-                            marginTop: 10, padding: '10px 12px', borderRadius: 10, fontSize: 12, lineHeight: 1.5,
-                            background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.35)', color: '#a7f3d0',
-                        }}>
-                            Bu dosya daha önce indirilmiş bir tasarım. Tasarım sizin hesabınıza aitse düzenleme ve tekrar indirme ücretsizdir.
+                            Bitirdiğinizde "Onayla" ile TEST yazısız dosyayı alırsınız; onaydan sonra tasarım değiştirilemez.
                         </div>
                     )}
                 </>

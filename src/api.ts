@@ -43,7 +43,7 @@ export const DESIGN_KEY_RE = /edesign-key:([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[
 export const designKeyOf = (xslt: string | null | undefined) => xslt?.match(DESIGN_KEY_RE)?.[1] ?? null;
 const embedDesignKey = (xslt: string, key: string) => {
     const clean = xslt.replace(/^(?:\uFEFF|\u00EF\u00BB\u00BF)+/, '').replace(/<!--\s*edesign-key:[^>]*?-->[ \t]*\r?\n?/gi, '');
-    const comment = `<!-- edesign-key:${key} | Bu satiri silmeyin: dosyayi tekrar yuklediginizde tasariminiza ek tasarim hakki harcamadan devam edersiniz. -->\n`;
+    const comment = `<!-- edesign-key:${key} | Onaylanmis tasarim. Tasarimcida tekrar duzenlenemez; hesabinizdaki Tasarimlarim bolumunden tekrar indirebilirsiniz. -->\n`;
     const decl = clean.match(/^\uFEFF?\s*<\?xml[^?]*\?>[ \t]*\r?\n?/);
     return decl ? clean.slice(0, decl[0].length) + comment + clean.slice(decl[0].length) : comment + clean;
 };
@@ -324,8 +324,8 @@ export const api = {
     },
 
     /**
-     * Tasarımı indirmek için: daha önce indirilmiş tasarım ücretsiz, değilse
-     * 1 tasarım hakkı düşer. Dönen xslt_content tasarım anahtarını içerir.
+     * Onay: 1 tasarım hakkı düşer, dönen xslt_content tasarım anahtarını içerir.
+     * Onaylı tasarımda gönderilen içerik yok sayılır, saklanan dosya ücretsiz döner.
      */
     exportDesign: async (payload: {
         design_id?: number;
@@ -344,8 +344,13 @@ export const api = {
         const users = getUsers();
         const user = users.find((u: any) => u.token === api.getToken());
         if (!user) throw new Error('Oturum geçersiz.');
+        if (existing?.paid) {
+            const again = { ...existing, download_count: existing.download_count + 1, updated_at: new Date().toISOString() };
+            localStorage.setItem('mock_designs', JSON.stringify([again, ...designs.filter(d => d.id !== again.id)]));
+            return { success: true, charged: false, credits: user.credits, design: again };
+        }
         let charged = false;
-        if (!existing?.paid && user.role !== 'admin') {
+        if (user.role !== 'admin') {
             if (user.credits <= 0) {
                 throw Object.assign(new Error('Tasarımı indirmek için tasarım hakkınız kalmadı.'), { status: 402, paymentRequired: true });
             }
@@ -403,6 +408,9 @@ export const api = {
         const designs = JSON.parse(localStorage.getItem('mock_designs') || '[]');
         const idx = designs.findIndex((d: any) => d.id === id);
         if (idx === -1) throw new Error('Tasarim bulunamadi.');
+        if (designs[idx].paid && (patch.xslt_content !== undefined || patch.xml_content !== undefined)) {
+            throw Object.assign(new Error('Onaylanmış (satın alınmış) tasarım düzenlenemez; yalnızca indirilebilir.'), { status: 403 });
+        }
         designs[idx] = { ...designs[idx], ...patch, updated_at: new Date().toISOString() };
         localStorage.setItem('mock_designs', JSON.stringify(designs));
         return { success: true, design: designs[idx] };

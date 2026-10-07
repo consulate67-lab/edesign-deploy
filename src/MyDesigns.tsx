@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { FileCode, CheckCircle2, PenLine, Trash2 } from 'lucide-react';
+import { FileCode, PenLine, Trash2, Download, Lock } from 'lucide-react';
 import { api, type SavedDesign } from './api';
 import { WIZARD_DOC_TYPES } from './wizard/docTypes';
+import { stripLeadingBom } from './xslt-editor/utils/testWatermark';
 
 const moduleLabel = (moduleId: string) =>
     WIZARD_DOC_TYPES.find(t => t.id === moduleId || t.defaults.some(d => d.moduleId === moduleId))?.label ?? moduleId;
@@ -11,9 +12,20 @@ const formatDate = (iso: string) => {
     return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric' });
 };
 
+const downloadDesign = (d: SavedDesign) => {
+    const url = URL.createObjectURL(new Blob([stripLeadingBom(d.xslt_content ?? '')], { type: 'application/xml;charset=utf-8' }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${d.name.replace(/[\\/:*?"<>|\s]+/g, '_')}_${d.module_id}.xslt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+};
+
 /**
- * Hesaptaki XSLT tasarımları. Satın alınmış (indirilmiş) tasarımlar ek
- * tasarım hakkı harcamadan açılıp düzenlenebilir ve tekrar indirilebilir.
+ * Hesaptaki XSLT tasarımları. Taslaklar açılıp düzenlenebilir; onaylanmış
+ * (satın alınmış) tasarımlar kilitlidir, yalnızca tekrar indirilebilir.
  */
 export const MyDesigns: React.FC<{ onOpen: (d: SavedDesign) => void }> = ({ onOpen }) => {
     const [designs, setDesigns] = useState<SavedDesign[] | null>(null);
@@ -27,7 +39,7 @@ export const MyDesigns: React.FC<{ onOpen: (d: SavedDesign) => void }> = ({ onOp
     if (!designs?.length) return null;
 
     const remove = async (d: SavedDesign) => {
-        if (!window.confirm(`"${d.name}" silinsin mi?${d.paid ? '\n\nSatın alınmış bir tasarımı silerseniz, indirdiğiniz dosyayı tekrar yükleyerek ücretsiz devam edemezsiniz.' : ''}`)) return;
+        if (!window.confirm(`"${d.name}" silinsin mi?${d.paid ? '\n\nOnaylanmış bir tasarımı silerseniz buradan tekrar indiremezsiniz.' : ''}`)) return;
         await api.deleteDesign(d.id);
         setDesigns(prev => prev?.filter(x => x.id !== d.id) ?? null);
     };
@@ -37,7 +49,7 @@ export const MyDesigns: React.FC<{ onOpen: (d: SavedDesign) => void }> = ({ onOp
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '12px' }}>
                 <h2 style={{ fontSize: '1.1rem', fontWeight: 800, margin: 0, color: '#f1f5f9' }}>Tasarımlarım</h2>
                 <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
-                    Satın aldığınız tasarımları ek tasarım hakkı harcamadan düzenleyip tekrar indirebilirsiniz.
+                    Taslaklarınıza devam edebilirsiniz. Onaylanan tasarımlar değiştirilemez, yalnızca ücretsiz tekrar indirilir.
                 </span>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '12px' }}>
@@ -45,6 +57,7 @@ export const MyDesigns: React.FC<{ onOpen: (d: SavedDesign) => void }> = ({ onOp
                     <div
                         key={d.id}
                         data-design-id={d.id}
+                        data-design-paid={d.paid ? '1' : undefined}
                         style={{
                             display: 'flex', flexDirection: 'column', gap: '8px', padding: '14px 16px',
                             background: 'rgba(30, 41, 59, 0.5)', borderRadius: '12px',
@@ -77,20 +90,35 @@ export const MyDesigns: React.FC<{ onOpen: (d: SavedDesign) => void }> = ({ onOp
                                 background: d.paid ? 'rgba(16, 185, 129, 0.15)' : 'rgba(148, 163, 184, 0.12)',
                                 color: d.paid ? '#6ee7b7' : '#94a3b8',
                             }}>
-                                {d.paid ? <><CheckCircle2 size={11} /> Satın alındı · ücretsiz düzenleme</> : 'Taslak · indirme 1 hak'}
+                                {d.paid ? <><Lock size={11} /> Onaylandı · yalnızca indirme</> : 'Taslak · onay 1 hak'}
                             </span>
-                            <button
-                                type="button"
-                                data-open-design={d.id}
-                                onClick={() => onOpen(d)}
-                                style={{
-                                    marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: '5px',
-                                    padding: '6px 12px', borderRadius: '8px', border: 'none', cursor: 'pointer',
-                                    background: '#6366f1', color: 'white', fontWeight: 700, fontSize: '0.8rem', fontFamily: 'inherit',
-                                }}
-                            >
-                                <PenLine size={13} /> Devam et
-                            </button>
+                            {d.paid ? (
+                                <button
+                                    type="button"
+                                    data-download-design={d.id}
+                                    onClick={() => downloadDesign(d)}
+                                    style={{
+                                        marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: '5px',
+                                        padding: '6px 12px', borderRadius: '8px', border: 'none', cursor: 'pointer',
+                                        background: '#10b981', color: 'white', fontWeight: 700, fontSize: '0.8rem', fontFamily: 'inherit',
+                                    }}
+                                >
+                                    <Download size={13} /> İndir
+                                </button>
+                            ) : (
+                                <button
+                                    type="button"
+                                    data-open-design={d.id}
+                                    onClick={() => onOpen(d)}
+                                    style={{
+                                        marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: '5px',
+                                        padding: '6px 12px', borderRadius: '8px', border: 'none', cursor: 'pointer',
+                                        background: '#6366f1', color: 'white', fontWeight: 700, fontSize: '0.8rem', fontFamily: 'inherit',
+                                    }}
+                                >
+                                    <PenLine size={13} /> Devam et
+                                </button>
+                            )}
                         </div>
                     </div>
                 ))}

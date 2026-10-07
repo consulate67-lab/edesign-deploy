@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { CheckCircle2, Download, Loader2, X, AlertTriangle } from 'lucide-react';
+import { CheckCircle2, Download, Loader2, X, AlertTriangle, Lock } from 'lucide-react';
 import { api } from '../api';
 
 interface ApproveDialogProps {
@@ -124,11 +124,11 @@ export const ApproveDialog: React.FC<ApproveDialogProps> = ({ defaultName, onTes
                     </li>
                     <li style={{ display: 'flex', gap: 8 }}>
                         <CheckCircle2 size={16} color="#10b981" style={{ flexShrink: 0 }} />
-                        <span>Tasarım hesabınıza kaydedilir; sonradan düzenleyip tekrar indirmek ücretsizdir.</span>
+                        <span>Tasarım hesabınıza kaydedilir; "Tasarımlarım" bölümünden istediğiniz zaman ücretsiz tekrar indirebilirsiniz.</span>
                     </li>
-                    <li style={{ display: 'flex', gap: 8 }}>
-                        <CheckCircle2 size={16} color="#10b981" style={{ flexShrink: 0 }} />
-                        <span>İndirilen dosyayı tekrar yüklerseniz aynı tasarıma ek hak harcamadan devam edersiniz.</span>
+                    <li data-approve-lock-note style={{ display: 'flex', gap: 8, color: '#fca5a5', fontWeight: 600 }}>
+                        <Lock size={16} color="#f87171" style={{ flexShrink: 0 }} />
+                        <span>Onaydan sonra tasarım kilitlenir: tekrar düzenlenemez, yalnızca indirilebilir.</span>
                     </li>
                 </ul>
 
@@ -155,7 +155,7 @@ export const ApproveDialog: React.FC<ApproveDialogProps> = ({ defaultName, onTes
 
                 <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: '#cbd5e1', marginBottom: 18, cursor: 'pointer' }}>
                     <input data-approve-check type="checkbox" checked={checked} onChange={e => setChecked(e.target.checked)} style={{ marginTop: 2 }} />
-                    Tasarımı kontrol ettim, onaylıyorum.
+                    Tasarımı kontrol ettim, onaylıyorum. Onaydan sonra değişiklik yapamayacağımı biliyorum.
                 </label>
 
                 {noCredits && (
