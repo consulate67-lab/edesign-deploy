@@ -2,7 +2,7 @@
  * Tasarım editörünün "Tüm Belge Alanları" kataloğu (UBL-TR 1.2.1).
  *
  * Yol sözdizimi: kökten başlayan yerel adlar, `/` ile ayrılır. Adım biçimleri:
- *   `Name`, `Name[@attr='v']`, `Name[Child='v']`, `@attr` (son adım).
+ *   `Name`, `Name[@attr='v']`, `Name[Child='v']`, `Name[A/B/Child='v']`, `@attr` (son adım).
  * XPath'ler namespace önekinden bağımsız üretilir (`*[local-name()='X']`),
  * böylece her şablonun kendi önek tanımlarıyla çalışır.
  */
@@ -55,6 +55,51 @@ const party = (prefix: string, base: string): Row[] => [
     [`${prefix} Web Sitesi`, `${base}/Party/WebsiteURI`],
 ];
 
+/** GİB Kod Listeleri v1.43 — Vergi Kodları Listesi (TaxTypeCode). */
+const TAX_TYPES: [code: string, name: string, detail: boolean][] = [
+    ['0015', 'KDV', true],
+    ['0059', 'Konaklama Vergisi', true],
+    ['0071', 'ÖTV 1. Liste (petrol/doğalgaz)', true],
+    ['9077', 'ÖTV 2. Liste (motorlu taşıt)', true],
+    ['0073', 'ÖTV 3. Liste', true],
+    ['0075', 'ÖTV 3A (alkollü içecek)', true],
+    ['0076', 'ÖTV 3B (tütün)', true],
+    ['0077', 'ÖTV 3C (kolalı gazoz)', true],
+    ['0074', 'ÖTV 4. Liste (dayanıklı tüketim)', true],
+    ['4171', 'Petrol-Doğalgaz ÖTV Tevkifatı', false],
+    ['1047', 'Damga Vergisi', false],
+    ['1048', '5035 SK Damga Vergisi', false],
+    ['4080', 'Özel İletişim Vergisi', false],
+    ['4081', '5035 SK Özel İletişim Vergisi', false],
+    ['4071', 'Elektrik ve Havagazı Tüketim Vergisi', false],
+    ['8005', 'Elektrik Tüketim Vergisi', false],
+    ['8004', 'TRT Payı', false],
+    ['8002', 'Enerji Fonu', false],
+    ['8001', 'Borsa Tescil Ücreti', false],
+    ['8006', 'Telsiz Kullanım Ücreti', false],
+    ['8007', 'Telsiz Ruhsat Ücreti', false],
+    ['8008', 'Çevre Temizlik Vergisi', false],
+    ['9944', 'Belediye Hal Rüsumu', false],
+    ['9040', 'Mera Fonu', false],
+    ['0003', 'Gelir Vergisi Stopajı', false],
+    ['0011', 'Kurumlar Vergisi Stopajı', false],
+    ['0021', 'Banka Muameleleri Vergisi', false],
+    ['0022', 'Sigorta Muameleleri Vergisi', false],
+    ['9021', '4961 Banka Sigorta Muameleleri Vergisi', false],
+    ['0061', 'KKDF Kesintisi', false],
+];
+
+const taxSubtotal = (base: string, code: string) => `${base}/TaxSubtotal[TaxCategory/TaxScheme/TaxTypeCode='${code}']`;
+
+const taxTypeRows = (base: string, prefix: string, all: boolean): Row[] =>
+    TAX_TYPES.filter(([, , detail]) => all || detail).flatMap(([code, name, detail]): Row[] => [
+        [`${prefix}${name} Tutarı`, `${taxSubtotal(base, code)}/TaxAmount`, 'amount'],
+        ...(detail ? [
+            [`${prefix}${name} Matrahı`, `${taxSubtotal(base, code)}/TaxableAmount`, 'amount'],
+            [`${prefix}${name} Oranı (%)`, `${taxSubtotal(base, code)}/Percent`, 'number'],
+        ] as Row[] : []),
+    ]);
+
 const INVOICE_FIELDS = build('Invoice', [
     ['Belge Bilgileri', [
         ['Fatura No', 'ID'],
@@ -67,10 +112,50 @@ const INVOICE_FIELDS = build('Invoice', [
         ['Fatura Notu', 'Note'],
         ['Satır Sayısı', 'LineCountNumeric', 'number'],
         ['Fatura Dönemi Başlangıcı', 'InvoicePeriod/StartDate', 'date'],
+        ['Fatura Dönemi Başlangıç Saati', 'InvoicePeriod/StartTime'],
         ['Fatura Dönemi Bitişi', 'InvoicePeriod/EndDate', 'date'],
+        ['Fatura Dönemi Bitiş Saati', 'InvoicePeriod/EndTime'],
+        ['Fatura Dönemi Açıklaması', 'InvoicePeriod/Description'],
+        ['Muhasebe Maliyet Kodu (SGK)', 'AccountingCost'],
     ]],
-    ['Satıcı', party('Satıcı', 'AccountingSupplierParty')],
-    ['Alıcı', party('Alıcı', 'AccountingCustomerParty')],
+    ['Satıcı', [
+        ...party('Satıcı', 'AccountingSupplierParty'),
+        ['Satıcı Sevkiyat No (IDIS)', "AccountingSupplierParty/Party/PartyIdentification/ID[@schemeID='SEVKIYATNO']"],
+        ['Satıcı Şube No', "AccountingSupplierParty/Party/PartyIdentification/ID[@schemeID='SUBENO']"],
+        ['Satıcı EPDK No', "AccountingSupplierParty/Party/PartyIdentification/ID[@schemeID='EPDKNO']"],
+    ]],
+    ['Alıcı', [
+        ...party('Alıcı', 'AccountingCustomerParty'),
+        ['Alıcı Araç Plakası (şarj)', "AccountingCustomerParty/Party/PartyIdentification/ID[@schemeID='PLAKA']"],
+        ['Alıcı Araç Kimlik No (şarj)', "AccountingCustomerParty/Party/PartyIdentification/ID[@schemeID='ARACKIMLIKNO']"],
+        ['Alıcı Müşteri No', "AccountingCustomerParty/Party/PartyIdentification/ID[@schemeID='MUSTERINO']"],
+        ['Alıcı Abone No', "AccountingCustomerParty/Party/PartyIdentification/ID[@schemeID='ABONENO']"],
+        ['Alıcı Tesisat No', "AccountingCustomerParty/Party/PartyIdentification/ID[@schemeID='TESISATNO']"],
+        ['Alıcı Sayaç No', "AccountingCustomerParty/Party/PartyIdentification/ID[@schemeID='SAYACNO']"],
+        ['Alıcı Hasta No', "AccountingCustomerParty/Party/PartyIdentification/ID[@schemeID='HASTANO']"],
+        ['Alıcı Dosya No', "AccountingCustomerParty/Party/PartyIdentification/ID[@schemeID='DOSYANO']"],
+        ['Alıcı Resmi Unvanı', 'AccountingCustomerParty/Party/PartyLegalEntity/RegistrationName'],
+    ]],
+    ['Asıl Alıcı (İhracat / Yolcu Beraber)', [
+        ['Alıcı Tipi (EXPORT / TAXFREE)', "BuyerCustomerParty/Party/PartyIdentification/ID[@schemeID='PARTYTYPE']"],
+        ['Asıl Alıcı Unvanı', 'BuyerCustomerParty/Party/PartyName/Name'],
+        ['Asıl Alıcı Resmi Unvanı', 'BuyerCustomerParty/Party/PartyLegalEntity/RegistrationName'],
+        ['Asıl Alıcı TCKN', "BuyerCustomerParty/Party/PartyIdentification/ID[@schemeID='TCKN']"],
+        ['Hastane Protokol No', "BuyerCustomerParty/Party/PartyIdentification/ID[@schemeID='PROTOCOLNO']"],
+        ['Turist Adı', 'BuyerCustomerParty/Party/Person/FirstName'],
+        ['Turist Soyadı', 'BuyerCustomerParty/Party/Person/FamilyName'],
+        ['Turist Uyruğu', 'BuyerCustomerParty/Party/Person/NationalityID'],
+        ['Pasaport No', 'BuyerCustomerParty/Party/Person/IdentityDocumentReference/ID'],
+        ['Pasaport Tarihi', 'BuyerCustomerParty/Party/Person/IdentityDocumentReference/IssueDate', 'date'],
+        ['Turist Banka Hesap No', 'BuyerCustomerParty/Party/Person/FinancialAccount/ID'],
+        ['Turist Bankası', 'BuyerCustomerParty/Party/Person/FinancialAccount/FinancialInstitutionBranch/FinancialInstitution/Name'],
+        ['Asıl Alıcı İli', 'BuyerCustomerParty/Party/PostalAddress/CityName'],
+        ['Asıl Alıcı Ülkesi', 'BuyerCustomerParty/Party/PostalAddress/Country/Name'],
+        ['Aracı Kurum VKN', "TaxRepresentativeParty/PartyIdentification/ID[@schemeID='ARACIKURUMVKN']"],
+        ['Aracı Kurum Etiketi', "TaxRepresentativeParty/PartyIdentification/ID[@schemeID='ARACIKURUMETIKET']"],
+        ['Aracı Kurum Unvanı', 'TaxRepresentativeParty/PartyName/Name'],
+        ['Aracı Kurum İli', 'TaxRepresentativeParty/PostalAddress/CityName'],
+    ]],
     ['Tutarlar', [
         ['Mal Hizmet Toplam Tutarı', 'LegalMonetaryTotal/LineExtensionAmount', 'amount'],
         ['Vergiler Hariç Toplam', 'LegalMonetaryTotal/TaxExclusiveAmount', 'amount'],
@@ -84,10 +169,10 @@ const INVOICE_FIELDS = build('Invoice', [
         ['İskonto Açıklaması', "AllowanceCharge[ChargeIndicator='false']/AllowanceChargeReason"],
     ]],
     ['Vergiler', [
-        ['Hesaplanan KDV (toplam)', 'TaxTotal/TaxAmount', 'amount'],
-        ['KDV Matrahı', 'TaxTotal/TaxSubtotal/TaxableAmount', 'amount'],
-        ['KDV Tutarı', 'TaxTotal/TaxSubtotal/TaxAmount', 'amount'],
-        ['KDV Oranı (%)', 'TaxTotal/TaxSubtotal/Percent', 'number'],
+        ['Hesaplanan Vergiler (toplam)', 'TaxTotal/TaxAmount', 'amount'],
+        ['Vergi Matrahı', 'TaxTotal/TaxSubtotal/TaxableAmount', 'amount'],
+        ['Vergi Tutarı', 'TaxTotal/TaxSubtotal/TaxAmount', 'amount'],
+        ['Vergi Oranı (%)', 'TaxTotal/TaxSubtotal/Percent', 'number'],
         ['Vergi Adı', 'TaxTotal/TaxSubtotal/TaxCategory/TaxScheme/Name'],
         ['Vergi Kodu', 'TaxTotal/TaxSubtotal/TaxCategory/TaxScheme/TaxTypeCode'],
         ['Muafiyet Sebebi', 'TaxTotal/TaxSubtotal/TaxCategory/TaxExemptionReason'],
@@ -95,7 +180,10 @@ const INVOICE_FIELDS = build('Invoice', [
         ['Tevkifat Tutarı', 'WithholdingTaxTotal/TaxAmount', 'amount'],
         ['Tevkifat Oranı (%)', 'WithholdingTaxTotal/TaxSubtotal/Percent', 'number'],
         ['Tevkifat Kodu', 'WithholdingTaxTotal/TaxSubtotal/TaxCategory/TaxScheme/TaxTypeCode'],
+        ['Tevkifat Adı', 'WithholdingTaxTotal/TaxSubtotal/TaxCategory/TaxScheme/Name'],
+        ['Tevkifat Matrahı', 'WithholdingTaxTotal/TaxSubtotal/TaxableAmount', 'amount'],
     ]],
+    ['Vergi Türleri', taxTypeRows('TaxTotal', '', true)],
     ['Döviz / Kur', [
         ['Döviz Kuru', 'PricingExchangeRate/CalculationRate', 'number'],
         ['Kaynak Para Birimi', 'PricingExchangeRate/SourceCurrencyCode'],
@@ -127,6 +215,11 @@ const INVOICE_FIELDS = build('Invoice', [
         ['Ek Belge No', 'AdditionalDocumentReference/ID'],
         ['Ek Belge Tarihi', 'AdditionalDocumentReference/IssueDate', 'date'],
         ['Ek Belge Türü', 'AdditionalDocumentReference/DocumentType'],
+        ['İade Edilen Belge Tipi', 'BillingReference/InvoiceDocumentReference/DocumentTypeCode'],
+        ['ESÜ Rapor ID (şarj)', "AdditionalDocumentReference/ID[@schemeID='ESURaporID']"],
+        ['Yatırım Teşvik Belge No', "ContractDocumentReference/ID[@schemeID='YTBNO']"],
+        ['Yatırım Teşvik Belge Tarihi', 'ContractDocumentReference/IssueDate', 'date'],
+        ['Sözleşme No', 'ContractDocumentReference/ID'],
     ]],
     ['Teslimat / İhracat', [
         ['Teslim Şartı (Incoterms)', 'Delivery/DeliveryTerms/ID'],
@@ -135,8 +228,6 @@ const INVOICE_FIELDS = build('Invoice', [
         ['Teslimat Adresi', 'Delivery/DeliveryAddress/StreetName'],
         ['Teslimat İli', 'Delivery/DeliveryAddress/CityName'],
         ['Teslimat Ülkesi', 'Delivery/DeliveryAddress/Country/Name'],
-        ['Alıcı (İhracat) Unvanı', 'BuyerCustomerParty/Party/PartyName/Name'],
-        ['Alıcı (İhracat) Ülkesi', 'BuyerCustomerParty/Party/PostalAddress/Country/Name'],
     ]],
     ['Satır (Kalem)', [
         ['Ürün / Hizmet Adı', 'InvoiceLine/Item/Name'],
@@ -151,10 +242,37 @@ const INVOICE_FIELDS = build('Invoice', [
         ['Satır İskonto Oranı', 'InvoiceLine/AllowanceCharge/MultiplierFactorNumeric', 'number'],
         ['Satır İskonto Tutarı', 'InvoiceLine/AllowanceCharge/Amount', 'amount'],
         ['Satır Tutarı', 'InvoiceLine/LineExtensionAmount', 'amount'],
-        ['Satır KDV Oranı (%)', 'InvoiceLine/TaxTotal/TaxSubtotal/Percent', 'number'],
-        ['Satır KDV Tutarı', 'InvoiceLine/TaxTotal/TaxSubtotal/TaxAmount', 'amount'],
+        ['Satır Vergi Oranı (%)', 'InvoiceLine/TaxTotal/TaxSubtotal/Percent', 'number'],
+        ['Satır Vergi Tutarı', 'InvoiceLine/TaxTotal/TaxSubtotal/TaxAmount', 'amount'],
         ['GTİP No', 'InvoiceLine/Delivery/Shipment/GoodsItem/RequiredCustomsID'],
         ['Satır Notu', 'InvoiceLine/Note'],
+        ['Satır Muafiyet Kodu', 'InvoiceLine/TaxTotal/TaxSubtotal/TaxCategory/TaxExemptionReasonCode'],
+        ['Satır Muafiyet Sebebi', 'InvoiceLine/TaxTotal/TaxSubtotal/TaxCategory/TaxExemptionReason'],
+        ['Satır Tevkifat Tutarı', 'InvoiceLine/WithholdingTaxTotal/TaxAmount', 'amount'],
+        ['Satır Tevkifat Oranı (%)', 'InvoiceLine/WithholdingTaxTotal/TaxSubtotal/Percent', 'number'],
+        ['Satır Tevkifat Kodu', 'InvoiceLine/WithholdingTaxTotal/TaxSubtotal/TaxCategory/TaxScheme/TaxTypeCode'],
+        ...taxTypeRows('InvoiceLine/TaxTotal', 'Satır ', false),
+    ]],
+    ['Satır · Özel Senaryolar', [
+        ['Künye No (HKS)', "InvoiceLine/Item/AdditionalItemIdentification/ID[@schemeID='KUNYENO']"],
+        ['Etiket No (IDIS)', "InvoiceLine/Item/AdditionalItemIdentification/ID[@schemeID='ETIKETNO']"],
+        ['İlaç Seri No', "InvoiceLine/Item/AdditionalItemIdentification/ID[@schemeID='ILAC']"],
+        ['Tıbbi Cihaz Seri No', "InvoiceLine/Item/AdditionalItemIdentification/ID[@schemeID='TIBBICIHAZ']"],
+        ['Diğer Ürün (İlaç/Tıbbi Cihaz)', "InvoiceLine/Item/AdditionalItemIdentification/ID[@schemeID='DIGER']"],
+        ['Telefon IMEI (Teknoloji Destek)', "InvoiceLine/Item/AdditionalItemIdentification/ID[@schemeID='TELEFON']"],
+        ['Tablet PC (Teknoloji Destek)', "InvoiceLine/Item/AdditionalItemIdentification/ID[@schemeID='TABLET_PC']"],
+        ['Harcama Tipi (Yatırım Teşvik)', 'InvoiceLine/Item/CommodityClassification/ItemClassificationCode'],
+        ['Makine Teçhizat Sıra No (YTB)', 'InvoiceLine/Item/ItemInstance/ProductTraceID'],
+        ['Seri No / Makine ID', 'InvoiceLine/Item/ItemInstance/SerialID'],
+        ['Satır Teslim Şartı', 'InvoiceLine/Delivery/DeliveryTerms/ID'],
+        ['Satır Gönderim Şekli', 'InvoiceLine/Delivery/Shipment/ShipmentStage/TransportModeCode'],
+        ['Kap Cinsi', 'InvoiceLine/Delivery/Shipment/TransportHandlingUnit/ActualPackage/PackagingTypeCode'],
+        ['Kap No', 'InvoiceLine/Delivery/Shipment/TransportHandlingUnit/ActualPackage/ID'],
+        ['Kap Adedi', 'InvoiceLine/Delivery/Shipment/TransportHandlingUnit/ActualPackage/Quantity', 'number'],
+        ['Satıcı DİİB Satır Kodu (İhraç Kayıtlı)', "InvoiceLine/Delivery/Shipment/TransportHandlingUnit/CustomsDeclaration/IssuerParty/PartyIdentification/ID[@schemeID='SATICIDIBSATIRKOD']"],
+        ['Alıcı DİİB Satır Kodu (İhraç Kayıtlı)', "InvoiceLine/Delivery/Shipment/TransportHandlingUnit/CustomsDeclaration/IssuerParty/PartyIdentification/ID[@schemeID='ALICIDIBSATIRKOD']"],
+        ['Satır Teslim Adresi', 'InvoiceLine/Delivery/DeliveryAddress/StreetName'],
+        ['Satır Teslim İli', 'InvoiceLine/Delivery/DeliveryAddress/CityName'],
     ]],
 ]);
 
@@ -171,7 +289,10 @@ const DESPATCH_FIELDS = build('DespatchAdvice', [
         ['Sipariş No', 'OrderReference/ID'],
         ['Sipariş Tarihi', 'OrderReference/IssueDate', 'date'],
     ]],
-    ['Gönderen', party('Gönderen', 'DespatchSupplierParty')],
+    ['Gönderen', [
+        ...party('Gönderen', 'DespatchSupplierParty'),
+        ['Gönderen Sevkiyat No (IDIS)', "DespatchSupplierParty/Party/PartyIdentification/ID[@schemeID='SEVKIYATNO']"],
+    ]],
     ['Alıcı', party('Alıcı', 'DeliveryCustomerParty')],
     ['Sevkiyat', [
         ['Fiili Sevk Tarihi', 'Shipment/Delivery/Despatch/ActualDespatchDate', 'date'],
@@ -197,6 +318,8 @@ const DESPATCH_FIELDS = build('DespatchAdvice', [
         ['Eksik Miktar', 'DespatchLine/OutstandingQuantity', 'number'],
         ['Birim Fiyat', 'DespatchLine/Shipment/GoodsItem/InvoiceLine/Price/PriceAmount', 'amount'],
         ['Satır Notu', 'DespatchLine/Note'],
+        ['Künye No (HKS)', "DespatchLine/Item/AdditionalItemIdentification/ID[@schemeID='KUNYENO']"],
+        ['Etiket No (IDIS)', "DespatchLine/Item/AdditionalItemIdentification/ID[@schemeID='ETIKETNO']"],
     ]],
 ]);
 
@@ -212,30 +335,33 @@ export function docRootOf(xml: string): DocRoot {
 /** Satır (kalem) alanı mı — yolun ikinci adımı satır elemanı. */
 export const isLineField = (f: CatalogField) => /^(Invoice\/InvoiceLine|DespatchAdvice\/DespatchLine)\//.test(f.path);
 
-const STEP_RE = /^(@?[\w.-]+)(?:\[(@?[\w.-]+)='([^']*)'\])?$/;
+const STEP_RE = /^(@?[\w.-]+)(?:\[((?:[\w.-]+\/)*@?[\w.-]+)='([^']*)'\])?$/;
+const PRED_RE = /\[(?:[\w.-]+\/)*@?[\w.-]+='([^']*)'\]/;
+
+/** Yolu adımlara böler; köşeli parantez içindeki `/` ayırıcı sayılmaz. */
+const splitPath = (path: string) => path.split(/\/(?![^[]*\])/);
 
 function stepXPath(step: string): string {
     const m = step.match(STEP_RE);
     if (!m) return step;
-    const [, name, predName, predValue] = m;
+    const [, name, predPath, predValue] = m;
     if (name.startsWith('@')) return name;
     let out = `*[local-name()='${name}']`;
-    if (predName) {
-        out += predName.startsWith('@')
-            ? `[${predName}='${predValue}']`
-            : `[*[local-name()='${predName}']='${predValue}']`;
+    if (predPath) {
+        const pred = predPath.split('/').map(p => (p.startsWith('@') ? p : `*[local-name()='${p}']`)).join('/');
+        out += `[${pred}='${predValue}']`;
     }
     return out;
 }
 
 /** Katalog yolunu XPath'e çevirir: mutlak (`/`) ya da satır içinden göreli. */
 export function fieldXPath(f: CatalogField, relativeToLine = false): string {
-    const steps = f.path.split('/');
+    const steps = splitPath(f.path);
     if (relativeToLine && isLineField(f)) return steps.slice(2).map(stepXPath).join('/');
     return '/' + steps.map(stepXPath).join('/');
 }
 
-const localNames = (path: string) => path.split('/').map(s => s.match(STEP_RE)?.[1] ?? s);
+const localNames = (path: string) => splitPath(path).map(s => s.match(STEP_RE)?.[1] ?? s);
 
 /**
  * Alan şablonda kullanılıyor mu (yaklaşık): yoldaki tüm ayırt edici eleman
@@ -244,7 +370,7 @@ const localNames = (path: string) => path.split('/').map(s => s.match(STEP_RE)?.
 export function detectInXslt(xsltLocalNames: Set<string>, xsltText: string, f: CatalogField): boolean {
     const names = localNames(f.path).slice(1).filter(n => n !== 'Party');
     if (!names.every(n => xsltLocalNames.has(n.replace(/^@/, '')))) return false;
-    const pred = f.path.match(/\[@?[\w.-]+='([^']*)'\]/);
+    const pred = f.path.match(PRED_RE);
     return !pred || xsltText.includes(pred[1]);
 }
 
@@ -345,7 +471,7 @@ export function labelForXPath(xpath: string, catalog: CatalogField[], context = 
         }
         skipped += Math.max(0, j);
         let score = matched * 10 - skipped;
-        const pred = f.path.match(/\[@?[\w.-]+='([^']*)'\]/);
+        const pred = f.path.match(PRED_RE);
         if (pred) {
             if (full.includes(`'${pred[1]}'`) || full.includes(`"${pred[1]}"`)) score += 20;
             else score -= 15;

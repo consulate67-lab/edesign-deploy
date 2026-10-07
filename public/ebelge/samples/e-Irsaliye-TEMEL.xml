@@ -14,7 +14,7 @@
     xmlns:ubltr="urn:oasis:names:specification:ubl:schema:xsd:TurkishCustomizationExtensionComponents">
     <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
     <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
-    <cbc:ProfileID>e-Irsaliye</cbc:ProfileID>
+    <cbc:ProfileID>TEMELIRSALIYE</cbc:ProfileID>
     <cbc:ID>IRS2026000000001</cbc:ID>
     <cbc:CopyIndicator>false</cbc:CopyIndicator>
     <cbc:UUID>aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee</cbc:UUID>

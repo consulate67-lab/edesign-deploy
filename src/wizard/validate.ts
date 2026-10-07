@@ -145,6 +145,9 @@ export function validateXml(text: string, docType: WizardDocType, xslt: string |
     const lineTag = docType.family === 'despatch' ? 'DespatchLine' : docType.family === 'receipt' ? 'ReceiptLine' : 'InvoiceLine';
     const lines = Array.from(root.children).filter(c => c.localName === lineTag).length;
     const typeCode = childText(root, 'InvoiceTypeCode') || childText(root, 'DespatchAdviceTypeCode');
+    if (docType.typeCodes && typeCode && !docType.typeCodes.includes(typeCode.trim().toUpperCase())) {
+        checks.push({ level: 'warn', text: `Belge tipi ${typeCode} GİB kod listesinde yok; ${docType.label} için geçerli tipler: ${docType.typeCodes.join(', ')}.` });
+    }
     const supplier = partyName(root, docType.family === 'despatch' ? 'DespatchSupplierParty' : 'AccountingSupplierParty');
     const customer = partyName(root, docType.family === 'despatch' ? 'DeliveryCustomerParty' : 'AccountingCustomerParty');
     const rows: [string, string][] = [

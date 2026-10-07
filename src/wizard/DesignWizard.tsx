@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, ArrowRight, Check, AlertTriangle, XCircle, Upload, FileCode, Database, FileText, Loader2 } from 'lucide-react';
-import { WIZARD_DOC_TYPES, FAMILY_INFO, loadSampleXml, type WizardDocType } from './docTypes';
+import { ArrowLeft, ArrowRight, Check, AlertTriangle, XCircle, Upload, FileCode, Database, FileText, Loader2, Landmark } from 'lucide-react';
+import { WIZARD_DOC_TYPES, FAMILY_INFO, loadSampleXml, loadXmlFile, type WizardDocType, type OfficialSample } from './docTypes';
 import { validateXslt, validateXml, stripBom, type ValidationResult } from './validate';
 import { designKeyOf } from '../api';
 import { hasTestWatermark, stripTestWatermark } from '../xslt-editor/utils/testWatermark';
@@ -121,8 +121,9 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
     const [xsltChoice, setXsltChoice] = useState<string>('');
     const [ownXslt, setOwnXslt] = useState<LoadedFile | null>(null);
     const [ownXsltWasTest, setOwnXsltWasTest] = useState(false);
-    const [xmlChoice, setXmlChoice] = useState<'default' | 'own'>('default');
+    const [xmlChoice, setXmlChoice] = useState<'default' | 'gib' | 'own'>('default');
     const [ownXml, setOwnXml] = useState<LoadedFile | null>(null);
+    const [gibXml, setGibXml] = useState<LoadedFile | null>(null);
     const [xsltText, setXsltText] = useState<string | null>(null);
     const [defaultXmlResult, setDefaultXmlResult] = useState<ValidationResult | null>(null);
     const [busy, setBusy] = useState(false);
@@ -144,9 +145,24 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
             setXsltChoice(t.defaults[0].id);
             setOwnXslt(null);
             setOwnXml(null);
+            setGibXml(null);
             setXmlChoice('default');
         }
         setStep(1);
+    };
+
+    const pickOfficial = async (s: OfficialSample) => {
+        if (!docType) return;
+        setError(null);
+        setBusy(true);
+        try {
+            const text = await loadXmlFile(s.file);
+            setGibXml({ name: s.file.split('/').pop() ?? s.file, size: text.length, text, result: validateXml(text, docType, xsltText) });
+        } catch (e) {
+            setError(e instanceof Error ? e.message : String(e));
+        } finally {
+            setBusy(false);
+        }
     };
 
     const loadOwn = async (file: File, kind: 'xslt' | 'xml') => {
@@ -184,6 +200,7 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
             setSampleXml(sample);
             setDefaultXmlResult(validateXml(sample, docType, text));
             if (ownXml) setOwnXml({ ...ownXml, result: validateXml(ownXml.text, docType, text) });
+            if (gibXml) setGibXml({ ...gibXml, result: validateXml(gibXml.text, docType, text) });
             setStep(2);
         } catch (e) {
             setError(e instanceof Error ? e.message : String(e));
@@ -194,7 +211,7 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
 
     const finish = () => {
         if (!docType || !xsltText) return;
-        const xml = xmlChoice === 'own' ? ownXml?.text : sampleXml;
+        const xml = xmlChoice === 'own' ? ownXml?.text : xmlChoice === 'gib' ? gibXml?.text : sampleXml;
         if (!xml) return;
         onFinish({
             moduleId: xsltChoice === 'own' ? docType.id : selectedDefault?.moduleId ?? docType.id,
@@ -207,7 +224,7 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
     const canNext = step === 1
         ? (xsltChoice === 'own' ? !!ownXslt?.result.ok : !!selectedDefault) && !!sampleXml
         : step === 2
-            ? (xmlChoice === 'own' ? !!ownXml?.result.ok : !!defaultXmlResult?.ok)
+            ? (xmlChoice === 'own' ? !!ownXml?.result.ok : xmlChoice === 'gib' ? !!gibXml?.result.ok : !!defaultXmlResult?.ok)
             : false;
 
     const sectionTitle = (t: string, sub: string) => (
@@ -301,6 +318,42 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
                         <div style={{ color: '#94a3b8', fontSize: 12, marginTop: 3 }}>{docType.label} için hazır örnek belge ({docType.sampleXml.split('/').pop()})</div>
                         {xmlChoice === 'default' && defaultXmlResult && <div style={{ marginTop: 10 }}><CheckList result={defaultXmlResult} /></div>}
                     </button>
+                    {docType.officialSamples && docType.officialSamples.length > 0 && (
+                        <>
+                            <button type="button" data-xml-option="gib" onClick={() => setXmlChoice('gib')} style={{ ...card(xmlChoice === 'gib', '#0ea5e9'), marginTop: 12 }}>
+                                <div style={{ fontWeight: 700, fontSize: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+                                    <Landmark size={16} /> GİB resmi örnek belgeler ({docType.officialSamples.length})
+                                </div>
+                                <div style={{ color: '#94a3b8', fontSize: 12, marginTop: 3 }}>
+                                    UBL-TR 1.2.1 ve e-Fatura paketindeki senaryo / tip örnekleri; tasarımınızı özel durumlarla deneyin.
+                                </div>
+                            </button>
+                            {xmlChoice === 'gib' && (
+                                <div style={{ marginTop: 10 }}>
+                                    <div data-gib-samples style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 8 }}>
+                                        {docType.officialSamples.map(s => {
+                                            const active = gibXml?.name === s.file.split('/').pop();
+                                            return (
+                                                <button key={s.file} type="button" data-gib-sample={s.file.split('/').pop()} disabled={busy} onClick={() => pickOfficial(s)}
+                                                    style={{ ...card(active, '#0ea5e9'), padding: '9px 12px', borderRadius: 10 }}>
+                                                    <div style={{ fontWeight: 600, fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                        {active && <Check size={14} color="#6ee7b7" />}{s.label}
+                                                    </div>
+                                                    <div style={{ color: '#64748b', fontSize: 11, marginTop: 2 }}>{s.tag}</div>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                    {gibXml && (
+                                        <div style={{ marginTop: 12, background: 'rgba(15,23,42,0.6)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: 12 }}>
+                                            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 10 }}>Uygunluk kontrolü · {gibXml.name}</div>
+                                            <CheckList result={gibXml.result} />
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </>
+                    )}
                     <button type="button" data-xml-option="own" onClick={() => setXmlChoice('own')} style={{ ...card(xmlChoice === 'own', '#f59e0b'), marginTop: 12 }}>
                         <div style={{ fontWeight: 700, fontSize: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
                             <Upload size={16} /> Kendi XML dosyamı seç
