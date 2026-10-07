@@ -961,7 +961,7 @@ export function fieldContent(f: CatalogField, inLine: boolean): string {
 export const fieldSnippet = (id: string, f: CatalogField, inLine: boolean) =>
     `<span data-xslt-obj="${id}" data-obj-kind="field" data-field="${f.key}">${fieldContent(f, inLine)}</span>`;
 
-export type FormulaOp = 'percent' | 'mul' | 'div' | 'add' | 'sub';
+export type FormulaOp = 'none' | 'percent' | 'mul' | 'div' | 'add' | 'sub';
 export interface FormulaModel {
     /** Katalog alan anahtarı. */
     a: string;
@@ -974,6 +974,7 @@ export interface FormulaModel {
 }
 
 export const FORMULA_OPS: { id: FormulaOp; label: string }[] = [
+    { id: 'none', label: '(yok) — sadece alan / toplamı' },
     { id: 'percent', label: '% (yüzdesi)' },
     { id: 'mul', label: '× (çarpı)' },
     { id: 'div', label: '÷ (bölü)' },
@@ -1012,16 +1013,34 @@ export const formulaAttrs = (m: FormulaModel): [string, string][] => [
     ['data-formula-suffix', m.suffix],
 ];
 
-/** Formül objesinin XSLT içeriği; alan bulunamazsa null. */
-export function formulaContent(m: FormulaModel, catalog: CatalogField[], inLine: boolean): string | null {
+/**
+ * Formülde bir alanın sayısal değeri. Satır alanları satır içinde o satırın
+ * değeri, satır dışında tüm satırların toplamıdır; boş / sayı olmayan
+ * değerler 0 sayılır (eksik alan sonucu NaN yapmasın).
+ */
+function formulaOperand(f: CatalogField, inLine: boolean): string {
+    if (!isLineField(f)) return `number(${fieldXPath(f)})`;
+    return `sum(${fieldXPath(f, inLine)}[number(.) = number(.)])`;
+}
+
+/** Satır alanı satır tablosu dışında kullanılıyor mu (toplam alınır). */
+export const formulaSumsLines = (m: FormulaModel, catalog: CatalogField[], inLine: boolean): boolean => {
+    if (inLine) return false;
+    const keys = [m.a, ...(m.op !== 'none' && m.b.startsWith('field:') ? [m.b.slice(6)] : [])];
+    return keys.some(k => { const f = catalog.find(x => x.key === k); return !!f && isLineField(f); });
+};
+
+/** Formülün XPath ifadesi ve görünürlük için ilk terimi; alan bulunamazsa null. */
+export function formulaExpression(m: FormulaModel, catalog: CatalogField[], inLine: boolean): { a: string; expr: string } | null {
     const fa = catalog.find(f => f.key === m.a);
     if (!fa) return null;
-    const a = `number(${fieldXPath(fa, inLine)})`;
+    const a = formulaOperand(fa, inLine);
+    if (m.op === 'none') return { a, expr: a };
     let b: string;
     if (m.b.startsWith('field:')) {
         const fb = catalog.find(f => f.key === m.b.slice(6));
         if (!fb) return null;
-        b = `number(${fieldXPath(fb, inLine)})`;
+        b = formulaOperand(fb, inLine);
     } else {
         const n = Number(m.b.replace(',', '.'));
         if (!Number.isFinite(n)) return null;
@@ -1032,7 +1051,42 @@ export function formulaContent(m: FormulaModel, catalog: CatalogField[], inLine:
         : m.op === 'div' ? `${a} div ${b}`
         : m.op === 'add' ? `${a} + ${b}`
         : `${a} - ${b}`;
-    return `${escapeText(m.label)}<xsl:if test="string(${a}) != 'NaN'"><xsl:value-of select="${formatted(expr, m.decimals)}"/></xsl:if>${escapeText(m.suffix)}`;
+    return { a, expr };
+}
+
+/**
+ * Formülün örnek XML'deki sonucu. Satır içindeki formül ilk satırın
+ * değerleriyle hesaplanır.
+ */
+export function evaluateFormula(xmlDoc: Document | null, m: FormulaModel, catalog: CatalogField[], inLine: boolean): number {
+    if (!xmlDoc) return NaN;
+    const fx = formulaExpression(m, catalog, inLine);
+    if (!fx) return NaN;
+    let ctx: Node = xmlDoc;
+    if (inLine) {
+        const lineField = [m.a, m.b.startsWith('field:') ? m.b.slice(6) : '']
+            .map(k => catalog.find(f => f.key === k))
+            .find((f): f is CatalogField => !!f && isLineField(f));
+        const prefix = lineField?.path.match(LINE_PREFIX_RE)?.[1];
+        if (prefix) {
+            try {
+                const line = xmlDoc.evaluate(fieldXPath({ ...lineField!, path: prefix }), xmlDoc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+                if (line) ctx = line;
+            } catch { /* belge kökünde hesaplanır */ }
+        }
+    }
+    try {
+        return xmlDoc.evaluate(`number(${fx.expr})`, ctx, null, XPathResult.NUMBER_TYPE, null).numberValue;
+    } catch {
+        return NaN;
+    }
+}
+
+/** Formül objesinin XSLT içeriği; alan bulunamazsa null. */
+export function formulaContent(m: FormulaModel, catalog: CatalogField[], inLine: boolean): string | null {
+    const fx = formulaExpression(m, catalog, inLine);
+    if (!fx) return null;
+    return `${escapeText(m.label)}<xsl:if test="string(${fx.a}) != 'NaN'"><xsl:value-of select="${formatted(fx.expr, m.decimals)}"/></xsl:if>${escapeText(m.suffix)}`;
 }
 
 export function formulaSnippet(id: string, m: FormulaModel, catalog: CatalogField[], inLine: boolean): string {

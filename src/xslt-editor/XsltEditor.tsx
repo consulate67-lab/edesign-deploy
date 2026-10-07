@@ -40,7 +40,7 @@ import { karekodSnippet, hasQrLibrary } from './karekod';
 import {
     getCatalog, docRootOf, detectInXslt, xsltLocalNameSet, bindingLabel, contextPathResolver, evaluateField,
     ensureDecimalFormat, isInLineContext, isLineField, fieldSnippet, fieldContent, formulaSnippet, formulaContent, formulaAttrs,
-    readFormula, DEFAULT_FORMULA, FORMULA_OPS,
+    readFormula, DEFAULT_FORMULA, FORMULA_OPS, evaluateFormula, formulaSumsLines,
     type CatalogField, type FormulaModel,
 } from './fieldCatalog';
 import { transformXmlWithXslt } from '../xsltTransformer';
@@ -87,6 +87,38 @@ const VOID_TAGS = new Set(['img', 'input', 'br', 'hr', 'meta', 'link', 'area', '
  * null → gövdenin sonu.
  */
 type InsertTarget = { el: HTMLElement; ordinal: number; position: InsertPosition };
+const decodeAttr = (v: string) => v
+    .replace(/\{\{/g, '{').replace(/\}\}/g, '}')
+    .replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+
+/**
+ * Alan / formül objelerinin içeriğini bulundukları yere göre yeniden üretir
+ * (satır içinde o satırın değeri, satır dışında satırların toplamı).
+ * `ids` verilmezse tüm formül objeleri yenilenir.
+ */
+function refreshObjectContents(xslt: string, catalog: CatalogField[], ids?: string[]): string {
+    const targets = ids ?? [...xslt.matchAll(/<span\b[^>]*\bdata-obj-kind="formula"[^>]*>/g)]
+        .map(m => m[0].match(/\bdata-xslt-obj="([^"]+)"/)?.[1])
+        .filter((x): x is string => !!x);
+    let next = xslt;
+    for (const id of targets) {
+        const tag = findObjTag(next, id);
+        if (!tag) continue;
+        const el = document.createElement('span');
+        for (const m of next.slice(tag.start, tag.end).matchAll(/\s([\w:-]+)\s*=\s*"([^"]*)"/g)) el.setAttribute(m[1], decodeAttr(m[2]));
+        const inLine = isInLineContext(next, tag.start);
+        const kind = el.getAttribute('data-obj-kind');
+        let content: string | null = null;
+        if (kind === 'formula') content = formulaContent(readFormula(el), catalog, inLine);
+        else if (kind === 'field') {
+            const f = catalog.find(x => x.key === el.getAttribute('data-field'));
+            if (f) content = fieldContent(f, inLine);
+        }
+        if (content !== null) next = replaceElementContent(next, tag, content);
+    }
+    return next;
+}
+
 function resolveInsertTarget(start: Element | null, mode: 'auto' | InsertPosition): InsertTarget | null {
     let el = start?.closest<HTMLElement>('[data-xsrc]') ?? null;
     if (!el) return null;
@@ -773,15 +805,9 @@ const CatalogOptions: React.FC<{ fields: CatalogField[]; xmlDoc: Document | null
 const formatTr = (n: number, decimals: number) =>
     n.toLocaleString('tr-TR', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 
-/** Formülün örnek XML ile JS'te hesaplanan önizleme metni (ilk satır değerleriyle). */
-function formulaPreviewText(m: FormulaModel, catalog: CatalogField[], xmlDoc: Document | null): string {
-    const num = (key: string) => {
-        const f = catalog.find(x => x.key === key);
-        return f ? parseFloat(evaluateField(xmlDoc, f)) : NaN;
-    };
-    const a = num(m.a);
-    const b = m.b.startsWith('field:') ? num(m.b.slice(6)) : Number(m.b.replace(',', '.'));
-    const r = m.op === 'percent' ? (a * b) / 100 : m.op === 'mul' ? a * b : m.op === 'div' ? a / b : m.op === 'add' ? a + b : a - b;
+/** Formülün örnek XML ile hesaplanan önizleme metni (satır içinde ilk satırın değerleriyle). */
+function formulaPreviewText(m: FormulaModel, catalog: CatalogField[], xmlDoc: Document | null, inLine: boolean): string {
+    const r = evaluateFormula(xmlDoc, m, catalog, inLine);
     return `${m.label}${Number.isFinite(r) ? formatTr(r, m.decimals) : ''}${m.suffix}`;
 }
 
@@ -789,17 +815,21 @@ const FormulaEditor: React.FC<{
     el: HTMLElement;
     catalog: CatalogField[];
     xmlDoc: Document | null;
+    inLine: boolean;
     onChange: (m: FormulaModel, previewText: string) => void;
-}> = ({ el, catalog, xmlDoc, onChange }) => {
+}> = ({ el, catalog, xmlDoc, inLine, onChange }) => {
     const [model, setModel] = useState<FormulaModel>(() => readFormula(el));
     const numeric = useMemo(() => catalog.filter(isNumericField), [catalog]);
     const update = (patch: Partial<FormulaModel>) => {
         const next = { ...model, ...patch };
         setModel(next);
-        onChange(next, formulaPreviewText(next, catalog, xmlDoc));
+        onChange(next, formulaPreviewText(next, catalog, xmlDoc, inLine));
     };
+    const hasB = model.op !== 'none';
     const bIsField = model.b.startsWith('field:');
-    const result = formulaPreviewText({ ...model, label: '', suffix: '' }, catalog, xmlDoc);
+    const sums = formulaSumsLines(model, catalog, inLine);
+    const productOfSums = sums && bIsField && (model.op === 'mul' || model.op === 'div');
+    const result = formulaPreviewText({ ...model, label: '', suffix: '' }, catalog, xmlDoc, inLine);
     return (
         <div data-formula-editor>
             <FieldText label="Önündeki metin" currentValue={model.label} placeholder="ör. Peşin (%20): " onChange={(v) => update({ label: v })} />
@@ -814,7 +844,7 @@ const FormulaEditor: React.FC<{
                         {FORMULA_OPS.map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
                     </select>
                 </div>
-                <div style={{ flex: 1 }}>
+                {hasB && <div style={{ flex: 1 }}>
                     <label style={fieldLabelStyle}>Değer türü</label>
                     <select
                         data-formula-b-kind
@@ -825,9 +855,9 @@ const FormulaEditor: React.FC<{
                         <option value="number">Sabit sayı</option>
                         <option value="field">Başka alan</option>
                     </select>
-                </div>
+                </div>}
             </div>
-            {bIsField ? (
+            {!hasB ? null : bIsField ? (
                 <>
                     <label style={fieldLabelStyle}>İkinci alan</label>
                     <select data-formula-b value={model.b.slice(6)} onChange={(e) => update({ b: `field:${e.target.value}` })} style={{ ...fieldInputStyle, marginBottom: '10px' }}>
@@ -850,8 +880,15 @@ const FormulaEditor: React.FC<{
                     <FieldText label="Arkasındaki metin" currentValue={model.suffix} placeholder="ör.  TL" onChange={(v) => update({ suffix: v })} />
                 </div>
             </div>
+            {sums && (
+                <div data-formula-sum-note style={{ marginBottom: '8px', fontSize: '11px', lineHeight: 1.45, color: productOfSums ? '#fcd34d' : '#93c5fd' }}>
+                    {productOfSums
+                        ? 'Formül satır tablosunun dışında: satır alanlarının önce toplamları alınır, sonra işlem yapılır (Σ × Σ). Satır satır çarpım için formülü satır tablosuna kolon olarak ekleyin.'
+                        : 'Formül satır tablosunun dışında: satır alanlarında tüm satırların toplamı kullanılır.'}
+                </div>
+            )}
             <div data-formula-result style={{ padding: '8px 10px', background: '#0b1222', border: '1px dashed #334155', borderRadius: '4px', fontSize: '12px', color: '#e2e8f0' }}>
-                Örnek veriyle sonuç: <b>{result || '—'}</b>
+                {inLine ? 'Örnek veriyle sonuç (ilk satır)' : 'Örnek veriyle sonuç'}: <b>{result || '—'}</b>
             </div>
         </div>
     );
@@ -1059,7 +1096,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         };
         if (initialXslt && moduleId === initialModuleId) {
             // İlk yükleme, kullanıcı verisi varsa onu kullan
-            load(stripLeadingBom(stripTestWatermark(initialXslt)));
+            const userXslt = stripLeadingBom(stripTestWatermark(initialXslt));
+            load(designKeyOf(userXslt) ? userXslt : refreshObjectContents(userXslt, catalogRef.current));
             return;
         }
         // Sprint 9 — Antrepo ise antrepoTemplates'tan al
@@ -1711,8 +1749,9 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         if (!src) return;
         const tag = target ? findLiteralTagByOrdinal(xslt, target.ordinal) : null;
         if (target && !tag) return;
-        const updated = moveElement(xslt, src, tag, target?.position ?? 'after');
-        if (!updated || updated === xslt) return;
+        const moved = moveElement(xslt, src, tag, target?.position ?? 'after');
+        if (!moved || moved === xslt) return;
+        const updated = refreshObjectContents(moved, catalogRef.current, [id]);
         console.log(`[XSLTEditor] Obje taşındı: ${id} → ${tag ? `<${tag.name}> ${target?.position === 'inside' ? 'içine' : 'altına'}` : 'sayfa sonu'}`);
         if (!tag) pendingPreviewScrollRef.current = Number.MAX_SAFE_INTEGER;
         pendingSelectRef.current = { kind: 'obj', id };
@@ -4102,8 +4141,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     {isObj && el && isFormula && (
                                         <>
                                             {sectionTitle('Formül', '#f9a8d4')}
-                                            <FormulaEditor key={fieldKey('formula')} el={el} catalog={catalog} xmlDoc={xmlDoc} onChange={handleFormulaChange} />
-                                            {noteBox('Sonuç her belgede o belgenin kendi değerleriyle hesaplanır. Satır tablosunun içine konan formül her satır için ayrı hesaplanır.', 'info')}
+                                            <FormulaEditor key={fieldKey('formula')} el={el} catalog={catalog} xmlDoc={xmlDoc} inLine={selectedObjInLine()} onChange={handleFormulaChange} />
+                                            {noteBox('Sonuç her belgede o belgenin kendi değerleriyle hesaplanır. Satır tablosunun içine konan formül her satır için ayrı, dışına konan formül tüm satırların toplamıyla hesaplanır. Tek bir alanın toplamı için işlemi "(yok)" seçin.', 'info')}
                                         </>
                                     )}
 
