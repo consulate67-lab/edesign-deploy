@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { LayoutTemplate, Search, Eye, X, Download, ArrowRight, Loader2, Code2, FileText } from 'lucide-react';
+import { LayoutTemplate, Search, Eye, X, Download, ArrowRight, Loader2, Code2, FileText, ChevronRight } from 'lucide-react';
 import { SECTOR_TEMPLATES, SECTORS, type SectorId, type SectorTemplate } from './index';
 import { WIZARD_DOC_TYPES, loadXmlFile } from '../wizard/docTypes';
 import { stripLeadingBom } from '../xslt-editor/utils/testWatermark';
@@ -88,7 +88,7 @@ const SectorChip: React.FC<{ sector: SectorId }> = ({ sector }) => {
     const color = s?.color ?? '#64748b';
     return (
         <span title={s?.label ?? sector} style={{
-            display: 'inline-block', padding: '3px 9px', borderRadius: 999, flexShrink: 0, maxWidth: '62%',
+            display: 'inline-block', padding: '3px 9px', borderRadius: 999, flexShrink: 1, minWidth: 0,
             background: `${color}e6`, color: 'white', fontSize: '0.68rem', fontWeight: 700,
             boxShadow: '0 2px 8px rgba(0,0,0,0.25)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
         }}>
@@ -102,7 +102,7 @@ const DocBadge: React.FC<{ docTypeId: string }> = ({ docTypeId }) => {
     const color = d?.color ?? '#64748b';
     return (
         <span title={d?.label ?? docTypeId} style={{
-            display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 6, minWidth: 0,
+            display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 6, flexShrink: 0, maxWidth: '70%',
             background: 'rgba(15, 23, 42, 0.85)', border: `1px solid ${color}`, color: 'white',
             fontSize: '0.66rem', fontWeight: 800, letterSpacing: 0.3, whiteSpace: 'nowrap',
         }}>
@@ -416,29 +416,135 @@ const TemplateModal: React.FC<{
  * önizlemeli kartlar, büyük önizleme / örnek XML penceresi. Seçilen şablon
  * örnek XML'iyle birlikte tasarım ekranında açılır.
  */
+interface SectorNode {
+    id: SectorId;
+    label: string;
+    color: string;
+    count: number;
+    docs: { id: string; label: string; color: string; count: number }[];
+}
+
+const matchesQuery = (t: SectorTemplate, q: string) => {
+    if (!q) return true;
+    const hay = [t.name, t.description, ...t.tags, SECTOR_BY_ID.get(t.sector)?.label ?? '', docTypeOf(t.docTypeId)?.label ?? ''].join(' ');
+    return lower(hay).includes(q);
+};
+
+const SectorTree: React.FC<{
+    nodes: SectorNode[];
+    total: number;
+    sector: SectorId | 'all';
+    docType: string | null;
+    expanded: Set<SectorId>;
+    onSelect: (sector: SectorId | 'all', docType: string | null) => void;
+    onToggle: (sector: SectorId) => void;
+}> = ({ nodes, total, sector, docType, expanded, onSelect, onToggle }) => {
+    const row = (active: boolean, color: string): React.CSSProperties => ({
+        display: 'flex', alignItems: 'center', gap: 8, width: '100%', boxSizing: 'border-box', textAlign: 'left',
+        padding: '7px 10px', borderRadius: 9, border: 'none', fontFamily: 'inherit', cursor: 'pointer',
+        background: active ? `${color}2e` : 'transparent', color: active ? '#f8fafc' : '#cbd5e1',
+        boxShadow: active ? `inset 3px 0 0 ${color}` : 'none', fontSize: '0.82rem', fontWeight: 700,
+        transition: 'background 0.15s',
+    });
+    const count = (n: number, active: boolean, color: string) => (
+        <span style={{
+            marginLeft: 'auto', fontSize: '0.66rem', padding: '1px 7px', borderRadius: 999, flexShrink: 0,
+            background: active ? color : 'rgba(148, 163, 184, 0.14)', color: active ? 'white' : '#94a3b8',
+        }}>
+            {n}
+        </span>
+    );
+
+    return (
+        <nav data-sector-tree role="tree" aria-label="Sektörler" style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <button type="button" role="treeitem" data-sector-chip="all" aria-selected={sector === 'all'}
+                onClick={() => onSelect('all', null)} style={row(sector === 'all', '#6366f1')}>
+                <LayoutTemplate size={14} color="#a5b4fc" style={{ flexShrink: 0 }} />
+                Tüm şablonlar
+                {count(total, sector === 'all', '#6366f1')}
+            </button>
+            <div style={{ height: 1, background: 'rgba(148, 163, 184, 0.12)', margin: '6px 4px' }} />
+            {nodes.map(n => {
+                const open = expanded.has(n.id);
+                const active = sector === n.id && !docType;
+                return (
+                    <div key={n.id} role="treeitem" aria-expanded={open} aria-selected={active}>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <button type="button" data-sector-toggle={n.id} aria-label={open ? 'Daralt' : 'Genişlet'}
+                                onClick={() => onToggle(n.id)}
+                                style={{ background: 'none', border: 'none', padding: 4, cursor: 'pointer', color: '#64748b', display: 'flex', flexShrink: 0 }}>
+                                <ChevronRight size={14} style={{ transform: open ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s' }} />
+                            </button>
+                            <button type="button" data-sector-chip={n.id} title={n.label} onClick={() => onSelect(n.id, null)} style={{ ...row(active, n.color), paddingLeft: 6 }}>
+                                <span style={{ width: 8, height: 8, borderRadius: 999, background: n.color, flexShrink: 0 }} />
+                                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{n.label}</span>
+                                {count(n.count, active, n.color)}
+                            </button>
+                        </div>
+                        {open && (
+                            <div role="group" style={{ marginLeft: 15, paddingLeft: 10, borderLeft: `1px dashed ${n.color}55`, display: 'flex', flexDirection: 'column', gap: 1, margin: '2px 0 4px 15px' }}>
+                                {n.docs.map(d => {
+                                    const docActive = sector === n.id && docType === d.id;
+                                    return (
+                                        <button key={d.id} type="button" role="treeitem" aria-selected={docActive}
+                                            data-doc-node={`${n.id}:${d.id}`}
+                                            title={`${n.label} › ${d.label}`}
+                                            onClick={() => onSelect(n.id, d.id)}
+                                            style={{ ...row(docActive, d.color), padding: '5px 8px', fontSize: '0.76rem', fontWeight: 600 }}>
+                                            <FileText size={12} color={d.color} style={{ flexShrink: 0 }} />
+                                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.label}</span>
+                                            {count(d.count, docActive, d.color)}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+                );
+            })}
+        </nav>
+    );
+};
+
 export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => {
     const [sector, setSector] = useState<SectorId | 'all'>('all');
+    const [docType, setDocType] = useState<string | null>(null);
+    const [expanded, setExpanded] = useState<Set<SectorId>>(() => new Set(SECTOR_TEMPLATES.map(t => t.sector)));
     const [query, setQuery] = useState('');
     const [previewId, setPreviewId] = useState<string | null>(null);
     const [busyId, setBusyId] = useState<string | null>(null);
     const [errors, setErrors] = useState<Record<string, string>>({});
 
-    const counts = useMemo(() => {
-        const m = new Map<SectorId, number>();
-        for (const t of SECTOR_TEMPLATES) m.set(t.sector, (m.get(t.sector) ?? 0) + 1);
-        return m;
-    }, []);
-    const sectors = useMemo(() => SECTORS.filter(s => counts.get(s.id)), [counts]);
+    const q = lower(query.trim());
+    const searched = useMemo(() => SECTOR_TEMPLATES.filter(t => matchesQuery(t, q)), [q]);
 
-    const filtered = useMemo(() => {
-        const q = lower(query.trim());
-        return SECTOR_TEMPLATES.filter(t => {
-            if (sector !== 'all' && t.sector !== sector) return false;
-            if (!q) return true;
-            const hay = [t.name, t.description, ...t.tags, SECTOR_BY_ID.get(t.sector)?.label ?? '', docTypeOf(t.docTypeId)?.label ?? ''].join(' ');
-            return lower(hay).includes(q);
-        });
-    }, [sector, query]);
+    const nodes = useMemo<SectorNode[]>(() => SECTORS.flatMap(s => {
+        const items = searched.filter(t => t.sector === s.id);
+        if (!items.length) return [];
+        const docIds = [...new Set(items.map(t => t.docTypeId))];
+        return [{
+            id: s.id, label: s.label, color: s.color, count: items.length,
+            docs: docIds.map(id => {
+                const d = docTypeOf(id);
+                return { id, label: d?.label ?? id, color: d?.color ?? '#64748b', count: items.filter(t => t.docTypeId === id).length };
+            }),
+        }];
+    }), [searched]);
+
+    const filtered = useMemo(() => searched.filter(t =>
+        (sector === 'all' || t.sector === sector) && (!docType || t.docTypeId === docType)), [searched, sector, docType]);
+
+    const selectNode = (s: SectorId | 'all', d: string | null) => {
+        setSector(s);
+        setDocType(d);
+        if (s !== 'all' && !d) setExpanded(prev => new Set(prev).add(s));
+    };
+    const toggleNode = (s: SectorId) => setExpanded(prev => {
+        const next = new Set(prev);
+        if (next.has(s)) next.delete(s); else next.add(s);
+        return next;
+    });
+    const expandedView = q ? new Set(nodes.map(n => n.id)) : expanded;
 
     const previewTemplate = previewId ? SECTOR_TEMPLATES.find(t => t.id === previewId) ?? null : null;
 
@@ -462,34 +568,8 @@ export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => 
 
     if (!SECTOR_TEMPLATES.length) return null;
 
-    const chip = (id: SectorId | 'all', label: string, count: number, color: string) => {
-        const active = sector === id;
-        return (
-            <button
-                key={id}
-                type="button"
-                data-sector-chip={id}
-                aria-pressed={active}
-                onClick={() => setSector(id)}
-                style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 7, padding: '6px 12px', borderRadius: 999,
-                    border: `1px solid ${active ? color : 'rgba(148, 163, 184, 0.2)'}`, fontFamily: 'inherit',
-                    background: active ? `${color}33` : 'rgba(30, 41, 59, 0.5)', color: active ? '#f8fafc' : '#cbd5e1',
-                    boxShadow: active ? `0 0 0 3px ${color}26` : 'none', fontSize: '0.8rem', fontWeight: 700,
-                    cursor: 'pointer', transition: 'all 0.15s', whiteSpace: 'nowrap',
-                }}
-            >
-                <span style={{ width: 8, height: 8, borderRadius: 999, background: color, flexShrink: 0 }} />
-                {label}
-                <span style={{
-                    fontSize: '0.68rem', padding: '1px 6px', borderRadius: 999,
-                    background: active ? color : 'rgba(148, 163, 184, 0.15)', color: active ? 'white' : '#94a3b8',
-                }}>
-                    {count}
-                </span>
-            </button>
-        );
-    };
+    const selectedSector = sector === 'all' ? null : SECTOR_BY_ID.get(sector);
+    const selectedDoc = docType ? docTypeOf(docType) : null;
 
     return (
         <section data-template-gallery style={{
@@ -532,36 +612,58 @@ export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => 
                 </div>
             </div>
 
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
-                {chip('all', 'Tümü', SECTOR_TEMPLATES.length, '#6366f1')}
-                {sectors.map(s => chip(s.id, s.label, counts.get(s.id) ?? 0, s.color))}
-            </div>
+            <div data-template-layout style={{ display: 'flex', gap: 20, alignItems: 'flex-start' }}>
+                <aside style={{
+                    flex: '0 0 230px', position: 'sticky', top: 12, maxHeight: 'calc(100vh - 24px)', overflowY: 'auto',
+                    padding: 8, borderRadius: 14, background: 'rgba(30, 41, 59, 0.45)', border: '1px solid rgba(148, 163, 184, 0.12)',
+                    boxSizing: 'border-box',
+                }}>
+                    <SectorTree
+                        nodes={nodes}
+                        total={searched.length}
+                        sector={sector}
+                        docType={docType}
+                        expanded={expandedView}
+                        onSelect={selectNode}
+                        onToggle={toggleNode}
+                    />
+                </aside>
 
-            {filtered.length > 0 ? (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(270px, 1fr))', gap: 18 }}>
-                    {filtered.map(t => (
-                        <TemplateCard
-                            key={t.id}
-                            t={t}
-                            busy={busyId === t.id}
-                            error={errors[t.id]}
-                            onPreview={() => setPreviewId(t.id)}
-                            onUse={() => openTemplate(t)}
-                        />
-                    ))}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                    <div data-template-breadcrumb style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12, fontSize: '0.82rem', color: '#94a3b8', flexWrap: 'wrap' }}>
+                        <span style={{ color: selectedSector ? '#94a3b8' : '#f1f5f9', fontWeight: 700 }}>Tüm şablonlar</span>
+                        {selectedSector && <><ChevronRight size={13} /><span style={{ color: selectedDoc ? '#94a3b8' : '#f1f5f9', fontWeight: 700 }}>{selectedSector.label}</span></>}
+                        {selectedDoc && <><ChevronRight size={13} /><span style={{ color: '#f1f5f9', fontWeight: 700 }}>{selectedDoc.label}</span></>}
+                        <span style={{ marginLeft: 'auto' }}>{filtered.length} şablon</span>
+                    </div>
+                    {filtered.length > 0 ? (
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
+                            {filtered.map(t => (
+                                <TemplateCard
+                                    key={t.id}
+                                    t={t}
+                                    busy={busyId === t.id}
+                                    error={errors[t.id]}
+                                    onPreview={() => setPreviewId(t.id)}
+                                    onUse={() => openTemplate(t)}
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <div style={{ padding: '28px 16px', textAlign: 'center', color: '#64748b', fontSize: '0.9rem' }}>
+                            Aramanıza uyan şablon yok.{' '}
+                            <button
+                                type="button"
+                                onClick={() => { setQuery(''); selectNode('all', null); }}
+                                style={{ background: 'none', border: 'none', color: '#a5b4fc', cursor: 'pointer', fontFamily: 'inherit', fontSize: 'inherit', textDecoration: 'underline' }}
+                            >
+                                Filtreleri temizle
+                            </button>
+                        </div>
+                    )}
                 </div>
-            ) : (
-                <div style={{ padding: '28px 16px', textAlign: 'center', color: '#64748b', fontSize: '0.9rem' }}>
-                    Aramanıza uyan şablon yok.{' '}
-                    <button
-                        type="button"
-                        onClick={() => { setQuery(''); setSector('all'); }}
-                        style={{ background: 'none', border: 'none', color: '#a5b4fc', cursor: 'pointer', fontFamily: 'inherit', fontSize: 'inherit', textDecoration: 'underline' }}
-                    >
-                        Filtreleri temizle
-                    </button>
-                </div>
-            )}
+            </div>
+            <style>{`@media (max-width: 760px) { [data-template-layout] { flex-direction: column; } [data-template-gallery] aside { position: static !important; flex-basis: auto !important; width: 100%; } }`}</style>
 
             {previewTemplate && (
                 <TemplateModal
