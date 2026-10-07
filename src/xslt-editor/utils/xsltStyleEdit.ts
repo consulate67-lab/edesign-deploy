@@ -21,6 +21,8 @@ export interface SourceTag {
 const PASS1_RE = /(<xsl:(?:value-of|copy-of)\b[^>]*?\/>)|(<xsl:(?:value-of|copy-of)\b[^>]*?>[\s\S]*?<\/xsl:(?:value-of|copy-of)>)/g;
 const XSL_TEXT_RE = /<xsl:text>([\s\S]*?)<\/xsl:text>/g;
 const TAG_RE = /<!--[\s\S]*?-->|<!\[CDATA\[[\s\S]*?\]\]>|<\?[\s\S]*?\?>|<(\/?)([A-Za-z_][\w:.-]*)((?:[^>"']|"[^"]*"|'[^']*')*?)(\/?)>/g;
+/** Etiket / yorum / CDATA tarayıcı: [1] '/' kapanış, [2] ad, [3] attribute'lar, [4] '/' self-closing. */
+export const XML_TAG_RE_SOURCE = TAG_RE.source;
 
 /**
  * Binding'in xslt içindeki başlangıç offset'i. parseXsltInstrumented'in
@@ -105,7 +107,7 @@ export function findObjTag(xslt: string, id: string): SourceTag | null {
 }
 
 /** Açılış etiketinden eşleşen kapanış etiketine kadar olan iç içerik aralığı. */
-function findElementContentRange(xslt: string, tag: SourceTag): { start: number; end: number } | null {
+export function findElementContentRange(xslt: string, tag: SourceTag): { start: number; end: number } | null {
     if (xslt.slice(tag.start, tag.end).endsWith('/>')) return null;
     const re = new RegExp(TAG_RE.source, 'g');
     re.lastIndex = tag.end;
@@ -162,6 +164,52 @@ export function findLiteralTagByOrdinal(xslt: string, ordinal: number): SourceTa
 export function elementEnd(xslt: string, tag: SourceTag): number {
     const range = findElementContentRange(xslt, tag);
     return range ? xslt.indexOf('>', range.end) + 1 : tag.end;
+}
+
+/** offset'teki etiketi doğrudan saran öğe (xsl: dahil). */
+export function findParentTag(xslt: string, offset: number): SourceTag | null {
+    const stack: SourceTag[] = [];
+    const re = new RegExp(TAG_RE.source, 'g');
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(xslt)) !== null && m.index < offset) {
+        const name = m[2];
+        if (!name) continue;
+        if (m[1] === '/') {
+            for (let i = stack.length - 1; i >= 0; i--) {
+                if (stack[i].name === name) { stack.length = i; break; }
+            }
+        } else if (m[4] !== '/') {
+            stack.push({ name, start: m.index, end: m.index + m[0].length });
+        }
+    }
+    return stack[stack.length - 1] ?? null;
+}
+
+/** Öğenin doğrudan alt öğeleri; yorum dışı boşluk olmayan metin varsa hasText. */
+export function childElements(xslt: string, parent: SourceTag): { children: SourceTag[]; hasText: boolean } {
+    const range = findElementContentRange(xslt, parent);
+    if (!range) return { children: [], hasText: false };
+    const children: SourceTag[] = [];
+    let hasText = false;
+    let depth = 0;
+    let last = range.start;
+    const re = new RegExp(TAG_RE.source, 'g');
+    re.lastIndex = range.start;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(xslt)) !== null && m.index < range.end) {
+        if (depth === 0 && xslt.slice(last, m.index).trim()) hasText = true;
+        last = m.index + m[0].length;
+        const name = m[2];
+        if (!name) {
+            if (depth === 0 && m[0].startsWith('<![CDATA[') && m[0].slice(9, -3).trim()) hasText = true;
+            continue;
+        }
+        if (m[1] === '/') { depth--; continue; }
+        if (depth === 0) children.push({ name, start: m.index, end: m.index + m[0].length });
+        if (m[4] !== '/') depth++;
+    }
+    if (xslt.slice(last, range.end).trim()) hasText = true;
+    return { children, hasText };
 }
 
 export type InsertPosition = 'after' | 'inside';

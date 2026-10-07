@@ -33,7 +33,7 @@ import type { editor } from 'monaco-editor';
 import {
     ArrowLeft, Save, Download, ChevronDown, FileCode, FileCode2,
     AlertCircle, Eye, RefreshCw, CheckCircle2, Sparkles, Search, ZoomIn, ZoomOut,
-    PanelLeftClose, PanelLeftOpen, X, Lock,
+    PanelLeftClose, PanelLeftOpen, X, Lock, Undo2, Redo2,
     Image as ImageIcon, Type, Table2, TextCursorInput, Calculator, Plus, Columns3, Wallpaper, QrCode,
 } from 'lucide-react';
 import { karekodSnippet, hasQrLibrary } from './karekod';
@@ -54,13 +54,25 @@ import {
     annotateLiteralTags, findLiteralTagByOrdinal, insertAtTag, moveElement, documentEndOffset,
     type SourceTag, type InsertPosition,
 } from './utils/xsltStyleEdit';
-import { findLineTableCell, addColumnAfterCell } from './utils/tableColumns';
+import { findLineTableCell, addColumnAfterCell, editColumn, countHiddenColumnCells, showHiddenColumns, type ColumnAction } from './utils/tableColumns';
 import { BG_FITS, readPageBackground, writePageBackground, imageFileToDataUrl, type PageBackground } from './utils/pageBackground';
 import { addTestWatermark, stripTestWatermark, stripLeadingBom } from './utils/testWatermark';
 import { ApproveDialog } from './ApproveDialog';
 
 /** Satır formülü kolonunun varsayılan alanı (ilk bulunan). */
 const LINE_FORMULA_KEYS = ['Invoice/InvoiceLine/LineExtensionAmount', 'DespatchAdvice/DespatchLine/DeliveredQuantity', 'ReceiptAdvice/ReceiptLine/ReceivedQuantity', 'CreditNote/CreditNoteLine/LineExtensionAmount', 'eBilet/bilet/tutar', 'eYolcuListesi/yolcuListesi/koltukListesi/koltuk/tutar'];
+
+/** Geri al geçmişinde tutulan en fazla adım. */
+const HISTORY_LIMIT = 100;
+/** Aynı öğede bu süreden kısa aralıklarla yapılan yazma düzenlemeleri tek adım sayılır. */
+const HISTORY_COALESCE_MS = 1500;
+
+/** Odak metin girişindeyse Ctrl+Z / Ctrl+Y tarayıcının kendi geri almasına bırakılır. */
+function isTextEditingTarget(target: EventTarget | null): boolean {
+    const el = target as HTMLElement | null;
+    if (!el || typeof el.closest !== 'function') return false;
+    return !!el.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"]), .monaco-editor');
+}
 
 const CONTAINER_TAGS = new Set(['td', 'th', 'div', 'li', 'section', 'article', 'header', 'footer', 'main', 'aside', 'form', 'fieldset']);
 const TABLE_PARTS = new Set(['tr', 'tbody', 'thead', 'tfoot', 'colgroup', 'col', 'caption']);
@@ -236,7 +248,7 @@ const fieldLabelStyle: React.CSSProperties = {
     marginBottom: '4px',
 };
 const fieldInputStyle: React.CSSProperties = {
-    width: '100%', padding: '6px 8px',
+    boxSizing: 'border-box', width: '100%', minWidth: 0, padding: '6px 8px',
     background: '#1e293b', border: '1px solid #334155',
     borderRadius: '4px', color: '#e2e8f0',
     fontSize: '12px', fontFamily: 'monospace', outline: 'none',
@@ -891,6 +903,51 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const [renderedBindingIndexes, setRenderedBindingIndexes] = useState<Set<number>>(new Set());
 
     // ------------------------------------------------------------------------
+    // Geri al / ileri al — tasarımın tek kaynağı xsltContent olduğundan geçmiş
+    // XSLT anlık görüntüleri tutar. Aynı öğede art arda yazılan değişiklikler
+    // (aynı editKey, HISTORY_COALESCE_MS içinde) tek adımda birleşir.
+    // ------------------------------------------------------------------------
+    const historyRef = useRef<{ past: string[]; future: string[]; current: string; key: string | null; at: number }>(
+        { past: [], future: [], current: '', key: null, at: 0 }
+    );
+    /** Bir sonraki xsltContent değişikliğinin birleştirme anahtarı (yazma türü düzenlemeler). */
+    const editKeyRef = useRef<string | null>(null);
+    const [historyState, setHistoryState] = useState({ canUndo: false, canRedo: false });
+    const syncHistoryState = useCallback(() => {
+        const { past, future } = historyRef.current;
+        setHistoryState(s => (s.canUndo === past.length > 0 && s.canRedo === future.length > 0
+            ? s
+            : { canUndo: past.length > 0, canRedo: future.length > 0 }));
+    }, []);
+    const resetHistory = useCallback((content: string) => {
+        historyRef.current = { past: [], future: [], current: content, key: null, at: 0 };
+        editKeyRef.current = null;
+        syncHistoryState();
+    }, [syncHistoryState]);
+    const recordHistory = useCallback((next: string) => {
+        const h = historyRef.current;
+        if (!next || next === h.current) return;
+        const key = editKeyRef.current;
+        editKeyRef.current = null;
+        const now = Date.now();
+        if (!h.current) {
+            h.current = next;
+            return;
+        }
+        const coalesce = key !== null && key === h.key && now - h.at < HISTORY_COALESCE_MS && h.future.length === 0;
+        if (!coalesce) {
+            h.past.push(h.current);
+            if (h.past.length > HISTORY_LIMIT) h.past.splice(0, h.past.length - HISTORY_LIMIT);
+        }
+        h.future = [];
+        h.current = next;
+        h.key = key;
+        h.at = now;
+        syncHistoryState();
+    }, [syncHistoryState]);
+    useEffect(() => { recordHistory(xsltContent); }, [xsltContent, recordHistory]);
+
+    // ------------------------------------------------------------------------
     // Mevcut modül tanımı
     // ------------------------------------------------------------------------
     const currentModule = useMemo(
@@ -904,37 +961,50 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     useEffect(() => {
         pendingPreviewScrollRef.current = 0;
         setSelectedObject(null);
+        // Önceki belgeye ait bekleyen düzenlemeler yeni belgeye yazılmasın.
+        if (sourceEditDebounceRef.current) clearTimeout(sourceEditDebounceRef.current);
+        if (propertyDebounceRef.current) clearTimeout(propertyDebounceRef.current);
+        sourceEditDebounceRef.current = null;
+        propertyDebounceRef.current = null;
+        pendingStyleRef.current = {};
+        pendingAttrRef.current = {};
+        pendingContentRef.current = null;
+        // Farklı belge yüklenince geri al geçmişi sıfırlanır.
+        const load = (content: string) => {
+            resetHistory(content);
+            setXsltContent(content);
+        };
         if (initialXslt && moduleId === initialModuleId) {
             // İlk yükleme, kullanıcı verisi varsa onu kullan
-            setXsltContent(stripLeadingBom(stripTestWatermark(initialXslt)));
+            load(stripLeadingBom(stripTestWatermark(initialXslt)));
             return;
         }
         // Sprint 9 — Antrepo ise antrepoTemplates'tan al
         if (currentModule.antrepoId) {
             const tmpl = getAntrepoTemplateById(currentModule.antrepoId);
             if (tmpl) {
-                setXsltContent(stripLeadingBom(tmpl.xslt));
+                load(stripLeadingBom(tmpl.xslt));
                 console.log(
                     `[XSLTEditor] Module switch → ${currentModule.id} loaded Antrepo ${tmpl.xslt.length} chars`
                 );
                 return;
             }
             console.warn(`[XSLTEditor] Antrepo template bulunamadı: ${currentModule.antrepoId}`);
-            setXsltContent('<!-- Antrepo template bulunamadı -->');
+            load('<!-- Antrepo template bulunamadı -->');
             return;
         }
         // Minimal şablonlar — xsltContent'ten al
         const inline = getInlineXslt(currentModule.inlineKey || '');
         if (inline) {
-            setXsltContent(stripLeadingBom(inline));
+            load(stripLeadingBom(inline));
             console.log(
                 `[XSLTEditor] Module switch → ${currentModule.id} loaded ${inline.length} chars from ${currentModule.inlineKey}`
             );
         } else {
             console.warn(`[XSLTEditor] Inline XSLT yok: ${currentModule.inlineKey}`);
-            setXsltContent('<!-- Bu modül için inline XSLT bulunamadı -->');
+            load('<!-- Bu modül için inline XSLT bulunamadı -->');
         }
-    }, [moduleId, currentModule.antrepoId, currentModule.inlineKey, initialXslt, initialModuleId]);
+    }, [moduleId, currentModule.antrepoId, currentModule.inlineKey, initialXslt, initialModuleId, resetHistory]);
 
     // ------------------------------------------------------------------------
     // Canlı preview — 500ms debounce
@@ -1129,6 +1199,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 xml_content: xmlContent,
             });
             const out = r.design.xslt_content ?? xsltContentRef.current;
+            // Onaylanan tasarım kilitlenir; önceki adımlara geri dönülemez.
+            resetHistory(out);
             if (out !== xsltContentRef.current) {
                 xsltContentRef.current = out;
                 setXsltContent(out);
@@ -1151,7 +1223,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             }
             throw e;
         }
-    }, [design, moduleId, xmlContent, downloadXslt]);
+    }, [design, moduleId, xmlContent, downloadXslt, resetHistory]);
 
     // ------------------------------------------------------------------------
     // Module dropdown kapat (dış tıklama)
@@ -1320,6 +1392,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         }
         if (next !== xsltContentRef.current) {
             xsltContentRef.current = next;
+            editKeyRef.current = `prop:${sel.id}:${[...Object.keys(styles), ...Object.keys(attrs), ...(content !== null ? ['content'] : [])].sort().join(',')}`;
             setXsltContent(next);
             console.log(`[XSLTEditor] Özellik XSLT'ye yazıldı → ${[...Object.keys(styles), ...Object.keys(attrs), ...(content !== null ? ['içerik'] : [])].join(', ')}`);
         }
@@ -1440,6 +1513,43 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         setXsltContent(updated);
         console.log(`[XSLTEditor] Kolon eklendi: ${header} → seçili kolonun sağına`);
         return true;
+    }, []);
+
+    /**
+     * Seçili hücrenin kolonunu satır tablosunun tüm satırlarından siler ya da
+     * gizler (başlık ve veri hücreleri birlikte — kayma olmaz).
+     */
+    const applyColumnEdit = useCallback((action: ColumnAction) => {
+        flushSourceEditsRef.current();
+        const xslt = xsltContentRef.current;
+        const ctx = findLineTableCell(selectedObjectRef.current?.element ?? null, xslt);
+        if (!ctx) return;
+        const name = (ctx.cell.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 40);
+        const r = editColumn(xslt, ctx, action);
+        if (!r.ok) {
+            setSaveStatus('error');
+            setSaveMessage(`⚠ ${r.error}`);
+            return;
+        }
+        selectedObjectRef.current = null;
+        setSelectedObject(null);
+        xsltContentRef.current = r.xslt;
+        setXsltContent(r.xslt);
+        setSaveStatus('idle');
+        setSaveMessage(`${action === 'remove' ? '🗑 Kolon silindi' : '👁 Kolon gizlendi'}${name ? ` · "${name}"` : ''} · Geri Al (Ctrl+Z) ile geri alınabilir`);
+        console.log(`[XSLTEditor] Kolon ${action === 'remove' ? 'silindi' : 'gizlendi'}: "${name}" (${r.cells} kaynak hücre)`);
+    }, []);
+
+    const hiddenColumnCells = useMemo(() => countHiddenColumnCells(xsltContent), [xsltContent]);
+    const revealHiddenColumns = useCallback(() => {
+        flushSourceEditsRef.current();
+        const xslt = xsltContentRef.current;
+        const next = showHiddenColumns(xslt);
+        if (next === xslt) return;
+        xsltContentRef.current = next;
+        setXsltContent(next);
+        setSaveStatus('idle');
+        setSaveMessage('👁 Gizli kolonlar yeniden gösteriliyor');
     }, []);
 
     // Arka plan resmi (sayfa veya seçili çerçeve)
@@ -1620,21 +1730,81 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
      * Statik metin / element attribute düzenleme (300ms debounce). Dinamik
      * veri alanlarının XPath'i salt okunurdur — veri XML'den gelir.
      */
+    const pendingPropertyApplyRef = useRef<(() => void) | null>(null);
     const handleXsltPropertyChange = useCallback((newValue: string) => {
         setPropertyDraft(prev => ({ ...prev, value: newValue }));
         if (propertyDebounceRef.current) clearTimeout(propertyDebounceRef.current);
-        propertyDebounceRef.current = setTimeout(() => {
-            const b = selectedObjectRef.current?.binding;
+        const apply = () => {
+            propertyDebounceRef.current = null;
+            pendingPropertyApplyRef.current = null;
+            const sel = selectedObjectRef.current;
+            const b = sel?.binding;
             if (!b || (b.kind || 'dropdown') === 'dropdown') return;
             const current = xsltContentRef.current;
             const updated = updateXSLTBinding(current, b, newValue);
             if (updated !== current) {
+                xsltContentRef.current = updated;
+                editKeyRef.current = `text:${sel.id}`;
                 setXsltContent(updated);
             } else {
                 console.warn(`[XSLTEditor] XSLT property update no-op (line=${b.line}) — tag multi-line olabilir`);
             }
-        }, 300);
+        };
+        pendingPropertyApplyRef.current = apply;
+        propertyDebounceRef.current = setTimeout(apply, 300);
     }, []);
+
+    /** Bekleyen (debounce'lu) tüm düzenlemeleri hemen XSLT'ye yazar ve geçmişe işler. */
+    const flushAllPendingEdits = useCallback(() => {
+        if (propertyDebounceRef.current) clearTimeout(propertyDebounceRef.current);
+        pendingPropertyApplyRef.current?.();
+        flushSourceEdits();
+        recordHistory(xsltContentRef.current);
+    }, [flushSourceEdits, recordHistory]);
+
+    const restoreHistory = useCallback((direction: 'undo' | 'redo') => {
+        if (design.paid) return;
+        flushAllPendingEdits();
+        const h = historyRef.current;
+        const target = direction === 'undo' ? h.past.pop() : h.future.pop();
+        if (target === undefined) return;
+        (direction === 'undo' ? h.future : h.past).push(h.current);
+        h.current = target;
+        h.key = null;
+        // Seçim / taşıma eski dokümana ait olabilir; geri yüklenen tasarım temiz açılır.
+        setMoveObjId(null);
+        selectedObjectRef.current = null;
+        setSelectedObject(null);
+        pendingSelectRef.current = null;
+        pendingPreviewScrollRef.current = iframeRef.current?.contentWindow?.scrollY ?? 0;
+        xsltContentRef.current = target;
+        setXsltContent(target);
+        syncHistoryState();
+        setSaveStatus('idle');
+        setSaveMessage(direction === 'undo' ? '↶ Geri alındı' : '↷ İleri alındı');
+    }, [design.paid, flushAllPendingEdits, syncHistoryState]);
+    const undo = useCallback(() => restoreHistory('undo'), [restoreHistory]);
+    const redo = useCallback(() => restoreHistory('redo'), [restoreHistory]);
+
+    /** Ctrl+Z geri al; Ctrl+Y / Ctrl+Shift+Z ileri al. Metin girişlerinde tarayıcıya bırakılır. */
+    const undoRedoKeyRef = useRef<(e: KeyboardEvent) => void>(() => {});
+    undoRedoKeyRef.current = (e: KeyboardEvent) => {
+        if (!(e.ctrlKey || e.metaKey) || e.altKey || e.defaultPrevented) return;
+        const k = e.key.length === 1 ? e.key.toLowerCase() : '';
+        const isUndo = (k === 'z' || (!k && e.code === 'KeyZ')) && !e.shiftKey;
+        const isRedo = k === 'y' || (!k && e.code === 'KeyY') || ((k === 'z' || (!k && e.code === 'KeyZ')) && e.shiftKey);
+        if (!isUndo && !isRedo) return;
+        if (isTextEditingTarget(e.target)) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (isUndo) undo();
+        else redo();
+    };
+    const handleUndoRedoKey = useCallback((e: KeyboardEvent) => undoRedoKeyRef.current(e), []);
+    useEffect(() => {
+        document.addEventListener('keydown', handleUndoRedoKey);
+        return () => document.removeEventListener('keydown', handleUndoRedoKey);
+    }, [handleUndoRedoKey]);
 
     /**
      * Editor mount — ref + Monaco API sakla, XSLT autocomplete provider kayıt.
@@ -2290,6 +2460,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         doc.addEventListener('mousedown', mouseDownHandler, { capture: true });
         doc.addEventListener('mousemove', mouseMoveHandler);
         doc.addEventListener('mouseup', endDrag);
+        // Odak önizlemedeyken klavye olayları iframe dokümanında kalır.
+        doc.addEventListener('keydown', handleUndoRedoKey);
         console.log(`[XSLTEditor] iframe listener re-bound (previewHtml changed, scrollHeight=${scrollH})`);
 
         // srcDoc değişirken iframe.contentDocument body'si henüz null olan yeni
@@ -2303,8 +2475,9 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             doc.removeEventListener('mousedown', mouseDownHandler, { capture: true });
             doc.removeEventListener('mousemove', mouseMoveHandler);
             doc.removeEventListener('mouseup', endDrag);
+            doc.removeEventListener('keydown', handleUndoRedoKey);
         };
-    }, [previewHtml, iframeLoadCount, handleIframeBodyClick, insertObject, insertField, commitPosition, openSelection]);
+    }, [previewHtml, iframeLoadCount, handleIframeBodyClick, insertObject, insertField, commitPosition, openSelection, handleUndoRedoKey]);
 
     // Taşıma modu bitince önizlemedeki hedef işareti kaldırılır.
     useEffect(() => {
@@ -2471,6 +2644,43 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         </div>
                     )}
                 </div>
+
+                {/* Geri al / ileri al */}
+                {!design.paid && (
+                    <div style={{ display: 'flex', gap: '4px' }}>
+                        {([
+                            { dir: 'undo', label: 'Geri Al', hint: 'Geri Al (Ctrl+Z) — son tasarım değişikliğini geri alır', Icon: Undo2, enabled: historyState.canUndo, run: undo },
+                            { dir: 'redo', label: 'İleri Al', hint: 'İleri Al (Ctrl+Y / Ctrl+Shift+Z) — geri alınan değişikliği yeniden uygular', Icon: Redo2, enabled: historyState.canRedo, run: redo },
+                        ] as const).map(({ dir, label, hint, Icon, enabled, run }) => (
+                            <button
+                                key={dir}
+                                type="button"
+                                data-history={dir}
+                                onClick={run}
+                                disabled={!enabled}
+                                title={enabled ? hint : `${label} — ${dir === 'undo' ? 'geri alınacak değişiklik yok' : 'ileri alınacak değişiklik yok'}`}
+                                aria-label={label}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '5px',
+                                    padding: '6px 10px',
+                                    background: enabled ? 'rgba(148, 163, 184, 0.12)' : 'transparent',
+                                    border: `1px solid ${enabled ? 'rgba(148, 163, 184, 0.45)' : 'rgba(148, 163, 184, 0.18)'}`,
+                                    borderRadius: '6px',
+                                    color: enabled ? '#e2e8f0' : '#475569',
+                                    fontSize: '12px',
+                                    fontWeight: 600,
+                                    fontFamily: 'inherit',
+                                    cursor: enabled ? 'pointer' : 'not-allowed',
+                                }}
+                            >
+                                <Icon size={14} />
+                                {label}
+                            </button>
+                        ))}
+                    </div>
+                )}
 
                 {/* Spacer */}
                 <div style={{ flex: 1 }} />
@@ -2679,12 +2889,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 )}
                 {/* SOL — Snippet gallery (Sprint 8 Aşama 1) */}
                 <div
+                    data-field-panel
                     style={{
                         display: 'flex',
                         flexDirection: 'column',
                         background: '#0f172a',
                         borderRight: '1px solid #334155',
                         minWidth: 0,
+                        overflow: 'hidden',
                     }}
                 >
                     {/* Snippet header */}
@@ -2752,7 +2964,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             borderBottom: '1px solid #1e293b',
                         }}
                     >
-                        <div style={{ position: 'relative' }}>
+                        <div style={{ position: 'relative', minWidth: 0 }}>
                             <Search
                                 size={12}
                                 style={{
@@ -2761,15 +2973,21 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     top: '50%',
                                     transform: 'translateY(-50%)',
                                     color: '#64748b',
+                                    pointerEvents: 'none',
                                 }}
                             />
                             <input
                                 type="text"
+                                data-field-search
                                 value={xsltSearch}
                                 onChange={(e) => setXsltSearch(e.target.value)}
                                 placeholder="Alan ara: kur, tutar, alıcı, IBAN..."
                                 style={{
+                                    display: 'block',
+                                    boxSizing: 'border-box',
                                     width: '100%',
+                                    minWidth: 0,
+                                    textOverflow: 'ellipsis',
                                     padding: '6px 8px 6px 26px',
                                     background: '#1e293b',
                                     border: '1px solid #334155',
@@ -3303,6 +3521,23 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             <Columns3 size={22} />
                             Kolon
                         </button>
+                        {hiddenColumnCells > 0 && (
+                            <button
+                                type="button"
+                                data-show-hidden-columns
+                                onClick={revealHiddenColumns}
+                                title="'Kolonu Gizle' ile gizlenen kolonları yeniden gösterir"
+                                style={{
+                                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px',
+                                    width: '68px', height: '56px', background: '#1e293b', border: '1px solid #fcd34d55',
+                                    borderRadius: '8px', color: '#fcd34d', fontSize: '10px', fontWeight: 700, fontFamily: 'inherit',
+                                    cursor: 'pointer', lineHeight: 1.1, textAlign: 'center',
+                                }}
+                            >
+                                <Eye size={20} />
+                                Gizlileri göster
+                            </button>
+                        )}
                         <button
                             type="button"
                             data-bg-toggle
@@ -3632,8 +3867,15 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 </div>
                             );
                         };
-                        const removable = !!b || ((sel.locator?.kind === 'img' || isObj) && canPersist);
+                        // Satır tablosunda hücrenin kendisi seçiliyse tek hücreyi silmek /
+                        // gizlemek başlık ile veriyi kaydırır; işlem tüm kolona uygulanır.
+                        const isColumnCell = !!selectedLineCell && (tag === 'td' || tag === 'th') && selectedLineCell.cell === el;
+                        const removable = isColumnCell || !!b || ((sel.locator?.kind === 'img' || isObj) && canPersist);
                         const handleRemove = () => {
+                            if (isColumnCell) {
+                                applyColumnEdit('remove');
+                                return;
+                            }
                             if (b) {
                                 const updated = removeXsltBinding(xsltContent, b);
                                 if (updated !== xsltContent) { setXsltContent(updated); closeSelection(); }
@@ -3682,6 +3924,32 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 </div>
 
                                 <div style={{ flex: 1, padding: '0 14px 14px', overflowY: 'auto' }}>
+                                    {selectedLineCell && el && (
+                                        <div data-column-actions>
+                                            {sectionTitle('Kolon (satır tablosu)', '#67e8f9')}
+                                            <div style={{ display: 'flex', gap: '6px' }}>
+                                                <button
+                                                    type="button"
+                                                    data-column-remove
+                                                    onClick={() => applyColumnEdit('remove')}
+                                                    title="Bu kolonu başlık, kalem satırları ve boş satırlarla birlikte XSLT'ten siler"
+                                                    style={{ flex: 1, padding: '6px 8px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)', borderRadius: '4px', color: '#fca5a5', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+                                                >
+                                                    🗑 Kolonu XSLT'ten Sil
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    data-column-hide
+                                                    onClick={() => applyColumnEdit('hide')}
+                                                    title="Bu kolonu tüm satırlarıyla gizler (display:none XSLT'ye yazılır)"
+                                                    style={{ flex: 1, padding: '6px 8px', background: 'rgba(252, 211, 77, 0.15)', border: '1px solid rgba(252, 211, 77, 0.4)', borderRadius: '4px', color: '#fcd34d', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+                                                >
+                                                    👁 Kolonu Gizle
+                                                </button>
+                                            </div>
+                                            {noteBox('Başlık hücresi ile her satırdaki veri hücresi birlikte silinir / gizlenir; diğer kolonların verisi yerinde kalır. Geri Al (Ctrl+Z) ile geri alınabilir.', 'info')}
+                                        </div>
+                                    )}
                                     {kind === 'dropdown' && b && (
                                         <>
                                             {sectionTitle('Veri Alanı (XML)', '#a5b4fc')}
@@ -3717,7 +3985,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                 onChange={(e) => handleXsltPropertyChange(e.target.value)}
                                                 spellCheck={false}
                                                 style={{
-                                                    width: '100%', minHeight: '60px', maxHeight: '220px',
+                                                    boxSizing: 'border-box', width: '100%', minHeight: '60px', maxHeight: '220px',
                                                     padding: '8px 10px', background: '#1e293b',
                                                     border: '1px solid #334155', borderRadius: '4px',
                                                     color: '#e2e8f0', fontSize: '12px', fontFamily: 'monospace',
@@ -3738,7 +4006,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                 onChange={(e) => handleXsltPropertyChange(e.target.value)}
                                                 spellCheck={false}
                                                 style={{
-                                                    width: '100%', minHeight: '60px', maxHeight: '220px',
+                                                    boxSizing: 'border-box', width: '100%', minHeight: '60px', maxHeight: '220px',
                                                     padding: '8px 10px', background: '#1e293b',
                                                     border: '1px solid #334155', borderRadius: '4px',
                                                     color: '#e2e8f0', fontSize: '12px', fontFamily: 'monospace',
@@ -3869,12 +4137,16 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 }}>
                                     {el && (
                                         <button
-                                            onClick={() => { el.style.display = el.style.display === 'none' ? '' : 'none'; closeSelection(); }}
-                                            title="Sadece önizlemeden gizle"
+                                            onClick={() => {
+                                                if (isColumnCell) { applyColumnEdit('hide'); return; }
+                                                el.style.display = el.style.display === 'none' ? '' : 'none';
+                                                closeSelection();
+                                            }}
+                                            title={isColumnCell ? 'Kolonu başlığı ve tüm satırlarıyla birlikte gizle (XSLT\'ye yazılır)' : 'Sadece önizlemeden gizle'}
                                             data-hide-preview-element
                                             style={{ flex: 1, padding: '6px 8px', background: 'rgba(252, 211, 77, 0.15)', border: '1px solid rgba(252, 211, 77, 0.4)', borderRadius: '4px', color: '#fcd34d', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
                                         >
-                                            👁 Gizle
+                                            {isColumnCell ? '👁 Kolonu Gizle' : '👁 Gizle'}
                                         </button>
                                     )}
                                     {isObj && canPersist && sel.locator?.kind === 'obj' && (
@@ -3890,11 +4162,11 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     {removable && (
                                         <button
                                             onClick={handleRemove}
-                                            title="XSLT kaynak kodundan tamamen kaldır"
+                                            title={isColumnCell ? 'Kolonu başlığı ve tüm satırlarıyla birlikte XSLT\'ten sil' : 'XSLT kaynak kodundan tamamen kaldır'}
                                             data-remove-from-xslt
                                             style={{ flex: 1, padding: '6px 8px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)', borderRadius: '4px', color: '#fca5a5', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
                                         >
-                                            🗑 XSLT'ten Sil
+                                            {isColumnCell ? '🗑 Kolonu Sil' : '🗑 XSLT\'ten Sil'}
                                         </button>
                                     )}
                                 </div>
