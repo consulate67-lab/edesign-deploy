@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DespatchAdvice xmlns="urn:oasis:names:specification:ubl:schema:xsd:DespatchAdvice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:n4="http://www.altova.com/samplexml/other-namespace" xsi:schemaLocation="urn:oasis:names:specification:ubl:schema:xsd:DespatchAdvice-2 UBL-DespatchAdvice-2.1.xsd">
+  <ext:UBLExtensions>
+    <ext:UBLExtension>
+      <ext:ExtensionContent>
+        <n4:auto-generated_for_wildcard/>
+      </ext:ExtensionContent>
+    </ext:UBLExtension>
+  </ext:UBLExtensions>
+  <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+  <cbc:CustomizationID>TR1.2.1</cbc:CustomizationID>
+  <cbc:ProfileID>TEMELIRSALIYE</cbc:ProfileID>
+  <cbc:ID>ALI2026000007315</cbc:ID>
+  <cbc:CopyIndicator>false</cbc:CopyIndicator>
+  <cbc:UUID>5A17C3E9-0F42-4B8D-9E61-D23B7A840C15</cbc:UUID>
+  <cbc:IssueDate>2026-10-06</cbc:IssueDate>
+  <cbc:IssueTime>07:40:00</cbc:IssueTime>
+  <cbc:DespatchAdviceTypeCode>SEVK</cbc:DespatchAdviceTypeCode>
+  <cbc:Note>Soğuk zincir: peynir ve zeytin paletleri (P-05) frigorifik bölmede +2/+4 °C taşınmaktadır.</cbc:Note>
+  <cbc:Note>Teslimat penceresi: 09:00 – 12:00 · Rampa 3 · Mal kabulde koli sayımı şoför huzurunda yapılır.</cbc:Note>
+  <cbc:LineCountNumeric>14</cbc:LineCountNumeric>
+  <cac:OrderReference>
+    <cbc:ID>BRK-SP-2026-1184</cbc:ID>
+    <cbc:IssueDate>2026-10-01</cbc:IssueDate>
+  </cac:OrderReference>
+  <cac:Signature>
+    <cbc:ID schemeID="VKN_TCKN">0685129473</cbc:ID>
+    <cac:SignatoryParty>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="VKN">0685129473</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PostalAddress>
+        <cbc:StreetName>İkitelli OSB Mah. Gıdacılar Sitesi 4. Cad.</cbc:StreetName>
+        <cbc:BuildingNumber>17</cbc:BuildingNumber>
+        <cbc:CitySubdivisionName>Başakşehir</cbc:CitySubdivisionName>
+        <cbc:CityName>İstanbul</cbc:CityName>
+        <cbc:PostalZone>34490</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+          <cbc:Name>Türkiye</cbc:Name>
+        </cac:Country>
+      </cac:PostalAddress>
+    </cac:SignatoryParty>
+    <cac:DigitalSignatureAttachment>
+      <cac:ExternalReference>
+        <cbc:URI>#Signature_ALI2026000007315</cbc:URI>
+      </cac:ExternalReference>
+    </cac:DigitalSignatureAttachment>
+  </cac:Signature>
+  <cac:DespatchSupplierParty>
+    <cac:Party>
+      <cbc:WebsiteURI>https://www.anadolulezzet.com.tr</cbc:WebsiteURI>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="VKN">0685129473</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="MERSISNO">0068512947000031</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="TICARETSICILNO">İTO 985274-5</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyName>
+        <cbc:Name>Anadolu Lezzet Gıda Toptan Dağıtım A.Ş.</cbc:Name>
+      </cac:PartyName>
+      <cac:PostalAddress>
+        <cbc:StreetName>İkitelli OSB Mah. Gıdacılar Sitesi 4. Cad.</cbc:StreetName>
+        <cbc:BuildingNumber>17</cbc:BuildingNumber>
+        <cbc:CitySubdivisionName>Başakşehir</cbc:CitySubdivisionName>
+        <cbc:CityName>İstanbul</cbc:CityName>
+        <cbc:PostalZone>34490</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+          <cbc:Name>Türkiye</cbc:Name>
+        </cac:Country>
+      </cac:PostalAddress>
+      <cac:PartyTaxScheme>
+        <cac:TaxScheme>
+          <cbc:Name>İkitelli</cbc:Name>
+        </cac:TaxScheme>
+      </cac:PartyTaxScheme>
+      <cac:Contact>
+        <cbc:Telephone>0212 549 17 17</cbc:Telephone>
+        <cbc:Telefax>0212 549 17 18</cbc:Telefax>
+        <cbc:ElectronicMail>siparis@anadolulezzet.com.tr</cbc:ElectronicMail>
+      </cac:Contact>
+    </cac:Party>
+    <cac:DespatchContact>
+      <cbc:Name>Gökhan Arı (Sevkiyat Sorumlusu)</cbc:Name>
+    </cac:DespatchContact>
+  </cac:DespatchSupplierParty>
+  <cac:DeliveryCustomerParty>
+    <cac:Party>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="VKN">1726304857</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="MUSTERINO">C-20418</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyName>
+        <cbc:Name>Bereket Market Gıda Ticaret Ltd. Şti.</cbc:Name>
+      </cac:PartyName>
+      <cac:PostalAddress>
+        <cbc:StreetName>Atatürk Mah. Cumhuriyet Cad.</cbc:StreetName>
+        <cbc:BuildingNumber>214</cbc:BuildingNumber>
+        <cbc:CitySubdivisionName>Ataşehir</cbc:CitySubdivisionName>
+        <cbc:CityName>İstanbul</cbc:CityName>
+        <cbc:PostalZone>34758</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+          <cbc:Name>Türkiye</cbc:Name>
+        </cac:Country>
+      </cac:PostalAddress>
+      <cac:PartyTaxScheme>
+        <cac:TaxScheme>
+          <cbc:Name>Kozyatağı</cbc:Name>
+        </cac:TaxScheme>
+      </cac:PartyTaxScheme>
+      <cac:Contact>
+        <cbc:Telephone>0216 574 20 20</cbc:Telephone>
+        <cbc:ElectronicMail>satinalma@bereketmarket.com.tr</cbc:ElectronicMail>
+      </cac:Contact>
+    </cac:Party>
+  </cac:DeliveryCustomerParty>
+  <cac:Shipment>
+    <cbc:ID>SVK-1006-03</cbc:ID>
+    <cbc:GrossWeightMeasure unitCode="KGM">3184.500</cbc:GrossWeightMeasure>
+    <cbc:TotalGoodsItemQuantity>196</cbc:TotalGoodsItemQuantity>
+    <cbc:TotalTransportHandlingUnitQuantity>6</cbc:TotalTransportHandlingUnitQuantity>
+    <cac:ShipmentStage>
+      <cac:TransportMeans>
+        <cac:RoadTransport>
+          <cbc:LicensePlateID schemeID="PLAKA">34TLN482</cbc:LicensePlateID>
+        </cac:RoadTransport>
+      </cac:TransportMeans>
+      <cac:DriverPerson>
+        <cbc:FirstName>Murat</cbc:FirstName>
+        <cbc:FamilyName>Kocabaş</cbc:FamilyName>
+        <cbc:Title>Şoför</cbc:Title>
+        <cbc:NationalityID>41820573640</cbc:NationalityID>
+      </cac:DriverPerson>
+    </cac:ShipmentStage>
+    <cac:Delivery>
+      <cac:DeliveryAddress>
+        <cbc:StreetName>Ferhatpaşa Mah. G-8 Sok.</cbc:StreetName>
+        <cbc:BuildingName>Bereket Market Lojistik Deposu</cbc:BuildingName>
+        <cbc:BuildingNumber>3</cbc:BuildingNumber>
+        <cbc:CitySubdivisionName>Ataşehir</cbc:CitySubdivisionName>
+        <cbc:CityName>İstanbul</cbc:CityName>
+        <cbc:PostalZone>34888</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+          <cbc:Name>Türkiye</cbc:Name>
+        </cac:Country>
+      </cac:DeliveryAddress>
+      <cac:Despatch>
+        <cbc:ActualDespatchDate>2026-10-06</cbc:ActualDespatchDate>
+        <cbc:ActualDespatchTime>08:15:00</cbc:ActualDespatchTime>
+      </cac:Despatch>
+    </cac:Delivery>
+    <cac:TransportHandlingUnit>
+      <cac:TransportEquipment>
+        <cbc:ID schemeID="DORSEPLAKA">34TLN483</cbc:ID>
+      </cac:TransportEquipment>
+    </cac:TransportHandlingUnit>
+  </cac:Shipment>
+  <cac:DespatchLine>
+    <cbc:ID>1</cbc:ID>
+    <cbc:Note>Palet P-01</cbc:Note>
+    <cbc:DeliveredQuantity unitCode="BX">24</cbc:DeliveredQuantity>
+    <cac:OrderLineReference>
+      <cbc:LineID>1</cbc:LineID>
+    </cac:OrderLineReference>
+    <cac:Item>
+      <cbc:Description>Koli: 10 x 1 kg</cbc:Description>
+      <cbc:Name>Baldo Pirinç</cbc:Name>
+      <cbc:BrandName>Anadolu Hasadı</cbc:BrandName>
+      <cac:SellersItemIdentification>
+        <cbc:ID>ALG-1001</cbc:ID>
+      </cac:SellersItemIdentification>
+    </cac:Item>
+  </cac:DespatchLine>
+  <cac:DespatchLine>
+    <cbc:ID>2</cbc:ID>
+    <cbc:Note>Palet P-01</cbc:Note>
+    <cbc:DeliveredQuantity unitCode="BX">18</cbc:DeliveredQuantity>
+    <cac:OrderLineReference>
+      <cbc:LineID>2</cbc:LineID>
+    </cac:OrderLineReference>
+    <cac:Item>
+      <cbc:Description>Koli: 10 x 1 kg</cbc:Description>
+      <cbc:Name>Kırmızı Mercimek</cbc:Name>
+      <cbc:BrandName>Anadolu Hasadı</cbc:BrandName>
+      <cac:SellersItemIdentification>
+        <cbc:ID>ALG-1002</cbc:ID>
+      </cac:SellersItemIdentification>
+    </cac:Item>
+  </cac:DespatchLine>
+  <cac:DespatchLine>
+    <cbc:ID>3</cbc:ID>
+    <cbc:Note>Palet P-02</cbc:Note>
+    <cbc:DeliveredQuantity unitCode="BX">15</cbc:DeliveredQuantity>
+    <cac:OrderLineReference>
+      <cbc:LineID>3</cbc:LineID>
+    </cac:OrderLineReference>
+    <cac:Item>
+      <cbc:Description>Koli: 10 x 1 kg</cbc:Description>
+      <cbc:Name>Nohut (9 mm)</cbc:Name>
+      <cbc:BrandName>Anadolu Hasadı</cbc:BrandName>
+      <cac:SellersItemIdentification>
+        <cbc:ID>ALG-1003</cbc:ID>
+      </cac:SellersItemIdentification>
+    </cac:Item>
+  </cac:DespatchLine>
+  <cac:DespatchLine>
+    <cbc:ID>4</cbc:ID>
+    <cbc:Note>Palet P-02</cbc:Note>
+    <cbc:DeliveredQuantity unitCode="BX">20</cbc:DeliveredQuantity>
+    <cac:OrderLineReference>
+      <cbc:LineID>4</cbc:LineID>
+    </cac:OrderLineReference>
+    <cac:Item>
+      <cbc:Description>Koli: 10 x 1 kg</cbc:Description>
+      <cbc:Name>Pilavlık Bulgur</cbc:Name>
+      <cbc:BrandName>Anadolu Hasadı</cbc:BrandName>
+      <cac:SellersItemIdentification>
+        <cbc:ID>ALG-1004</cbc:ID>
+      </cac:SellersItemIdentification>
+    </cac:Item>
+  </cac:DespatchLine>
+  <cac:DespatchLine>
+    <cbc:ID>5</cbc:ID>
+    <cbc:Note>Palet P-03</cbc:Note>
+    <cbc:DeliveredQuantity unitCode="BG">10</cbc:DeliveredQuantity>
+    <cac:OrderLineReference>
+      <cbc:LineID>5</cbc:LineID>
+    </cac:OrderLineReference>
+    <cac:Item>
+      <cbc:Description>Çuval: 25 kg</cbc:Description>
+      <cbc:Name>Buğday Unu Tip 550</cbc:Name>
+      <cbc:BrandName>Değirmenci</cbc:BrandName>
+      <cac:SellersItemIdentification>
+        <cbc:ID>ALG-1101</cbc:ID>
+      </cac:SellersItemIdentification>
+    </cac:Item>
+  </cac:DespatchLine>
+  <cac:DespatchLine>
+    <cbc:ID>6</cbc:ID>
+    <cbc:Note>Palet P-03</cbc:Note>
+    <cbc:DeliveredQuantity unitCode="BX">30</cbc:DeliveredQuantity>
+    <cac:OrderLineReference>
+      <cbc:LineID>6</cbc:LineID>
+    </cac:OrderLineReference>
+    <cac:Item>
+      <cbc:Description>Koli: 20 x 500 g</cbc:Description>
+      <cbc:Name>Burgu Makarna</cbc:Name>
+      <cbc:BrandName>Değirmenci</cbc:BrandName>
+      <cac:SellersItemIdentification>
+        <cbc:ID>ALG-1102</cbc:ID>
+      </cac:SellersItemIdentification>
+    </cac:Item>
+  </cac:DespatchLine>
+  <cac:DespatchLine>
+    <cbc:ID>7</cbc:ID>
+    <cbc:Note>Palet P-04</cbc:Note>
+    <cbc:DeliveredQuantity unitCode="BX">12</cbc:DeliveredQuantity>
+    <cac:OrderLineReference>
+      <cbc:LineID>7</cbc:LineID>
+    </cac:OrderLineReference>
+    <cac:Item>
+      <cbc:Description>Koli: 12 x 830 g</cbc:Description>
+      <cbc:Name>Domates Salçası</cbc:Name>
+      <cbc:BrandName>Bahçeden</cbc:BrandName>
+      <cac:SellersItemIdentification>
+        <cbc:ID>ALG-2001</cbc:ID>
+      </cac:SellersItemIdentification>
+    </cac:Item>
+  </cac:DespatchLine>
+  <cac:DespatchLine>
+    <cbc:ID>8</cbc:ID>
+    <cbc:Note>Palet P-05</cbc:Note>
+    <cbc:DeliveredQuantity unitCode="BX">10</cbc:DeliveredQuantity>
+    <cac:OrderLineReference>
+      <cbc:LineID>8</cbc:LineID>
+    </cac:OrderLineReference>
+    <cac:Item>
+      <cbc:Description>Koli: 4 x 2 kg (soğuk zincir)</cbc:Description>
+      <cbc:Name>Tam Yağlı Beyaz Peynir</cbc:Name>
+      <cbc:BrandName>Trakya Mandıra</cbc:BrandName>
+      <cac:SellersItemIdentification>
+        <cbc:ID>ALG-2002</cbc:ID>
+      </cac:SellersItemIdentification>
+    </cac:Item>
+  </cac:DespatchLine>
+  <cac:DespatchLine>
+    <cbc:ID>9</cbc:ID>
+    <cbc:Note>Palet P-05</cbc:Note>
+    <cbc:DeliveredQuantity unitCode="BX">9</cbc:DeliveredQuantity>
+    <cac:OrderLineReference>
+      <cbc:LineID>9</cbc:LineID>
+    </cac:OrderLineReference>
+    <cac:Item>
+      <cbc:Description>Koli: 6 x 1 kg</cbc:Description>
+      <cbc:Name>Gemlik Siyah Zeytin (S)</cbc:Name>
+      <cbc:BrandName>Trakya Mandıra</cbc:BrandName>
+      <cac:SellersItemIdentification>
+        <cbc:ID>ALG-2003</cbc:ID>
+      </cac:SellersItemIdentification>
+    </cac:Item>
+  </cac:DespatchLine>
+  <cac:DespatchLine>
+    <cbc:ID>10</cbc:ID>
+    <cbc:Note>Palet P-04</cbc:Note>
+    <cbc:DeliveredQuantity unitCode="BX">14</cbc:DeliveredQuantity>
+    <cac:OrderLineReference>
+      <cbc:LineID>10</cbc:LineID>
+    </cac:OrderLineReference>
+    <cac:Item>
+      <cbc:Description>Koli: 6 x 1 kg</cbc:Description>
+      <cbc:Name>Rize Siyah Çay</cbc:Name>
+      <cbc:BrandName>Karadeniz</cbc:BrandName>
+      <cac:SellersItemIdentification>
+        <cbc:ID>ALG-2004</cbc:ID>
+      </cac:SellersItemIdentification>
+    </cac:Item>
+  </cac:DespatchLine>
+  <cac:DespatchLine>
+    <cbc:ID>11</cbc:ID>
+    <cbc:Note>Palet P-06</cbc:Note>
+    <cbc:DeliveredQuantity unitCode="BX">16</cbc:DeliveredQuantity>
+    <cac:OrderLineReference>
+      <cbc:LineID>11</cbc:LineID>
+    </cac:OrderLineReference>
+    <cac:Item>
+      <cbc:Description>Koli: 4 x 5 L</cbc:Description>
+      <cbc:Name>Ayçiçek Yağı</cbc:Name>
+      <cbc:BrandName>Bahçeden</cbc:BrandName>
+      <cac:SellersItemIdentification>
+        <cbc:ID>ALG-2005</cbc:ID>
+      </cac:SellersItemIdentification>
+    </cac:Item>
+  </cac:DespatchLine>
+  <cac:DespatchLine>
+    <cbc:ID>12</cbc:ID>
+    <cbc:Note>Palet P-06</cbc:Note>
+    <cbc:DeliveredQuantity unitCode="BX">6</cbc:DeliveredQuantity>
+    <cac:OrderLineReference>
+      <cbc:LineID>12</cbc:LineID>
+    </cac:OrderLineReference>
+    <cac:Item>
+      <cbc:Description>Koli: 4 x 3,5 L</cbc:Description>
+      <cbc:Name>Bulaşık Deterjanı</cbc:Name>
+      <cbc:BrandName>Parlak</cbc:BrandName>
+      <cac:SellersItemIdentification>
+        <cbc:ID>ALG-3001</cbc:ID>
+      </cac:SellersItemIdentification>
+    </cac:Item>
+  </cac:DespatchLine>
+  <cac:DespatchLine>
+    <cbc:ID>13</cbc:ID>
+    <cbc:Note>Palet P-06</cbc:Note>
+    <cbc:DeliveredQuantity unitCode="BX">8</cbc:DeliveredQuantity>
+    <cac:OrderLineReference>
+      <cbc:LineID>13</cbc:LineID>
+    </cac:OrderLineReference>
+    <cac:Item>
+      <cbc:Description>Balya: 4 x 12 rulo</cbc:Description>
+      <cbc:Name>Kağıt Havlu (12'li)</cbc:Name>
+      <cbc:BrandName>Parlak</cbc:BrandName>
+      <cac:SellersItemIdentification>
+        <cbc:ID>ALG-3002</cbc:ID>
+      </cac:SellersItemIdentification>
+    </cac:Item>
+  </cac:DespatchLine>
+  <cac:DespatchLine>
+    <cbc:ID>14</cbc:ID>
+    <cbc:Note>Palet P-06</cbc:Note>
+    <cbc:DeliveredQuantity unitCode="BX">4</cbc:DeliveredQuantity>
+    <cac:OrderLineReference>
+      <cbc:LineID>14</cbc:LineID>
+    </cac:OrderLineReference>
+    <cac:Item>
+      <cbc:Description>Koli: 50 rulo</cbc:Description>
+      <cbc:Name>Çöp Poşeti Büyük Boy</cbc:Name>
+      <cbc:BrandName>Parlak</cbc:BrandName>
+      <cac:SellersItemIdentification>
+        <cbc:ID>ALG-3003</cbc:ID>
+      </cac:SellersItemIdentification>
+    </cac:Item>
+  </cac:DespatchLine>
+</DespatchAdvice>

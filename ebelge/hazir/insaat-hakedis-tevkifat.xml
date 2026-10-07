@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: İnşaat taahhüt — 7 No'lu ara hakediş faturası (TICARIFATURA · TEVKIFAT)
+  KDV %20, tevkifat kodu 601 (yapım işleri, 4/10). Tüm kişi/firma bilgileri kurgusaldır.
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+    xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>TICARIFATURA</cbc:ProfileID>
+    <cbc:ID>KYI2026000000147</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>304C8954-694E-484A-956B-6E3ABEC69758</cbc:UUID>
+    <cbc:IssueDate>2026-10-05</cbc:IssueDate>
+    <cbc:IssueTime>10:15:00</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>TEVKIFAT</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız: Dört Milyon Yüz On Dokuz Bin Dokuz Yüz Yirmi Türk Lirasıdır.</cbc:Note>
+    <cbc:Note>Teminat kesintisi: Sözleşmenin 14. maddesi gereği hakediş tutarının %5'i (183.925,00 TL) iş sahibince teminat olarak kesilecek, kesin kabulde iade edilecektir.</cbc:Note>
+    <cbc:Note>KDV tevkifatı, KDV Genel Uygulama Tebliği (I/C-2.1.3.2.1) uyarınca yapım işlerinde 4/10 oranında uygulanmıştır.</cbc:Note>
+    <cbc:Note>Hakediş metrajları kontrol mühendisi Y. Müh. Selin Arıkan tarafından 03.10.2026 tarihinde onaylanmıştır.</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>4</cbc:LineCountNumeric>
+    <cac:InvoicePeriod>
+        <cbc:StartDate>2026-09-01</cbc:StartDate>
+        <cbc:EndDate>2026-09-30</cbc:EndDate>
+        <cbc:Description>Eylül 2026 imalat dönemi</cbc:Description>
+    </cac:InvoicePeriod>
+    <cac:ContractDocumentReference>
+        <cbc:ID>BGS-2025/118</cbc:ID>
+        <cbc:IssueDate>2025-11-20</cbc:IssueDate>
+        <cbc:DocumentType>Yapım İşi Sözleşmesi</cbc:DocumentType>
+        <cbc:DocumentDescription>Bilgeşehir Ataşehir Konutları — B Blok Kaba ve İnce İnşaat Yapım İşi</cbc:DocumentDescription>
+    </cac:ContractDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>7</cbc:ID>
+        <cbc:IssueDate>2026-10-03</cbc:IssueDate>
+        <cbc:DocumentType>HAKEDIS</cbc:DocumentType>
+        <cbc:DocumentDescription>7 No'lu Ara Hakediş</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">5230418877</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">5230418877</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Mustafa Kemal Mah. 2120. Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>14/6</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Çankaya</cbc:CitySubdivisionName>
+                <cbc:CityName>Ankara</cbc:CityName>
+                <cbc:PostalZone>06510</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.kalekentyapi.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">5230418877</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">0523041887700015</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TICARETSICILNO">412887</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Kalekent Yapı İnşaat Taahhüt A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Mustafa Kemal Mah. 2120. Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>14/6</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Çankaya</cbc:CitySubdivisionName>
+                <cbc:CityName>Ankara</cbc:CityName>
+                <cbc:PostalZone>06510</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Kavaklıdere</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(312) 285 40 40</cbc:Telephone>
+                <cbc:ElectronicMail>hakedis@kalekentyapi.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.bilgesehir.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">1780352262</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Bilgeşehir Gayrimenkul Geliştirme A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Barbaros Mah. Begonya Sok.</cbc:StreetName>
+                <cbc:BuildingNumber>3</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Ataşehir</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34746</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Kozyatağı</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(216) 688 12 00</cbc:Telephone>
+                <cbc:ElectronicMail>satinalma@bilgesehir.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-10-20</cbc:PaymentDueDate>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR830001000001978645784126</cbc:ID>
+            <cbc:CurrencyCode>TRY</cbc:CurrencyCode>
+            <cbc:PaymentNote>T.C. Ziraat Bankası — Kızılay Şubesi</cbc:PaymentNote>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-10-20</cbc:PaymentDueDate>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR450001200009045122870044</cbc:ID>
+            <cbc:CurrencyCode>TRY</cbc:CurrencyCode>
+            <cbc:PaymentNote>Türkiye Halk Bankası — Ankara Kurumsal Şubesi</cbc:PaymentNote>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">735700.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">3678500.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">735700.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>20</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:WithholdingTaxTotal>
+        <cbc:TaxAmount currencyID="TRY">294280.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">735700.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">294280.00</cbc:TaxAmount>
+            <cbc:Percent>40</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>YAPIM İŞLERİ İLE BU İŞLERLE BİRLİKTE İFA EDİLEN MÜHENDİSLİK-MİMARLIK VE ETÜT-PROJE HİZMETLERİ</cbc:Name>
+                    <cbc:TaxTypeCode>601</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:WithholdingTaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">3678500.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">3678500.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">4414200.00</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="TRY">0.00</cbc:AllowanceTotalAmount>
+        <cbc:PayableAmount currencyID="TRY">4119920.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="MTQ">420</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">2037000.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">407400.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">2037000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">407400.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:WithholdingTaxTotal>
+            <cbc:TaxAmount currencyID="TRY">162960.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">407400.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">162960.00</cbc:TaxAmount>
+                <cbc:Percent>40</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>YAPIM İŞLERİ İLE BU İŞLERLE BİRLİKTE İFA EDİLEN MÜHENDİSLİK-MİMARLIK VE ETÜT-PROJE HİZMETLERİ</cbc:Name>
+                        <cbc:TaxTypeCode>601</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:WithholdingTaxTotal>
+        <cac:Item>
+            <cbc:Description>B Blok 8-10. katlar kolon, perde, kiriş ve döşeme betonu (pompa dahil)</cbc:Description>
+            <cbc:Name>C30/37 betonarme karkas imalatı</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>15.150.1005</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">4850.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="MTK">1860</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">1134600.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">226920.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">1134600.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">226920.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:WithholdingTaxTotal>
+            <cbc:TaxAmount currencyID="TRY">90768.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">226920.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">90768.00</cbc:TaxAmount>
+                <cbc:Percent>40</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>YAPIM İŞLERİ İLE BU İŞLERLE BİRLİKTE İFA EDİLEN MÜHENDİSLİK-MİMARLIK VE ETÜT-PROJE HİZMETLERİ</cbc:Name>
+                        <cbc:TaxTypeCode>601</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:WithholdingTaxTotal>
+        <cac:Item>
+            <cbc:Description>20 cm gazbeton duvar örgüsü, yapıştırma harcı ile (B Blok 4-7. katlar)</cbc:Description>
+            <cbc:Name>Gazbeton duvar örgüsü</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>15.255.1102</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">610.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="MTK">940</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">361900.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">72380.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">361900.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">72380.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:WithholdingTaxTotal>
+            <cbc:TaxAmount currencyID="TRY">28952.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">72380.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">28952.00</cbc:TaxAmount>
+                <cbc:Percent>40</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>YAPIM İŞLERİ İLE BU İŞLERLE BİRLİKTE İFA EDİLEN MÜHENDİSLİK-MİMARLIK VE ETÜT-PROJE HİZMETLERİ</cbc:Name>
+                        <cbc:TaxTypeCode>601</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:WithholdingTaxTotal>
+        <cac:Item>
+            <cbc:Description>Bitümlü membran (2 kat, 4 mm) ve XPS ısı yalıtımlı teras çatı</cbc:Description>
+            <cbc:Name>Teras çatı su ve ısı yalıtımı</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>15.375.1201</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">385.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>4</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="MON">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">145000.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">29000.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">145000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">29000.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:WithholdingTaxTotal>
+            <cbc:TaxAmount currencyID="TRY">11600.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">29000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">11600.00</cbc:TaxAmount>
+                <cbc:Percent>40</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>YAPIM İŞLERİ İLE BU İŞLERLE BİRLİKTE İFA EDİLEN MÜHENDİSLİK-MİMARLIK VE ETÜT-PROJE HİZMETLERİ</cbc:Name>
+                        <cbc:TaxTypeCode>601</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:WithholdingTaxTotal>
+        <cac:Item>
+            <cbc:Description>Statik ve mimari uygulama projesi kontrolü, şantiye mühendisliği</cbc:Description>
+            <cbc:Name>Proje kontrol mühendisliği hizmeti (Eylül 2026)</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>MH-09/2026</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">145000.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>

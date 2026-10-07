@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: Elektrikli araç anlık şarj e-Faturası (ENERJI · SARJANLIK), GİB SARJANLIK.xml yapısında.
+  Alıcıda tek PLAKA (+ ARACKIMLIKNO), InvoicePeriod ile şarj başlangıç / bitiş tarih-saati,
+  her kalemde şarj ünitesi seri numarası (Item/ItemInstance/SerialID). İstasyon Delivery/DeliveryLocation'da.
+  Tüm kişi/firma bilgileri kurgusaldır.
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+    xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>ENERJI</cbc:ProfileID>
+    <cbc:ID>VLT2026000918244</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>980B5169-6CD3-4497-A3A7-5E40F3E79D41</cbc:UUID>
+    <cbc:IssueDate>2026-10-06</cbc:IssueDate>
+    <cbc:IssueTime>15:04:12</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>SARJANLIK</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız: Yedi Yüz Altmış Dokuz Türk Lirası On Üç Kuruş</cbc:Note>
+    <cbc:Note>Batarya doluluk: başlangıç %18 → bitiş %84 · Ortalama güç 54,5 kW</cbc:Note>
+    <cbc:Note>Tarife: Hızlı DC 12,40 TL/kWh, şarj sonrası işgal 5,00 TL/dk (KDV hariç; ilk 10 dk ücretsiz).</cbc:Note>
+    <cbc:Note>EPDK şarj hizmeti lisansı: ŞH/11458-3/2025</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>2</cbc:LineCountNumeric>
+    <cac:InvoicePeriod>
+        <cbc:StartDate>2026-10-06</cbc:StartDate>
+        <cbc:StartTime>14:12:08</cbc:StartTime>
+        <cbc:EndDate>2026-10-06</cbc:EndDate>
+        <cbc:EndTime>15:03:41</cbc:EndTime>
+    </cac:InvoicePeriod>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>VLT-S-26100614-88213</cbc:ID>
+        <cbc:IssueDate>2026-10-06</cbc:IssueDate>
+        <cbc:DocumentType>SARJOTURUMU</cbc:DocumentType>
+        <cbc:DocumentDescription>Şarj oturum kimliği (mobil uygulama)</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">4811036752</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">4811036752</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Maslak Mah. Büyükdere Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>255</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Sarıyer</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34485</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.voltajsarj.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">4811036752</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Voltaj Şarj Teknolojileri A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Maslak Mah. Büyükdere Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>255</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Sarıyer</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34485</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Maslak</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0850 455 86 58</cbc:Telephone>
+                <cbc:ElectronicMail>fatura@voltajsarj.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">9466032186</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="PLAKA">34YFH457</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="ARACKIMLIKNO">887341</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Yeşilyol Kurumsal Filo Hizmetleri A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Esentepe Mah. Kore Şehitleri Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>16</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Şişli</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34394</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Zincirlikuyu</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:ElectronicMail>efatura@yesilyolfilo.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:Delivery>
+        <cac:DeliveryLocation>
+            <cbc:ID>VLT-IST-0457</cbc:ID>
+            <cbc:Description>Voltaj Hub Ataşehir · AVM otoparkı -2. kat</cbc:Description>
+            <cac:Address>
+                <cbc:StreetName>Barbaros Mah. Halk Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>8</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Ataşehir</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34746</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:Address>
+        </cac:DeliveryLocation>
+    </cac:Delivery>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>48</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-10-06</cbc:PaymentDueDate>
+        <cbc:InstructionNote>Mobil uygulama · kayıtlı kurumsal kart **** 4417</cbc:InstructionNote>
+    </cac:PaymentMeans>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">128.19</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">640.94</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">128.19</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>20</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">640.94</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">640.94</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">769.13</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="TRY">0.00</cbc:AllowanceTotalAmount>
+        <cbc:PayableAmount currencyID="TRY">769.13</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="KWH">46.85</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">580.94</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">116.19</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">580.94</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">116.19</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Soket CCS2 · maks. 180 kW · şarj noktası 2B</cbc:Description>
+            <cbc:Name>DC hızlı şarj</cbc:Name>
+            <cbc:Keyword>DC</cbc:Keyword>
+            <cac:ItemInstance>
+                <cbc:SerialID>VLT-DC180-23-004571</cbc:SerialID>
+            </cac:ItemInstance>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">12.40</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="MIN">12</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">60.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">12.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">60.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">12.00</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Şarj bitiminden sonra soket işgali, ücretsiz süre sonrası</cbc:Description>
+            <cbc:Name>Şarj sonrası işgal ücreti</cbc:Name>
+            <cbc:Keyword>IDLE</cbc:Keyword>
+            <cac:ItemInstance>
+                <cbc:SerialID>VLT-DC180-23-004571</cbc:SerialID>
+            </cac:ItemInstance>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">5.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>

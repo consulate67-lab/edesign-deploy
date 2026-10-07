@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği — Muayenehane e-Serbest Meslek Makbuzu (kurgusal veriler).
+  Uzman hekim -> vergi mükellefi olmayan hasta (TCKN, nihai tüketici); stopaj yok, KDV %10, kredi kartı tahsilatı
+  (509 Sıra No'lu VUK GT V.5.4: işyeri no, terminal no, kartın son dört hanesi, kart sahibi, tutar, onay kodu).
+    Brüt ücret 11.000,00 | GV stopajı yok | KDV %10 1.100,00 | Tahsil edilen tutar 12.100,00
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+    xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>EARSIVBELGE</cbc:ProfileID>
+    <cbc:ID>OZD2026000001208</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>15611424-F7EA-42EA-A329-0492F8CFABC1</cbc:UUID>
+    <cbc:IssueDate>2026-10-06</cbc:IssueDate>
+    <cbc:IssueTime>11:40:00</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>SERBESTMESLEKMAKBUZU</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız On İki Bin Yüz Türk Lirasıdır.</cbc:Note>
+    <cbc:Note>Diploma Tescil No: 2009-41872</cbc:Note>
+    <cbc:Note>Uzmanlık Tescil No: 2015-09318</cbc:Note>
+    <cbc:Note>Protokol No: 2026-10418</cbc:Note>
+    <cbc:Note>POS İşyeri No: 000412233</cbc:Note>
+    <cbc:Note>POS Terminal No: TRM00451</cbc:Note>
+    <cbc:Note>Kart No: **** **** **** 4821</cbc:Note>
+    <cbc:Note>Kart Sahibi: Zeynep AKTAŞ</cbc:Note>
+    <cbc:Note>Onay Kodu: 731905</cbc:Note>
+    <cbc:Note>Kontrol muayenesi 20.10.2026 tarihinde planlanmıştır.</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>4</cbc:LineCountNumeric>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">37195826450</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Uzm. Dr. Kerem ÖZDEMİR</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Bağdat Caddesi Caddebostan Tıp Merkezi</cbc:StreetName>
+                <cbc:BuildingNumber>302/6</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Kadıköy</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34728</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Kozyatağı</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(216) 360 30 20</cbc:Telephone>
+                <cbc:ElectronicMail>randevu@drkeremozdemir.com</cbc:ElectronicMail>
+            </cac:Contact>
+            <cac:Person>
+                <cbc:FirstName>Kerem</cbc:FirstName>
+                <cbc:FamilyName>ÖZDEMİR</cbc:FamilyName>
+                <cbc:Title>Ortopedi ve Travmatoloji Uzmanı</cbc:Title>
+            </cac:Person>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">45920731696</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Moda Caddesi Şair Nefi Sokak</cbc:StreetName>
+                <cbc:BuildingNumber>8/3</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Kadıköy</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:Contact>
+                <cbc:Telephone>(532) 418 27 63</cbc:Telephone>
+            </cac:Contact>
+            <cac:Person>
+                <cbc:FirstName>Zeynep</cbc:FirstName>
+                <cbc:FamilyName>AKTAŞ</cbc:FamilyName>
+            </cac:Person>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>48</cbc:PaymentMeansCode>
+        <cbc:InstructionNote>Kredi kartı ile tek çekim — EFT-POS özellikli YN ÖKC</cbc:InstructionNote>
+    </cac:PaymentMeans>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">1100.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">11000.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">1100.00</cbc:TaxAmount>
+            <cbc:Percent>10</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">11000.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">11000.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">12100.00</cbc:TaxInclusiveAmount>
+        <cbc:PayableAmount currencyID="TRY">12100.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">2500.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">250.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">2500.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">250.00</cbc:TaxAmount>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>İlk başvuru, fizik muayene ve tedavi planı</cbc:Description>
+            <cbc:Name>Uzman hekim muayenesi</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">2500.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">1800.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">180.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">1800.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">180.00</cbc:TaxAmount>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Sağ diz — menisküs ve bağ değerlendirmesi</cbc:Description>
+            <cbc:Name>Kas-iskelet ultrasonografisi</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">1800.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">2</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">6000.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">600.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">6000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">600.00</cbc:TaxAmount>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Ultrason eşliğinde sağ diz eklem içi uygulama (2 seans)</cbc:Description>
+            <cbc:Name>PRP enjeksiyonu</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">3000.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>4</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">700.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">70.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">700.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">70.00</cbc:TaxAmount>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Patellar destek bantlaması</cbc:Description>
+            <cbc:Name>Kinesio bantlama</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">700.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>

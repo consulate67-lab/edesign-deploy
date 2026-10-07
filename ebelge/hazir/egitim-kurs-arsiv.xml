@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği — Eğitim kurumu / kurs e-Arşiv Faturası (kurgusal veriler).
+  EARSIVFATURA / SATIS; nihai tüketici veliye düzenlenir. Kurs ücreti %10, atölye ve deneme paketi %20 KDV.
+  Taksit planı "Taksit: sıra/toplam | vade | tutar" biçimli notlardan tablo olarak gösterilir.
+    Mal/hizmet toplamı 23.500,00 | KDV %10 1.800,00 | KDV %20 1.100,00 | Ödenecek 26.400,00 (5 × 5.280,00)
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+    xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>EARSIVFATURA</cbc:ProfileID>
+    <cbc:ID>PSL2026000003341</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>BED62A02-50BB-4ECC-B705-5EB773ABF76D</cbc:UUID>
+    <cbc:IssueDate>2026-10-02</cbc:IssueDate>
+    <cbc:IssueTime>16:05:00</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>SATIS</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız Yirmi Altı Bin Dört Yüz Türk Lirasıdır.</cbc:Note>
+    <cbc:Note>Öğrenci: Ege YILDIZ</cbc:Note>
+    <cbc:Note>Sınıf: 8. Sınıf · LGS Grubu B</cbc:Note>
+    <cbc:Note>MEB Kurum Kodu: 974215</cbc:Note>
+    <cbc:Note>Taksit: 1/5 | 15.10.2026 | 5.280,00</cbc:Note>
+    <cbc:Note>Taksit: 2/5 | 15.11.2026 | 5.280,00</cbc:Note>
+    <cbc:Note>Taksit: 3/5 | 15.12.2026 | 5.280,00</cbc:Note>
+    <cbc:Note>Taksit: 4/5 | 15.01.2027 | 5.280,00</cbc:Note>
+    <cbc:Note>Taksit: 5/5 | 15.02.2027 | 5.280,00</cbc:Note>
+    <cbc:Note>Kayıt yenileme ve kardeş indirimi için kurum sekreterliğine başvurabilirsiniz.</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>3</cbc:LineCountNumeric>
+    <cac:InvoicePeriod>
+        <cbc:StartDate>2026-09-14</cbc:StartDate>
+        <cbc:EndDate>2027-01-22</cbc:EndDate>
+        <cbc:Description>2026–2027 Güz Dönemi</cbc:Description>
+    </cac:InvoicePeriod>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>ELEKTRONIK</cbc:ID>
+        <cbc:IssueDate>2026-10-02</cbc:IssueDate>
+        <cbc:DocumentTypeCode>SEND_TYPE</cbc:DocumentTypeCode>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">7255903184</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">7255903184</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Kızılay Mahallesi Meşrutiyet Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>27</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Çankaya</cbc:CitySubdivisionName>
+                <cbc:CityName>Ankara</cbc:CityName>
+                <cbc:PostalZone>06420</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://pusulaegitim.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">7255903184</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Pusula Eğitim Hizmetleri Ltd. Şti.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Kızılay Mahallesi Meşrutiyet Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>27</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Çankaya</cbc:CitySubdivisionName>
+                <cbc:CityName>Ankara</cbc:CityName>
+                <cbc:PostalZone>06420</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Kavaklıdere</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(312) 418 27 27</cbc:Telephone>
+                <cbc:ElectronicMail>kayit@pusulaegitim.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">19638452716</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Ayrancı Mahallesi Hoşdere Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>112/6</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Çankaya</cbc:CitySubdivisionName>
+                <cbc:CityName>Ankara</cbc:CityName>
+                <cbc:PostalZone>06540</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:Contact>
+                <cbc:Telephone>(532) 614 08 52</cbc:Telephone>
+                <cbc:ElectronicMail>burcu.yildiz@example.com</cbc:ElectronicMail>
+            </cac:Contact>
+            <cac:Person>
+                <cbc:FirstName>Burcu</cbc:FirstName>
+                <cbc:FamilyName>YILDIZ</cbc:FamilyName>
+            </cac:Person>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2027-02-15</cbc:PaymentDueDate>
+        <cbc:InstructionNote>Açıklama alanına öğrenci adını ve fatura numarasını yazınız.</cbc:InstructionNote>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR32 0006 4000 0015 9753 4862 01</cbc:ID>
+            <cbc:CurrencyCode>TRY</cbc:CurrencyCode>
+            <cac:FinancialInstitutionBranch>
+                <cbc:Name>Kızılay Şubesi</cbc:Name>
+                <cac:FinancialInstitution>
+                    <cbc:Name>Türkiye İş Bankası A.Ş.</cbc:Name>
+                </cac:FinancialInstitution>
+            </cac:FinancialInstitutionBranch>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">2900.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">18000.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">1800.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>10</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">5500.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">1100.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>20</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">23500.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">23500.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">26400.00</cbc:TaxInclusiveAmount>
+        <cbc:PayableAmount currencyID="TRY">26400.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">18000.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">1800.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">18000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">1800.00</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Haftada 12 ders saati · Türkçe, Matematik, Fen, İnkılap, İngilizce, Din Kültürü</cbc:Description>
+            <cbc:Name>LGS Hazırlık Programı — Güz Dönemi</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>LGS-8B</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">18000.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="HUR">16</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">4000.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">800.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">4000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">800.00</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Cumartesi atölyesi · Arduino ile robotik ve blok tabanlı kodlama</cbc:Description>
+            <cbc:Name>Robotik Kodlama Atölyesi</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>ATL-ROB</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">250.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">10</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">1500.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">300.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">1500.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">300.00</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Türkiye geneli LGS deneme sınavı ve kişisel analiz raporu</cbc:Description>
+            <cbc:Name>Deneme Sınavı Paketi</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>DNM-10</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">150.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>
