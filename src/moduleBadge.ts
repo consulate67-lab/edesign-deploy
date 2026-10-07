@@ -55,6 +55,15 @@ export const MODULE_BADGES: Record<string, ModuleBadge> = {
         stampBrandColor: '#0e7490',
         stampStarColor: '#dc2626',
     },
+    'irsaliye-yanit': {
+        title: 'e-İRSALİYE YANITI',
+        subtitle: 'Kabul / Red Bildirimi',
+        color: '#0891b2',
+        icon: '📨',
+        stampBrand: 'e-İrsaliye',
+        stampBrandColor: '#0891b2',
+        stampStarColor: '#dc2626',
+    },
     ihracat: {
         title: 'e-İHRACAT',
         subtitle: 'Gümrüklü İhracat',

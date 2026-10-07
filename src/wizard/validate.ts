@@ -68,6 +68,7 @@ export function validateXslt(text: string, docType: WizardDocType, sampleXml: st
     const usage: Record<DocFamily, number> = {
         invoice: count(/\bInvoice(Line)?\b/g),
         despatch: count(/\bDespatch(Advice|Line)\b/g),
+        receiptAdvice: count(/\bReceiptAdvice\b|\bReceivedQuantity\b/g),
         receipt: count(/\bReceipt(Line)?\b/g),
     };
     const candidates = families.size ? [...families] : (Object.keys(usage) as DocFamily[]).filter(f => usage[f] > 0);
@@ -120,6 +121,117 @@ function partyName(root: Element, partyTag: string): string {
     return `${first} ${family}`.trim();
 }
 
+/** Çocuk elemanlar üzerinden yerel adla yol izler: 'Shipment/Delivery/Despatch'. */
+function pathAll(el: Element, path: string): Element[] {
+    let cur = [el];
+    for (const step of path.split('/')) {
+        cur = cur.flatMap(e => Array.from(e.children).filter(c => c.localName === step));
+    }
+    return cur;
+}
+const pathText = (el: Element, path: string) => pathAll(el, path)[0]?.textContent?.trim() ?? '';
+
+const PLATE_RE: Record<string, RegExp> = {
+    PLAKA: /^(0[1-9]|[1-7][0-9]|8[01])[A-Z]+[0-9]+$/,
+    DORSE: /^(0[1-9]|[1-7][0-9]|8[01])[A-Z]+[0-9]+$/,
+    DORSEPLAKA: /^(0[1-9]|[1-7][0-9]|8[01])[A-Z]+[0-9]+$/,
+    YABANCIPLAKA: /^[A-Z0-9_-]+$/,
+    YABANCIDORSE: /^[A-Z0-9_-]+$/,
+    YABANCIDORSEPLAKA: /^[A-Z0-9_-]+$/,
+};
+const DOC_ID_RE = /^[A-Z0-9]{3}20[0-9]{2}[0-9]{9}$/;
+
+/** GİB e-İrsaliye şematron kuralları (UBL-TR 1.2.1). Önizlemeyi engellemez, uyarı olarak gösterilir. */
+function despatchRuleChecks(root: Element, profile: string, typeCode: string): string[] {
+    const issues: string[] = [];
+    const id = childText(root, 'ID');
+    if (id && !DOC_ID_RE.test(id)) issues.push(`Belge no (${id}) 16 karakter olmalı: 3 harf/rakam seri + yıl + 9 haneli sıra.`);
+
+    if (typeCode.toUpperCase() === 'MATBUDAN') {
+        const refs = pathAll(root, 'AdditionalDocumentReference');
+        if (!refs.some(r => pathText(r, 'ID') && pathText(r, 'IssueDate'))) {
+            issues.push('MATBUDAN irsaliyede matbu belgenin numarası ve tarihi (AdditionalDocumentReference) bulunmalı.');
+        }
+    }
+
+    const shipment = pathAll(root, 'Shipment')[0];
+    if (!shipment) return [...issues, 'Sevkiyat (Shipment) bilgisi yok: fiili sevk tarihi/saati, teslim adresi ve şoför ya da taşıyıcı zorunlu.'];
+
+    const despatch = pathAll(shipment, 'Delivery/Despatch')[0];
+    if (!despatch || !pathText(despatch, 'ActualDespatchDate') || !pathText(despatch, 'ActualDespatchTime')) {
+        issues.push('Fiili sevk tarihi ve saati (Shipment/Delivery/Despatch) zorunlu.');
+    }
+    const address = pathAll(shipment, 'Delivery/DeliveryAddress')[0];
+    if (!address) {
+        issues.push('Sevkiyat teslimat adresi (Shipment/Delivery/DeliveryAddress) yok; ilçe, il, ülke ve posta kodu zorunlu.');
+    } else {
+        if (!pathText(address, 'CitySubdivisionName') || !pathText(address, 'CityName') || !pathText(address, 'Country/Name')) {
+            issues.push('Teslimat adresinde ilçe, il ve ülke zorunlu.');
+        }
+        const postal = pathText(address, 'PostalZone');
+        if (!/^((0[1-9])|([1-7][0-9])|(8[0-1]))[0-9]{3}$/.test(postal)) {
+            issues.push(`Teslimat adresi posta kodu ${postal ? `"${postal}" geçersiz` : 'eksik'}; il koduyla başlayan 5 haneli olmalı.`);
+        }
+    }
+
+    const drivers = pathAll(shipment, 'ShipmentStage/DriverPerson');
+    const carrier = pathAll(shipment, 'Delivery/CarrierParty')[0];
+    if (!drivers.length && !carrier) issues.push('Şoför (DriverPerson) veya taşıyıcı firma (CarrierParty) bilgisinden biri zorunlu.');
+    if (drivers.some(d => !pathText(d, 'FirstName') || !pathText(d, 'FamilyName') || !pathText(d, 'NationalityID'))) {
+        issues.push('Şoförün adı, soyadı ve TCKN bilgisi zorunlu.');
+    }
+    const plates = pathAll(shipment, 'ShipmentStage/TransportMeans/RoadTransport/LicensePlateID');
+    if (drivers.length && !plates.length) issues.push('Şoför bilgisi verildiğinde araç plakası (LicensePlateID) zorunlu.');
+    const equipment = pathAll(shipment, 'TransportHandlingUnit/TransportEquipment/ID');
+    for (const p of [...plates, ...equipment]) {
+        const scheme = (p.getAttribute('schemeID') || '').toUpperCase();
+        const value = p.textContent?.trim() ?? '';
+        const re = PLATE_RE[scheme];
+        if (!re) issues.push(`Plaka/dorse türü "${scheme || 'boş'}" geçersiz; PLAKA, YABANCIPLAKA, DORSE, DORSEPLAKA, YABANCIDORSE veya YABANCIDORSEPLAKA olmalı.`);
+        else if (!re.test(value)) issues.push(`${scheme} değeri "${value}" GİB formatına uymuyor (ör. 34ABC123).`);
+    }
+
+    const lines = pathAll(root, 'DespatchLine');
+    const itemIds = (line: Element, scheme: string) => pathAll(line, 'Item/AdditionalItemIdentification/ID')
+        .filter(e => e.getAttribute('schemeID') === scheme).map(e => e.textContent?.trim() ?? '');
+    if (lines.some(l => !pathText(l, 'DeliveredQuantity') || !pathAll(l, 'DeliveredQuantity')[0]?.getAttribute('unitCode'))) {
+        issues.push('Her satırda gönderilen miktar ve birim kodu (DeliveredQuantity/@unitCode) zorunlu.');
+    }
+    const p = profile.toUpperCase();
+    if (p === 'HKSIRSALIYE' && lines.some(l => !itemIds(l, 'KUNYENO').some(v => v.length === 19))) {
+        issues.push('HKS irsaliyesinde her satırda 19 karakterlik künye numarası (KUNYENO) zorunlu.');
+    }
+    if (p === 'IDISIRSALIYE') {
+        if (lines.some(l => !itemIds(l, 'ETIKETNO').some(v => /^[A-Z]{2}[0-9]{7}$/.test(v)))) {
+            issues.push('IDIS irsaliyesinde her satırda etiket numarası (ETIKETNO: 2 harf + 7 rakam) zorunlu.');
+        }
+        const sevkiyat = pathAll(root, 'DespatchSupplierParty/Party/PartyIdentification/ID')
+            .find(e => e.getAttribute('schemeID') === 'SEVKIYATNO')?.textContent?.trim() ?? '';
+        if (!/^(SE|ES)-[0-9]{7}$/.test(sevkiyat)) issues.push('IDIS irsaliyesinde gönderen için SEVKIYATNO (SE-1234567 biçiminde) zorunlu.');
+    }
+    return issues;
+}
+
+/** GİB e-İrsaliye Yanıtı kuralları. */
+function receiptAdviceRuleChecks(root: Element): string[] {
+    const issues: string[] = [];
+    const id = childText(root, 'ID');
+    if (id && !DOC_ID_RE.test(id)) issues.push(`Belge no (${id}) 16 karakter olmalı: 3 harf/rakam seri + yıl + 9 haneli sıra.`);
+    if (!pathText(root, 'DespatchDocumentReference/ID')) issues.push('Yanıtlanan irsaliyenin numarası (DespatchDocumentReference) zorunlu.');
+    if (pathAll(root, 'ReceiptLine').some(l => !pathText(l, 'ID') || !pathText(l, 'Item/Name'))) {
+        issues.push('Her yanıt satırında satır no ve ürün adı zorunlu.');
+    }
+    return issues;
+}
+
+function receiptAdviceStatus(root: Element): string {
+    const lines = pathAll(root, 'ReceiptLine');
+    const has = (tag: string) => lines.some(l => Number(pathText(l, tag)) > 0);
+    if (lines.length && lines.every(l => !Number(pathText(l, 'ReceivedQuantity')) && Number(pathText(l, 'RejectedQuantity')) > 0)) return 'Red';
+    const parts = [has('RejectedQuantity') && 'red', has('ShortQuantity') && 'eksik', has('OversupplyQuantity') && 'fazla'].filter(Boolean);
+    return parts.length ? `Kısmi kabul (${parts.join(', ')})` : 'Kabul';
+}
+
 /** Kullanıcının XML'i seçilen belge türüne uygun mu? Seçilen XSLT ile deneme dönüşümü yapılır. */
 export function validateXml(text: string, docType: WizardDocType, xslt: string | null): ValidationResult {
     const checks: Check[] = [];
@@ -142,14 +254,15 @@ export function validateXml(text: string, docType: WizardDocType, xslt: string |
         checks.push({ level: 'warn', text: `Belgenin profili ${profile}; ${docType.label} için beklenen: ${docType.profileIds.join(' / ')}.` });
     }
 
-    const lineTag = docType.family === 'despatch' ? 'DespatchLine' : docType.family === 'receipt' ? 'ReceiptLine' : 'InvoiceLine';
+    const despatchLike = docType.family === 'despatch' || docType.family === 'receiptAdvice';
+    const lineTag = docType.family === 'despatch' ? 'DespatchLine' : docType.family === 'receipt' || docType.family === 'receiptAdvice' ? 'ReceiptLine' : 'InvoiceLine';
     const lines = Array.from(root.children).filter(c => c.localName === lineTag).length;
-    const typeCode = childText(root, 'InvoiceTypeCode') || childText(root, 'DespatchAdviceTypeCode');
+    const typeCode = childText(root, 'InvoiceTypeCode') || childText(root, 'DespatchAdviceTypeCode') || childText(root, 'ReceiptAdviceTypeCode');
     if (docType.typeCodes && typeCode && !docType.typeCodes.includes(typeCode.trim().toUpperCase())) {
         checks.push({ level: 'warn', text: `Belge tipi ${typeCode} GİB kod listesinde yok; ${docType.label} için geçerli tipler: ${docType.typeCodes.join(', ')}.` });
     }
-    const supplier = partyName(root, docType.family === 'despatch' ? 'DespatchSupplierParty' : 'AccountingSupplierParty');
-    const customer = partyName(root, docType.family === 'despatch' ? 'DeliveryCustomerParty' : 'AccountingCustomerParty');
+    const supplier = partyName(root, despatchLike ? 'DespatchSupplierParty' : 'AccountingSupplierParty');
+    const customer = partyName(root, despatchLike ? 'DeliveryCustomerParty' : 'AccountingCustomerParty');
     const rows: [string, string][] = [
         ['Belge no', childText(root, 'ID')],
         ['Tarih', childText(root, 'IssueDate')],
@@ -160,8 +273,19 @@ export function validateXml(text: string, docType: WizardDocType, xslt: string |
         ['Alıcı', customer],
         ['Satır sayısı', String(lines)],
     ];
+    if (docType.family === 'receiptAdvice') {
+        rows.push(['Yanıtlanan irsaliye', pathText(root, 'DespatchDocumentReference/ID')], ['Yanıt durumu', receiptAdviceStatus(root)]);
+    }
     info.push(...rows.filter(([, v]) => v));
     if (!lines) checks.push({ level: 'warn', text: 'Belgede kalem (satır) bulunamadı; satır tablosu boş görünür.' });
+
+    const gibIssues = docType.family === 'despatch' ? despatchRuleChecks(root, profile, typeCode)
+        : docType.family === 'receiptAdvice' ? receiptAdviceRuleChecks(root) : [];
+    if (gibIssues.length) {
+        checks.push(...gibIssues.map(text => ({ level: 'warn' as const, text: `GİB kuralı: ${text}` })));
+    } else if (despatchLike) {
+        checks.push({ level: 'ok', text: 'GİB e-İrsaliye zorunlu alan kontrolleri geçti' });
+    }
 
     if (xslt) {
         const x = parseXml(xslt);

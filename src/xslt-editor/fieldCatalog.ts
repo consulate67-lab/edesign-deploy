@@ -17,7 +17,7 @@ export interface CatalogField {
     format: CatalogFormat;
 }
 
-export type DocRoot = 'Invoice' | 'DespatchAdvice';
+export type DocRoot = 'Invoice' | 'DespatchAdvice' | 'ReceiptAdvice';
 
 type Row = [label: string, path: string, format?: CatalogFormat];
 
@@ -289,51 +289,146 @@ const DESPATCH_FIELDS = build('DespatchAdvice', [
         ['Sipariş No', 'OrderReference/ID'],
         ['Sipariş Tarihi', 'OrderReference/IssueDate', 'date'],
     ]],
+    ['Ek Belge / Matbu İrsaliye', [
+        ['Ek Belge No (matbu irsaliye / fatura)', 'AdditionalDocumentReference/ID'],
+        ['Ek Belge Tarihi', 'AdditionalDocumentReference/IssueDate', 'date'],
+        ['Ek Belge Türü', 'AdditionalDocumentReference/DocumentType'],
+        ['Ek Belge Tür Kodu', 'AdditionalDocumentReference/DocumentTypeCode'],
+        ['Ek Belge Açıklaması', 'AdditionalDocumentReference/DocumentDescription'],
+    ]],
     ['Gönderen', [
         ...party('Gönderen', 'DespatchSupplierParty'),
         ['Gönderen Sevkiyat No (IDIS)', "DespatchSupplierParty/Party/PartyIdentification/ID[@schemeID='SEVKIYATNO']"],
+        ['Gönderen İlgili Kişi', 'DespatchSupplierParty/DespatchContact/Name'],
+        ['Malın Çıktığı Yer Kodu', 'DespatchSupplierParty/Party/PhysicalLocation/ID'],
+        ['Malın Çıktığı Yer Adresi', 'DespatchSupplierParty/Party/PhysicalLocation/Address/StreetName'],
+        ['Malın Çıktığı Yer İlçe', 'DespatchSupplierParty/Party/PhysicalLocation/Address/CitySubdivisionName'],
+        ['Malın Çıktığı Yer İl', 'DespatchSupplierParty/Party/PhysicalLocation/Address/CityName'],
     ]],
-    ['Alıcı', party('Alıcı', 'DeliveryCustomerParty')],
+    ['Alıcı', [
+        ...party('Alıcı', 'DeliveryCustomerParty'),
+        ['Alıcı İlgili Kişi', 'DeliveryCustomerParty/DeliveryContact/Name'],
+    ]],
+    ['Satıcı (Zincir Teslim)', party('Satıcı', 'SellerSupplierParty')],
+    ['Alıcı / Sipariş Veren (Zincir Teslim)', party('Sipariş Veren', 'BuyerCustomerParty')],
+    ['Asıl Alıcı (Zincir Teslim)', party('Asıl Alıcı', 'OriginatorCustomerParty')],
     ['Sevkiyat', [
+        ['Kargo / Sevkiyat No', 'Shipment/ID'],
+        ['Toplam Mal Değeri', 'Shipment/GoodsItem/ValueAmount', 'amount'],
         ['Fiili Sevk Tarihi', 'Shipment/Delivery/Despatch/ActualDespatchDate', 'date'],
         ['Fiili Sevk Saati', 'Shipment/Delivery/Despatch/ActualDespatchTime'],
         ['Araç Plakası', "Shipment/ShipmentStage/TransportMeans/RoadTransport/LicensePlateID"],
+        ['Araç Plaka Türü (PLAKA/YABANCIPLAKA)', 'Shipment/ShipmentStage/TransportMeans/RoadTransport/LicensePlateID/@schemeID'],
         ['Dorse Plakası', 'Shipment/TransportHandlingUnit/TransportEquipment/ID'],
+        ['Dorse Türü (DORSE/DORSEPLAKA/YABANCI...)', 'Shipment/TransportHandlingUnit/TransportEquipment/ID/@schemeID'],
         ['Sürücü Adı', 'Shipment/ShipmentStage/DriverPerson/FirstName'],
         ['Sürücü Soyadı', 'Shipment/ShipmentStage/DriverPerson/FamilyName'],
         ['Sürücü TCKN', 'Shipment/ShipmentStage/DriverPerson/NationalityID'],
+        ['Sürücü Unvanı / Görevi', 'Shipment/ShipmentStage/DriverPerson/Title'],
         ['Taşıyıcı Unvanı', 'Shipment/Delivery/CarrierParty/PartyName/Name'],
         ['Taşıyıcı VKN', "Shipment/Delivery/CarrierParty/PartyIdentification/ID"],
+        ['Taşıyıcı İlçe', 'Shipment/Delivery/CarrierParty/PostalAddress/CitySubdivisionName'],
+        ['Taşıyıcı İl', 'Shipment/Delivery/CarrierParty/PostalAddress/CityName'],
         ['Teslimat Adresi', 'Shipment/Delivery/DeliveryAddress/StreetName'],
+        ['Teslimat Kapı No', 'Shipment/Delivery/DeliveryAddress/BuildingNumber'],
         ['Teslimat İlçesi', 'Shipment/Delivery/DeliveryAddress/CitySubdivisionName'],
         ['Teslimat İli', 'Shipment/Delivery/DeliveryAddress/CityName'],
+        ['Teslimat Posta Kodu', 'Shipment/Delivery/DeliveryAddress/PostalZone'],
         ['Teslimat Ülkesi', 'Shipment/Delivery/DeliveryAddress/Country/Name'],
     ]],
     ['Satır (Kalem)', [
+        ['Satır No', 'DespatchLine/ID'],
         ['Ürün / Hizmet Adı', 'DespatchLine/Item/Name'],
         ['Ürün Açıklaması', 'DespatchLine/Item/Description'],
         ['Satıcı Ürün Kodu', 'DespatchLine/Item/SellersItemIdentification/ID'],
+        ['Alıcı Ürün Kodu', 'DespatchLine/Item/BuyersItemIdentification/ID'],
         ['Gönderilen Miktar', 'DespatchLine/DeliveredQuantity', 'number'],
         ['Birim', 'DespatchLine/DeliveredQuantity/@unitCode'],
         ['Eksik Miktar', 'DespatchLine/OutstandingQuantity', 'number'],
+        ['Eksik Miktar Nedeni', 'DespatchLine/OutstandingReason'],
+        ['Sipariş Satır No', 'DespatchLine/OrderLineReference/LineID'],
         ['Birim Fiyat', 'DespatchLine/Shipment/GoodsItem/InvoiceLine/Price/PriceAmount', 'amount'],
+        ['Satır Tutarı', 'DespatchLine/Shipment/GoodsItem/InvoiceLine/LineExtensionAmount', 'amount'],
+        ['GTİP No', 'DespatchLine/Shipment/GoodsItem/RequiredCustomsID'],
         ['Satır Notu', 'DespatchLine/Note'],
         ['Künye No (HKS)', "DespatchLine/Item/AdditionalItemIdentification/ID[@schemeID='KUNYENO']"],
         ['Etiket No (IDIS)', "DespatchLine/Item/AdditionalItemIdentification/ID[@schemeID='ETIKETNO']"],
     ]],
 ]);
 
+const RECEIPT_ADVICE_FIELDS = build('ReceiptAdvice', [
+    ['Belge Bilgileri', [
+        ['Yanıt No', 'ID'],
+        ['Yanıt Tarihi', 'IssueDate', 'date'],
+        ['Yanıt Saati', 'IssueTime'],
+        ['Yanıt Tipi', 'ReceiptAdviceTypeCode'],
+        ['Senaryo (Profil)', 'ProfileID'],
+        ['ETTN (UUID)', 'UUID'],
+        ['Yanıt Notu', 'Note'],
+        ['Satır Sayısı', 'LineCountNumeric', 'number'],
+        ['Sipariş No', 'OrderReference/ID'],
+        ['Sipariş Tarihi', 'OrderReference/IssueDate', 'date'],
+    ]],
+    ['Yanıtlanan İrsaliye', [
+        ['İrsaliye No', 'DespatchDocumentReference/ID'],
+        ['İrsaliye Tarihi', 'DespatchDocumentReference/IssueDate', 'date'],
+        ['Ek Belge No', 'AdditionalDocumentReference/ID'],
+        ['Ek Belge Tarihi', 'AdditionalDocumentReference/IssueDate', 'date'],
+        ['Ek Belge Türü', 'AdditionalDocumentReference/DocumentType'],
+        ['Ek Belge Tür Kodu', 'AdditionalDocumentReference/DocumentTypeCode'],
+    ]],
+    ['Teslim Alan (Yanıtlayan)', [
+        ...party('Teslim Alan', 'DeliveryCustomerParty'),
+        ['Teslim Alan İlgili Kişi', 'DeliveryCustomerParty/DeliveryContact/Name'],
+    ]],
+    ['Gönderen', [
+        ...party('Gönderen', 'DespatchSupplierParty'),
+        ['Gönderen İlgili Kişi', 'DespatchSupplierParty/DespatchContact/Name'],
+        ['Malın Çıktığı Yer Kodu', 'DespatchSupplierParty/Party/PhysicalLocation/ID'],
+        ['Malın Çıktığı Yer Adresi', 'DespatchSupplierParty/Party/PhysicalLocation/Address/StreetName'],
+        ['Malın Çıktığı Yer İlçe', 'DespatchSupplierParty/Party/PhysicalLocation/Address/CitySubdivisionName'],
+        ['Malın Çıktığı Yer İl', 'DespatchSupplierParty/Party/PhysicalLocation/Address/CityName'],
+    ]],
+    ['Teslimat', [
+        ['Kargo / Sevkiyat No', 'Shipment/ID'],
+        ['Fiili Teslim Tarihi', 'Shipment/Delivery/ActualDeliveryDate', 'date'],
+        ['Fiili Teslim Saati', 'Shipment/Delivery/ActualDeliveryTime'],
+    ]],
+    ['Satır (Kalem)', [
+        ['Satır No', 'ReceiptLine/ID'],
+        ['Ürün Adı', 'ReceiptLine/Item/Name'],
+        ['Satıcı Ürün Kodu', 'ReceiptLine/Item/SellersItemIdentification/ID'],
+        ['Teslim Alınan Miktar', 'ReceiptLine/ReceivedQuantity', 'number'],
+        ['Birim', 'ReceiptLine/ReceivedQuantity/@unitCode'],
+        ['Reddedilen Miktar', 'ReceiptLine/RejectedQuantity', 'number'],
+        ['Red Nedeni', 'ReceiptLine/RejectReason'],
+        ['Eksik Miktar', 'ReceiptLine/ShortQuantity', 'number'],
+        ['Fazla Miktar', 'ReceiptLine/OversupplyQuantity', 'number'],
+        ['Zamanlama Şikayeti (geç teslim)', 'ReceiptLine/TimingComplaint'],
+        ['İrsaliye Satır No', 'ReceiptLine/DespatchLineReference/LineID'],
+        ['Sipariş Satır No', 'ReceiptLine/OrderLineReference/LineID'],
+        ['Satır Notu', 'ReceiptLine/Note'],
+    ]],
+]);
+
+const CATALOGS: Record<DocRoot, CatalogField[]> = {
+    Invoice: INVOICE_FIELDS,
+    DespatchAdvice: DESPATCH_FIELDS,
+    ReceiptAdvice: RECEIPT_ADVICE_FIELDS,
+};
+
 export function getCatalog(root: DocRoot): CatalogField[] {
-    return root === 'DespatchAdvice' ? DESPATCH_FIELDS : INVOICE_FIELDS;
+    return CATALOGS[root];
 }
 
 export function docRootOf(xml: string): DocRoot {
     const m = xml.replace(/<\?[\s\S]*?\?>/g, '').replace(/<!--[\s\S]*?-->/g, '').match(/<([\w.-]+:)?([\w.-]+)/);
-    return m?.[2] === 'DespatchAdvice' ? 'DespatchAdvice' : 'Invoice';
+    const name = m?.[2] as DocRoot | undefined;
+    return name && name in CATALOGS ? name : 'Invoice';
 }
 
 /** Satır (kalem) alanı mı — yolun ikinci adımı satır elemanı. */
-export const isLineField = (f: CatalogField) => /^(Invoice\/InvoiceLine|DespatchAdvice\/DespatchLine)\//.test(f.path);
+export const isLineField = (f: CatalogField) => /^(Invoice\/InvoiceLine|DespatchAdvice\/DespatchLine|ReceiptAdvice\/ReceiptLine)\//.test(f.path);
 
 const STEP_RE = /^(@?[\w.-]+)(?:\[((?:[\w.-]+\/)*@?[\w.-]+)='([^']*)'\])?$/;
 const PRED_RE = /\[(?:[\w.-]+\/)*@?[\w.-]+='([^']*)'\]/;
@@ -527,11 +622,11 @@ export const numberPattern = (decimals: number) => (decimals > 0 ? `###.##0,${'0
 const formatted = (expr: string, decimals: number) =>
     `format-number(${expr}, '${numberPattern(decimals)}', '${DECIMAL_FORMAT_NAME}')`;
 
-/** Seçilen konum bir satır döngüsünün (InvoiceLine / DespatchLine) içinde mi? */
+/** Seçilen konum bir satır döngüsünün (InvoiceLine / DespatchLine / ReceiptLine) içinde mi? */
 export function isInLineContext(xslt: string, offset: number): boolean {
     const { selects, match } = contextAt(xslt, offset);
     const inner = selects.length ? selects[selects.length - 1] : match;
-    return !!inner && /(InvoiceLine|DespatchLine)/.test(inner);
+    return !!inner && /(InvoiceLine|DespatchLine|ReceiptLine)/.test(inner);
 }
 
 const escapeText = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');

@@ -59,7 +59,7 @@ import { addTestWatermark, stripTestWatermark, stripLeadingBom } from './utils/t
 import { ApproveDialog } from './ApproveDialog';
 
 /** Satır formülü kolonunun varsayılan alanı (ilk bulunan). */
-const LINE_FORMULA_KEYS = ['Invoice/InvoiceLine/LineExtensionAmount', 'DespatchAdvice/DespatchLine/DeliveredQuantity'];
+const LINE_FORMULA_KEYS = ['Invoice/InvoiceLine/LineExtensionAmount', 'DespatchAdvice/DespatchLine/DeliveredQuantity', 'ReceiptAdvice/ReceiptLine/ReceivedQuantity'];
 
 const CONTAINER_TAGS = new Set(['td', 'th', 'div', 'li', 'section', 'article', 'header', 'footer', 'main', 'aside', 'form', 'fieldset']);
 const TABLE_PARTS = new Set(['tr', 'tbody', 'thead', 'tfoot', 'colgroup', 'col', 'caption']);
@@ -126,6 +126,7 @@ const MODULES: ModuleDef[] = [
     { id: 'fatura',        label: 'e-Fatura',          inlineKey: 'gib/v2/e-Fatura-Sablon.xslt' },
     { id: 'arsiv',         label: 'e-Arşiv',           inlineKey: 'gib/v2/e-Arsiv-Sablon.xslt' },
     { id: 'irsaliye',      label: 'e-İrsaliye',        inlineKey: 'community/IRPTeam-eWaybill-Irsaliye-Aracli.xslt' },
+    { id: 'irsaliye-yanit', label: 'e-İrsaliye Yanıtı', inlineKey: 'gib/irsaliye-yaniti.xslt' },
     { id: 'ihracat',       label: 'e-İhracat',         inlineKey: 'community/IRPTeam-eFatura.xslt' },
     { id: 'mikro_ihracat', label: 'e-Mikro İhracat',   inlineKey: 'community/IRPTeam-eFatura.xslt' },
     { id: 'smm',           label: 'e-SMM',             inlineKey: 'community/hzkucuk-eFatura-smm.xslt' },

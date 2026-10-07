@@ -2,7 +2,7 @@
  * Tasarım sihirbazı belge türleri. Her tür bir UBL kök elemanına (family)
  * bağlıdır; kullanıcının yüklediği XSLT/XML bu aileye uymak zorundadır.
  */
-export type DocFamily = 'invoice' | 'despatch' | 'receipt';
+export type DocFamily = 'invoice' | 'despatch' | 'receiptAdvice' | 'receipt';
 
 export interface DefaultXsltOption {
     id: string;
@@ -46,6 +46,8 @@ export const EFATURA_PROFILE_IDS = [
     'TEMELFATURA', 'TICARIFATURA', 'YOLCUBERABERFATURA', 'IHRACAT', 'OZELFATURA', 'KAMU',
     'HKS', 'ENERJI', 'ILAC_TIBBICIHAZ', 'YATIRIMTESVIK', 'IDIS',
 ];
+/** GİB kod listesi — ProfileIDTypeDespatchAdvice (irsaliye ve irsaliye yanıtı). */
+export const DESPATCH_PROFILE_IDS = ['TEMELIRSALIYE', 'HKSIRSALIYE', 'IDISIRSALIYE'];
 /** GİB kod listesi — InvoiceTypeCodeList. */
 export const INVOICE_TYPE_CODES = [
     'SATIS', 'IADE', 'TEVKIFAT', 'TEVKIFATIADE', 'ISTISNA', 'OZELMATRAH', 'IHRACKAYITLI', 'SGK', 'KOMISYONCU',
@@ -56,6 +58,7 @@ export const INVOICE_TYPE_CODES = [
 export const FAMILY_INFO: Record<DocFamily, { root: string; ns: string; label: string }> = {
     invoice: { root: 'Invoice', ns: 'urn:oasis:names:specification:ubl:schema:xsd:Invoice-2', label: 'Fatura (Invoice)' },
     despatch: { root: 'DespatchAdvice', ns: 'urn:oasis:names:specification:ubl:schema:xsd:DespatchAdvice-2', label: 'İrsaliye (DespatchAdvice)' },
+    receiptAdvice: { root: 'ReceiptAdvice', ns: 'urn:oasis:names:specification:ubl:schema:xsd:ReceiptAdvice-2', label: 'İrsaliye Yanıtı (ReceiptAdvice)' },
     receipt: { root: 'Receipt', ns: 'urn:oasis:names:specification:ubl:schema:xsd:Receipt-2', label: 'Makbuz (Receipt)' },
 };
 
@@ -145,18 +148,33 @@ export const WIZARD_DOC_TYPES: WizardDocType[] = [
     },
     {
         id: 'irsaliye', label: 'e-İrsaliye', description: 'Sevk irsaliyesi', color: '#0ea5e9',
-        family: 'despatch', profileIds: ['TEMELIRSALIYE', 'HKSIRSALIYE', 'IDISIRSALIYE'], typeCodes: ['SEVK', 'MATBUDAN'],
+        family: 'despatch', profileIds: DESPATCH_PROFILE_IDS, typeCodes: ['SEVK', 'MATBUDAN'],
         sampleXml: 'ebelge/samples/e-Irsaliye-TEMEL.xml',
         officialSamples: [
-            gibSample('Irsaliye-Ornek1.xml', 'Sevk irsaliyesi (1)', 'TEMELIRSALIYE · SEVK'),
-            gibSample('Irsaliye-Ornek2.xml', 'Sevk irsaliyesi (2)', 'TEMELIRSALIYE · SEVK'),
-            gibSample('Irsaliye-Ornek3.xml', 'Sevk irsaliyesi (3)', 'TEMELIRSALIYE · SEVK'),
+            gibSample('Irsaliye-Ornek1.xml', 'Sevk irsaliyesi (şoför + taşıyıcı)', 'TEMELIRSALIYE · SEVK'),
+            gibSample('Irsaliye-Ornek2.xml', 'Eksik gönderimli sevk', 'TEMELIRSALIYE · SEVK'),
+            gibSample('Irsaliye-Ornek3.xml', 'Zincir teslim (satıcı / alıcı / asıl alıcı)', 'TEMELIRSALIYE · SEVK'),
             gibSample('Irsaliye-Matbudan.xml', 'Matbudan irsaliye', 'TEMELIRSALIYE · MATBUDAN'),
             gibSample('IDIS_Irsaliye.xml', 'IDIS irsaliye', 'IDISIRSALIYE · SEVK'),
+            gibSample('HKS_Irsaliye.xml', 'HKS irsaliye (Örnek 1\'den türetilmiş)', 'HKSIRSALIYE · SEVK'),
         ],
         defaults: [
             { id: 'gib-resmi-irsaliye', label: 'GİB Resmi Şablon', description: 'ebelge.gib.gov.tr UBL-TR 1.2.1 resmi görünümü', moduleId: 'irsaliye', load: inline('gib/irsaliye.xslt') },
             { id: 'irsaliye', label: 'e-İrsaliye Şablonu', description: 'Araç / sürücü / teslimat bilgili', moduleId: 'irsaliye', load: inline('community/IRPTeam-eWaybill-Irsaliye-Aracli.xslt') },
+        ],
+    },
+    {
+        id: 'irsaliye-yanit', label: 'e-İrsaliye Yanıtı', description: 'Kabul / kısmi kabul / red', color: '#06b6d4',
+        family: 'receiptAdvice', profileIds: DESPATCH_PROFILE_IDS, typeCodes: ['SEVK'],
+        sampleXml: 'ebelge/samples/gib/IrsaliyeYaniti-Ornek1.xml',
+        officialSamples: [
+            gibSample('IrsaliyeYaniti-Ornek1.xml', 'Tamamı kabul', 'TEMELIRSALIYE · KABUL'),
+            gibSample('IrsaliyeYaniti-Ornek2.xml', 'Kabul, geç teslim notu', 'TEMELIRSALIYE · KABUL'),
+            gibSample('IrsaliyeYaniti-Ornek3.xml', 'Kısmi kabul (hasarlı ürün reddi)', 'TEMELIRSALIYE · KISMİ KABUL'),
+            gibSample('IrsaliyeYaniti-Ornek4.xml', 'Eksik ve fazla teslim', 'TEMELIRSALIYE · KISMİ KABUL'),
+        ],
+        defaults: [
+            { id: 'gib-resmi-irsaliye-yanit', label: 'GİB Resmi Şablon', description: 'ebelge.gib.gov.tr UBL-TR 1.2.1 resmi irsaliye yanıtı görünümü', moduleId: 'irsaliye-yanit', load: inline('gib/irsaliye-yaniti.xslt') },
         ],
     },
     {
