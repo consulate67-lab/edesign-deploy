@@ -1180,7 +1180,11 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         let cancelled = false;
         api.getDesign(initialDesignId).then((r: { design?: { id: number; design_key?: string | null; paid?: boolean; paid_at?: string | null; name?: string } }) => {
             const d = r?.design;
-            if (cancelled || !d?.paid) return;
+            if (cancelled || !d) return;
+            if (!d.paid) {
+                setDesign(prev => ({ ...prev, id: d.id, name: d.name }));
+                return;
+            }
             setDesign({ id: d.id, key: d.design_key ?? undefined, paid: true, paidAt: d.paid_at, name: d.name });
             setSaveStatus('saved');
             setSaveMessage('🔒 Onaylanmış tasarım — yalnızca indirilebilir');
@@ -1235,8 +1239,34 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         }
     }, [design.id, design.paid, docName, moduleId, xmlContent]);
 
+    /** Kaydedilmemiş tasarım indirilemez / onaylanamaz; kullanıcı Kaydet'e yönlendirilir. */
+    const needsSave = !design.paid && !design.id;
+    const [saveHint, setSaveHint] = useState(false);
+    const requireSaved = useCallback((): boolean => {
+        if (!needsSave) return true;
+        setSaveStatus('error');
+        setSaveMessage('⚠ Önce "Kaydet" ile tasarıma bir isim verip kaydedin; sonra indirebilir ve onaylayabilirsiniz.');
+        setSaveHint(true);
+        setTimeout(() => setSaveHint(false), 2400);
+        return false;
+    }, [needsSave]);
+
+    /** Kayıtlı taslaktaki son hali indirilecek dosyayla aynı olsun diye günceller. */
+    const syncSavedDesign = useCallback(async (): Promise<boolean> => {
+        if (!design.id || design.paid) return true;
+        try {
+            await api.updateDesign(design.id, { xslt_content: xsltContentRef.current, xml_content: xmlContent });
+            return true;
+        } catch (err) {
+            setSaveStatus('error');
+            setSaveMessage(`⚠ Kayıt hatası: ${(err as Error).message}`);
+            return false;
+        }
+    }, [design.id, design.paid, xmlContent]);
+
     const downloadXslt = useCallback((content: string, suffix = '') => {
-        const fileName = `${docName.replace(/\s+/g, '_')}_${moduleId}${suffix}.xslt`;
+        const base = (design.name || docName).trim().replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, '_');
+        const fileName = `${base}_${moduleId}${suffix}.xslt`;
         const url = URL.createObjectURL(new Blob([stripLeadingBom(content)], { type: 'application/xml;charset=utf-8' }));
         const a = document.createElement('a');
         a.href = url;
@@ -1245,12 +1275,13 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         a.click();
         document.body.removeChild(a);
         setTimeout(() => URL.revokeObjectURL(url), 10000);
-    }, [docName, moduleId]);
+    }, [design.name, docName, moduleId]);
 
     // ------------------------------------------------------------------------
     // Test indirme — ücretsiz, sayfa ortasında TEST filigranı ile
     // ------------------------------------------------------------------------
-    const handleTestDownload = useCallback(() => {
+    const handleTestDownload = useCallback(async () => {
+        if (!requireSaved()) return;
         flushSourceEditsRef.current();
         const marked = addTestWatermark(xsltContentRef.current);
         if (!marked) {
@@ -1258,10 +1289,11 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             setSaveMessage('⚠ Test dosyası oluşturulamadı: XSLT içinde <body> veya kök template bulunamadı.');
             return;
         }
+        if (!(await syncSavedDesign())) return;
         downloadXslt(marked, '_TEST');
         setSaveStatus('saved');
         setSaveMessage('🧪 Test dosyası indirildi · ücretsiz. Sorun yoksa "Onayla" ile TEST yazısız dosyayı alın.');
-    }, [downloadXslt]);
+    }, [downloadXslt, requireSaved, syncSavedDesign]);
 
     // ------------------------------------------------------------------------
     // Onay — ilk onayda 1 tasarım hakkı; TEST yazısız dosya indirilir.
@@ -1269,6 +1301,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     // ------------------------------------------------------------------------
     const [approveOpen, setApproveOpen] = useState(false);
     const handleApprove = useCallback(async (name: string) => {
+        if (!requireSaved()) return;
         flushSourceEditsRef.current();
         setSaveStatus('saving');
         setSaveMessage('Onaylanıyor...');
@@ -1306,7 +1339,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             }
             throw e;
         }
-    }, [design, moduleId, xmlContent, downloadXslt, resetHistory]);
+    }, [design, moduleId, xmlContent, downloadXslt, resetHistory, requireSaved]);
 
     // ------------------------------------------------------------------------
     // Sprint 14 Aşama 1 — XSLT alanları 3-gruplu liste (snippet gallery kaldırıldı)
@@ -2741,14 +2774,18 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 {/* Save butonu */}
                 {!design.paid && <button
                     onClick={handleSave}
+                    data-save
                     disabled={saveStatus === 'saving'}
+                    title={design.id ? `"${design.name || docName}" olarak kaydedilir` : 'Tasarıma bir isim verip hesabınıza kaydeder. İndirme ve onay için önce kaydetmelisiniz.'}
                     style={{
                         display: 'flex',
                         alignItems: 'center',
                         gap: '6px',
                         padding: '6px 12px',
                         background: saveStatus === 'saved' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(99, 102, 241, 0.15)',
-                        border: '1px solid rgba(99, 102, 241, 0.4)',
+                        border: saveHint ? '1px solid #fbbf24' : '1px solid rgba(99, 102, 241, 0.4)',
+                        boxShadow: saveHint ? '0 0 0 3px rgba(251, 191, 36, 0.45)' : 'none',
+                        transition: 'box-shadow 0.2s, border-color 0.2s',
                         borderRadius: '6px',
                         color: '#a5b4fc',
                         fontSize: '13px',
@@ -2769,11 +2806,15 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
 
                 {!design.paid && (
                     <button
-                        onClick={handleTestDownload}
+                        onClick={() => { void handleTestDownload(); }}
                         data-test-download
+                        data-needs-save={needsSave ? '1' : undefined}
                         disabled={saveStatus === 'saving'}
-                        title="Ücretsiz. Dosyayı kendi sisteminizde denemeniz için sayfa ortasında büyük TEST yazısıyla indirir."
+                        title={needsSave
+                            ? 'Önce "Kaydet" ile tasarıma bir isim verip kaydedin.'
+                            : 'Ücretsiz. Dosyayı kendi sisteminizde denemeniz için sayfa ortasında büyük TEST yazısıyla indirir.'}
                         style={{
+                            opacity: needsSave ? 0.45 : 1,
                             display: 'flex',
                             alignItems: 'center',
                             gap: '6px',
@@ -2784,7 +2825,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             color: '#fcd34d',
                             fontSize: '13px',
                             fontWeight: 600,
-                            cursor: 'pointer',
+                            cursor: needsSave ? 'not-allowed' : 'pointer',
                         }}
                     >
                         <Download size={14} />
@@ -2796,14 +2837,21 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 )}
 
                 <button
-                    onClick={() => (design.paid ? handleApprove(design.name || docName).catch(() => {}) : setApproveOpen(true))}
+                    onClick={() => {
+                        if (design.paid) { handleApprove(design.name || docName).catch(() => {}); return; }
+                        if (requireSaved()) setApproveOpen(true);
+                    }}
                     data-download
                     data-approve
+                    data-needs-save={needsSave ? '1' : undefined}
                     disabled={saveStatus === 'saving'}
                     title={design.paid
                         ? 'Onaylı tasarım kilitlidir — onaylanan dosyayı tekrar indirmek ücretsiz.'
-                        : 'Tasarımı onaylayın: TEST yazısı kaldırılmış dosya indirilir (1 tasarım hakkı).'}
+                        : needsSave
+                            ? 'Önce "Kaydet" ile tasarıma bir isim verip kaydedin.'
+                            : 'Tasarımı onaylayın: TEST yazısı kaldırılmış dosya indirilir (1 tasarım hakkı).'}
                     style={{
+                        opacity: needsSave ? 0.45 : 1,
                         display: 'flex',
                         alignItems: 'center',
                         gap: '6px',
@@ -2814,8 +2862,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         color: 'white',
                         fontSize: '13px',
                         fontWeight: 700,
-                        cursor: 'pointer',
-                        boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)',
+                        cursor: needsSave ? 'not-allowed' : 'pointer',
+                        boxShadow: needsSave ? 'none' : '0 2px 8px rgba(16, 185, 129, 0.3)',
                     }}
                 >
                     {design.paid ? <Download size={14} /> : <CheckCircle2 size={14} />}
