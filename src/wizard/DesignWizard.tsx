@@ -161,7 +161,7 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
             if (kind === 'xslt') setOwnXsltWasTest(wasTest);
             const approved = kind === 'xslt' && !!designKeyOf(text);
             const result: ValidationResult = approved
-                ? { ok: false, info: [], checks: [{ level: 'error', text: 'Bu dosya onaylanmış (satın alınmış) bir tasarım; tekrar düzenlenemez. Dosyayı "Tasarımlarım" bölümünden tekrar indirebilirsiniz.' }] }
+                ? { ok: false, info: [], checks: [{ level: 'error', text: 'Bu dosya onaylanmış (satın alınmış) bir tasarım; tekrar düzenlenemez. Dosyayı "Tamamlanan Tasarımlar" listesinden tekrar indirebilirsiniz.' }] }
                 : kind === 'xslt' ? validateXslt(text, docType, sampleXml) : validateXml(text, docType, xsltText);
             const loaded = { name: file.name, size: file.size, text, result };
             if (kind === 'xslt') setOwnXslt(loaded); else setOwnXml(loaded);

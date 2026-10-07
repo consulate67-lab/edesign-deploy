@@ -2609,7 +2609,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             <div style={{ fontSize: 17, fontWeight: 800, marginBottom: 6 }}>Bu tasarım onaylandı</div>
                             <div style={{ fontSize: 13, lineHeight: 1.6, color: '#94a3b8', marginBottom: 18 }}>
                                 Onaylanmış (satın alınmış) tasarımlar tekrar düzenlenemez. Onaylanan dosyayı
-                                istediğiniz zaman buradan veya "Tasarımlarım" bölümünden ücretsiz indirebilirsiniz.
+                                istediğiniz zaman buradan veya "Tamamlanan Tasarımlar" listesinden ücretsiz indirebilirsiniz.
                             </div>
                             <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
                                 <button

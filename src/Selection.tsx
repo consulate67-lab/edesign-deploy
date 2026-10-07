@@ -7,7 +7,7 @@ import { getSnippetsForModule, Snippet } from './snippets';
 import { useUiStore } from './store/uiStore';
 import { TEMPLATES, type XsltTemplate } from './xslt-editor/templates';
 import { DesignWizard } from './wizard/DesignWizard';
-import { MyDesigns } from './MyDesigns';
+import { MyDesigns, CompletedDesigns } from './MyDesigns';
 
 interface SelectionProps {
     onSelect: (moduleId: string, template: string, moduleName: string, customContent?: string, themeColor?: string) => void;
@@ -360,6 +360,8 @@ export const Selection: React.FC<SelectionProps> = ({ onSelect, onLogout, onSele
                         onFinish={(r) => onSelectXsltEditor?.(r.moduleId, r.xslt, r.docName, r.xml)}
                     />
                 </div>
+
+                <CompletedDesigns />
 
                 <button
                     type="button"

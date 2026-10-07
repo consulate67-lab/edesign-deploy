@@ -124,7 +124,7 @@ export const ApproveDialog: React.FC<ApproveDialogProps> = ({ defaultName, onTes
                     </li>
                     <li style={{ display: 'flex', gap: 8 }}>
                         <CheckCircle2 size={16} color="#10b981" style={{ flexShrink: 0 }} />
-                        <span>Tasarım hesabınıza kaydedilir; "Tasarımlarım" bölümünden istediğiniz zaman ücretsiz tekrar indirebilirsiniz.</span>
+                        <span>Tasarım hesabınıza kaydedilir; "Tamamlanan Tasarımlar" listesinden istediğiniz zaman önizleyip ücretsiz tekrar indirebilirsiniz.</span>
                     </li>
                     <li data-approve-lock-note style={{ display: 'flex', gap: 8, color: '#fca5a5', fontWeight: 600 }}>
                         <Lock size={16} color="#f87171" style={{ flexShrink: 0 }} />
