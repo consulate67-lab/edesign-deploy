@@ -409,6 +409,282 @@ function mustahsilRuleChecks(root: Element): string[] {
     return issues;
 }
 
+// ---------------------------------------------------------------------------
+// CreditNote tabanlı diğer e-Arşiv belgeleri: e-Gider Pusulası, e-Döviz ve
+// Kıymetli Maden, e-Dekont, e-Sigorta Komisyon Gider Belgesi (GİB paketleri).
+// ---------------------------------------------------------------------------
+const TIME_RE = /^[0-9]{2}:[0-9]{2}:[0-9]{2}/;
+const near01 = (a: number, b: number) => Math.abs(a - b) <= 0.011;
+const num0 = (s: string) => Number(s) || 0;
+
+/** Başlık, imza ve taraf varlığı: dört paketin kılavuzlarında ortak zorunlu alanlar. */
+function creditNoteHeaderChecks(root: Element, noun: string, timeRequired: boolean): string[] {
+    const issues: string[] = [];
+    const version = childText(root, 'UBLVersionID');
+    if (version !== '2.1') issues.push(`UBL sürümü (UBLVersionID) 2.1 olmalı${version ? `; belgede ${version}` : ''}.`);
+    const customization = childText(root, 'CustomizationID');
+    if (customization !== 'TR1.2.1') issues.push(`Özelleştirme no (CustomizationID) TR1.2.1 olmalı${customization ? `; belgede ${customization}` : ''}.`);
+    const id = childText(root, 'ID');
+    if (!id) issues.push(`${noun} numarası (ID) zorunlu.`);
+    else if (!DOC_ID_RE.test(id)) issues.push(`${noun} no (${id}) 16 karakter olmalı: 3 haneli alfanümerik birim kod + yıl + 9 haneli sıra.`);
+    if (!/^(true|false)$/.test(childText(root, 'CopyIndicator'))) issues.push('Asıl / suret bilgisi (CopyIndicator) zorunlu: asıl için false, suret için true.');
+    const uuid = childText(root, 'UUID');
+    if (!GUID_RE.test(uuid)) issues.push(uuid ? `ETTN (${uuid}) 36 karakterlik GUID biçiminde olmalı.` : 'ETTN (UUID) zorunlu; karekodda yer alır.');
+    const date = childText(root, 'IssueDate');
+    if (!ISO_DATE_RE.test(date)) issues.push(date ? `Düzenleme tarihi (${date}) YYYY-AA-GG biçiminde olmalı.` : 'Düzenleme tarihi (IssueDate) zorunlu.');
+    if (timeRequired && !TIME_RE.test(childText(root, 'IssueTime'))) issues.push('Düzenleme zamanı (IssueTime) saat:dakika:saniye olarak zorunlu.');
+    if (!pathAll(root, 'Signature').length) issues.push('Mali mühür / imza bilgisi (Signature) zorunlu.');
+    if (!pathAll(root, 'AccountingSupplierParty/Party').length) issues.push(`${noun} düzenleyen taraf (AccountingSupplierParty) zorunlu.`);
+    if (!pathAll(root, 'AccountingCustomerParty/Party').length) issues.push('Karşı taraf (AccountingCustomerParty) zorunlu.');
+    if (!pathAll(root, 'LegalMonetaryTotal').length) issues.push('Parasal toplamlar (LegalMonetaryTotal) zorunlu.');
+    if (!pathAll(root, 'CreditNoteLine').length) issues.push('En az bir kalem (CreditNoteLine) zorunlu.');
+    return issues;
+}
+
+/** VKN 10, TCKN 11 hane; uygun kimlik yoksa veya biçim bozuksa uyarı metni döner. */
+function vknTcknIssue(party: Element | undefined, label: string): string | null {
+    if (!party) return null;
+    const el = pathAll(party, 'PartyIdentification/ID').find(e => ['VKN', 'TCKN'].includes(e.getAttribute('schemeID') ?? '') && e.textContent?.trim());
+    if (!el) return `${label} için schemeID'si VKN veya TCKN olan kimlik numarası zorunlu.`;
+    const scheme = el.getAttribute('schemeID');
+    const value = el.textContent?.trim() ?? '';
+    return (scheme === 'VKN' ? /^[0-9]{10}$/ : /^[0-9]{11}$/).test(value) ? null : `${label} ${scheme} değeri (${value}) ${scheme === 'VKN' ? 10 : 11} haneli olmalı.`;
+}
+
+const GIDER_IADE_REFS = ['EARSIV_FATURA', 'SATIS_FISI', 'BELGESIZ'];
+
+/** e-Gider Pusulası Teknik Kılavuzu V1.0: SATIS (mükellef olmayandan alım) ve IADE (nihai tüketici iadesi). */
+function giderPusulasiRuleChecks(root: Element, typeCode: string): string[] {
+    const issues = creditNoteHeaderChecks(root, 'Gider pusulası', true);
+    if (!childText(root, 'DocumentCurrencyCode')) issues.push('Para birimi (DocumentCurrencyCode) zorunlu; karekodda "parabirimi" olarak yer alır.');
+    const iade = typeCode.toUpperCase() === 'IADE';
+    if (!pathAll(root, 'AdditionalDocumentReference').length) issues.push('İlave doküman bilgisi (AdditionalDocumentReference) en az bir kez yazılmalı.');
+    const supplier = pathAll(root, 'AccountingSupplierParty/Party')[0];
+    const customer = pathAll(root, 'AccountingCustomerParty/Party')[0];
+    const supplierIssue = vknTcknIssue(supplier, 'Gider pusulasını düzenleyen');
+    if (supplierIssue) issues.push(supplierIssue);
+    if (supplier && !pathAll(supplier, 'Contact/OtherCommunication').some(o => pathText(o, 'ChannelCode') && pathText(o, 'Value'))) {
+        issues.push('Düzenleyenin Contact/OtherCommunication alanına kodu üreten SMS operatörü ya da iade kodu uygulaması (ChannelCode name="SMS_PROVIDER" / "IADE_PROVIDER") ve VKN\'si (Value) yazılmalı.');
+    }
+    const codeContact = (party: Element, label: string) => {
+        const contact = pathAll(party, 'Contact').find(c => /^(SMS|IADE ?KODU)$/i.test(pathText(c, 'Name')));
+        if (!contact || !pathText(contact, 'ID') || !pathText(contact, 'Telephone')) {
+            issues.push(`${label} Contact alanında Name "${iade ? 'SMS" veya "IADEKODU' : 'SMS'}", ID = ${iade ? 'SMS / iade kodu' : 'SMS kodu'}, Telephone = kodun gönderildiği telefon yazılmalı.`);
+        } else if (!iade && pathText(contact, 'Name').toUpperCase() !== 'SMS') {
+            issues.push('SATIS tipinde malı satanın telefonuna gönderilen SMS kodu yazılmalı (Contact/Name "SMS"); iade kodu yalnızca IADE tipinde kullanılır.');
+        }
+    };
+    if (customer) codeContact(customer, iade ? 'İade eden (AccountingCustomerParty)' : 'Malı satan (AccountingCustomerParty)');
+    const buyer = pathAll(root, 'BuyerCustomerParty/Party')[0];
+    if (buyer) codeContact(buyer, 'Adına iade yapılan (BuyerCustomerParty)');
+    if (iade) {
+        const ref = pathAll(root, 'BillingReference/InvoiceDocumentReference/ID')[0];
+        const scheme = ref?.getAttribute('schemeID') ?? '';
+        if (!ref) {
+            issues.push('IADE tipinde iade edilen malın belgesi BillingReference/InvoiceDocumentReference/ID alanına yazılmalı (schemeID EARSIV_FATURA, SATIS_FISI ya da belge yoksa BELGESIZ).');
+        } else if (!GIDER_IADE_REFS.includes(scheme)) {
+            issues.push(`İade belgesi türü (schemeID) "${scheme || 'boş'}" geçersiz; EARSIV_FATURA, SATIS_FISI veya BELGESIZ olmalı.`);
+        } else if (scheme !== 'BELGESIZ' && !ref.textContent?.trim()) {
+            issues.push(`İade edilen mala ait ${scheme} numarası (InvoiceDocumentReference/ID) boş olamaz.`);
+        }
+        if (scheme === 'BELGESIZ' && customer && !pathAll(customer, 'PartyIdentification/ID').some(e => e.getAttribute('schemeID') === 'TCKN' && /^[0-9]{11}$/.test(e.textContent?.trim() ?? ''))) {
+            issues.push('Belgesiz iadede iade edenin 11 haneli TCKN\'si (schemeID TCKN) zorunlu.');
+        }
+        for (const party of pathAll(root, 'Delivery/DeliveryParty')) {
+            const vkn = pathAll(party, 'PartyIdentification/ID').some(e => e.getAttribute('schemeID') === 'VKN' && e.textContent?.trim());
+            const yetki = pathAll(party, 'IndustryClassificationCode').some(e => e.getAttribute('name') === 'YETKIBELGENO' && e.textContent?.trim());
+            if (!vkn || !pathText(party, 'PartyName/Name') || !yetki) {
+                issues.push('Kargoyla iadede Delivery/DeliveryParty alanına kargo firmasının VKN\'si, unvanı ve yetki belgesi numarası (IndustryClassificationCode name="YETKIBELGENO") yazılmalı.');
+            }
+        }
+    }
+    if (!pathAll(root, 'TaxTotal').length) issues.push('Vergi bilgisi (TaxTotal) zorunlu.');
+    const lines = pathAll(root, 'CreditNoteLine');
+    if (lines.some(l => !pathText(l, 'Item/Name'))) issues.push('Her kalemde malın / hizmetin adı (Item/Name) zorunlu.');
+    if (lines.some(l => !pathText(l, 'CreditedQuantity') || !pathText(l, 'LineExtensionAmount'))) issues.push('Her kalemde miktar ve tutar (CreditedQuantity, LineExtensionAmount) zorunlu.');
+    const total = (tag: string) => pathText(root, `LegalMonetaryTotal/${tag}`);
+    if (!total('LineExtensionAmount') || !total('PayableAmount')) {
+        issues.push('Mal hizmet toplamı ve ödenecek tutar (LegalMonetaryTotal/LineExtensionAmount, PayableAmount) zorunlu; karekodda yer alır.');
+    } else {
+        const lineSum = lines.reduce((t, l) => t + num0(pathText(l, 'LineExtensionAmount')), 0);
+        if (lines.length && Math.abs(lineSum - num0(total('LineExtensionAmount'))) > 0.05) {
+            issues.push(`Kalem tutarları toplamı ${lineSum.toFixed(2)}, mal hizmet toplamı ${total('LineExtensionAmount')} ile uyuşmuyor.`);
+        }
+    }
+    return issues;
+}
+
+const DOVIZ_METAL_CODES = ['XAU_22C', 'XAU_22Y', 'XAU_22T', 'XAU_22I', 'XAU_22B', 'XAU_24G', 'XAU_24G_1000'];
+const DOVIZ_PAYMENT_CODES = ['10', '55', '46', '68'];
+const DOVIZ_PARTY_SCHEMES = ['TCKN', 'VKN', 'SUBENO', 'PASAPORTNO', 'MUSTERITURU'];
+const DOVIZ_CUSTOMER_TYPES = ['BANKA', 'GERCEKKISI', 'TUZELKISI', 'YETKILIMUESSESE'];
+
+/** e-Döviz ve Kıymetli Maden Alım-Satım Belgesi Teknik Kılavuzu V1.3 ve paketteki "doviz kural listesi". */
+function dovizRuleChecks(root: Element, profile: string, typeCode: string): string[] {
+    const issues = creditNoteHeaderChecks(root, 'Belge', false);
+    const maden = profile.toUpperCase() === 'EKIYMETLIMADENBELGE';
+    const alim = typeCode.toUpperCase() === 'ALIM';
+    const signatureId = pathAll(root, 'Signature/ID')[0];
+    if (signatureId && (signatureId.getAttribute('schemeID') !== 'VKN_TCKN' || !/^([0-9]{10}|[0-9]{11})$/.test(signatureId.textContent?.trim() ?? ''))) {
+        issues.push('İmza bilgisinde Signature/ID schemeID="VKN_TCKN" ve 10 haneli VKN ya da 11 haneli TCKN olmalı.');
+    }
+    const subs = pathAll(root, 'TaxTotal/TaxSubtotal');
+    if (subs.some(s => ['TaxableAmount', 'TaxAmount', 'CalculationSequenceNumeric', 'Percent', 'TaxCategory/TaxScheme/Name', 'TaxCategory/TaxScheme/TaxTypeCode'].some(f => !pathText(s, f)))) {
+        issues.push('Her vergi satırında matrah, vergi tutarı, hesaplama sırası, oran, vergi adı ve kodu (TaxSubtotal) zorunlu.');
+    }
+    const means = pathAll(root, 'PaymentMeans');
+    if (means.length < 2) issues.push('Ödeme şekli (PaymentMeans) müşteri ve yetkili müessese için ayrı ayrı, en az iki kez yazılmalı.');
+    const badCode = means.map(m => pathText(m, 'PaymentMeansCode')).find(c => !DOVIZ_PAYMENT_CODES.includes(c));
+    if (badCode !== undefined) issues.push(`Ödeme şekli kodu "${badCode || 'boş'}" geçersiz; 10 (nakit), 55 (hesaptan), 46 (EFT / havale) veya 68 (kredi kartı) olmalı.`);
+    if (means.length && (!means.some(m => pathText(m, 'PayerFinancialAccount/ID')) || !means.some(m => pathText(m, 'PayeeFinancialAccount/ID')))) {
+        issues.push('Ödeme şekillerinde müşteri hesabı (PayerFinancialAccount/ID) ve müessese hesabı (PayeeFinancialAccount/ID) birer kez yazılmalı.');
+    }
+    const badScheme = pathAll(root, 'AccountingSupplierParty/Party/PartyIdentification/ID').concat(pathAll(root, 'AccountingCustomerParty/Party/PartyIdentification/ID'))
+        .map(e => e.getAttribute('schemeID')).find(s => s !== null && !DOVIZ_PARTY_SCHEMES.includes(s));
+    if (badScheme !== undefined) issues.push(`Kimlik türü (schemeID) "${badScheme}" geçersiz; ${DOVIZ_PARTY_SCHEMES.join(', ')} kullanılabilir.`);
+    const checkParty = (tag: string, label: string) => {
+        const party = pathAll(root, `${tag}/Party`)[0];
+        if (!party) return undefined;
+        const ids = pathAll(party, 'PartyIdentification/ID');
+        const vkn = ids.find(e => e.getAttribute('schemeID') === 'VKN')?.textContent?.trim();
+        const tckn = ids.find(e => e.getAttribute('schemeID') === 'TCKN')?.textContent?.trim();
+        if (!vkn && !tckn) issues.push(`${label} için VKN ya da TCKN zorunlu.`);
+        if (vkn !== undefined && (!/^[0-9]{10}$/.test(vkn) || !pathText(party, 'PartyName/Name'))) issues.push(`${label} VKN ile yazıldığında 10 haneli VKN ve unvan (PartyName/Name) zorunlu.`);
+        if (tckn !== undefined && (!/^[0-9]{11}$/.test(tckn) || ['FirstName', 'FamilyName', 'NationalityID'].some(f => !pathText(party, `Person/${f}`)))) {
+            issues.push(`${label} TCKN ile yazıldığında 11 haneli TCKN ile kişinin adı, soyadı ve uyruğu (Person/FirstName, FamilyName, NationalityID) zorunlu.`);
+        }
+        return ids;
+    };
+    const supplierIds = checkParty('AccountingSupplierParty', 'Yetkili müessese / banka');
+    if (supplierIds && !supplierIds.some(e => e.getAttribute('schemeID') === 'SUBENO' && e.textContent?.trim())) {
+        issues.push('Yetkili müessesenin dosya / şube numarası (schemeID SUBENO) zorunlu.');
+    }
+    const customerIds = checkParty('AccountingCustomerParty', 'Müşteri');
+    const customerType = customerIds?.find(e => e.getAttribute('schemeID') === 'MUSTERITURU')?.textContent?.trim();
+    if (customerIds && !DOVIZ_CUSTOMER_TYPES.includes(customerType ?? '')) {
+        issues.push(`Müşteri türü (schemeID MUSTERITURU) ${customerType ? `"${customerType}" geçersiz; ` : 'zorunlu; '}${DOVIZ_CUSTOMER_TYPES.join(', ')} olmalı.`);
+    }
+    const total = (tag: string) => pathText(root, `LegalMonetaryTotal/${tag}`);
+    if (['LineExtensionAmount', 'TaxExclusiveAmount', 'TaxInclusiveAmount', 'PayableAmount'].some(f => !total(f))) {
+        issues.push('LegalMonetaryTotal altında LineExtensionAmount, TaxExclusiveAmount, TaxInclusiveAmount ve PayableAmount zorunlu.');
+    }
+    const rate = pathAll(root, 'PaymentExchangeRate')[0];
+    const pricing = pathAll(root, 'PricingExchangeRate')[0];
+    if (!rate || !pathText(rate, 'SourceCurrencyCode') || !pathText(rate, 'TargetCurrencyCode') || !pathText(rate, 'CalculationRate')) {
+        issues.push(`Uygulanan ${maden ? 'birim fiyat' : 'kur'} (PaymentExchangeRate: SourceCurrencyCode, TargetCurrencyCode, CalculationRate) zorunlu.`);
+    }
+    for (const [el, label] of [[rate, 'PaymentExchangeRate'], [pricing, 'PricingExchangeRate']] as const) {
+        if (!el) continue;
+        if (!/^[0-9]+(\.[0-9]{1,6})?$/.test(pathText(el, 'CalculationRate'))) issues.push(`${label}/CalculationRate sayı olmalı ve virgülden sonra en fazla 6 hane içermeli.`);
+        if (pathText(el, 'SourceCurrencyCode') && pathText(el, 'SourceCurrencyCode') === pathText(el, 'TargetCurrencyCode')) issues.push(`${label} kaynak ve hedef para birimi aynı olamaz.`);
+    }
+    const validCode = (c: string) => EBILET_CURRENCIES.has(c) || (maden && DOVIZ_METAL_CODES.includes(c));
+    const badCurrency = Array.from(root.getElementsByTagName('*')).map(e => e.getAttribute('currencyID')).find(c => c !== null && !validCode(c));
+    if (badCurrency !== undefined) {
+        issues.push(`Para birimi kodu (currencyID) "${badCurrency}" geçersiz; ISO 4217 kodu${maden ? ` ya da kıymetli maden kodu (${DOVIZ_METAL_CODES.join(', ')})` : ''} olmalı.`);
+    }
+    if (rate) {
+        const source = pathText(rate, 'SourceCurrencyCode');
+        const target = pathText(rate, 'TargetCurrencyCode');
+        const foreign = alim ? source : target;
+        const local = alim ? target : source;
+        if (local !== 'TRY' || foreign === 'TRY' || (foreign && !validCode(foreign))) {
+            issues.push(`${alim ? 'ALIM' : 'SATIM'} belgesinde PaymentExchangeRate ${alim ? 'kaynağı' : 'hedefi'} ${maden ? 'kıymetli maden ya da döviz' : 'döviz'} kodu, ${alim ? 'hedefi' : 'kaynağı'} TRY olmalı.`);
+        }
+        const r = Number(pathText(rate, 'CalculationRate'));
+        const payable = num0(total('PayableAmount'));
+        const line = num0(total('LineExtensionAmount'));
+        if (!maden && r > 0 && payable && line && !near01(Math.round(payable * r * 100) / 100, line)) {
+            issues.push(`Ödenecek tutar ${total('PayableAmount')} × kur ${pathText(rate, 'CalculationRate')} = ${(payable * r).toFixed(2)}; döviz karşılığı (LineExtensionAmount) ${total('LineExtensionAmount')} ile uyuşmuyor.`);
+        }
+    }
+    return issues;
+}
+
+/** e-Dekont Teknik Kılavuzu V1.4: banka, ÖK / EPK dekontları ile VTA ve GVTA tahsil alındıları. */
+function dekontRuleChecks(root: Element, profile: string): string[] {
+    const issues = creditNoteHeaderChecks(root, 'Dekont', true);
+    const supplierIssue = vknTcknIssue(pathAll(root, 'AccountingSupplierParty/Party')[0], 'Dekontu düzenleyen banka / kuruluş');
+    if (supplierIssue) issues.push(supplierIssue);
+    if (!pathAll(root, 'AdditionalDocumentReference').length) issues.push('İlave doküman bilgisi (AdditionalDocumentReference) en az bir kez yazılmalı.');
+    const scenario = profile.toUpperCase().replace(/IPTAL$/, '');
+    if (scenario === 'VTA' || scenario === 'GVTA') {
+        const rep = pathAll(root, 'TaxRepresentativeParty')[0];
+        const repId = (scheme: string) => rep && pathAll(rep, 'PartyIdentification/ID').some(e => e.getAttribute('schemeID') === scheme && e.textContent?.trim());
+        if (!rep) {
+            issues.push(`${scenario} senaryosunda tahsil alındısı bilgileri (TaxRepresentativeParty) zorunlu.`);
+        } else if (scenario === 'VTA' && (!repId('VERGIDONEMI') || !pathText(rep, 'PartyTaxScheme/TaxScheme/Name') || !pathText(rep, 'PartyTaxScheme/TaxScheme/TaxTypeCode'))) {
+            issues.push('VTA\'da vergilendirme dönemi (schemeID VERGIDONEMI) ile tahsil eden vergi dairesinin adı ve kodu (PartyTaxScheme/TaxScheme) zorunlu.');
+        } else if (scenario === 'GVTA' && (!repId('GUMRUKKODU') || !pathText(rep, 'PartyName/Name') || !pathText(rep, 'PartyLegalEntity/RegistrationName'))) {
+            issues.push('GVTA\'da gümrük müdürlüğü kodu ve adı (schemeID GUMRUKKODU, PartyName) ile gümrük saymanlığı bilgileri (PartyLegalEntity) zorunlu.');
+        }
+        const refs = pathAll(root, 'AdditionalDocumentReference');
+        const receipt = refs.find(r => pathAll(r, 'ID').some(e => e.getAttribute('schemeID') === 'BELGENO') && pathText(r, 'DocumentDescription') === scenario);
+        if (!receipt) {
+            const legacy = refs.some(r => pathAll(r, 'ID').some(e => e.getAttribute('schemeID') === 'BELGE_NO'));
+            issues.push(legacy
+                ? `${scenario} alındı numarası schemeID "BELGE_NO" ile yazılmış; kılavuz V1.4 ve resmi XSLT "BELGENO" bekler, numara görünümde çıkmaz.`
+                : `${scenario} alındı numarası AdditionalDocumentReference altında ID schemeID="BELGENO", IssueDate ve DocumentDescription "${scenario}" ile yazılmalı.`);
+        }
+    }
+    if (!pathText(root, 'LegalMonetaryTotal/PayableAmount')) issues.push('Ödenecek / işlem tutarı (LegalMonetaryTotal/PayableAmount) zorunlu; karekodda yer alır.');
+    const lines = pathAll(root, 'CreditNoteLine');
+    if (lines.some(l => !pathText(l, 'Item/Name'))) issues.push('Her kalemde işlem adı (Item/Name) zorunlu.');
+    if (lines.some(l => !pathText(l, 'Item/Description') && !pathText(l, 'Price/PriceAmount'))) issues.push('Her kalemde işlem değeri (Item/Description) ya da tutarı (Price/PriceAmount) yazılmalı.');
+    return issues;
+}
+
+/** e-Sigorta Komisyon Gider Belgesi Teknik Kılavuzu V1.2 ve Karekod Standardı 2.6. */
+function sigortaKomisyonRuleChecks(root: Element): string[] {
+    const issues = creditNoteHeaderChecks(root, 'Komisyon gider belgesi', true);
+    if (!childText(root, 'DocumentCurrencyCode')) issues.push('Para birimi (DocumentCurrencyCode) zorunlu; karekodda "parabirimi" olarak yer alır.');
+    const supplierIssue = vknTcknIssue(pathAll(root, 'AccountingSupplierParty/Party')[0], 'Belgeyi düzenleyen sigorta / emeklilik şirketi');
+    if (supplierIssue) issues.push(supplierIssue);
+    const customerIssue = vknTcknIssue(pathAll(root, 'AccountingCustomerParty/Party')[0], 'Komisyonu alan acente / broker');
+    if (customerIssue) issues.push(customerIssue);
+    if (!ISO_DATE_RE.test(pathText(root, 'InvoicePeriod/StartDate')) || !ISO_DATE_RE.test(pathText(root, 'InvoicePeriod/EndDate'))) {
+        issues.push('Komisyon dönemi başlangıç ve bitiş tarihi (InvoicePeriod/StartDate, EndDate) zorunlu.');
+    }
+    const lines = pathAll(root, 'CreditNoteLine');
+    if (lines.some(l => !pathText(l, 'Item/Name'))) issues.push('Her kalemde sigorta branşı / ürün adı (Item/Name) zorunlu.');
+    const charges = lines.flatMap(l => pathAll(l, 'AllowanceCharge'));
+    if (charges.some(c => !/^(true|false)$/.test(pathText(c, 'ChargeIndicator')) || !pathText(c, 'Amount'))) {
+        issues.push('Komisyon satırlarında ChargeIndicator (true: istihsal, false: iptal) ve tutar (Amount) zorunlu.');
+    }
+    const sum = (flag: string) => charges.filter(c => pathText(c, 'ChargeIndicator') === flag).reduce((t, c) => t + num0(pathText(c, 'Amount')), 0);
+    const total = (tag: string) => pathText(root, `LegalMonetaryTotal/${tag}`);
+    if (charges.length) {
+        const istihsal = sum('true');
+        const iptal = sum('false');
+        if (!near01(istihsal, num0(total('AllowanceTotalAmount')))) {
+            issues.push(`İstihsal komisyonu toplamı (AllowanceTotalAmount) ${total('AllowanceTotalAmount') || 'boş'}; ChargeIndicator true satırlarının toplamı ${istihsal.toFixed(2)}.`);
+        }
+        if (!near01(iptal, num0(total('ChargeTotalAmount')))) {
+            issues.push(`İptal komisyonu toplamı (ChargeTotalAmount) ${total('ChargeTotalAmount') || 'boş'}; ChargeIndicator false satırlarının toplamı ${iptal.toFixed(2)}.`);
+        }
+    }
+    if (!total('PayableAmount')) issues.push('Ödenecek tutar (LegalMonetaryTotal/PayableAmount) zorunlu.');
+    return issues;
+}
+
+/** CreditNote ailesinde belge türüne göre kural seti. */
+function creditNoteRuleChecks(docTypeId: string, root: Element, profile: string, typeCode: string): string[] {
+    switch (docTypeId) {
+        case 'gider-pusulasi': return giderPusulasiRuleChecks(root, typeCode);
+        case 'doviz': return dovizRuleChecks(root, profile, typeCode);
+        case 'dekont': return dekontRuleChecks(root, profile);
+        case 'sigorta-komisyon': return sigortaKomisyonRuleChecks(root);
+        default: return mustahsilRuleChecks(root);
+    }
+}
+
+const CREDIT_NOTE_PARTY_LABELS: Record<string, [string, string]> = {
+    'gider-pusulasi': ['Düzenleyen (alan)', 'Malı satan / iade eden'],
+    doviz: ['Banka / yetkili müessese', 'Müşteri'],
+    dekont: ['Banka / ödeme kuruluşu', 'Müşteri'],
+    'sigorta-komisyon': ['Sigorta şirketi', 'Acente / broker'],
+};
+
 /** GİB e-İrsaliye Yanıtı kuralları. */
 function receiptAdviceRuleChecks(root: Element): string[] {
     const issues: string[] = [];
@@ -820,15 +1096,16 @@ export function validateXml(text: string, docType: WizardDocType, xslt: string |
         ['Profil', profile],
         ['Tip', typeCode],
         ['Para birimi', childText(root, 'DocumentCurrencyCode')],
-        [creditNote ? 'Düzenleyen (alıcı)' : 'Gönderen', supplier],
-        [creditNote ? 'Üretici / çiftçi' : 'Alıcı', customer],
+        [creditNote ? CREDIT_NOTE_PARTY_LABELS[docType.id]?.[0] ?? 'Düzenleyen (alıcı)' : 'Gönderen', supplier],
+        [creditNote ? CREDIT_NOTE_PARTY_LABELS[docType.id]?.[1] ?? 'Üretici / çiftçi' : 'Alıcı', customer],
         ['Satır sayısı', String(lines)],
     ];
     if (docType.family === 'receiptAdvice') {
         rows.push(['Yanıtlanan irsaliye', pathText(root, 'DespatchDocumentReference/ID')], ['Yanıt durumu', receiptAdviceStatus(root)]);
     }
     if (creditNote) {
-        rows.push(['Toplam kesinti', pathText(root, 'TaxTotal/TaxAmount')], ['Ödenecek tutar', pathText(root, 'LegalMonetaryTotal/PayableAmount')]);
+        if (!CREDIT_NOTE_PARTY_LABELS[docType.id]) rows.push(['Toplam kesinti', pathText(root, 'TaxTotal/TaxAmount')]);
+        rows.push(['Ödenecek tutar', pathText(root, 'LegalMonetaryTotal/PayableAmount')]);
     }
     info.push(...rows.filter(([, v]) => v));
     if (!lines) checks.push({ level: 'warn', text: 'Belgede kalem (satır) bulunamadı; satır tablosu boş görünür.' });
@@ -836,12 +1113,12 @@ export function validateXml(text: string, docType: WizardDocType, xslt: string |
     const ublInvoice = docType.family === 'invoice' && (docType.profileIds ?? []).some(p => p === 'EARSIVFATURA' || EFATURA_PROFILE_IDS.includes(p));
     const gibIssues = docType.family === 'despatch' ? despatchRuleChecks(root, profile, typeCode)
         : docType.family === 'receiptAdvice' ? receiptAdviceRuleChecks(root)
-        : creditNote ? mustahsilRuleChecks(root)
+        : creditNote ? creditNoteRuleChecks(docType.id, root, profile, typeCode)
         : ublInvoice ? invoiceRuleChecks(root, profile, typeCode) : [];
     if (gibIssues.length) {
         checks.push(...gibIssues.map(text => ({ level: 'warn' as const, text: `GİB kuralı: ${text}` })));
     } else if (despatchLike || ublInvoice || creditNote) {
-        checks.push({ level: 'ok', text: despatchLike ? 'GİB e-İrsaliye zorunlu alan kontrolleri geçti' : creditNote ? 'GİB e-Müstahsil zorunlu bilgi kontrolleri geçti' : 'GİB fatura kural kontrolleri geçti' });
+        checks.push({ level: 'ok', text: despatchLike ? 'GİB e-İrsaliye zorunlu alan kontrolleri geçti' : creditNote ? `GİB ${docType.label} zorunlu bilgi kontrolleri geçti` : 'GİB fatura kural kontrolleri geçti' });
     }
     if (docType.id === 'smm') {
         const smmIssues = smmRuleChecks(root);

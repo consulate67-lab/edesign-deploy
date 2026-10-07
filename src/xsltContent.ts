@@ -40,6 +40,12 @@ import ebiletYolcuListesiRaw from '../public/ebelge/ebilet/ebilet-yolcu-listesi.
 import ebiletGorselRaw from '../public/ebelge/ebilet/ebilet-gorsel.xslt?raw';
 // e-Müstahsil (CreditNote): GİB resmi XSLT yayımlamadığı için Müstahsil Makbuzu Kılavuzu V1.1 ve Karekod Standardı 2.5'e göre hazırlandı
 import eMustahsilMakbuzuRaw from '../public/ebelge/gib/v2/e-Mustahsil-Makbuzu.xslt?raw';
+// GİB paketlerindeki resmi CreditNote görselleştirmeleri (e-Dekont paketinde ayrı XSLT olmadığından örneğe gömülü olandan çıkarıldı)
+import gibGiderPusulasiRaw from '../public/ebelge/gib/gider-pusulasi.xslt?raw';
+import gibDovizAlimRaw from '../public/ebelge/gib/doviz-maden-alim.xslt?raw';
+import gibDovizSatimRaw from '../public/ebelge/gib/doviz-maden-satim.xslt?raw';
+import gibDekontRaw from '../public/ebelge/gib/dekont.xslt?raw';
+import gibSigortaKomisyonRaw from '../public/ebelge/gib/sigorta-komisyon-gider.xslt?raw';
 
 export const INLINE_XSLT_CONTENT: Record<string, string> = {
     'gib/general.xslt': gibGeneralRaw,
@@ -64,6 +70,11 @@ export const INLINE_XSLT_CONTENT: Record<string, string> = {
     'ebilet/ebilet-yolcu-listesi.xslt': ebiletYolcuListesiRaw,
     'ebilet/ebilet-gorsel.xslt': ebiletGorselRaw,
     'gib/v2/e-Mustahsil-Makbuzu.xslt': eMustahsilMakbuzuRaw,
+    'gib/gider-pusulasi.xslt': gibGiderPusulasiRaw,
+    'gib/doviz-maden-alim.xslt': gibDovizAlimRaw,
+    'gib/doviz-maden-satim.xslt': gibDovizSatimRaw,
+    'gib/dekont.xslt': gibDekontRaw,
+    'gib/sigorta-komisyon-gider.xslt': gibSigortaKomisyonRaw,
 };
 
 /**

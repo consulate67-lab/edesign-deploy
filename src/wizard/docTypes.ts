@@ -58,13 +58,20 @@ export const INVOICE_TYPE_CODES = [
     'HKSSATIS', 'HKSKOMISYONCU', 'KONAKLAMAVERGISI', 'SARJ', 'SARJANLIK', 'TEKNOLOJIDESTEK',
     'YTBSATIS', 'YTBIADE', 'YTBISTISNA', 'YTBTEVKIFAT', 'YTBTEVKIFATIADE',
 ];
+/** e-Dekont Teknik Kılavuzu V1.4 — senaryolar ve iptal karşılıkları. */
+export const DEKONT_PROFILE_IDS = ['DEKONT', 'DEKONTIPTAL', 'VTA', 'VTAIPTAL', 'GVTA', 'GVTAIPTAL'];
+/** e-Dekont Teknik Kılavuzu V1.4 — bankalar ile ödeme / elektronik para kuruluşlarının (ÖK / EPK) işlem tipleri. */
+export const DEKONT_TYPE_CODES = [
+    'NKT', 'HVL', 'EFT', 'SWT', 'OKT', 'MOT', 'DVZ', 'KMI', 'ARB', 'NKR', 'GKR', 'KEI', 'KKI', 'YKI', 'DKI', 'DIGER',
+    'EPIH', 'PAGO', 'PAL', 'POSH', 'FTM', 'FTK',
+];
 
 export const FAMILY_INFO: Record<DocFamily, { root: string; ns: string; label: string }> = {
     invoice: { root: 'Invoice', ns: 'urn:oasis:names:specification:ubl:schema:xsd:Invoice-2', label: 'Fatura (Invoice)' },
     despatch: { root: 'DespatchAdvice', ns: 'urn:oasis:names:specification:ubl:schema:xsd:DespatchAdvice-2', label: 'İrsaliye (DespatchAdvice)' },
     receiptAdvice: { root: 'ReceiptAdvice', ns: 'urn:oasis:names:specification:ubl:schema:xsd:ReceiptAdvice-2', label: 'İrsaliye Yanıtı (ReceiptAdvice)' },
     receipt: { root: 'Receipt', ns: 'urn:oasis:names:specification:ubl:schema:xsd:Receipt-2', label: 'Makbuz (Receipt)' },
-    creditNote: { root: 'CreditNote', ns: 'urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2', label: 'Müstahsil Makbuzu (CreditNote)' },
+    creditNote: { root: 'CreditNote', ns: 'urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2', label: 'CreditNote (Müstahsil, Gider Pusulası, Döviz, Dekont, Sigorta Komisyon)' },
     // e-Bilet paketi (ebilet.xsd): iki kök aynı namespace'i paylaşır, aile kök adıyla ayrılır.
     ebiletReport: { root: 'eBilet', ns: 'http://ebilet.efatura.gov.tr', label: 'e-Bilet Raporu (eBilet)' },
     ebiletPassengerList: { root: 'eYolcuListesi', ns: 'http://ebilet.efatura.gov.tr', label: 'e-Yolcu Listesi (eYolcuListesi)' },
@@ -233,6 +240,84 @@ export const WIZARD_DOC_TYPES: WizardDocType[] = [
             {
                 id: 'gib-mustahsil-makbuzu', label: 'e-Müstahsil Makbuzu (GİB kılavuzu V1.1)',
                 description: 'CreditNote yapısı, kesintiler, SMS doğrulama ve e-MM karekodu', moduleId: 'mustahsil', load: inline('gib/v2/e-Mustahsil-Makbuzu.xslt'),
+            },
+        ],
+    },
+    {
+        id: 'gider-pusulasi', label: 'e-Gider Pusulası', description: 'Mükellef olmayandan alım, nihai tüketici iadesi', color: '#65a30d',
+        family: 'creditNote', profileIds: ['GIDERPUSULASI'], typeCodes: ['SATIS', 'IADE'],
+        sampleXml: 'ebelge/samples/gib/GiderPusulasi-SATIS.xml',
+        officialSamples: [
+            gibSample('GiderPusulasi-SATIS.xml', 'Mükellef olmayandan alım, SMS kodlu', 'GIDERPUSULASI · SATIS'),
+            gibSample('GiderPusulasi-IADE-IadeKodu.xml', 'e-Arşiv faturalı iade, kargo + iade kodu', 'GIDERPUSULASI · IADE · EARSIV_FATURA'),
+            gibSample('GiderPusulasi-IADE-SMS.xml', 'Satış fişli iade, adına iade eden + SMS', 'GIDERPUSULASI · IADE · SATIS_FISI'),
+            gibSample('GiderPusulasi-IADE-Belgesiz.xml', 'Belgesiz iade (TCKN zorunlu)', 'GIDERPUSULASI · IADE · BELGESIZ'),
+        ],
+        officialNote: 'Örnekler ve şablon GİB e-Gider Pusulası Paketi (Teknik Kılavuz V1.0) içinden olduğu gibi alındı.',
+        defaults: [
+            {
+                id: 'gib-gider-pusulasi', label: 'GİB Resmi e-Gider Pusulası Şablonu',
+                description: 'Paketteki resmi görünüm: iade belgesi, kargo, SMS / iade kodu ve karekod', moduleId: 'gider-pusulasi', load: inline('gib/gider-pusulasi.xslt'),
+            },
+        ],
+    },
+    {
+        id: 'doviz', label: 'e-Döviz / Kıymetli Maden', description: 'Döviz ve kıymetli maden alım-satım belgesi', color: '#ca8a04',
+        family: 'creditNote', profileIds: ['EDOVIZBELGE', 'EKIYMETLIMADENBELGE'], typeCodes: ['ALIM', 'SATIM'],
+        sampleXml: 'ebelge/samples/gib/Doviz-Alim.xml',
+        officialSamples: [
+            gibSample('Doviz-Alim.xml', 'Döviz alım (EUR karşılığı TL)', 'EDOVIZBELGE · ALIM'),
+            gibSample('Doviz-Satim.xml', 'Döviz satım (TL karşılığı EUR)', 'EDOVIZBELGE · SATIM'),
+            gibSample('KiymetliMaden-Alim.xml', 'Çeyrek altın alım', 'EKIYMETLIMADENBELGE · ALIM'),
+            gibSample('KiymetliMaden-Satim.xml', 'Çeyrek altın satım', 'EKIYMETLIMADENBELGE · SATIM'),
+        ],
+        officialNote: 'Örnekler ve şablonlar e-Döviz ve Kıymetli Maden Alım-Satım Belgesi Paketi V1.3 içinden alındı; ALIM ve SATIM için ayrı resmi XSLT vardır.',
+        defaults: [
+            {
+                id: 'gib-doviz-alim', label: 'GİB Resmi Alım Belgesi Şablonu',
+                description: 'ALIM tipi döviz ve kıymetli maden belgeleri (paketteki alim.xslt)', moduleId: 'doviz', load: inline('gib/doviz-maden-alim.xslt'),
+            },
+            {
+                id: 'gib-doviz-satim', label: 'GİB Resmi Satım Belgesi Şablonu',
+                description: 'SATIM tipi döviz ve kıymetli maden belgeleri (paketteki satim.xslt)', moduleId: 'doviz-satim', load: inline('gib/doviz-maden-satim.xslt'),
+            },
+        ],
+    },
+    {
+        id: 'dekont', label: 'e-Dekont', description: 'Banka, ödeme ve elektronik para kuruluşu dekontu', color: '#0f766e',
+        family: 'creditNote', profileIds: DEKONT_PROFILE_IDS, typeCodes: DEKONT_TYPE_CODES,
+        sampleXml: 'ebelge/samples/gib/Dekont-NKT.xml',
+        officialSamples: [
+            gibSample('Dekont-NKT.xml', 'Banka: nakit işlemi', 'DEKONT · NKT'),
+            gibSample('Dekont-VTA.xml', 'Vergi tahsil alındısı, kredi kartıyla', 'VTA · KKI'),
+            gibSample('Dekont-GVTA.xml', 'Gümrük vergisi tahsil alındısı, havale', 'GVTA · HVL'),
+            gibSample('Dekont-EPIH.xml', 'ÖK / EPK: elektronik para ihracı', 'DEKONT · EPIH'),
+            gibSample('Dekont-PAL.xml', 'ÖK / EPK: para alma', 'DEKONT · PAL'),
+            gibSample('Dekont-PAGO.xml', 'ÖK / EPK: para gönderme', 'DEKONT · PAGO'),
+            gibSample('Dekont-POSH.xml', 'ÖK / EPK: POS hizmeti (sanal POS)', 'DEKONT · POSH'),
+            gibSample('Dekont-FTM.xml', 'ÖK / EPK: fatura tahsilatı (müşteri)', 'DEKONT · FTM'),
+            gibSample('Dekont-FTK.xml', 'ÖK / EPK: fatura tahsilatı (kurum)', 'DEKONT · FTK'),
+        ],
+        officialNote: 'Örnekler e-Dekont paketinden (Kılavuz V1.4) alındı. Pakette ayrı XSLT dosyası yok; şablon, ÖK / EPK örneklerine gömülü resmi XSLT\'den çıkarıldı.',
+        defaults: [
+            {
+                id: 'gib-dekont', label: 'GİB Resmi e-Dekont Şablonu',
+                description: 'Banka ve ÖK / EPK dekontları için paketteki resmi görünüm (karekodlu)', moduleId: 'dekont', load: inline('gib/dekont.xslt'),
+            },
+        ],
+    },
+    {
+        id: 'sigorta-komisyon', label: 'e-Sigorta Komisyon Gider', description: 'Sigorta ve emeklilik komisyon gider belgesi', color: '#4f46e5',
+        family: 'creditNote', profileIds: ['EARSIVBELGE'], typeCodes: ['SIGORTAKOMISYONGIDERBELGESI'],
+        sampleXml: 'ebelge/samples/gib/SigortaKomisyonGider.xml',
+        officialSamples: [
+            gibSample('SigortaKomisyonGider.xml', 'Dönemlik komisyon: istihsal + iptal', 'EARSIVBELGE · SIGORTAKOMISYONGIDERBELGESI'),
+        ],
+        officialNote: 'Örnek ve şablon e-Sigorta Komisyon Gider Belgesi Paketi V1.2 içinden alındı.',
+        defaults: [
+            {
+                id: 'gib-sigorta-komisyon', label: 'GİB Resmi e-Sigorta Komisyon Gider Belgesi Şablonu',
+                description: 'Dönem, istihsal / iptal komisyonları ve karekod', moduleId: 'sigorta-komisyon', load: inline('gib/sigorta-komisyon-gider.xslt'),
             },
         ],
     },

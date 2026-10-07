@@ -356,6 +356,11 @@ export const ProfessionalDesigner: React.FC<ProfessionalDesignerProps> = ({ temp
             'bilet': 'e-Bilet-TEMEL.xml',
             'bilet-rapor': 'gib/eBilet-Rapor-Karayolu.xml',
             'bilet-yolcu': 'gib/eYolcuListesi-YurtIci.xml',
+            'gider-pusulasi': 'gib/GiderPusulasi-SATIS.xml',
+            'doviz': 'gib/Doviz-Alim.xml',
+            'doviz-satim': 'gib/Doviz-Satim.xml',
+            'dekont': 'gib/Dekont-NKT.xml',
+            'sigorta-komisyon': 'gib/SigortaKomisyonGider.xml',
             'makbuz': 'e-Makbuz-TEMEL.xml',
             // Legacy alias (eski ID'ler — geriye uyumluluk)
             'mikro': 'e-Arsiv-TEMEL.xml',

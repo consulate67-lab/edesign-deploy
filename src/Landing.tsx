@@ -21,7 +21,7 @@ const SSS_ITEMS: SssItem[] = [
     },
     {
         q: 'Hangi e-belge tiplerini tasarlayabilirim?',
-        a: 'Toplam 9 modül: e-Fatura, e-Arşiv, e-İrsaliye, e-İhracat, e-Mikro İhracat, e-SMM, e-Müstahsil, e-Bilet ve e-Makbuz. Her modül için GİB resmi XSLT veya topluluk versiyonu yüklenir.',
+        a: 'Toplam 13 modül: e-Fatura, e-Arşiv, e-İrsaliye, e-İhracat, e-Mikro İhracat, e-SMM, e-Müstahsil, e-Bilet, e-Makbuz, e-Gider Pusulası, e-Döviz / Kıymetli Maden, e-Dekont ve e-Sigorta Komisyon Gider Belgesi. Her modül için GİB resmi XSLT veya topluluk versiyonu yüklenir.',
     },
     {
         q: 'XSLT bilmem gerekiyor mu?',
@@ -51,6 +51,10 @@ const DOC_TYPES = [
     { label: 'e-Müstahsil', code: '07', a: '#84cc16' },
     { label: 'e-Bilet', code: '08', a: '#f97316' },
     { label: 'e-Makbuz', code: '09', a: '#14b8a6' },
+    { label: 'e-Gider Pusulası', code: '10', a: '#65a30d' },
+    { label: 'e-Döviz / Kıymetli Maden', code: '11', a: '#ca8a04' },
+    { label: 'e-Dekont', code: '12', a: '#0f766e' },
+    { label: 'e-Sigorta Komisyon', code: '13', a: '#6366f1' },
 ];
 
 /** Başlıkta belge türleri arasında dönen kelime. */
@@ -413,7 +417,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                 >
                     {[
                         { v: 'GİB', l: 'UBL-TR Resmi Uyumlu', a: '#10b981' },
-                        { v: '9', l: 'Belge Türü Desteği', a: '#38bdf8' },
+                        { v: '13', l: 'Belge Türü Desteği', a: '#38bdf8' },
                         { v: '3', l: 'Paket Seçeneği', a: '#ec4899' },
                         { v: '%100', l: 'Web Tabanlı', a: '#a78bfa' },
                     ].map((s, i) => (
@@ -456,7 +460,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                             color: '#f8fafc',
                         }}
                     >
-                        Tek tasarımcı, dokuz e-belge
+                        Tek tasarımcı, on üç e-belge
                     </h2>
                     <p style={{ fontSize: 15, color: '#94a3b8', margin: 0 }}>
                         GİB UBL 2.1 uyumlu, hepsi tek editörde
@@ -558,7 +562,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                         { icon: <Layers size={22} />, t: 'Sürükle & Bırak', d: 'XSLT öğrenmeden görsel tasarım', a: '#38bdf8' },
                         { icon: <Zap size={22} />, t: 'Anlık Önizleme', d: 'Kendi XML ile test et', a: '#10b981' },
                         { icon: <FileText size={22} />, t: 'GİB Uyumlu', d: 'e-Fatura Paketi v29', a: '#f97316' },
-                        { icon: <Globe size={22} />, t: '9 Belge Türü', d: 'Fatura, irsaliye, makbuz...', a: '#ec4899' },
+                        { icon: <Globe size={22} />, t: '13 Belge Türü', d: 'Fatura, irsaliye, makbuz, dekont...', a: '#ec4899' },
                     ].map((f, i) => (
                         <div
                             key={i}
