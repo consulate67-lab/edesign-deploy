@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { LayoutTemplate, Search, Eye, X, Download, ArrowRight, Loader2, Code2, FileText, ChevronRight } from 'lucide-react';
+import { LayoutTemplate, Search, Eye, X, Download, ArrowRight, Loader2, Code2, FileText, ChevronDown, Check, Building2, RotateCcw } from 'lucide-react';
 import { SECTOR_TEMPLATES, SECTORS, CATEGORIES, type CategoryId, type SectorId, type SectorTemplate } from './index';
 import { WIZARD_DOC_TYPES, loadXmlFile } from '../wizard/docTypes';
 import { stripLeadingBom } from '../xslt-editor/utils/testWatermark';
@@ -412,12 +412,7 @@ const TemplateModal: React.FC<{
     );
 };
 
-interface DocNode { id: string; label: string; color: string; count: number }
-interface SectorNode { id: SectorId; label: string; color: string; count: number; docs: DocNode[] }
-interface CategoryNode { id: CategoryId; label: string; color: string; count: number; sectors: SectorNode[] }
-
-/** Boş alanlar "hepsi" demektir; sektör seçiliyse kategori de onunkidir. */
-interface TreeSelection { category?: CategoryId; sector?: SectorId; docType?: string }
+interface FilterOption { id: string; label: string; color: string; count: number; depth: 0 | 1 }
 
 const matchesQuery = (t: SectorTemplate, q: string) => {
     if (!q) return true;
@@ -426,142 +421,129 @@ const matchesQuery = (t: SectorTemplate, q: string) => {
     return lower(hay).includes(q);
 };
 
-const docNodes = (items: SectorTemplate[]): DocNode[] => [...new Set(items.map(t => t.docTypeId))].map(id => {
-    const d = docTypeOf(id);
-    return { id, label: d?.label ?? id, color: d?.color ?? '#64748b', count: items.filter(t => t.docTypeId === id).length };
-});
-
-const buildTree = (items: SectorTemplate[]): CategoryNode[] => CATEGORIES.flatMap(c => {
-    const sectors = SECTORS.filter(s => s.category === c.id).flatMap(s => {
-        const own = items.filter(t => t.sector === s.id);
-        return own.length ? [{ id: s.id, label: s.label, color: s.color, count: own.length, docs: docNodes(own) }] : [];
-    });
-    const count = sectors.reduce((n, s) => n + s.count, 0);
-    return count ? [{ id: c.id, label: c.label, color: c.color, count, sectors }] : [];
-});
-
-const Chevron: React.FC<{ open: boolean; onClick: () => void; attr: Record<string, string> }> = ({ open, onClick, attr }) => (
-    <button type="button" {...attr} aria-label={open ? 'Daralt' : 'Genişlet'} onClick={onClick}
-        style={{ background: 'none', border: 'none', padding: 4, cursor: 'pointer', color: '#64748b', display: 'flex', flexShrink: 0 }}>
-        <ChevronRight size={14} style={{ transform: open ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s' }} />
-    </button>
-);
-
-const SectorTree: React.FC<{
-    tree: CategoryNode[];
-    total: number;
-    sel: TreeSelection;
-    openCategories: Set<CategoryId>;
-    openSectors: Set<SectorId>;
-    onSelect: (sel: TreeSelection) => void;
-    onToggleCategory: (id: CategoryId) => void;
-    onToggleSector: (id: SectorId) => void;
-}> = ({ tree, total, sel, openCategories, openSectors, onSelect, onToggleCategory, onToggleSector }) => {
-    const row = (active: boolean, color: string): React.CSSProperties => ({
-        display: 'flex', alignItems: 'center', gap: 8, width: '100%', minWidth: 0, boxSizing: 'border-box', textAlign: 'left',
-        padding: '6px 9px', borderRadius: 9, border: 'none', fontFamily: 'inherit', cursor: 'pointer',
-        background: active ? `${color}2e` : 'transparent', color: active ? '#f8fafc' : '#cbd5e1',
-        boxShadow: active ? `inset 3px 0 0 ${color}` : 'none', fontSize: '0.8rem', fontWeight: 700,
-        transition: 'background 0.15s',
-    });
-    const count = (n: number, active: boolean, color: string) => (
-        <span style={{
-            marginLeft: 'auto', fontSize: '0.66rem', padding: '1px 7px', borderRadius: 999, flexShrink: 0,
-            background: active ? color : 'rgba(148, 163, 184, 0.14)', color: active ? 'white' : '#94a3b8',
-        }}>
-            {n}
-        </span>
-    );
-    const ellipsis: React.CSSProperties = { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
-    const branch = (color: string): React.CSSProperties => ({
-        display: 'flex', flexDirection: 'column', gap: 1, margin: '1px 0 4px 13px', paddingLeft: 8, borderLeft: `1px dashed ${color}55`,
-    });
-    const isAll = !sel.category && !sel.sector;
-
-    return (
-        <nav data-sector-tree role="tree" aria-label="Firma kategorileri ve sektörler" style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <button type="button" role="treeitem" data-sector-chip="all" aria-selected={isAll}
-                onClick={() => onSelect({})} style={row(isAll, '#6366f1')}>
-                <LayoutTemplate size={14} color="#a5b4fc" style={{ flexShrink: 0 }} />
-                Tüm şablonlar
-                {count(total, isAll, '#6366f1')}
-            </button>
-            <div style={{ height: 1, background: 'rgba(148, 163, 184, 0.12)', margin: '6px 4px' }} />
-            {tree.map(c => {
-                const catOpen = openCategories.has(c.id);
-                const catActive = sel.category === c.id && !sel.sector;
-                return (
-                    <div key={c.id} role="treeitem" aria-expanded={catOpen} aria-selected={catActive} style={{ marginBottom: 2 }}>
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <Chevron open={catOpen} onClick={() => onToggleCategory(c.id)} attr={{ 'data-category-toggle': c.id }} />
-                            <button type="button" data-category-node={c.id} title={c.label} onClick={() => onSelect({ category: c.id })}
-                                style={{ ...row(catActive, c.color), paddingLeft: 4, fontSize: '0.84rem', fontWeight: 800, color: catActive ? '#f8fafc' : '#e2e8f0' }}>
-                                <span style={{ width: 10, height: 10, borderRadius: 3, background: c.color, flexShrink: 0 }} />
-                                <span style={ellipsis}>{c.label}</span>
-                                {count(c.count, catActive, c.color)}
-                            </button>
-                        </div>
-                        {catOpen && (
-                            <div role="group" style={branch(c.color)}>
-                                {c.sectors.map(s => {
-                                    const open = openSectors.has(s.id);
-                                    const active = sel.sector === s.id && !sel.docType;
-                                    return (
-                                        <div key={s.id} role="treeitem" aria-expanded={open} aria-selected={active}>
-                                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                <Chevron open={open} onClick={() => onToggleSector(s.id)} attr={{ 'data-sector-toggle': s.id }} />
-                                                <button type="button" data-sector-chip={s.id} title={s.label}
-                                                    onClick={() => onSelect({ category: c.id, sector: s.id })} style={{ ...row(active, s.color), paddingLeft: 4 }}>
-                                                    <span style={{ width: 8, height: 8, borderRadius: 999, background: s.color, flexShrink: 0 }} />
-                                                    <span style={ellipsis}>{s.label}</span>
-                                                    {count(s.count, active, s.color)}
-                                                </button>
-                                            </div>
-                                            {open && (
-                                                <div role="group" style={branch(s.color)}>
-                                                    {s.docs.map(d => {
-                                                        const docActive = sel.sector === s.id && sel.docType === d.id;
-                                                        return (
-                                                            <button key={d.id} type="button" role="treeitem" aria-selected={docActive}
-                                                                data-doc-node={`${s.id}:${d.id}`}
-                                                                title={`${s.label} › ${d.label}`}
-                                                                onClick={() => onSelect({ category: c.id, sector: s.id, docType: d.id })}
-                                                                style={{ ...row(docActive, d.color), padding: '4px 8px', fontSize: '0.74rem', fontWeight: 600 }}>
-                                                                <FileText size={12} color={d.color} style={{ flexShrink: 0 }} />
-                                                                <span style={ellipsis}>{d.label}</span>
-                                                                {count(d.count, docActive, d.color)}
-                                                            </button>
-                                                        );
-                                                    })}
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        )}
-                    </div>
-                );
-            })}
-        </nav>
-    );
+/** Firma filtresi değeri: '' (tümü), 'c:<kategori>' veya 's:<sektör>'. */
+const matchesCompany = (t: SectorTemplate, company: string) => {
+    if (!company) return true;
+    if (company.startsWith('s:')) return t.sector === company.slice(2);
+    return SECTOR_BY_ID.get(t.sector)?.category === company.slice(2);
 };
 
-const toggled = <T,>(set: Set<T>, id: T) => {
-    const next = new Set(set);
-    if (next.has(id)) next.delete(id); else next.add(id);
-    return next;
+const docOptions = (items: SectorTemplate[]): FilterOption[] => WIZARD_DOC_TYPES.flatMap(d => {
+    const count = items.filter(t => t.docTypeId === d.id).length;
+    return count ? [{ id: d.id, label: d.label, color: d.color ?? '#64748b', count, depth: 0 as const }] : [];
+});
+
+const companyOptions = (items: SectorTemplate[]): FilterOption[] => CATEGORIES.flatMap(c => {
+    const sectors = SECTORS.filter(s => s.category === c.id).flatMap(s => {
+        const count = items.filter(t => t.sector === s.id).length;
+        return count ? [{ id: `s:${s.id}`, label: s.label, color: s.color, count, depth: 1 as const }] : [];
+    });
+    const count = sectors.reduce((n, s) => n + s.count, 0);
+    return count ? [{ id: `c:${c.id}`, label: c.label, color: c.color, count, depth: 0 as const }, ...sectors] : [];
+});
+
+const FilterDropdown: React.FC<{
+    name: string;
+    title: string;
+    icon: React.ReactNode;
+    value: string;
+    options: FilterOption[];
+    total: number;
+    onChange: (id: string) => void;
+}> = ({ name, title, icon, value, options, total, onChange }) => {
+    const [open, setOpen] = useState(false);
+    const rootRef = useRef<HTMLDivElement>(null);
+    const current = options.find(o => o.id === value);
+    const accent = current?.color ?? '#6366f1';
+
+    useEffect(() => {
+        if (!open) return;
+        const onDown = (e: MouseEvent) => { if (!rootRef.current?.contains(e.target as Node)) setOpen(false); };
+        const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+        document.addEventListener('mousedown', onDown);
+        window.addEventListener('keydown', onKey);
+        return () => { document.removeEventListener('mousedown', onDown); window.removeEventListener('keydown', onKey); };
+    }, [open]);
+
+    const pick = (id: string) => { onChange(id); setOpen(false); };
+    const option = (o: FilterOption | null) => {
+        const id = o?.id ?? '';
+        const active = id === value;
+        const color = o?.color ?? '#6366f1';
+        return (
+            <button key={id || 'all'} type="button" role="option" aria-selected={active} data-filter-option={id || 'all'}
+                onClick={() => pick(id)}
+                style={{
+                    display: 'flex', alignItems: 'center', gap: 9, width: '100%', boxSizing: 'border-box', textAlign: 'left',
+                    padding: o?.depth ? '6px 10px 6px 30px' : '8px 10px', borderRadius: 8, border: 'none', cursor: 'pointer',
+                    fontFamily: 'inherit', fontSize: o?.depth ? '0.78rem' : '0.82rem', fontWeight: o?.depth ? 600 : 800,
+                    background: active ? `${color}2e` : 'transparent', color: active ? '#f8fafc' : o?.depth ? '#cbd5e1' : '#e2e8f0',
+                }}
+                onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'rgba(148, 163, 184, 0.1)'; }}
+                onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent'; }}
+            >
+                {o
+                    ? <span style={{ width: o.depth ? 7 : 10, height: o.depth ? 7 : 10, borderRadius: o.depth ? 999 : 3, background: color, flexShrink: 0 }} />
+                    : <LayoutTemplate size={13} color="#a5b4fc" style={{ flexShrink: 0 }} />}
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{o?.label ?? 'Tümü'}</span>
+                <span style={{
+                    marginLeft: 'auto', fontSize: '0.66rem', padding: '1px 7px', borderRadius: 999, flexShrink: 0,
+                    background: active ? color : 'rgba(148, 163, 184, 0.14)', color: active ? 'white' : '#94a3b8',
+                }}>
+                    {o?.count ?? total}
+                </span>
+                {active && <Check size={13} color="#f8fafc" style={{ flexShrink: 0 }} />}
+            </button>
+        );
+    };
+
+    return (
+        <div ref={rootRef} data-filter={name} style={{ position: 'relative', flex: '0 1 auto', minWidth: 0 }}>
+            <button
+                type="button"
+                data-filter-toggle={name}
+                aria-haspopup="listbox"
+                aria-expanded={open}
+                onClick={() => setOpen(v => !v)}
+                style={{
+                    display: 'flex', alignItems: 'center', gap: 8, maxWidth: 300, padding: '7px 12px', borderRadius: 999,
+                    border: `1px solid ${value ? `${accent}aa` : 'rgba(148, 163, 184, 0.25)'}`,
+                    background: value ? `${accent}24` : 'rgba(15, 23, 42, 0.7)', color: '#f1f5f9',
+                    cursor: 'pointer', fontFamily: 'inherit', fontSize: '0.82rem', whiteSpace: 'nowrap',
+                    boxShadow: open ? `0 0 0 3px ${accent}33` : 'none', transition: 'box-shadow 0.15s, background 0.15s',
+                }}
+            >
+                {icon}
+                <span style={{ color: '#94a3b8', fontWeight: 600 }}>{title}:</span>
+                <span data-filter-value={name} style={{ fontWeight: 800, overflow: 'hidden', textOverflow: 'ellipsis' }}>{current?.label ?? 'Tümü'}</span>
+                <ChevronDown size={14} color="#94a3b8" style={{ flexShrink: 0, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
+            </button>
+            {open && (
+                <div role="listbox" aria-label={title} data-filter-menu={name} style={{
+                    position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 60, width: 300, maxHeight: 380, overflowY: 'auto',
+                    padding: 6, borderRadius: 14, background: '#0f172a', border: '1px solid rgba(148, 163, 184, 0.22)',
+                    boxShadow: '0 20px 50px rgba(0,0,0,0.55)', animation: 'fadeIn 0.15s ease-out', boxSizing: 'border-box',
+                }}>
+                    {option(null)}
+                    <div style={{ height: 1, background: 'rgba(148, 163, 184, 0.12)', margin: '4px 6px' }} />
+                    {options.length ? options.map(o => option(o)) : (
+                        <div style={{ padding: 10, color: '#64748b', fontSize: '0.8rem' }}>Bu filtrelerle eşleşen seçenek yok.</div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
 };
 
 /**
- * Sektöre göre hazır tasarım galerisi: solda Kategori › Sektör › Belge türü
- * ağacı + arama, canlı küçük önizlemeli kartlar, büyük önizleme / örnek XML
- * penceresi. Seçilen şablon örnek XML'iyle birlikte tasarım ekranında açılır.
+ * Sektöre göre hazır tasarım galerisi: arama kutusunun yanında Fatura tipi ve
+ * Firma kategorisi filtreleri (başta "Tümü"), canlı küçük önizlemeli kartlar,
+ * büyük önizleme / örnek XML penceresi. Seçilen şablon örnek XML'iyle birlikte
+ * tasarım ekranında açılır.
  */
 export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => {
-    const [sel, setSel] = useState<TreeSelection>({});
-    const [openCategories, setOpenCategories] = useState<Set<CategoryId>>(() => new Set());
-    const [openSectors, setOpenSectors] = useState<Set<SectorId>>(() => new Set());
+    const [docType, setDocType] = useState('');
+    const [company, setCompany] = useState('');
     const [query, setQuery] = useState('');
     const [previewId, setPreviewId] = useState<string | null>(null);
     const [busyId, setBusyId] = useState<string | null>(null);
@@ -569,21 +551,13 @@ export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => 
 
     const q = lower(query.trim());
     const searched = useMemo(() => SECTOR_TEMPLATES.filter(t => matchesQuery(t, q)), [q]);
-    const tree = useMemo(() => buildTree(searched), [searched]);
-
-    const filtered = useMemo(() => searched.filter(t => {
-        if (sel.sector) return t.sector === sel.sector && (!sel.docType || t.docTypeId === sel.docType);
-        if (sel.category) return SECTOR_BY_ID.get(t.sector)?.category === sel.category;
-        return true;
-    }), [searched, sel]);
-
-    const selectNode = (next: TreeSelection) => {
-        setSel(next);
-        if (next.category) setOpenCategories(prev => new Set(prev).add(next.category as CategoryId));
-        if (next.sector && !next.docType) setOpenSectors(prev => new Set(prev).add(next.sector as SectorId));
-    };
-    const viewCategories = q ? new Set(tree.map(c => c.id)) : openCategories;
-    const viewSectors = q ? new Set(tree.flatMap(c => c.sectors.map(s => s.id))) : openSectors;
+    const byCompany = useMemo(() => searched.filter(t => matchesCompany(t, company)), [searched, company]);
+    const byDoc = useMemo(() => searched.filter(t => !docType || t.docTypeId === docType), [searched, docType]);
+    const filtered = useMemo(() => byCompany.filter(t => !docType || t.docTypeId === docType), [byCompany, docType]);
+    const docOpts = useMemo(() => docOptions(byCompany), [byCompany]);
+    const companyOpts = useMemo(() => companyOptions(byDoc), [byDoc]);
+    const anyFilter = !!(docType || company || q);
+    const clearAll = () => { setDocType(''); setCompany(''); setQuery(''); };
 
     const previewTemplate = previewId ? SECTOR_TEMPLATES.find(t => t.id === previewId) ?? null : null;
 
@@ -607,13 +581,6 @@ export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => 
 
     if (!SECTOR_TEMPLATES.length) return null;
 
-    const crumbs = [
-        { label: 'Tüm şablonlar', sel: {} as TreeSelection },
-        ...(sel.category ? [{ label: CATEGORY_BY_ID.get(sel.category)?.label ?? sel.category, sel: { category: sel.category } }] : []),
-        ...(sel.sector ? [{ label: SECTOR_BY_ID.get(sel.sector)?.label ?? sel.sector, sel: { category: sel.category, sector: sel.sector } }] : []),
-        ...(sel.docType ? [{ label: docTypeOf(sel.docType)?.label ?? sel.docType, sel }] : []),
-    ];
-
     return (
         <section data-template-gallery style={{
             width: '100%', marginBottom: '2rem', background: 'rgba(15, 23, 42, 0.7)', border: '1px solid rgba(255,255,255,0.08)',
@@ -626,99 +593,103 @@ export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => 
                 .tg-shimmer { background: linear-gradient(90deg, #e2e8f0 0px, #f1f5f9 80px, #e2e8f0 160px); background-size: 400px 100%; animation: tg-shimmer 1.2s linear infinite; }
             `}</style>
 
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 18, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 16 }}>
                 <div style={{
                     width: 46, height: 46, borderRadius: 14, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
                     background: 'linear-gradient(135deg, #f97316, #ec4899 50%, #6366f1)', boxShadow: '0 10px 24px rgba(236, 72, 153, 0.3)',
                 }}>
                     <LayoutTemplate size={24} color="white" />
                 </div>
-                <div style={{ flex: '1 1 380px', minWidth: 0 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
                     <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>Sektörünüze Hazır Şablonlar</h2>
                     <p style={{ margin: '4px 0 0', color: '#94a3b8', fontSize: 14, lineHeight: 1.5 }}>
-                        Firma kategorinizi ve sektörünüzü seçin; o sektörün kullandığı belgeler için hazır tasarımı önizleyip tek tıkla tasarım ekranında açın.
+                        Fatura tipini ve firma kategorinizi seçin; hazır tasarımı önizleyip tek tıkla tasarım ekranında açın.
                     </p>
                 </div>
-                <div style={{ position: 'relative', flex: '0 1 260px', alignSelf: 'center' }}>
-                    <Search size={14} color="#64748b" style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)' }} />
+            </div>
+
+            <div data-template-toolbar style={{
+                display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 16, padding: 10,
+                borderRadius: 14, background: 'rgba(30, 41, 59, 0.45)', border: '1px solid rgba(148, 163, 184, 0.12)',
+            }}>
+                <div style={{ position: 'relative', flex: '1 1 240px', minWidth: 200 }}>
+                    <Search size={14} color="#64748b" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
                     <input
                         data-template-search
                         value={query}
                         onChange={e => setQuery(e.target.value)}
                         placeholder="Şablon, belge türü veya etiket ara"
                         style={{
-                            width: '100%', boxSizing: 'border-box', padding: '9px 12px 9px 32px', borderRadius: 10,
+                            width: '100%', boxSizing: 'border-box', padding: '8px 30px 8px 33px', borderRadius: 999,
                             border: '1px solid rgba(148, 163, 184, 0.25)', background: 'rgba(15, 23, 42, 0.7)',
                             color: '#f1f5f9', fontSize: '0.84rem', fontFamily: 'inherit', outline: 'none',
                         }}
                     />
-                </div>
-            </div>
-
-            <div data-template-layout style={{ display: 'flex', gap: 20, alignItems: 'flex-start' }}>
-                <aside style={{
-                    flex: '0 0 284px', position: 'sticky', top: 12, maxHeight: 'calc(100vh - 24px)', overflowY: 'auto',
-                    padding: 8, borderRadius: 14, background: 'rgba(30, 41, 59, 0.45)', border: '1px solid rgba(148, 163, 184, 0.12)',
-                    boxSizing: 'border-box',
-                }}>
-                    <SectorTree
-                        tree={tree}
-                        total={searched.length}
-                        sel={sel}
-                        openCategories={viewCategories}
-                        openSectors={viewSectors}
-                        onSelect={selectNode}
-                        onToggleCategory={id => setOpenCategories(prev => toggled(prev, id))}
-                        onToggleSector={id => setOpenSectors(prev => toggled(prev, id))}
-                    />
-                </aside>
-
-                <div style={{ flex: 1, minWidth: 0 }}>
-                    <div data-template-breadcrumb style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12, fontSize: '0.82rem', color: '#94a3b8', flexWrap: 'wrap' }}>
-                        {crumbs.map((c, i) => {
-                            const last = i === crumbs.length - 1;
-                            return (
-                                <React.Fragment key={i}>
-                                    {i > 0 && <ChevronRight size={13} />}
-                                    <button type="button" disabled={last} onClick={() => selectNode(c.sel)} style={{
-                                        background: 'none', border: 'none', padding: 0, fontFamily: 'inherit', fontSize: 'inherit', fontWeight: 700,
-                                        color: last ? '#f1f5f9' : '#94a3b8', cursor: last ? 'default' : 'pointer',
-                                    }}>
-                                        {c.label}
-                                    </button>
-                                </React.Fragment>
-                            );
-                        })}
-                        <span style={{ marginLeft: 'auto' }}>{filtered.length} şablon</span>
-                    </div>
-                    {filtered.length > 0 ? (
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(196px, 1fr))', gap: 14 }}>
-                            {filtered.map(t => (
-                                <TemplateCard
-                                    key={t.id}
-                                    t={t}
-                                    busy={busyId === t.id}
-                                    error={errors[t.id]}
-                                    onPreview={() => setPreviewId(t.id)}
-                                    onUse={() => openTemplate(t)}
-                                />
-                            ))}
-                        </div>
-                    ) : (
-                        <div style={{ padding: '28px 16px', textAlign: 'center', color: '#64748b', fontSize: '0.9rem' }}>
-                            Aramanıza uyan şablon yok.{' '}
-                            <button
-                                type="button"
-                                onClick={() => { setQuery(''); selectNode({}); }}
-                                style={{ background: 'none', border: 'none', color: '#a5b4fc', cursor: 'pointer', fontFamily: 'inherit', fontSize: 'inherit', textDecoration: 'underline' }}
-                            >
-                                Filtreleri temizle
-                            </button>
-                        </div>
+                    {query && (
+                        <button type="button" aria-label="Aramayı temizle" onClick={() => setQuery('')} style={{
+                            position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none',
+                            color: '#94a3b8', cursor: 'pointer', display: 'flex', padding: 2,
+                        }}>
+                            <X size={14} />
+                        </button>
                     )}
                 </div>
+                <FilterDropdown
+                    name="doc"
+                    title="Fatura tipi"
+                    icon={<FileText size={14} color="#a5b4fc" style={{ flexShrink: 0 }} />}
+                    value={docType}
+                    options={docOpts}
+                    total={byCompany.length}
+                    onChange={setDocType}
+                />
+                <FilterDropdown
+                    name="company"
+                    title="Firma kategorisi"
+                    icon={<Building2 size={14} color="#a5b4fc" style={{ flexShrink: 0 }} />}
+                    value={company}
+                    options={companyOpts}
+                    total={byDoc.length}
+                    onChange={setCompany}
+                />
+                <span data-template-count style={{ marginLeft: 'auto', fontSize: '0.8rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>
+                    <b style={{ color: '#f1f5f9' }}>{filtered.length}</b> şablon
+                </span>
+                {anyFilter && (
+                    <button type="button" data-template-clear onClick={clearAll} style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 5, background: 'none', border: 'none', color: '#a5b4fc',
+                        cursor: 'pointer', fontFamily: 'inherit', fontSize: '0.8rem', fontWeight: 700, padding: '4px 2px',
+                    }}>
+                        <RotateCcw size={13} /> Temizle
+                    </button>
+                )}
             </div>
-            <style>{`@media (max-width: 760px) { [data-template-layout] { flex-direction: column; } [data-template-gallery] aside { position: static !important; flex-basis: auto !important; width: 100%; } }`}</style>
+
+            {filtered.length > 0 ? (
+                <div data-template-grid style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
+                    {filtered.map(t => (
+                        <TemplateCard
+                            key={t.id}
+                            t={t}
+                            busy={busyId === t.id}
+                            error={errors[t.id]}
+                            onPreview={() => setPreviewId(t.id)}
+                            onUse={() => openTemplate(t)}
+                        />
+                    ))}
+                </div>
+            ) : (
+                <div style={{ padding: '28px 16px', textAlign: 'center', color: '#64748b', fontSize: '0.9rem' }}>
+                    Bu filtrelere uyan şablon yok.{' '}
+                    <button
+                        type="button"
+                        onClick={clearAll}
+                        style={{ background: 'none', border: 'none', color: '#a5b4fc', cursor: 'pointer', fontFamily: 'inherit', fontSize: 'inherit', textDecoration: 'underline' }}
+                    >
+                        Filtreleri temizle
+                    </button>
+                </div>
+            )}
 
             {previewTemplate && (
                 <TemplateModal
