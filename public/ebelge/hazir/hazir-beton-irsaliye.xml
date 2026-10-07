@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: Hazır beton sevk irsaliyesi (TEMELIRSALIYE · SEVK), GİB Irsaliye-Ornek1.xml yapısında.
+  Tek transmikser seferi: C30/37 beton, su yalıtım katkısı ve pompa seferi. Mikser plakası ve operatör
+  ShipmentStage altında; pompa ve mikser kodu AdditionalDocumentReference (POMPA / MIKSER) ile;
+  döküm penceresi Shipment/Delivery/RequestedDeliveryPeriod ile verilmiştir. Tüm bilgiler kurgusaldır.
+-->
+<DespatchAdvice xmlns="urn:oasis:names:specification:ubl:schema:xsd:DespatchAdvice-2"
+    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+    xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2.1</cbc:CustomizationID>
+    <cbc:ProfileID>TEMELIRSALIYE</cbc:ProfileID>
+    <cbc:ID>GRB2026000004871</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>1D069DDC-A679-48BC-BC4A-9924DFEBEB8B</cbc:UUID>
+    <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+    <cbc:IssueTime>07:38:00</cbc:IssueTime>
+    <cbc:DespatchAdviceTypeCode>SEVK</cbc:DespatchAdviceTypeCode>
+    <cbc:Note>Kıvam (slump) santral çıkışında 18 cm ölçülmüştür (S4 sınıfı: 16–21 cm). Şantiyede slump deneyi yapılmadan döküme başlanmamalıdır.</cbc:Note>
+    <cbc:Note>Beton yükleme saati 07:35 — üretimden itibaren en geç 90 dakika içinde (09:05'e kadar) dökülmelidir.</cbc:Note>
+    <cbc:Note>Betona şantiyede su ilave edilmesi yasaktır; ilave su TS EN 206 uygunluğunu ve dayanım garantisini geçersiz kılar.</cbc:Note>
+    <cbc:Note>Döküm yeri: B Blok 6. kat döşeme ve kirişleri. Numune: 6 adet 15×15×15 cm küp alınacak (Yapı denetim: Ege Kontrol).</cbc:Note>
+    <cbc:LineCountNumeric>3</cbc:LineCountNumeric>
+    <cac:OrderReference>
+        <cbc:ID>EGP-SAS-2026-1184</cbc:ID>
+        <cbc:IssueDate>2026-10-02</cbc:IssueDate>
+    </cac:OrderReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>M-17</cbc:ID>
+        <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+        <cbc:DocumentType>MIKSER</cbc:DocumentType>
+        <cbc:DocumentDescription>12 m³ transmikser · 2. sefer (günlük toplam 21 m³)</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>35GRB042</cbc:ID>
+        <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+        <cbc:DocumentType>POMPA</cbc:DocumentType>
+        <cbc:DocumentDescription>42 m bomlu mobil beton pompası · Operatör: Serkan Yıldız</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">3920481756</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">3920481756</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Kemalpaşa OSB Mah. Atatürk Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>48</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Kemalpaşa</cbc:CitySubdivisionName>
+                <cbc:CityName>İzmir</cbc:CityName>
+                <cbc:PostalZone>35730</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:DespatchSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.granitasbeton.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">3920481756</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">0392048175600011</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Granitaş Hazır Beton ve Yapı Malzemeleri A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Kemalpaşa OSB Mah. Atatürk Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>48</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Kemalpaşa</cbc:CitySubdivisionName>
+                <cbc:CityName>İzmir</cbc:CityName>
+                <cbc:PostalZone>35730</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PhysicalLocation>
+                <cbc:ID>Pınarbaşı Beton Santrali (120 m³/saat)</cbc:ID>
+                <cac:Address>
+                    <cbc:StreetName>Pınarbaşı Mah. Kemalpaşa Cad.</cbc:StreetName>
+                    <cbc:BuildingNumber>311</cbc:BuildingNumber>
+                    <cbc:CitySubdivisionName>Bornova</cbc:CitySubdivisionName>
+                    <cbc:CityName>İzmir</cbc:CityName>
+                    <cbc:PostalZone>35060</cbc:PostalZone>
+                    <cac:Country>
+                        <cbc:Name>Türkiye</cbc:Name>
+                    </cac:Country>
+                </cac:Address>
+            </cac:PhysicalLocation>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Kemalpaşa</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(232) 877 42 42</cbc:Telephone>
+                <cbc:ElectronicMail>sevkiyat@granitasbeton.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+        <cac:DespatchContact>
+            <cbc:Name>Ufuk Eren (Sevk Şefi)</cbc:Name>
+        </cac:DespatchContact>
+    </cac:DespatchSupplierParty>
+    <cac:DeliveryCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">3310275849</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Egeport Konut İnşaat Ltd. Şti.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Adalet Mah. Manas Bulvarı</cbc:StreetName>
+                <cbc:BuildingNumber>39/1104</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Bayraklı</cbc:CitySubdivisionName>
+                <cbc:CityName>İzmir</cbc:CityName>
+                <cbc:PostalZone>35530</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Karşıyaka</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Name>Şantiye Şefi: İnş. Müh. Gökhan Avcı</cbc:Name>
+                <cbc:Telephone>0532 614 27 90</cbc:Telephone>
+            </cac:Contact>
+        </cac:Party>
+    </cac:DeliveryCustomerParty>
+    <cac:Shipment>
+        <cbc:ID>1</cbc:ID>
+        <cac:GoodsItem>
+            <cbc:GrossWeightMeasure unitCode="KGM">25350</cbc:GrossWeightMeasure>
+        </cac:GoodsItem>
+        <cac:ShipmentStage>
+            <cac:TransportMeans>
+                <cac:RoadTransport>
+                    <cbc:LicensePlateID schemeID="PLAKA">35GRB417</cbc:LicensePlateID>
+                </cac:RoadTransport>
+            </cac:TransportMeans>
+            <cac:DriverPerson>
+                <cbc:FirstName>Hüseyin</cbc:FirstName>
+                <cbc:FamilyName>Kocabaş</cbc:FamilyName>
+                <cbc:Title>Mikser Operatörü</cbc:Title>
+                <cbc:NationalityID>24816039572</cbc:NationalityID>
+            </cac:DriverPerson>
+        </cac:ShipmentStage>
+        <cac:Delivery>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>Manavkuyu Mah. 268/5 Sok. — Smyrna Rezidans Şantiyesi</cbc:StreetName>
+                <cbc:BuildingNumber>12</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Bayraklı</cbc:CitySubdivisionName>
+                <cbc:CityName>İzmir</cbc:CityName>
+                <cbc:PostalZone>35535</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:RequestedDeliveryPeriod>
+                <cbc:StartDate>2026-10-07</cbc:StartDate>
+                <cbc:StartTime>08:15:00</cbc:StartTime>
+                <cbc:EndDate>2026-10-07</cbc:EndDate>
+                <cbc:EndTime>09:05:00</cbc:EndTime>
+            </cac:RequestedDeliveryPeriod>
+            <cac:Despatch>
+                <cbc:ActualDespatchDate>2026-10-07</cbc:ActualDespatchDate>
+                <cbc:ActualDespatchTime>07:42:00</cbc:ActualDespatchTime>
+            </cac:Despatch>
+        </cac:Delivery>
+    </cac:Shipment>
+    <cac:DespatchLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:DeliveredQuantity unitCode="MTQ">10.5</cbc:DeliveredQuantity>
+        <cac:OrderLineReference>
+            <cbc:LineID>1</cbc:LineID>
+        </cac:OrderLineReference>
+        <cac:Item>
+            <cbc:Description>XC3 çevre etki sınıfı · S4 kıvam · Dmax 22 mm · CEM II/A-M 42,5 R · TS EN 206</cbc:Description>
+            <cbc:Name>C30/37 Hazır Beton</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>HB-C30-S4-D22</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+    </cac:DespatchLine>
+    <cac:DespatchLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:DeliveredQuantity unitCode="KGM">31.5</cbc:DeliveredQuantity>
+        <cac:OrderLineReference>
+            <cbc:LineID>2</cbc:LineID>
+        </cac:OrderLineReference>
+        <cac:Item>
+            <cbc:Description>Kristal yapılı su geçirimsizlik katkısı — santralde 3 kg/m³ dozajla betona katılmıştır</cbc:Description>
+            <cbc:Name>Su Yalıtım Katkısı (Kristalize)</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>KT-KRS-03</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+    </cac:DespatchLine>
+    <cac:DespatchLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:DeliveredQuantity unitCode="C62">1</cbc:DeliveredQuantity>
+        <cac:OrderLineReference>
+            <cbc:LineID>4</cbc:LineID>
+        </cac:OrderLineReference>
+        <cac:Item>
+            <cbc:Description>42 m bomlu mobil pompa ile yerine döküm — sefer başı</cbc:Description>
+            <cbc:Name>Beton Pompası Seferi</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>PMP-42</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+    </cac:DespatchLine>
+</DespatchAdvice>

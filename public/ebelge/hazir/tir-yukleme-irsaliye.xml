@@ -1,0 +1,401 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: İhracat TIR yükleme irsaliyesi (TEMELIRSALIYE · SEVK)
+  Çekici + dorse plakası, gümrük ve firma mühürleri (TransportEquipmentSeal), palet / koli / brüt-net kg,
+  GTİP (CommodityClassification), gümrük beyannamesi, CMR ve A.TR referansları; teslim noktası çıkış gümrüğü.
+  Tüm kişi/firma bilgileri kurgusaldır.
+-->
+<DespatchAdvice xmlns="urn:oasis:names:specification:ubl:schema:xsd:DespatchAdvice-2"
+    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+    xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2.1</cbc:CustomizationID>
+    <cbc:ProfileID>TEMELIRSALIYE</cbc:ProfileID>
+    <cbc:ID>UOY2026000003127</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>3F8B1C62-47D9-4E2A-B5A1-8C6D20E9F473</cbc:UUID>
+    <cbc:IssueDate>2026-10-06</cbc:IssueDate>
+    <cbc:IssueTime>16:55:00</cbc:IssueTime>
+    <cbc:DespatchAdviceTypeCode>SEVK</cbc:DespatchAdviceTypeCode>
+    <cbc:Note>Nihai varış yeri: Rheinwerk Automotive Components GmbH, Industriestraße 48, 50829 Köln / Almanya. Yük Kapıkule çıkış gümrüğünde ihracat işlemine tabi tutulacaktır.</cbc:Note>
+    <cbc:Note>Gümrük mührü (TR-GM 0458821) ve firma mührü (UOY-26-11873) varış gümrüğüne kadar açılmayacaktır; mühür değişikliği tutanakla yapılır.</cbc:Note>
+    <cbc:Note>Tehlikeli madde içermez (ADR dışı). Paletler EUR tipi, streç ve köşebentlidir; istif en fazla 2 kat.</cbc:Note>
+    <cbc:LineCountNumeric>5</cbc:LineCountNumeric>
+    <cac:OrderReference>
+        <cbc:ID>RW-PO-77812</cbc:ID>
+        <cbc:IssueDate>2026-09-14</cbc:IssueDate>
+    </cac:OrderReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>26160200EX00052318</cbc:ID>
+        <cbc:IssueDate>2026-10-06</cbc:IssueDate>
+        <cbc:DocumentType>GUMRUKBEYANNAMESI</cbc:DocumentType>
+        <cbc:DocumentDescription>Bursa Gümrük Müdürlüğü · Serbest dolaşım ihracat (EX1)</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>TR 0612774</cbc:ID>
+        <cbc:IssueDate>2026-10-06</cbc:IssueDate>
+        <cbc:DocumentType>CMR</cbc:DocumentType>
+        <cbc:DocumentDescription>Uluslararası karayolu taşıma senedi</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>B 4471028</cbc:ID>
+        <cbc:IssueDate>2026-10-06</cbc:IssueDate>
+        <cbc:DocumentType>ATR</cbc:DocumentType>
+        <cbc:DocumentDescription>A.TR dolaşım belgesi</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>UOY2026000001842</cbc:ID>
+        <cbc:IssueDate>2026-10-06</cbc:IssueDate>
+        <cbc:DocumentType>FATURA</cbc:DocumentType>
+        <cbc:DocumentDescription>İhracat faturası · 186.420,00 EUR</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">8840127365</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">8840127365</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Nilüfer OSB Kırmızı Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>14</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Nilüfer</cbc:CitySubdivisionName>
+                <cbc:CityName>Bursa</cbc:CityName>
+                <cbc:PostalZone>16140</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:DespatchSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.uludagotomotiv.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">8840127365</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">0884012736500015</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Uludağ Otomotiv Yan Sanayi A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Nilüfer OSB Kırmızı Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>14</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Nilüfer</cbc:CitySubdivisionName>
+                <cbc:CityName>Bursa</cbc:CityName>
+                <cbc:PostalZone>16140</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Nilüfer</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(224) 411 82 00</cbc:Telephone>
+                <cbc:ElectronicMail>export@uludagotomotiv.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+        <cac:DespatchContact>
+            <cbc:Name>Sinem Koç (İhracat Sevkiyat Sorumlusu)</cbc:Name>
+        </cac:DespatchContact>
+    </cac:DespatchSupplierParty>
+    <cac:DeliveryCustomerParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.rheinwerk-ac.de</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">2222222222</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Rheinwerk Automotive Components GmbH</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Industriestraße</cbc:StreetName>
+                <cbc:BuildingNumber>48</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Ossendorf</cbc:CitySubdivisionName>
+                <cbc:CityName>Köln</cbc:CityName>
+                <cbc:PostalZone>50829</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>DE</cbc:IdentificationCode>
+                    <cbc:Name>Almanya</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>DE 284 551 902</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>+49 221 5871 300</cbc:Telephone>
+                <cbc:ElectronicMail>wareneingang@rheinwerk-ac.de</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:DeliveryCustomerParty>
+    <cac:Shipment>
+        <cbc:ID>UOY-EXP-26-0418</cbc:ID>
+        <cbc:HandlingInstructions>EUR palet · streçli ve köşebentli · istif en fazla 2 kat · yağmurdan koruyun</cbc:HandlingInstructions>
+        <cbc:GrossWeightMeasure unitCode="KGM">14280</cbc:GrossWeightMeasure>
+        <cbc:NetWeightMeasure unitCode="KGM">12960</cbc:NetWeightMeasure>
+        <cbc:GrossVolumeMeasure unitCode="MTQ">78.5</cbc:GrossVolumeMeasure>
+        <cbc:TotalGoodsItemQuantity>612</cbc:TotalGoodsItemQuantity>
+        <cbc:TotalTransportHandlingUnitQuantity>26</cbc:TotalTransportHandlingUnitQuantity>
+        <cac:GoodsItem>
+            <cbc:ValueAmount currencyID="EUR">186420.00</cbc:ValueAmount>
+        </cac:GoodsItem>
+        <cac:ShipmentStage>
+            <cbc:TransportModeCode>3</cbc:TransportModeCode>
+            <cac:TransportMeans>
+                <cac:RoadTransport>
+                    <cbc:LicensePlateID schemeID="PLAKA">16BTR428</cbc:LicensePlateID>
+                </cac:RoadTransport>
+            </cac:TransportMeans>
+            <cac:DriverPerson>
+                <cbc:FirstName>Ercan</cbc:FirstName>
+                <cbc:FamilyName>Yıldırım</cbc:FamilyName>
+                <cbc:Title>Şoför</cbc:Title>
+                <cbc:NationalityID>31846207594</cbc:NationalityID>
+            </cac:DriverPerson>
+        </cac:ShipmentStage>
+        <cac:Delivery>
+            <cbc:TrackingID>BSF-26-77104</cbc:TrackingID>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>Kapıkule Gümrük Müdürlüğü TIR Çıkış Sahası</cbc:StreetName>
+                <cbc:BuildingNumber>1</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Merkez</cbc:CitySubdivisionName>
+                <cbc:CityName>Edirne</cbc:CityName>
+                <cbc:PostalZone>22030</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:EstimatedDeliveryPeriod>
+                <cbc:StartDate>2026-10-07</cbc:StartDate>
+                <cbc:StartTime>05:30:00</cbc:StartTime>
+                <cbc:EndDate>2026-10-07</cbc:EndDate>
+                <cbc:EndTime>09:00:00</cbc:EndTime>
+            </cac:EstimatedDeliveryPeriod>
+            <cac:CarrierParty>
+                <cac:PartyIdentification>
+                    <cbc:ID schemeID="VKN">1907364582</cbc:ID>
+                </cac:PartyIdentification>
+                <cac:PartyName>
+                    <cbc:Name>Bosfor Uluslararası Nakliyat Ltd. Şti.</cbc:Name>
+                </cac:PartyName>
+                <cac:PostalAddress>
+                    <cbc:StreetName>Gürsu OSB 3. Cad.</cbc:StreetName>
+                    <cbc:BuildingNumber>9</cbc:BuildingNumber>
+                    <cbc:CitySubdivisionName>Gürsu</cbc:CitySubdivisionName>
+                    <cbc:CityName>Bursa</cbc:CityName>
+                    <cbc:PostalZone>16580</cbc:PostalZone>
+                    <cac:Country>
+                        <cbc:Name>Türkiye</cbc:Name>
+                    </cac:Country>
+                </cac:PostalAddress>
+                <cac:Contact>
+                    <cbc:Telephone>(224) 373 44 10</cbc:Telephone>
+                </cac:Contact>
+            </cac:CarrierParty>
+            <cac:Despatch>
+                <cbc:ActualDespatchDate>2026-10-06</cbc:ActualDespatchDate>
+                <cbc:ActualDespatchTime>17:40:00</cbc:ActualDespatchTime>
+                <cac:DespatchAddress>
+                    <cbc:StreetName>Nilüfer OSB Kırmızı Cad. (Sevkiyat Rampası 2)</cbc:StreetName>
+                    <cbc:BuildingNumber>14</cbc:BuildingNumber>
+                    <cbc:CitySubdivisionName>Nilüfer</cbc:CitySubdivisionName>
+                    <cbc:CityName>Bursa</cbc:CityName>
+                    <cbc:PostalZone>16140</cbc:PostalZone>
+                    <cac:Country>
+                        <cbc:Name>Türkiye</cbc:Name>
+                    </cac:Country>
+                </cac:DespatchAddress>
+            </cac:Despatch>
+            <cac:DeliveryTerms>
+                <cbc:ID schemeID="INCOTERMS">FCA</cbc:ID>
+                <cbc:SpecialTerms>FCA Bursa, Nilüfer OSB — Incoterms 2020</cbc:SpecialTerms>
+            </cac:DeliveryTerms>
+        </cac:Delivery>
+        <cac:TransportHandlingUnit>
+            <cac:TransportEquipment>
+                <cbc:ID schemeID="DORSEPLAKA">16BTR913</cbc:ID>
+                <cbc:Description>Tenteli dorse · 13,6 m · 90 m³</cbc:Description>
+                <cac:TransportEquipmentSeal>
+                    <cbc:ID>TR-GM 0458821</cbc:ID>
+                    <cbc:SealIssuerTypeCode>CU</cbc:SealIssuerTypeCode>
+                </cac:TransportEquipmentSeal>
+                <cac:TransportEquipmentSeal>
+                    <cbc:ID>UOY-26-11873</cbc:ID>
+                    <cbc:SealIssuerTypeCode>SH</cbc:SealIssuerTypeCode>
+                </cac:TransportEquipmentSeal>
+            </cac:TransportEquipment>
+        </cac:TransportHandlingUnit>
+    </cac:Shipment>
+    <cac:DespatchLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:DeliveredQuantity unitCode="C62">2400</cbc:DeliveredQuantity>
+        <cac:OrderLineReference>
+            <cbc:LineID>10</cbc:LineID>
+        </cac:OrderLineReference>
+        <cac:Item>
+            <cbc:Description>Havalandırmalı, Ø 300 mm, GG20 döküm · 20 adet/koli</cbc:Description>
+            <cbc:Name>Fren diski (ön aks)</cbc:Name>
+            <cac:BuyersItemIdentification>
+                <cbc:ID>RW-BD-300V</cbc:ID>
+            </cac:BuyersItemIdentification>
+            <cac:SellersItemIdentification>
+                <cbc:ID>UOY-FD-3001</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:OriginCountry>
+                <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                <cbc:Name>Türkiye</cbc:Name>
+            </cac:OriginCountry>
+            <cac:CommodityClassification>
+                <cbc:ItemClassificationCode>8708.30.91.90.00</cbc:ItemClassificationCode>
+            </cac:CommodityClassification>
+        </cac:Item>
+        <cac:Shipment>
+            <cbc:ID>1</cbc:ID>
+            <cbc:GrossWeightMeasure unitCode="KGM">4380</cbc:GrossWeightMeasure>
+            <cbc:NetWeightMeasure unitCode="KGM">4100</cbc:NetWeightMeasure>
+            <cbc:TotalGoodsItemQuantity>120</cbc:TotalGoodsItemQuantity>
+            <cbc:TotalTransportHandlingUnitQuantity>6</cbc:TotalTransportHandlingUnitQuantity>
+        </cac:Shipment>
+    </cac:DespatchLine>
+    <cac:DespatchLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:DeliveredQuantity unitCode="SET">3600</cbc:DeliveredQuantity>
+        <cac:OrderLineReference>
+            <cbc:LineID>20</cbc:LineID>
+        </cac:OrderLineReference>
+        <cac:Item>
+            <cbc:Description>Seramik, 4'lü set, aşınma sensörlü · 24 set/koli</cbc:Description>
+            <cbc:Name>Fren balata seti</cbc:Name>
+            <cac:BuyersItemIdentification>
+                <cbc:ID>RW-BP-4S</cbc:ID>
+            </cac:BuyersItemIdentification>
+            <cac:SellersItemIdentification>
+                <cbc:ID>UOY-BL-0424</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:OriginCountry>
+                <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                <cbc:Name>Türkiye</cbc:Name>
+            </cac:OriginCountry>
+            <cac:CommodityClassification>
+                <cbc:ItemClassificationCode>6813.81.00.00.11</cbc:ItemClassificationCode>
+            </cac:CommodityClassification>
+        </cac:Item>
+        <cac:Shipment>
+            <cbc:ID>2</cbc:ID>
+            <cbc:GrossWeightMeasure unitCode="KGM">1890</cbc:GrossWeightMeasure>
+            <cbc:NetWeightMeasure unitCode="KGM">1720</cbc:NetWeightMeasure>
+            <cbc:TotalGoodsItemQuantity>150</cbc:TotalGoodsItemQuantity>
+            <cbc:TotalTransportHandlingUnitQuantity>4</cbc:TotalTransportHandlingUnitQuantity>
+        </cac:Shipment>
+    </cac:DespatchLine>
+    <cac:DespatchLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:DeliveredQuantity unitCode="C62">960</cbc:DeliveredQuantity>
+        <cac:OrderLineReference>
+            <cbc:LineID>30</cbc:LineID>
+        </cac:OrderLineReference>
+        <cac:Item>
+            <cbc:Description>Gazlı, çift tüplü, arka aks · 6 adet/koli</cbc:Description>
+            <cbc:Name>Amortisör (arka)</cbc:Name>
+            <cac:BuyersItemIdentification>
+                <cbc:ID>RW-SA-R2G</cbc:ID>
+            </cac:BuyersItemIdentification>
+            <cac:SellersItemIdentification>
+                <cbc:ID>UOY-AM-2206</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:OriginCountry>
+                <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                <cbc:Name>Türkiye</cbc:Name>
+            </cac:OriginCountry>
+            <cac:CommodityClassification>
+                <cbc:ItemClassificationCode>8708.80.55.00.00</cbc:ItemClassificationCode>
+            </cac:CommodityClassification>
+        </cac:Item>
+        <cac:Shipment>
+            <cbc:ID>3</cbc:ID>
+            <cbc:GrossWeightMeasure unitCode="KGM">4120</cbc:GrossWeightMeasure>
+            <cbc:NetWeightMeasure unitCode="KGM">3720</cbc:NetWeightMeasure>
+            <cbc:TotalGoodsItemQuantity>160</cbc:TotalGoodsItemQuantity>
+            <cbc:TotalTransportHandlingUnitQuantity>8</cbc:TotalTransportHandlingUnitQuantity>
+        </cac:Shipment>
+    </cac:DespatchLine>
+    <cac:DespatchLine>
+        <cbc:ID>4</cbc:ID>
+        <cbc:DeliveredQuantity unitCode="C62">4800</cbc:DeliveredQuantity>
+        <cac:OrderLineReference>
+            <cbc:LineID>40</cbc:LineID>
+        </cac:OrderLineReference>
+        <cac:Item>
+            <cbc:Description>Sol/sağ takım, M14 dişli · 50 adet/koli</cbc:Description>
+            <cbc:Name>Rot başı</cbc:Name>
+            <cac:BuyersItemIdentification>
+                <cbc:ID>RW-TE-M14</cbc:ID>
+            </cac:BuyersItemIdentification>
+            <cac:SellersItemIdentification>
+                <cbc:ID>UOY-RB-1450</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:OriginCountry>
+                <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                <cbc:Name>Türkiye</cbc:Name>
+            </cac:OriginCountry>
+            <cac:CommodityClassification>
+                <cbc:ItemClassificationCode>8708.94.35.00.00</cbc:ItemClassificationCode>
+            </cac:CommodityClassification>
+        </cac:Item>
+        <cac:Shipment>
+            <cbc:ID>4</cbc:ID>
+            <cbc:GrossWeightMeasure unitCode="KGM">1480</cbc:GrossWeightMeasure>
+            <cbc:NetWeightMeasure unitCode="KGM">1340</cbc:NetWeightMeasure>
+            <cbc:TotalGoodsItemQuantity>96</cbc:TotalGoodsItemQuantity>
+            <cbc:TotalTransportHandlingUnitQuantity>4</cbc:TotalTransportHandlingUnitQuantity>
+        </cac:Shipment>
+    </cac:DespatchLine>
+    <cac:DespatchLine>
+        <cbc:ID>5</cbc:ID>
+        <cbc:DeliveredQuantity unitCode="C62">1200</cbc:DeliveredQuantity>
+        <cac:OrderLineReference>
+            <cbc:LineID>50</cbc:LineID>
+        </cac:OrderLineReference>
+        <cac:Item>
+            <cbc:Description>Alt salıncak kolu, burçlu, ön aks · 14 adet/koli</cbc:Description>
+            <cbc:Name>Salıncak kolu</cbc:Name>
+            <cac:BuyersItemIdentification>
+                <cbc:ID>RW-CA-LF14</cbc:ID>
+            </cac:BuyersItemIdentification>
+            <cac:SellersItemIdentification>
+                <cbc:ID>UOY-SK-1014</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:OriginCountry>
+                <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                <cbc:Name>Türkiye</cbc:Name>
+            </cac:OriginCountry>
+            <cac:CommodityClassification>
+                <cbc:ItemClassificationCode>8708.80.99.00.00</cbc:ItemClassificationCode>
+            </cac:CommodityClassification>
+        </cac:Item>
+        <cac:Shipment>
+            <cbc:ID>5</cbc:ID>
+            <cbc:GrossWeightMeasure unitCode="KGM">2410</cbc:GrossWeightMeasure>
+            <cbc:NetWeightMeasure unitCode="KGM">2080</cbc:NetWeightMeasure>
+            <cbc:TotalGoodsItemQuantity>86</cbc:TotalGoodsItemQuantity>
+            <cbc:TotalTransportHandlingUnitQuantity>4</cbc:TotalTransportHandlingUnitQuantity>
+        </cac:Shipment>
+    </cac:DespatchLine>
+</DespatchAdvice>

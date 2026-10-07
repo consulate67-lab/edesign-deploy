@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği — Seyahat acentesi paket tur e-Arşiv faturası (kurgusal veriler).
+  EARSIVFATURA / SATIS; bireysel müşteriye Kapadokya 3 gece / 4 gün paket tur.
+  GİB özel matrah kod listesinde (801-8xx) paket tura özgü bir kod bulunmadığından belge SATIS tipinde,
+  her bileşen kendi KDV oranıyla düzenlenmiştir: konaklama %10, transfer / rehberlik / balon / müze %20.
+    Konaklama 3 gece × 4.800,00 = 14.400,00 → KDV %10 1.440,00
+    Transfer 2.500,00 + Rehberlik 4.600,00 + Balon 15.000,00 + Müze 1.300,00 = 23.400,00 → KDV %20 4.680,00
+    Mal/hizmet toplamı 37.800,00 | KDV toplamı 6.120,00 | Ödenecek 43.920,00
+  Tur bilgileri "Tur:", "Tur Kodu:", "Buluşma:", "Dönüş:", "Rehber:", "Katılımcı:" notlarında;
+  hareket / dönüş tarihleri InvoicePeriod'da taşınır.
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+    xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>EARSIVFATURA</cbc:ProfileID>
+    <cbc:ID>GRT2026000004176</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>3B9E61D2-58A4-4F07-9C1E-7D20A4F5B836</cbc:UUID>
+    <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+    <cbc:IssueTime>16:24:00</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>SATIS</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız Kırk Üç Bin Dokuz Yüz Yirmi Türk Lirasıdır.</cbc:Note>
+    <cbc:Note>Tur: Kapadokya Balon ve Peribacaları — 3 Gece 4 Gün</cbc:Note>
+    <cbc:Note>Tur Kodu: KPD-2610-B07</cbc:Note>
+    <cbc:Note>Buluşma: 16.10.2026 09:30 · Kayseri Erkilet Havalimanı, İç Hatlar Geliş Kapısı</cbc:Note>
+    <cbc:Note>Dönüş: 19.10.2026 16:00 · Kayseri Erkilet Havalimanı</cbc:Note>
+    <cbc:Note>Rehber: Murat ŞEN (Kokartlı Turist Rehberi, Ruhsat No 50-1187) · 0532 614 20 87</cbc:Note>
+    <cbc:Note>TÜRSAB: A Grubu Belge No 11842</cbc:Note>
+    <cbc:Note>Katılımcı: Zeynep KARACA · Yetişkin · Oda 1</cbc:Note>
+    <cbc:Note>Katılımcı: Emre KARACA · Yetişkin · Oda 1</cbc:Note>
+    <cbc:Note>Balon uçuşu hava koşullarına bağlıdır; SHGM iptal kararında uçuş ertesi sabaha aktarılır veya bedeli iade edilir.</cbc:Note>
+    <cbc:Note>Bu fatura 6502 sayılı Kanun ve Paket Tur Sözleşmeleri Yönetmeliği kapsamındaki KPD-2610-B07 numaralı sözleşmeye istinaden düzenlenmiştir.</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>5</cbc:LineCountNumeric>
+    <cac:InvoicePeriod>
+        <cbc:StartDate>2026-10-16</cbc:StartDate>
+        <cbc:StartTime>09:30:00</cbc:StartTime>
+        <cbc:EndDate>2026-10-19</cbc:EndDate>
+        <cbc:EndTime>16:00:00</cbc:EndTime>
+        <cbc:Description>Kapadokya Balon ve Peribacaları — 3 Gece 4 Gün</cbc:Description>
+    </cac:InvoicePeriod>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">3920471856</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">3920471856</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Aydınlı Mahallesi Uzundere Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>14</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Göreme</cbc:CitySubdivisionName>
+                <cbc:CityName>Nevşehir</cbc:CityName>
+                <cbc:PostalZone>50180</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_GRT2026000004176</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.goremerota.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">3920471856</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">0392047185600014</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Göreme Rota Turizm Seyahat Acentası Ltd. Şti.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Aydınlı Mahallesi Uzundere Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>14</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Göreme</cbc:CitySubdivisionName>
+                <cbc:CityName>Nevşehir</cbc:CityName>
+                <cbc:PostalZone>50180</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Nevşehir</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0384 271 48 50</cbc:Telephone>
+                <cbc:ElectronicMail>rezervasyon@goremerota.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">31847265904</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Ayrancı Mahallesi Güvenlik Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>87/6</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Çankaya</cbc:CitySubdivisionName>
+                <cbc:CityName>Ankara</cbc:CityName>
+                <cbc:PostalZone>06540</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:Contact>
+                <cbc:Telephone>0533 418 27 65</cbc:Telephone>
+                <cbc:ElectronicMail>zeynep.karaca@example.com</cbc:ElectronicMail>
+            </cac:Contact>
+            <cac:Person>
+                <cbc:FirstName>Zeynep</cbc:FirstName>
+                <cbc:FamilyName>Karaca</cbc:FamilyName>
+            </cac:Person>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>48</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-10-07</cbc:PaymentDueDate>
+        <cbc:InstructionNote>Kredi kartı · 3 taksit · Provizyon 551902</cbc:InstructionNote>
+    </cac:PaymentMeans>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>
+        <cbc:InstructionNote>Havale / EFT ile ödemelerde açıklamaya tur kodunu yazınız.</cbc:InstructionNote>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR56 0006 4000 0011 2345 6789 01</cbc:ID>
+            <cbc:CurrencyCode>TRY</cbc:CurrencyCode>
+            <cac:FinancialInstitutionBranch>
+                <cbc:Name>Nevşehir Şubesi</cbc:Name>
+                <cac:FinancialInstitution>
+                    <cbc:Name>Türkiye İş Bankası A.Ş.</cbc:Name>
+                </cac:FinancialInstitution>
+            </cac:FinancialInstitutionBranch>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">6120.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">14400.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">1440.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>10</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">23400.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">4680.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>2</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>20</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">37800.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">37800.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">43920.00</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="TRY">0.00</cbc:AllowanceTotalAmount>
+        <cbc:PayableAmount currencyID="TRY">43920.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="DAY">3</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">14400.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">1440.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">14400.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">1440.00</cbc:TaxAmount>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Taşkonak Cave Hotel, Uçhisar · Deluxe mağara oda, 2 yetişkin, yarım pansiyon</cbc:Description>
+            <cbc:Name>Konaklama — 3 gece mağara otel</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>KON</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">4800.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">2</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">2500.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">500.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">2500.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">500.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Kayseri Erkilet Havalimanı ⇄ Uçhisar, özel VIP minibüs, gidiş ve dönüş</cbc:Description>
+            <cbc:Name>Havalimanı transferi</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>TRF</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">1250.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">4</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">4600.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">920.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">4600.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">920.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Kırmızı Tur (Göreme, Paşabağ, Avanos) ve Yeşil Tur (Derinkuyu, Ihlara) · 2 kişi × 2 gün, öğle yemeği dahil</cbc:Description>
+            <cbc:Name>Profesyonel rehberli günlük turlar</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>RHB</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">1150.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>4</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">2</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">15000.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">3000.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">15000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">3000.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>17.10.2026 gün doğumu, 60 dk standart sepet, otel transferi ve uçuş sertifikası dahil</cbc:Description>
+            <cbc:Name>Sıcak hava balonu turu</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>BLN</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">7500.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>5</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">2</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">1300.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">260.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">1300.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">260.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Göreme Açık Hava Müzesi, Derinkuyu Yeraltı Şehri ve Ihlara Vadisi giriş organizasyonu</cbc:Description>
+            <cbc:Name>Müze ve ören yeri giriş paketi</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>MZE</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">650.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>

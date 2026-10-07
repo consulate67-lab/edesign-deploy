@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği — SaaS yıllık abonelik e-Arşiv Faturası, internet satışı (kurgusal veriler).
+  EARSIVFATURA / SATIS; GİB EArsiv_InternetSatis örneğindeki alanlar: "Bu satış internet üzerinden yapılmıştır." notu,
+  satıcı WebsiteURI, PaymentMeans 48 (ödeme tarihi + ödeme aracısı), Delivery (taşıyıcı + gönderim tarihi).
+  Kupon indirimi satır AllowanceCharge'ı olarak uygulanır; satır tutarı indirim sonrası tutardır.
+  "Kullanım: ad|kullanılan|limit|birim" notları kullanım çubukları olarak çizilir.
+    Brüt 10.500,00 | Kupon −1.920,00 | Matrah 8.580,00 | KDV %20 1.716,00 | Ödenecek 10.296,00
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+    xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>EARSIVFATURA</cbc:ProfileID>
+    <cbc:ID>BKD2026000072915</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>A4F17C3E-28D6-4B91-8E5A-0D63B2C7914F</cbc:UUID>
+    <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+    <cbc:IssueTime>00:04:12</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>SATIS</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız On Bin İki Yüz Doksan Altı Türk Lirasıdır.</cbc:Note>
+    <cbc:Note>Bu satış internet üzerinden yapılmıştır.</cbc:Note>
+    <cbc:Note>Abonelik No: BK-SUB-2026-0418827</cbc:Note>
+    <cbc:Note>Plan: Pro · Yıllık · Öncelikli destek · %99,95 SLA</cbc:Note>
+    <cbc:Note>Kupon: GUZ26 · Pro plan ilk yıl %20 indirim</cbc:Note>
+    <cbc:Note>Kullanım: Depolama|142|350|GB</cbc:Note>
+    <cbc:Note>Kullanım: Kullanıcı koltuğu|2|2|kişi</cbc:Note>
+    <cbc:Note>Kullanım: API çağrısı (aylık)|48200|100000|istek</cbc:Note>
+    <cbc:Note>Otomatik yenileme: Aboneliğiniz 07.10.2027 tarihinde kayıtlı kartınızla yenilenir; hesap ayarları &gt; Faturalama ekranından iptal edebilirsiniz.</cbc:Note>
+    <cbc:Note>Mesafeli Sözleşmeler Yönetmeliği md. 15/1-ğ uyarınca elektronik ortamda anında ifa edilen hizmetlerde cayma hakkı bulunmamaktadır.</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>3</cbc:LineCountNumeric>
+    <cac:InvoicePeriod>
+        <cbc:StartDate>2026-10-07</cbc:StartDate>
+        <cbc:EndDate>2027-10-06</cbc:EndDate>
+        <cbc:Description>Yıllık abonelik dönemi</cbc:Description>
+    </cac:InvoicePeriod>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>ELEKTRONIK</cbc:ID>
+        <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+        <cbc:DocumentTypeCode>SEND_TYPE</cbc:DocumentTypeCode>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">1903847265</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">1903847265</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Kurtköy Mahallesi Ankara Caddesi Teknopark İstanbul Blok 2</cbc:StreetName>
+                <cbc:BuildingNumber>243</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Pendik</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34906</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.bulutkod.app</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">1903847265</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">0190384726500016</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Bulutkod Yazılım Teknolojileri A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Kurtköy Mahallesi Ankara Caddesi Teknopark İstanbul Blok 2</cbc:StreetName>
+                <cbc:BuildingNumber>243</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Pendik</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34906</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Pendik</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(216) 999 25 26</cbc:Telephone>
+                <cbc:ElectronicMail>billing@bulutkod.app</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">30418572966</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Moda Mahallesi Şair Nefi Sokak</cbc:StreetName>
+                <cbc:BuildingNumber>12/4</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Kadıköy</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34710</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:Contact>
+                <cbc:ElectronicMail>ece@durmaz.studio</cbc:ElectronicMail>
+            </cac:Contact>
+            <cac:Person>
+                <cbc:FirstName>Ece</cbc:FirstName>
+                <cbc:FamilyName>DURMAZ</cbc:FamilyName>
+            </cac:Person>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:Delivery>
+        <cac:CarrierParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">1903847265</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Bulutkod Yazılım Teknolojileri A.Ş. (elektronik teslim)</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:CitySubdivisionName>Pendik</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:CarrierParty>
+        <cac:Despatch>
+            <cbc:ActualDespatchDate>2026-10-07</cbc:ActualDespatchDate>
+        </cac:Despatch>
+    </cac:Delivery>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>48</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-10-07</cbc:PaymentDueDate>
+        <cbc:InstructionNote>Kredi kartı (sanal POS) · **** 4417 · Ödeme aracısı: Kuşkanadı Ödeme Hizmetleri A.Ş.</cbc:InstructionNote>
+    </cac:PaymentMeans>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">1716.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">8580.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">1716.00</cbc:TaxAmount>
+            <cbc:Percent>20</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">8580.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">8580.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">10296.00</cbc:TaxInclusiveAmount>
+        <cbc:PayableAmount currencyID="TRY">10296.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">2</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">7680.00</cbc:LineExtensionAmount>
+        <cac:AllowanceCharge>
+            <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+            <cbc:AllowanceChargeReason>Kupon GUZ26</cbc:AllowanceChargeReason>
+            <cbc:MultiplierFactorNumeric>0.20</cbc:MultiplierFactorNumeric>
+            <cbc:Amount currencyID="TRY">1920.00</cbc:Amount>
+            <cbc:BaseAmount currencyID="TRY">9600.00</cbc:BaseAmount>
+        </cac:AllowanceCharge>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">1536.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">7680.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">1536.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>2 kullanıcı × 12 ay · proje yönetimi, CI/CD hattı, 250 GB depolama</cbc:Description>
+            <cbc:Name>Bulutkod Pro — yıllık plan</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>PLAN-PRO-Y</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">4800.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="MON">12</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">540.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">108.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">540.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">108.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>+100 GB nesne depolama eklentisi</cbc:Description>
+            <cbc:Name>Ek depolama paketi</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>ADD-STR-100</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">45.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="ANN">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">360.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">72.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">360.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">72.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>durmaz.studio · otomatik yenilenen TLS sertifikası</cbc:Description>
+            <cbc:Name>Özel alan adı bağlantısı + SSL</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>ADD-DOMAIN</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">360.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>

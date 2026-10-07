@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CreditNote
+    xmlns="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2"
+    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2.1</cbc:CustomizationID>
+    <cbc:ProfileID>DEKONT</cbc:ProfileID>
+    <cbc:ID>KKD2026000058213</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>7C1E4B92-5A3D-4F6E-8B21-D94A06E3F518</cbc:UUID>
+    <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+    <cbc:IssueTime>14:26:41</cbc:IssueTime>
+    <cbc:CreditNoteTypeCode>PAGO</cbc:CreditNoteTypeCode>
+    <cbc:Note>Yalnız On Sekiz Bin Yedi Yüz Altmış Dört Türk Lirası Yetmiş Kuruştur.</cbc:Note>
+    <cbc:Note>Transfer FAST sistemi üzerinden alıcının banka hesabına anlık olarak gönderilmiştir.</cbc:Note>
+    <cbc:Note>Kuşkanadı Ödeme ve Elektronik Para Hizmetleri A.Ş., 6493 sayılı Kanun kapsamında TCMB tarafından yetkilendirilmiş elektronik para kuruluşudur.</cbc:Note>
+    <cbc:Note>Bu dekont 509 Sıra No'lu VUK Genel Tebliği kapsamında elektronik ortamda düzenlenmiş olup ıslak imza gerektirmez.</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>6</cbc:LineCountNumeric>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID schemeID="ISLEMREFNO">KKP2026100714264</cbc:ID>
+        <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+        <cbc:DocumentType>ISLEMREFERANSNO</cbc:DocumentType>
+        <cbc:DocumentDescription>ISLEMREFERANSNO</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID schemeID="ISLEMKANALI">MOBİL UYGULAMA</cbc:ID>
+        <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+        <cbc:DocumentType>ISLEMKANALI</cbc:DocumentType>
+        <cbc:DocumentDescription>ISLEMKANALI</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN">5830917264</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">5830917264</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Kuşkanadı Ödeme ve Elektronik Para Hizmetleri A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Büyükdere Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>255</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Sarıyer</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34485</cbc:PostalZone>
+                <cbc:District>Maslak Mahallesi</cbc:District>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>TÜRKİYE</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Maslak</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_KKD2026000058213</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.kuskanadi.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">5830917264</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">0583091726400015</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="SUBEKODU">001</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="SUBEADI">Genel Müdürlük</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Kuşkanadı Ödeme ve Elektronik Para Hizmetleri A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Büyükdere Caddesi</cbc:StreetName>
+                <cbc:BuildingName>Kanat Plaza</cbc:BuildingName>
+                <cbc:BuildingNumber>255</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Sarıyer</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34485</cbc:PostalZone>
+                <cbc:District>Maslak Mahallesi</cbc:District>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>TÜRKİYE</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Maslak</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0850 460 24 24</cbc:Telephone>
+                <cbc:ElectronicMail>destek@kuskanadi.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">28471639502</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MUSTERINO">40917735</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="IBAN">TR350010300000000058213407</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Mert AKYÜZ</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Moda Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>118/4</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Kadıköy</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34710</cbc:PostalZone>
+                <cbc:District>Caferağa Mahallesi</cbc:District>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>TÜRKİYE</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:Contact>
+                <cbc:Telephone>(532) 418 07 35</cbc:Telephone>
+                <cbc:ElectronicMail>mert.akyuz@example.com</cbc:ElectronicMail>
+            </cac:Contact>
+            <cac:Person>
+                <cbc:FirstName>Mert</cbc:FirstName>
+                <cbc:FamilyName>AKYÜZ</cbc:FamilyName>
+            </cac:Person>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:BuyerCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">15938264710</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="IBAN">TR610006400000123450067891</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Gülşen TAŞKIRAN</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Bağdat Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>402/9</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Kadıköy</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34728</cbc:PostalZone>
+                <cbc:District>Caddebostan Mahallesi</cbc:District>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>TÜRKİYE</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:Person>
+                <cbc:FirstName>Gülşen</cbc:FirstName>
+                <cbc:FamilyName>TAŞKIRAN</cbc:FamilyName>
+            </cac:Person>
+        </cac:Party>
+    </cac:BuyerCustomerParty>
+    <cac:PaymentTerms>
+        <cac:SettlementPeriod>
+            <cbc:StartDate>2026-10-07</cbc:StartDate>
+            <cbc:StartTime>14:26:41</cbc:StartTime>
+            <cbc:EndDate>2026-10-07</cbc:EndDate>
+            <cbc:EndTime>14:26:43</cbc:EndTime>
+        </cac:SettlementPeriod>
+    </cac:PaymentTerms>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">0.70</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">14.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">0.70</cbc:TaxAmount>
+            <cbc:Percent>5</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>BSMV</cbc:Name>
+                    <cbc:TaxTypeCode>0021</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">18750.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">18764.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">18764.70</cbc:TaxInclusiveAmount>
+        <cbc:PayableAmount currencyID="TRY">18764.70</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:CreditNoteLine>
+        <cbc:ID>1</cbc:ID>
+        <cac:Item>
+            <cbc:Name>İŞLEM TUTARI</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">18750.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>2</cbc:ID>
+        <cac:Item>
+            <cbc:Name>KOMİSYON TUTARI</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">14.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>3</cbc:ID>
+        <cac:Item>
+            <cbc:Name>TOPLAM TUTAR</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">18764.70</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>4</cbc:ID>
+        <cac:Item>
+            <cbc:Name>ÖDENECEK TUTAR</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">18764.70</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>5</cbc:ID>
+        <cac:Item>
+            <cbc:Description>PARA GÖNDERME (IBAN'A FAST)</cbc:Description>
+            <cbc:Name>İŞLEM TİPİ</cbc:Name>
+        </cac:Item>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>6</cbc:ID>
+        <cac:Item>
+            <cbc:Description>EKİM 2026 KİRA BEDELİ - MODA DAİRE 4</cbc:Description>
+            <cbc:Name>AÇIKLAMA</cbc:Name>
+        </cac:Item>
+    </cac:CreditNoteLine>
+</CreditNote>

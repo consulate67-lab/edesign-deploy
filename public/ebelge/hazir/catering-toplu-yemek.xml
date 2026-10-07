@@ -1,0 +1,401 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği — Fabrika toplu yemek (catering) aylık hizmet e-Faturası, KDV tevkifatlı (kurgusal veriler).
+  TICARIFATURA / TEVKIFAT; tüm kalemler %10 KDV, yemek servis hizmeti (604) 5/10 KDV tevkifatı.
+  Öğün sayıları satır notlarında ("Öğün:"), haftalık menü belge notlarında ("Menü Pzt:" … "Menü Cum:").
+    Mal/hizmet 2.090.080,00 | KDV %10 209.008,00 | Tevkifat 5/10 104.504,00
+    Vergiler dahil 2.299.088,00 | Ödenecek 2.194.584,00
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+    xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>TICARIFATURA</cbc:ProfileID>
+    <cbc:ID>SFR2026000006074</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>3E6A9D24-81B7-4C5F-A2D8-7F04B1C96E35</cbc:UUID>
+    <cbc:IssueDate>2026-10-02</cbc:IssueDate>
+    <cbc:IssueTime>11:00:00</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>TEVKIFAT</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız İki Milyon Yüz Doksan Dört Bin Beş Yüz Seksen Dört Türk Lirasıdır.</cbc:Note>
+    <cbc:Note>Hizmet Dönemi: Eylül 2026 · 22 iş günü</cbc:Note>
+    <cbc:Note>Sözleşme No: SFR-KS-2025/041</cbc:Note>
+    <cbc:Note>Yemekhane: Dilovası fabrika yemekhanesi · 3 vardiya</cbc:Note>
+    <cbc:Note>Kişi Sayısı: Günlük ortalama 420 personel</cbc:Note>
+    <cbc:Note>Menü Pzt: Ezogelin çorba · Tavuk sote · Bulgur pilavı · Cacık</cbc:Note>
+    <cbc:Note>Menü Sal: Mercimek çorba · Etli kuru fasulye · Pirinç pilavı · Turşu</cbc:Note>
+    <cbc:Note>Menü Çar: Yayla çorba · Izgara köfte · Patates püresi · Salata</cbc:Note>
+    <cbc:Note>Menü Per: Domates çorba · Fırın tavuk · Şehriyeli pilav · Sütlaç</cbc:Note>
+    <cbc:Note>Menü Cum: Tarhana çorba · Etli nohut · Pirinç pilavı · Meyve</cbc:Note>
+    <cbc:Note>KDV Genel Uygulama Tebliği uyarınca yemek servis hizmetinde 5/10 oranında KDV tevkifatı uygulanmıştır.</cbc:Note>
+    <cbc:Note>Öğün sayıları yemekhane turnike kayıtları ve imzalı tutanaklarla mutabık kalınmıştır.</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>5</cbc:LineCountNumeric>
+    <cac:InvoicePeriod>
+        <cbc:StartDate>2026-09-01</cbc:StartDate>
+        <cbc:EndDate>2026-09-30</cbc:EndDate>
+        <cbc:Description>Eylül 2026 toplu yemek hizmeti</cbc:Description>
+    </cac:InvoicePeriod>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">7839215064</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">7839215064</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Aydınlı Mahallesi Birlik OSB Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>9</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Tuzla</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34953</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_SFR2026000006074</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.sofrayemek.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">7839215064</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">0783921506400015</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TICARETSICILNO">İTO 655120</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Sofra Endüstriyel Yemek Hizmetleri A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Aydınlı Mahallesi Birlik OSB Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>9</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Tuzla</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34953</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Tuzla</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0216 593 40 00</cbc:Telephone>
+                <cbc:ElectronicMail>fatura@sofrayemek.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.marmaradokum.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">6127053948</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Marmara Döküm ve Makine Sanayi A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Dilovası OSB Mahallesi D-2006 Sokak</cbc:StreetName>
+                <cbc:BuildingNumber>14</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Dilovası</cbc:CitySubdivisionName>
+                <cbc:CityName>Kocaeli</cbc:CityName>
+                <cbc:PostalZone>41455</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Gebze</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0262 290 12 00</cbc:Telephone>
+                <cbc:ElectronicMail>satinalma@marmaradokum.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-10-31</cbc:PaymentDueDate>
+        <cbc:InstructionNote>Ay sonu ödemeli; tevkifat tutarı alıcı tarafından beyan edilecektir.</cbc:InstructionNote>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR67 0006 7010 0000 0012 3456 78</cbc:ID>
+            <cbc:CurrencyCode>TRY</cbc:CurrencyCode>
+            <cac:FinancialInstitutionBranch>
+                <cbc:Name>Tuzla Ticari Şubesi</cbc:Name>
+                <cac:FinancialInstitution>
+                    <cbc:Name>Yapı ve Kredi Bankası A.Ş.</cbc:Name>
+                </cac:FinancialInstitution>
+            </cac:FinancialInstitutionBranch>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">209008.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">2090080.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">209008.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>10</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:WithholdingTaxTotal>
+        <cbc:TaxAmount currencyID="TRY">104504.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">209008.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">104504.00</cbc:TaxAmount>
+            <cbc:Percent>50</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>YEMEK SERVİS HİZMETİ</cbc:Name>
+                    <cbc:TaxTypeCode>604</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:WithholdingTaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">2090080.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">2090080.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">2299088.00</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="TRY">0.00</cbc:AllowanceTotalAmount>
+        <cbc:PayableAmount currencyID="TRY">2194584.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:Note>Öğün: 22 gün × 420 kişi</cbc:Note>
+        <cbc:InvoicedQuantity unitCode="C62">9240</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">1316700.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">131670.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">1316700.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">131670.00</cbc:TaxAmount>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:WithholdingTaxTotal>
+            <cbc:TaxAmount currencyID="TRY">65835.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">131670.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">65835.00</cbc:TaxAmount>
+                <cbc:Percent>50</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>YEMEK SERVİS HİZMETİ</cbc:Name>
+                        <cbc:TaxTypeCode>604</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:WithholdingTaxTotal>
+        <cac:Item>
+            <cbc:Description>Çorba, ana yemek, yardımcı yemek, salata / tatlı</cbc:Description>
+            <cbc:Name>Öğle yemeği · 4 çeşit tabldot</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>OGL</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">142.50</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:Note>Öğün: 22 gün × 180 kişi</cbc:Note>
+        <cbc:InvoicedQuantity unitCode="C62">3960</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">506880.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">50688.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">506880.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">50688.00</cbc:TaxAmount>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:WithholdingTaxTotal>
+            <cbc:TaxAmount currencyID="TRY">25344.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">50688.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">25344.00</cbc:TaxAmount>
+                <cbc:Percent>50</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>YEMEK SERVİS HİZMETİ</cbc:Name>
+                        <cbc:TaxTypeCode>604</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:WithholdingTaxTotal>
+        <cac:Item>
+            <cbc:Description>Çorba, ana yemek, pilav / makarna, meyve</cbc:Description>
+            <cbc:Name>Akşam yemeği · 2. vardiya</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>AKS</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">128.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:Note>Öğün: 22 gün × 95 kişi</cbc:Note>
+        <cbc:InvoicedQuantity unitCode="C62">2090</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">133760.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">13376.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">133760.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">13376.00</cbc:TaxAmount>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:WithholdingTaxTotal>
+            <cbc:TaxAmount currencyID="TRY">6688.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">13376.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">6688.00</cbc:TaxAmount>
+                <cbc:Percent>50</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>YEMEK SERVİS HİZMETİ</cbc:Name>
+                        <cbc:TaxTypeCode>604</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:WithholdingTaxTotal>
+        <cac:Item>
+            <cbc:Description>Sandviç, ayran, meyve, kuru yemiş</cbc:Description>
+            <cbc:Name>Gece kumanyası · 3. vardiya</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>GCE</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">64.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>4</cbc:ID>
+        <cbc:Note>Öğün: 22 gün × 95 kişi</cbc:Note>
+        <cbc:InvoicedQuantity unitCode="C62">2090</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">121220.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">12122.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">121220.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">12122.00</cbc:TaxAmount>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:WithholdingTaxTotal>
+            <cbc:TaxAmount currencyID="TRY">6061.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">12122.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">6061.00</cbc:TaxAmount>
+                <cbc:Percent>50</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>YEMEK SERVİS HİZMETİ</cbc:Name>
+                        <cbc:TaxTypeCode>604</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:WithholdingTaxTotal>
+        <cac:Item>
+            <cbc:Description>Serpme kahvaltı tabağı, çay</cbc:Description>
+            <cbc:Name>Kahvaltı · 3. vardiya çıkışı</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>KHV</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">58.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>5</cbc:ID>
+        <cbc:Note>Öğün: 640 porsiyon</cbc:Note>
+        <cbc:InvoicedQuantity unitCode="C62">640</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">11520.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">1152.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">11520.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">1152.00</cbc:TaxAmount>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:WithholdingTaxTotal>
+            <cbc:TaxAmount currencyID="TRY">576.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">1152.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">576.00</cbc:TaxAmount>
+                <cbc:Percent>50</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>YEMEK SERVİS HİZMETİ</cbc:Name>
+                        <cbc:TaxTypeCode>604</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:WithholdingTaxTotal>
+        <cac:Item>
+            <cbc:Description>Diyetisyen onaylı özel menü ek bedeli</cbc:Description>
+            <cbc:Name>Diyet / glutensiz menü farkı</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>DYT</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">18.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>

@@ -1,0 +1,473 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: Zirai girdi bayisi → tarımsal kalkınma kooperatifi e-Faturası (TICARIFATURA · SATIS).
+  Karma KDV: gübre ve tohum %1, zirai ilaç %10, sulama ekipmanı %20.
+  Lot / son kullanma: Item/ItemInstance/LotIdentification (LotNumberID, ExpiryDate); ilaç ruhsat no: AdditionalItemIdentification/ID[@schemeID='RUHSATNO'];
+  kategori ve etken madde: AdditionalItemProperty[ID='KATEGORI' | 'ETKENMADDE']. Tüm kişi/firma bilgileri kurgusaldır.
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+    xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>TICARIFATURA</cbc:ProfileID>
+    <cbc:ID>TPB2026000003518</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>9B3D5F71-0E4A-4C28-8D6B-2F1A7E9C4B05</cbc:UUID>
+    <cbc:IssueDate>2026-10-06</cbc:IssueDate>
+    <cbc:IssueTime>09:30:00</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>SATIS</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız: Sekiz Yüz Yetmiş Bin Altmış Bir Türk Lirasıdır.</cbc:Note>
+    <cbc:Note>Zirai ilaç bayi ruhsatı: Manisa İl Tarım ve Orman Müdürlüğü 45-SAL-0127 · Sorumlu ziraat mühendisi: Zir. Müh. Gülay Erdem (oda sicil 35-4182).</cbc:Note>
+    <cbc:Note>Bitki koruma ürünlerini etiketindeki doz ve hasat öncesi bekleme sürelerine uyarak kullanınız; boş ambalajları bayimize iade ediniz.</cbc:Note>
+    <cbc:Note>Ödeme hasat sonu vadelidir; vade tarihinden sonraki ödemelerde aylık %3,5 vade farkı uygulanır.</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>7</cbc:LineCountNumeric>
+    <cac:OrderReference>
+        <cbc:ID>KOOP-SAT-2026-077</cbc:ID>
+        <cbc:IssueDate>2026-09-29</cbc:IssueDate>
+    </cac:OrderReference>
+    <cac:DespatchDocumentReference>
+        <cbc:ID>TPI2026000002904</cbc:ID>
+        <cbc:IssueDate>2026-10-06</cbc:IssueDate>
+    </cac:DespatchDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">8460271935</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">8460271935</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Cumhuriyet Mah. Atatürk Bulvarı</cbc:StreetName>
+                <cbc:BuildingNumber>212</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Salihli</cbc:CitySubdivisionName>
+                <cbc:CityName>Manisa</cbc:CityName>
+                <cbc:PostalZone>45300</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_TPB2026000003518</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.toprakbeytarim.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">8460271935</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">0846027193500012</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Toprakbey Tarım Ürünleri Tic. Ltd. Şti.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Cumhuriyet Mah. Atatürk Bulvarı</cbc:StreetName>
+                <cbc:BuildingNumber>212</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Salihli</cbc:CitySubdivisionName>
+                <cbc:CityName>Manisa</cbc:CityName>
+                <cbc:PostalZone>45300</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Salihli</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(236) 713 25 50</cbc:Telephone>
+                <cbc:ElectronicMail>satis@toprakbeytarim.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">7480315926</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>S.S. Salihli Tarımsal Kalkınma Kooperatifi</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Durasıllı Mah. Kooperatif Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>4</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Salihli</cbc:CitySubdivisionName>
+                <cbc:CityName>Manisa</cbc:CityName>
+                <cbc:PostalZone>45330</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Salihli</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(236) 728 41 12</cbc:Telephone>
+                <cbc:ElectronicMail>muhasebe@salihlikoop.org.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-12-15</cbc:PaymentDueDate>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR830004600512888000184726</cbc:ID>
+            <cbc:CurrencyCode>TRY</cbc:CurrencyCode>
+            <cbc:PaymentNote>Akbank — Salihli Şubesi</cbc:PaymentNote>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">42161.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">548100.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">5481.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>1</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">192800.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">19280.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>2</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>10</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">87000.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">17400.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>3</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>20</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">827900.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">827900.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">870061.00</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="TRY">0.00</cbc:AllowanceTotalAmount>
+        <cbc:PayableAmount currencyID="TRY">870061.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="TNE">12</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">256800.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">2568.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">256800.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">2568.00</cbc:TaxAmount>
+                <cbc:Percent>1</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Kompoze taban gübresi · 50 kg'lık 240 torba</cbc:Description>
+            <cbc:Name>NPK Kompoze Gübre 15-15-15</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>GBR-NPK-151515</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>KATEGORI</cbc:ID>
+                <cbc:Name>Kategori</cbc:Name>
+                <cbc:Value>GÜBRE</cbc:Value>
+            </cac:AdditionalItemProperty>
+            <cac:ItemInstance>
+                <cac:LotIdentification>
+                    <cbc:LotNumberID>TB-2609-15A</cbc:LotNumberID>
+                </cac:LotIdentification>
+            </cac:ItemInstance>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">21400.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="TNE">8</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">102800.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">1028.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">102800.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">1028.00</cbc:TaxAmount>
+                <cbc:Percent>1</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>%21 azot, %24 kükürt · kristal · 50 kg'lık 160 torba</cbc:Description>
+            <cbc:Name>Amonyum Sülfat Gübresi</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>GBR-AS-21</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>KATEGORI</cbc:ID>
+                <cbc:Name>Kategori</cbc:Name>
+                <cbc:Value>GÜBRE</cbc:Value>
+            </cac:AdditionalItemProperty>
+            <cac:ItemInstance>
+                <cac:LotIdentification>
+                    <cbc:LotNumberID>AS-2608-044</cbc:LotNumberID>
+                </cac:LotIdentification>
+            </cac:ItemInstance>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">12850.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">40</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">94000.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">940.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">94000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">940.00</cbc:TaxAmount>
+                <cbc:Percent>1</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>F1 hibrit sofralık domates · 1.000 tohumluk paket · TSWV ve ToMV dayanıklı</cbc:Description>
+            <cbc:Name>Domates Tohumu Gediz F1</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>TOH-DMT-GDZ</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>KATEGORI</cbc:ID>
+                <cbc:Name>Kategori</cbc:Name>
+                <cbc:Value>TOHUM</cbc:Value>
+            </cac:AdditionalItemProperty>
+            <cac:ItemInstance>
+                <cac:LotIdentification>
+                    <cbc:LotNumberID>DT-26-3381</cbc:LotNumberID>
+                    <cbc:ExpiryDate>2027-12-31</cbc:ExpiryDate>
+                </cac:LotIdentification>
+            </cac:ItemInstance>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">2350.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>4</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="TNE">5</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">94500.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">945.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">94500.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">945.00</cbc:TaxAmount>
+                <cbc:Percent>1</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Sertifikalı ekmeklik buğday tohumu · ilaçlı · 25 kg'lık 200 çuval</cbc:Description>
+            <cbc:Name>Buğday Tohumu Bozdağ-26 (Sertifikalı)</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>TOH-BGD-BZD</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>KATEGORI</cbc:ID>
+                <cbc:Name>Kategori</cbc:Name>
+                <cbc:Value>TOHUM</cbc:Value>
+            </cac:AdditionalItemProperty>
+            <cac:ItemInstance>
+                <cac:LotIdentification>
+                    <cbc:LotNumberID>BT-26-0712</cbc:LotNumberID>
+                    <cbc:ExpiryDate>2027-06-30</cbc:ExpiryDate>
+                </cac:LotIdentification>
+            </cac:ItemInstance>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">18900.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>5</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="LTR">120</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">141600.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">14160.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">141600.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">14160.00</cbc:TaxAmount>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Sistemik fungisit · 1 L'lik 120 şişe · bağ ve sebzede mildiyö ve külleme</cbc:Description>
+            <cbc:Name>Fungisit Strobigard 250 SC</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>ILC-FNG-STR250</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RUHSATNO">6204</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>KATEGORI</cbc:ID>
+                <cbc:Name>Kategori</cbc:Name>
+                <cbc:Value>İLAÇ</cbc:Value>
+            </cac:AdditionalItemProperty>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>ETKENMADDE</cbc:ID>
+                <cbc:Name>Etken madde</cbc:Name>
+                <cbc:Value>Azoksistrobin 250 g/L</cbc:Value>
+            </cac:AdditionalItemProperty>
+            <cac:ItemInstance>
+                <cac:LotIdentification>
+                    <cbc:LotNumberID>AZX-2604-118</cbc:LotNumberID>
+                    <cbc:ExpiryDate>2028-04-30</cbc:ExpiryDate>
+                </cac:LotIdentification>
+            </cac:ItemInstance>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">1180.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>6</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="LTR">80</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">51200.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">5120.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">51200.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">5120.00</cbc:TaxAmount>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Kontakt ve mide etkili insektisit · 1 L'lik 80 şişe · yaprakbiti ve tripse karşı</cbc:Description>
+            <cbc:Name>İnsektisit Deltakor 25 EC</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>ILC-INS-DLT25</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RUHSATNO">5317</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>KATEGORI</cbc:ID>
+                <cbc:Name>Kategori</cbc:Name>
+                <cbc:Value>İLAÇ</cbc:Value>
+            </cac:AdditionalItemProperty>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>ETKENMADDE</cbc:ID>
+                <cbc:Name>Etken madde</cbc:Name>
+                <cbc:Value>Deltametrin 25 g/L</cbc:Value>
+            </cac:AdditionalItemProperty>
+            <cac:ItemInstance>
+                <cac:LotIdentification>
+                    <cbc:LotNumberID>DLT-2603-071</cbc:LotNumberID>
+                    <cbc:ExpiryDate>2028-03-31</cbc:ExpiryDate>
+                </cac:LotIdentification>
+            </cac:ItemInstance>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">640.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>7</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">25</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">87000.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">17400.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">87000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">17400.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>1 dekarlık set: 16 mm damlatıcılı lateral boru, filtre, vana ve bağlantı elemanları</cbc:Description>
+            <cbc:Name>Damla Sulama Seti (1 dekar)</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>SLM-DML-1DK</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>KATEGORI</cbc:ID>
+                <cbc:Name>Kategori</cbc:Name>
+                <cbc:Value>SULAMA</cbc:Value>
+            </cac:AdditionalItemProperty>
+            <cac:ItemInstance>
+                <cac:LotIdentification>
+                    <cbc:LotNumberID>DS-2607-209</cbc:LotNumberID>
+                </cac:LotIdentification>
+            </cac:ItemInstance>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">3480.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>

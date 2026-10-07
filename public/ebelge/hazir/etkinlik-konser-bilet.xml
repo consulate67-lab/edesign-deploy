@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği — Konser e-Bileti (etkinlik bileti) (kurgusal veriler).
+  GİB e-Bilet için UBL şeması yayımlamamıştır; bu dosya tasarımcının e-Bilet eşlemesiyle (bkz.
+  samples/bilet/e-Bilet-Etkinlik.xml) hazırlanmış TÜRETİLMİŞ bir örnektir:
+    InvoicePeriod/StartDate+StartTime : etkinlik tarihi ve saati (Description: etkinlik adı)
+    Delivery/DeliveryAddress          : etkinlik yeri (BuildingName: salon / sahne ve belediye)
+    PaymentMeans                      : ödeme türü (54 kredi kartı) ve ödeme tarihi
+  Koltuk bilgileri notlarda: "Kapı Açılış:", "Blok:", "Sıra:", "Koltuk:", "Kategori:", "Bilet Kodu:".
+    Bilet 1.450,00 (%10 KDV 145,00) + hizmet bedeli 95,00 (%20 KDV 19,00) | Ödenecek 1.709,00
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+    xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>e-Bilet</cbc:ProfileID>
+    <cbc:ID>KIO2026000048217</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>D18F5B37-6A2C-4E90-B7D4-2C9E81F04A6B</cbc:UUID>
+    <cbc:IssueDate>2026-10-06</cbc:IssueDate>
+    <cbc:IssueTime>14:35:00</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>SATIS</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız Bin Yedi Yüz Dokuz Türk Lirasıdır.</cbc:Note>
+    <cbc:Note>Etkinlik: Mavi Gece Orkestrası &amp; Konuklar · Sonbahar Konseri</cbc:Note>
+    <cbc:Note>Yer: Harbiye Cemil Topuzlu Açıkhava Tiyatrosu, Şişli / İstanbul (Şişli Belediyesi)</cbc:Note>
+    <cbc:Note>Kapı Açılış: 19:30</cbc:Note>
+    <cbc:Note>Blok: Saha B</cbc:Note>
+    <cbc:Note>Sıra: 14</cbc:Note>
+    <cbc:Note>Koltuk: 27</cbc:Note>
+    <cbc:Note>Kategori: Kategori 2</cbc:Note>
+    <cbc:Note>Bilet Kodu: KIO-48217-B1427</cbc:Note>
+    <cbc:Note>İzleyici: Ece Yıldırım</cbc:Note>
+    <cbc:Note>Girişte QR kod ve kimlik kontrolü yapılır; bilet tek girişliktir ve kopyalanan biletler geçersizdir.</cbc:Note>
+    <cbc:Note>Bilet iade edilemez; etkinliğin iptalinde bedel 15 gün içinde ödeme aracına iade edilir.</cbc:Note>
+    <cbc:Note>e-Bilet izni kapsamında elektronik ortamda düzenlenmiş ve iletilmiştir.</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>2</cbc:LineCountNumeric>
+    <cac:InvoicePeriod>
+        <cbc:StartDate>2026-10-24</cbc:StartDate>
+        <cbc:StartTime>21:00:00</cbc:StartTime>
+        <cbc:Description>Mavi Gece Orkestrası &amp; Konuklar</cbc:Description>
+    </cac:InvoicePeriod>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">5470923816</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">5470923816</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Esentepe Mahallesi Büyükdere Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>185</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Şişli</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34394</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_KIO2026000048217</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://bilet.kuzeyisigi.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">5470923816</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Kuzey Işığı Organizasyon ve Prodüksiyon A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Esentepe Mahallesi Büyükdere Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>185</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Şişli</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34394</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Mecidiyeköy</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0850 455 18 18</cbc:Telephone>
+                <cbc:ElectronicMail>destek@kuzeyisigi.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">38265019472</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Caferağa Mahallesi Moda Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>64/3</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Kadıköy</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34710</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:Contact>
+                <cbc:ElectronicMail>ece.yildirim@example.com</cbc:ElectronicMail>
+            </cac:Contact>
+            <cac:Person>
+                <cbc:FirstName>Ece</cbc:FirstName>
+                <cbc:FamilyName>Yıldırım</cbc:FamilyName>
+            </cac:Person>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:Delivery>
+        <cac:DeliveryAddress>
+            <cbc:StreetName>Harbiye Mahallesi Taşkışla Caddesi</cbc:StreetName>
+            <cbc:BuildingName>Cemil Topuzlu Açıkhava Tiyatrosu — Şişli Belediyesi</cbc:BuildingName>
+            <cbc:BuildingNumber>8</cbc:BuildingNumber>
+            <cbc:CitySubdivisionName>Şişli</cbc:CitySubdivisionName>
+            <cbc:CityName>İstanbul</cbc:CityName>
+            <cac:Country>
+                <cbc:Name>Türkiye</cbc:Name>
+            </cac:Country>
+        </cac:DeliveryAddress>
+    </cac:Delivery>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>54</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-10-06</cbc:PaymentDueDate>
+        <cbc:InstructionNote>Online satış (**** 4417)</cbc:InstructionNote>
+    </cac:PaymentMeans>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">164.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">1450.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">145.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>10</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">95.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">19.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>2</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>20</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">1545.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">1545.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">1709.00</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="TRY">0.00</cbc:AllowanceTotalAmount>
+        <cbc:PayableAmount currencyID="TRY">1709.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">1450.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">145.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">1450.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">145.00</cbc:TaxAmount>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>24.10.2026 21:00 · Saha B · Sıra 14 · Koltuk 27</cbc:Description>
+            <cbc:Name>Konser bileti · Kategori 2</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>B-14-27</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">1450.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">95.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">19.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">95.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">19.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Online satış ve işlem bedeli</cbc:Description>
+            <cbc:Name>Bilet hizmet bedeli</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>HZM</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">95.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>

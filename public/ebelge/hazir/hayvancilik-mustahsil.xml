@@ -1,0 +1,422 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: Besi hayvanı alımı e-Müstahsil Makbuzu (CreditNote · EARSIVBELGE · MUSTAHSILMAKBUZ).
+  Canlı ağırlık (KGM) üzerinden fiyatlama; kulak küpe no: Item/AdditionalItemIdentification/ID[@schemeID='KUPENO'],
+  ırk / cinsiyet / yaş: Item/AdditionalItemProperty[ID='IRK' | 'CINSIYET' | 'YAS'].
+  Kesintiler: GV stopajı %1 (0003, canlı hayvan), borsa tescil ücreti %0,2 (8001), mera fonu %0,2 (9040), SGK prim kesintisi %1 (SGK_PRIM).
+  Veteriner raporu ve kantar fişi: AdditionalDocumentReference[DocumentType='VETERINER' | 'KANTAR']. Tüm kişi/firma bilgileri kurgusaldır.
+-->
+<CreditNote xmlns="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2"
+    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+    xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2.1</cbc:CustomizationID>
+    <cbc:ProfileID>EARSIVBELGE</cbc:ProfileID>
+    <cbc:ID>KFB2026000002217</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>4D7A1E93-2C58-4B6F-9E04-7A3B5C1D8F62</cbc:UUID>
+    <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+    <cbc:IssueTime>11:05:00</cbc:IssueTime>
+    <cbc:CreditNoteTypeCode>MUSTAHSILMAKBUZ</cbc:CreditNoteTypeCode>
+    <cbc:Note>Yalnız: Altı Yüz Elli İki Bin Beş Yüz Seksen İki Türk Lirası Seksen Sekiz Kuruştur.</cbc:Note>
+    <cbc:Note>Hayvanlar TÜRKVET sisteminde TR360000047812 numaralı işletmeden nakil edilmiş; kulak küpeleri ve hayvan pasaportları teslim alınmıştır.</cbc:Note>
+    <cbc:Note>Fiyatlandırma canlı ağırlık üzerinden yapılmış olup tartım, 12 saatlik aç bekletme sonrası işletme kantarında üretici huzurunda gerçekleştirilmiştir.</cbc:Note>
+    <cbc:Note>Hayvanlar Kars Ticaret Borsası canlı hayvan salonunda 07.10.2026 tarih ve 2026/7731 sayı ile tescil edilmiştir.</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>5</cbc:LineCountNumeric>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>VSR-36-2026-04418</cbc:ID>
+        <cbc:IssueDate>2026-10-06</cbc:IssueDate>
+        <cbc:DocumentType>VETERINER</cbc:DocumentType>
+        <cbc:DocumentDescription>Hayvan sağlık raporu · Sarıkamış İlçe Tarım ve Orman Müdürlüğü · Şap, şarbon ve brusella aşıları tam</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>KF-26-07731</cbc:ID>
+        <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+        <cbc:DocumentType>KANTAR</cbc:DocumentType>
+        <cbc:DocumentDescription>Canlı ağırlık tartımı 09:40 · Toplam 2.731 kg · 5 baş</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">5148302967</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">5148302967</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Ortakapı Mah. Faikbey Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>64</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Merkez</cbc:CitySubdivisionName>
+                <cbc:CityName>Kars</cbc:CityName>
+                <cbc:PostalZone>36100</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.kafkasbesicilik.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">5148302967</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Kafkas Besicilik ve Et Ürünleri Ltd. Şti.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Ortakapı Mah. Faikbey Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>64</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Merkez</cbc:CitySubdivisionName>
+                <cbc:CityName>Kars</cbc:CityName>
+                <cbc:PostalZone>36100</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Kars</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(474) 212 36 36</cbc:Telephone>
+                <cbc:ElectronicMail>alim@kafkasbesicilik.com.tr</cbc:ElectronicMail>
+                <cac:OtherCommunication>
+                    <cbc:ChannelCode name="SMS_PROVIDER">Doğu Mesaj Hizmetleri A.Ş.</cbc:ChannelCode>
+                    <cbc:Value>3184092751</cbc:Value>
+                </cac:OtherCommunication>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">52817346094</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Karakurt Köyü Yayla Sok. No:3</cbc:StreetName>
+                <cbc:CitySubdivisionName>Sarıkamış</cbc:CitySubdivisionName>
+                <cbc:CityName>Kars</cbc:CityName>
+                <cbc:Region>Allahuekber Dağları eteği</cbc:Region>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:Contact>
+                <cbc:ID>731205</cbc:ID>
+                <cbc:Name>SMS</cbc:Name>
+                <cbc:Telephone>5426183047</cbc:Telephone>
+            </cac:Contact>
+            <cac:Person>
+                <cbc:FirstName>Ahmet</cbc:FirstName>
+                <cbc:FamilyName>Yalçınkaya</cbc:FamilyName>
+            </cac:Person>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:Delivery>
+        <cbc:ActualDeliveryDate>2026-10-07</cbc:ActualDeliveryDate>
+    </cac:Delivery>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-10-09</cbc:PaymentDueDate>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR270001000837492015630001</cbc:ID>
+            <cbc:CurrencyCode>TRY</cbc:CurrencyCode>
+            <cbc:PaymentNote>T.C. Ziraat Bankası — Sarıkamış Şubesi (üretici hesabı)</cbc:PaymentNote>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">16047.12</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">668630.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">6686.30</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>1</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>GELİR VERGİSİ S. (MUHTASAR)</cbc:Name>
+                    <cbc:TaxTypeCode>0003</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">668630.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">1337.26</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>2</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>0.2</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>BORSA TESCİL ÜCRETİ</cbc:Name>
+                    <cbc:TaxTypeCode>8001</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">668630.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">1337.26</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>3</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>0.2</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>MERA FONU</cbc:Name>
+                    <cbc:TaxTypeCode>9040</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">668630.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">6686.30</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>4</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>1</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>SGK (BAĞ-KUR) PRİM KESİNTİSİ</cbc:Name>
+                    <cbc:TaxTypeCode>SGK_PRIM</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">668630.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">668630.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">668630.00</cbc:TaxInclusiveAmount>
+        <cbc:PayableAmount currencyID="TRY">652582.88</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:CreditNoteLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:CreditedQuantity unitCode="KGM">612</cbc:CreditedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">151776.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">1517.76</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">151776.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">1517.76</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>1</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>GELİR VERGİSİ S. (MUHTASAR)</cbc:Name>
+                        <cbc:TaxTypeCode>0003</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Besi sonu, kondisyon 4/5 · yayla otu + arpa ezmesi ile beslenmiş</cbc:Description>
+            <cbc:Name>Simental Tosun</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="KUPENO">TR360001482731</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>IRK</cbc:ID>
+                <cbc:Name>Irk</cbc:Name>
+                <cbc:Value>Simental</cbc:Value>
+            </cac:AdditionalItemProperty>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>CINSIYET</cbc:ID>
+                <cbc:Name>Cinsiyet</cbc:Name>
+                <cbc:Value>Erkek</cbc:Value>
+            </cac:AdditionalItemProperty>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>YAS</cbc:ID>
+                <cbc:Name>Yaş</cbc:Name>
+                <cbc:Value>22 ay</cbc:Value>
+            </cac:AdditionalItemProperty>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">248.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:CreditedQuantity unitCode="KGM">587</cbc:CreditedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">145576.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">1455.76</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">145576.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">1455.76</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>1</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>GELİR VERGİSİ S. (MUHTASAR)</cbc:Name>
+                        <cbc:TaxTypeCode>0003</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Besi sonu, kondisyon 4/5</cbc:Description>
+            <cbc:Name>Simental Tosun</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="KUPENO">TR360001482744</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>IRK</cbc:ID>
+                <cbc:Name>Irk</cbc:Name>
+                <cbc:Value>Simental</cbc:Value>
+            </cac:AdditionalItemProperty>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>CINSIYET</cbc:ID>
+                <cbc:Name>Cinsiyet</cbc:Name>
+                <cbc:Value>Erkek</cbc:Value>
+            </cac:AdditionalItemProperty>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>YAS</cbc:ID>
+                <cbc:Name>Yaş</cbc:Name>
+                <cbc:Value>21 ay</cbc:Value>
+            </cac:AdditionalItemProperty>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">248.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:CreditedQuantity unitCode="KGM">498</cbc:CreditedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">120018.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">1200.18</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">120018.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">1200.18</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>1</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>GELİR VERGİSİ S. (MUHTASAR)</cbc:Name>
+                        <cbc:TaxTypeCode>0003</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Esmer (montofon) tosun · kondisyon 3/5</cbc:Description>
+            <cbc:Name>Montofon Tosun</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="KUPENO">TR360001519208</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>IRK</cbc:ID>
+                <cbc:Name>Irk</cbc:Name>
+                <cbc:Value>Montofon</cbc:Value>
+            </cac:AdditionalItemProperty>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>CINSIYET</cbc:ID>
+                <cbc:Name>Cinsiyet</cbc:Name>
+                <cbc:Value>Erkek</cbc:Value>
+            </cac:AdditionalItemProperty>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>YAS</cbc:ID>
+                <cbc:Name>Yaş</cbc:Name>
+                <cbc:Value>19 ay</cbc:Value>
+            </cac:AdditionalItemProperty>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">241.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>4</cbc:ID>
+        <cbc:CreditedQuantity unitCode="KGM">431</cbc:CreditedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">101716.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">1017.16</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">101716.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">1017.16</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>1</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>GELİR VERGİSİ S. (MUHTASAR)</cbc:Name>
+                        <cbc:TaxTypeCode>0003</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Yerli kara × Doğu Anadolu Kırmızısı melezi düve · kesimlik</cbc:Description>
+            <cbc:Name>Doğu Anadolu Kırmızısı Düve</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="KUPENO">TR360001519215</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>IRK</cbc:ID>
+                <cbc:Name>Irk</cbc:Name>
+                <cbc:Value>D.A. Kırmızısı</cbc:Value>
+            </cac:AdditionalItemProperty>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>CINSIYET</cbc:ID>
+                <cbc:Name>Cinsiyet</cbc:Name>
+                <cbc:Value>Dişi</cbc:Value>
+            </cac:AdditionalItemProperty>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>YAS</cbc:ID>
+                <cbc:Name>Yaş</cbc:Name>
+                <cbc:Value>26 ay</cbc:Value>
+            </cac:AdditionalItemProperty>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">236.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>5</cbc:ID>
+        <cbc:CreditedQuantity unitCode="KGM">603</cbc:CreditedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">149544.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">1495.44</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">149544.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">1495.44</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>1</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>GELİR VERGİSİ S. (MUHTASAR)</cbc:Name>
+                        <cbc:TaxTypeCode>0003</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Simental × Holştayn melezi tosun · besi sonu, kondisyon 4/5</cbc:Description>
+            <cbc:Name>Simental Melezi Tosun</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="KUPENO">TR360001482759</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>IRK</cbc:ID>
+                <cbc:Name>Irk</cbc:Name>
+                <cbc:Value>Simental melezi</cbc:Value>
+            </cac:AdditionalItemProperty>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>CINSIYET</cbc:ID>
+                <cbc:Name>Cinsiyet</cbc:Name>
+                <cbc:Value>Erkek</cbc:Value>
+            </cac:AdditionalItemProperty>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>YAS</cbc:ID>
+                <cbc:Name>Yaş</cbc:Name>
+                <cbc:Value>23 ay</cbc:Value>
+            </cac:AdditionalItemProperty>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">248.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+</CreditNote>

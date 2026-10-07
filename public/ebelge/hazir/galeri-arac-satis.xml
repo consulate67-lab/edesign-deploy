@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: İkinci el otomobil galerisi e-Arşiv faturası (EARSIVFATURA · OZELMATRAH), GİB OZELMATRAH.xml yapısında.
+  Satış bedeli KDV dahildir (LineExtension = TaxInclusive); KDV, alış-satış farkı (KDV dahil 123.000,00 TL) üzerinden
+  özel matrah 102.500,00 TL × %20 = 20.500,00 TL olarak hesaplanmıştır. İstisna / özel matrah kodu: 812.
+  Araç: Item/BrandName, ModelName, ItemInstance/RegistrationID (plaka), ItemInstance/SerialID (şasi),
+  AdditionalItemProperty[ID='MOTORNO' | 'KM' | 'MODELYILI' | 'RENK' | 'YAKIT' | 'VITES' | 'ALISBEDELI'].
+  Kapora: PrepaidPayment + LegalMonetaryTotal/PrepaidAmount. Noter / alış / ekspertiz: AdditionalDocumentReference.
+  Tüm kişi/firma bilgileri kurgusaldır.
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+    xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>EARSIVFATURA</cbc:ProfileID>
+    <cbc:ID>BPO2026000000417</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>2A8C4E61-7B3D-4F90-A1E5-6D2C8B0F3E97</cbc:UUID>
+    <cbc:IssueDate>2026-10-03</cbc:IssueDate>
+    <cbc:IssueTime>15:20:00</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>OZELMATRAH</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız: Bir Milyon Üç Yüz Seksen Beş Bin Türk Lirasıdır.</cbc:Note>
+    <cbc:Note>KDV, ikinci el araç ticaretinde özel matrah uygulaması kapsamında alış ve satış bedeli arasındaki fark (KDV dahil 123.000,00 TL) üzerinden hesaplanmıştır.</cbc:Note>
+    <cbc:Note>Araç noter satış sözleşmesi ile devredilmiş; 2 adet anahtar, ruhsat, servis bakım kitapçığı ve stepne ile eksiksiz teslim edilmiştir.</cbc:Note>
+    <cbc:Note>28.09.2026 tarihinde alınan 100.000,00 TL kapora düşülmüş, kalan bedel noter satışı öncesinde havale ile tahsil edilmiştir.</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>1</cbc:LineCountNumeric>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>2026/18342</cbc:ID>
+        <cbc:IssueDate>2026-10-03</cbc:IssueDate>
+        <cbc:DocumentType>NOTER</cbc:DocumentType>
+        <cbc:DocumentDescription>Ankara 41. Noterliği · Araç satış sözleşmesi yevmiye no</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>OTB2026000005541</cbc:ID>
+        <cbc:IssueDate>2026-08-21</cbc:IssueDate>
+        <cbc:DocumentType>ALISBELGESI</cbc:DocumentType>
+        <cbc:DocumentDescription>Araç alış faturası · Alış bedeli 1.262.000,00 TL</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>EXP-26-77421</cbc:ID>
+        <cbc:IssueDate>2026-09-27</cbc:IssueDate>
+        <cbc:DocumentType>EKSPERTIZ</cbc:DocumentType>
+        <cbc:DocumentDescription>Bağımsız ekspertiz · Tramer kaydı yok · Sağ arka çamurlukta lokal boya</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">1739420586</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">1739420586</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Eskişehir Yolu 9. km Oto Galericiler Sitesi B Blok</cbc:StreetName>
+                <cbc:BuildingNumber>14</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Çankaya</cbc:CitySubdivisionName>
+                <cbc:CityName>Ankara</cbc:CityName>
+                <cbc:PostalZone>06530</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_BPO2026000000417</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.bilkentprestij.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">1739420586</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">0173942058600015</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Bilkent Prestij Otomotiv Tic. Ltd. Şti.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Eskişehir Yolu 9. km Oto Galericiler Sitesi B Blok</cbc:StreetName>
+                <cbc:BuildingNumber>14</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Çankaya</cbc:CitySubdivisionName>
+                <cbc:CityName>Ankara</cbc:CityName>
+                <cbc:PostalZone>06530</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Kavaklıdere</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(312) 286 54 54</cbc:Telephone>
+                <cbc:ElectronicMail>satis@bilkentprestij.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">19374628051</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Birlik Mah. 448. Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>12/4</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Çankaya</cbc:CitySubdivisionName>
+                <cbc:CityName>Ankara</cbc:CityName>
+                <cbc:PostalZone>06610</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:Contact>
+                <cbc:Telephone>0535 417 92 60</cbc:Telephone>
+                <cbc:ElectronicMail>burak.senturk@example.com</cbc:ElectronicMail>
+            </cac:Contact>
+            <cac:Person>
+                <cbc:FirstName>Burak</cbc:FirstName>
+                <cbc:FamilyName>Şentürk</cbc:FamilyName>
+            </cac:Person>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-10-03</cbc:PaymentDueDate>
+        <cbc:InstructionNote>Kalan bedel havale ile tahsil edilmiştir</cbc:InstructionNote>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR460006200041700006297318</cbc:ID>
+            <cbc:CurrencyCode>TRY</cbc:CurrencyCode>
+            <cbc:PaymentNote>Garanti BBVA — Ankara Ticari Şubesi</cbc:PaymentNote>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:PrepaidPayment>
+        <cbc:ID>KPR-2026-0417</cbc:ID>
+        <cbc:PaidAmount currencyID="TRY">100000.00</cbc:PaidAmount>
+        <cbc:ReceivedDate>2026-09-28</cbc:ReceivedDate>
+    </cac:PrepaidPayment>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">20500.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">102500.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">20500.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>20</cbc:Percent>
+            <cac:TaxCategory>
+                <cbc:TaxExemptionReasonCode>812</cbc:TaxExemptionReasonCode>
+                <cbc:TaxExemptionReason>İkinci El Motorlu Kara Taşıtı veya Taşınmaz Teslimi</cbc:TaxExemptionReason>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">1385000.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">1385000.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">1385000.00</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="TRY">0.00</cbc:AllowanceTotalAmount>
+        <cbc:PrepaidAmount currencyID="TRY">100000.00</cbc:PrepaidAmount>
+        <cbc:PayableAmount currencyID="TRY">1285000.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">1385000.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">20500.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">102500.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">20500.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cbc:TaxExemptionReasonCode>812</cbc:TaxExemptionReasonCode>
+                    <cbc:TaxExemptionReason>İkinci El Motorlu Kara Taşıtı veya Taşınmaz Teslimi</cbc:TaxExemptionReason>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>İkinci el binek otomobil · tek elden · yetkili servis bakımlı · KDV dahil satış bedeli</cbc:Description>
+            <cbc:Name>Renault Megane Sedan 1.3 TCe Icon EDC</cbc:Name>
+            <cbc:BrandName>Renault</cbc:BrandName>
+            <cbc:ModelName>Megane Sedan 1.3 TCe 140 Icon EDC</cbc:ModelName>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>MODELYILI</cbc:ID>
+                <cbc:Name>Model yılı</cbc:Name>
+                <cbc:Value>2022</cbc:Value>
+            </cac:AdditionalItemProperty>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>KM</cbc:ID>
+                <cbc:Name>Kilometre</cbc:Name>
+                <cbc:Value>48350</cbc:Value>
+            </cac:AdditionalItemProperty>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>RENK</cbc:ID>
+                <cbc:Name>Renk</cbc:Name>
+                <cbc:Value>Titanyum Gri</cbc:Value>
+            </cac:AdditionalItemProperty>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>YAKIT</cbc:ID>
+                <cbc:Name>Yakıt</cbc:Name>
+                <cbc:Value>Benzin</cbc:Value>
+            </cac:AdditionalItemProperty>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>VITES</cbc:ID>
+                <cbc:Name>Vites</cbc:Name>
+                <cbc:Value>Otomatik (EDC)</cbc:Value>
+            </cac:AdditionalItemProperty>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>MOTORNO</cbc:ID>
+                <cbc:Name>Motor no</cbc:Name>
+                <cbc:Value>H5H470Q012345</cbc:Value>
+            </cac:AdditionalItemProperty>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>ALISBEDELI</cbc:ID>
+                <cbc:Name>Alış bedeli</cbc:Name>
+                <cbc:Value>1262000.00</cbc:Value>
+            </cac:AdditionalItemProperty>
+            <cac:ItemInstance>
+                <cbc:RegistrationID>06BRK527</cbc:RegistrationID>
+                <cbc:SerialID>VF1RFB00X67123456</cbc:SerialID>
+            </cac:ItemInstance>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">1385000.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>

@@ -837,7 +837,8 @@ function ebiletHeaderChecks(root: Element): string[] {
     else if (vkn ? !/^[0-9]{10}$/.test(vkn) : !/^[0-9]{11}$/.test(tckn)) issues.push(`Gönderen ${vkn ? `VKN (${vkn}) 10` : `TCKN (${tckn}) 11`} haneli olmalı.`);
     const start = pathText(baslik, 'baslangicTarihi');
     const end = pathText(baslik, 'bitisTarihi');
-    const today = new Date().toISOString().slice(0, 10);
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     if (!ISO_DATE_RE.test(start) || !ISO_DATE_RE.test(end)) {
         issues.push('Rapor dönemi başlangıç ve bitiş tarihi (baslangicTarihi, bitisTarihi; YYYY-AA-GG) zorunlu.');
     } else {

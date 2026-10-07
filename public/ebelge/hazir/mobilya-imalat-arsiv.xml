@@ -1,0 +1,419 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: Kişiye özel mutfak mobilyası imalat ve montaj e-Arşiv faturası (EARSIVFATURA · SATIS).
+  Ölçü / malzeme / renk: Item/AdditionalItemProperty[ID='OLCU' | 'MALZEME' | 'RENK'], modül kodu: SellersItemIdentification,
+  teslimat-montaj: Delivery/PromisedDeliveryPeriod, garanti: AdditionalDocumentReference[DocumentType='GARANTI']/ValidityPeriod.
+  Tüm kişi/firma bilgileri kurgusaldır.
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+    xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>EARSIVFATURA</cbc:ProfileID>
+    <cbc:ID>KZL2026000001296</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>3E9B7C14-6A2F-4D85-B1C3-58F0A2E7D964</cbc:UUID>
+    <cbc:IssueDate>2026-10-05</cbc:IssueDate>
+    <cbc:IssueTime>14:10:00</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>SATIS</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız: İki Yüz Yirmi İki Bin Üç Yüz Otuz Altı Türk Lirasıdır.</cbc:Note>
+    <cbc:Note>Ürünler KZL-SP-2026-0418 numaralı sipariş sözleşmesine ve 28.09.2026 tarihli yerinde ölçüye göre kişiye özel üretilmiştir.</cbc:Note>
+    <cbc:Note>Teslimat ve montaj 12–13.10.2026 tarihlerinde yapılacaktır · Montaj ekibi sorumlusu: Kemal Aydın · 0532 715 40 28</cbc:Note>
+    <cbc:Note>Bakım: Lake ve ceviz kaplama yüzeyleri aşındırıcı içermeyen, hafif nemli yumuşak bezle siliniz; sıcak tencereyi doğrudan tezgaha koymayınız.</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>6</cbc:LineCountNumeric>
+    <cac:OrderReference>
+        <cbc:ID>KZL-SP-2026-0418</cbc:ID>
+        <cbc:IssueDate>2026-09-14</cbc:IssueDate>
+    </cac:OrderReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>KZL-GRT-2026-1296</cbc:ID>
+        <cbc:IssueDate>2026-10-05</cbc:IssueDate>
+        <cbc:DocumentType>GARANTI</cbc:DocumentType>
+        <cbc:DocumentDescription>Gövde, kapak ve tezgah 24 ay · Blum menteşe ve raylar ömür boyu üretici garantisi</cbc:DocumentDescription>
+        <cac:ValidityPeriod>
+            <cbc:StartDate>2026-10-13</cbc:StartDate>
+            <cbc:EndDate>2028-10-13</cbc:EndDate>
+        </cac:ValidityPeriod>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>KZL-OLC-0418-R2</cbc:ID>
+        <cbc:IssueDate>2026-09-28</cbc:IssueDate>
+        <cbc:DocumentType>OLCU</cbc:DocumentType>
+        <cbc:DocumentDescription>Yerinde ölçü krokisi Rev.2 · Mutfak duvarı 4,80 m · Tavan yüksekliği 2,62 m · Ölçen: Mimar Ece Kozluca</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">5730284196</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">5730284196</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Sinanbey Mah. Mobilyacılar Sitesi 4. Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>22</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>İnegöl</cbc:CitySubdivisionName>
+                <cbc:CityName>Bursa</cbc:CityName>
+                <cbc:PostalZone>16400</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_KZL2026000001296</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.kozlucaahsap.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">5730284196</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">0573028419600011</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Kozluca Ahşap Mobilya İmalat Ltd. Şti.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Sinanbey Mah. Mobilyacılar Sitesi 4. Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>22</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>İnegöl</cbc:CitySubdivisionName>
+                <cbc:CityName>Bursa</cbc:CityName>
+                <cbc:PostalZone>16400</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>İnegöl</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(224) 713 48 90</cbc:Telephone>
+                <cbc:ElectronicMail>siparis@kozlucaahsap.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">41287530962</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Fethiye Mah. Lefkoşe Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>18 D: 7</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Nilüfer</cbc:CitySubdivisionName>
+                <cbc:CityName>Bursa</cbc:CityName>
+                <cbc:PostalZone>16140</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:Contact>
+                <cbc:Telephone>0533 274 18 65</cbc:Telephone>
+                <cbc:ElectronicMail>deniz.karaca@example.com</cbc:ElectronicMail>
+            </cac:Contact>
+            <cac:Person>
+                <cbc:FirstName>Deniz</cbc:FirstName>
+                <cbc:FamilyName>Karaca</cbc:FamilyName>
+            </cac:Person>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:Delivery>
+        <cac:DeliveryAddress>
+            <cbc:StreetName>Fethiye Mah. Lefkoşe Cad.</cbc:StreetName>
+            <cbc:BuildingNumber>18 D: 7</cbc:BuildingNumber>
+            <cbc:CitySubdivisionName>Nilüfer</cbc:CitySubdivisionName>
+            <cbc:CityName>Bursa</cbc:CityName>
+            <cbc:PostalZone>16140</cbc:PostalZone>
+            <cac:Country>
+                <cbc:Name>Türkiye</cbc:Name>
+            </cac:Country>
+        </cac:DeliveryAddress>
+        <cac:PromisedDeliveryPeriod>
+            <cbc:StartDate>2026-10-12</cbc:StartDate>
+            <cbc:EndDate>2026-10-13</cbc:EndDate>
+        </cac:PromisedDeliveryPeriod>
+    </cac:Delivery>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>48</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-10-05</cbc:PaymentDueDate>
+        <cbc:InstructionNote>Kredi Kartı · 6 Taksit (6 × 37.056,00 TL) · Kart: 4543 •••• •••• 2210 · Provizyon 731406</cbc:InstructionNote>
+    </cac:PaymentMeans>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>
+        <cbc:InstructionNote>Ek sipariş ve servis ödemeleri için havale / EFT hesabımız</cbc:InstructionNote>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR610001000214529876430001</cbc:ID>
+            <cbc:CurrencyCode>TRY</cbc:CurrencyCode>
+            <cbc:PaymentNote>T.C. Ziraat Bankası — İnegöl Şubesi</cbc:PaymentNote>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">37056.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">185280.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">37056.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>20</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">185280.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">185280.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">222336.00</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="TRY">0.00</cbc:AllowanceTotalAmount>
+        <cbc:PayableAmount currencyID="TRY">222336.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="MTR">4.20</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">77700.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">15540.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">77700.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">15540.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Çekmeceli ve kapaklı alt modüller · frenli tam açılır ray, eviye altı alüminyum taban</cbc:Description>
+            <cbc:Name>Mutfak Alt Dolap Modülleri</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>KZL-ALT</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>OLCU</cbc:ID>
+                <cbc:Name>Ölçü</cbc:Name>
+                <cbc:Value>Y 72 × D 58 cm</cbc:Value>
+            </cac:AdditionalItemProperty>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>MALZEME</cbc:ID>
+                <cbc:Name>Malzeme</cbc:Name>
+                <cbc:Value>18 mm MDF-Lam gövde · 22 mm lake kapak</cbc:Value>
+            </cac:AdditionalItemProperty>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>RENK</cbc:ID>
+                <cbc:Name>Renk</cbc:Name>
+                <cbc:Value>Fildişi mat lake</cbc:Value>
+            </cac:AdditionalItemProperty>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">18500.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="MTR">3.60</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">51120.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">10224.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">51120.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">10224.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Amortisörlü kapaklı üst modüller · aspiratör üstü yatay açılır kapak</cbc:Description>
+            <cbc:Name>Mutfak Üst Dolap Modülleri</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>KZL-UST</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>OLCU</cbc:ID>
+                <cbc:Name>Ölçü</cbc:Name>
+                <cbc:Value>Y 72 × D 35 cm</cbc:Value>
+            </cac:AdditionalItemProperty>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>MALZEME</cbc:ID>
+                <cbc:Name>Malzeme</cbc:Name>
+                <cbc:Value>18 mm MDF-Lam gövde · ceviz kaplama kapak</cbc:Value>
+            </cac:AdditionalItemProperty>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>RENK</cbc:ID>
+                <cbc:Name>Renk</cbc:Name>
+                <cbc:Value>Doğal ceviz</cbc:Value>
+            </cac:AdditionalItemProperty>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">14200.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">24800.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">4960.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">24800.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">4960.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Ankastre buzdolabı ve fırın-mikrodalga nişli boy dolabı · iç raflar ayarlanabilir</cbc:Description>
+            <cbc:Name>Boy Dolabı (Buzdolabı + Fırın Nişli)</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>KZL-BOY</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>OLCU</cbc:ID>
+                <cbc:Name>Ölçü</cbc:Name>
+                <cbc:Value>G 120 × Y 240 × D 60 cm</cbc:Value>
+            </cac:AdditionalItemProperty>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>MALZEME</cbc:ID>
+                <cbc:Name>Malzeme</cbc:Name>
+                <cbc:Value>Masif meşe çerçeve · MDF-Lam gövde</cbc:Value>
+            </cac:AdditionalItemProperty>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>RENK</cbc:ID>
+                <cbc:Name>Renk</cbc:Name>
+                <cbc:Value>Fildişi lake / Doğal ceviz</cbc:Value>
+            </cac:AdditionalItemProperty>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">24800.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>4</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="MTR">4.80</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">18960.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">3792.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">18960.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">3792.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Eviye ve ocak kesimli, su yalıtımlı kenar bantlı kompakt laminat tezgah</cbc:Description>
+            <cbc:Name>Kompakt Laminat Tezgah</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>KZL-TZG</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>OLCU</cbc:ID>
+                <cbc:Name>Ölçü</cbc:Name>
+                <cbc:Value>D 62 cm × 12 mm</cbc:Value>
+            </cac:AdditionalItemProperty>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>MALZEME</cbc:ID>
+                <cbc:Name>Malzeme</cbc:Name>
+                <cbc:Value>Kompakt laminat</cbc:Value>
+            </cac:AdditionalItemProperty>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>RENK</cbc:ID>
+                <cbc:Name>Renk</cbc:Name>
+                <cbc:Value>Kalakata mermer desen</cbc:Value>
+            </cac:AdditionalItemProperty>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">3950.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>5</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">9500.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">1900.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">9500.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">1900.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>2 kişilik usta ekip ile yerinde montaj, terazileme, kapak ayarı ve ankastre yerleşimi</cbc:Description>
+            <cbc:Name>Montaj ve Yerinde Uygulama</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>KZL-MNT</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">9500.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>6</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">3200.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">640.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">3200.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">640.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Battaniyeli kapalı kasa kamyonet ile İnegöl atölye → Nilüfer teslimat, kat çıkışı dahil</cbc:Description>
+            <cbc:Name>Nakliye ve Kat Çıkışı</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>KZL-NAK</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">3200.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>

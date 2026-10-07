@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği — Özel okul (kolej) yıllık ücret e-Arşiv Faturası (kurgusal veriler).
+  EARSIVFATURA / SATIS; veliye (nihai tüketici) düzenlenir. Eğitim, yemek, servis ve forma %10; kırtasiye %20 KDV.
+  Kardeş indirimi eğitim satırında AllowanceCharge olarak uygulanır (satır tutarı indirim sonrası).
+  Taksit planı "Taksit: sıra | vade | tutar" biçimli notlardan çizelge olarak gösterilir.
+    Brüt 557.000,00 | Kardeş indirimi −42.000,00 | Matrah 515.000,00
+    KDV %10 50.850,00 | KDV %20 1.300,00 | Ödenecek 567.150,00 (peşinat 67.150,00 + 8 × 62.500,00)
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+    xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>EARSIVFATURA</cbc:ProfileID>
+    <cbc:ID>CNK2026000000846</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>5C0B8E47-D29A-4F13-B6E8-93A1F4C27D60</cbc:UUID>
+    <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+    <cbc:IssueTime>10:15:00</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>SATIS</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız Beş Yüz Altmış Yedi Bin Yüz Elli Türk Lirasıdır.</cbc:Note>
+    <cbc:Note>Öğrenci: Mert Can ÖZDEMİR</cbc:Note>
+    <cbc:Note>Sınıf: 6-B · Ortaokul</cbc:Note>
+    <cbc:Note>Öğrenci No: 2026-0614</cbc:Note>
+    <cbc:Note>Kardeş: Defne ÖZDEMİR (3-A) · eğitim ücretinde %10 kardeş indirimi uygulanmıştır</cbc:Note>
+    <cbc:Note>MEB Kurum Kodu: 763412</cbc:Note>
+    <cbc:Note>Taksit: Peşinat | 07.10.2026 | 67.150,00</cbc:Note>
+    <cbc:Note>Taksit: 1/8 | 15.11.2026 | 62.500,00</cbc:Note>
+    <cbc:Note>Taksit: 2/8 | 15.12.2026 | 62.500,00</cbc:Note>
+    <cbc:Note>Taksit: 3/8 | 15.01.2027 | 62.500,00</cbc:Note>
+    <cbc:Note>Taksit: 4/8 | 15.02.2027 | 62.500,00</cbc:Note>
+    <cbc:Note>Taksit: 5/8 | 15.03.2027 | 62.500,00</cbc:Note>
+    <cbc:Note>Taksit: 6/8 | 15.04.2027 | 62.500,00</cbc:Note>
+    <cbc:Note>Taksit: 7/8 | 15.05.2027 | 62.500,00</cbc:Note>
+    <cbc:Note>Taksit: 8/8 | 15.06.2027 | 62.500,00</cbc:Note>
+    <cbc:Note>Ücretler, Özel Öğretim Kurumları Yönetmeliği uyarınca 2026–2027 eğitim-öğretim yılı için ilan edilen ücretlerdir; kayıt sözleşmesi hükümleri saklıdır.</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>5</cbc:LineCountNumeric>
+    <cac:InvoicePeriod>
+        <cbc:StartDate>2026-09-07</cbc:StartDate>
+        <cbc:EndDate>2027-06-25</cbc:EndDate>
+        <cbc:Description>2026–2027 Eğitim-Öğretim Yılı</cbc:Description>
+    </cac:InvoicePeriod>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>ELEKTRONIK</cbc:ID>
+        <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+        <cbc:DocumentTypeCode>SEND_TYPE</cbc:DocumentTypeCode>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">2269451873</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">2269451873</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Görükle Mahallesi Kampüs Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>48</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Nilüfer</cbc:CitySubdivisionName>
+                <cbc:CityName>Bursa</cbc:CityName>
+                <cbc:PostalZone>16285</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.cinaraltikoleji.k12.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">2269451873</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">0226945187300011</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Özel Çınaraltı Koleji — Çınaraltı Eğitim Kurumları A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Görükle Mahallesi Kampüs Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>48</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Nilüfer</cbc:CitySubdivisionName>
+                <cbc:CityName>Bursa</cbc:CityName>
+                <cbc:PostalZone>16285</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Nilüfer</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(224) 483 19 50</cbc:Telephone>
+                <cbc:ElectronicMail>muhasebe@cinaraltikoleji.k12.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">18273645590</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Ihlamur Mahallesi Ilgaz Sokak</cbc:StreetName>
+                <cbc:BuildingNumber>6/2</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Nilüfer</cbc:CitySubdivisionName>
+                <cbc:CityName>Bursa</cbc:CityName>
+                <cbc:PostalZone>16120</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:Contact>
+                <cbc:Telephone>(532) 207 44 18</cbc:Telephone>
+                <cbc:ElectronicMail>emre.ozdemir@example.com</cbc:ElectronicMail>
+            </cac:Contact>
+            <cac:Person>
+                <cbc:FirstName>Emre</cbc:FirstName>
+                <cbc:FamilyName>ÖZDEMİR</cbc:FamilyName>
+            </cac:Person>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2027-06-15</cbc:PaymentDueDate>
+        <cbc:InstructionNote>Açıklamaya öğrenci numarasını ve taksit sırasını yazınız.</cbc:InstructionNote>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR71 0006 2000 4160 0006 2954 17</cbc:ID>
+            <cbc:CurrencyCode>TRY</cbc:CurrencyCode>
+            <cac:FinancialInstitutionBranch>
+                <cbc:Name>Nilüfer Ticari Şubesi</cbc:Name>
+                <cac:FinancialInstitution>
+                    <cbc:Name>Türkiye Garanti Bankası A.Ş.</cbc:Name>
+                </cac:FinancialInstitution>
+            </cac:FinancialInstitutionBranch>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">52150.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">508500.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">50850.00</cbc:TaxAmount>
+            <cbc:Percent>10</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">6500.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">1300.00</cbc:TaxAmount>
+            <cbc:Percent>20</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">515000.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">515000.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">567150.00</cbc:TaxInclusiveAmount>
+        <cbc:PayableAmount currencyID="TRY">567150.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">378000.00</cbc:LineExtensionAmount>
+        <cac:AllowanceCharge>
+            <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+            <cbc:AllowanceChargeReason>Kardeş indirimi</cbc:AllowanceChargeReason>
+            <cbc:MultiplierFactorNumeric>0.10</cbc:MultiplierFactorNumeric>
+            <cbc:Amount currencyID="TRY">42000.00</cbc:Amount>
+            <cbc:BaseAmount currencyID="TRY">420000.00</cbc:BaseAmount>
+        </cac:AllowanceCharge>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">37800.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">378000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">37800.00</cbc:TaxAmount>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Ortaokul 6. sınıf · tam gün eğitim, İngilizce yoğun program, kulüp ve etüt çalışmaları</cbc:Description>
+            <cbc:Name>Yıllık eğitim-öğretim ücreti</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>EGT-ORT-06</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">420000.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">72000.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">7200.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">72000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">7200.00</cbc:TaxAmount>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Öğle yemeği ve iki ara öğün · 180 eğitim günü</cbc:Description>
+            <cbc:Name>Yemek ücreti</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>YMK-YIL</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">72000.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">54000.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">5400.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">54000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">5400.00</cbc:TaxAmount>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Ihlamur – Görükle güzergâhı · sabah ve akşam, rehber personelli</cbc:Description>
+            <cbc:Name>Okul servisi</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>SRV-G07</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">54000.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>4</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">2</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">4500.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">450.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">4500.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">450.00</cbc:TaxAmount>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Kışlık okul forması takımı (ceket, pantolon, 2 gömlek)</cbc:Description>
+            <cbc:Name>Okul forması seti</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>FRM-KIS</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">2250.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>5</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">6500.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">1300.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">6500.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">1300.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Yıllık kırtasiye paketi, yabancı dil yayın seti ve dijital platform erişimi</cbc:Description>
+            <cbc:Name>Kırtasiye ve yayın seti</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>KRT-06</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">6500.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>

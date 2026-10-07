@@ -1,0 +1,122 @@
+import { hazirPath, type SectorTemplate } from '../types';
+
+/** Hizmet ikinci dalga: hukuk, denetim, sağlık-eczane, bilişim, eğitim, güzellik, sigorta, finans. */
+export const HIZMET2_TEMPLATES: SectorTemplate[] = [
+    {
+        id: 'avukat-bireysel-smm',
+        sector: 'hukuk',
+        name: 'Bireysel Avukat — Minimal e-SMM',
+        description:
+            'Serbest avukatın şahıs müvekkile kestiği sade, İsviçre tipografili makbuz; grafit omurga, kil rengi vurgular, vekalet ücreti ile KDV dışı dava avansı ayrımı ve dosya / esas no ızgarası.',
+        docTypeId: 'smm',
+        moduleId: 'smm',
+        accent: '#a14a1f',
+        xslt: hazirPath('avukat-bireysel-smm', 'xslt'),
+        xml: hazirPath('avukat-bireysel-smm', 'xml'),
+        tags: ['Minimal', 'Dava avansı', 'Dosya / esas no', 'Baro sicil', 'Karekod'],
+    },
+    {
+        id: 'bagimsiz-denetim-fatura',
+        sector: 'muhasebe',
+        name: 'Bağımsız Denetim & YMM Faturası',
+        description:
+            'Denetim firmasının kurumsal müşteriye kestiği saatlik ekip faturası; koyu bant ve sarı ışın başlık, yetki / lisans kenar paneli (KGK, SPK), ekip ve saat notları, 9/10 KDV tevkifatı.',
+        docTypeId: 'fatura',
+        moduleId: 'fatura',
+        accent: '#2e2e38',
+        xslt: hazirPath('bagimsiz-denetim-fatura', 'xslt'),
+        xml: hazirPath('bagimsiz-denetim-fatura', 'xml'),
+        tags: ['TEVKIFAT 602', 'Saatlik ekip', 'KGK / SPK lisans', 'Kenar paneli', 'Kurumsal'],
+    },
+    {
+        id: 'ozel-hastane-fatura',
+        sector: 'saglik',
+        name: 'Özel Hastane — Sigorta Provizyon Faturası',
+        description:
+            'Yatışlı tedavinin özel sağlık sigortasına faturalandığı hastane faturası; EKG çizgili başlık, bileklik tipi hasta kartı, ICD tanı çipi, provizyon / poliçe şeridi ve ameliyat, yatak, tetkik, malzeme grup etiketleri.',
+        docTypeId: 'fatura',
+        moduleId: 'fatura',
+        accent: '#1d6fa5',
+        xslt: hazirPath('ozel-hastane-fatura', 'xslt'),
+        xml: hazirPath('ozel-hastane-fatura', 'xml'),
+        tags: ['Provizyon no', 'ICD-10 tanı', 'Hasta kartı', 'Hizmet grupları', 'KDV %10'],
+    },
+    {
+        id: 'eczane-arsiv',
+        sector: 'saglik',
+        name: 'Eczane e-Arşiv Fişi',
+        description:
+            'Serbest eczacının hastaya kestiği e-Arşiv fatura; yeşil haç ℞ logosu, kesik çizgili reçete kartı, ürün barkodları, reçeteli / reçetesiz / dermokozmetik ayrımı, KDV oranı kutucukları ve eczane kaşesi.',
+        docTypeId: 'arsiv',
+        moduleId: 'arsiv',
+        accent: '#0a8f4c',
+        xslt: hazirPath('eczane-arsiv', 'xslt'),
+        xml: hazirPath('eczane-arsiv', 'xml'),
+        tags: ['Reçete no', 'Barkod', 'KDV %10 / %20', 'Katılım payı', 'Eczane kaşesi'],
+    },
+    {
+        id: 'saas-abonelik-arsiv',
+        sector: 'bilisim',
+        name: 'SaaS Abonelik e-Arşiv Faturası',
+        description:
+            'Yazılım aboneliğinin internet satışı olarak kesilen e-Arşiv faturası; koyu hero alan, degrade plan kartı, kullanım / kota ölçerleri, kupon indirimi çipleri ve internet satış bilgileri tablosu.',
+        docTypeId: 'arsiv',
+        moduleId: 'arsiv',
+        accent: '#e0306d',
+        xslt: hazirPath('saas-abonelik-arsiv', 'xslt'),
+        xml: hazirPath('saas-abonelik-arsiv', 'xml'),
+        tags: ['İnternet satışı', 'Abonelik planı', 'Kullanım ölçerleri', 'Kupon', 'Elektronik teslim'],
+    },
+    {
+        id: 'ozel-okul-fatura',
+        sector: 'egitim',
+        name: 'Özel Okul Veli Faturası',
+        description:
+            'Özel okulun veliye kestiği yıllık eğitim bedeli e-Arşiv faturası; fildişi zemin, bordo-altın çift diploma çerçevesi, okul arması, Romen rakamlı kalemler, kardeş indirimi ve taksit planı defteri.',
+        docTypeId: 'arsiv',
+        moduleId: 'arsiv',
+        accent: '#7a1f2b',
+        xslt: hazirPath('ozel-okul-fatura', 'xslt'),
+        xml: hazirPath('ozel-okul-fatura', 'xml'),
+        tags: ['Kardeş indirimi', 'Taksit planı', 'Öğrenci bilgisi', 'KDV %10 / %20', 'Mühür'],
+    },
+    {
+        id: 'kuafor-guzellik-arsiv',
+        sector: 'guzellik',
+        name: 'Kuaför & Güzellik Salonu e-Arşiv',
+        description:
+            'Salonun misafirine kestiği pastel tonlu e-Arşiv faturası; monogram logo, randevu şeridi, uzman baş harfli hizmet kartları, seans paketi ilerleme noktaları ve bir sonraki randevu hatırlatması.',
+        docTypeId: 'arsiv',
+        moduleId: 'arsiv',
+        accent: '#c08b7d',
+        xslt: hazirPath('kuafor-guzellik-arsiv', 'xslt'),
+        xml: hazirPath('kuafor-guzellik-arsiv', 'xml'),
+        tags: ['Randevu', 'Uzman bilgisi', 'Seans paketi', 'Ürün satışı', 'Pastel'],
+    },
+    {
+        id: 'sigorta-acente-komisyon',
+        sector: 'sigorta',
+        name: 'Acente Komisyon Hesap Özeti',
+        description:
+            'Sigorta şirketinin acenteye düzenlediği e-Sigorta Komisyon Gider Belgesi; çivit başlık ve dönem rozeti, istihsal / iptal / net komisyon göstergeleri, branş renk çubukları, prim ve oran sütunları.',
+        docTypeId: 'sigorta-komisyon',
+        moduleId: 'sigorta-komisyon',
+        accent: '#312e81',
+        xslt: hazirPath('sigorta-acente-komisyon', 'xslt'),
+        xml: hazirPath('sigorta-acente-komisyon', 'xml'),
+        tags: ['İstihsal / iptal', 'Branş bazında', 'Komisyon oranı', 'Levha no', 'Aylık dönem'],
+    },
+    {
+        id: 'odeme-kurulusu-dekont',
+        sector: 'finans',
+        name: 'Ödeme Kuruluşu Para Transferi e-Dekontu',
+        description:
+            'Elektronik para kuruluşunun para gönderme (PAGO) dekontu; büyük tutarlı fintech fişi, gönderen → alıcı IBAN akış kartı, delikli koparma çizgisi, komisyon ve BSMV dökümü, işlem referansı ve kanal bilgisi.',
+        docTypeId: 'dekont',
+        moduleId: 'dekont',
+        accent: '#f05a28',
+        xslt: hazirPath('odeme-kurulusu-dekont', 'xslt'),
+        xml: hazirPath('odeme-kurulusu-dekont', 'xml'),
+        tags: ['PAGO', 'Gönderen → alıcı', 'IBAN', 'BSMV', 'Valör'],
+    },
+];

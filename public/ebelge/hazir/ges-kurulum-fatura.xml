@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: Çatı GES (güneş enerji santrali) anahtar teslim kurulum e-Faturası (TICARIFATURA · SATIS · KDV %20).
+  Proje sözleşmesi: ContractDocumentReference; kurulu güç / yıllık üretim / şebeke bağlantısı:
+  AdditionalDocumentReference[DocumentType='KAPASITE' | 'URETIM' | 'BAGLANTI']; kalem garantisi: Item/AdditionalItemProperty[ID='GARANTI'].
+  Tüm kişi/firma bilgileri kurgusaldır.
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+    xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>TICARIFATURA</cbc:ProfileID>
+    <cbc:ID>GNK2026000000189</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>7E1F3A95-4C6B-4D82-B0A7-9C5E2D8F1A36</cbc:UUID>
+    <cbc:IssueDate>2026-10-02</cbc:IssueDate>
+    <cbc:IssueTime>14:00:00</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>SATIS</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız: Yedi Milyon Yüz Yirmi İki Bin Beş Yüz Yirmi Sekiz Türk Lirasıdır.</cbc:Note>
+    <cbc:Note>Santralin geçici kabulü 30.09.2026 tarihinde yapılmış, sistem dağıtım şebekesine senkronize edilerek devreye alınmıştır.</cbc:Note>
+    <cbc:Note>Uzaktan izleme (SCADA) portal erişimi alıcının enerji sorumlusuna tanımlanmıştır; ilk yıl panel yıkama ve periyodik bakım hizmeti bedelsizdir.</cbc:Note>
+    <cbc:Note>Garanti süreleri kalem bazında belirtilmiştir. Panel lineer performans garantisi: 30. yıl sonunda nominal gücün en az %87,4'ü.</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>7</cbc:LineCountNumeric>
+    <cac:ContractDocumentReference>
+        <cbc:ID>GNK-EPC-2026-014</cbc:ID>
+        <cbc:IssueDate>2026-06-12</cbc:IssueDate>
+        <cbc:DocumentType>Anahtar teslim GES kurulum (EPC) sözleşmesi</cbc:DocumentType>
+    </cac:ContractDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>400,4 kWp</cbc:ID>
+        <cbc:IssueDate>2026-06-12</cbc:IssueDate>
+        <cbc:DocumentType>KAPASITE</cbc:DocumentType>
+        <cbc:DocumentDescription>DC kurulu güç · 400 kWe AC · 728 panel · 4 inverter</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>612.000 kWh</cbc:ID>
+        <cbc:IssueDate>2026-06-12</cbc:IssueDate>
+        <cbc:DocumentType>URETIM</cbc:DocumentType>
+        <cbc:DocumentDescription>Yıllık tahmini üretim · 1.528 kWh/kWp · ≈ 270 ton CO₂ tasarrufu</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>MEDAŞ-2026-BÇ-04471</cbc:ID>
+        <cbc:IssueDate>2026-07-03</cbc:IssueDate>
+        <cbc:DocumentType>BAGLANTI</cbc:DocumentType>
+        <cbc:DocumentDescription>Bağlantı anlaşması · lisanssız öz tüketim (çatı) · 400 kWe</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">4071592836</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">4071592836</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Fevziçakmak Mah. Enerji Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>18</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Karatay</cbc:CitySubdivisionName>
+                <cbc:CityName>Konya</cbc:CityName>
+                <cbc:PostalZone>42050</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_GNK2026000000189</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.guneskoyenerji.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">4071592836</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">0407159283600018</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Güneşköy Enerji Mühendislik ve Taahhüt A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Fevziçakmak Mah. Enerji Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>18</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Karatay</cbc:CitySubdivisionName>
+                <cbc:CityName>Konya</cbc:CityName>
+                <cbc:PostalZone>42050</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Meram</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(332) 342 70 70</cbc:Telephone>
+                <cbc:ElectronicMail>proje@guneskoyenerji.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">0471836259</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Akşehir Soğuk Hava Deposu ve Tarım Ürünleri Ltd. Şti.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Organize Sanayi Bölgesi 3. Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>7</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Akşehir</cbc:CitySubdivisionName>
+                <cbc:CityName>Konya</cbc:CityName>
+                <cbc:PostalZone>42550</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Akşehir</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(332) 813 44 20</cbc:Telephone>
+                <cbc:ElectronicMail>finans@aksehirsogukhava.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-11-01</cbc:PaymentDueDate>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR170001500158007312946805</cbc:ID>
+            <cbc:CurrencyCode>TRY</cbc:CurrencyCode>
+            <cbc:PaymentNote>Türkiye Vakıflar Bankası — Konya Kurumsal Şubesi</cbc:PaymentNote>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">1187088.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">5935440.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">1187088.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>20</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">5935440.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">5935440.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">7122528.00</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="TRY">0.00</cbc:AllowanceTotalAmount>
+        <cbc:PayableAmount currencyID="TRY">7122528.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">728</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">3043040.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">608608.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">3043040.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">608608.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Monokristal PERC bifacial, 144 yarım hücre · 550 Wp · %21,3 verim · Tier-1 · yerli üretim</cbc:Description>
+            <cbc:Name>Güneş Paneli 550 Wp Bifacial</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>PV-MONO-550B</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>GARANTI</cbc:ID>
+                <cbc:Name>Garanti</cbc:Name>
+                <cbc:Value>12 yıl ürün · 30 yıl performans</cbc:Value>
+            </cac:AdditionalItemProperty>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">4180.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">4</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">994000.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">198800.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">994000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">198800.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>100 kW trifaze string inverter · 10 MPPT · %98,6 maks. verim · IP66</cbc:Description>
+            <cbc:Name>String İnverter 100 kW</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>INV-STR-100K</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>GARANTI</cbc:ID>
+                <cbc:Name>Garanti</cbc:Name>
+                <cbc:Value>10 yıl</cbc:Value>
+            </cac:AdditionalItemProperty>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">248500.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="KWT">400.4</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">460460.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">92092.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">460460.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">92092.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Trapez çatı için anodize alüminyum ray ve paslanmaz kelepçe sistemi · statik hesaplı</cbc:Description>
+            <cbc:Name>Çatı Montaj Konstrüksiyonu</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>KNS-ALU-TRP</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>GARANTI</cbc:ID>
+                <cbc:Name>Garanti</cbc:Name>
+                <cbc:Value>15 yıl</cbc:Value>
+            </cac:AdditionalItemProperty>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">1150.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>4</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="MTR">5200</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">200200.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">40040.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">200200.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">40040.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>H1Z2Z2-K 6 mm² solar DC kablo, MC4 konnektör ve kablo tavası dahil</cbc:Description>
+            <cbc:Name>Solar DC Kablo ve Kablo Tavası</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>KBL-DC-6MM</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>GARANTI</cbc:ID>
+                <cbc:Name>Garanti</cbc:Name>
+                <cbc:Value>25 yıl</cbc:Value>
+            </cac:AdditionalItemProperty>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">38.50</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>5</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="SET">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">312000.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">62400.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">312000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">62400.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>AC toplama panosu, koruma röleleri, enerji analizörü ve SCADA uzaktan izleme sistemi</cbc:Description>
+            <cbc:Name>AC Dağıtım Panosu ve SCADA İzleme</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>PNO-AC-SCADA</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>GARANTI</cbc:ID>
+                <cbc:Name>Garanti</cbc:Name>
+                <cbc:Value>5 yıl</cbc:Value>
+            </cac:AdditionalItemProperty>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">312000.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>6</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="KWT">400.4</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">740740.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">148148.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">740740.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">148148.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Panel ve inverter montajı, DC/AC kablolama, topraklama ve yıldırımdan korunma tesisatı</cbc:Description>
+            <cbc:Name>Montaj ve Elektrik İşçiliği</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>ISC-MNT-KWP</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemProperty>
+                <cbc:ID>GARANTI</cbc:ID>
+                <cbc:Name>Garanti</cbc:Name>
+                <cbc:Value>2 yıl işçilik</cbc:Value>
+            </cac:AdditionalItemProperty>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">1850.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>7</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">185000.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">37000.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">185000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">37000.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Elektrik projesi, statik rapor, dağıtım şirketi onay süreçleri, devreye alma ve kabul testleri</cbc:Description>
+            <cbc:Name>Mühendislik, Proje ve Kabul Hizmeti</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>MHN-PRJ-KBL</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">185000.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>

@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CreditNote xmlns="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:n4="http://www.altova.com/samplexml/other-namespace" xsi:schemaLocation="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2 UBL-CreditNote-2.1.xsd">
+  <ext:UBLExtensions>
+    <ext:UBLExtension>
+      <ext:ExtensionContent>
+        <n4:auto-generated_for_wildcard/>
+      </ext:ExtensionContent>
+    </ext:UBLExtension>
+  </ext:UBLExtensions>
+  <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+  <cbc:CustomizationID>TR1.2.1</cbc:CustomizationID>
+  <cbc:ProfileID>EDOVIZBELGE</cbc:ProfileID>
+  <cbc:ID>KRD2026000004571</cbc:ID>
+  <cbc:CopyIndicator>false</cbc:CopyIndicator>
+  <cbc:UUID>3D7B92E4-0A6F-4C58-B1E7-8F25C4A09D36</cbc:UUID>
+  <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+  <cbc:IssueTime>13:47:22</cbc:IssueTime>
+  <cbc:CreditNoteTypeCode>SATIM</cbc:CreditNoteTypeCode>
+  <cbc:Note>Kur Tablosu | USD | 42,1460 | 42,5280</cbc:Note>
+  <cbc:Note>Kur Tablosu | EUR | 48,9120 | 49,3650</cbc:Note>
+  <cbc:Note>Kur Tablosu | GBP | 56,3840 | 56,9970</cbc:Note>
+  <cbc:Note>Kur Tablosu | CHF | 52,6150 | 53,2240</cbc:Note>
+  <cbc:Note>İşlem amacı: Yurt dışı seyahat</cbc:Note>
+  <cbc:Note>Banknotlar müşteri huzurunda sayılmış; UV ve manyetik mürekkep kontrolünden geçirilmiştir.</cbc:Note>
+  <cbc:Note>Kambiyo işlemine ait BSMV (%0,2) ödenecek tutara dahildir.</cbc:Note>
+  <cbc:Note>Yalnız: Yüz Altı Bin Beş Yüz Otuz İki Türk Lirası Altmış Dört Kuruş</cbc:Note>
+  <cbc:LineCountNumeric>3</cbc:LineCountNumeric>
+  <cac:AdditionalDocumentReference>
+    <cbc:ID>A4471</cbc:ID>
+    <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+    <cbc:DocumentTypeCode>ISTATISTIKNO</cbc:DocumentTypeCode>
+  </cac:AdditionalDocumentReference>
+  <cac:Signature>
+    <cbc:ID schemeID="VKN_TCKN">5207813964</cbc:ID>
+    <cac:SignatoryParty>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="VKN">5207813964</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PostalAddress>
+        <cbc:StreetName>Kemeraltı Çarşısı, Anafartalar Cad.</cbc:StreetName>
+        <cbc:BuildingNumber>312</cbc:BuildingNumber>
+        <cbc:CitySubdivisionName>Konak</cbc:CitySubdivisionName>
+        <cbc:CityName>İzmir</cbc:CityName>
+        <cbc:PostalZone>35250</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+          <cbc:Name>Türkiye</cbc:Name>
+        </cac:Country>
+      </cac:PostalAddress>
+    </cac:SignatoryParty>
+    <cac:DigitalSignatureAttachment>
+      <cac:ExternalReference>
+        <cbc:URI>#Signature_KRD2026000004571</cbc:URI>
+      </cac:ExternalReference>
+    </cac:DigitalSignatureAttachment>
+  </cac:Signature>
+  <cac:AccountingSupplierParty>
+    <cac:Party>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="VKN">5207813964</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="SUBENO">IZM-0093</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyName>
+        <cbc:Name>Kordon Döviz ve Altın Ticaret A.Ş.</cbc:Name>
+      </cac:PartyName>
+      <cac:PostalAddress>
+        <cbc:StreetName>Kemeraltı Çarşısı, Anafartalar Cad.</cbc:StreetName>
+        <cbc:BuildingNumber>312</cbc:BuildingNumber>
+        <cbc:CitySubdivisionName>Konak</cbc:CitySubdivisionName>
+        <cbc:CityName>İzmir</cbc:CityName>
+        <cbc:PostalZone>35250</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+          <cbc:Name>Türkiye</cbc:Name>
+        </cac:Country>
+      </cac:PostalAddress>
+      <cac:PartyTaxScheme>
+        <cac:TaxScheme>
+          <cbc:Name>Kemeraltı</cbc:Name>
+        </cac:TaxScheme>
+      </cac:PartyTaxScheme>
+      <cac:Contact>
+        <cbc:Telephone>0232 425 63 63</cbc:Telephone>
+        <cbc:ElectronicMail>islem@kordondoviz.com.tr</cbc:ElectronicMail>
+      </cac:Contact>
+    </cac:Party>
+  </cac:AccountingSupplierParty>
+  <cac:AccountingCustomerParty>
+    <cac:Party>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="TCKN">60418273956</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="MUSTERITURU">GERCEKKISI</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PostalAddress>
+        <cbc:StreetName>Mithatpaşa Cad.</cbc:StreetName>
+        <cbc:BuildingNumber>1180 D: 3</cbc:BuildingNumber>
+        <cbc:CitySubdivisionName>Karabağlar</cbc:CitySubdivisionName>
+        <cbc:CityName>İzmir</cbc:CityName>
+        <cbc:PostalZone>35290</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+          <cbc:Name>Türkiye</cbc:Name>
+        </cac:Country>
+      </cac:PostalAddress>
+      <cac:Contact>
+        <cbc:Telephone>0544 281 39 06</cbc:Telephone>
+      </cac:Contact>
+      <cac:Person>
+        <cbc:FirstName>Can</cbc:FirstName>
+        <cbc:FamilyName>Erdem</cbc:FamilyName>
+        <cbc:NationalityID>TR</cbc:NationalityID>
+      </cac:Person>
+    </cac:Party>
+  </cac:AccountingCustomerParty>
+  <cac:PaymentMeans>
+    <cbc:PaymentMeansCode listID="UN/4461">46</cbc:PaymentMeansCode>
+    <cbc:InstructionNote>Müşteri ödemesi — havale / EFT</cbc:InstructionNote>
+    <cac:PayerFinancialAccount>
+      <cbc:ID>TR620006400000142118375904</cbc:ID>
+    </cac:PayerFinancialAccount>
+  </cac:PaymentMeans>
+  <cac:PaymentMeans>
+    <cbc:PaymentMeansCode listID="UN/4461">10</cbc:PaymentMeansCode>
+    <cbc:InstructionNote>Müessese — döviz efektif olarak elden teslim edildi</cbc:InstructionNote>
+    <cac:PayeeFinancialAccount>
+      <cbc:ID>0</cbc:ID>
+    </cac:PayeeFinancialAccount>
+  </cac:PaymentMeans>
+  <cac:PaymentExchangeRate>
+    <cbc:SourceCurrencyCode>TRY</cbc:SourceCurrencyCode>
+    <cbc:TargetCurrencyCode>USD</cbc:TargetCurrencyCode>
+    <cbc:CalculationRate>0.023467</cbc:CalculationRate>
+  </cac:PaymentExchangeRate>
+  <cac:TaxTotal>
+    <cbc:TaxAmount currencyID="TRY">212.64</cbc:TaxAmount>
+    <cac:TaxSubtotal>
+      <cbc:TaxableAmount currencyID="TRY">106320.00</cbc:TaxableAmount>
+      <cbc:TaxAmount currencyID="TRY">212.64</cbc:TaxAmount>
+      <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+      <cbc:Percent>0.2</cbc:Percent>
+      <cac:TaxCategory>
+        <cac:TaxScheme>
+          <cbc:Name>BSMV</cbc:Name>
+          <cbc:TaxTypeCode>0021</cbc:TaxTypeCode>
+        </cac:TaxScheme>
+      </cac:TaxCategory>
+    </cac:TaxSubtotal>
+  </cac:TaxTotal>
+  <cac:LegalMonetaryTotal>
+    <cbc:LineExtensionAmount currencyID="USD">2500.00</cbc:LineExtensionAmount>
+    <cbc:TaxExclusiveAmount currencyID="TRY">106320.00</cbc:TaxExclusiveAmount>
+    <cbc:TaxInclusiveAmount currencyID="TRY">106532.64</cbc:TaxInclusiveAmount>
+    <cbc:PayableAmount currencyID="TRY">106532.64</cbc:PayableAmount>
+  </cac:LegalMonetaryTotal>
+  <cac:CreditNoteLine>
+    <cbc:ID>1</cbc:ID>
+    <cbc:CreditedQuantity unitCode="C62">20</cbc:CreditedQuantity>
+    <cbc:LineExtensionAmount currencyID="USD">2000.00</cbc:LineExtensionAmount>
+    <cac:Item>
+      <cbc:Description>Seri 2017A · yeni tasarım, mavi güvenlik şeritli</cbc:Description>
+      <cbc:Name>100 USD Banknot</cbc:Name>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="USD">100.00</cbc:PriceAmount>
+    </cac:Price>
+  </cac:CreditNoteLine>
+  <cac:CreditNoteLine>
+    <cbc:ID>2</cbc:ID>
+    <cbc:CreditedQuantity unitCode="C62">8</cbc:CreditedQuantity>
+    <cbc:LineExtensionAmount currencyID="USD">400.00</cbc:LineExtensionAmount>
+    <cac:Item>
+      <cbc:Description>Seri 2013 · renkli tasarım</cbc:Description>
+      <cbc:Name>50 USD Banknot</cbc:Name>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="USD">50.00</cbc:PriceAmount>
+    </cac:Price>
+  </cac:CreditNoteLine>
+  <cac:CreditNoteLine>
+    <cbc:ID>3</cbc:ID>
+    <cbc:CreditedQuantity unitCode="C62">5</cbc:CreditedQuantity>
+    <cbc:LineExtensionAmount currencyID="USD">100.00</cbc:LineExtensionAmount>
+    <cac:Item>
+      <cbc:Description>Seri 2017A</cbc:Description>
+      <cbc:Name>20 USD Banknot</cbc:Name>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="USD">20.00</cbc:PriceAmount>
+    </cac:Price>
+  </cac:CreditNoteLine>
+</CreditNote>
