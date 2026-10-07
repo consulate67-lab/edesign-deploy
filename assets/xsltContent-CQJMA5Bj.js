@@ -5965,7 +5965,1650 @@ const A=`<?xml version="1.0" encoding="UTF-8"?>\r
 		</xsl:if>\r
 	</xsl:template>\r
 </xsl:stylesheet>\r
-`,F=`<?xml version="1.0" encoding="UTF-8"?>
+`,F=`<?xml version="1.0" encoding="UTF-8"?>\r
+<xsl:stylesheet version="2.0" \r
+	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"\r
+	xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"\r
+	xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"\r
+	xmlns:ccts="urn:un:unece:uncefact:documentation:2"\r
+	xmlns:clm54217="urn:un:unece:uncefact:codelist:specification:54217:2001"\r
+	xmlns:clm5639="urn:un:unece:uncefact:codelist:specification:5639:1988"\r
+	xmlns:clm66411="urn:un:unece:uncefact:codelist:specification:66411:2001"\r
+	xmlns:clmIANAMIMEMediaType="urn:un:unece:uncefact:codelist:specification:IANAMIMEMediaType:2003"\r
+	xmlns:fn="http://www.w3.org/2005/xpath-functions" \r
+	xmlns:link="http://www.xbrl.org/2003/linkbase"\r
+	xmlns:n1="urn:oasis:names:specification:ubl:schema:xsd:ReceiptAdvice-2"\r
+	xmlns:qdt="urn:oasis:names:specification:ubl:schema:xsd:QualifiedDatatypes-2"\r
+	xmlns:udt="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2"\r
+	xmlns:xbrldi="http://xbrl.org/2006/xbrldi" \r
+	xmlns:xbrli="http://www.xbrl.org/2003/instance"\r
+	xmlns:xdt="http://www.w3.org/2005/xpath-datatypes" \r
+	xmlns:xlink="http://www.w3.org/1999/xlink"\r
+	xmlns:xs="http://www.w3.org/2001/XMLSchema" \r
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"\r
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"\r
+	exclude-result-prefixes="cac cbc ccts clm54217 clm5639 clm66411 clmIANAMIMEMediaType fn link n1 qdt udt xbrldi xbrli xdt xlink xs xsd xsi">\r
+	<xsl:character-map name="a"> \r
+		<xsl:output-character character="&#128;" string=""/>\r
+		<xsl:output-character character="&#129;" string=""/>\r
+		<xsl:output-character character="&#130;" string=""/>\r
+		<xsl:output-character character="&#131;" string=""/>\r
+		<xsl:output-character character="&#132;" string=""/>\r
+		<xsl:output-character character="&#133;" string=""/>\r
+		<xsl:output-character character="&#134;" string=""/>\r
+		<xsl:output-character character="&#135;" string=""/>\r
+		<xsl:output-character character="&#136;" string=""/>\r
+		<xsl:output-character character="&#137;" string=""/>\r
+		<xsl:output-character character="&#138;" string=""/>\r
+		<xsl:output-character character="&#139;" string=""/>\r
+		<xsl:output-character character="&#140;" string=""/>\r
+		<xsl:output-character character="&#141;" string=""/>\r
+		<xsl:output-character character="&#142;" string=""/>\r
+		<xsl:output-character character="&#143;" string=""/>\r
+		<xsl:output-character character="&#144;" string=""/>\r
+		<xsl:output-character character="&#145;" string=""/>\r
+		<xsl:output-character character="&#146;" string=""/>\r
+		<xsl:output-character character="&#147;" string=""/>\r
+		<xsl:output-character character="&#148;" string=""/>\r
+		<xsl:output-character character="&#149;" string=""/>\r
+		<xsl:output-character character="&#150;" string=""/>\r
+		<xsl:output-character character="&#151;" string=""/>\r
+		<xsl:output-character character="&#152;" string=""/>\r
+		<xsl:output-character character="&#153;" string=""/>\r
+		<xsl:output-character character="&#154;" string=""/>\r
+		<xsl:output-character character="&#155;" string=""/>\r
+		<xsl:output-character character="&#156;" string=""/>\r
+		<xsl:output-character character="&#157;" string=""/>\r
+		<xsl:output-character character="&#158;" string=""/>\r
+		<xsl:output-character character="&#159;" string=""/>\r
+	</xsl:character-map> \r
+	<xsl:decimal-format name="european" decimal-separator="," grouping-separator="." NaN=""/>\r
+	<xsl:output version="4.0" method="html" indent="no" encoding="UTF-8"\r
+		doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN"\r
+		doctype-system="http://www.w3.org/TR/html4/loose.dtd" use-character-maps="a"/>\r
+	<xsl:param name="SV_OutputFormat" select="'HTML'"/>\r
+	<xsl:variable name="XML" select="/"/>\r
+	\r
+	\r
+	<xsl:template match="/">\r
+		<html>\r
+			<head>\r
+				<style type="text/css">\r
+					body {\r
+					    background-color: #FFFFFF;\r
+					    font-family: 'Tahoma', "Times New Roman", Times, serif;\r
+					    font-size: 11px;\r
+					    color: #666666;\r
+					}\r
+					h1, h2 {\r
+					    padding-bottom: 3px;\r
+					    padding-top: 3px;\r
+					    margin-bottom: 5px;\r
+					    text-transform: uppercase;\r
+					    font-family: Arial, Helvetica, sans-serif;\r
+					}\r
+					h1 {\r
+					    font-size: 1.4em;\r
+					    text-transform:none;\r
+					}\r
+					h2 {\r
+					    font-size: 1em;\r
+					    color: brown;\r
+					}\r
+					h3 {\r
+					    font-size: 1em;\r
+					    color: #333333;\r
+					    text-align: justify;\r
+					    margin: 0;\r
+					    padding: 0;\r
+					}\r
+					h4 {\r
+					    font-size: 1.1em;\r
+					    font-style: bold;\r
+					    font-family: Arial, Helvetica, sans-serif;\r
+					    color: #000000;\r
+					    margin: 0;\r
+					    padding: 0;\r
+					}\r
+					hr {\r
+					    height:2px;\r
+					    color: #000000;\r
+					    background-color: #000000;\r
+					    border-bottom: 1px solid #000000;\r
+					}\r
+					p, ul, ol {\r
+					    margin-top: 1.5em;\r
+					}\r
+					ul, ol {\r
+					    margin-left: 3em;\r
+					}\r
+					blockquote {\r
+					    margin-left: 3em;\r
+					    margin-right: 3em;\r
+					    font-style: italic;\r
+					}\r
+					a {\r
+					    text-decoration: none;\r
+					    color: #70A300;\r
+					}\r
+					a:hover {\r
+					    border: none;\r
+					    color: #70A300;\r
+					}\r
+					#despatchTable {\r
+					    border-collapse:collapse;\r
+					    font-size:11px;\r
+					    float:right;\r
+					    border-color:gray;\r
+					}\r
+					#ettnTable {\r
+					    border-collapse:collapse;\r
+					    font-size:11px;\r
+					    border-color:gray;\r
+					}\r
+					#customerPartyTable {\r
+					    border-width: 0px;\r
+					    border-spacing:;\r
+					    border-style: inset;\r
+					    border-color: gray;\r
+					    border-collapse: collapse;\r
+					    background-color:\r
+					}\r
+					#customerIDTable {\r
+					    border-width: 2px;\r
+					    border-spacing:;\r
+					    border-style: inset;\r
+					    border-color: gray;\r
+					    border-collapse: collapse;\r
+					    background-color:\r
+					}\r
+					#customerIDTableTd {\r
+					    border-width: 2px;\r
+					    border-spacing:;\r
+					    border-style: inset;\r
+					    border-color: gray;\r
+					    border-collapse: collapse;\r
+					    background-color:\r
+					}\r
+					#lineTable {\r
+					    border-width:2px;\r
+					    border-spacing:;\r
+					    border-style: inset;\r
+					    border-color: black;\r
+					    border-collapse: collapse;\r
+					    background-color:;\r
+					}\r
+					td.lineTableTd {\r
+					    border-width: 1px;\r
+					    padding: 1px;\r
+					    border-style: inset;\r
+					    border-color: black;\r
+					    background-color: white;\r
+					}\r
+					tr.lineTableTr {\r
+					    border-width: 1px;\r
+					    padding: 0px;\r
+					    border-style: inset;\r
+					    border-color: black;\r
+					    background-color: white;\r
+					    -moz-border-radius:;\r
+					}\r
+					#lineTableDummyTd {\r
+					    border-width: 1px;\r
+					    border-color:white;\r
+					    padding: 1px;\r
+					    border-style: inset;\r
+					    border-color: black;\r
+					    background-color: white;\r
+					}\r
+					td.lineTableBudgetTd {\r
+					    border-width: 2px;\r
+					    border-spacing:0px;\r
+					    padding: 1px;\r
+					    border-style: inset;\r
+					    border-color: black;\r
+					    background-color: white;\r
+					    -moz-border-radius:;\r
+					}\r
+					#notesTable {\r
+					    border-width: 2px;\r
+					    border-spacing:;\r
+					    border-style: inset;\r
+					    border-color: black;\r
+					    border-collapse: collapse;\r
+					    background-color:\r
+					}\r
+					#notesTableTd {\r
+					    border-width: 0px;\r
+					    border-spacing:;\r
+					    border-style: inset;\r
+					    border-color: black;\r
+					    border-collapse: collapse;\r
+					    background-color: ;\r
+						vertical-align: top;\r
+					}\r
+					table {\r
+					    border-spacing:0px;\r
+					}\r
+					#budgetContainerTable {\r
+					    border-width: 0px;\r
+					    border-spacing: 0px;\r
+					    border-style: inset;\r
+					    border-color: black;\r
+					    border-collapse: collapse;\r
+					    background-color:;\r
+					}\r
+					td {\r
+					    border-color:gray;\r
+					}</style>\r
+				<title>İrsaliye Yanıtı</title>\r
+			</head>\r
+			<body\r
+				style="margin-left=0.6in; margin-right=0.6in; margin-top=0.79in; margin-bottom=0.79in">\r
+				<xsl:for-each select="$XML">\r
+					<table style="border-color:blue; " border="0" cellspacing="0px" width="800"\r
+						cellpadding="0px">\r
+						<tbody>\r
+							<tr valign="top">\r
+								<td width="40%">\r
+									<br/>\r
+									<hr/>\r
+									<table align="center" border="0" width="100%">\r
+										<tbody>\r
+											<tr align="left">\r
+												<xsl:for-each select="n1:ReceiptAdvice/cac:DeliveryCustomerParty/cac:Party">\r
+													<td align="left">\r
+													<xsl:if test="cac:PartyName">\r
+													<xsl:value-of select="cac:PartyName/cbc:Name"/>\r
+													<br/>\r
+													</xsl:if>\r
+													\r
+													</td>\r
+												</xsl:for-each>\r
+											</tr>\r
+											<tr align="left">\r
+												<xsl:for-each select="n1:ReceiptAdvice/cac:DeliveryCustomerParty/cac:Party">\r
+												<td align="left">\r
+												<xsl:for-each select="cac:PostalAddress">\r
+													<xsl:for-each select="cbc:StreetName">\r
+													<xsl:apply-templates/>\r
+													<xsl:text>&#160;</xsl:text>\r
+													</xsl:for-each>\r
+													<xsl:for-each select="cbc:BuildingName">\r
+													<xsl:apply-templates/>\r
+													</xsl:for-each>\r
+													<xsl:if test="cbc:BuildingNumber">\r
+													<xsl:text> No:</xsl:text>\r
+													<xsl:for-each select="cbc:BuildingNumber">\r
+													<xsl:apply-templates/>\r
+													</xsl:for-each>\r
+													<xsl:text>&#160;</xsl:text>\r
+													</xsl:if>\r
+													<br/>\r
+													<xsl:for-each select="cbc:PostalZone">\r
+													<xsl:apply-templates/>\r
+													<xsl:text>&#160;</xsl:text>\r
+													</xsl:for-each>\r
+													<xsl:for-each select="cbc:CitySubdivisionName">\r
+													<xsl:apply-templates/>\r
+													</xsl:for-each>\r
+													<xsl:text>/ </xsl:text>\r
+													<xsl:for-each select="cbc:CityName">\r
+													<xsl:apply-templates/>\r
+													<xsl:text>&#160;</xsl:text>\r
+													</xsl:for-each>\r
+												</xsl:for-each>\r
+												</td>\r
+												</xsl:for-each>\r
+											</tr>\r
+											<xsl:if\r
+												test="//n1:ReceiptAdvice/cac:DeliveryCustomerParty/cac:Party/cac:Contact/cbc:Telephone or //n1:ReceiptAdvice/cac:DeliveryCustomerParty/cac:Party/cac:Contact/cbc:Telefax">\r
+												<tr align="left">\r
+													<xsl:for-each select="n1:ReceiptAdvice/cac:DeliveryCustomerParty/cac:Party">														\r
+														<td align="left">\r
+														<xsl:for-each select="cac:Contact">\r
+														<xsl:if test="cbc:Telephone">\r
+														<xsl:text>Tel: </xsl:text>\r
+														<xsl:for-each select="cbc:Telephone">\r
+														<xsl:apply-templates/>\r
+														</xsl:for-each>\r
+														</xsl:if>\r
+														<xsl:if test="cbc:Telefax">\r
+														<xsl:text> Fax: </xsl:text>\r
+														<xsl:for-each select="cbc:Telefax">\r
+														<xsl:apply-templates/>\r
+														</xsl:for-each>\r
+														</xsl:if>\r
+														<xsl:text>&#160;</xsl:text>\r
+														</xsl:for-each>\r
+														</td>\r
+													</xsl:for-each>\r
+												</tr>\r
+											</xsl:if>\r
+											<xsl:for-each\r
+												select="//n1:ReceiptAdvice/cac:DeliveryCustomerParty/cac:Party/cbc:WebsiteURI">\r
+												<tr align="left">\r
+												<td>\r
+												<xsl:text>Web Sitesi: </xsl:text>\r
+												<xsl:value-of select="."/>\r
+												</td>\r
+												</tr>\r
+											</xsl:for-each>\r
+											<xsl:for-each\r
+												select="//n1:ReceiptAdvice/cac:DeliveryCustomerParty/cac:Party/cac:Contact/cbc:ElectronicMail">\r
+												<tr align="left">\r
+												<td>\r
+												<xsl:text>E-Posta: </xsl:text>\r
+												<xsl:value-of select="."/>\r
+												</td>\r
+												</tr>\r
+											</xsl:for-each>\r
+											<tr align="left">\r
+												<xsl:for-each select="n1:ReceiptAdvice/cac:DeliveryCustomerParty/cac:Party">																											\r
+													<td align="left">\r
+													<xsl:text>Vergi Dairesi: </xsl:text>\r
+													<xsl:for-each select="cac:PartyTaxScheme">\r
+													<xsl:for-each select="cac:TaxScheme">\r
+													<xsl:for-each select="cbc:Name">\r
+													<xsl:apply-templates/>\r
+													</xsl:for-each>\r
+													</xsl:for-each>\r
+													<xsl:text>&#160; </xsl:text>\r
+													</xsl:for-each>\r
+													</td>\r
+												</xsl:for-each>\r
+											</tr>\r
+											<xsl:for-each\r
+												select="//n1:ReceiptAdvice/cac:DeliveryCustomerParty/cac:Party/cac:PartyIdentification">\r
+												<tr align="left">\r
+												<td>\r
+												<xsl:value-of select="cbc:ID/@schemeID"/>\r
+												<xsl:text>: </xsl:text>\r
+												<xsl:value-of select="cbc:ID"/>\r
+												</td>\r
+												</tr>\r
+											</xsl:for-each>\r
+										</tbody>\r
+									</table>\r
+									<hr/>\r
+								</td>\r
+								<td width="20%" align="center" valign="middle">\r
+									<br/>\r
+									<br/>\r
+									<img style="width:91px;" align="middle" alt="E-Fatura Logo"\r
+										src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4QBoRXhpZgAASUkqAAgAAAADABIBAwABAAAAAQAAADEBAgAQAAAAMgAAAGmHBAABAAAAQgAAAAAAAABTaG90d2VsbCAwLjIyLjAAAgACoAkAAQAAAKYBAAADoAkAAQAAAKYBAAAAAAAA/+EJ9Gh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8APD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNC40LjAtRXhpdjIiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczpleGlmPSJodHRwOi8vbnMuYWRvYmUuY29tL2V4aWYvMS4wLyIgeG1sbnM6dGlmZj0iaHR0cDovL25zLmFkb2JlLmNvbS90aWZmLzEuMC8iIGV4aWY6UGl4ZWxYRGltZW5zaW9uPSI0MjIiIGV4aWY6UGl4ZWxZRGltZW5zaW9uPSI0MjIiIHRpZmY6SW1hZ2VXaWR0aD0iNDIyIiB0aWZmOkltYWdlSGVpZ2h0PSI0MjIiIHRpZmY6T3JpZW50YXRpb249IjEiLz4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8P3hwYWNrZXQgZW5kPSJ3Ij8+/9sAQwADAgIDAgIDAwMDBAMDBAUIBQUE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"/>\r
+									<h1 align="center">\r
+										<span style="font-weight:bold; ">\r
+											<xsl:text>İRSALİYE YANITI</xsl:text>\r
+										</span>\r
+									</h1>\r
+								</td>\r
+								<td width="40%"/>\r
+							</tr>\r
+							<tr style="height:118px; " valign="top">\r
+								<td width="40%" align="right" valign="bottom">\r
+									<table id="customerPartyTable" align="left" border="0">\r
+										<tbody>\r
+											<tr style="height:71px; ">\r
+												<td>\r
+												<hr/>\r
+												<table align="center" border="0">\r
+												<tbody>\r
+												<tr>\r
+												<xsl:for-each select="n1:ReceiptAdvice/cac:DespatchSupplierParty/cac:Party">\r
+													<td style="width:469px; " align="left">\r
+														<span style="font-weight:bold; ">\r
+															<xsl:text>SAYIN</xsl:text>\r
+														</span>\r
+													</td>\r
+												</xsl:for-each>													\r
+												</tr>\r
+												<tr>\r
+													<xsl:choose>\r
+														<xsl:when test="n1:ReceiptAdvice/cac:BuyerCustomerParty/cac:Party/cac:PartyIdentification/cbc:ID[@schemeID='PARTYTYPE' and text()='TAXFREE']">\r
+															<xsl:for-each select="n1:ReceiptAdvice/cac:BuyerCustomerParty/cac:Party">\r
+																<xsl:call-template name="Party_Title">\r
+																	<xsl:with-param name="PartyType">TAXFREE</xsl:with-param>\r
+																</xsl:call-template>\r
+															</xsl:for-each>															\r
+														</xsl:when>\r
+														<xsl:otherwise>\r
+															<xsl:for-each select="n1:ReceiptAdvice/cac:DespatchSupplierParty/cac:Party">\r
+																<xsl:call-template name="Party_Title">\r
+																	<xsl:with-param name="PartyType">OTHER</xsl:with-param>\r
+																</xsl:call-template>\r
+															</xsl:for-each>															\r
+														</xsl:otherwise>\r
+													</xsl:choose>													\r
+												</tr>\r
+													<xsl:choose>\r
+														<xsl:when test="n1:ReceiptAdvice/cac:BuyerCustomerParty/cac:Party/cac:PartyIdentification/cbc:ID[@schemeID='PARTYTYPE' and text()='TAXFREE']">\r
+																<xsl:for-each select="n1:ReceiptAdvice/cac:BuyerCustomerParty/cac:Party">\r
+																	<tr>\r
+																		<xsl:call-template name="Party_Adress">\r
+																			<xsl:with-param name="PartyType">TAXFREE</xsl:with-param>\r
+																		</xsl:call-template>\r
+																	</tr>\r
+																	<xsl:call-template name="Party_Other">\r
+																		<xsl:with-param name="PartyType">TAXFREE</xsl:with-param>\r
+																	</xsl:call-template>\r
+																</xsl:for-each>															\r
+														</xsl:when>\r
+														<xsl:otherwise>\r
+															<xsl:for-each select="n1:ReceiptAdvice/cac:DespatchSupplierParty/cac:Party">\r
+																<tr>\r
+																	<xsl:call-template name="Party_Adress">\r
+																		<xsl:with-param name="PartyType">OTHER</xsl:with-param>																	\r
+																	</xsl:call-template>\r
+																</tr>\r
+																<xsl:call-template name="Party_Other">\r
+																	<xsl:with-param name="PartyType">OTHER</xsl:with-param>\r
+																</xsl:call-template>\r
+															</xsl:for-each>\r
+														</xsl:otherwise>\r
+													</xsl:choose>																										\r
+												</tbody>\r
+												</table>\r
+												<hr/>\r
+												</td>\r
+											</tr>\r
+										</tbody>\r
+									</table>\r
+									<br/>\r
+								</td>\r
+								<td width="60%" align="center" valign="bottom" colspan="2">\r
+									<table border="1" id="despatchTable">\r
+										<tbody>\r
+											<tr>\r
+												<td style="width:135px;" align="left">\r
+												<span style="font-weight:bold; ">\r
+												<xsl:text>Özelleştirme No:</xsl:text>\r
+												</span>\r
+												</td>\r
+												<td style="width:110px;" align="left">\r
+													<xsl:for-each select="n1:ReceiptAdvice/cbc:CustomizationID">\r
+														<xsl:apply-templates/>\r
+													</xsl:for-each>\r
+												</td>\r
+											</tr>\r
+											<tr style="height:13px; ">\r
+												<td align="left">\r
+												<span style="font-weight:bold; ">\r
+												<xsl:text>Senaryo:</xsl:text>\r
+												</span>\r
+												</td>\r
+												<td align="left">\r
+													<xsl:for-each select="n1:ReceiptAdvice/cbc:ProfileID">\r
+														<xsl:apply-templates/>\r
+													</xsl:for-each>\r
+												</td>\r
+											</tr>\r
+											<tr style="height:13px; ">\r
+												<td align="left">\r
+												<span style="font-weight:bold; ">\r
+												<xsl:text>İrsaliye Yanıtı Tipi:</xsl:text>\r
+												</span>\r
+												</td>\r
+												<td align="left">\r
+													<xsl:for-each select="n1:ReceiptAdvice/cbc:ReceiptAdviceTypeCode">\r
+														<xsl:apply-templates/>\r
+													</xsl:for-each>\r
+												</td>\r
+											</tr>\r
+											<tr style="height:13px; ">\r
+												<td align="left">\r
+												<span style="font-weight:bold; ">\r
+												<xsl:text>İrsaliye Yanıtı No:</xsl:text>\r
+												</span>\r
+												</td>\r
+												<td align="left">\r
+													<xsl:for-each select="n1:ReceiptAdvice/cbc:ID">\r
+														<xsl:apply-templates/>\r
+													</xsl:for-each>\r
+												</td>\r
+											</tr>\r
+											<tr style="height:13px; ">\r
+												<td align="left">\r
+												<span style="font-weight:bold; ">\r
+												<xsl:text>İrsaliye Yanıtı Tarihi:</xsl:text>\r
+												</span>\r
+												</td>\r
+												<td align="left">\r
+													<xsl:for-each select="n1:ReceiptAdvice/cbc:IssueDate">\r
+														<xsl:apply-templates select="."/>\r
+													</xsl:for-each>\r
+												</td>\r
+											</tr>\r
+											<tr style="height:13px; ">\r
+												<td align="left">\r
+												<span style="font-weight:bold; ">\r
+												<xsl:text>İrsaliye Yanıtı Zamanı:</xsl:text>\r
+												</span>\r
+												</td>\r
+												<td align="left">\r
+													<xsl:for-each select="n1:ReceiptAdvice/cbc:IssueTime">\r
+														<xsl:apply-templates select="."/>\r
+													</xsl:for-each>\r
+												</td>\r
+											</tr>\r
+											<tr style="height:13px; ">\r
+												<td align="left">\r
+												<span style="font-weight:bold; ">\r
+												<xsl:text>Teslim Tarihi:</xsl:text>\r
+												</span>\r
+												</td>\r
+												<td align="left">\r
+													<xsl:for-each select="n1:ReceiptAdvice/cac:Shipment/cac:Delivery/cbc:ActualDeliveryDate">\r
+														<xsl:apply-templates select="."/>\r
+													</xsl:for-each>\r
+												</td>\r
+											</tr>\r
+											<tr style="height:13px; ">\r
+												<td align="left">\r
+												<span style="font-weight:bold; ">\r
+												<xsl:text>Teslim Zamanı:</xsl:text>\r
+												</span>\r
+												</td>\r
+												<td align="left">\r
+													<xsl:for-each select="n1:ReceiptAdvice/cac:Shipment/cac:Delivery/cbc:ActualDeliveryTime">\r
+														<xsl:apply-templates select="."/>\r
+													</xsl:for-each>\r
+												</td>\r
+											</tr>\r
+											<xsl:if test="n1:ReceiptAdvice/cac:DespatchDocumentReference">\r
+												<tr style="height:13px">\r
+													<td align="left">\r
+														<span style="font-weight:bold; ">\r
+															<xsl:text>İrsaliye No:</xsl:text>\r
+														</span>\r
+													</td>\r
+													<td align="left">\r
+														<xsl:for-each select="n1:ReceiptAdvice/cac:DespatchDocumentReference/cbc:ID">\r
+															<xsl:apply-templates/>\r
+														</xsl:for-each>\r
+													</td>\r
+												</tr>\r
+											</xsl:if>\r
+											<xsl:if	test="n1:ReceiptAdvice/cac:OrderReference/cbc:IssueDate">\r
+												<tr style="height:13px">\r
+													<td align="left">\r
+														<span style="font-weight:bold; ">\r
+														<xsl:text>İrsaliye Tarihi:</xsl:text>\r
+														</span>\r
+													</td>\r
+													<td align="left">\r
+														<xsl:for-each select="n1:ReceiptAdvice/cac:DespatchDocumentReference/cbc:IssueDate">\r
+															<xsl:apply-templates select="."/>\r
+														</xsl:for-each>\r
+													</td>\r
+												</tr>\r
+											</xsl:if>\r
+											\r
+											<xsl:if test="n1:ReceiptAdvice/cac:OrderReference">\r
+												<tr style="height:13px">\r
+													<td align="left">\r
+														<span style="font-weight:bold; ">\r
+															<xsl:text>Sipariş No:</xsl:text>\r
+														</span>\r
+													</td>\r
+													<td align="left">\r
+														<xsl:for-each select="n1:ReceiptAdvice/cac:OrderReference/cbc:ID">\r
+															<xsl:apply-templates/>\r
+														</xsl:for-each>\r
+													</td>\r
+												</tr>\r
+											</xsl:if>\r
+											<xsl:if	test="n1:ReceiptAdvice/cac:OrderReference/cbc:IssueDate">\r
+												<tr style="height:13px">\r
+													<td align="left">\r
+														<span style="font-weight:bold; ">\r
+														<xsl:text>Sipariş Tarihi:</xsl:text>\r
+														</span>\r
+													</td>\r
+													<td align="left">\r
+														<xsl:for-each select="n1:ReceiptAdvice/cac:OrderReference/cbc:IssueDate">\r
+															<xsl:apply-templates select="."/>\r
+														</xsl:for-each>\r
+													</td>\r
+												</tr>\r
+											</xsl:if>\r
+										</tbody>\r
+									</table>\r
+								</td>\r
+							</tr>\r
+							<tr align="left">\r
+								<td align="left" valign="top" id="ettnTable">\r
+									<span style="font-weight:bold; ">\r
+										<xsl:text>ETTN:&#160;</xsl:text>\r
+									</span>\r
+									<xsl:for-each select="n1:ReceiptAdvice/cbc:UUID">\r
+										<xsl:apply-templates/>\r
+									</xsl:for-each>\r
+								</td>\r
+							</tr>\r
+						</tbody>\r
+					</table>\r
+					<div id="lineTableAligner">\r
+						<span>\r
+							<xsl:text>&#160;</xsl:text>\r
+						</span>\r
+					</div>\r
+					<table border="1" id="lineTable" width="800">\r
+						<tbody>\r
+							<tr class="lineTableTr">\r
+								<td class="lineTableTd" style="width:5%" align="center">\r
+									<span style="font-weight:bold;">\r
+										<xsl:text>Sıra No</xsl:text>\r
+									</span>\r
+								</td>\r
+								<td class="lineTableTd" style="width:25%" align="center">\r
+									<span style="font-weight:bold;">\r
+										<xsl:text>Mal</xsl:text>\r
+									</span>\r
+								</td>\r
+								<td class="lineTableTd" style="width:12%" align="center">\r
+									<span style="font-weight:bold;">\r
+										<xsl:text>Teslim Alınan Miktar</xsl:text>\r
+									</span>\r
+								</td>\r
+								<td class="lineTableTd" style="width:10%" align="center">\r
+									<span style="font-weight:bold;">\r
+										<xsl:text>Kabul Edilmeyen Miktar</xsl:text>\r
+									</span>\r
+								</td>\r
+								<td class="lineTableTd" style="width:8%" align="center">\r
+									<span style="font-weight:bold;">\r
+										<xsl:text>Eksik Miktar</xsl:text>\r
+									</span>\r
+								</td>\r
+								\r
+								<td class="lineTableTd" style="width:8%" align="center">\r
+									<span style="font-weight:bold;">\r
+										<xsl:text>Fazla Miktar</xsl:text>\r
+									</span>\r
+								</td>\r
+								<td class="lineTableTd" style="width:32%" align="center">\r
+									<span style="font-weight:bold;">\r
+										<xsl:text>Açıklama</xsl:text>\r
+									</span>\r
+								</td>\r
+							</tr>\r
+							<xsl:if test="count(//n1:ReceiptAdvice/cac:ReceiptLine) &gt;= 20">\r
+								<xsl:for-each select="//n1:ReceiptAdvice/cac:ReceiptLine">\r
+									<xsl:apply-templates select="."/>\r
+								</xsl:for-each>\r
+							</xsl:if>\r
+							<xsl:if test="count(//n1:ReceiptAdvice/cac:ReceiptLine) &lt; 20">\r
+								<xsl:choose>\r
+									<xsl:when test="//n1:ReceiptAdvice/cac:ReceiptLine[1]">\r
+										<xsl:apply-templates\r
+											select="//n1:ReceiptAdvice/cac:ReceiptLine[1]"/>\r
+									</xsl:when>\r
+									<xsl:otherwise>\r
+										<xsl:apply-templates select="//n1:ReceiptAdvice"/>\r
+									</xsl:otherwise>\r
+								</xsl:choose>\r
+								<xsl:choose>\r
+									<xsl:when test="//n1:ReceiptAdvice/cac:ReceiptLine[2]">\r
+										<xsl:apply-templates\r
+											select="//n1:ReceiptAdvice/cac:ReceiptLine[2]"/>\r
+									</xsl:when>\r
+									<xsl:otherwise>\r
+										<xsl:apply-templates select="//n1:ReceiptAdvice"/>\r
+									</xsl:otherwise>\r
+								</xsl:choose>\r
+								<xsl:choose>\r
+									<xsl:when test="//n1:ReceiptAdvice/cac:ReceiptLine[3]">\r
+										<xsl:apply-templates\r
+											select="//n1:ReceiptAdvice/cac:ReceiptLine[3]"/>\r
+									</xsl:when>\r
+									<xsl:otherwise>\r
+										<xsl:apply-templates select="//n1:ReceiptAdvice"/>\r
+									</xsl:otherwise>\r
+								</xsl:choose>\r
+								<xsl:choose>\r
+									<xsl:when test="//n1:ReceiptAdvice/cac:ReceiptLine[4]">\r
+										<xsl:apply-templates\r
+											select="//n1:ReceiptAdvice/cac:ReceiptLine[4]"/>\r
+									</xsl:when>\r
+									<xsl:otherwise>\r
+										<xsl:apply-templates select="//n1:ReceiptAdvice"/>\r
+									</xsl:otherwise>\r
+								</xsl:choose>\r
+								<xsl:choose>\r
+									<xsl:when test="//n1:ReceiptAdvice/cac:ReceiptLine[5]">\r
+										<xsl:apply-templates\r
+											select="//n1:ReceiptAdvice/cac:ReceiptLine[5]"/>\r
+									</xsl:when>\r
+									<xsl:otherwise>\r
+										<xsl:apply-templates select="//n1:ReceiptAdvice"/>\r
+									</xsl:otherwise>\r
+								</xsl:choose>\r
+								<xsl:choose>\r
+									<xsl:when test="//n1:ReceiptAdvice/cac:ReceiptLine[6]">\r
+										<xsl:apply-templates\r
+											select="//n1:ReceiptAdvice/cac:ReceiptLine[6]"/>\r
+									</xsl:when>\r
+									<xsl:otherwise>\r
+										<xsl:apply-templates select="//n1:ReceiptAdvice"/>\r
+									</xsl:otherwise>\r
+								</xsl:choose>\r
+								<xsl:choose>\r
+									<xsl:when test="//n1:ReceiptAdvice/cac:ReceiptLine[7]">\r
+										<xsl:apply-templates\r
+											select="//n1:ReceiptAdvice/cac:ReceiptLine[7]"/>\r
+									</xsl:when>\r
+									<xsl:otherwise>\r
+										<xsl:apply-templates select="//n1:ReceiptAdvice"/>\r
+									</xsl:otherwise>\r
+								</xsl:choose>\r
+								<xsl:choose>\r
+									<xsl:when test="//n1:ReceiptAdvice/cac:ReceiptLine[8]">\r
+										<xsl:apply-templates\r
+											select="//n1:ReceiptAdvice/cac:ReceiptLine[8]"/>\r
+									</xsl:when>\r
+									<xsl:otherwise>\r
+										<xsl:apply-templates select="//n1:ReceiptAdvice"/>\r
+									</xsl:otherwise>\r
+								</xsl:choose>\r
+								<xsl:choose>\r
+									<xsl:when test="//n1:ReceiptAdvice/cac:ReceiptLine[9]">\r
+										<xsl:apply-templates\r
+											select="//n1:ReceiptAdvice/cac:ReceiptLine[9]"/>\r
+									</xsl:when>\r
+									<xsl:otherwise>\r
+										<xsl:apply-templates select="//n1:ReceiptAdvice"/>\r
+									</xsl:otherwise>\r
+								</xsl:choose>\r
+								<xsl:choose>\r
+									<xsl:when test="//n1:ReceiptAdvice/cac:ReceiptLine[10]">\r
+										<xsl:apply-templates\r
+											select="//n1:ReceiptAdvice/cac:ReceiptLine[10]"/>\r
+									</xsl:when>\r
+									<xsl:otherwise>\r
+										<xsl:apply-templates select="//n1:ReceiptAdvice"/>\r
+									</xsl:otherwise>\r
+								</xsl:choose>\r
+							</xsl:if>\r
+						</tbody>\r
+					</table>\r
+				</xsl:for-each>\r
+				<table id="budgetContainerTable" width="800px">\r
+					<tr align="right">\r
+						<td/>\r
+						<td class="lineTableBudgetTd" align="right" width="156px">\r
+							<span style="font-weight:bold; ">\r
+								<xsl:text>Toplam Tutar</xsl:text>\r
+							</span>\r
+						</td>\r
+						<td class="lineTableBudgetTd" style="width:156px; " align="right">\r
+							<xsl:for-each select="n1:ReceiptAdvice/cac:Shipment/cac:Consignment/cbc:TotalInvoiceAmount">\r
+								<xsl:call-template name="Curr_Type"/>\r
+							</xsl:for-each>\r
+						</td>\r
+					</tr>\r
+				</table>\r
+				<br/>\r
+				<xsl:if test="//n1:ReceiptAdvice/cac:AdditionalDocumentReference">\r
+					<table id="lineTable" width="800">\r
+						<thead>\r
+							<tr>\r
+								<td align="left"><span style="font-weight:bold; " align="center">&#160;&#160;&#160;&#160;&#160;İlgili Dokümanlar</span></td>							\r
+								<td align="left"><span style="font-weight:bold; " align="center">&#160;&#160;&#160;&#160;&#160;</span></td>\r
+								<td align="left"><span style="font-weight:bold; " align="center">&#160;&#160;&#160;&#160;&#160;</span></td>\r
+								<td align="left"><span style="font-weight:bold; " align="center">&#160;&#160;&#160;&#160;&#160;</span></td>\r
+							</tr>\r
+						</thead>					\r
+						<tbody>\r
+							<tr align="left" class="lineTableTr">							\r
+								<td class="lineTableTd">\r
+									<span style="font-weight:bold; " align="center">&#160;&#160;&#160;&#160;&#160;Doküman No</span>\r
+								</td>\r
+								<td class="lineTableTd"><span style="font-weight:bold; " align="center">&#160;&#160;&#160;&#160;&#160;Tarih</span></td>\r
+								<td class="lineTableTd"><span style="font-weight:bold; " align="center">&#160;&#160;&#160;&#160;&#160;Doküman Tipi</span></td>\r
+								<td class="lineTableTd"><span style="font-weight:bold; " align="center">&#160;&#160;&#160;&#160;&#160;Açıklama</span></td>\r
+							</tr>\r
+							<xsl:for-each select="//n1:ReceiptAdvice/cac:AdditionalDocumentReference">\r
+								<tr align="left" class="lineTableTr">\r
+									<td class="lineTableTd">&#160;&#160;&#160;&#160;&#160;\r
+										<xsl:value-of select="./cbc:ID"/> \r
+									</td>\r
+									<td class="lineTableTd">&#160;&#160;&#160;&#160;&#160;\r
+										<xsl:for-each select="./cbc:IssueDate">\r
+											<xsl:apply-templates select="."/>\r
+										</xsl:for-each> \r
+									</td>\r
+									<td class="lineTableTd">&#160;&#160;&#160;&#160;&#160;\r
+										<xsl:value-of select="./cbc:DocumentType"/> \r
+									</td>\r
+									<td class="lineTableTd">&#160;&#160;&#160;&#160;&#160;\r
+										<xsl:value-of select="./cbc:DocumentDescription"/> \r
+									</td>\r
+								</tr>\r
+							</xsl:for-each>\r
+						</tbody>\r
+					</table>\r
+				</xsl:if>\r
+				<br/>\r
+				<table id="notesTable" width="800" align="left">\r
+				<thead>\r
+							<tr>\r
+								<td align="left"><span style="font-weight:bold; " align="center">&#160;&#160;&#160;&#160;&#160;Açıklamalar</span></td>\r
+								<td align="left"><span style="font-weight:bold; " align="center">&#160;&#160;&#160;&#160;&#160;Taşıyıcı Bilgileri</span></td>								\r
+							</tr>\r
+						</thead>\r
+					<tbody>\r
+						<tr align="left">\r
+							<td id="notesTableTd" height="100">\r
+								<xsl:for-each select="//n1:ReceiptAdvice/cbc:Note">\r
+									<b>&#160;&#160;&#160;&#160;&#160;&#160;Not: </b>\r
+									<xsl:value-of select="."/>	\r
+									<br/>\r
+								</xsl:for-each>	\r
+								<xsl:for-each select="//cac:SellerSupplierParty"> \r
+									<b>&#160;&#160;&#160;&#160;&#160;&#160;Asıl Satıcı VKN: </b>\r
+									<xsl:value-of select="cac:Party/cac:PartyIdentification/cbc:ID"/><br/>\r
+									<b>&#160;&#160;&#160;&#160;&#160;&#160;Asıl Satıcı Ünvan: </b>\r
+									<xsl:value-of select="cac:Party/cac:PartyName/cbc:Name"/><br/>\r
+								</xsl:for-each>\r
+								<xsl:for-each select="//cac:BuyerCustomerParty"> \r
+									<b>&#160;&#160;&#160;&#160;&#160;&#160;Asıl Alıcı VKN: </b>\r
+									<xsl:value-of select="cac:Party/cac:PartyIdentification/cbc:ID"/><br/>\r
+									<b>&#160;&#160;&#160;&#160;&#160;&#160;Asıl Alıcı Ünvan: </b>\r
+									<xsl:value-of select="cac:Party/cac:PartyName/cbc:Name"/><br/>\r
+								</xsl:for-each>	\r
+								<xsl:for-each select="//cac:DespatchSupplierParty/cac:DespatchContact/cbc:Name">\r
+									<b>&#160;&#160;&#160;&#160;&#160; Teslim Eden: </b>\r
+									<xsl:apply-templates/>\r
+									<xsl:text>&#160;</xsl:text>\r
+									<br/>\r
+								</xsl:for-each>\r
+								<xsl:for-each select="//cac:DeliveryCustomerParty/cac:DeliveryContact/cbc:Name">\r
+									<b>&#160;&#160;&#160;&#160;&#160; Teslim Alan: </b>\r
+									<xsl:apply-templates/>\r
+									<xsl:text>&#160;</xsl:text>\r
+									<br/>\r
+								</xsl:for-each>\r
+							</td>\r
+							<td id="notesTableTd" height="100">\r
+								<xsl:for-each select="//cac:CarrierParty">\r
+									<b>&#160;&#160;&#160;&#160;&#160;&#160; Taşıyıcı Firma: </b>\r
+									VKN: <xsl:value-of select="./cac:PartyIdentification/cbc:ID"/>, <xsl:value-of select="./cac:PartyName/cbc:Name"/>\r
+									<br/>\r
+								</xsl:for-each>\r
+								<xsl:for-each select="//cac:ShipmentStage/cac:TransportMeans/cac:RoadTransport/cbc:LicensePlateID">\r
+									<b>&#160;&#160;&#160;&#160;&#160;&#160; Araç plaka numarası: </b>\r
+									<xsl:value-of select="."/>	\r
+									<br/>\r
+								</xsl:for-each>	\r
+								<xsl:for-each select="//cac:TransportHandlingUnit/cac:TransportEquipment/cbc:ID[@schemeID = 'DORSEPLAKA']">\r
+									<b>&#160;&#160;&#160;&#160;&#160;&#160; Dorse plaka numarası: </b>\r
+									<xsl:value-of select="."/>	\r
+									<br/>\r
+								</xsl:for-each>	\r
+								<xsl:for-each select="//cac:ShipmentStage/cac:DriverPerson">\r
+									<xsl:if	test="cbc:FirstName">									\r
+										<b>&#160;&#160;&#160;&#160;&#160;&#160; Şoför: </b>\r
+														<xsl:for-each select="cbc:Title">\r
+														<xsl:apply-templates/>\r
+														<xsl:text>&#160;</xsl:text>\r
+														</xsl:for-each>\r
+														<xsl:for-each select="cbc:FirstName">\r
+														<xsl:apply-templates/>\r
+														<xsl:text>&#160;</xsl:text>\r
+														</xsl:for-each>\r
+														<xsl:for-each select="cbc:MiddleName">\r
+														<xsl:apply-templates/>\r
+														<xsl:text>&#160;</xsl:text>\r
+														</xsl:for-each>\r
+														<xsl:for-each select="cbc:FamilyName">\r
+														<xsl:apply-templates/>\r
+														<xsl:text>&#160;</xsl:text>\r
+														</xsl:for-each>, TCKN:\r
+														<xsl:for-each select="cbc:NationalityID">\r
+														<xsl:apply-templates/>\r
+														</xsl:for-each>\r
+										<br/>\r
+									</xsl:if>\r
+								</xsl:for-each>\r
+							</td>\r
+						</tr>\r
+					</tbody>\r
+				</table>\r
+				\r
+			</body>\r
+		</html>\r
+	</xsl:template>\r
+	<xsl:template match="//n1:ReceiptAdvice/cac:ReceiptLine">\r
+		<tr class="lineTableTr">\r
+			<td class="lineTableTd">\r
+				<xsl:text>&#160;</xsl:text>\r
+				<xsl:value-of select="./cbc:ID"/>\r
+			</td>\r
+			<td class="lineTableTd">\r
+				<xsl:text>&#160;</xsl:text>\r
+				<xsl:value-of select="./cac:Item/cbc:Name"/>\r
+			</td>\r
+			<td class="lineTableTd" align="right">\r
+				<xsl:text>&#160;</xsl:text>\r
+				<xsl:value-of\r
+					select="format-number(./cbc:ReceivedQuantity, '###.###,####', 'european')"/>\r
+				<xsl:if test="./cbc:ReceivedQuantity/@unitCode">\r
+					<xsl:for-each select="./cbc:ReceivedQuantity">\r
+						<xsl:text> </xsl:text>\r
+						<xsl:choose>\r
+							<xsl:when test="@unitCode  = '26'">\r
+								<xsl:text>ton</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'BX'">\r
+								<xsl:text>Kutu</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'LTR'">\r
+								<xsl:text>lt</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'C62'">\r
+								<xsl:text>Adet</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'NIU'">\r
+								<xsl:text>Adet</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'KGM'">\r
+								<xsl:text>kg</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'KJO'">\r
+								<xsl:text>kJ</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'GRM'">\r
+								<xsl:text>g</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'MGM'">\r
+								<xsl:text>mg</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'NT'">\r
+								<xsl:text>Net Ton</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'GT'">\r
+								<xsl:text>Gross Ton</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'MTR'">\r
+								<xsl:text>m</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'MMT'">\r
+								<xsl:text>mm</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'KTM'">\r
+								<xsl:text>km</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'MLT'">\r
+								<xsl:text>ml</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'MMQ'">\r
+								<xsl:text>mm3</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'CLT'">\r
+								<xsl:text>cl</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'CMK'">\r
+								<xsl:text>cm2</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'CMQ'">\r
+								<xsl:text>cm3</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'CMT'">\r
+								<xsl:text>cm</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'MTK'">\r
+								<xsl:text>m2</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'MTQ'">\r
+								<xsl:text>m3</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'DAY'">\r
+								<xsl:text> Gün</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'MON'">\r
+								<xsl:text> Ay</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'PA'">\r
+								<xsl:text> Paket</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'KWH'">\r
+								<xsl:text> KWH</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'ANN'">\r
+								<xsl:text> Yıl</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'HUR'">\r
+								<xsl:text> Saat</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'D61'">\r
+								<xsl:text> Dakika</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'D62'">\r
+								<xsl:text> Saniye</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'CCT'">\r
+								<xsl:text> Ton baş.taşıma kap.</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'D30'">\r
+								<xsl:text> Brüt kalori</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'D40'">\r
+								<xsl:text> 1000 lt</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'LPA'">\r
+								<xsl:text> saf alkol lt</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'B32'">\r
+								<xsl:text> kg.m2</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'NCL'">\r
+								<xsl:text> hücre adet</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'PR'">\r
+								<xsl:text> Çift</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'R9'">\r
+								<xsl:text> 1000 m3</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'SET'">\r
+								<xsl:text> Set</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'T3'">\r
+								<xsl:text> 1000 adet</xsl:text>\r
+							</xsl:when>							\r
+						</xsl:choose>\r
+					</xsl:for-each>\r
+				</xsl:if>\r
+			</td>\r
+			<td class="lineTableTd" align="right">\r
+				<xsl:text>&#160;</xsl:text>\r
+				<xsl:value-of\r
+					select="format-number(./cbc:RejectedQuantity, '###.###,####', 'european')"/>\r
+				<xsl:if test="./cbc:RejectedQuantity/@unitCode">\r
+					<xsl:for-each select="./cbc:RejectedQuantity">\r
+						<xsl:text> </xsl:text>\r
+						<xsl:choose>\r
+							<xsl:when test="@unitCode  = '26'">\r
+								<xsl:text>ton</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'BX'">\r
+								<xsl:text>Kutu</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'LTR'">\r
+								<xsl:text>lt</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'C62'">\r
+								<xsl:text>Adet</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'NIU'">\r
+								<xsl:text>Adet</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'KGM'">\r
+								<xsl:text>kg</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'KJO'">\r
+								<xsl:text>kJ</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'GRM'">\r
+								<xsl:text>g</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'MGM'">\r
+								<xsl:text>mg</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'NT'">\r
+								<xsl:text>Net Ton</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'GT'">\r
+								<xsl:text>Gross Ton</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'MTR'">\r
+								<xsl:text>m</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'MMT'">\r
+								<xsl:text>mm</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'KTM'">\r
+								<xsl:text>km</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'MLT'">\r
+								<xsl:text>ml</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'MMQ'">\r
+								<xsl:text>mm3</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'CLT'">\r
+								<xsl:text>cl</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'CMK'">\r
+								<xsl:text>cm2</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'CMQ'">\r
+								<xsl:text>cm3</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'CMT'">\r
+								<xsl:text>cm</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'MTK'">\r
+								<xsl:text>m2</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'MTQ'">\r
+								<xsl:text>m3</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'DAY'">\r
+								<xsl:text> Gün</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'MON'">\r
+								<xsl:text> Ay</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'PA'">\r
+								<xsl:text> Paket</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'KWH'">\r
+								<xsl:text> KWH</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'ANN'">\r
+								<xsl:text> Yıl</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'HUR'">\r
+								<xsl:text> Saat</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'D61'">\r
+								<xsl:text> Dakika</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'D62'">\r
+								<xsl:text> Saniye</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'CCT'">\r
+								<xsl:text> Ton baş.taşıma kap.</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'D30'">\r
+								<xsl:text> Brüt kalori</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'D40'">\r
+								<xsl:text> 1000 lt</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'LPA'">\r
+								<xsl:text> saf alkol lt</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'B32'">\r
+								<xsl:text> kg.m2</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'NCL'">\r
+								<xsl:text> hücre adet</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'PR'">\r
+								<xsl:text> Çift</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'R9'">\r
+								<xsl:text> 1000 m3</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'SET'">\r
+								<xsl:text> Set</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'T3'">\r
+								<xsl:text> 1000 adet</xsl:text>\r
+							</xsl:when>							\r
+						</xsl:choose>\r
+					</xsl:for-each>\r
+				</xsl:if>\r
+			</td>\r
+			<td class="lineTableTd" align="right">\r
+				<xsl:text>&#160;</xsl:text>\r
+				<xsl:value-of\r
+					select="format-number(./cbc:ShortQuantity, '###.###,####', 'european')"/>\r
+				<xsl:if test="./cbc:ShortQuantity/@unitCode">\r
+					<xsl:for-each select="./cbc:ShortQuantity">\r
+						<xsl:text> </xsl:text>\r
+						<xsl:choose>\r
+							<xsl:when test="@unitCode  = '26'">\r
+								<xsl:text>ton</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'BX'">\r
+								<xsl:text>Kutu</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'LTR'">\r
+								<xsl:text>lt</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'C62'">\r
+								<xsl:text>Adet</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'NIU'">\r
+								<xsl:text>Adet</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'KGM'">\r
+								<xsl:text>kg</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'KJO'">\r
+								<xsl:text>kJ</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'GRM'">\r
+								<xsl:text>g</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'MGM'">\r
+								<xsl:text>mg</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'NT'">\r
+								<xsl:text>Net Ton</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'GT'">\r
+								<xsl:text>Gross Ton</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'MTR'">\r
+								<xsl:text>m</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'MMT'">\r
+								<xsl:text>mm</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'KTM'">\r
+								<xsl:text>km</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'MLT'">\r
+								<xsl:text>ml</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'MMQ'">\r
+								<xsl:text>mm3</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'CLT'">\r
+								<xsl:text>cl</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'CMK'">\r
+								<xsl:text>cm2</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'CMQ'">\r
+								<xsl:text>cm3</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'CMT'">\r
+								<xsl:text>cm</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'MTK'">\r
+								<xsl:text>m2</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'MTQ'">\r
+								<xsl:text>m3</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'DAY'">\r
+								<xsl:text> Gün</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'MON'">\r
+								<xsl:text> Ay</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'PA'">\r
+								<xsl:text> Paket</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'KWH'">\r
+								<xsl:text> KWH</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'ANN'">\r
+								<xsl:text> Yıl</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'HUR'">\r
+								<xsl:text> Saat</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'D61'">\r
+								<xsl:text> Dakika</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'D62'">\r
+								<xsl:text> Saniye</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'CCT'">\r
+								<xsl:text> Ton baş.taşıma kap.</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'D30'">\r
+								<xsl:text> Brüt kalori</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'D40'">\r
+								<xsl:text> 1000 lt</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'LPA'">\r
+								<xsl:text> saf alkol lt</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'B32'">\r
+								<xsl:text> kg.m2</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'NCL'">\r
+								<xsl:text> hücre adet</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'PR'">\r
+								<xsl:text> Çift</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'R9'">\r
+								<xsl:text> 1000 m3</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'SET'">\r
+								<xsl:text> Set</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'T3'">\r
+								<xsl:text> 1000 adet</xsl:text>\r
+							</xsl:when>							\r
+						</xsl:choose>\r
+					</xsl:for-each>\r
+				</xsl:if>\r
+			</td>\r
+			<td class="lineTableTd" align="right">\r
+				<xsl:text>&#160;</xsl:text>\r
+				<xsl:value-of\r
+					select="format-number(./cbc:OversupplyQuantity, '###.###,####', 'european')"/>\r
+				<xsl:if test="./cbc:OversupplyQuantity/@unitCode">\r
+					<xsl:for-each select="./cbc:OversupplyQuantity">\r
+						<xsl:text> </xsl:text>\r
+						<xsl:choose>\r
+							<xsl:when test="@unitCode  = '26'">\r
+								<xsl:text>ton</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'BX'">\r
+								<xsl:text>Kutu</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'LTR'">\r
+								<xsl:text>lt</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'C62'">\r
+								<xsl:text>Adet</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'NIU'">\r
+								<xsl:text>Adet</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'KGM'">\r
+								<xsl:text>kg</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'KJO'">\r
+								<xsl:text>kJ</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'GRM'">\r
+								<xsl:text>g</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'MGM'">\r
+								<xsl:text>mg</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'NT'">\r
+								<xsl:text>Net Ton</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'GT'">\r
+								<xsl:text>Gross Ton</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'MTR'">\r
+								<xsl:text>m</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'MMT'">\r
+								<xsl:text>mm</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'KTM'">\r
+								<xsl:text>km</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'MLT'">\r
+								<xsl:text>ml</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'MMQ'">\r
+								<xsl:text>mm3</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'CLT'">\r
+								<xsl:text>cl</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'CMK'">\r
+								<xsl:text>cm2</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'CMQ'">\r
+								<xsl:text>cm3</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'CMT'">\r
+								<xsl:text>cm</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'MTK'">\r
+								<xsl:text>m2</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'MTQ'">\r
+								<xsl:text>m3</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'DAY'">\r
+								<xsl:text> Gün</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'MON'">\r
+								<xsl:text> Ay</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'PA'">\r
+								<xsl:text> Paket</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'KWH'">\r
+								<xsl:text> KWH</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'ANN'">\r
+								<xsl:text> Yıl</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'HUR'">\r
+								<xsl:text> Saat</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'D61'">\r
+								<xsl:text> Dakika</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'D62'">\r
+								<xsl:text> Saniye</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'CCT'">\r
+								<xsl:text> Ton baş.taşıma kap.</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'D30'">\r
+								<xsl:text> Brüt kalori</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'D40'">\r
+								<xsl:text> 1000 lt</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'LPA'">\r
+								<xsl:text> saf alkol lt</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'B32'">\r
+								<xsl:text> kg.m2</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'NCL'">\r
+								<xsl:text> hücre adet</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'PR'">\r
+								<xsl:text> Çift</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'R9'">\r
+								<xsl:text> 1000 m3</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'SET'">\r
+								<xsl:text> Set</xsl:text>\r
+							</xsl:when>\r
+							<xsl:when test="@unitCode  = 'T3'">\r
+								<xsl:text> 1000 adet</xsl:text>\r
+							</xsl:when>							\r
+						</xsl:choose>\r
+					</xsl:for-each>\r
+				</xsl:if>\r
+			</td>\r
+			<td class="lineTableTd">\r
+				<xsl:text>&#160;</xsl:text>\r
+				<xsl:value-of select="./cbc:Note"/><xsl:text>&#160;</xsl:text><xsl:value-of select="./cbc:RejectReason"/>\r
+			</td>\r
+		</tr>\r
+	</xsl:template>\r
+	<xsl:template match="//cbc:IssueDate">\r
+		<xsl:value-of select="substring(.,9,2)"/>-<xsl:value-of select="substring(.,6,2)"/>-<xsl:value-of select="substring(.,1,4)"/>\r
+	</xsl:template>\r
+	<xsl:template match="//cbc:ActualDespatchDate">\r
+		<xsl:value-of select="substring(.,9,2)"/>-<xsl:value-of select="substring(.,6,2)"/>-<xsl:value-of select="substring(.,1,4)"/>\r
+	</xsl:template>\r
+	<xsl:template match="//cbc:ActualDeliveryDate">\r
+		<xsl:value-of select="substring(.,9,2)"/>-<xsl:value-of select="substring(.,6,2)"/>-<xsl:value-of select="substring(.,1,4)"/>\r
+	</xsl:template>\r
+	<xsl:template match="//n1:ReceiptAdvice">\r
+		<tr class="lineTableTr">\r
+			<td class="lineTableTd">\r
+				<xsl:text>&#160;</xsl:text>\r
+			</td>\r
+			<td class="lineTableTd">\r
+				<xsl:text>&#160;</xsl:text>\r
+			</td>\r
+			<td class="lineTableTd" align="right">\r
+				<xsl:text>&#160;</xsl:text>\r
+			</td>\r
+			<td class="lineTableTd" align="right">\r
+				<xsl:text>&#160;</xsl:text>\r
+			</td>\r
+			<td class="lineTableTd" align="right">\r
+				<xsl:text>&#160;</xsl:text>\r
+			</td>\r
+			<td class="lineTableTd" align="right">\r
+				<xsl:text>&#160;</xsl:text>\r
+			</td>\r
+			<td class="lineTableTd" align="right">\r
+				<xsl:text>&#160;</xsl:text>\r
+			</td>\r
+		</tr>\r
+	</xsl:template>\r
+	<xsl:template name="Party_Title" >\r
+		<xsl:param name="PartyType" />\r
+		<td style="width:469px; " align="left">\r
+			<xsl:if test="cac:PartyName">\r
+				<xsl:value-of select="cac:PartyName/cbc:Name"/>\r
+				<br/>\r
+			</xsl:if>\r
+			<!--xsl:for-each select="cac:Person">\r
+				<xsl:for-each select="cbc:Title">\r
+					<xsl:apply-templates/>\r
+					<xsl:text>&#160;</xsl:text>\r
+				</xsl:for-each>\r
+				<xsl:for-each select="cbc:FirstName">\r
+					<xsl:apply-templates/>\r
+					<xsl:text>&#160;</xsl:text>\r
+				</xsl:for-each>\r
+				<xsl:for-each select="cbc:MiddleName">\r
+					<xsl:apply-templates/>\r
+					<xsl:text>&#160; </xsl:text>\r
+				</xsl:for-each>\r
+				<xsl:for-each select="cbc:FamilyName">\r
+					<xsl:apply-templates/>\r
+					<xsl:text>&#160;</xsl:text>\r
+				</xsl:for-each>\r
+				<xsl:for-each select="cbc:NameSuffix">\r
+					<xsl:apply-templates/>\r
+				</xsl:for-each>\r
+				<xsl:if test="$PartyType='TAXFREE'">\r
+					<br/>\r
+					<xsl:text>Pasaport No: </xsl:text>\r
+					<xsl:value-of select="cac:IdentityDocumentReference/cbc:ID"/>\r
+					<br/>\r
+					<xsl:text>Ülkesi: </xsl:text>\r
+					<xsl:value-of select="cbc:NationalityID"/>	\r
+				</xsl:if>\r
+			</xsl:for-each-->\r
+		</td>		\r
+	</xsl:template>\r
+	<xsl:template name="Party_Adress" >\r
+		<xsl:param name="PartyType" />\r
+		<td style="width:469px; " align="left">\r
+			<xsl:for-each select="cac:PostalAddress">\r
+				<xsl:for-each select="cbc:StreetName">\r
+					<xsl:apply-templates/>\r
+					<xsl:text>&#160;</xsl:text>\r
+				</xsl:for-each>\r
+				<xsl:for-each select="cbc:BuildingName">\r
+					<xsl:apply-templates/>\r
+				</xsl:for-each>\r
+				<xsl:for-each select="cbc:BuildingNumber">\r
+					<xsl:text> No:</xsl:text>\r
+					<xsl:apply-templates/>\r
+					<xsl:text>&#160;</xsl:text>\r
+				</xsl:for-each>\r
+				<br/>\r
+				<xsl:for-each select="cbc:Room">\r
+					<xsl:text>Kapı No:</xsl:text>\r
+					<xsl:apply-templates/>\r
+					<xsl:text>&#160;</xsl:text>\r
+				</xsl:for-each>\r
+				<br/>\r
+				<xsl:for-each select="cbc:PostalZone">\r
+					<xsl:apply-templates/>\r
+					<xsl:text>&#160;</xsl:text>\r
+				</xsl:for-each>\r
+				<xsl:for-each select="cbc:CitySubdivisionName">\r
+					<xsl:apply-templates/>\r
+					<xsl:text>/ </xsl:text>\r
+				</xsl:for-each>\r
+				<xsl:for-each select="cbc:CityName">\r
+					<xsl:apply-templates/>\r
+					<xsl:text>&#160;</xsl:text>\r
+				</xsl:for-each>\r
+				<xsl:if test="$PartyType='TAXFREE'">\r
+					<br/>\r
+					<xsl:value-of select="cac:Country/cbc:Name"/>\r
+					<br/>\r
+				</xsl:if>\r
+			</xsl:for-each>\r
+		</td>\r
+	</xsl:template>\r
+	<xsl:template name='Party_Other'>\r
+		<xsl:param name="PartyType" />\r
+		<xsl:for-each select="cbc:WebsiteURI">\r
+			<tr align="left">\r
+				<td>\r
+					<xsl:text>Web Sitesi: </xsl:text>\r
+					<xsl:value-of select="."/>\r
+				</td>\r
+			</tr>\r
+		</xsl:for-each>\r
+		<xsl:for-each select="cac:Contact/cbc:ElectronicMail">\r
+			<tr align="left">\r
+				<td>\r
+					<xsl:text>E-Posta: </xsl:text>\r
+					<xsl:value-of select="."/>\r
+				</td>\r
+			</tr>\r
+		</xsl:for-each>	\r
+		<xsl:for-each select="cac:Contact">\r
+			<xsl:if test="cbc:Telephone or cbc:Telefax">\r
+				<tr align="left">\r
+					<td style="width:469px; " align="left">\r
+						<xsl:for-each select="cbc:Telephone">\r
+							<xsl:text>Tel: </xsl:text>\r
+							<xsl:apply-templates/>\r
+						</xsl:for-each>\r
+						<xsl:for-each select="cbc:Telefax">\r
+							<xsl:text> Fax: </xsl:text>\r
+							<xsl:apply-templates/>\r
+						</xsl:for-each>\r
+						<xsl:text>&#160;</xsl:text>\r
+					</td>\r
+				</tr>\r
+			</xsl:if>\r
+		</xsl:for-each>\r
+		<xsl:if test="$PartyType!='TAXFREE'">\r
+			<xsl:for-each select="cac:PartyTaxScheme/cac:TaxScheme/cbc:Name">\r
+				<tr align="left">\r
+					<td>\r
+						<xsl:text>Vergi Dairesi: </xsl:text>\r
+						<xsl:apply-templates/>\r
+					</td>\r
+				</tr>\r
+			</xsl:for-each>\r
+			<xsl:for-each select="cac:PartyIdentification">\r
+			<tr align="left">\r
+				<td>\r
+					<xsl:value-of select="cbc:ID/@schemeID"/>\r
+					<xsl:text>: </xsl:text>\r
+					<xsl:value-of select="cbc:ID"/>\r
+				</td>\r
+			</tr>\r
+			</xsl:for-each>\r
+		</xsl:if>\r
+	</xsl:template>\r
+	<xsl:template name="Curr_Type">\r
+		<xsl:value-of select="format-number(., '###.##0,00', 'european')"/>		\r
+		<xsl:if	test="@currencyID">\r
+			<xsl:text> </xsl:text>\r
+			<xsl:choose>\r
+				<xsl:when test="@currencyID = 'TRL' or @currencyID = 'TRY'">\r
+					<xsl:text>TL</xsl:text>					\r
+				</xsl:when>\r
+				<xsl:otherwise>\r
+					<xsl:value-of select="@currencyID"/>\r
+				</xsl:otherwise>\r
+			</xsl:choose>\r
+		</xsl:if>		\r
+	</xsl:template>\r
+</xsl:stylesheet>\r
+`,U=`<?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
 	xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
@@ -10248,7 +11891,7 @@ const A=`<?xml version="1.0" encoding="UTF-8"?>\r
 			</xsl:choose>
 		</xsl:if>
 	</xsl:template>
-</xsl:stylesheet>`,U=`<?xml version="1.0" encoding="UTF-8"?>
+</xsl:stylesheet>`,i=`<?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="1.0"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
@@ -10837,7 +12480,7 @@ const A=`<?xml version="1.0" encoding="UTF-8"?>\r
 
 </xsl:stylesheet>
 
-`,i=`<?xml version="1.0" encoding="UTF-8"?>
+`,K=`<?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="1.0"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
@@ -11062,7 +12705,7 @@ const A=`<?xml version="1.0" encoding="UTF-8"?>\r
     </xsl:template>
 
 </xsl:stylesheet>
-`,K=`<?xml version="1.0" encoding="UTF-8"?>\r
+`,R=`<?xml version="1.0" encoding="UTF-8"?>\r
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ccts="urn:un:unece:uncefact:documentation:2" xmlns:clm54217="urn:un:unece:uncefact:codelist:specification:54217:2001" xmlns:clm5639="urn:un:unece:uncefact:codelist:specification:5639:1988" xmlns:clm66411="urn:un:unece:uncefact:codelist:specification:66411:2001" xmlns:clmIANAMIMEMediaType="urn:un:unece:uncefact:codelist:specification:IANAMIMEMediaType:2003" xmlns:fn="http://www.w3.org/2005/xpath-functions" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:n1="urn:oasis:names:specification:ubl:schema:xsd:DespatchAdvice-2" xmlns:qdt="urn:oasis:names:specification:ubl:schema:xsd:QualifiedDatatypes-2" xmlns:udt="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" xmlns:xbrldi="http://xbrl.org/2006/xbrldi" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:xdt="http://www.w3.org/2005/xpath-datatypes" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" exclude-result-prefixes="cac cbc ccts clm54217 clm5639 clm66411 clmIANAMIMEMediaType fn link n1 qdt udt xbrldi xbrli xdt xlink xs xsd xsi">\r
 	<xsl:decimal-format name="european" decimal-separator="," grouping-separator="." NaN=""/>\r
 	<xsl:output method="html" encoding="utf-8" indent="yes"/>\r
@@ -13148,7 +14791,7 @@ const A=`<?xml version="1.0" encoding="UTF-8"?>\r
 		</xsl:choose>\r
 	</xsl:template>\r
 </xsl:stylesheet>\r
-`,R=`<?xml version="1.0" encoding="UTF-8"?>\r
+`,e=`<?xml version="1.0" encoding="UTF-8"?>\r
 <!-- Version for IRP. info@irpteam.com -->\r
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ccts="urn:un:unece:uncefact:documentation:2" xmlns:clm54217="urn:un:unece:uncefact:codelist:specification:54217:2001" xmlns:clm5639="urn:un:unece:uncefact:codelist:specification:5639:1988" xmlns:clm66411="urn:un:unece:uncefact:codelist:specification:66411:2001" xmlns:clmIANAMIMEMediaType="urn:un:unece:uncefact:codelist:specification:IANAMIMEMediaType:2003" xmlns:fn="http://www.w3.org/2005/xpath-functions" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:n1="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:qdt="urn:oasis:names:specification:ubl:schema:xsd:QualifiedDatatypes-2" xmlns:udt="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" xmlns:xbrldi="http://xbrl.org/2006/xbrldi" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:xdt="http://www.w3.org/2005/xpath-datatypes" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" exclude-result-prefixes="cac cbc ccts clm54217 clm5639 clm66411 clmIANAMIMEMediaType fn link n1 qdt udt xbrldi xbrli xdt xlink xs xsd xsi ext ds xades">\r
 	<xsl:decimal-format name="european" decimal-separator="," grouping-separator="." NaN=""/>\r
@@ -17594,7 +19237,7 @@ const A=`<?xml version="1.0" encoding="UTF-8"?>\r
       </xsl:choose>\r
     </xsl:if>\r
   </xsl:template>\r
-</xsl:stylesheet>`,e=`\uFEFF<?xml version="1.0" encoding="UTF-8"?>\r
+</xsl:stylesheet>`,r=`\uFEFF<?xml version="1.0" encoding="UTF-8"?>\r
 <xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"\r
 	xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"\r
 	xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"\r
@@ -19459,7 +21102,7 @@ const A=`<?xml version="1.0" encoding="UTF-8"?>\r
       </xsl:choose>\r
     </xsl:if>\r
   </xsl:template>\r
-</xsl:stylesheet>`,r=`\uFEFF<?xml version="1.0" encoding="UTF-8"?>\r
+</xsl:stylesheet>`,a=`\uFEFF<?xml version="1.0" encoding="UTF-8"?>\r
 <xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"\r
 	xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"\r
 	xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"\r
@@ -21324,7 +22967,7 @@ const A=`<?xml version="1.0" encoding="UTF-8"?>\r
       </xsl:choose>\r
     </xsl:if>\r
   </xsl:template>\r
-</xsl:stylesheet>`,a=`\uFEFF<?xml version="1.0" encoding="UTF-8"?>\r
+</xsl:stylesheet>`,l=`\uFEFF<?xml version="1.0" encoding="UTF-8"?>\r
 <xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"\r
 	xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"\r
 	xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"\r
@@ -23191,4 +24834,4 @@ const A=`<?xml version="1.0" encoding="UTF-8"?>\r
       </xsl:choose>\r
     </xsl:if>\r
   </xsl:template>\r
-</xsl:stylesheet>`,l={"gib/general.xslt":A,"gib/irsaliye.xslt":o,"gib/earsiv-2026.xslt":F,"gib/v2/e-Fatura-Sablon.xslt":U,"gib/v2/e-Arsiv-Sablon.xslt":i,"community/IRPTeam-eWaybill-Irsaliye-Aracli.xslt":K,"community/IRPTeam-eFatura.xslt":R,"community/hzkucuk-eFatura-smm.xslt":n,"community/hzkucuk-eFatura-mustahsil.xslt":e,"community/hzkucuk-eFatura-bilet.xslt":r,"community/hzkucuk-eFatura-makbuz.xslt":a},f=t=>l[t];export{l as INLINE_XSLT_CONTENT,f as getInlineXslt};
+</xsl:stylesheet>`,f={"gib/general.xslt":A,"gib/irsaliye.xslt":o,"gib/irsaliye-yaniti.xslt":F,"gib/earsiv-2026.xslt":U,"gib/v2/e-Fatura-Sablon.xslt":i,"gib/v2/e-Arsiv-Sablon.xslt":K,"community/IRPTeam-eWaybill-Irsaliye-Aracli.xslt":R,"community/IRPTeam-eFatura.xslt":e,"community/hzkucuk-eFatura-smm.xslt":n,"community/hzkucuk-eFatura-mustahsil.xslt":r,"community/hzkucuk-eFatura-bilet.xslt":a,"community/hzkucuk-eFatura-makbuz.xslt":l},s=t=>f[t];export{f as INLINE_XSLT_CONTENT,s as getInlineXslt};
