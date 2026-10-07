@@ -21,13 +21,13 @@
     xmlns:ubltr="urn:oasis:names:specification:ubl:schema:xsd:TurkishCustomizationExtensionComponents">
     <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
     <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
-    <cbc:ProfileID>e-SMM</cbc:ProfileID>
+    <cbc:ProfileID>EARSIVBELGE</cbc:ProfileID>
     <cbc:ID>SMM2026000000001</cbc:ID>
     <cbc:CopyIndicator>false</cbc:CopyIndicator>
     <cbc:UUID>11111111-2222-3333-4444-555555555555</cbc:UUID>
     <cbc:IssueDate>2026-09-25</cbc:IssueDate>
     <cbc:IssueTime>10:30:00</cbc:IssueTime>
-    <cbc:InvoiceTypeCode>SMM</cbc:InvoiceTypeCode>
+    <cbc:InvoiceTypeCode>SERBESTMESLEKMAKBUZU</cbc:InvoiceTypeCode>
     <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
     <cbc:LineCountNumeric>1</cbc:LineCountNumeric>
 

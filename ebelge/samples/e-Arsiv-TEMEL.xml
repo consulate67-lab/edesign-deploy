@@ -15,7 +15,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
     <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
-    <cbc:ProfileID>e-Arsiv-Fatura</cbc:ProfileID>
+    <cbc:ProfileID>EARSIVFATURA</cbc:ProfileID>
     <cbc:ID>EAR2026000000001</cbc:ID>
     <cbc:CopyIndicator>false</cbc:CopyIndicator>
     <cbc:UUID>11111111-2222-3333-4444-555555555555</cbc:UUID>
