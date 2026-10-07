@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useState, useEffect } from 'react';
+import React, { Suspense, lazy, useState, useEffect, useCallback } from 'react';
 import './index.css';
 import { api } from './api';
 import { ToastHost } from './store/ToastHost.tsx';
@@ -36,13 +36,62 @@ const ScreenFallback: React.FC = () => (
 
 type View = 'landing' | 'auth' | 'selection' | 'designer' | 'xslt-editor';
 type AuthMode = 'login' | 'register';
+type SelectedDoc = { moduleId: string, moduleName: string, template: string, customContent?: string, themeColor?: string, xml?: string, designId?: number };
+
+/** Sayfa yenilenince oturumdaki ekran ve açık belge geri yüklenir (sekme kapanınca silinir). */
+const VIEW_KEY = 'app_view';
+const DOC_KEY = 'app_doc';
+const readSession = (): { view: View; doc: SelectedDoc | null } => {
+    if (!api.getToken()) return { view: 'landing', doc: null };
+    let doc: SelectedDoc | null = null;
+    try { doc = JSON.parse(sessionStorage.getItem(DOC_KEY) || 'null'); } catch { doc = null; }
+    const stored = sessionStorage.getItem(VIEW_KEY) as View | null;
+    const view: View = (stored === 'designer' || stored === 'xslt-editor') && doc ? stored : 'selection';
+    return { view, doc };
+};
+const writeSession = (view: View, doc: SelectedDoc | null) => {
+    try {
+        sessionStorage.setItem(VIEW_KEY, view);
+        if (doc) sessionStorage.setItem(DOC_KEY, JSON.stringify(doc));
+        else sessionStorage.removeItem(DOC_KEY);
+    } catch { /* kota dolarsa yalnızca geri yükleme çalışmaz */ }
+};
 
 const App: React.FC = () => {
-    // Initial view: Landing. Once user clicks "Üye Ol" or "Giriş Yap", switch to auth.
-    // After successful auth, move to selection. After selecting a doc, designer.
-    const [view, setView] = useState<View>('landing');
+    const [initial] = useState(readSession);
+    const [view, setView] = useState<View>(initial.view);
     const [authMode, setAuthMode] = useState<AuthMode>('login');
-    const [selectedDoc, setSelectedDoc] = useState<{ moduleId: string, moduleName: string, template: string, customContent?: string, themeColor?: string, xml?: string, designId?: number } | null>(null);
+    const [selectedDoc, setSelectedDoc] = useState<SelectedDoc | null>(initial.doc);
+
+    useEffect(() => {
+        if (view === 'landing' || view === 'auth') {
+            sessionStorage.removeItem(VIEW_KEY);
+            sessionStorage.removeItem(DOC_KEY);
+            return;
+        }
+        writeSession(view, view === 'selection' ? null : selectedDoc);
+    }, [view, selectedDoc]);
+
+    // Süresi dolmuş / geçersiz oturumla açılırsa girişe dön.
+    useEffect(() => {
+        if (!api.getToken()) return;
+        api.getMe().catch((err: { status?: number }) => {
+            if (err?.status === 401 || err?.status === 403) {
+                api.logout();
+                setSelectedDoc(null);
+                setView('auth');
+            }
+        });
+    }, []);
+
+    /** Editördeki güncel içerik — yenilemede kaybolmasın diye yalnızca oturuma yazılır. */
+    const handleEditorWork = useCallback((work: { moduleId: string; xslt: string; xml: string; designId?: number }) => {
+        const doc = readSession().doc;
+        if (!doc) return;
+        writeSession('xslt-editor', {
+            ...doc, moduleId: work.moduleId, customContent: work.xslt, xml: work.xml, designId: work.designId ?? doc.designId,
+        });
+    }, []);
 
     // iyzico ödeme sonrası backend ?payment=success|fail|error|invalid ile geri yönlendirir.
     useEffect(() => {
@@ -73,7 +122,8 @@ const App: React.FC = () => {
     };
 
     const handleLogout = () => {
-        api.setToken('');
+        api.logout();
+        setSelectedDoc(null);
         setView('landing'); // logout → back to Landing (cleaner than Auth)
     };
 
@@ -147,6 +197,7 @@ const App: React.FC = () => {
                         initialXml={selectedDoc.xml}
                         docName={selectedDoc.moduleName}
                         initialDesignId={selectedDoc.designId}
+                        onWorkChange={handleEditorWork}
                         onBack={handleBack}
                     />
                 )}

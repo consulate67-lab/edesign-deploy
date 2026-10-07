@@ -207,6 +207,8 @@ interface XsltEditorProps {
     docName?: string;
     /** Hesaptaki kayıtlı tasarımdan açıldıysa id'si (Kaydet onu günceller). */
     initialDesignId?: number;
+    /** Güncel çalışma (sayfa yenilenince geri yüklemek için). */
+    onWorkChange?: (work: { moduleId: string; xslt: string; xml: string; designId?: number }) => void;
     /** Geri dön (Selection sayfasına). */
     onBack: () => void;
 }
@@ -756,6 +758,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     initialXml,
     docName = 'XSLT Tasarım',
     initialDesignId,
+    onWorkChange,
     onBack,
 }) => {
     // ------------------------------------------------------------------------
@@ -1008,6 +1011,26 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         }).catch(err => console.warn('[XSLTEditor] Tasarım anahtarı sorgulanamadı:', err));
         return () => { cancelled = true; };
     }, [initialXslt]);
+
+    // Kayıtlı tasarım id ile açıldıysa (ör. sayfa yenilendi) onay kilidini sunucudan al.
+    useEffect(() => {
+        if (!initialDesignId) return;
+        let cancelled = false;
+        api.getDesign(initialDesignId).then((r: { design?: { id: number; design_key?: string | null; paid?: boolean; paid_at?: string | null; name?: string } }) => {
+            const d = r?.design;
+            if (cancelled || !d?.paid) return;
+            setDesign({ id: d.id, key: d.design_key ?? undefined, paid: true, paidAt: d.paid_at, name: d.name });
+            setSaveStatus('saved');
+            setSaveMessage('🔒 Onaylanmış tasarım — yalnızca indirilebilir');
+        }).catch(err => console.warn('[XSLTEditor] Tasarım durumu alınamadı:', err));
+        return () => { cancelled = true; };
+    }, [initialDesignId]);
+
+    useEffect(() => {
+        if (!onWorkChange || !xsltContent) return;
+        const t = setTimeout(() => onWorkChange({ moduleId, xslt: xsltContent, xml: xmlContent, designId: design.id }), 800);
+        return () => clearTimeout(t);
+    }, [onWorkChange, moduleId, xsltContent, xmlContent, design.id]);
 
     // ------------------------------------------------------------------------
     // Save — hesaptaki tasarımı günceller, yoksa yeni taslak oluşturur
