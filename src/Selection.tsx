@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { FileText, ShoppingCart, Globe, Plane, Package, Zap, Upload, LogOut, User, X, CreditCard, Building2, Phone, Mail, Sparkles, Layout, Truck, Briefcase, Sprout, Ticket, Receipt, Plus, FileSignature, Code2, Copy, Check, FileCode } from 'lucide-react';
+import { FileText, ShoppingCart, Globe, Package, Zap, Upload, LogOut, User, X, CreditCard, Building2, Phone, Mail, Sparkles, Layout, Truck, Briefcase, Sprout, Ticket, Receipt, Plus, FileSignature, Code2, Copy, Check, FileCode } from 'lucide-react';
 import { api } from './api';
 import { PaymentModal } from './PaymentModal.tsx';
 import { getModuleHints, getModuleConfig } from './templateConfig';
@@ -56,14 +56,6 @@ const modules: Module[] = [
         icon: <Globe size={24} />,
         color: '#8b5cf6',
         // e-İhracat Invoice-2 bazlı
-        template: 'community/IRPTeam-eFatura.xslt'
-    },
-    {
-        id: 'mikro_ihracat',
-        name: 'e-Mikro İhracat',
-        icon: <Plane size={24} />,
-        color: '#a855f7',
-        // e-Mikro İhracat da Invoice-2 bazlı
         template: 'community/IRPTeam-eFatura.xslt'
     },
     {

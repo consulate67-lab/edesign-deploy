@@ -21,7 +21,7 @@ const SSS_ITEMS: SssItem[] = [
     },
     {
         q: 'Hangi e-belge tiplerini tasarlayabilirim?',
-        a: 'Toplam 13 modül: e-Fatura, e-Arşiv, e-İrsaliye, e-İhracat, e-Mikro İhracat, e-SMM, e-Müstahsil, e-Bilet, e-Makbuz, e-Gider Pusulası, e-Döviz / Kıymetli Maden, e-Dekont ve e-Sigorta Komisyon Gider Belgesi. Her modül için GİB resmi XSLT veya topluluk versiyonu yüklenir.',
+        a: 'Toplam 15 belge türü: e-Fatura, e-Arşiv, e-İrsaliye, e-İrsaliye Yanıtı, e-İhracat, e-SMM, e-Müstahsil, e-Gider Pusulası, e-Döviz / Kıymetli Maden, e-Dekont, e-Sigorta Komisyon Gider Belgesi, e-Bilet, e-Bilet Raporu, e-Yolcu Listesi ve e-Makbuz. Her tür için GİB resmi XSLT veya hazır şablon yüklenir.',
     },
     {
         q: 'XSLT bilmem gerekiyor mu?',
@@ -45,16 +45,18 @@ const DOC_TYPES = [
     { label: 'e-Fatura', code: '01', a: '#3b82f6' },
     { label: 'e-Arşiv', code: '02', a: '#8b5cf6' },
     { label: 'e-İrsaliye', code: '03', a: '#0ea5e9' },
-    { label: 'e-İhracat', code: '04', a: '#10b981' },
-    { label: 'e-Mikro İhracat', code: '05', a: '#22d3ee' },
+    { label: 'e-İrsaliye Yanıtı', code: '04', a: '#06b6d4' },
+    { label: 'e-İhracat', code: '05', a: '#10b981' },
     { label: 'e-SMM', code: '06', a: '#ec4899' },
     { label: 'e-Müstahsil', code: '07', a: '#84cc16' },
-    { label: 'e-Bilet', code: '08', a: '#f97316' },
-    { label: 'e-Makbuz', code: '09', a: '#14b8a6' },
-    { label: 'e-Gider Pusulası', code: '10', a: '#65a30d' },
-    { label: 'e-Döviz / Kıymetli Maden', code: '11', a: '#ca8a04' },
-    { label: 'e-Dekont', code: '12', a: '#0f766e' },
-    { label: 'e-Sigorta Komisyon', code: '13', a: '#6366f1' },
+    { label: 'e-Gider Pusulası', code: '08', a: '#65a30d' },
+    { label: 'e-Döviz / Kıymetli Maden', code: '09', a: '#ca8a04' },
+    { label: 'e-Dekont', code: '10', a: '#14b8a6' },
+    { label: 'e-Sigorta Komisyon', code: '11', a: '#6366f1' },
+    { label: 'e-Bilet', code: '12', a: '#f97316' },
+    { label: 'e-Bilet Raporu', code: '13', a: '#ea580c' },
+    { label: 'e-Yolcu Listesi', code: '14', a: '#fb923c' },
+    { label: 'e-Makbuz', code: '15', a: '#0f766e' },
 ];
 
 /** Başlıkta belge türleri arasında dönen kelime. */
@@ -92,7 +94,7 @@ const RotatingDocType: React.FC = () => {
  * - Logo kaldırıldı (sadece nav + CTA)
  * - Hero: bold gradient başlık (sky → indigo) + 2 CTA
  * - Sticky trust bar
- * - Bento grid + 9 belge strip + fiyatlandırma + SSS + final CTA
+ * - Bento grid + belge türü listesi + fiyatlandırma + SSS + final CTA
  * - Sabit WhatsApp butonu (wa.me/905336660125)
  */
 export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
@@ -286,7 +288,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                         }}
                     >
                         <Sparkles size={14} color="#0ea5e9" />
-                        Yeni: e-SMM, e-Müstahsil, e-Bilet desteği eklendi
+                        Yeni: e-Gider Pusulası, e-Döviz / Kıymetli Maden, e-Dekont ve e-Sigorta Komisyon eklendi
                     </div>
 
                     {/* Headline */}
@@ -325,7 +327,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                         }}
                     >
                         GİB uyumlu <strong style={{ color: '#f1f5f9' }}>e-Fatura, e-Arşiv, e-İrsaliye</strong>{' '}
-                        ve 6 tür daha. Şablonu seç, logo-kaşe-bankasını ekle, XML önizle.
+                        ve 12 tür daha. Şablonu seç, logo-kaşe-bankasını ekle, XML önizle.
                         XSLT bilgisi olmadan dakikalar içinde profesyonel tasarım.
                     </p>
 
@@ -417,7 +419,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                 >
                     {[
                         { v: 'GİB', l: 'UBL-TR Resmi Uyumlu', a: '#10b981' },
-                        { v: '13', l: 'Belge Türü Desteği', a: '#38bdf8' },
+                        { v: String(DOC_TYPES.length), l: 'Belge Türü Desteği', a: '#38bdf8' },
                         { v: '3', l: 'Paket Seçeneği', a: '#ec4899' },
                         { v: '%100', l: 'Web Tabanlı', a: '#a78bfa' },
                     ].map((s, i) => (
@@ -460,7 +462,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                             color: '#f8fafc',
                         }}
                     >
-                        Tek tasarımcı, on üç e-belge
+                        Tek tasarımcı, on beş e-belge
                     </h2>
                     <p style={{ fontSize: 15, color: '#94a3b8', margin: 0 }}>
                         GİB UBL 2.1 uyumlu, hepsi tek editörde
@@ -562,7 +564,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                         { icon: <Layers size={22} />, t: 'Sürükle & Bırak', d: 'XSLT öğrenmeden görsel tasarım', a: '#38bdf8' },
                         { icon: <Zap size={22} />, t: 'Anlık Önizleme', d: 'Kendi XML ile test et', a: '#10b981' },
                         { icon: <FileText size={22} />, t: 'GİB Uyumlu', d: 'e-Fatura Paketi v29', a: '#f97316' },
-                        { icon: <Globe size={22} />, t: '13 Belge Türü', d: 'Fatura, irsaliye, makbuz, dekont...', a: '#ec4899' },
+                        { icon: <Globe size={22} />, t: `${DOC_TYPES.length} Belge Türü`, d: 'Fatura, irsaliye, makbuz, dekont, bilet...', a: '#ec4899' },
                     ].map((f, i) => (
                         <div
                             key={i}
