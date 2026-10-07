@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  e-SMM TÜRETİLMİŞ ÖRNEK — GİB e-SMM için resmi UBL örneği yayımlamamıştır.
+  Dayanak: e-Arşiv Teknik Kılavuzu V1.18 3.3.6.9-3.3.6.10 (döviz cinsinden e-SMM için para birimi
+  ve döviz kuru zorunlu), Karekod Standardı Kılavuzu V1.2 bölüm 2.4 (parabirimi),
+  UBL-TR Kod Listeleri V1.43 (302 - 11/1-a Hizmet İhracatı istisnası).
+
+  Senaryo: Serbest çevirmen -> yurt dışındaki müşteri, USD, KDV istisnası (hizmet ihracatı), stopaj yok
+    Brüt ücret 1.500,00 USD | KDV %0 (302) | Tahsil edilen 1.500,00 USD | Kur 41,2500
+    Yurt dışı alıcı için VKN alanına 2222222222 yazılır.
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+    xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>EARSIVBELGE</cbc:ProfileID>
+    <cbc:ID>CVR2026000000033</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>6A9C2E47-0B3D-4F18-8E25-71C4D9A0F356</cbc:UUID>
+    <cbc:IssueDate>2026-10-01</cbc:IssueDate>
+    <cbc:IssueTime>11:05:00</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>SERBESTMESLEKMAKBUZU</cbc:InvoiceTypeCode>
+    <cbc:Note>Hizmet yurt dışındaki müşteri adına ifa edilmiş ve yurt dışında yararlanılmıştır.</cbc:Note>
+    <cbc:DocumentCurrencyCode>USD</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>1</cbc:LineCountNumeric>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">56789012345</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Can ÖZTÜRK Çeviri Hizmetleri</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Moda Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>88/2</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Kadıköy</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34710</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Kozyatağı</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:ElectronicMail>can@ozturkceviri.com</cbc:ElectronicMail>
+            </cac:Contact>
+            <cac:Person>
+                <cbc:FirstName>Can</cbc:FirstName>
+                <cbc:FamilyName>ÖZTÜRK</cbc:FamilyName>
+                <cbc:Title>Yeminli Tercüman</cbc:Title>
+            </cac:Person>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">2222222222</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Northwind Publishing GmbH</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Friedrichstraße</cbc:StreetName>
+                <cbc:BuildingNumber>68</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Mitte</cbc:CitySubdivisionName>
+                <cbc:CityName>Berlin</cbc:CityName>
+                <cbc:PostalZone>10117</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>DE</cbc:IdentificationCode>
+                    <cbc:Name>Almanya</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:PricingExchangeRate>
+        <cbc:SourceCurrencyCode>USD</cbc:SourceCurrencyCode>
+        <cbc:TargetCurrencyCode>TRY</cbc:TargetCurrencyCode>
+        <cbc:CalculationRate>41.2500</cbc:CalculationRate>
+        <cbc:Date>2026-09-30</cbc:Date>
+    </cac:PricingExchangeRate>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="USD">0.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="USD">1500.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="USD">0.00</cbc:TaxAmount>
+            <cbc:Percent>0</cbc:Percent>
+            <cac:TaxCategory>
+                <cbc:TaxExemptionReasonCode>302</cbc:TaxExemptionReasonCode>
+                <cbc:TaxExemptionReason>11/1-a Hizmet İhracatı</cbc:TaxExemptionReason>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="USD">1500.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="USD">1500.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="USD">1500.00</cbc:TaxInclusiveAmount>
+        <cbc:PayableAmount currencyID="USD">1500.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="USD">1500.00</cbc:LineExtensionAmount>
+        <cac:Item>
+            <cbc:Description>Teknik kitap çevirisi (Türkçe - Almanca, 120 sayfa)</cbc:Description>
+            <cbc:Name>Çeviri hizmeti</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="USD">1500.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  e-Bilet örnek XML — havayolu yolcu bileti (yurt içi uçuş). Varsayılan tasarım verisidir.
+  e-Bilet örnek XML — ücret iadesi için düzenlenen e-Bilet (509 s. VUK GT IV.7.3.2: cezalar, ücret iadesi vb. için de e-Bilet düzenlenir).
 
   GİB e-Bilet için UBL şeması yayımlamamıştır (e-Bilet PDF/PAdES gibi genel tanınırlığa sahip bir
   formatta düzenlenir; GİB'e yalnızca eBilet raporu gönderilir). Bu dosya tasarımcıda görsel bilet
@@ -28,28 +28,29 @@
     <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
     <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
     <cbc:ProfileID>e-Bilet</cbc:ProfileID>
-    <cbc:ID>BLT2026000000001</cbc:ID>
+    <cbc:ID>2351234567899</cbc:ID>
     <cbc:CopyIndicator>false</cbc:CopyIndicator>
-    <cbc:UUID>33333333-4444-5555-6666-777777777777</cbc:UUID>
-    <cbc:IssueDate>2026-09-25</cbc:IssueDate>
-    <cbc:IssueTime>09:15:00</cbc:IssueTime>
-    <cbc:InvoiceTypeCode>SATIS</cbc:InvoiceTypeCode>
+    <cbc:UUID>9E8D7C6B-5A49-4382-9170-6F5E4D3C2B1A</cbc:UUID>
+    <cbc:IssueDate>2026-09-18</cbc:IssueDate>
+    <cbc:IssueTime>10:00:00</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>IADE</cbc:InvoiceTypeCode>
+    <cbc:Note>İade nedeni: uçuş iptali — 2351234567890 numaralı biletin ücret iadesi</cbc:Note>
     <cbc:Note>Yolcu: Selin Demir (TCKN 34567890178)</cbc:Note>
-    <cbc:Note>Uçuş: TK2014 İstanbul (IST) → Ankara (ESB), 25.09.2026 14:30, Koltuk 14A, Ekonomi</cbc:Note>
     <cbc:Note>e-Bilet izni kapsamında elektronik ortamda iletilmiştir.</cbc:Note>
     <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
     <cbc:LineCountNumeric>1</cbc:LineCountNumeric>
     <cac:InvoicePeriod>
         <cbc:StartDate>2026-09-25</cbc:StartDate>
         <cbc:StartTime>14:30:00</cbc:StartTime>
-        <cbc:Description>TK2014 İstanbul (IST) → Ankara (ESB)</cbc:Description>
+        <cbc:Description>İptal edilen uçuş: TK2014 İstanbul (IST) → Ankara (ESB)</cbc:Description>
     </cac:InvoicePeriod>
-    <cac:AdditionalDocumentReference>
-        <cbc:ID>SEFER</cbc:ID>
-        <cbc:IssueDate>2026-09-25</cbc:IssueDate>
-        <cbc:DocumentType>Sefer Bilgisi</cbc:DocumentType>
-        <cbc:DocumentDescription>TK2014 IST → ESB 25.09.2026 14:30 Koltuk 14A</cbc:DocumentDescription>
-    </cac:AdditionalDocumentReference>
+    <cac:BillingReference>
+        <cac:InvoiceDocumentReference>
+            <cbc:ID>2351234567890</cbc:ID>
+            <cbc:IssueDate>2026-09-02</cbc:IssueDate>
+            <cbc:DocumentTypeCode>IADE</cbc:DocumentTypeCode>
+        </cac:InvoiceDocumentReference>
+    </cac:BillingReference>
 
     <cac:Signature>
         <cbc:ID schemeID="VKN_TCKN">1112223334</cbc:ID>
@@ -68,7 +69,7 @@
         </cac:SignatoryParty>
         <cac:DigitalSignatureAttachment>
             <cac:ExternalReference>
-                <cbc:URI>#Signature_BLT2026000000001</cbc:URI>
+                <cbc:URI>#Signature_2351234567899</cbc:URI>
             </cac:ExternalReference>
         </cac:DigitalSignatureAttachment>
     </cac:Signature>
@@ -112,36 +113,22 @@
                     <cbc:Name>Türkiye</cbc:Name>
                 </cac:Country>
             </cac:PostalAddress>
-            <cac:Contact>
-                <cbc:ElectronicMail>selin@example.com</cbc:ElectronicMail>
-            </cac:Contact>
             <cac:Person>
                 <cbc:FirstName>Selin</cbc:FirstName>
                 <cbc:FamilyName>Demir</cbc:FamilyName>
             </cac:Person>
         </cac:Party>
     </cac:AccountingCustomerParty>
-    <cac:Delivery>
-        <cac:DeliveryAddress>
-            <cbc:StreetName>Tayakadın Terminal Cad. No:1</cbc:StreetName>
-            <cbc:BuildingName>İstanbul Havalimanı (IST) → Esenboğa Havalimanı (ESB)</cbc:BuildingName>
-            <cbc:CitySubdivisionName>Arnavutköy</cbc:CitySubdivisionName>
-            <cbc:CityName>İstanbul</cbc:CityName>
-            <cac:Country>
-                <cbc:Name>Türkiye</cbc:Name>
-            </cac:Country>
-        </cac:DeliveryAddress>
-    </cac:Delivery>
     <cac:PaymentMeans>
         <cbc:PaymentMeansCode>54</cbc:PaymentMeansCode>
-        <cbc:PaymentDueDate>2026-09-25</cbc:PaymentDueDate>
-        <cbc:InstructionNote>Tek çekim</cbc:InstructionNote>
+        <cbc:PaymentDueDate>2026-09-18</cbc:PaymentDueDate>
+        <cbc:InstructionNote>Karta iade</cbc:InstructionNote>
     </cac:PaymentMeans>
     <cac:TaxTotal>
-        <cbc:TaxAmount currencyID="TRY">150.00</cbc:TaxAmount>
+        <cbc:TaxAmount currencyID="TRY">333.33</cbc:TaxAmount>
         <cac:TaxSubtotal>
-            <cbc:TaxableAmount currencyID="TRY">750.00</cbc:TaxableAmount>
-            <cbc:TaxAmount currencyID="TRY">150.00</cbc:TaxAmount>
+            <cbc:TaxableAmount currencyID="TRY">1666.67</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">333.33</cbc:TaxAmount>
             <cbc:Percent>20</cbc:Percent>
             <cac:TaxCategory>
                 <cac:TaxScheme>
@@ -152,21 +139,21 @@
         </cac:TaxSubtotal>
     </cac:TaxTotal>
     <cac:LegalMonetaryTotal>
-        <cbc:LineExtensionAmount currencyID="TRY">750.00</cbc:LineExtensionAmount>
-        <cbc:TaxExclusiveAmount currencyID="TRY">750.00</cbc:TaxExclusiveAmount>
-        <cbc:TaxInclusiveAmount currencyID="TRY">900.00</cbc:TaxInclusiveAmount>
+        <cbc:LineExtensionAmount currencyID="TRY">1666.67</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">1666.67</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">2000.00</cbc:TaxInclusiveAmount>
         <cbc:AllowanceTotalAmount currencyID="TRY">0.00</cbc:AllowanceTotalAmount>
-        <cbc:PayableAmount currencyID="TRY">900.00</cbc:PayableAmount>
+        <cbc:PayableAmount currencyID="TRY">2000.00</cbc:PayableAmount>
     </cac:LegalMonetaryTotal>
     <cac:InvoiceLine>
         <cbc:ID>1</cbc:ID>
         <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
-        <cbc:LineExtensionAmount currencyID="TRY">750.00</cbc:LineExtensionAmount>
+        <cbc:LineExtensionAmount currencyID="TRY">1666.67</cbc:LineExtensionAmount>
         <cac:TaxTotal>
-            <cbc:TaxAmount currencyID="TRY">150.00</cbc:TaxAmount>
+            <cbc:TaxAmount currencyID="TRY">333.33</cbc:TaxAmount>
             <cac:TaxSubtotal>
-                <cbc:TaxableAmount currencyID="TRY">750.00</cbc:TaxableAmount>
-                <cbc:TaxAmount currencyID="TRY">150.00</cbc:TaxAmount>
+                <cbc:TaxableAmount currencyID="TRY">1666.67</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">333.33</cbc:TaxAmount>
                 <cbc:Percent>20</cbc:Percent>
                 <cac:TaxCategory>
                     <cac:TaxScheme>
@@ -177,11 +164,11 @@
             </cac:TaxSubtotal>
         </cac:TaxTotal>
         <cac:Item>
-            <cbc:Description>TK2014 IST → ESB, 25.09.2026 14:30, Koltuk 14A</cbc:Description>
-            <cbc:Name>Yolcu Bileti (Ekonomi Sınıfı)</cbc:Name>
+            <cbc:Description>TK2014 IST → ESB biletinin iadesi</cbc:Description>
+            <cbc:Name>Yolcu Bileti Ücret İadesi</cbc:Name>
         </cac:Item>
         <cac:Price>
-            <cbc:PriceAmount currencyID="TRY">750.00</cbc:PriceAmount>
+            <cbc:PriceAmount currencyID="TRY">1666.67</cbc:PriceAmount>
         </cac:Price>
     </cac:InvoiceLine>
 </Invoice>

@@ -1,111 +1,98 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  e-SMM (Serbest Meslek Makbuzu) örnek XML
-  UBL-TR 1.2.1 SelfBilledInvoice
-  Resmi GİB paketi: eSMMSerbestMeslekPaketi.zip
-  URL: https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/eSMMSerbestMeslekPaketi.zip
-  Şema: eSMM.xsd (SelfBilledInvoice özelleştirmesi)
-  Hukuki dayanak: 213 sayılı VUK Md. 236, GİB 509 sıra no'lu tebliğ
+  e-SMM (e-Serbest Meslek Makbuzu) varsayılan örnek — TÜRETİLMİŞ ÖRNEK
+  GİB, e-SMM için UBL-TR paketi / resmi örnek XML yayımlamamıştır (e-SMM, e-Arşiv
+  uygulaması içinde PDF + ekli XML olarak düzenlenir). Bu örnek; 509 Sıra No'lu VUK
+  Genel Tebliği IV.4.3, Karekod Standardı Kılavuzu 2.4 ve e-Arşiv Teknik Kılavuzu
+  3.3.6 (serbestMeslekMakbuz) alanlarına göre UBL-TR Invoice yapısında hazırlanmıştır.
 
-  Özellikler:
-  - Serbest meslek erbabı (doktor, avukat, mühendis vb.)
-  - BRÜT ücret - KDV istisna (Madde 18) - stopaj (GVK Md. 94) = NET ödeme
-  - Gerçek kişi (TCKN) ile
-  - TC Kimlik No, vergi dairesi, mükellefiyet bilgisi
+  Kurgu: Mali müşavir -> vergi mükellefi şirket (stopaj yapan)
+    Brüt ücret 10.000,00 | GV stopajı %20 2.000,00 | Net ücret 8.000,00
+    KDV %20 2.000,00 | Tahsil edilen (net tahsilat) 10.000,00
+  Vergiler: KDV 0015 ve GV stopajı 0003 (GİB vergi kodları listesi) TaxTotal altında.
 -->
-<Invoice
-    xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
     xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
     xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
-    xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2"
-    xmlns:ubltr="urn:oasis:names:specification:ubl:schema:xsd:TurkishCustomizationExtensionComponents">
+    xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
     <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
     <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
     <cbc:ProfileID>EARSIVBELGE</cbc:ProfileID>
     <cbc:ID>SMM2026000000001</cbc:ID>
     <cbc:CopyIndicator>false</cbc:CopyIndicator>
-    <cbc:UUID>11111111-2222-3333-4444-555555555555</cbc:UUID>
-    <cbc:IssueDate>2026-09-25</cbc:IssueDate>
+    <cbc:UUID>3F2B8C41-7A1D-4E55-9C0B-2D6E8A41B701</cbc:UUID>
+    <cbc:IssueDate>2026-10-05</cbc:IssueDate>
     <cbc:IssueTime>10:30:00</cbc:IssueTime>
     <cbc:InvoiceTypeCode>SERBESTMESLEKMAKBUZU</cbc:InvoiceTypeCode>
+    <cbc:Note>Eylül 2026 dönemi muhasebe ve mali müşavirlik hizmet bedelidir.</cbc:Note>
     <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
     <cbc:LineCountNumeric>1</cbc:LineCountNumeric>
-
-    <!-- Müşteri (hizmeti alan kurum) — Fatura kesen kurum -->
-    <cac:AccountingCustomerParty>
-        <cac:Party>
-            <cac:PartyIdentification>
-                <cbc:ID schemeID="VKN">1234567890</cbc:ID>
-            </cac:PartyIdentification>
-            <cac:PartyName>
-                <cbc:Name>Hizmet Alan Kurum A.Ş.</cbc:Name>
-            </cac:PartyName>
-            <cac:PostalAddress>
-                <cbc:ID>12345</cbc:ID>
-                <cbc:StreetName>Levent Mah. Büyükdere Cad.</cbc:StreetName>
-                <cbc:BuildingNumber>45</cbc:BuildingNumber>
-                <cbc:CitySubdivisionName>Beşiktaş</cbc:CitySubdivisionName>
-                <cbc:CityName>İstanbul</cbc:CityName>
-                <cbc:PostalZone>34394</cbc:PostalZone>
-                <cac:Country>
-                    <cbc:Name>Türkiye</cbc:Name>
-                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
-                </cac:Country>
-            </cac:PostalAddress>
-            <cac:PartyTaxScheme>
-                <cac:TaxScheme>
-                    <cbc:ID>0001</cbc:ID>
-                    <cbc:Name>Levent</cbc:Name>
-                </cac:TaxScheme>
-            </cac:PartyTaxScheme>
-        </cac:Party>
-    </cac:AccountingCustomerParty>
-
-    <!-- Tedarikçi (serbest meslek erbabı — gerçek kişi) -->
     <cac:AccountingSupplierParty>
         <cac:Party>
             <cac:PartyIdentification>
                 <cbc:ID schemeID="TCKN">12345678901</cbc:ID>
             </cac:PartyIdentification>
             <cac:PartyName>
-                <cbc:Name>Dr. Ahmet YILMAZ</cbc:Name>
+                <cbc:Name>SMMM Ahmet YILMAZ</cbc:Name>
             </cac:PartyName>
             <cac:PostalAddress>
-                <cbc:StreetName>Bağdat Cad.</cbc:StreetName>
-                <cbc:BuildingNumber>120</cbc:BuildingNumber>
+                <cbc:StreetName>Bağdat Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>120/4</cbc:BuildingNumber>
                 <cbc:CitySubdivisionName>Kadıköy</cbc:CitySubdivisionName>
                 <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34710</cbc:PostalZone>
                 <cac:Country>
                     <cbc:Name>Türkiye</cbc:Name>
                 </cac:Country>
             </cac:PostalAddress>
             <cac:PartyTaxScheme>
                 <cac:TaxScheme>
-                    <cbc:ID>0010</cbc:ID>
                     <cbc:Name>Kadıköy</cbc:Name>
                 </cac:TaxScheme>
             </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(216) 555 10 20</cbc:Telephone>
+                <cbc:ElectronicMail>ahmet@ornekmusavirlik.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
             <cac:Person>
                 <cbc:FirstName>Ahmet</cbc:FirstName>
                 <cbc:FamilyName>YILMAZ</cbc:FamilyName>
-                <cbc:Title>Dr.</cbc:Title>
             </cac:Person>
         </cac:Party>
     </cac:AccountingSupplierParty>
-
-    <!-- Stopaj (Gelir Vergisi) ve KDV İstisna bilgisi -->
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">1234567890</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Örnek Yazılım Danışmanlık A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Büyükdere Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>45</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Şişli</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34394</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Zincirlikuyu</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
     <cac:TaxTotal>
-        <cbc:TaxAmount currencyID="TRY">0.00</cbc:TaxAmount>
+        <cbc:TaxAmount currencyID="TRY">4000.00</cbc:TaxAmount>
         <cac:TaxSubtotal>
             <cbc:TaxableAmount currencyID="TRY">10000.00</cbc:TaxableAmount>
-            <cbc:TaxAmount currencyID="TRY">0.00</cbc:TaxAmount>
+            <cbc:TaxAmount currencyID="TRY">2000.00</cbc:TaxAmount>
+            <cbc:Percent>20</cbc:Percent>
             <cac:TaxCategory>
-                <cbc:ID>0015</cbc:ID>
-                <cbc:Name>KDV İstisna</cbc:Name>
-                <cbc:TaxExemptionReasonCode>17/4-a</cbc:TaxExemptionReasonCode>
-                <cbc:TaxExemptionReason>213 sayılı VUK 17/4-a maddesi kapsamında KDV'den müstesna serbest meslek hizmeti</cbc:TaxExemptionReason>
                 <cac:TaxScheme>
-                    <cbc:ID>0015</cbc:ID>
                     <cbc:Name>KDV</cbc:Name>
                     <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
                 </cac:TaxScheme>
@@ -114,35 +101,28 @@
         <cac:TaxSubtotal>
             <cbc:TaxableAmount currencyID="TRY">10000.00</cbc:TaxableAmount>
             <cbc:TaxAmount currencyID="TRY">2000.00</cbc:TaxAmount>
+            <cbc:Percent>20</cbc:Percent>
             <cac:TaxCategory>
-                <cbc:ID>0001</cbc:ID>
-                <cbc:Name>Gelir Vergisi Stopajı</cbc:Name>
-                <cbc:Percent>20.00</cbc:Percent>
                 <cac:TaxScheme>
-                    <cbc:ID>0001</cbc:ID>
-                    <cbc:Name>Gelir Vergisi</cbc:Name>
+                    <cbc:Name>GV STOPAJI</cbc:Name>
+                    <cbc:TaxTypeCode>0003</cbc:TaxTypeCode>
                 </cac:TaxScheme>
             </cac:TaxCategory>
         </cac:TaxSubtotal>
     </cac:TaxTotal>
-
-    <!-- Toplamlar: BRÜT 10000 - Stopaj 2000 = NET 8000 -->
     <cac:LegalMonetaryTotal>
         <cbc:LineExtensionAmount currencyID="TRY">10000.00</cbc:LineExtensionAmount>
         <cbc:TaxExclusiveAmount currencyID="TRY">10000.00</cbc:TaxExclusiveAmount>
-        <cbc:TaxInclusiveAmount currencyID="TRY">10000.00</cbc:TaxInclusiveAmount>
-        <cbc:AllowanceTotalAmount currencyID="TRY">0.00</cbc:AllowanceTotalAmount>
-        <cbc:PayableAmount currencyID="TRY">8000.00</cbc:PayableAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">12000.00</cbc:TaxInclusiveAmount>
+        <cbc:PayableAmount currencyID="TRY">10000.00</cbc:PayableAmount>
     </cac:LegalMonetaryTotal>
-
-    <!-- Hizmet satırı -->
     <cac:InvoiceLine>
         <cbc:ID>1</cbc:ID>
         <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
         <cbc:LineExtensionAmount currencyID="TRY">10000.00</cbc:LineExtensionAmount>
         <cac:Item>
-            <cbc:Description>Eylül 2026 dönemi danışmanlık hizmeti (20 saat)</cbc:Description>
-            <cbc:Name>Mühendislik Danışmanlık Hizmeti</cbc:Name>
+            <cbc:Description>Eylül 2026 dönemi defter, beyanname ve danışmanlık</cbc:Description>
+            <cbc:Name>Muhasebe ve mali müşavirlik hizmeti</cbc:Name>
         </cac:Item>
         <cac:Price>
             <cbc:PriceAmount currencyID="TRY">10000.00</cbc:PriceAmount>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  e-Yolcu Listesi — uluslararası otobüs seferi (ebilet.xsd eYolcuListesi, e-Bilet Paketi 14.02.2023)
+  GİB e-Yolcu Listesi Raporu Teknik Kılavuzu örnek parçalarından derlenmiştir; imza değerleri temsilidir.
+  509 s. VUK GT: uluslararası seyahat eden yolcuların adı soyadı ile TCKN veya pasaport numarası
+  yolcu listesine yazılmak zorundadır.
+-->
+<ebilet:eYolcuListesi xmlns:ebilet="http://ebilet.efatura.gov.tr" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" xmlns:xades141="http://uri.etsi.org/01903/v1.4.1#">
+    <ebilet:baslik>
+        <ebilet:gonderen>
+            <ebilet:vkn>1234567890</ebilet:vkn>
+        </ebilet:gonderen>
+        <ebilet:baslangicTarihi>2026-09-12</ebilet:baslangicTarihi>
+        <ebilet:bitisTarihi>2026-09-12</ebilet:bitisTarihi>
+        <ebilet:versiyon>1.0</ebilet:versiyon>
+        <ebilet:uuid>B2C3D4E5-F6A7-4B8C-9D0E-1F2A3B4C5D6E</ebilet:uuid>
+        <ds:Signature Id="Signature_1">
+            <ds:SignedInfo>
+                <ds:CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
+                <ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+                <ds:Reference URI="">
+                    <ds:Transforms>
+                        <ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+                    </ds:Transforms>
+                    <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                    <ds:DigestValue>D5spG4+BfC7kEsONq5pPuD5110x4OzevGhU4z7oElQQ=</ds:DigestValue>
+                </ds:Reference>
+                <ds:Reference Type="http://uri.etsi.org/01903#SignedProperties" URI="#SignedProperties_1">
+                    <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                    <ds:DigestValue>C5kubmJpzWO2zhzYrll0iLiHWGvN1RjHqSSvoI7zpMg=</ds:DigestValue>
+                </ds:Reference>
+            </ds:SignedInfo>
+            <ds:SignatureValue>PRO1YCGhS4x17jbC/QfrhTWJk/v33yx6fLCj7+I2xuhuvHAL3OfCtXYXAOwHu4UBeb6xM14MP6ses5c3rVMUgg==</ds:SignatureValue>
+            <ds:KeyInfo>
+                <ds:X509Data>
+                    <ds:X509Certificate>MIIFlDCCBHygAwIBAgIGAIiEmAELMA0GCSqGSIb3DQEBCwUAMFwxCzAJBgNVBAYTAlRS</ds:X509Certificate>
+                </ds:X509Data>
+            </ds:KeyInfo>
+            <ds:Object>
+                <xades:QualifyingProperties Target="#Signature_1">
+                    <xades:SignedProperties Id="SignedProperties_1">
+                        <xades:SignedSignatureProperties>
+                            <xades:SigningTime>2026-09-12T06:30:00+03:00</xades:SigningTime>
+                            <xades:SigningCertificate>
+                                <xades:Cert>
+                                    <xades:CertDigest>
+                                        <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                                        <ds:DigestValue>+VSgWjpP9XlNGk6EM7WYWzHXQ2xrzUZLas1QR+IS7Rc=</ds:DigestValue>
+                                    </xades:CertDigest>
+                                    <xades:IssuerSerial>
+                                        <ds:X509IssuerName>CN=Mali Mühür Elektronik Sertifika Hizmet Sağlayıcısı - Sürüm 1,C=TR</ds:X509IssuerName>
+                                        <ds:X509SerialNumber>586340106507</ds:X509SerialNumber>
+                                    </xades:IssuerSerial>
+                                </xades:Cert>
+                            </xades:SigningCertificate>
+                        </xades:SignedSignatureProperties>
+                    </xades:SignedProperties>
+                </xades:QualifyingProperties>
+            </ds:Object>
+        </ds:Signature>
+    </ebilet:baslik>
+    <ebilet:yolcuListesi>
+        <ebilet:yolcuListesiNo>ISU2026000000044</ebilet:yolcuListesiNo>
+        <ebilet:ozetDeger>515947359f7a3fb4acfe61f34ddae677c5b2aa2ab3884204a43f07dee470bc23</ebilet:ozetDeger>
+        <ebilet:haraketZamani>2026-09-12T07:00:00</ebilet:haraketZamani>
+        <ebilet:hareketNoktasi>İstanbul Esenler Otogarı (Uluslararası)</ebilet:hareketNoktasi>
+        <ebilet:seferNumarasi>IST-SOF-0700</ebilet:seferNumarasi>
+        <ebilet:seferTarihi>2026-09-12</ebilet:seferTarihi>
+        <ebilet:aracPlakasi>34XYZ789</ebilet:aracPlakasi>
+        <ebilet:toplamHasilat>5650.00</ebilet:toplamHasilat>
+        <ebilet:koltukListesi>
+                <ebilet:koltuk>
+                    <ebilet:koltukNo>3</ebilet:koltukNo>
+                    <ebilet:biletNo>ISU2026000000310</ebilet:biletNo>
+                    <ebilet:tutar>1450.00</ebilet:tutar>
+                    <ebilet:adSoyad>Elif Arslan</ebilet:adSoyad>
+                    <ebilet:tcknYkn>56789012396</ebilet:tcknYkn>
+                </ebilet:koltuk>
+                <ebilet:koltuk>
+                    <ebilet:koltukNo>4</ebilet:koltukNo>
+                    <ebilet:biletNo>ISU2026000000311</ebilet:biletNo>
+                    <ebilet:tutar>1450.00</ebilet:tutar>
+                    <ebilet:adSoyad>Georgi Ivanov</ebilet:adSoyad>
+                    <ebilet:pasaportNo>BG3841257</ebilet:pasaportNo>
+                </ebilet:koltuk>
+                <ebilet:koltuk>
+                    <ebilet:koltukNo>5</ebilet:koltukNo>
+                    <ebilet:biletNo>ISU2026000000312</ebilet:biletNo>
+                    <ebilet:tutar>1450.00</ebilet:tutar>
+                    <ebilet:adSoyad>Maria Petrova</ebilet:adSoyad>
+                    <ebilet:pasaportNo>BG7719023</ebilet:pasaportNo>
+                </ebilet:koltuk>
+                <ebilet:koltuk>
+                    <ebilet:koltukNo>9</ebilet:koltukNo>
+                    <ebilet:biletNo>ISU2026000000315</ebilet:biletNo>
+                    <ebilet:tutar>1300.00</ebilet:tutar>
+                    <ebilet:adSoyad>Hasan Çelik</ebilet:adSoyad>
+                    <ebilet:tcknYkn>67890123450</ebilet:tcknYkn>
+                </ebilet:koltuk>
+        </ebilet:koltukListesi>
+    </ebilet:yolcuListesi>
+</ebilet:eYolcuListesi>

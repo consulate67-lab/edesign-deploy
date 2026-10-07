@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  e-Müstahsil Makbuzu — UBL-TR CreditNote
+  GİB "UBL-TR Müstahsil Makbuzu Kılavuzu" V1.1 (22.05.2026) eleman örneklerinden
+  birleştirilerek türetilmiştir (GİB ayrı bir örnek XML yayımlamamaktadır).
+  Toplamlar ve para birimi örnek tutarlılığı için eklenmiştir. İmza alanı boş bırakılmıştır.
+-->
+<CreditNote xmlns="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2"
+    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+    xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2"
+    xmlns:n4="http://www.altova.com/samplexml/other-namespace">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent>
+                <n4:auto-generated_for_wildcard/>
+            </ext:ExtensionContent>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2.1</cbc:CustomizationID>
+    <cbc:ProfileID>EARSIVBELGE</cbc:ProfileID>
+    <cbc:ID>GIB2016000000001</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>e093a490-dd99-11dd-ad8b-0800200c9a66</cbc:UUID>
+    <cbc:IssueDate>2016-01-01</cbc:IssueDate>
+    <cbc:IssueTime>14:50:00</cbc:IssueTime>
+    <cbc:CreditNoteTypeCode>MUSTAHSILMAKBUZ</cbc:CreditNoteTypeCode>
+    <cbc:Note>Kılavuz örneği</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>1</cbc:LineCountNumeric>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">1234567890</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">1234567890</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Cadde/Sokak</cbc:StreetName>
+                <cbc:CitySubdivisionName>İlçe</cbc:CitySubdivisionName>
+                <cbc:CityName>İl</cbc:CityName>
+                <cac:Country>
+                    <cbc:Name>TÜRKİYE</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.aaa.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">1234567890</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>AAA Anonim Şirketi</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:Room>1</cbc:Room>
+                <cbc:StreetName>Cadde/Sokak</cbc:StreetName>
+                <cbc:BuildingName>Bina Adı</cbc:BuildingName>
+                <cbc:BuildingNumber>Bina No</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>İlçe</cbc:CitySubdivisionName>
+                <cbc:CityName>İl</cbc:CityName>
+                <cbc:PostalZone>Posta Kodu</cbc:PostalZone>
+                <cbc:Region>Bölge</cbc:Region>
+                <cbc:District>Mahalle</cbc:District>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>TÜRKİYE</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Vergi Dairesi</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cac:OtherCommunication>
+                    <cbc:ChannelCode name="SMS_PROVIDER">Uygulama Adı</cbc:ChannelCode>
+                    <cbc:Value>1111111111</cbc:Value>
+                </cac:OtherCommunication>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cbc:WebsiteURI/>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">14604153088</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>AAA Mah. BBB Cad. No:67</cbc:StreetName>
+                <cbc:CitySubdivisionName>Merkez</cbc:CitySubdivisionName>
+                <cbc:CityName>Niğde</cbc:CityName>
+                <cbc:Region>Sazlıca</cbc:Region>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:Contact>
+                <cbc:ID>482913</cbc:ID>
+                <cbc:Name>SMS</cbc:Name>
+                <cbc:Telephone>5555555555</cbc:Telephone>
+            </cac:Contact>
+            <cac:Person>
+                <cbc:FirstName>ÇiftçiAd</cbc:FirstName>
+                <cbc:FamilyName>ÇiftçiSoyad</cbc:FamilyName>
+            </cac:Person>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:Delivery>
+        <cbc:ActualDeliveryDate>2016-01-01</cbc:ActualDeliveryDate>
+    </cac:Delivery>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">350</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">17500</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">350</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>2</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>GELİR VERGİSİ S. (MUHTASAR)</cbc:Name>
+                    <cbc:TaxTypeCode>0003</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">17500</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">17500</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">17500</cbc:TaxInclusiveAmount>
+        <cbc:PayableAmount currencyID="TRY">17150</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:CreditNoteLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:CreditedQuantity unitCode="C62">5</cbc:CreditedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">17500</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">350</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">17500</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">350</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>2</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>GELİR VERGİSİ S. (MUHTASAR)</cbc:Name>
+                        <cbc:TaxTypeCode>0003</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Büyükbaş hayvan</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">3500</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+</CreditNote>
