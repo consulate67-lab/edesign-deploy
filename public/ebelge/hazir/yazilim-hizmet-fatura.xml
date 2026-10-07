@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği — Yazılım / bilişim hizmetleri e-Faturası, KDV tevkifatlı (kurgusal veriler).
+  TICARIFATURA / TEVKIFAT; belirlenmiş alıcıya yazılım, danışmanlık ve entegrasyon hizmetleri,
+  602 kodlu (etüt, plan-proje, danışmanlık ve benzeri) 9/10 KDV tevkifatı. Vergi toplamı GİB TEVKIFAT örneğindeki gibi
+  TaxTotal/TaxAmount = hesaplanan KDV - tevkifat.
+    Mal/hizmet toplamı 130.000,00 | KDV %20 26.000,00 | Tevkifat 9/10 23.400,00
+    Vergiler dahil 156.000,00 | Ödenecek 132.600,00
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+    xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>TICARIFATURA</cbc:ProfileID>
+    <cbc:ID>NMB2026000004517</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>F768DB32-EE5E-41E0-9210-7D5A2CE7F0CA</cbc:UUID>
+    <cbc:IssueDate>2026-10-01</cbc:IssueDate>
+    <cbc:IssueTime>09:12:00</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>TEVKIFAT</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız Yüz Otuz İki Bin Altı Yüz Türk Lirasıdır.</cbc:Note>
+    <cbc:Note>Proje Kodu: MRM-ERP-2026-07</cbc:Note>
+    <cbc:Note>KDV Genel Uygulama Tebliği I/C-2.1.3.2.2 kapsamında belirlenmiş alıcıya verilen yazılım ve danışmanlık hizmetlerinde 9/10 oranında KDV tevkifatı uygulanmıştır.</cbc:Note>
+    <cbc:Note>Fatura tarihinden itibaren 30 gün vadelidir.</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>3</cbc:LineCountNumeric>
+    <cac:InvoicePeriod>
+        <cbc:StartDate>2026-09-01</cbc:StartDate>
+        <cbc:EndDate>2026-09-30</cbc:EndDate>
+        <cbc:Description>Eylül 2026 hizmet dönemi</cbc:Description>
+    </cac:InvoicePeriod>
+    <cac:OrderReference>
+        <cbc:ID>PO-4500218817</cbc:ID>
+        <cbc:IssueDate>2026-09-12</cbc:IssueDate>
+    </cac:OrderReference>
+    <cac:ContractDocumentReference>
+        <cbc:ID>NMB-SOZ-2026-118</cbc:ID>
+        <cbc:IssueDate>2026-01-15</cbc:IssueDate>
+    </cac:ContractDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">2917346503</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">2917346503</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Büyükdere Caddesi Nurol Plaza Kat 14</cbc:StreetName>
+                <cbc:BuildingNumber>255</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Sarıyer</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34485</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://nimbus.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">2917346503</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">0291734650300017</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TICARETSICILNO">748215-5</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Nimbus Yazılım Teknolojileri A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Maslak Mahallesi Büyükdere Caddesi Nurol Plaza Kat 14</cbc:StreetName>
+                <cbc:BuildingNumber>255</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Sarıyer</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34485</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Maslak</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(212) 909 26 26</cbc:Telephone>
+                <cbc:ElectronicMail>finans@nimbus.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">6352071486</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Marmara Enerji Dağıtım A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Barbaros Mahallesi Begonya Sokak</cbc:StreetName>
+                <cbc:BuildingNumber>3</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Ataşehir</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34746</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Büyük Mükellefler</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(216) 444 06 26</cbc:Telephone>
+                <cbc:ElectronicMail>efatura@marmaraenerji.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-10-31</cbc:PaymentDueDate>
+        <cbc:InstructionNote>Ödeme açıklamasına fatura numarasını yazınız.</cbc:InstructionNote>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR06 0006 7000 0074 1852 9637 41</cbc:ID>
+            <cbc:CurrencyCode>TRY</cbc:CurrencyCode>
+            <cac:FinancialInstitutionBranch>
+                <cbc:Name>Maslak Kurumsal Şubesi</cbc:Name>
+                <cac:FinancialInstitution>
+                    <cbc:Name>Yapı ve Kredi Bankası A.Ş.</cbc:Name>
+                </cac:FinancialInstitution>
+            </cac:FinancialInstitutionBranch>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">2600.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">130000.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">26000.00</cbc:TaxAmount>
+            <cbc:Percent>20</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:WithholdingTaxTotal>
+        <cbc:TaxAmount currencyID="TRY">23400.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">26000.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">23400.00</cbc:TaxAmount>
+            <cbc:Percent>90</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>ETÜT, PLAN-PROJE, DANIŞMANLIK, DENETİM VE BENZERİ HİZMETLER</cbc:Name>
+                    <cbc:TaxTypeCode>602</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:WithholdingTaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">130000.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">130000.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">156000.00</cbc:TaxInclusiveAmount>
+        <cbc:PayableAmount currencyID="TRY">132600.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">50</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">24000.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">480.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">24000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">4800.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:WithholdingTaxTotal>
+            <cbc:TaxAmount currencyID="TRY">4320.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">4800.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">4320.00</cbc:TaxAmount>
+                <cbc:Percent>90</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>ETÜT, PLAN-PROJE, DANIŞMANLIK, DENETİM VE BENZERİ HİZMETLER</cbc:Name>
+                        <cbc:TaxTypeCode>602</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:WithholdingTaxTotal>
+        <cac:Item>
+            <cbc:Description>Eylül 2026 · 50 kullanıcı · %99,9 erişilebilirlik (SLA)</cbc:Description>
+            <cbc:Name>Nimbus ERP Cloud — Kurumsal Plan aylık abonelik</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>NMB-SAAS-ENT</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">480.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="HUR">40</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">90000.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">1800.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">90000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">18000.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:WithholdingTaxTotal>
+            <cbc:TaxAmount currencyID="TRY">16200.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">18000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">16200.00</cbc:TaxAmount>
+                <cbc:Percent>90</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>ETÜT, PLAN-PROJE, DANIŞMANLIK, DENETİM VE BENZERİ HİZMETLER</cbc:Name>
+                        <cbc:TaxTypeCode>602</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:WithholdingTaxTotal>
+        <cac:Item>
+            <cbc:Description>Sprint 18–19: talep yönetimi modülü geliştirme, kod inceleme ve mimari danışmanlık</cbc:Description>
+            <cbc:Name>Yazılım geliştirme ve teknik danışmanlık</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>NMB-DEV-HR</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">2250.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">16000.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">320.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">16000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">3200.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:WithholdingTaxTotal>
+            <cbc:TaxAmount currencyID="TRY">2880.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">3200.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">2880.00</cbc:TaxAmount>
+                <cbc:Percent>90</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>ETÜT, PLAN-PROJE, DANIŞMANLIK, DENETİM VE BENZERİ HİZMETLER</cbc:Name>
+                        <cbc:TaxTypeCode>602</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:WithholdingTaxTotal>
+        <cac:Item>
+            <cbc:Description>Muhasebe sistemi ile REST API entegrasyonu, tek seferlik kurulum ve kabul testleri</cbc:Description>
+            <cbc:Name>ERP entegrasyon kurulumu</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>NMB-INT-API</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">16000.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>

@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:n4="http://www.altova.com/samplexml/other-namespace" xsi:schemaLocation="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2 UBL-Invoice-2.1.xsd">
+  <ext:UBLExtensions>
+    <ext:UBLExtension>
+      <ext:ExtensionContent>
+        <n4:auto-generated_for_wildcard/>
+      </ext:ExtensionContent>
+    </ext:UBLExtension>
+  </ext:UBLExtensions>
+  <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+  <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+  <cbc:ProfileID>EARSIVFATURA</cbc:ProfileID>
+  <cbc:ID>KKE2026000204718</cbc:ID>
+  <cbc:CopyIndicator>false</cbc:CopyIndicator>
+  <cbc:UUID>3B9D6E2F-81A4-4C07-B5E3-9F1C2D7A4E60</cbc:UUID>
+  <cbc:IssueDate>2026-10-05</cbc:IssueDate>
+  <cbc:IssueTime>09:12:44</cbc:IssueTime>
+  <cbc:InvoiceTypeCode>SATIS</cbc:InvoiceTypeCode>
+  <cbc:Note>Bu satış internet üzerinden yapılmıştır.</cbc:Note>
+  <cbc:Note>Sipariş kanalı: kutukutu.com.tr mobil uygulama</cbc:Note>
+  <cbc:Note>Cayma hakkı: Teslimden itibaren 14 gün içinde ücretsiz iade edebilirsiniz.</cbc:Note>
+  <cbc:Note>Yalnız: Beş Bin Altı Yüz Doksan Yedi Türk Lirası İki Kuruş</cbc:Note>
+  <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+  <cbc:LineCountNumeric>6</cbc:LineCountNumeric>
+  <cac:OrderReference>
+    <cbc:ID>KK-2026-0748213</cbc:ID>
+    <cbc:IssueDate>2026-10-04</cbc:IssueDate>
+  </cac:OrderReference>
+  <cac:Signature>
+    <cbc:ID schemeID="VKN_TCKN">5839201740</cbc:ID>
+    <cac:SignatoryParty>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="VKN">5839201740</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PostalAddress>
+        <cbc:StreetName>Sanayi Mah. Teknopark Bulvarı</cbc:StreetName>
+        <cbc:BuildingName>Teknopark İstanbul</cbc:BuildingName>
+        <cbc:BuildingNumber>1/7A</cbc:BuildingNumber>
+        <cbc:CitySubdivisionName>Pendik</cbc:CitySubdivisionName>
+        <cbc:CityName>İstanbul</cbc:CityName>
+        <cbc:PostalZone>34906</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+          <cbc:Name>Türkiye</cbc:Name>
+        </cac:Country>
+      </cac:PostalAddress>
+    </cac:SignatoryParty>
+    <cac:DigitalSignatureAttachment>
+      <cac:ExternalReference>
+        <cbc:URI>#Signature_KKE2026000204718</cbc:URI>
+      </cac:ExternalReference>
+    </cac:DigitalSignatureAttachment>
+  </cac:Signature>
+  <cac:AccountingSupplierParty>
+    <cac:Party>
+      <cbc:WebsiteURI>https://www.kutukutu.com.tr</cbc:WebsiteURI>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="VKN">5839201740</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="MERSISNO">0583920174000027</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyName>
+        <cbc:Name>Kutu Kutu E-Ticaret ve Bilişim Ltd. Şti.</cbc:Name>
+      </cac:PartyName>
+      <cac:PostalAddress>
+        <cbc:StreetName>Sanayi Mah. Teknopark Bulvarı</cbc:StreetName>
+        <cbc:BuildingName>Teknopark İstanbul</cbc:BuildingName>
+        <cbc:BuildingNumber>1/7A</cbc:BuildingNumber>
+        <cbc:CitySubdivisionName>Pendik</cbc:CitySubdivisionName>
+        <cbc:CityName>İstanbul</cbc:CityName>
+        <cbc:PostalZone>34906</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+          <cbc:Name>Türkiye</cbc:Name>
+        </cac:Country>
+      </cac:PostalAddress>
+      <cac:PartyTaxScheme>
+        <cac:TaxScheme>
+          <cbc:Name>Pendik</cbc:Name>
+        </cac:TaxScheme>
+      </cac:PartyTaxScheme>
+      <cac:Contact>
+        <cbc:Telephone>0850 255 58 88</cbc:Telephone>
+        <cbc:ElectronicMail>musteri@kutukutu.com.tr</cbc:ElectronicMail>
+      </cac:Contact>
+    </cac:Party>
+  </cac:AccountingSupplierParty>
+  <cac:AccountingCustomerParty>
+    <cac:Party>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="TCKN">39620481722</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PostalAddress>
+        <cbc:StreetName>Kızılırmak Mah. Ufuk Üniversitesi Cad.</cbc:StreetName>
+        <cbc:BuildingNumber>12 D: 8</cbc:BuildingNumber>
+        <cbc:CitySubdivisionName>Çankaya</cbc:CitySubdivisionName>
+        <cbc:CityName>Ankara</cbc:CityName>
+        <cbc:PostalZone>06510</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+          <cbc:Name>Türkiye</cbc:Name>
+        </cac:Country>
+      </cac:PostalAddress>
+      <cac:Contact>
+        <cbc:Telephone>0533 207 41 96</cbc:Telephone>
+        <cbc:ElectronicMail>mert.aydogan@example.com</cbc:ElectronicMail>
+      </cac:Contact>
+      <cac:Person>
+        <cbc:FirstName>Mert</cbc:FirstName>
+        <cbc:FamilyName>Aydoğan</cbc:FamilyName>
+      </cac:Person>
+    </cac:Party>
+  </cac:AccountingCustomerParty>
+  <cac:Delivery>
+    <cbc:TrackingID>HZK 7319 4402 851</cbc:TrackingID>
+    <cac:DeliveryAddress>
+      <cbc:StreetName>Kızılırmak Mah. Ufuk Üniversitesi Cad.</cbc:StreetName>
+      <cbc:BuildingNumber>12 D: 8</cbc:BuildingNumber>
+      <cbc:CitySubdivisionName>Çankaya</cbc:CitySubdivisionName>
+      <cbc:CityName>Ankara</cbc:CityName>
+      <cbc:PostalZone>06510</cbc:PostalZone>
+      <cac:Country>
+        <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+        <cbc:Name>Türkiye</cbc:Name>
+      </cac:Country>
+    </cac:DeliveryAddress>
+    <cac:CarrierParty>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="VKN">4682019377</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyName>
+        <cbc:Name>Hızır Kargo ve Lojistik A.Ş.</cbc:Name>
+      </cac:PartyName>
+      <cac:PostalAddress>
+        <cbc:CitySubdivisionName>Esenyurt</cbc:CitySubdivisionName>
+        <cbc:CityName>İstanbul</cbc:CityName>
+        <cac:Country>
+          <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+          <cbc:Name>Türkiye</cbc:Name>
+        </cac:Country>
+      </cac:PostalAddress>
+    </cac:CarrierParty>
+    <cac:Despatch>
+      <cbc:ActualDespatchDate>2026-10-05</cbc:ActualDespatchDate>
+      <cbc:ActualDespatchTime>10:20:00</cbc:ActualDespatchTime>
+    </cac:Despatch>
+  </cac:Delivery>
+  <cac:PaymentMeans>
+    <cbc:PaymentMeansCode>48</cbc:PaymentMeansCode>
+    <cbc:PaymentDueDate>2026-10-04</cbc:PaymentDueDate>
+    <cbc:InstructionNote>Kredi Kartı (3 taksit) — Ödeme aracısı: iyzico Ödeme Hizmetleri A.Ş.</cbc:InstructionNote>
+  </cac:PaymentMeans>
+  <cac:TaxTotal>
+    <cbc:TaxAmount currencyID="TRY">949.50</cbc:TaxAmount>
+    <cac:TaxSubtotal>
+      <cbc:TaxableAmount currencyID="TRY">4747.52</cbc:TaxableAmount>
+      <cbc:TaxAmount currencyID="TRY">949.50</cbc:TaxAmount>
+      <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+      <cbc:Percent>20</cbc:Percent>
+      <cac:TaxCategory>
+        <cac:TaxScheme>
+          <cbc:Name>KDV</cbc:Name>
+          <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+        </cac:TaxScheme>
+      </cac:TaxCategory>
+    </cac:TaxSubtotal>
+  </cac:TaxTotal>
+  <cac:LegalMonetaryTotal>
+    <cbc:LineExtensionAmount currencyID="TRY">4947.50</cbc:LineExtensionAmount>
+    <cbc:TaxExclusiveAmount currencyID="TRY">4747.52</cbc:TaxExclusiveAmount>
+    <cbc:TaxInclusiveAmount currencyID="TRY">5697.02</cbc:TaxInclusiveAmount>
+    <cbc:AllowanceTotalAmount currencyID="TRY">199.98</cbc:AllowanceTotalAmount>
+    <cbc:PayableAmount currencyID="TRY">5697.02</cbc:PayableAmount>
+  </cac:LegalMonetaryTotal>
+  <cac:InvoiceLine>
+    <cbc:ID>1</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="TRY">584.91</cbc:LineExtensionAmount>
+    <cac:AllowanceCharge>
+      <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+      <cbc:AllowanceChargeReason>Kupon HOSGELDIN10</cbc:AllowanceChargeReason>
+      <cbc:MultiplierFactorNumeric>0.1</cbc:MultiplierFactorNumeric>
+      <cbc:Amount currencyID="TRY">64.99</cbc:Amount>
+      <cbc:BaseAmount currencyID="TRY">649.90</cbc:BaseAmount>
+    </cac:AllowanceCharge>
+    <cac:TaxTotal>
+      <cbc:TaxAmount currencyID="TRY">116.98</cbc:TaxAmount>
+      <cac:TaxSubtotal>
+        <cbc:TaxableAmount currencyID="TRY">584.91</cbc:TaxableAmount>
+        <cbc:TaxAmount currencyID="TRY">116.98</cbc:TaxAmount>
+        <cbc:Percent>20</cbc:Percent>
+        <cac:TaxCategory>
+          <cac:TaxScheme>
+            <cbc:Name>KDV</cbc:Name>
+            <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+          </cac:TaxScheme>
+        </cac:TaxCategory>
+      </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:Item>
+      <cbc:Name>Bambu Kesme Tahtası Seti (3'lü)</cbc:Name>
+      <cac:SellersItemIdentification>
+        <cbc:ID>KK-MTF-0412</cbc:ID>
+      </cac:SellersItemIdentification>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="TRY">649.90</cbc:PriceAmount>
+    </cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine>
+    <cbc:ID>2</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="TRY">1199.00</cbc:LineExtensionAmount>
+    <cac:TaxTotal>
+      <cbc:TaxAmount currencyID="TRY">239.80</cbc:TaxAmount>
+      <cac:TaxSubtotal>
+        <cbc:TaxableAmount currencyID="TRY">1199.00</cbc:TaxableAmount>
+        <cbc:TaxAmount currencyID="TRY">239.80</cbc:TaxAmount>
+        <cbc:Percent>20</cbc:Percent>
+        <cac:TaxCategory>
+          <cac:TaxScheme>
+            <cbc:Name>KDV</cbc:Name>
+            <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+          </cac:TaxScheme>
+        </cac:TaxCategory>
+      </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:Item>
+      <cbc:Name>Porselen Espresso Fincan Takımı (6 Kişilik)</cbc:Name>
+      <cac:SellersItemIdentification>
+        <cbc:ID>KK-MTF-0877</cbc:ID>
+      </cac:SellersItemIdentification>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="TRY">1199.00</cbc:PriceAmount>
+    </cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine>
+    <cbc:ID>3</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="TRY">764.91</cbc:LineExtensionAmount>
+    <cac:AllowanceCharge>
+      <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+      <cbc:AllowanceChargeReason>Flaş indirim %15</cbc:AllowanceChargeReason>
+      <cbc:MultiplierFactorNumeric>0.15</cbc:MultiplierFactorNumeric>
+      <cbc:Amount currencyID="TRY">134.99</cbc:Amount>
+      <cbc:BaseAmount currencyID="TRY">899.90</cbc:BaseAmount>
+    </cac:AllowanceCharge>
+    <cac:TaxTotal>
+      <cbc:TaxAmount currencyID="TRY">152.98</cbc:TaxAmount>
+      <cac:TaxSubtotal>
+        <cbc:TaxableAmount currencyID="TRY">764.91</cbc:TaxableAmount>
+        <cbc:TaxAmount currencyID="TRY">152.98</cbc:TaxAmount>
+        <cbc:Percent>20</cbc:Percent>
+        <cac:TaxCategory>
+          <cac:TaxScheme>
+            <cbc:Name>KDV</cbc:Name>
+            <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+          </cac:TaxScheme>
+        </cac:TaxCategory>
+      </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:Item>
+      <cbc:Name>Paslanmaz Çelik French Press 1 L</cbc:Name>
+      <cac:SellersItemIdentification>
+        <cbc:ID>KK-MTF-1023</cbc:ID>
+      </cac:SellersItemIdentification>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="TRY">899.90</cbc:PriceAmount>
+    </cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine>
+    <cbc:ID>4</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="C62">2</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="TRY">559.80</cbc:LineExtensionAmount>
+    <cac:TaxTotal>
+      <cbc:TaxAmount currencyID="TRY">111.96</cbc:TaxAmount>
+      <cac:TaxSubtotal>
+        <cbc:TaxableAmount currencyID="TRY">559.80</cbc:TaxableAmount>
+        <cbc:TaxAmount currencyID="TRY">111.96</cbc:TaxAmount>
+        <cbc:Percent>20</cbc:Percent>
+        <cac:TaxCategory>
+          <cac:TaxScheme>
+            <cbc:Name>KDV</cbc:Name>
+            <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+          </cac:TaxScheme>
+        </cac:TaxCategory>
+      </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:Item>
+      <cbc:Name>Pamuklu Mutfak Önlüğü — Haki</cbc:Name>
+      <cac:SellersItemIdentification>
+        <cbc:ID>KK-TKS-0256</cbc:ID>
+      </cac:SellersItemIdentification>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="TRY">279.90</cbc:PriceAmount>
+    </cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine>
+    <cbc:ID>5</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="TRY">1549.00</cbc:LineExtensionAmount>
+    <cac:TaxTotal>
+      <cbc:TaxAmount currencyID="TRY">309.80</cbc:TaxAmount>
+      <cac:TaxSubtotal>
+        <cbc:TaxableAmount currencyID="TRY">1549.00</cbc:TaxableAmount>
+        <cbc:TaxAmount currencyID="TRY">309.80</cbc:TaxAmount>
+        <cbc:Percent>20</cbc:Percent>
+        <cac:TaxCategory>
+          <cac:TaxScheme>
+            <cbc:Name>KDV</cbc:Name>
+            <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+          </cac:TaxScheme>
+        </cac:TaxCategory>
+      </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:Item>
+      <cbc:Name>Akıllı LED Masa Lambası (USB-C)</cbc:Name>
+      <cac:SellersItemIdentification>
+        <cbc:ID>KK-AYD-3140</cbc:ID>
+      </cac:SellersItemIdentification>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="TRY">1549.00</cbc:PriceAmount>
+    </cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine>
+    <cbc:ID>6</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="TRY">89.90</cbc:LineExtensionAmount>
+    <cac:TaxTotal>
+      <cbc:TaxAmount currencyID="TRY">17.98</cbc:TaxAmount>
+      <cac:TaxSubtotal>
+        <cbc:TaxableAmount currencyID="TRY">89.90</cbc:TaxableAmount>
+        <cbc:TaxAmount currencyID="TRY">17.98</cbc:TaxAmount>
+        <cbc:Percent>20</cbc:Percent>
+        <cac:TaxCategory>
+          <cac:TaxScheme>
+            <cbc:Name>KDV</cbc:Name>
+            <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+          </cac:TaxScheme>
+        </cac:TaxCategory>
+      </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:Item>
+      <cbc:Name>Kargo ve Paketleme Hizmeti</cbc:Name>
+      <cac:SellersItemIdentification>
+        <cbc:ID>KARGO</cbc:ID>
+      </cac:SellersItemIdentification>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="TRY">89.90</cbc:PriceAmount>
+    </cac:Price>
+  </cac:InvoiceLine>
+</Invoice>

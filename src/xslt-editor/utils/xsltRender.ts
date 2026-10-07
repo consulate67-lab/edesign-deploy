@@ -13,7 +13,7 @@
  * pipeline'ı (instrumentXslt / xsltInstrumenter) farklı, dokunulmuyor.
  */
 import { documentEndOffset } from './xsltStyleEdit';
-import { restoreScriptText } from '../../xsltTransformer';
+import { restoreScriptText, stripXsltDeprecationBanner } from '../../xsltTransformer';
 
 const INDEXED_TAGS = new Set([
     'div', 'span', 'p', 'table', 'tr', 'td', 'th',
@@ -483,6 +483,7 @@ export function renderAndAnnotateXslt(
         walk(resultDoc.documentElement || resultDoc);
         console.log(`[xsltRender] annotated ${annotated} bindings via comment markers (total: ${bindings.length})`);
 
+        stripXsltDeprecationBanner(resultDoc);
         const serializer = new XMLSerializer();
         let html = restoreScriptText(serializer.serializeToString(resultDoc));
 

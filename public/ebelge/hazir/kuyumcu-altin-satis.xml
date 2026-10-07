@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CreditNote xmlns="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:n4="http://www.altova.com/samplexml/other-namespace" xsi:schemaLocation="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2 UBL-CreditNote-2.1.xsd">
+  <ext:UBLExtensions>
+    <ext:UBLExtension>
+      <ext:ExtensionContent>
+        <n4:auto-generated_for_wildcard/>
+      </ext:ExtensionContent>
+    </ext:UBLExtension>
+  </ext:UBLExtensions>
+  <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+  <cbc:CustomizationID>TR1.2.1</cbc:CustomizationID>
+  <cbc:ProfileID>EKIYMETLIMADENBELGE</cbc:ProfileID>
+  <cbc:ID>ABK2026000001284</cbc:ID>
+  <cbc:CopyIndicator>false</cbc:CopyIndicator>
+  <cbc:UUID>E62B9F04-7C31-4A5D-B8E2-0D4F61A93C77</cbc:UUID>
+  <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+  <cbc:IssueTime>11:26:40</cbc:IssueTime>
+  <cbc:CreditNoteTypeCode>SATIM</cbc:CreditNoteTypeCode>
+  <cbc:Note>Ürünler ziynet eşyası olarak Darphane ambalajında, mühürleri sağlam teslim edilmiştir.</cbc:Note>
+  <cbc:Note>Satış fiyatına işçilik farkı dahildir; KDV yalnızca işçilik farkı üzerinden hesaplanmıştır.</cbc:Note>
+  <cbc:Note>Yalnız: Otuz Bin Türk Lirası</cbc:Note>
+  <cac:AdditionalDocumentReference>
+    <cbc:ID>48213</cbc:ID>
+    <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+    <cbc:DocumentTypeCode>ISTATISTIKNO</cbc:DocumentTypeCode>
+  </cac:AdditionalDocumentReference>
+  <cac:Signature>
+    <cbc:ID schemeID="VKN_TCKN">0457182965</cbc:ID>
+    <cac:SignatoryParty>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="VKN">0457182965</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PostalAddress>
+        <cbc:StreetName>Kapalıçarşı, Kalpakçılar Cad.</cbc:StreetName>
+        <cbc:BuildingNumber>74</cbc:BuildingNumber>
+        <cbc:CitySubdivisionName>Fatih</cbc:CitySubdivisionName>
+        <cbc:CityName>İstanbul</cbc:CityName>
+        <cbc:PostalZone>34126</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+          <cbc:Name>Türkiye</cbc:Name>
+        </cac:Country>
+      </cac:PostalAddress>
+    </cac:SignatoryParty>
+    <cac:DigitalSignatureAttachment>
+      <cac:ExternalReference>
+        <cbc:URI>#Signature_ABK2026000001284</cbc:URI>
+      </cac:ExternalReference>
+    </cac:DigitalSignatureAttachment>
+  </cac:Signature>
+  <cac:AccountingSupplierParty>
+    <cac:Party>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="VKN">0457182965</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="SUBENO">IST-0417</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyName>
+        <cbc:Name>Altınbaşak Kuyumculuk ve Kıymetli Madenler Tic. A.Ş.</cbc:Name>
+      </cac:PartyName>
+      <cac:PostalAddress>
+        <cbc:StreetName>Kapalıçarşı, Kalpakçılar Cad.</cbc:StreetName>
+        <cbc:BuildingNumber>74</cbc:BuildingNumber>
+        <cbc:CitySubdivisionName>Fatih</cbc:CitySubdivisionName>
+        <cbc:CityName>İstanbul</cbc:CityName>
+        <cbc:PostalZone>34126</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+          <cbc:Name>Türkiye</cbc:Name>
+        </cac:Country>
+      </cac:PostalAddress>
+      <cac:PartyTaxScheme>
+        <cac:TaxScheme>
+          <cbc:Name>Beyazıt</cbc:Name>
+        </cac:TaxScheme>
+      </cac:PartyTaxScheme>
+      <cac:Contact>
+        <cbc:Telephone>0212 522 74 74</cbc:Telephone>
+        <cbc:ElectronicMail>satis@altinbasakkuyumculuk.com.tr</cbc:ElectronicMail>
+      </cac:Contact>
+    </cac:Party>
+  </cac:AccountingSupplierParty>
+  <cac:AccountingCustomerParty>
+    <cac:Party>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="TCKN">52730918476</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="MUSTERITURU">GERCEKKISI</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PostalAddress>
+        <cbc:StreetName>Mimar Sinan Mah. Hakimiyet-i Milliye Cad.</cbc:StreetName>
+        <cbc:BuildingNumber>37 D: 4</cbc:BuildingNumber>
+        <cbc:CitySubdivisionName>Üsküdar</cbc:CitySubdivisionName>
+        <cbc:CityName>İstanbul</cbc:CityName>
+        <cbc:PostalZone>34672</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+          <cbc:Name>Türkiye</cbc:Name>
+        </cac:Country>
+      </cac:PostalAddress>
+      <cac:Contact>
+        <cbc:Telephone>0542 316 90 27</cbc:Telephone>
+        <cbc:ElectronicMail>zeynep.arslan@example.com</cbc:ElectronicMail>
+      </cac:Contact>
+      <cac:Person>
+        <cbc:FirstName>Zeynep</cbc:FirstName>
+        <cbc:FamilyName>Arslan</cbc:FamilyName>
+        <cbc:NationalityID>TR</cbc:NationalityID>
+      </cac:Person>
+    </cac:Party>
+  </cac:AccountingCustomerParty>
+  <cac:PaymentMeans>
+    <cbc:PaymentMeansCode listID="UN/4461">68</cbc:PaymentMeansCode>
+    <cbc:InstructionNote>Müşteri ödemesi — kredi kartı, tek çekim</cbc:InstructionNote>
+    <cac:PayerFinancialAccount>
+      <cbc:ID>540130******2290</cbc:ID>
+    </cac:PayerFinancialAccount>
+  </cac:PaymentMeans>
+  <cac:PaymentMeans>
+    <cbc:PaymentMeansCode listID="UN/4461">68</cbc:PaymentMeansCode>
+    <cbc:InstructionNote>Müessese tahsilat hesabı (POS)</cbc:InstructionNote>
+    <cac:PayeeFinancialAccount>
+      <cbc:ID>TR660006400000110749382215</cbc:ID>
+      <cbc:CurrencyCode>TRY</cbc:CurrencyCode>
+      <cbc:PaymentNote>Türkiye İş Bankası — Kapalıçarşı Şubesi</cbc:PaymentNote>
+    </cac:PayeeFinancialAccount>
+  </cac:PaymentMeans>
+  <cac:PricingExchangeRate>
+    <cbc:SourceCurrencyCode>TRY</cbc:SourceCurrencyCode>
+    <cbc:TargetCurrencyCode>XAU_22C</cbc:TargetCurrencyCode>
+    <cbc:CalculationRate>0.0001</cbc:CalculationRate>
+  </cac:PricingExchangeRate>
+  <cac:PaymentExchangeRate>
+    <cbc:SourceCurrencyCode>TRY</cbc:SourceCurrencyCode>
+    <cbc:TargetCurrencyCode>XAU_22C</cbc:TargetCurrencyCode>
+    <cbc:CalculationRate>0.0001</cbc:CalculationRate>
+  </cac:PaymentExchangeRate>
+  <cac:TaxTotal>
+    <cbc:TaxAmount currencyID="TRY">150.00</cbc:TaxAmount>
+    <cac:TaxSubtotal>
+      <cbc:TaxableAmount currencyID="TRY">750.00</cbc:TaxableAmount>
+      <cbc:TaxAmount currencyID="TRY">150.00</cbc:TaxAmount>
+      <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+      <cbc:Percent>20</cbc:Percent>
+      <cac:TaxCategory>
+        <cac:TaxScheme>
+          <cbc:Name>KDV</cbc:Name>
+          <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+        </cac:TaxScheme>
+      </cac:TaxCategory>
+    </cac:TaxSubtotal>
+  </cac:TaxTotal>
+  <cac:LegalMonetaryTotal>
+    <cbc:LineExtensionAmount currencyID="XAU_22C">3</cbc:LineExtensionAmount>
+    <cbc:TaxExclusiveAmount currencyID="TRY">29850.00</cbc:TaxExclusiveAmount>
+    <cbc:TaxInclusiveAmount currencyID="TRY">30000.00</cbc:TaxInclusiveAmount>
+    <cbc:PayableAmount currencyID="TRY">30000.00</cbc:PayableAmount>
+  </cac:LegalMonetaryTotal>
+  <cac:CreditNoteLine>
+    <cbc:ID>1</cbc:ID>
+    <cbc:CreditedQuantity unitCode="C62">3</cbc:CreditedQuantity>
+    <cbc:LineExtensionAmount currencyID="TRY">30000.00</cbc:LineExtensionAmount>
+    <cac:Item>
+      <cbc:Description>22 ayar (916 milyem) · adet başı 1,75 g · Darphane ambalajlı</cbc:Description>
+      <cbc:Name>Çeyrek Altın (Ziynet)</cbc:Name>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="TRY">10000.00</cbc:PriceAmount>
+    </cac:Price>
+  </cac:CreditNoteLine>
+</CreditNote>

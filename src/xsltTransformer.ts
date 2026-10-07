@@ -1,11 +1,23 @@
 /**
- * XMLSerializer script gövdesindeki `<`, `>`, `&` karakterlerini kaçışlar; HTML
- * olarak yüklenince script çalışmaz (ör. GİB şablonlarındaki karekod). Script
- * içeriği HTML'de ham metindir, kaçışlar geri alınır.
+ * XMLSerializer script/style gövdesindeki `<`, `>`, `&` karakterlerini kaçışlar;
+ * HTML olarak yüklenince script çalışmaz (ör. GİB şablonlarındaki karekod) ve
+ * `.a > b` gibi CSS kuralları düşer. Bu içerik HTML'de ham metindir, kaçışlar geri alınır.
  */
 export const restoreScriptText = (html: string): string =>
-    html.replace(/(<script\b[^>]*>)([\s\S]*?)(<\/script>)/gi, (_, open: string, body: string, close: string) =>
+    html.replace(/(<(script|style)\b[^>]*>)([\s\S]*?)(<\/\2>)/gi, (_, open: string, _tag: string, body: string, close: string) =>
         open + body.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&') + close);
+
+/** Chrome 155+ XSLTProcessor çıktısının <body> başına "This site uses XSLT…" uyarısı ekler. */
+export const stripXsltDeprecationBanner = (doc: Document): void => {
+    const body = doc.body ?? doc.getElementsByTagName('body')[0];
+    if (!body) return;
+    for (const el of Array.from(body.children)) {
+        if (el.tagName.toLowerCase() === 'div' && /uses XSLT/i.test(el.textContent ?? '')
+            && /#d9534f|rgb\(217,\s*83,\s*79\)/i.test(el.getAttribute('style') ?? '')) {
+            el.remove();
+        }
+    }
+};
 
 export const transformXmlWithXslt = (xmlString: string, xsltString: string): string => {
     // DEBUG LOG
@@ -29,7 +41,7 @@ export const transformXmlWithXslt = (xmlString: string, xsltString: string): str
         const processor = new XSLTProcessor();
         processor.importStylesheet(xsltDoc);
 
-        let resultDoc = processor.transformToDocument(xmlDoc);
+        const resultDoc = processor.transformToDocument(xmlDoc);
 
         const serializer = new XMLSerializer();
 
@@ -43,12 +55,13 @@ export const transformXmlWithXslt = (xmlString: string, xsltString: string): str
             throw new Error('XSLT transformation produced null result. Possible causes: Invalid XSLT syntax, missing templates, or runtime errors (e.g. format-number pattern mismatch).');
         }
 
+        stripXsltDeprecationBanner(resultDoc);
         return restoreScriptText(serializer.serializeToString(resultDoc));
     } catch (error) {
         console.error("XSLT Transformation Error:", error);
 
         let context = "";
-        let lineMatch = error instanceof Error ? error.message.match(/line (\d+)/) : null;
+        const lineMatch = error instanceof Error ? error.message.match(/line (\d+)/) : null;
         if (lineMatch) {
             const lineNum = parseInt(lineMatch[1]);
             const lines = xsltString.split('\n');

@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği — Hukuk bürosu e-Serbest Meslek Makbuzu (kurgusal veriler).
+  Avukat -> belirlenmiş alıcı A.Ş.; GV stopajı %20, KDV %20, hukuki danışmanlık kalemine 602 kodlu 9/10 KDV tevkifatı.
+    Brüt ücret 40.000,00 | GV stopajı %20 8.000,00 | Net ücret 32.000,00
+    KDV %20 8.000,00 | KDV tevkifatı (12.000,00 x %20 = 2.400,00 x 9/10) 2.160,00 | Tahsil edilen KDV 5.840,00
+    Tahsil edilen tutar 37.840,00
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+    xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>EARSIVBELGE</cbc:ProfileID>
+    <cbc:ID>ARH2026000000214</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>44C6792F-40D8-4B25-A06E-FADB12122200</cbc:UUID>
+    <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+    <cbc:IssueTime>15:20:00</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>SERBESTMESLEKMAKBUZU</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız Otuz Yedi Bin Sekiz Yüz Kırk Türk Lirasıdır.</cbc:Note>
+    <cbc:Note>Mahkeme: İstanbul 14. Asliye Ticaret Mahkemesi</cbc:Note>
+    <cbc:Note>Dosya No: 2026/512 Esas</cbc:Note>
+    <cbc:Note>Vekalet Konusu: Taşıma sözleşmesinden doğan alacak davası ve icra takibi</cbc:Note>
+    <cbc:Note>Baro Sicil: İstanbul Barosu 48213</cbc:Note>
+    <cbc:Note>Hukuki danışmanlık kalemi KDV Genel Uygulama Tebliği I/C-2.1.3.2.2 kapsamında 602 kodlu 9/10 oranında KDV tevkifatına tabidir.</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>3</cbc:LineCountNumeric>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.arslanhukuk.av.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">0762145831</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Arslan Hukuk Bürosu</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Halaskargazi Caddesi Nişantaşı Plaza</cbc:StreetName>
+                <cbc:BuildingNumber>118/9</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Şişli</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34371</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Şişli</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(212) 231 48 21</cbc:Telephone>
+                <cbc:ElectronicMail>selin@arslanhukuk.av.tr</cbc:ElectronicMail>
+            </cac:Contact>
+            <cac:Person>
+                <cbc:FirstName>Selin</cbc:FirstName>
+                <cbc:FamilyName>ARSLAN</cbc:FamilyName>
+                <cbc:Title>Avukat</cbc:Title>
+            </cac:Person>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">1834509272</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Boğaziçi Lojistik ve Dış Ticaret A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Atatürk Mahallesi Ertuğrul Gazi Sokak</cbc:StreetName>
+                <cbc:BuildingNumber>4/A</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Ataşehir</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34758</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Büyük Mükellefler</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(216) 555 40 40</cbc:Telephone>
+                <cbc:ElectronicMail>hukuk@bogazicilojistik.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-10-21</cbc:PaymentDueDate>
+        <cbc:InstructionNote>Havale / EFT açıklamasına makbuz numarasını yazınız.</cbc:InstructionNote>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR66 0006 2000 0012 3456 7890 12</cbc:ID>
+            <cbc:CurrencyCode>TRY</cbc:CurrencyCode>
+            <cac:FinancialInstitutionBranch>
+                <cbc:Name>Nişantaşı Şubesi</cbc:Name>
+                <cac:FinancialInstitution>
+                    <cbc:Name>Türkiye Garanti Bankası A.Ş.</cbc:Name>
+                </cac:FinancialInstitution>
+            </cac:FinancialInstitutionBranch>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">16000.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">40000.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">8000.00</cbc:TaxAmount>
+            <cbc:Percent>20</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">40000.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">8000.00</cbc:TaxAmount>
+            <cbc:Percent>20</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>GV STOPAJI</cbc:Name>
+                    <cbc:TaxTypeCode>0003</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:WithholdingTaxTotal>
+        <cbc:TaxAmount currencyID="TRY">2160.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">2400.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">2160.00</cbc:TaxAmount>
+            <cbc:Percent>90</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>Etüt, Plan-Proje, Danışmanlık, Denetim ve Benzeri Hizmetler</cbc:Name>
+                    <cbc:TaxTypeCode>602</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:WithholdingTaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">40000.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">40000.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">48000.00</cbc:TaxInclusiveAmount>
+        <cbc:PayableAmount currencyID="TRY">37840.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">25000.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">5000.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">25000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">5000.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>İstanbul 14. Asliye Ticaret Mahkemesi 2026/512 E. — dava açılışı, dilekçeler ve duruşma takibi</cbc:Description>
+            <cbc:Name>Dava vekalet ücreti (alacak davası)</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">25000.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">12000.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">2400.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">12000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">2400.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:WithholdingTaxTotal>
+            <cbc:TaxAmount currencyID="TRY">2160.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">2400.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">2160.00</cbc:TaxAmount>
+                <cbc:Percent>90</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>Etüt, Plan-Proje, Danışmanlık, Denetim ve Benzeri Hizmetler</cbc:Name>
+                        <cbc:TaxTypeCode>602</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:WithholdingTaxTotal>
+        <cac:Item>
+            <cbc:Description>Ekim 2026 — sözleşme incelemeleri, şirket içi hukuki görüşler</cbc:Description>
+            <cbc:Name>Sürekli hukuki danışmanlık (aylık)</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">12000.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">3000.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">600.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">3000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">600.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Borçluya noter kanalıyla ihtarname keşidesi</cbc:Description>
+            <cbc:Name>İhtarname hazırlanması ve tebliği</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">3000.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>

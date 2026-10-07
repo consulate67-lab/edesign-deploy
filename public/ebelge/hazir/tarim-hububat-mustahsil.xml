@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: Hububat tüccarı e-Müstahsil Makbuzu (CreditNote · EARSIVBELGE · MUSTAHSILMAKBUZ)
+  Müstahsil Makbuzu Kılavuzu V1.1 yapısında: GV stopajı %2 (0003), borsa tescil ücreti %0,2 (8001),
+  SGK (Bağ-Kur) prim kesintisi %1 (SGK_PRIM), çiftçiye SMS doğrulama kodu, SMS operatörü.
+  Tüm kişi/firma bilgileri kurgusaldır.
+-->
+<CreditNote xmlns="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2"
+    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+    xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2.1</cbc:CustomizationID>
+    <cbc:ProfileID>EARSIVBELGE</cbc:ProfileID>
+    <cbc:ID>BOH2026000000586</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>AB2FBBE6-351A-46CB-B6D8-A62BE2D3D42A</cbc:UUID>
+    <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+    <cbc:IssueTime>10:30:00</cbc:IssueTime>
+    <cbc:CreditNoteTypeCode>MUSTAHSILMAKBUZ</cbc:CreditNoteTypeCode>
+    <cbc:Note>Yalnız: Üç Yüz Doksan İki Bin Dört Yüz Seksen Beş Türk Lirası Yirmi Sekiz Kuruş</cbc:Note>
+    <cbc:Note>Ürünler Polatlı Ticaret Borsası'nda 06.10.2026 tarih ve 2026/48712 sayılı tescil beyannamesi ile tescil edilmiştir.</cbc:Note>
+    <cbc:Note>Kalite analizi: Borsa laboratuvarı fişi LAB-26-11873 (numune 06.10.2026, kantar fişi KF-26-09455).</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>3</cbc:LineCountNumeric>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">2674431903</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">2674431903</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Cumhuriyet Mah. Ankara Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>118</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Polatlı</cbc:CitySubdivisionName>
+                <cbc:CityName>Ankara</cbc:CityName>
+                <cbc:PostalZone>06900</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.bereketliova.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">2674431903</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Bereketli Ova Hububat Tarım Ürünleri Ticaret Ltd. Şti.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Cumhuriyet Mah. Ankara Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>118</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Polatlı</cbc:CitySubdivisionName>
+                <cbc:CityName>Ankara</cbc:CityName>
+                <cbc:PostalZone>06900</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Polatlı</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(312) 623 18 18</cbc:Telephone>
+                <cbc:ElectronicMail>alim@bereketliova.com.tr</cbc:ElectronicMail>
+                <cac:OtherCommunication>
+                    <cbc:ChannelCode name="SMS_PROVIDER">Anadolu Mesaj Teknolojileri A.Ş.</cbc:ChannelCode>
+                    <cbc:Value>7310456785</cbc:Value>
+                </cac:OtherCommunication>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">37642091530</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Yenidoğan Mah. Değirmen Sok. No:7</cbc:StreetName>
+                <cbc:CitySubdivisionName>Polatlı</cbc:CitySubdivisionName>
+                <cbc:CityName>Ankara</cbc:CityName>
+                <cbc:Region>Sakarya Ovası</cbc:Region>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:Contact>
+                <cbc:ID>482915</cbc:ID>
+                <cbc:Name>SMS</cbc:Name>
+                <cbc:Telephone>5324471893</cbc:Telephone>
+            </cac:Contact>
+            <cac:Person>
+                <cbc:FirstName>Mehmet Ali</cbc:FirstName>
+                <cbc:FamilyName>Kılınç</cbc:FamilyName>
+            </cac:Person>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:Delivery>
+        <cbc:ActualDeliveryDate>2026-10-06</cbc:ActualDeliveryDate>
+    </cac:Delivery>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-10-09</cbc:PaymentDueDate>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR100001500015800734412906</cbc:ID>
+            <cbc:CurrencyCode>TRY</cbc:CurrencyCode>
+            <cbc:PaymentNote>Türkiye Vakıflar Bankası — Polatlı Şubesi (üretici hesabı)</cbc:PaymentNote>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">12974.72</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">405460.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">8109.20</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>2</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>GELİR VERGİSİ S. (MUHTASAR)</cbc:Name>
+                    <cbc:TaxTypeCode>0003</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">405460.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">810.92</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>2</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>0.2</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>BORSA TESCİL ÜCRETİ</cbc:Name>
+                    <cbc:TaxTypeCode>8001</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">405460.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">4054.60</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>3</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>1</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>SGK (BAĞ-KUR) PRİM KESİNTİSİ</cbc:Name>
+                    <cbc:TaxTypeCode>SGK_PRIM</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">405460.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">405460.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">405460.00</cbc:TaxInclusiveAmount>
+        <cbc:PayableAmount currencyID="TRY">392485.28</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:CreditNoteLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:CreditedQuantity unitCode="KGM">18450</cbc:CreditedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">243540.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">4870.80</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">243540.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">4870.80</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>2</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>GELİR VERGİSİ S. (MUHTASAR)</cbc:Name>
+                        <cbc:TaxTypeCode>0003</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Anadolu kırmızı sert, 2. grup · rutubet %11,6 · protein %12,9 · hektolitre 79,4 kg</cbc:Description>
+            <cbc:Name>Ekmeklik buğday</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">13.20</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:CreditedQuantity unitCode="KGM">9200</cbc:CreditedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">99820.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">1996.40</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">99820.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">1996.40</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>2</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>GELİR VERGİSİ S. (MUHTASAR)</cbc:Name>
+                        <cbc:TaxTypeCode>0003</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Yemlik, iki sıralı · rutubet %12,1 · hektolitre 64,2 kg</cbc:Description>
+            <cbc:Name>Arpa</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">10.85</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:CreditedQuantity unitCode="KGM">1350</cbc:CreditedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">62100.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">1242.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">62100.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">1242.00</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>2</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>GELİR VERGİSİ S. (MUHTASAR)</cbc:Name>
+                        <cbc:TaxTypeCode>0003</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Koçbaşı, 9 mm elek üstü · rutubet %10,8</cbc:Description>
+            <cbc:Name>Nohut</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">46.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+</CreditNote>

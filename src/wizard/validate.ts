@@ -90,8 +90,9 @@ export function validateXslt(text: string, docType: WizardDocType, sampleXml: st
     }
 
     if (docType.family === 'invoice') {
-        const arsiv = /EARSIV|e-Ar[şs]iv/i.test(text);
-        const fatura = /TEMELFATURA|TICARIFATURA/.test(text);
+        const visible = text.replace(/<!--[\s\S]*?-->/g, '').replace(/<script\b[\s\S]*?<\/script>/gi, '');
+        const arsiv = /EARSIV|e-Ar[şs]iv/i.test(visible);
+        const fatura = /TEMELFATURA|TICARIFATURA/.test(visible);
         if (docType.id === 'fatura' && arsiv && !fatura) {
             checks.push({ level: 'warn', text: 'XSLT e-Arşiv faturasına özel görünüyor; e-Fatura için başlık ve alanları kontrol edin.' });
         }
