@@ -748,12 +748,13 @@ export function removeXsltBinding(xslt: string, b: XsltBinding): string {
     return xslt;
 }
 
-const IMAGE_PLACEHOLDER_SRC = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='100'%3E%3Crect width='100%25' height='100%25' fill='%23e2e8f0' stroke='%2394a3b8'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='13' fill='%23475569'%3EResim URL girin%3C/text%3E%3C/svg%3E";
+const IMAGE_PLACEHOLDER_SRC = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='100'%3E%3Crect width='100%25' height='100%25' fill='%23e2e8f0' stroke='%2394a3b8'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='13' fill='%23475569'%3EResim se%C3%A7in%3C/text%3E%3C/svg%3E";
 
 // data-xslt-obj: özellik panelinin objeyi XSLT kaynağında ve önizlemede
 // bulduğu kalıcı kimlik.
 export const XSLT_ELEMENT_SNIPPETS = {
-    image: (id: string) => `<img data-xslt-obj="${id}" src="${IMAGE_PLACEHOLDER_SRC}" alt="Yeni Resim" width="200" />`,
+    image: (id: string, src: string = IMAGE_PLACEHOLDER_SRC, width = 200) =>
+        `<img data-xslt-obj="${id}" src="${src}" alt="Resim" width="${width}" />`,
     text: (id: string) => `<p data-xslt-obj="${id}">Yeni metin</p>`,
     table: (id: string) => {
         const line = '1px solid #000000';

@@ -47,6 +47,7 @@ import { transformXmlWithXslt } from '../xsltTransformer';
 import { getInlineXslt } from '../xsltContent';
 import { getAntrepoTemplateById } from './antrepoTemplates';
 import { renderAndAnnotateXslt, parseXsltInstrumented, updateXSLTBinding, removeXsltBinding, nextXsltObjId, XSLT_ELEMENT_SNIPPETS } from './utils/xsltRender';
+import { pickImageFile, readImageFile, dataUrlFormat, dataUrlBytes, formatBytes } from './utils/imageFile';
 import type { XsltBinding, XsltInsertType } from './utils/xsltRender';
 import {
     findBindingSourceOffset, findEnclosingLiteralTag, findImgTagBySrc, findObjTag,
@@ -270,6 +271,89 @@ const FieldText: React.FC<{ label: string; currentValue: string; onChange: (v: s
         </div>
     );
 };
+const isImagePlaceholder = (src: string) => src.startsWith('data:image/svg+xml,%3Csvg') && src.includes('%3EResim');
+
+/**
+ * Resim kaynağı: dosya seçilir, `data:<tür>;base64,...` değeri otomatik
+ * üretilir. Harici adres (URL) isteyenler için ayrıca metin alanı vardır.
+ */
+const ImageSourceField: React.FC<{ currentValue: string; onChange: (v: string) => void }> = ({ currentValue, onChange }) => {
+    const [src, setSrc] = useState(currentValue);
+    const [busy, setBusy] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [url, setUrl] = useState(currentValue.startsWith('data:') ? '' : currentValue);
+    const placeholder = !src || isImagePlaceholder(src);
+    const format = placeholder ? null : dataUrlFormat(src);
+    const choose = async () => {
+        setError(null);
+        const file = await pickImageFile();
+        if (!file) return;
+        setBusy(true);
+        try {
+            const img = await readImageFile(file);
+            setSrc(img.dataUrl);
+            setUrl('');
+            onChange(img.dataUrl);
+        } catch (e) {
+            setError(e instanceof Error ? e.message : String(e));
+        } finally {
+            setBusy(false);
+        }
+    };
+    return (
+        <div data-image-source style={{ marginBottom: '10px' }}>
+            <label style={fieldLabelStyle}>Resim</label>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
+                <div style={{
+                    width: '64px', height: '48px', flexShrink: 0, borderRadius: '4px', border: '1px solid #334155',
+                    background: 'repeating-conic-gradient(#1e293b 0% 25%, #273449 0% 50%) 50% / 12px 12px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
+                }}>
+                    {placeholder
+                        ? <ImageIcon size={18} color="#64748b" />
+                        : <img src={src} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />}
+                </div>
+                <div data-image-info style={{ fontSize: '11px', color: '#94a3b8', lineHeight: 1.4, minWidth: 0 }}>
+                    {placeholder
+                        ? 'Henüz resim seçilmedi'
+                        : format
+                            ? <>Gömülü {format} · {formatBytes(dataUrlBytes(src))}</>
+                            : <span style={{ wordBreak: 'break-all' }}>Harici adres</span>}
+                </div>
+            </div>
+            <button
+                type="button"
+                data-image-pick
+                disabled={busy}
+                onClick={choose}
+                style={{
+                    width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                    padding: '7px 10px', borderRadius: '4px', border: '1px solid rgba(165,180,252,0.5)',
+                    background: 'rgba(99,102,241,0.15)', color: '#c7d2fe', fontSize: '12px', fontWeight: 700,
+                    cursor: busy ? 'wait' : 'pointer', fontFamily: 'inherit',
+                }}
+            >
+                <ImageIcon size={14} /> {busy ? 'Yükleniyor…' : placeholder ? 'Resim Seç' : 'Resmi Değiştir'}
+            </button>
+            {error && <div style={{ marginTop: '6px', fontSize: '11px', color: '#fca5a5' }}>{error}</div>}
+            <label style={{ ...fieldLabelStyle, marginTop: '10px' }}>veya resim adresi (URL)</label>
+            <input
+                type="text"
+                value={url}
+                placeholder="https://..."
+                onChange={(e) => {
+                    const v = e.target.value;
+                    setUrl(v);
+                    if (v.trim()) { setSrc(v.trim()); onChange(v.trim()); }
+                }}
+                style={fieldInputStyle}
+                onFocus={(e) => e.currentTarget.style.borderColor = '#6366f1'}
+                onBlur={(e) => e.currentTarget.style.borderColor = '#334155'}
+            />
+        </div>
+    );
+};
+
 const cssColorToHex = (color: string): string => {
     const m = color.match(/rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)/);
     if (m) return '#' + [m[1], m[2], m[3]].map(n => Number(n).toString(16).padStart(2, '0')).join('');
@@ -1445,6 +1529,23 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const insertObject = useCallback((type: XsltInsertType | 'formula' | 'karekod', target: InsertTarget | null) => {
         if (type === 'karekod') {
             insertSnippet((id) => karekodSnippet(id, !hasQrLibrary(xsltContentRef.current)), target, 'karekod');
+            return;
+        }
+        if (type === 'image') {
+            void pickImageFile().then(async (file) => {
+                if (file === null) return;
+                if (file === undefined) {
+                    insertSnippet((id) => XSLT_ELEMENT_SNIPPETS.image(id), target, 'resim');
+                    return;
+                }
+                try {
+                    const img = await readImageFile(file);
+                    insertSnippet((id) => XSLT_ELEMENT_SNIPPETS.image(id, img.dataUrl, Math.min(200, img.width || 200)), target, `resim (${file.name})`);
+                } catch (e) {
+                    setSaveStatus('error');
+                    setSaveMessage(`⚠ ${e instanceof Error ? e.message : String(e)}`);
+                }
+            });
             return;
         }
         if (type !== 'formula') {
@@ -4008,7 +4109,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     {el && cs && isImg && (
                                         <>
                                             {sectionTitle('Resim', '#fcd34d')}
-                                            <FieldText key={fieldKey('src')} label="Resim URL (src)" placeholder="https://... veya data:image/..." currentValue={el.getAttribute('src') || ''} onChange={(v) => handleAttrChange('src', v)} />
+                                            <ImageSourceField
+                                                key={fieldKey('src')}
+                                                currentValue={el.getAttribute('src') || ''}
+                                                onChange={(v) => {
+                                                    handleAttrChange('src', v);
+                                                    if (v.startsWith('data:')) flushSourceEditsRef.current();
+                                                }}
+                                            />
                                             <FieldText key={fieldKey('alt')} label="Alternatif metin (alt)" currentValue={el.getAttribute('alt') || ''} onChange={(v) => handleAttrChange('alt', v)} />
                                             <FieldText key={fieldKey('width')} label="Genişlik (width)" currentValue={el.style.width || el.getAttribute('width') || cs.width} onChange={(v) => handleStyleChange('width', v)} />
                                             <FieldText key={fieldKey('height')} label="Yükseklik (height)" currentValue={el.style.height || el.getAttribute('height') || ''} placeholder="auto" onChange={(v) => handleStyleChange('height', v)} />
