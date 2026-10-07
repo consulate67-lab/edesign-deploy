@@ -18,6 +18,11 @@ const ProfessionalDesigner = lazy(() =>
 const XSLTEditor = lazy(() =>
     import('./xslt-editor/XsltEditor').then((m) => ({ default: m.XSLTEditor }))
 );
+// Yönetim paneli yalnızca #/yonetim (veya #/admin) ile açılır; sitede bağlantısı yoktur.
+const AdminApp = lazy(() => import('./admin/AdminApp').then((m) => ({ default: m.AdminApp })));
+const SupportWidget = lazy(() => import('./support/SupportWidget').then((m) => ({ default: m.SupportWidget })));
+
+const isAdminHash = () => /^#\/(yonetim|admin)(\/|$)/i.test(window.location.hash);
 
 const ScreenFallback: React.FC = () => (
     <div
@@ -62,6 +67,36 @@ const App: React.FC = () => {
     const [view, setView] = useState<View>(initial.view);
     const [authMode, setAuthMode] = useState<AuthMode>('login');
     const [selectedDoc, setSelectedDoc] = useState<SelectedDoc | null>(initial.doc);
+    const [adminRoute, setAdminRoute] = useState(isAdminHash);
+
+    useEffect(() => {
+        const onHash = () => setAdminRoute(isAdminHash());
+        window.addEventListener('hashchange', onHash);
+        return () => window.removeEventListener('hashchange', onHash);
+    }, []);
+
+    const userArea = !adminRoute && (view === 'selection' || view === 'designer' || view === 'xslt-editor');
+
+    // Giriş yapmış kullanıcı: canlı bağlantı + ortak ekran istemcisi; çıkışta / girişe dönünce kapatılır.
+    useEffect(() => {
+        if (!userArea) return;
+        let alive = true;
+        import('./support/cobrowse/CobrowseClient')
+            .then((m) => { if (alive) m.mountCobrowseClient(); })
+            .catch((e) => console.warn('[support] ortak ekran istemcisi yüklenemedi', e));
+        return () => {
+            alive = false;
+            import('./support/cobrowse/CobrowseClient').then((m) => m.unmountCobrowseClient()).catch(() => undefined);
+            import('./support/realtime').then((m) => m.disconnectUserRealtime()).catch(() => undefined);
+        };
+    }, [userArea]);
+
+    useEffect(() => {
+        if (!userArea) return;
+        import('./support/realtime')
+            .then((m) => { m.getUserRealtime(); m.reportView(view); })
+            .catch(() => undefined);
+    }, [userArea, view]);
 
     useEffect(() => {
         if (view === 'landing' || view === 'auth') {
@@ -157,9 +192,25 @@ const App: React.FC = () => {
         setView('xslt-editor');
     };
 
+    if (adminRoute) {
+        return (
+            <>
+                <ToastHost />
+                <Suspense fallback={<ScreenFallback />}>
+                    <AdminApp />
+                </Suspense>
+            </>
+        );
+    }
+
     return (
         <>
             <ToastHost />
+            {userArea && api.getToken() && (
+                <Suspense fallback={null}>
+                    <SupportWidget />
+                </Suspense>
+            )}
             <Suspense fallback={<ScreenFallback />}>
                 {view === 'landing' && (
                     <Landing onRegister={handleRegister} onLogin={handleLogin} />

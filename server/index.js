@@ -4,6 +4,13 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { randomUUID } from 'node:crypto';
 import { initDb } from './db.js';
+import { createRequireAdmin, registerAdminAuthRoutes } from './admin-auth.js';
+import { registerAdminRoutes } from './admin.js';
+import { registerGalleryRoutes } from './gallery.js';
+import { attachRealtime, touchLastSeen } from './realtime.js';
+import { registerSupportRoutes } from './support.js';
+import { createBotHandler } from './telegram-bot.js';
+import { startPolling } from './telegram.js';
 
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -22,10 +29,13 @@ const EFFECTIVE_SECRET = SECRET_KEY || 'dev-only-insecure-fallback-do-not-use-in
 // Allowed CORS origins. Comma-separated. Defaults to local dev hosts.
 // Sprint 1.4 (2026-10-02): production domain'ler eklendi (api.edesign-deploy.com, edesign-deploy.com).
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS
-    || 'http://localhost:5173,http://localhost:3002,http://127.0.0.1:5173,http://127.0.0.1:3002,https://edesign-deploy.com,https://www.edesign-deploy.com,https://api.edesign-deploy.com')
+    || 'http://localhost:5173,http://localhost:3002,http://127.0.0.1:5173,http://127.0.0.1:3002,https://edesign-deploy.com,https://www.edesign-deploy.com,https://api.edesign-deploy.com,https://consulate67-lab.github.io')
     .split(',')
     .map((o) => o.trim())
     .filter(Boolean);
+
+// Railway önünde tek proxy katmanı var; req.ip gerçek istemci adresi olur (giriş sınırlaması için).
+app.set('trust proxy', 1);
 
 // Middleware
 app.use(cors({
@@ -33,7 +43,7 @@ app.use(cors({
         // Allow same-origin or curl-like requests with no origin header.
         if (!origin) return callback(null, true);
         if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
-        return callback(new Error(`CORS policy violation: origin ${origin} not allowed`));
+        return callback(Object.assign(new Error(`CORS policy violation: origin ${origin} not allowed`), { status: 403 }));
     },
     credentials: true,
 }));
@@ -58,9 +68,20 @@ const authenticateToken = (req, res, next) => {
 };
 
 // Start Server
-initDb().then(_db => {
+initDb().then(async _db => {
     db = _db;
-    app.listen(PORT, () => {
+    const requireAdmin = createRequireAdmin({ db, secret: EFFECTIVE_SECRET });
+    registerAdminAuthRoutes(app, { db, secret: EFFECTIVE_SECRET, requireAdmin });
+    registerAdminRoutes(app, { db, requireAdmin });
+    registerGalleryRoutes(app, { db, requireAdmin });
+    registerSupportRoutes(app, { db, authenticateToken });
+    app.use((err, _req, res, _next) => {
+        const status = err.status || err.statusCode || 500;
+        if (status >= 500) console.error('[server] error:', err);
+        res.status(status).json({ error: status >= 500 ? 'Sunucu hatası.' : err.message });
+    });
+
+    const server = app.listen(PORT, () => {
         const host = process.env.HOST || '0.0.0.0';
         if (process.env.NODE_ENV !== 'production') {
             console.log(`Server running on http://localhost:${PORT}`);
@@ -68,6 +89,8 @@ initDb().then(_db => {
             console.log(`[server] Listening on ${host}:${PORT} (env=${NODE_ENV})`);
         }
     });
+    await attachRealtime(server, { db, secret: EFFECTIVE_SECRET });
+    startPolling(createBotHandler(db));
 });
 
 // Health endpoint used by Railway's healthcheck (and uptime monitors).
@@ -135,6 +158,7 @@ app.post('/api/auth/login', async (req, res) => {
 app.get('/api/me', authenticateToken, async (req, res) => {
     try {
         const user = await db.get('SELECT id, username, role, credits, free_design_used, full_name, company_name, phone_number FROM users WHERE id = ?', [req.user.id]);
+        touchLastSeen(db, req.user.id);
         res.json(user);
     } catch (e) {
         res.status(500).json({ error: e.message });

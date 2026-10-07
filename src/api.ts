@@ -2,9 +2,18 @@ const isLocal = window.location.hostname === 'localhost' || window.location.host
 // VITE_API_URL is injected at build time. Falls back to:
 //   - localhost dev (Vite proxy or direct): http://localhost:3002/api
 //   - prod static deploy (GitHub Pages):      /api  (assumes reverse proxy)
-const API_URL =
+export const API_URL =
     (import.meta.env.VITE_API_URL as string | undefined)
     || (isLocal ? 'http://localhost:3002/api' : '/api');
+
+/** API ile aynı sunucudaki WebSocket adresi (…/api → …/ws). */
+export const wsUrl = (token: string) => {
+    const base = new URL(API_URL, window.location.href);
+    base.protocol = base.protocol === 'https:' ? 'wss:' : 'ws:';
+    base.pathname = base.pathname.replace(/\/api\/?$/, '') + '/ws';
+    base.search = `?token=${encodeURIComponent(token)}`;
+    return base.toString();
+};
 
 // Session storage is used instead of localStorage for auth tokens to limit
 // the XSS attack surface: tokens are cleared when the browser tab closes.

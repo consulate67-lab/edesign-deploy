@@ -77,6 +77,10 @@ export interface SectorTemplate {
     xml: string;
     /** Öne çıkan özellikler (kartta etiket olarak): "Tevkifat", "Banka bilgisi", ... */
     tags: string[];
+    /** Yönetim panelinden eklenen tasarımlarda içerik dosyadan değil buradan okunur (xslt / xml alanları yalnızca ad taşır). */
+    inline?: { xslt: string; xml: string };
+    /** 'admin': veritabanı galerisinden (yönetim paneli); verilmezse public/ altındaki hazır şablon. */
+    source?: 'static' | 'admin';
 }
 
 export const CATEGORIES: CategoryInfo[] = [

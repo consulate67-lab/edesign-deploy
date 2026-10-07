@@ -144,6 +144,7 @@ export const initDb = async () => {
         await ensureColumn(probe, 'company_name', 'TEXT');
         await ensureColumn(probe, 'phone_number', 'TEXT');
         await ensureColumn(probe, 'free_design_used', 'INTEGER NOT NULL DEFAULT 0');
+        await ensureColumn(probe, 'last_seen_at', 'TIMESTAMPTZ');
 
         // Useful indexes for the auth query path.
         await probe.query(`CREATE INDEX IF NOT EXISTS idx_users_username ON users (username)`);
@@ -198,6 +199,9 @@ export const initDb = async () => {
         await probe.query(`CREATE INDEX IF NOT EXISTS idx_payments_user_id ON payments (user_id)`);
         await probe.query(`CREATE INDEX IF NOT EXISTS idx_payments_token ON payments (token)`);
         await probe.query(`CREATE INDEX IF NOT EXISTS idx_payments_status ON payments (status)`);
+
+        await createSupportSchema(probe);
+        await promoteAdmins(probe);
     } finally {
         probe.release();
     }
@@ -222,4 +226,127 @@ const ensureDesignsColumn = async (client, column, definition) => {
     console.log(`[db] Migration: adding column designs.${column}`);
     await client.query(`ALTER TABLE designs ADD COLUMN ${column} ${definition}`);
     return true;
+};
+
+/**
+ * Yönetim paneli, destek talepleri, online destek, galeri ve tasarım yapay zekası tabloları.
+ */
+const createSupportSchema = async (client) => {
+    await client.query(`
+        CREATE TABLE IF NOT EXISTS admin_otp (
+            id           TEXT PRIMARY KEY,
+            user_id      INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            code_hash    TEXT NOT NULL,
+            expires_at   TIMESTAMPTZ NOT NULL,
+            attempts     INTEGER NOT NULL DEFAULT 0,
+            consumed_at  TIMESTAMPTZ,
+            created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            ip           TEXT
+        )
+    `);
+
+    await client.query(`
+        CREATE TABLE IF NOT EXISTS support_tickets (
+            id               SERIAL PRIMARY KEY,
+            user_id          INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            subject          TEXT NOT NULL,
+            status           TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'answered', 'closed')),
+            context          JSONB,
+            created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            updated_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            last_message_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_support_tickets_user_id ON support_tickets (user_id)`);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_support_tickets_last_message ON support_tickets (last_message_at DESC)`);
+
+    await client.query(`
+        CREATE TABLE IF NOT EXISTS support_messages (
+            id                SERIAL PRIMARY KEY,
+            ticket_id         INTEGER NOT NULL REFERENCES support_tickets(id) ON DELETE CASCADE,
+            sender            TEXT NOT NULL CHECK (sender IN ('user', 'admin')),
+            body              TEXT NOT NULL,
+            via               TEXT NOT NULL DEFAULT 'web' CHECK (via IN ('web', 'telegram')),
+            created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            read_by_admin_at  TIMESTAMPTZ,
+            read_by_user_at   TIMESTAMPTZ
+        )
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_support_messages_ticket_id ON support_messages (ticket_id)`);
+
+    await client.query(`
+        CREATE TABLE IF NOT EXISTS remote_sessions (
+            id            TEXT PRIMARY KEY,
+            user_id       INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            ticket_id     INTEGER REFERENCES support_tickets(id) ON DELETE SET NULL,
+            status        TEXT NOT NULL CHECK (status IN ('requested', 'active', 'ended', 'declined')),
+            initiated_by  TEXT NOT NULL CHECK (initiated_by IN ('user', 'admin')),
+            note          TEXT,
+            created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            started_at    TIMESTAMPTZ,
+            ended_at      TIMESTAMPTZ,
+            admin_id      INTEGER REFERENCES users(id) ON DELETE SET NULL
+        )
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_remote_sessions_user_status ON remote_sessions (user_id, status)`);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_remote_sessions_status ON remote_sessions (status)`);
+
+    await client.query(`
+        CREATE TABLE IF NOT EXISTS gallery_designs (
+            id           SERIAL PRIMARY KEY,
+            name         TEXT NOT NULL,
+            description  TEXT NOT NULL DEFAULT '',
+            doc_type_id  TEXT NOT NULL,
+            module_id    TEXT NOT NULL,
+            sector       TEXT NOT NULL DEFAULT '',
+            category     TEXT NOT NULL DEFAULT '',
+            accent       TEXT NOT NULL DEFAULT '',
+            tags         JSONB NOT NULL DEFAULT '[]'::jsonb,
+            xslt         TEXT NOT NULL,
+            xml          TEXT NOT NULL DEFAULT '',
+            published    BOOLEAN NOT NULL DEFAULT FALSE,
+            source       TEXT NOT NULL DEFAULT 'manual' CHECK (source IN ('ai', 'manual')),
+            created_by   INTEGER REFERENCES users(id) ON DELETE SET NULL,
+            created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_gallery_designs_published ON gallery_designs (published)`);
+
+    await client.query(`
+        CREATE TABLE IF NOT EXISTS ai_memory (
+            id           SERIAL PRIMARY KEY,
+            doc_type_id  TEXT NOT NULL,
+            category     TEXT NOT NULL DEFAULT '',
+            sector       TEXT NOT NULL DEFAULT '',
+            prompt       TEXT NOT NULL DEFAULT '',
+            answers      JSONB NOT NULL DEFAULT '{}'::jsonb,
+            params       JSONB NOT NULL DEFAULT '{}'::jsonb,
+            rating       SMALLINT NOT NULL DEFAULT 0 CHECK (rating IN (-1, 0, 1)),
+            published    BOOLEAN NOT NULL DEFAULT FALSE,
+            gallery_id   INTEGER REFERENCES gallery_designs(id) ON DELETE SET NULL,
+            created_by   INTEGER REFERENCES users(id) ON DELETE SET NULL,
+            created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_ai_memory_doc_type ON ai_memory (doc_type_id, created_at DESC)`);
+};
+
+/**
+ * ADMIN_USERNAMES (virgülle ayrılmış e-postalar) içindeki mevcut kullanıcılara
+ * yönetici rolü verir. Sonradan kayıt olanlar bir sonraki açılışta yükseltilir.
+ */
+const promoteAdmins = async (client) => {
+    const usernames = (process.env.ADMIN_USERNAMES || '')
+        .split(',')
+        .map((u) => u.trim().toLowerCase())
+        .filter(Boolean);
+    if (usernames.length === 0) return;
+    const { rows } = await client.query(
+        `UPDATE users SET role = 'admin', updated_at = NOW()
+          WHERE LOWER(username) = ANY($1) AND role <> 'admin'
+          RETURNING username`,
+        [usernames]
+    );
+    for (const row of rows) console.log(`[db] ADMIN_USERNAMES: '${row.username}' yönetici yapıldı.`);
 };

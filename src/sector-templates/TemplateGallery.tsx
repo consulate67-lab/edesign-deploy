@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { LayoutTemplate, Search, Eye, X, Download, ArrowRight, Loader2, Code2, FileText, ChevronDown, Check, Building2, RotateCcw } from 'lucide-react';
-import { SECTOR_TEMPLATES, SECTORS, CATEGORIES, type CategoryId, type SectorId, type SectorTemplate } from './index';
+import { SECTOR_TEMPLATES, SECTORS, CATEGORIES, cachedDbTemplates, loadDbTemplates, type CategoryId, type SectorId, type SectorTemplate } from './index';
 import { WIZARD_DOC_TYPES, loadXmlFile } from '../wizard/docTypes';
 import { stripLeadingBom } from '../xslt-editor/utils/testWatermark';
 import { transformXmlWithXslt } from '../xsltTransformer';
@@ -38,7 +38,10 @@ const loadText = (path: string): Promise<string> => {
     return p;
 };
 
+const loadXml = (t: SectorTemplate) => (t.inline ? Promise.resolve(stripLeadingBom(t.inline.xml)) : loadText(t.xml));
+
 const loadPair = async (t: SectorTemplate) => {
+    if (t.inline) return { xslt: stripLeadingBom(t.inline.xslt), xml: stripLeadingBom(t.inline.xml) };
     const [xslt, xml] = await Promise.all([loadText(t.xslt), loadText(t.xml)]);
     return { xslt, xml };
 };
@@ -230,7 +233,17 @@ const TemplateCard: React.FC<{
                 </div>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '14px 16px 14px', flex: 1 }}>
-                <div style={{ fontWeight: 800, fontSize: '0.98rem', color: '#f1f5f9', lineHeight: 1.3 }}>{t.name}</div>
+                <div style={{ fontWeight: 800, fontSize: '0.98rem', color: '#f1f5f9', lineHeight: 1.3 }}>
+                    {t.source === 'admin' && (
+                        <span data-template-new style={{
+                            display: 'inline-block', verticalAlign: 2, marginRight: 6, padding: '1px 7px', borderRadius: 999,
+                            background: 'linear-gradient(135deg, #f97316, #ec4899)', color: 'white', fontSize: '0.62rem', fontWeight: 800, letterSpacing: 0.3,
+                        }}>
+                            Yeni
+                        </span>
+                    )}
+                    {t.name}
+                </div>
                 <div style={{
                     fontSize: '0.78rem', color: '#94a3b8', lineHeight: 1.45,
                     display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
@@ -289,7 +302,7 @@ const TemplateModal: React.FC<{
     useEffect(() => {
         let alive = true;
         renderHtml(t).then(h => { if (alive) setHtml(h); }).catch(e => { if (alive) setLoadError(errorText(e)); });
-        loadText(t.xml).then(x => { if (alive) setXml(x); }).catch(e => { if (alive) setLoadError(errorText(e)); });
+        loadXml(t).then(x => { if (alive) setXml(x); }).catch(e => { if (alive) setLoadError(errorText(e)); });
         return () => { alive = false; };
     }, [t]);
 
@@ -548,9 +561,17 @@ export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => 
     const [previewId, setPreviewId] = useState<string | null>(null);
     const [busyId, setBusyId] = useState<string | null>(null);
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const [dbTemplates, setDbTemplates] = useState<SectorTemplate[]>(() => cachedDbTemplates() ?? []);
 
+    useEffect(() => {
+        let alive = true;
+        loadDbTemplates().then(list => { if (alive) setDbTemplates(list); });
+        return () => { alive = false; };
+    }, []);
+
+    const allTemplates = useMemo(() => [...dbTemplates, ...SECTOR_TEMPLATES], [dbTemplates]);
     const q = lower(query.trim());
-    const searched = useMemo(() => SECTOR_TEMPLATES.filter(t => matchesQuery(t, q)), [q]);
+    const searched = useMemo(() => allTemplates.filter(t => matchesQuery(t, q)), [allTemplates, q]);
     const byCompany = useMemo(() => searched.filter(t => matchesCompany(t, company)), [searched, company]);
     const byDoc = useMemo(() => searched.filter(t => !docType || t.docTypeId === docType), [searched, docType]);
     const filtered = useMemo(() => byCompany.filter(t => !docType || t.docTypeId === docType), [byCompany, docType]);
@@ -559,7 +580,7 @@ export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => 
     const anyFilter = !!(docType || company || q);
     const clearAll = () => { setDocType(''); setCompany(''); setQuery(''); };
 
-    const previewTemplate = previewId ? SECTOR_TEMPLATES.find(t => t.id === previewId) ?? null : null;
+    const previewTemplate = previewId ? allTemplates.find(t => t.id === previewId) ?? null : null;
 
     const openTemplate = async (t: SectorTemplate) => {
         if (busyId) return;
@@ -579,7 +600,7 @@ export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => 
         }
     };
 
-    if (!SECTOR_TEMPLATES.length) return null;
+    if (!allTemplates.length) return null;
 
     return (
         <section data-template-gallery style={{
