@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowRight, Check, AlertTriangle, XCircle, Upload, FileCode,
 import { WIZARD_DOC_TYPES, FAMILY_INFO, loadSampleXml, type WizardDocType } from './docTypes';
 import { validateXslt, validateXml, stripBom, type ValidationResult } from './validate';
 import { designKeyOf } from '../api';
+import { hasTestWatermark, stripTestWatermark } from '../xslt-editor/utils/testWatermark';
 
 export interface WizardResult {
     moduleId: string;
@@ -119,6 +120,7 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
     const [sampleXml, setSampleXml] = useState<string | null>(null);
     const [xsltChoice, setXsltChoice] = useState<string>('');
     const [ownXslt, setOwnXslt] = useState<LoadedFile | null>(null);
+    const [ownXsltWasTest, setOwnXsltWasTest] = useState(false);
     const [xmlChoice, setXmlChoice] = useState<'default' | 'own'>('default');
     const [ownXml, setOwnXml] = useState<LoadedFile | null>(null);
     const [xsltText, setXsltText] = useState<string | null>(null);
@@ -153,7 +155,10 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
         if (file.size > MAX_BYTES) { setError(`Dosya çok büyük (en fazla 5 MB): ${(file.size / 1024 / 1024).toFixed(1)} MB`); return; }
         setBusy(true);
         try {
-            const text = await readFile(file);
+            const raw = await readFile(file);
+            const wasTest = kind === 'xslt' && hasTestWatermark(raw);
+            const text = wasTest ? stripTestWatermark(raw) : raw;
+            if (kind === 'xslt') setOwnXsltWasTest(wasTest);
             const result = kind === 'xslt' ? validateXslt(text, docType, sampleXml) : validateXml(text, docType, xsltText);
             const loaded = { name: file.name, size: file.size, text, result };
             if (kind === 'xslt') setOwnXslt(loaded); else setOwnXml(loaded);
@@ -270,6 +275,15 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
                     </button>
                     {xsltChoice === 'own' && (
                         <FilePanel accept=".xslt,.xsl" hint=".xslt veya .xsl · en fazla 5 MB" file={ownXslt} busy={busy} onFile={(f) => loadOwn(f, 'xslt')} />
+                    )}
+                    {xsltChoice === 'own' && ownXslt && ownXsltWasTest && (
+                        <div data-test-file-note style={{
+                            marginTop: 10, padding: '10px 12px', borderRadius: 10, fontSize: 12, lineHeight: 1.5,
+                            background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.35)', color: '#fde68a',
+                        }}>
+                            Bu bir TEST dosyası. TEST yazısı editörde kaldırıldı; tasarıma kaldığınız yerden devam edebilirsiniz.
+                            Bitirdiğinizde "Onayla" ile TEST yazısız dosyayı alırsınız.
+                        </div>
                     )}
                     {xsltChoice === 'own' && ownXslt && designKeyOf(ownXslt.text) && (
                         <div data-design-key-note style={{

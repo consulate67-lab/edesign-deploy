@@ -42,7 +42,7 @@ export interface SavedDesign {
 export const DESIGN_KEY_RE = /edesign-key:([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i;
 export const designKeyOf = (xslt: string | null | undefined) => xslt?.match(DESIGN_KEY_RE)?.[1] ?? null;
 const embedDesignKey = (xslt: string, key: string) => {
-    const clean = xslt.replace(/<!--\s*edesign-key:[^>]*?-->[ \t]*\r?\n?/gi, '');
+    const clean = xslt.replace(/^(?:\uFEFF|\u00EF\u00BB\u00BF)+/, '').replace(/<!--\s*edesign-key:[^>]*?-->[ \t]*\r?\n?/gi, '');
     const comment = `<!-- edesign-key:${key} | Bu satiri silmeyin: dosyayi tekrar yuklediginizde tasariminiza ek tasarim hakki harcamadan devam edersiniz. -->\n`;
     const decl = clean.match(/^\uFEFF?\s*<\?xml[^?]*\?>[ \t]*\r?\n?/);
     return decl ? clean.slice(0, decl[0].length) + comment + clean.slice(decl[0].length) : comment + clean;

@@ -439,7 +439,7 @@ app.delete('/api/designs/:id', authenticateToken, async (req, res) => {
 const DESIGN_KEY_RE = /edesign-key:([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i;
 const DESIGN_KEY_COMMENT_RE = /<!--\s*edesign-key:[^>]*?-->[ \t]*\r?\n?/gi;
 const embedDesignKey = (xslt, key) => {
-    const clean = xslt.replace(DESIGN_KEY_COMMENT_RE, '');
+    const clean = xslt.replace(/^(?:\uFEFF|\u00EF\u00BB\u00BF)+/, '').replace(DESIGN_KEY_COMMENT_RE, '');
     const comment = `<!-- edesign-key:${key} | Bu satiri silmeyin: dosyayi tekrar yuklediginizde tasariminiza ek tasarim hakki harcamadan devam edersiniz. -->\n`;
     const decl = clean.match(/^\uFEFF?\s*<\?xml[^?]*\?>[ \t]*\r?\n?/);
     return decl ? clean.slice(0, decl[0].length) + comment + clean.slice(decl[0].length) : comment + clean;

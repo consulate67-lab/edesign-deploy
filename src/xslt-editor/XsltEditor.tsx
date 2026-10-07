@@ -55,6 +55,8 @@ import {
 } from './utils/xsltStyleEdit';
 import { findLineTableCell, addColumnAfterCell } from './utils/tableColumns';
 import { BG_FITS, readPageBackground, writePageBackground, imageFileToDataUrl, type PageBackground } from './utils/pageBackground';
+import { addTestWatermark, stripTestWatermark, stripLeadingBom } from './utils/testWatermark';
+import { ApproveDialog } from './ApproveDialog';
 
 /** Satır formülü kolonunun varsayılan alanı (ilk bulunan). */
 const LINE_FORMULA_KEYS = ['Invoice/InvoiceLine/LineExtensionAmount', 'DespatchAdvice/DespatchLine/DeliveredQuantity'];
@@ -892,14 +894,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         setSelectedObject(null);
         if (initialXslt && moduleId === initialModuleId) {
             // İlk yükleme, kullanıcı verisi varsa onu kullan
-            setXsltContent(initialXslt);
+            setXsltContent(stripLeadingBom(stripTestWatermark(initialXslt)));
             return;
         }
         // Sprint 9 — Antrepo ise antrepoTemplates'tan al
         if (currentModule.antrepoId) {
             const tmpl = getAntrepoTemplateById(currentModule.antrepoId);
             if (tmpl) {
-                setXsltContent(tmpl.xslt);
+                setXsltContent(stripLeadingBom(tmpl.xslt));
                 console.log(
                     `[XSLTEditor] Module switch → ${currentModule.id} loaded Antrepo ${tmpl.xslt.length} chars`
                 );
@@ -912,7 +914,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         // Minimal şablonlar — xsltContent'ten al
         const inline = getInlineXslt(currentModule.inlineKey || '');
         if (inline) {
-            setXsltContent(inline);
+            setXsltContent(stripLeadingBom(inline));
             console.log(
                 `[XSLTEditor] Module switch → ${currentModule.id} loaded ${inline.length} chars from ${currentModule.inlineKey}`
             );
@@ -988,7 +990,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     // alır. Anahtarlı dosya tekrar yüklendiğinde tasarıma ücretsiz devam edilir.
     // ------------------------------------------------------------------------
     const flushSourceEditsRef = useRef<() => void>(() => {});
-    const [design, setDesign] = useState<{ id?: number; key?: string; paid: boolean; paidAt?: string | null }>(
+    const [design, setDesign] = useState<{ id?: number; key?: string; paid: boolean; paidAt?: string | null; name?: string }>(
         { id: initialDesignId, paid: false }
     );
     const [showPayment, setShowPayment] = useState(false);
@@ -998,7 +1000,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         let cancelled = false;
         api.getDesignByKey(key).then(d => {
             if (cancelled || !d) return;
-            setDesign({ id: d.id, key: d.design_key ?? key, paid: d.paid, paidAt: d.paid_at });
+            setDesign({ id: d.id, key: d.design_key ?? key, paid: d.paid, paidAt: d.paid_at, name: d.name });
             if (d.paid) {
                 setSaveStatus('saved');
                 setSaveMessage('Satın alınmış tasarım — düzenleyip tekrar indirmeniz ücretsiz');
@@ -1038,7 +1040,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 sections: {},
                 status: 'draft',
             });
-            setDesign(prev => ({ ...prev, id: result.design.id }));
+            setDesign(prev => ({ ...prev, id: result.design.id, name: result.design.name }));
             setSaveStatus('saved');
             setSaveMessage(`✅ Kaydedildi — "${result.design.name}"`);
         } catch (err) {
@@ -1047,24 +1049,50 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         }
     }, [design.id, docName, moduleId, xmlContent]);
 
+    const downloadXslt = useCallback((content: string, suffix = '') => {
+        const fileName = `${docName.replace(/\s+/g, '_')}_${moduleId}${suffix}.xslt`;
+        const url = URL.createObjectURL(new Blob([stripLeadingBom(content)], { type: 'application/xml;charset=utf-8' }));
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
+    }, [docName, moduleId]);
+
     // ------------------------------------------------------------------------
-    // Download .xslt — ilk indirmede 1 tasarım hakkı, sonrakiler ücretsiz
+    // Test indirme — ücretsiz, sayfa ortasında TEST filigranı ile
     // ------------------------------------------------------------------------
-    const handleDownload = useCallback(async () => {
+    const handleTestDownload = useCallback(() => {
         flushSourceEditsRef.current();
-        if (!design.paid && !window.confirm(
-            'İndirme 1 tasarım hakkı kullanır.\n\nTasarım hesabınıza kaydedilir: daha sonra düzenleyip tekrar indirmeniz '
-            + 'veya indirdiğiniz dosyayı yeniden yükleyip devam etmeniz ücretsizdir.\n\nDevam edilsin mi?'
-        )) return;
+        const marked = addTestWatermark(xsltContentRef.current);
+        if (!marked) {
+            setSaveStatus('error');
+            setSaveMessage('⚠ Test dosyası oluşturulamadı: XSLT içinde <body> veya kök template bulunamadı.');
+            return;
+        }
+        downloadXslt(marked, '_TEST');
+        setSaveStatus('saved');
+        setSaveMessage('🧪 Test dosyası indirildi · ücretsiz. Sorun yoksa "Onayla" ile TEST yazısız dosyayı alın.');
+    }, [downloadXslt]);
+
+    // ------------------------------------------------------------------------
+    // Onay — ilk onayda 1 tasarım hakkı; TEST yazısız dosya indirilir.
+    // Onaylanmış tasarımın sonraki indirmeleri ücretsizdir.
+    // ------------------------------------------------------------------------
+    const [approveOpen, setApproveOpen] = useState(false);
+    const handleApprove = useCallback(async (name: string) => {
+        flushSourceEditsRef.current();
         setSaveStatus('saving');
-        setSaveMessage('İndirme hazırlanıyor...');
+        setSaveMessage('Onaylanıyor...');
         try {
             const r = await api.exportDesign({
                 design_id: design.id,
                 design_key: design.key,
-                name: docName,
+                name,
                 module_id: moduleId,
-                xslt_content: xsltContentRef.current,
+                xslt_content: stripLeadingBom(stripTestWatermark(xsltContentRef.current)),
                 xml_content: xmlContent,
             });
             const out = r.design.xslt_content ?? xsltContentRef.current;
@@ -1072,27 +1100,24 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 xsltContentRef.current = out;
                 setXsltContent(out);
             }
-            setDesign({ id: r.design.id, key: r.design.design_key ?? undefined, paid: true, paidAt: r.design.paid_at });
-            const fileName = `${docName.replace(/\s+/g, '_')}_${moduleId}.xslt`;
-            const url = URL.createObjectURL(new Blob([out], { type: 'application/xml;charset=utf-8' }));
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = fileName;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            setDesign({ id: r.design.id, key: r.design.design_key ?? undefined, paid: true, paidAt: r.design.paid_at, name: r.design.name });
+            downloadXslt(out);
+            setApproveOpen(false);
             setSaveStatus('saved');
             setSaveMessage(r.charged
-                ? `📥 İndirildi · 1 tasarım hakkı kullanıldı (kalan ${r.credits}). Tekrar indirmek ücretsiz.`
-                : '📥 İndirildi · ücretsiz (satın alınmış tasarım)');
+                ? `✅ Onaylandı ve indirildi · 1 tasarım hakkı kullanıldı (kalan ${r.credits}).`
+                : '✅ İndirildi · ücretsiz (onaylı tasarım)');
         } catch (err) {
             const e = err as Error & { paymentRequired?: boolean };
             setSaveStatus('error');
             setSaveMessage(`⚠ ${e.message}`);
-            if (e.paymentRequired) setShowPayment(true);
+            if (e.paymentRequired) {
+                setApproveOpen(false);
+                setShowPayment(true);
+            }
+            throw e;
         }
-    }, [design, docName, moduleId, xmlContent]);
+    }, [design, moduleId, xmlContent, downloadXslt]);
 
     // ------------------------------------------------------------------------
     // Module dropdown kapat (dış tıklama)
@@ -2474,40 +2499,77 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                     Kaydet
                 </button>
 
-                {/* Download butonu */}
+                {!design.paid && (
+                    <button
+                        onClick={handleTestDownload}
+                        data-test-download
+                        disabled={saveStatus === 'saving'}
+                        title="Ücretsiz. Dosyayı kendi sisteminizde denemeniz için sayfa ortasında büyük TEST yazısıyla indirir."
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '6px 12px',
+                            background: 'rgba(245, 158, 11, 0.12)',
+                            border: '1px solid rgba(245, 158, 11, 0.45)',
+                            borderRadius: '6px',
+                            color: '#fcd34d',
+                            fontSize: '13px',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                        }}
+                    >
+                        <Download size={14} />
+                        Test İndir
+                        <span style={{ padding: '1px 6px', borderRadius: 999, fontSize: '10px', fontWeight: 700, background: 'rgba(245, 158, 11, 0.25)' }}>
+                            ücretsiz
+                        </span>
+                    </button>
+                )}
+
                 <button
-                    onClick={handleDownload}
+                    onClick={() => (design.paid ? handleApprove(design.name || docName).catch(() => {}) : setApproveOpen(true))}
                     data-download
+                    data-approve
                     disabled={saveStatus === 'saving'}
                     title={design.paid
-                        ? 'Bu tasarım daha önce satın alındı — tekrar indirmek ücretsiz.'
-                        : 'İlk indirme 1 tasarım hakkı kullanır; sonraki indirmeler ve düzenlemeler ücretsizdir.'}
+                        ? 'Onaylı tasarım — TEST yazısız dosyayı tekrar indirmek ücretsiz.'
+                        : 'Tasarımı onaylayın: TEST yazısı kaldırılmış dosya indirilir (1 tasarım hakkı).'}
                     style={{
                         display: 'flex',
                         alignItems: 'center',
                         gap: '6px',
                         padding: '6px 14px',
-                        background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+                        background: 'linear-gradient(135deg, #10b981, #059669)',
                         border: 'none',
                         borderRadius: '6px',
                         color: 'white',
                         fontSize: '13px',
                         fontWeight: 700,
                         cursor: 'pointer',
-                        boxShadow: '0 2px 8px rgba(99, 102, 241, 0.3)',
+                        boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)',
                     }}
                 >
-                    <Download size={14} />
-                    İndir .xslt
+                    {design.paid ? <Download size={14} /> : <CheckCircle2 size={14} />}
+                    {design.paid ? 'İndir .xslt' : 'Onayla'}
                     <span style={{
                         padding: '1px 6px', borderRadius: 999, fontSize: '10px', fontWeight: 700,
-                        background: design.paid ? 'rgba(16, 185, 129, 0.9)' : 'rgba(255, 255, 255, 0.2)',
+                        background: design.paid ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.2)',
                     }}>
                         {design.paid ? 'ücretsiz' : '1 hak'}
                     </span>
                 </button>
             </div>
             <PaymentModal isOpen={showPayment} onClose={() => setShowPayment(false)} onSuccess={() => setShowPayment(false)} />
+            {approveOpen && (
+                <ApproveDialog
+                    defaultName={design.name || docName}
+                    onTestDownload={handleTestDownload}
+                    onApprove={handleApprove}
+                    onBuy={() => { setApproveOpen(false); setShowPayment(true); }}
+                    onClose={() => setApproveOpen(false)}
+                />
+            )}
 
             {/* Ana grid: snippet panel varsa 240px, yoksa 0 + Preview (1fr).
                 Sprint 16 Aşama 5d — Monaco editör kaldırıldı (Xslt Tasarım ekranında
