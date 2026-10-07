@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CreditNote xmlns="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:n4="http://www.altova.com/samplexml/other-namespace" xsi:schemaLocation="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2 UBL-CreditNote-2.1.xsd">
+  <ext:UBLExtensions>
+    <ext:UBLExtension>
+      <ext:ExtensionContent>
+        <n4:auto-generated_for_wildcard/>
+      </ext:ExtensionContent>
+    </ext:UBLExtension>
+  </ext:UBLExtensions>
+  <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+  <cbc:CustomizationID>TR1.2.1</cbc:CustomizationID>
+  <cbc:ProfileID>GIDERPUSULASI</cbc:ProfileID>
+  <cbc:ID>DGD2026000002318</cbc:ID>
+  <cbc:CopyIndicator>false</cbc:CopyIndicator>
+  <cbc:UUID>6A0E4C93-B27D-41F8-95C3-D8E61B2A7F04</cbc:UUID>
+  <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+  <cbc:IssueTime>09:52:40</cbc:IssueTime>
+  <cbc:CreditNoteTypeCode>SATIS</cbc:CreditNoteTypeCode>
+  <cbc:Note>Brüt tartım: 3415 kg</cbc:Note>
+  <cbc:Note>Dara: 2180 kg</cbc:Note>
+  <cbc:Note>Araç: 41 AKS 392 · Kamyonet</cbc:Note>
+  <cbc:Note>Malı satan, hurdaların kendi faaliyeti dışında oluşan ev / atölye hurdası olduğunu beyan etmiştir.</cbc:Note>
+  <cbc:Note>GV stopajı GVK 94/13-a uyarınca %2 oranında kesilmiştir.</cbc:Note>
+  <cbc:Note>Ödeme VUK 7.000 TL sınırı nedeniyle satıcının banka hesabına havale ile yapılmıştır.</cbc:Note>
+  <cbc:Note>Yalnız: Elli Yedi Bin Dört Yüz Elli Dört Türk Lirası Yedi Kuruş</cbc:Note>
+  <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+  <cbc:LineCountNumeric>6</cbc:LineCountNumeric>
+  <cac:AdditionalDocumentReference>
+    <cbc:ID>KNT-2026-018447</cbc:ID>
+    <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+    <cbc:DocumentType>KANTARFISI</cbc:DocumentType>
+    <cbc:DocumentDescription>Kantar 2 · 60 t köprü kantar · Operatör: Serkan Aydın</cbc:DocumentDescription>
+  </cac:AdditionalDocumentReference>
+  <cac:Signature>
+    <cbc:ID schemeID="VKN">3046182759</cbc:ID>
+    <cac:SignatoryParty>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="VKN">3046182759</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyName>
+        <cbc:Name>Döngü Geri Dönüşüm Hurda Metal San. ve Tic. Ltd. Şti.</cbc:Name>
+      </cac:PartyName>
+      <cac:PostalAddress>
+        <cbc:StreetName>Dilovası OSB 1. Kısım, D-1007 Sok.</cbc:StreetName>
+        <cbc:BuildingNumber>9</cbc:BuildingNumber>
+        <cbc:CitySubdivisionName>Dilovası</cbc:CitySubdivisionName>
+        <cbc:CityName>Kocaeli</cbc:CityName>
+        <cbc:PostalZone>41455</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+          <cbc:Name>Türkiye</cbc:Name>
+        </cac:Country>
+      </cac:PostalAddress>
+    </cac:SignatoryParty>
+    <cac:DigitalSignatureAttachment>
+      <cac:ExternalReference>
+        <cbc:URI>#Signature_DGD2026000002318</cbc:URI>
+      </cac:ExternalReference>
+    </cac:DigitalSignatureAttachment>
+  </cac:Signature>
+  <cac:AccountingSupplierParty>
+    <cac:Party>
+      <cbc:WebsiteURI>https://www.dongugeridonusum.com.tr</cbc:WebsiteURI>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="VKN">3046182759</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyName>
+        <cbc:Name>Döngü Geri Dönüşüm Hurda Metal San. ve Tic. Ltd. Şti.</cbc:Name>
+      </cac:PartyName>
+      <cac:PostalAddress>
+        <cbc:StreetName>Dilovası OSB 1. Kısım, D-1007 Sok.</cbc:StreetName>
+        <cbc:BuildingNumber>9</cbc:BuildingNumber>
+        <cbc:CitySubdivisionName>Dilovası</cbc:CitySubdivisionName>
+        <cbc:CityName>Kocaeli</cbc:CityName>
+        <cbc:PostalZone>41455</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+          <cbc:Name>Türkiye</cbc:Name>
+        </cac:Country>
+      </cac:PostalAddress>
+      <cac:PartyTaxScheme>
+        <cac:TaxScheme>
+          <cbc:Name>Gebze</cbc:Name>
+        </cac:TaxScheme>
+      </cac:PartyTaxScheme>
+      <cac:Contact>
+        <cbc:Telephone>0262 754 18 18</cbc:Telephone>
+        <cbc:ElectronicMail>alim@dongugeridonusum.com.tr</cbc:ElectronicMail>
+        <cac:OtherCommunication>
+          <cbc:ChannelCode name="SMS_PROVIDER">e-Belge Mobil Onay</cbc:ChannelCode>
+          <cbc:Value>4840357162</cbc:Value>
+        </cac:OtherCommunication>
+      </cac:Contact>
+    </cac:Party>
+  </cac:AccountingSupplierParty>
+  <cac:AccountingCustomerParty>
+    <cac:Party>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="TCKN">52817364092</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PostalAddress>
+        <cbc:StreetName>Mimar Sinan Mah. Atatürk Cad.</cbc:StreetName>
+        <cbc:BuildingNumber>56</cbc:BuildingNumber>
+        <cbc:CitySubdivisionName>Darıca</cbc:CitySubdivisionName>
+        <cbc:CityName>Kocaeli</cbc:CityName>
+        <cbc:PostalZone>41700</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+          <cbc:Name>Türkiye</cbc:Name>
+        </cac:Country>
+      </cac:PostalAddress>
+      <cac:Contact>
+        <cbc:ID>731948</cbc:ID>
+        <cbc:Name>SMS</cbc:Name>
+        <cbc:Telephone>5324186297</cbc:Telephone>
+      </cac:Contact>
+      <cac:Person>
+        <cbc:FirstName>Recep</cbc:FirstName>
+        <cbc:FamilyName>Aksoy</cbc:FamilyName>
+      </cac:Person>
+    </cac:Party>
+  </cac:AccountingCustomerParty>
+  <cac:PaymentMeans>
+    <cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>
+    <cbc:PaymentDueDate>2026-10-07</cbc:PaymentDueDate>
+    <cbc:InstructionNote>Satıcı hesabına havale</cbc:InstructionNote>
+    <cac:PayeeFinancialAccount>
+      <cbc:ID>TR910001200945200058167342</cbc:ID>
+      <cbc:CurrencyCode>TRY</cbc:CurrencyCode>
+      <cbc:PaymentNote>Halkbank — Darıca Şubesi · Hesap sahibi: Recep Aksoy</cbc:PaymentNote>
+    </cac:PayeeFinancialAccount>
+  </cac:PaymentMeans>
+  <cac:TaxTotal>
+    <cbc:TaxAmount currencyID="TRY">1172.53</cbc:TaxAmount>
+    <cac:TaxSubtotal>
+      <cbc:TaxableAmount currencyID="TRY">58626.60</cbc:TaxableAmount>
+      <cbc:TaxAmount currencyID="TRY">1172.53</cbc:TaxAmount>
+      <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+      <cbc:Percent>2</cbc:Percent>
+      <cac:TaxCategory>
+        <cac:TaxScheme>
+          <cbc:Name>GV Stopajı</cbc:Name>
+          <cbc:TaxTypeCode>0003</cbc:TaxTypeCode>
+        </cac:TaxScheme>
+      </cac:TaxCategory>
+    </cac:TaxSubtotal>
+  </cac:TaxTotal>
+  <cac:LegalMonetaryTotal>
+    <cbc:LineExtensionAmount currencyID="TRY">58626.60</cbc:LineExtensionAmount>
+    <cbc:TaxExclusiveAmount currencyID="TRY">58626.60</cbc:TaxExclusiveAmount>
+    <cbc:TaxInclusiveAmount currencyID="TRY">58626.60</cbc:TaxInclusiveAmount>
+    <cbc:PayableAmount currencyID="TRY">57454.07</cbc:PayableAmount>
+  </cac:LegalMonetaryTotal>
+  <cac:CreditNoteLine>
+    <cbc:ID>1</cbc:ID>
+    <cbc:CreditedQuantity unitCode="KGM">86</cbc:CreditedQuantity>
+    <cbc:LineExtensionAmount currencyID="TRY">26832.00</cbc:LineExtensionAmount>
+    <cac:TaxTotal>
+      <cbc:TaxAmount currencyID="TRY">536.64</cbc:TaxAmount>
+      <cac:TaxSubtotal>
+        <cbc:TaxableAmount currencyID="TRY">26832.00</cbc:TaxableAmount>
+        <cbc:TaxAmount currencyID="TRY">536.64</cbc:TaxAmount>
+        <cbc:Percent>2</cbc:Percent>
+        <cac:TaxCategory>
+          <cac:TaxScheme>
+            <cbc:Name>GV Stopajı</cbc:Name>
+            <cbc:TaxTypeCode>0003</cbc:TaxTypeCode>
+          </cac:TaxScheme>
+        </cac:TaxCategory>
+      </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:Item>
+      <cbc:Description>Kırmızı bakır, %98 saflık</cbc:Description>
+      <cbc:Name>Hurda Bakır Kablo (soyulmuş)</cbc:Name>
+      <cac:SellersItemIdentification>
+        <cbc:ID>HM-CU-01</cbc:ID>
+      </cac:SellersItemIdentification>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="TRY">312.00</cbc:PriceAmount>
+    </cac:Price>
+  </cac:CreditNoteLine>
+  <cac:CreditNoteLine>
+    <cbc:ID>2</cbc:ID>
+    <cbc:CreditedQuantity unitCode="KGM">54</cbc:CreditedQuantity>
+    <cbc:LineExtensionAmount currencyID="TRY">10719.00</cbc:LineExtensionAmount>
+    <cac:TaxTotal>
+      <cbc:TaxAmount currencyID="TRY">214.38</cbc:TaxAmount>
+      <cac:TaxSubtotal>
+        <cbc:TaxableAmount currencyID="TRY">10719.00</cbc:TaxableAmount>
+        <cbc:TaxAmount currencyID="TRY">214.38</cbc:TaxAmount>
+        <cbc:Percent>2</cbc:Percent>
+        <cac:TaxCategory>
+          <cac:TaxScheme>
+            <cbc:Name>GV Stopajı</cbc:Name>
+            <cbc:TaxTypeCode>0003</cbc:TaxTypeCode>
+          </cac:TaxScheme>
+        </cac:TaxCategory>
+      </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:Item>
+      <cbc:Description>Karışık armatür</cbc:Description>
+      <cbc:Name>Sarı (Pirinç) Musluk Hurdası</cbc:Name>
+      <cac:SellersItemIdentification>
+        <cbc:ID>HM-BR-02</cbc:ID>
+      </cac:SellersItemIdentification>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="TRY">198.50</cbc:PriceAmount>
+    </cac:Price>
+  </cac:CreditNoteLine>
+  <cac:CreditNoteLine>
+    <cbc:ID>3</cbc:ID>
+    <cbc:CreditedQuantity unitCode="KGM">145</cbc:CreditedQuantity>
+    <cbc:LineExtensionAmount currencyID="TRY">10730.00</cbc:LineExtensionAmount>
+    <cac:TaxTotal>
+      <cbc:TaxAmount currencyID="TRY">214.60</cbc:TaxAmount>
+      <cac:TaxSubtotal>
+        <cbc:TaxableAmount currencyID="TRY">10730.00</cbc:TaxableAmount>
+        <cbc:TaxAmount currencyID="TRY">214.60</cbc:TaxAmount>
+        <cbc:Percent>2</cbc:Percent>
+        <cac:TaxCategory>
+          <cac:TaxScheme>
+            <cbc:Name>GV Stopajı</cbc:Name>
+            <cbc:TaxTypeCode>0003</cbc:TaxTypeCode>
+          </cac:TaxScheme>
+        </cac:TaxCategory>
+      </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:Item>
+      <cbc:Description>Boyalı doğrama profili</cbc:Description>
+      <cbc:Name>Alüminyum Profil Hurdası</cbc:Name>
+      <cac:SellersItemIdentification>
+        <cbc:ID>HM-AL-03</cbc:ID>
+      </cac:SellersItemIdentification>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="TRY">74.00</cbc:PriceAmount>
+    </cac:Price>
+  </cac:CreditNoteLine>
+  <cac:CreditNoteLine>
+    <cbc:ID>4</cbc:ID>
+    <cbc:CreditedQuantity unitCode="KGM">92</cbc:CreditedQuantity>
+    <cbc:LineExtensionAmount currencyID="TRY">3818.00</cbc:LineExtensionAmount>
+    <cac:TaxTotal>
+      <cbc:TaxAmount currencyID="TRY">76.36</cbc:TaxAmount>
+      <cac:TaxSubtotal>
+        <cbc:TaxableAmount currencyID="TRY">3818.00</cbc:TaxableAmount>
+        <cbc:TaxAmount currencyID="TRY">76.36</cbc:TaxAmount>
+        <cbc:Percent>2</cbc:Percent>
+        <cac:TaxCategory>
+          <cac:TaxScheme>
+            <cbc:Name>GV Stopajı</cbc:Name>
+            <cbc:TaxTypeCode>0003</cbc:TaxTypeCode>
+          </cac:TaxScheme>
+        </cac:TaxCategory>
+      </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:Item>
+      <cbc:Description>Mutfak ekipmanı</cbc:Description>
+      <cbc:Name>Paslanmaz Çelik Hurda (304)</cbc:Name>
+      <cac:SellersItemIdentification>
+        <cbc:ID>HM-SS-04</cbc:ID>
+      </cac:SellersItemIdentification>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="TRY">41.50</cbc:PriceAmount>
+    </cac:Price>
+  </cac:CreditNoteLine>
+  <cac:CreditNoteLine>
+    <cbc:ID>5</cbc:ID>
+    <cbc:CreditedQuantity unitCode="KGM">610</cbc:CreditedQuantity>
+    <cbc:LineExtensionAmount currencyID="TRY">5734.00</cbc:LineExtensionAmount>
+    <cac:TaxTotal>
+      <cbc:TaxAmount currencyID="TRY">114.68</cbc:TaxAmount>
+      <cac:TaxSubtotal>
+        <cbc:TaxableAmount currencyID="TRY">5734.00</cbc:TaxableAmount>
+        <cbc:TaxAmount currencyID="TRY">114.68</cbc:TaxAmount>
+        <cbc:Percent>2</cbc:Percent>
+        <cac:TaxCategory>
+          <cac:TaxScheme>
+            <cbc:Name>GV Stopajı</cbc:Name>
+            <cbc:TaxTypeCode>0003</cbc:TaxTypeCode>
+          </cac:TaxScheme>
+        </cac:TaxCategory>
+      </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:Item>
+      <cbc:Description>Ev tipi karışık</cbc:Description>
+      <cbc:Name>Demir-Çelik Karışık Hurda (DKP)</cbc:Name>
+      <cac:SellersItemIdentification>
+        <cbc:ID>HM-FE-05</cbc:ID>
+      </cac:SellersItemIdentification>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="TRY">9.40</cbc:PriceAmount>
+    </cac:Price>
+  </cac:CreditNoteLine>
+  <cac:CreditNoteLine>
+    <cbc:ID>6</cbc:ID>
+    <cbc:CreditedQuantity unitCode="KGM">248</cbc:CreditedQuantity>
+    <cbc:LineExtensionAmount currencyID="TRY">793.60</cbc:LineExtensionAmount>
+    <cac:TaxTotal>
+      <cbc:TaxAmount currencyID="TRY">15.87</cbc:TaxAmount>
+      <cac:TaxSubtotal>
+        <cbc:TaxableAmount currencyID="TRY">793.60</cbc:TaxableAmount>
+        <cbc:TaxAmount currencyID="TRY">15.87</cbc:TaxAmount>
+        <cbc:Percent>2</cbc:Percent>
+        <cac:TaxCategory>
+          <cac:TaxScheme>
+            <cbc:Name>GV Stopajı</cbc:Name>
+            <cbc:TaxTypeCode>0003</cbc:TaxTypeCode>
+          </cac:TaxScheme>
+        </cac:TaxCategory>
+      </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:Item>
+      <cbc:Description>Balyasız, kuru</cbc:Description>
+      <cbc:Name>Karton / Oluklu Mukavva</cbc:Name>
+      <cac:SellersItemIdentification>
+        <cbc:ID>GD-KR-06</cbc:ID>
+      </cac:SellersItemIdentification>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="TRY">3.20</cbc:PriceAmount>
+    </cac:Price>
+  </cac:CreditNoteLine>
+</CreditNote>

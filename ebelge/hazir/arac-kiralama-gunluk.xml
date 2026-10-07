@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği — Günlük araç kiralama e-Arşiv faturası, bireysel kiracı (kurgusal veriler).
+  EARSIVFATURA / SATIS; tüm kalemler %20 KDV. Günlük kira satırında %10 web rezervasyon iskontosu
+  (satır AllowanceCharge); satır tutarları iskonto sonrası netlerdir.
+    Kira 5 gün × 1.650,00 = 8.250,00 − 825,00 iskonto = 7.425,00
+    Ek sürücü 750,00 + Bebek koltuğu 600,00 + Süper kasko 1.400,00 + Farklı şube iade 1.200,00 + HGS 370,00
+    Mal/hizmet (net) 11.745,00 | KDV %20 2.349,00 | Ödenecek 14.094,00
+  Araç ve sözleşme bilgileri notlarda: "Plaka:", "Araç:", "Araç Özellikleri:", "Sözleşme No:", "Teslim:",
+  "İade:", "Teslim KM:", "İade KM:", "Yakıt:", "Ek Sürücü:", "Depozito:"; kiralama süresi InvoicePeriod'da.
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+    xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>EARSIVFATURA</cbc:ProfileID>
+    <cbc:ID>KRC2026000027514</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>9D2E4C71-0B3F-4A86-B5D9-61F8E2A7C034</cbc:UUID>
+    <cbc:IssueDate>2026-10-03</cbc:IssueDate>
+    <cbc:IssueTime>10:20:00</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>SATIS</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız On Dört Bin Doksan Dört Türk Lirasıdır.</cbc:Note>
+    <cbc:Note>Sözleşme No: KRC-2609-4471</cbc:Note>
+    <cbc:Note>Plaka: 35 KRC 418</cbc:Note>
+    <cbc:Note>Araç: Renault Clio 1.0 TCe 90 Touch X-Tronic</cbc:Note>
+    <cbc:Note>Araç Özellikleri: Otomatik · Benzin · 2025 · Gri · Grup C</cbc:Note>
+    <cbc:Note>Teslim: İzmir Adnan Menderes Havalimanı İç Hatlar Ofisi</cbc:Note>
+    <cbc:Note>İade: Çeşme Şube · Alaçatı</cbc:Note>
+    <cbc:Note>Teslim KM: 18342</cbc:Note>
+    <cbc:Note>İade KM: 19106</cbc:Note>
+    <cbc:Note>Yakıt: Teslim 4/4 · İade 4/4</cbc:Note>
+    <cbc:Note>Ek Sürücü: Deniz AKSOY · B sınıfı ehliyet (2014)</cbc:Note>
+    <cbc:Note>Depozito: 7.500,00 TL kredi kartı provizyonu alınmış, araç hasarsız iade edildiğinden 03.10.2026 tarihinde çözülmüştür; faturaya dahil değildir.</cbc:Note>
+    <cbc:Note>Kiralama süresinde oluşan trafik cezaları ve otoyol / köprü ihlalleri sonradan tebliğ edilse dahi kiracıya yansıtılır.</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>6</cbc:LineCountNumeric>
+    <cac:InvoicePeriod>
+        <cbc:StartDate>2026-09-28</cbc:StartDate>
+        <cbc:StartTime>10:30:00</cbc:StartTime>
+        <cbc:EndDate>2026-10-03</cbc:EndDate>
+        <cbc:EndTime>10:00:00</cbc:EndTime>
+        <cbc:Description>Kiralama süresi</cbc:Description>
+    </cac:InvoicePeriod>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">5207814369</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">5207814369</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Dokuz Eylül Mahallesi Akçay Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>212</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Gaziemir</cbc:CitySubdivisionName>
+                <cbc:CityName>İzmir</cbc:CityName>
+                <cbc:PostalZone>35410</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_KRC2026000027514</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.kiyirentacar.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">5207814369</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">0520781436900018</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Kıyı Rent A Car Otomotiv Turizm Ltd. Şti.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Dokuz Eylül Mahallesi Akçay Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>212</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Gaziemir</cbc:CitySubdivisionName>
+                <cbc:CityName>İzmir</cbc:CityName>
+                <cbc:PostalZone>35410</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Gaziemir</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0850 302 35 35</cbc:Telephone>
+                <cbc:ElectronicMail>rezervasyon@kiyirentacar.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">42918375062</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Ataevler Mahallesi Kırlangıç Sokak</cbc:StreetName>
+                <cbc:BuildingNumber>9/4</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Nilüfer</cbc:CitySubdivisionName>
+                <cbc:CityName>Bursa</cbc:CityName>
+                <cbc:PostalZone>16140</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:Contact>
+                <cbc:Telephone>0535 274 61 08</cbc:Telephone>
+                <cbc:ElectronicMail>can.aksoy@example.com</cbc:ElectronicMail>
+            </cac:Contact>
+            <cac:Person>
+                <cbc:FirstName>Can</cbc:FirstName>
+                <cbc:FamilyName>Aksoy</cbc:FamilyName>
+            </cac:Person>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>48</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-10-03</cbc:PaymentDueDate>
+        <cbc:InstructionNote>Kredi kartı · tek çekim · Provizyon 774310</cbc:InstructionNote>
+    </cac:PaymentMeans>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>
+        <cbc:InstructionNote>Sonradan yansıtılan ceza ve masraflar için</cbc:InstructionNote>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR12 0001 2009 4520 0058 0012 34</cbc:ID>
+            <cbc:CurrencyCode>TRY</cbc:CurrencyCode>
+            <cac:FinancialInstitutionBranch>
+                <cbc:Name>Gaziemir Şubesi</cbc:Name>
+                <cac:FinancialInstitution>
+                    <cbc:Name>Türkiye Halk Bankası A.Ş.</cbc:Name>
+                </cac:FinancialInstitution>
+            </cac:FinancialInstitutionBranch>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">2349.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">11745.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">2349.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>20</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">11745.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">11745.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">14094.00</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="TRY">825.00</cbc:AllowanceTotalAmount>
+        <cbc:PayableAmount currencyID="TRY">14094.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="DAY">5</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">7425.00</cbc:LineExtensionAmount>
+        <cac:AllowanceCharge>
+            <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+            <cbc:AllowanceChargeReason>Web rezervasyon indirimi</cbc:AllowanceChargeReason>
+            <cbc:MultiplierFactorNumeric>0.10</cbc:MultiplierFactorNumeric>
+            <cbc:Amount currencyID="TRY">825.00</cbc:Amount>
+            <cbc:BaseAmount currencyID="TRY">8250.00</cbc:BaseAmount>
+        </cac:AllowanceCharge>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">1485.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">7425.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">1485.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Grup C · Ekonomik otomatik · sınırsız km</cbc:Description>
+            <cbc:Name>Günlük kiralama bedeli</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>KIRA-C</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">1650.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="DAY">5</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">750.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">150.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">750.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">150.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Deniz AKSOY</cbc:Description>
+            <cbc:Name>Ek sürücü</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>EK-SRC</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">150.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="DAY">5</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">600.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">120.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">600.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">120.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Grup 1 (9–18 kg), ISOFIX</cbc:Description>
+            <cbc:Name>Bebek / çocuk koltuğu</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>EK-BBK</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">120.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>4</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="DAY">5</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">1400.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">280.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">1400.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">280.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Muafiyetsiz hasar güvencesi (SCDW), lastik-cam-far dahil</cbc:Description>
+            <cbc:Name>Süper kasko güvencesi</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>GV-SCDW</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">280.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>5</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">1200.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">240.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">1200.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">240.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Havalimanı teslim → Çeşme Şube iade</cbc:Description>
+            <cbc:Name>Farklı şubeye iade bedeli</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>ONE-WAY</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">1200.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>6</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">4</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">370.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">74.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">370.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">74.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>İzmir–Çeşme Otoyolu, 4 geçiş (HGS 35 KRC 418)</cbc:Description>
+            <cbc:Name>HGS geçiş ücretleri</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>HGS</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">92.50</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>

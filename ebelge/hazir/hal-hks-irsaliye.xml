@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DespatchAdvice xmlns="urn:oasis:names:specification:ubl:schema:xsd:DespatchAdvice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:n4="http://www.altova.com/samplexml/other-namespace" xsi:schemaLocation="urn:oasis:names:specification:ubl:schema:xsd:DespatchAdvice-2 UBL-DespatchAdvice-2.1.xsd">
+  <ext:UBLExtensions>
+    <ext:UBLExtension>
+      <ext:ExtensionContent>
+        <n4:auto-generated_for_wildcard/>
+      </ext:ExtensionContent>
+    </ext:UBLExtension>
+  </ext:UBLExtensions>
+  <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+  <cbc:CustomizationID>TR1.2.1</cbc:CustomizationID>
+  <cbc:ProfileID>HKSIRSALIYE</cbc:ProfileID>
+  <cbc:ID>HAL2026000007419</cbc:ID>
+  <cbc:CopyIndicator>false</cbc:CopyIndicator>
+  <cbc:UUID>4F2D8B61-C93A-4E07-B5A2-6E18D0C7F935</cbc:UUID>
+  <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+  <cbc:IssueTime>04:35:00</cbc:IssueTime>
+  <cbc:DespatchAdviceTypeCode>SEVK</cbc:DespatchAdviceTypeCode>
+  <cbc:Note>Sıfat: Komisyoncu · Hal: Antalya Büyükşehir Belediyesi Toptancı Hali</cbc:Note>
+  <cbc:Note>HKS bildirimi: Satış bildirimleri 07.10.2026 04:12 itibarıyla Hal Kayıt Sistemi’ne yapılmıştır; künye numaraları satırlarda yer alır.</cbc:Note>
+  <cbc:Note>Soğuk zincir: Ürünler +6 / +8 °C frigorifik araçla taşınmaktadır.</cbc:Note>
+  <cbc:Note>Kasa iadesi: 444 adet plastik hal kasası boş olarak iade edilecektir.</cbc:Note>
+  <cbc:LineCountNumeric>7</cbc:LineCountNumeric>
+  <cac:OrderReference>
+    <cbc:ID>YS-SAT-2026-104418</cbc:ID>
+    <cbc:IssueDate>2026-10-06</cbc:IssueDate>
+  </cac:OrderReference>
+  <cac:Signature>
+    <cbc:ID schemeID="VKN_TCKN">1650392748</cbc:ID>
+    <cac:SignatoryParty>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="VKN">1650392748</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PostalAddress>
+        <cbc:StreetName>Antalya Toptancı Hali, C Blok</cbc:StreetName>
+        <cbc:BuildingNumber>24</cbc:BuildingNumber>
+        <cbc:CitySubdivisionName>Kepez</cbc:CitySubdivisionName>
+        <cbc:CityName>Antalya</cbc:CityName>
+        <cbc:PostalZone>07210</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+          <cbc:Name>Türkiye</cbc:Name>
+        </cac:Country>
+      </cac:PostalAddress>
+    </cac:SignatoryParty>
+    <cac:DigitalSignatureAttachment>
+      <cac:ExternalReference>
+        <cbc:URI>#Signature_HAL2026000007419</cbc:URI>
+      </cac:ExternalReference>
+    </cac:DigitalSignatureAttachment>
+  </cac:Signature>
+  <cac:DespatchSupplierParty>
+    <cac:Party>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="VKN">1650392748</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyName>
+        <cbc:Name>Bereket Hal Sebze Meyve Komisyonculuğu — Ali Rıza Toprak</cbc:Name>
+      </cac:PartyName>
+      <cac:PostalAddress>
+        <cbc:StreetName>Antalya Toptancı Hali, C Blok</cbc:StreetName>
+        <cbc:BuildingNumber>24</cbc:BuildingNumber>
+        <cbc:CitySubdivisionName>Kepez</cbc:CitySubdivisionName>
+        <cbc:CityName>Antalya</cbc:CityName>
+        <cbc:PostalZone>07210</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+          <cbc:Name>Türkiye</cbc:Name>
+        </cac:Country>
+      </cac:PostalAddress>
+      <cac:PartyTaxScheme>
+        <cac:TaxScheme>
+          <cbc:Name>Kalekapı</cbc:Name>
+        </cac:TaxScheme>
+      </cac:PartyTaxScheme>
+      <cac:Contact>
+        <cbc:Telephone>0242 346 21 24</cbc:Telephone>
+        <cbc:ElectronicMail>siparis@berekethal.com.tr</cbc:ElectronicMail>
+      </cac:Contact>
+    </cac:Party>
+    <cac:DespatchContact>
+      <cbc:Name>Ali Rıza Toprak</cbc:Name>
+    </cac:DespatchContact>
+  </cac:DespatchSupplierParty>
+  <cac:DeliveryCustomerParty>
+    <cac:Party>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="VKN">9281046357</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="MUSTERINO">YS-3104</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyName>
+        <cbc:Name>Yeşil Sepet Gıda Market Zinciri A.Ş.</cbc:Name>
+      </cac:PartyName>
+      <cac:PostalAddress>
+        <cbc:StreetName>Fevziçakmak Mah. Kosgeb Cad.</cbc:StreetName>
+        <cbc:BuildingNumber>37</cbc:BuildingNumber>
+        <cbc:CitySubdivisionName>Karatay</cbc:CitySubdivisionName>
+        <cbc:CityName>Konya</cbc:CityName>
+        <cbc:PostalZone>42050</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+          <cbc:Name>Türkiye</cbc:Name>
+        </cac:Country>
+      </cac:PostalAddress>
+      <cac:PartyTaxScheme>
+        <cac:TaxScheme>
+          <cbc:Name>Selçuk</cbc:Name>
+        </cac:TaxScheme>
+      </cac:PartyTaxScheme>
+      <cac:Contact>
+        <cbc:Telephone>0332 248 70 70</cbc:Telephone>
+        <cbc:ElectronicMail>tedarik@yesilsepet.com.tr</cbc:ElectronicMail>
+      </cac:Contact>
+    </cac:Party>
+  </cac:DeliveryCustomerParty>
+  <cac:Shipment>
+    <cbc:ID>SVK-0710-04</cbc:ID>
+    <cbc:GrossWeightMeasure unitCode="KGM">6700.4</cbc:GrossWeightMeasure>
+    <cbc:TotalTransportHandlingUnitQuantity>444</cbc:TotalTransportHandlingUnitQuantity>
+    <cac:ShipmentStage>
+      <cac:TransportMeans>
+        <cac:RoadTransport>
+          <cbc:LicensePlateID schemeID="PLAKA">07HAL482</cbc:LicensePlateID>
+        </cac:RoadTransport>
+      </cac:TransportMeans>
+      <cac:DriverPerson>
+        <cbc:FirstName>Kemal</cbc:FirstName>
+        <cbc:FamilyName>Güneş</cbc:FamilyName>
+        <cbc:Title>Şoför</cbc:Title>
+        <cbc:NationalityID>38215064972</cbc:NationalityID>
+      </cac:DriverPerson>
+    </cac:ShipmentStage>
+    <cac:Delivery>
+      <cac:DeliveryAddress>
+        <cbc:StreetName>Fevziçakmak Mah. Kosgeb Cad. — Yeşil Sepet Bölge Deposu</cbc:StreetName>
+        <cbc:BuildingNumber>37</cbc:BuildingNumber>
+        <cbc:CitySubdivisionName>Karatay</cbc:CitySubdivisionName>
+        <cbc:CityName>Konya</cbc:CityName>
+        <cbc:PostalZone>42050</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+          <cbc:Name>Türkiye</cbc:Name>
+        </cac:Country>
+      </cac:DeliveryAddress>
+      <cac:Despatch>
+        <cbc:ActualDespatchDate>2026-10-07</cbc:ActualDespatchDate>
+        <cbc:ActualDespatchTime>05:00:00</cbc:ActualDespatchTime>
+      </cac:Despatch>
+    </cac:Delivery>
+    <cac:TransportHandlingUnit>
+      <cac:TransportEquipment>
+        <cbc:ID schemeID="DORSEPLAKA">07AKR913</cbc:ID>
+      </cac:TransportEquipment>
+    </cac:TransportHandlingUnit>
+  </cac:Shipment>
+  <cac:DespatchLine>
+    <cbc:ID>1</cbc:ID>
+    <cbc:Note>Üretici: Hüseyin Yıldız · Kumluca / Antalya</cbc:Note>
+    <cbc:DeliveredQuantity unitCode="KGM">1260</cbc:DeliveredQuantity>
+    <cac:OrderLineReference>
+      <cbc:LineID>1</cbc:LineID>
+    </cac:OrderLineReference>
+    <cac:Item>
+      <cbc:Description>Sınıf I · 57-67 mm · Sera</cbc:Description>
+      <cbc:Name>Domates (Salkım)</cbc:Name>
+      <cac:SellersItemIdentification>
+        <cbc:ID>BH-DOM-01</cbc:ID>
+      </cac:SellersItemIdentification>
+      <cac:AdditionalItemIdentification>
+        <cbc:ID schemeID="KUNYENO">2607104173825100917</cbc:ID>
+      </cac:AdditionalItemIdentification>
+    </cac:Item>
+    <cac:Shipment>
+      <cbc:ID>1</cbc:ID>
+      <cbc:TotalTransportHandlingUnitQuantity>90</cbc:TotalTransportHandlingUnitQuantity>
+    </cac:Shipment>
+  </cac:DespatchLine>
+  <cac:DespatchLine>
+    <cbc:ID>2</cbc:ID>
+    <cbc:Note>Üretici: Fatma Arslan · Kumluca / Antalya</cbc:Note>
+    <cbc:DeliveredQuantity unitCode="KGM">540</cbc:DeliveredQuantity>
+    <cac:OrderLineReference>
+      <cbc:LineID>2</cbc:LineID>
+    </cac:OrderLineReference>
+    <cac:Item>
+      <cbc:Description>Sınıf I · 14-17 cm · Sera</cbc:Description>
+      <cbc:Name>Sivri Biber</cbc:Name>
+      <cac:SellersItemIdentification>
+        <cbc:ID>BH-BIB-03</cbc:ID>
+      </cac:SellersItemIdentification>
+      <cac:AdditionalItemIdentification>
+        <cbc:ID schemeID="KUNYENO">2607104173825100924</cbc:ID>
+      </cac:AdditionalItemIdentification>
+    </cac:Item>
+    <cac:Shipment>
+      <cbc:ID>2</cbc:ID>
+      <cbc:TotalTransportHandlingUnitQuantity>54</cbc:TotalTransportHandlingUnitQuantity>
+    </cac:Shipment>
+  </cac:DespatchLine>
+  <cac:DespatchLine>
+    <cbc:ID>3</cbc:ID>
+    <cbc:Note>Üretici: Mehmet Ali Çınar · Demre / Antalya</cbc:Note>
+    <cbc:DeliveredQuantity unitCode="KGM">720</cbc:DeliveredQuantity>
+    <cac:OrderLineReference>
+      <cbc:LineID>3</cbc:LineID>
+    </cac:OrderLineReference>
+    <cac:Item>
+      <cbc:Description>Sınıf I · 20-25 cm · Sera</cbc:Description>
+      <cbc:Name>Patlıcan (Kemer)</cbc:Name>
+      <cac:SellersItemIdentification>
+        <cbc:ID>BH-PAT-02</cbc:ID>
+      </cac:SellersItemIdentification>
+      <cac:AdditionalItemIdentification>
+        <cbc:ID schemeID="KUNYENO">2607104173825100931</cbc:ID>
+      </cac:AdditionalItemIdentification>
+    </cac:Item>
+    <cac:Shipment>
+      <cbc:ID>3</cbc:ID>
+      <cbc:TotalTransportHandlingUnitQuantity>60</cbc:TotalTransportHandlingUnitQuantity>
+    </cac:Shipment>
+  </cac:DespatchLine>
+  <cac:DespatchLine>
+    <cbc:ID>4</cbc:ID>
+    <cbc:Note>Üretici: Hatice Doğan · Serik / Antalya</cbc:Note>
+    <cbc:DeliveredQuantity unitCode="KGM">880</cbc:DeliveredQuantity>
+    <cac:OrderLineReference>
+      <cbc:LineID>4</cbc:LineID>
+    </cac:OrderLineReference>
+    <cac:Item>
+      <cbc:Description>Sınıf I · 14-16 cm · Sera</cbc:Description>
+      <cbc:Name>Salatalık (Silor)</cbc:Name>
+      <cac:SellersItemIdentification>
+        <cbc:ID>BH-SAL-01</cbc:ID>
+      </cac:SellersItemIdentification>
+      <cac:AdditionalItemIdentification>
+        <cbc:ID schemeID="KUNYENO">2607104173825100948</cbc:ID>
+      </cac:AdditionalItemIdentification>
+    </cac:Item>
+    <cac:Shipment>
+      <cbc:ID>4</cbc:ID>
+      <cbc:TotalTransportHandlingUnitQuantity>80</cbc:TotalTransportHandlingUnitQuantity>
+    </cac:Shipment>
+  </cac:DespatchLine>
+  <cac:DespatchLine>
+    <cbc:ID>5</cbc:ID>
+    <cbc:Note>Üretici: Osman Kurt · Aksu / Antalya</cbc:Note>
+    <cbc:DeliveredQuantity unitCode="KGM">450</cbc:DeliveredQuantity>
+    <cac:OrderLineReference>
+      <cbc:LineID>5</cbc:LineID>
+    </cac:OrderLineReference>
+    <cac:Item>
+      <cbc:Description>Sınıf I · 15-18 cm · Sera</cbc:Description>
+      <cbc:Name>Sakız Kabak</cbc:Name>
+      <cac:SellersItemIdentification>
+        <cbc:ID>BH-KAB-01</cbc:ID>
+      </cac:SellersItemIdentification>
+      <cac:AdditionalItemIdentification>
+        <cbc:ID schemeID="KUNYENO">2607104173825100955</cbc:ID>
+      </cac:AdditionalItemIdentification>
+    </cac:Item>
+    <cac:Shipment>
+      <cbc:ID>5</cbc:ID>
+      <cbc:TotalTransportHandlingUnitQuantity>45</cbc:TotalTransportHandlingUnitQuantity>
+    </cac:Shipment>
+  </cac:DespatchLine>
+  <cac:DespatchLine>
+    <cbc:ID>6</cbc:ID>
+    <cbc:Note>Üretici: Zeynep Öztürk · Finike / Antalya</cbc:Note>
+    <cbc:DeliveredQuantity unitCode="KGM">1500</cbc:DeliveredQuantity>
+    <cac:OrderLineReference>
+      <cbc:LineID>6</cbc:LineID>
+    </cac:OrderLineReference>
+    <cac:Item>
+      <cbc:Description>Sınıf I · Kalibre 2 · Bahçe</cbc:Description>
+      <cbc:Name>Mandalina (Satsuma)</cbc:Name>
+      <cac:SellersItemIdentification>
+        <cbc:ID>BH-MAN-04</cbc:ID>
+      </cac:SellersItemIdentification>
+      <cac:AdditionalItemIdentification>
+        <cbc:ID schemeID="KUNYENO">2607104173825100962</cbc:ID>
+      </cac:AdditionalItemIdentification>
+    </cac:Item>
+    <cac:Shipment>
+      <cbc:ID>6</cbc:ID>
+      <cbc:TotalTransportHandlingUnitQuantity>75</cbc:TotalTransportHandlingUnitQuantity>
+    </cac:Shipment>
+  </cac:DespatchLine>
+  <cac:DespatchLine>
+    <cbc:ID>7</cbc:ID>
+    <cbc:Note>Üretici: İbrahim Şahin · Gazipaşa / Antalya</cbc:Note>
+    <cbc:DeliveredQuantity unitCode="KGM">640</cbc:DeliveredQuantity>
+    <cac:OrderLineReference>
+      <cbc:LineID>7</cbc:LineID>
+    </cac:OrderLineReference>
+    <cac:Item>
+      <cbc:Description>Sınıf Ekstra · Kalibre B · Bahçe</cbc:Description>
+      <cbc:Name>Nar (Hicaz)</cbc:Name>
+      <cac:SellersItemIdentification>
+        <cbc:ID>BH-NAR-02</cbc:ID>
+      </cac:SellersItemIdentification>
+      <cac:AdditionalItemIdentification>
+        <cbc:ID schemeID="KUNYENO">2607104173825100979</cbc:ID>
+      </cac:AdditionalItemIdentification>
+    </cac:Item>
+    <cac:Shipment>
+      <cbc:ID>7</cbc:ID>
+      <cbc:TotalTransportHandlingUnitQuantity>40</cbc:TotalTransportHandlingUnitQuantity>
+    </cac:Shipment>
+  </cac:DespatchLine>
+</DespatchAdvice>

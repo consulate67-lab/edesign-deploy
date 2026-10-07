@@ -1,0 +1,857 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: Yurtiçi nakliye — aylık sefer dökümlü yük taşıma faturası (TICARIFATURA · TEVKIFAT)
+  KDV %20, tevkifat kodu 624 (yük taşımacılığı hizmeti, 2/10). Her satır bir sefer: tarih, güzergah, plaka, tonaj.
+  Tüm kişi/firma bilgileri kurgusaldır.
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+    xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>TICARIFATURA</cbc:ProfileID>
+    <cbc:ID>YYN2026000000963</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>A71E4C3B-92D5-4F08-B6A3-5E1D07C8F2A9</cbc:UUID>
+    <cbc:IssueDate>2026-10-01</cbc:IssueDate>
+    <cbc:IssueTime>09:20:00</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>TEVKIFAT</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız: Üç Yüz On Beş Bin Yüz On İki Türk Lirası Seksen Dört Kuruş</cbc:Note>
+    <cbc:Note>KDV tevkifatı, KDV Genel Uygulama Tebliği (I/C-2.1.3.2.11) uyarınca yük taşımacılığı hizmetinde 2/10 oranında uygulanmıştır; tevkif edilen KDV alıcı tarafından 2 No'lu KDV beyannamesi ile beyan edilecektir.</cbc:Note>
+    <cbc:Note>Tonajlar yükleme ve boşaltma noktalarındaki kantar fişlerine göre faturalandırılmıştır; kantar fişleri sefer numarasıyla eşleştirilerek ekte sunulmuştur.</cbc:Note>
+    <cbc:Note>Fatura bedeli sözleşme gereği fatura tarihinden itibaren 30 gün içinde ödenecektir.</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>9</cbc:LineCountNumeric>
+    <cac:InvoicePeriod>
+        <cbc:StartDate>2026-09-01</cbc:StartDate>
+        <cbc:EndDate>2026-09-30</cbc:EndDate>
+        <cbc:Description>Eylül 2026 sefer dönemi</cbc:Description>
+    </cac:InvoicePeriod>
+    <cac:ContractDocumentReference>
+        <cbc:ID>OVA-NKL-2026/04</cbc:ID>
+        <cbc:IssueDate>2026-01-12</cbc:IssueDate>
+        <cbc:DocumentType>Taşıma Sözleşmesi</cbc:DocumentType>
+        <cbc:DocumentDescription>2026 yılı dökme ve paketli yük taşıma çerçeve sözleşmesi (ton bazlı fiyat)</cbc:DocumentDescription>
+    </cac:ContractDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>K1.42.0087316</cbc:ID>
+        <cbc:IssueDate>2024-03-18</cbc:IssueDate>
+        <cbc:DocumentType>YETKIBELGESI</cbc:DocumentType>
+        <cbc:DocumentDescription>K1 Yetki Belgesi (yurtiçi ticari eşya taşımacılığı)</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">9630147285</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">9630147285</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Büyükkayacık OSB Mah. 410. Sok.</cbc:StreetName>
+                <cbc:BuildingNumber>6</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Selçuklu</cbc:CitySubdivisionName>
+                <cbc:CityName>Konya</cbc:CityName>
+                <cbc:PostalZone>42300</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.yesilyolnakliyat.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">9630147285</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">0963014728500012</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Yeşilyol Nakliyat ve Lojistik Ltd. Şti.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Büyükkayacık OSB Mah. 410. Sok.</cbc:StreetName>
+                <cbc:BuildingNumber>6</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Selçuklu</cbc:CitySubdivisionName>
+                <cbc:CityName>Konya</cbc:CityName>
+                <cbc:PostalZone>42300</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Selçuk</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(332) 239 42 42</cbc:Telephone>
+                <cbc:ElectronicMail>muhasebe@yesilyolnakliyat.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.ovaun.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">6450218739</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Ova Un ve Yem Sanayi A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Fevziçakmak Mah. Ankara Yolu Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>211</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Karatay</cbc:CitySubdivisionName>
+                <cbc:CityName>Konya</cbc:CityName>
+                <cbc:PostalZone>42050</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Mevlana</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(332) 345 60 60</cbc:Telephone>
+                <cbc:ElectronicMail>lojistik@ovaun.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-10-31</cbc:PaymentDueDate>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR560006400000142300875412</cbc:ID>
+            <cbc:CurrencyCode>TRY</cbc:CurrencyCode>
+            <cbc:PaymentNote>Türkiye İş Bankası — Konya Sanayi Şubesi</cbc:PaymentNote>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:PaymentTerms>
+        <cbc:Note>Fatura tarihinden itibaren 30 gün vadeli, havale / EFT ile ödenir.</cbc:Note>
+    </cac:PaymentTerms>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">54329.80</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">271649.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">54329.80</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>20</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:WithholdingTaxTotal>
+        <cbc:TaxAmount currencyID="TRY">10865.96</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">54329.80</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">10865.96</cbc:TaxAmount>
+            <cbc:Percent>20</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>YÜK TAŞIMACILIĞI HİZMETİ [KDVGUT-(I/C-2.1.3.2.11)]</cbc:Name>
+                    <cbc:TaxTypeCode>624</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:WithholdingTaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">271649.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">271649.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">325978.80</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="TRY">0.00</cbc:AllowanceTotalAmount>
+        <cbc:PayableAmount currencyID="TRY">315112.84</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="TNE">26.40</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">30360.00</cbc:LineExtensionAmount>
+        <cac:Delivery>
+            <cbc:ID>YY-2609-01</cbc:ID>
+            <cbc:ActualDeliveryDate>2026-09-02</cbc:ActualDeliveryDate>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>Konya Karatay</cbc:StreetName>
+                <cbc:CitySubdivisionName>Karatay</cbc:CitySubdivisionName>
+                <cbc:CityName>Konya</cbc:CityName>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:Despatch>
+                <cac:DespatchAddress>
+                    <cbc:StreetName>Mersin Limanı</cbc:StreetName>
+                    <cbc:CitySubdivisionName>Akdeniz</cbc:CitySubdivisionName>
+                    <cbc:CityName>Mersin</cbc:CityName>
+                    <cac:Country>
+                        <cbc:Name>Türkiye</cbc:Name>
+                    </cac:Country>
+                </cac:DespatchAddress>
+            </cac:Despatch>
+            <cac:Shipment>
+                <cbc:ID>YY-2609-01</cbc:ID>
+                <cac:ShipmentStage>
+                    <cac:TransportMeans>
+                        <cac:RoadTransport>
+                            <cbc:LicensePlateID schemeID="PLAKA">42KR4518</cbc:LicensePlateID>
+                        </cac:RoadTransport>
+                    </cac:TransportMeans>
+                </cac:ShipmentStage>
+            </cac:Shipment>
+        </cac:Delivery>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">6072.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">30360.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">6072.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:WithholdingTaxTotal>
+            <cbc:TaxAmount currencyID="TRY">1214.40</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">6072.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">1214.40</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>YÜK TAŞIMACILIĞI HİZMETİ [KDVGUT-(I/C-2.1.3.2.11)]</cbc:Name>
+                        <cbc:TaxTypeCode>624</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:WithholdingTaxTotal>
+        <cac:Item>
+            <cbc:Description>Dökme ithal buğday · damperli tır</cbc:Description>
+            <cbc:Name>Karayolu yük taşıma · Mersin Limanı → Konya Karatay</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>NKL-TON</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">1150.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="TNE">25.80</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">21156.00</cbc:LineExtensionAmount>
+        <cac:Delivery>
+            <cbc:ID>YY-2609-02</cbc:ID>
+            <cbc:ActualDeliveryDate>2026-09-04</cbc:ActualDeliveryDate>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>Ankara Sincan OSB</cbc:StreetName>
+                <cbc:CitySubdivisionName>Sincan</cbc:CitySubdivisionName>
+                <cbc:CityName>Ankara</cbc:CityName>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:Despatch>
+                <cac:DespatchAddress>
+                    <cbc:StreetName>Konya Karatay</cbc:StreetName>
+                    <cbc:CitySubdivisionName>Karatay</cbc:CitySubdivisionName>
+                    <cbc:CityName>Konya</cbc:CityName>
+                    <cac:Country>
+                        <cbc:Name>Türkiye</cbc:Name>
+                    </cac:Country>
+                </cac:DespatchAddress>
+            </cac:Despatch>
+            <cac:Shipment>
+                <cbc:ID>YY-2609-02</cbc:ID>
+                <cac:ShipmentStage>
+                    <cac:TransportMeans>
+                        <cac:RoadTransport>
+                            <cbc:LicensePlateID schemeID="PLAKA">42KR4526</cbc:LicensePlateID>
+                        </cac:RoadTransport>
+                    </cac:TransportMeans>
+                </cac:ShipmentStage>
+            </cac:Shipment>
+        </cac:Delivery>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">4231.20</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">21156.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">4231.20</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:WithholdingTaxTotal>
+            <cbc:TaxAmount currencyID="TRY">846.24</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">4231.20</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">846.24</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>YÜK TAŞIMACILIĞI HİZMETİ [KDVGUT-(I/C-2.1.3.2.11)]</cbc:Name>
+                        <cbc:TaxTypeCode>624</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:WithholdingTaxTotal>
+        <cac:Item>
+            <cbc:Description>Paketli un (50 kg çuval) · tenteli</cbc:Description>
+            <cbc:Name>Karayolu yük taşıma · Konya Karatay → Ankara Sincan OSB</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>NKL-TON</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">820.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="TNE">26.10</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">38628.00</cbc:LineExtensionAmount>
+        <cac:Delivery>
+            <cbc:ID>YY-2609-03</cbc:ID>
+            <cbc:ActualDeliveryDate>2026-09-07</cbc:ActualDeliveryDate>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>İzmir Kemalpaşa</cbc:StreetName>
+                <cbc:CitySubdivisionName>Kemalpaşa</cbc:CitySubdivisionName>
+                <cbc:CityName>İzmir</cbc:CityName>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:Despatch>
+                <cac:DespatchAddress>
+                    <cbc:StreetName>Konya Karatay</cbc:StreetName>
+                    <cbc:CitySubdivisionName>Karatay</cbc:CitySubdivisionName>
+                    <cbc:CityName>Konya</cbc:CityName>
+                    <cac:Country>
+                        <cbc:Name>Türkiye</cbc:Name>
+                    </cac:Country>
+                </cac:DespatchAddress>
+            </cac:Despatch>
+            <cac:Shipment>
+                <cbc:ID>YY-2609-03</cbc:ID>
+                <cac:ShipmentStage>
+                    <cac:TransportMeans>
+                        <cac:RoadTransport>
+                            <cbc:LicensePlateID schemeID="PLAKA">42KR4518</cbc:LicensePlateID>
+                        </cac:RoadTransport>
+                    </cac:TransportMeans>
+                </cac:ShipmentStage>
+            </cac:Shipment>
+        </cac:Delivery>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">7725.60</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">38628.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">7725.60</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:WithholdingTaxTotal>
+            <cbc:TaxAmount currencyID="TRY">1545.12</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">7725.60</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">1545.12</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>YÜK TAŞIMACILIĞI HİZMETİ [KDVGUT-(I/C-2.1.3.2.11)]</cbc:Name>
+                        <cbc:TaxTypeCode>624</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:WithholdingTaxTotal>
+        <cac:Item>
+            <cbc:Description>Paketli un (25 kg çuval) · tenteli</cbc:Description>
+            <cbc:Name>Karayolu yük taşıma · Konya Karatay → İzmir Kemalpaşa</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>NKL-TON</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">1480.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>4</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="TNE">24.60</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">26814.00</cbc:LineExtensionAmount>
+        <cac:Delivery>
+            <cbc:ID>YY-2609-04</cbc:ID>
+            <cbc:ActualDeliveryDate>2026-09-10</cbc:ActualDeliveryDate>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>Antalya Kepez</cbc:StreetName>
+                <cbc:CitySubdivisionName>Kepez</cbc:CitySubdivisionName>
+                <cbc:CityName>Antalya</cbc:CityName>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:Despatch>
+                <cac:DespatchAddress>
+                    <cbc:StreetName>Konya Karatay</cbc:StreetName>
+                    <cbc:CitySubdivisionName>Karatay</cbc:CitySubdivisionName>
+                    <cbc:CityName>Konya</cbc:CityName>
+                    <cac:Country>
+                        <cbc:Name>Türkiye</cbc:Name>
+                    </cac:Country>
+                </cac:DespatchAddress>
+            </cac:Despatch>
+            <cac:Shipment>
+                <cbc:ID>YY-2609-04</cbc:ID>
+                <cac:ShipmentStage>
+                    <cac:TransportMeans>
+                        <cac:RoadTransport>
+                            <cbc:LicensePlateID schemeID="PLAKA">42KR4533</cbc:LicensePlateID>
+                        </cac:RoadTransport>
+                    </cac:TransportMeans>
+                </cac:ShipmentStage>
+            </cac:Shipment>
+        </cac:Delivery>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">5362.80</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">26814.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">5362.80</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:WithholdingTaxTotal>
+            <cbc:TaxAmount currencyID="TRY">1072.56</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">5362.80</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">1072.56</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>YÜK TAŞIMACILIĞI HİZMETİ [KDVGUT-(I/C-2.1.3.2.11)]</cbc:Name>
+                        <cbc:TaxTypeCode>624</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:WithholdingTaxTotal>
+        <cac:Item>
+            <cbc:Description>Pelet büyükbaş yemi · tenteli</cbc:Description>
+            <cbc:Name>Karayolu yük taşıma · Konya Karatay → Antalya Kepez</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>NKL-TON</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">1090.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>5</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="TNE">26.00</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">25480.00</cbc:LineExtensionAmount>
+        <cac:Delivery>
+            <cbc:ID>YY-2609-05</cbc:ID>
+            <cbc:ActualDeliveryDate>2026-09-13</cbc:ActualDeliveryDate>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>Kayseri OSB</cbc:StreetName>
+                <cbc:CitySubdivisionName>Melikgazi</cbc:CitySubdivisionName>
+                <cbc:CityName>Kayseri</cbc:CityName>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:Despatch>
+                <cac:DespatchAddress>
+                    <cbc:StreetName>Konya Karatay</cbc:StreetName>
+                    <cbc:CitySubdivisionName>Karatay</cbc:CitySubdivisionName>
+                    <cbc:CityName>Konya</cbc:CityName>
+                    <cac:Country>
+                        <cbc:Name>Türkiye</cbc:Name>
+                    </cac:Country>
+                </cac:DespatchAddress>
+            </cac:Despatch>
+            <cac:Shipment>
+                <cbc:ID>YY-2609-05</cbc:ID>
+                <cac:ShipmentStage>
+                    <cac:TransportMeans>
+                        <cac:RoadTransport>
+                            <cbc:LicensePlateID schemeID="PLAKA">42KR4526</cbc:LicensePlateID>
+                        </cac:RoadTransport>
+                    </cac:TransportMeans>
+                </cac:ShipmentStage>
+            </cac:Shipment>
+        </cac:Delivery>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">5096.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">25480.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">5096.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:WithholdingTaxTotal>
+            <cbc:TaxAmount currencyID="TRY">1019.20</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">5096.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">1019.20</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>YÜK TAŞIMACILIĞI HİZMETİ [KDVGUT-(I/C-2.1.3.2.11)]</cbc:Name>
+                        <cbc:TaxTypeCode>624</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:WithholdingTaxTotal>
+        <cac:Item>
+            <cbc:Description>Dökme kepek · damperli</cbc:Description>
+            <cbc:Name>Karayolu yük taşıma · Konya Karatay → Kayseri OSB</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>NKL-TON</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">980.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>6</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="TNE">26.30</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">30245.00</cbc:LineExtensionAmount>
+        <cac:Delivery>
+            <cbc:ID>YY-2609-06</cbc:ID>
+            <cbc:ActualDeliveryDate>2026-09-17</cbc:ActualDeliveryDate>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>Konya Karatay</cbc:StreetName>
+                <cbc:CitySubdivisionName>Karatay</cbc:CitySubdivisionName>
+                <cbc:CityName>Konya</cbc:CityName>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:Despatch>
+                <cac:DespatchAddress>
+                    <cbc:StreetName>Mersin Limanı</cbc:StreetName>
+                    <cbc:CitySubdivisionName>Akdeniz</cbc:CitySubdivisionName>
+                    <cbc:CityName>Mersin</cbc:CityName>
+                    <cac:Country>
+                        <cbc:Name>Türkiye</cbc:Name>
+                    </cac:Country>
+                </cac:DespatchAddress>
+            </cac:Despatch>
+            <cac:Shipment>
+                <cbc:ID>YY-2609-06</cbc:ID>
+                <cac:ShipmentStage>
+                    <cac:TransportMeans>
+                        <cac:RoadTransport>
+                            <cbc:LicensePlateID schemeID="PLAKA">42KR4533</cbc:LicensePlateID>
+                        </cac:RoadTransport>
+                    </cac:TransportMeans>
+                </cac:ShipmentStage>
+            </cac:Shipment>
+        </cac:Delivery>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">6049.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">30245.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">6049.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:WithholdingTaxTotal>
+            <cbc:TaxAmount currencyID="TRY">1209.80</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">6049.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">1209.80</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>YÜK TAŞIMACILIĞI HİZMETİ [KDVGUT-(I/C-2.1.3.2.11)]</cbc:Name>
+                        <cbc:TaxTypeCode>624</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:WithholdingTaxTotal>
+        <cac:Item>
+            <cbc:Description>Dökme ithal buğday · damperli tır</cbc:Description>
+            <cbc:Name>Karayolu yük taşıma · Mersin Limanı → Konya Karatay</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>NKL-TON</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">1150.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>7</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="TNE">25.50</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">41310.00</cbc:LineExtensionAmount>
+        <cac:Delivery>
+            <cbc:ID>YY-2609-07</cbc:ID>
+            <cbc:ActualDeliveryDate>2026-09-21</cbc:ActualDeliveryDate>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>Bursa Nilüfer</cbc:StreetName>
+                <cbc:CitySubdivisionName>Nilüfer</cbc:CitySubdivisionName>
+                <cbc:CityName>Bursa</cbc:CityName>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:Despatch>
+                <cac:DespatchAddress>
+                    <cbc:StreetName>Konya Karatay</cbc:StreetName>
+                    <cbc:CitySubdivisionName>Karatay</cbc:CitySubdivisionName>
+                    <cbc:CityName>Konya</cbc:CityName>
+                    <cac:Country>
+                        <cbc:Name>Türkiye</cbc:Name>
+                    </cac:Country>
+                </cac:DespatchAddress>
+            </cac:Despatch>
+            <cac:Shipment>
+                <cbc:ID>YY-2609-07</cbc:ID>
+                <cac:ShipmentStage>
+                    <cac:TransportMeans>
+                        <cac:RoadTransport>
+                            <cbc:LicensePlateID schemeID="PLAKA">42KR4518</cbc:LicensePlateID>
+                        </cac:RoadTransport>
+                    </cac:TransportMeans>
+                </cac:ShipmentStage>
+            </cac:Shipment>
+        </cac:Delivery>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">8262.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">41310.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">8262.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:WithholdingTaxTotal>
+            <cbc:TaxAmount currencyID="TRY">1652.40</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">8262.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">1652.40</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>YÜK TAŞIMACILIĞI HİZMETİ [KDVGUT-(I/C-2.1.3.2.11)]</cbc:Name>
+                        <cbc:TaxTypeCode>624</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:WithholdingTaxTotal>
+        <cac:Item>
+            <cbc:Description>Paketli un (50 kg çuval) · tenteli</cbc:Description>
+            <cbc:Name>Karayolu yük taşıma · Konya Karatay → Bursa Nilüfer</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>NKL-TON</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">1620.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>8</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="TNE">26.20</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">36418.00</cbc:LineExtensionAmount>
+        <cac:Delivery>
+            <cbc:ID>YY-2609-08</cbc:ID>
+            <cbc:ActualDeliveryDate>2026-09-24</cbc:ActualDeliveryDate>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>Gaziantep Başpınar OSB</cbc:StreetName>
+                <cbc:CitySubdivisionName>Şehitkamil</cbc:CitySubdivisionName>
+                <cbc:CityName>Gaziantep</cbc:CityName>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:Despatch>
+                <cac:DespatchAddress>
+                    <cbc:StreetName>Konya Karatay</cbc:StreetName>
+                    <cbc:CitySubdivisionName>Karatay</cbc:CitySubdivisionName>
+                    <cbc:CityName>Konya</cbc:CityName>
+                    <cac:Country>
+                        <cbc:Name>Türkiye</cbc:Name>
+                    </cac:Country>
+                </cac:DespatchAddress>
+            </cac:Despatch>
+            <cac:Shipment>
+                <cbc:ID>YY-2609-08</cbc:ID>
+                <cac:ShipmentStage>
+                    <cac:TransportMeans>
+                        <cac:RoadTransport>
+                            <cbc:LicensePlateID schemeID="PLAKA">42KR4526</cbc:LicensePlateID>
+                        </cac:RoadTransport>
+                    </cac:TransportMeans>
+                </cac:ShipmentStage>
+            </cac:Shipment>
+        </cac:Delivery>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">7283.60</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">36418.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">7283.60</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:WithholdingTaxTotal>
+            <cbc:TaxAmount currencyID="TRY">1456.72</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">7283.60</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">1456.72</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>YÜK TAŞIMACILIĞI HİZMETİ [KDVGUT-(I/C-2.1.3.2.11)]</cbc:Name>
+                        <cbc:TaxTypeCode>624</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:WithholdingTaxTotal>
+        <cac:Item>
+            <cbc:Description>Paketli un (50 kg çuval) · tenteli</cbc:Description>
+            <cbc:Name>Karayolu yük taşıma · Konya Karatay → Gaziantep Başpınar OSB</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>NKL-TON</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">1390.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>9</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="TNE">25.90</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">21238.00</cbc:LineExtensionAmount>
+        <cac:Delivery>
+            <cbc:ID>YY-2609-09</cbc:ID>
+            <cbc:ActualDeliveryDate>2026-09-28</cbc:ActualDeliveryDate>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>Ankara Sincan OSB</cbc:StreetName>
+                <cbc:CitySubdivisionName>Sincan</cbc:CitySubdivisionName>
+                <cbc:CityName>Ankara</cbc:CityName>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:Despatch>
+                <cac:DespatchAddress>
+                    <cbc:StreetName>Konya Karatay</cbc:StreetName>
+                    <cbc:CitySubdivisionName>Karatay</cbc:CitySubdivisionName>
+                    <cbc:CityName>Konya</cbc:CityName>
+                    <cac:Country>
+                        <cbc:Name>Türkiye</cbc:Name>
+                    </cac:Country>
+                </cac:DespatchAddress>
+            </cac:Despatch>
+            <cac:Shipment>
+                <cbc:ID>YY-2609-09</cbc:ID>
+                <cac:ShipmentStage>
+                    <cac:TransportMeans>
+                        <cac:RoadTransport>
+                            <cbc:LicensePlateID schemeID="PLAKA">42KR4533</cbc:LicensePlateID>
+                        </cac:RoadTransport>
+                    </cac:TransportMeans>
+                </cac:ShipmentStage>
+            </cac:Shipment>
+        </cac:Delivery>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">4247.60</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">21238.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">4247.60</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:WithholdingTaxTotal>
+            <cbc:TaxAmount currencyID="TRY">849.52</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">4247.60</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">849.52</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>YÜK TAŞIMACILIĞI HİZMETİ [KDVGUT-(I/C-2.1.3.2.11)]</cbc:Name>
+                        <cbc:TaxTypeCode>624</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:WithholdingTaxTotal>
+        <cac:Item>
+            <cbc:Description>Paketli un (50 kg çuval) · tenteli</cbc:Description>
+            <cbc:Name>Karayolu yük taşıma · Konya Karatay → Ankara Sincan OSB</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>NKL-TON</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">820.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>

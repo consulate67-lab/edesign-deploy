@@ -1,0 +1,415 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: Uluslararası karayolu taşıma faturası (TICARIFATURA · ISTISNA)
+  Çorlu (TR) → München (DE) komple TIR seferi; EUR, TCMB kuru PricingExchangeRate.
+  KDV istisnası 311 — 3065 s. KDV Kanunu 14/1 uluslararası taşımacılık.
+  Taşıma belgeleri ve güzergah AdditionalDocumentReference (DocumentType: CMR, TIRKARNESI,
+  GUMRUKBEYANNAMESI, SINIRKAPISI, YETKIBELGESI, MESAFE, GUZERGAH); araç/dorse/şoför
+  Delivery/Shipment altında. Tüm kişi/firma bilgileri kurgusaldır.
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+    xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>TICARIFATURA</cbc:ProfileID>
+    <cbc:ID>ATN2026000000918</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>5D2A7C19-8E43-4B6F-A0D2-3C9E71F4B582</cbc:UUID>
+    <cbc:IssueDate>2026-10-06</cbc:IssueDate>
+    <cbc:IssueTime>10:40:00</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>ISTISNA</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız: Dört Bin Üç Yüz Beş Avro</cbc:Note>
+    <cbc:Note>KDV, 3065 sayılı KDV Kanunu'nun 14/1. maddesi uyarınca uluslararası taşımacılık istisnası kapsamında hesaplanmamıştır.</cbc:Note>
+    <cbc:Note>Yük 06.10.2026 08:15'te München teslim noktasında hasarsız ve mühürleri sağlam olarak teslim edilmiş, CMR 24. kutu alıcıca imzalanmıştır.</cbc:Note>
+    <cbc:Note>Fatura bedeli, fatura tarihindeki TCMB döviz satış kuru esas alınarak TL karşılığı ile kayıtlara alınmıştır.</cbc:Note>
+    <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>3</cbc:LineCountNumeric>
+    <cac:OrderReference>
+        <cbc:ID>MRM-LOG-2026-0457</cbc:ID>
+        <cbc:IssueDate>2026-09-28</cbc:IssueDate>
+    </cac:OrderReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>TR 0458812</cbc:ID>
+        <cbc:IssueDate>2026-10-02</cbc:IssueDate>
+        <cbc:DocumentType>CMR</cbc:DocumentType>
+        <cbc:DocumentDescription>Uluslararası Karayolu Taşıma Senedi</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>XF 75413268</cbc:ID>
+        <cbc:IssueDate>2026-10-02</cbc:IssueDate>
+        <cbc:DocumentType>TIRKARNESI</cbc:DocumentType>
+        <cbc:DocumentDescription>IRU TIR Karnesi · 14 yaprak</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>26590100EX00087412</cbc:ID>
+        <cbc:IssueDate>2026-10-02</cbc:IssueDate>
+        <cbc:DocumentType>GUMRUKBEYANNAMESI</cbc:DocumentType>
+        <cbc:DocumentDescription>Çorlu Gümrük Müdürlüğü · İhracat beyannamesi</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>Kapıkule</cbc:ID>
+        <cbc:IssueDate>2026-10-03</cbc:IssueDate>
+        <cbc:DocumentType>SINIRKAPISI</cbc:DocumentType>
+        <cbc:DocumentDescription>Kapıkule (TR) → Kapitan Andreevo (BG) çıkış</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>C2.34.0112458</cbc:ID>
+        <cbc:IssueDate>2024-03-15</cbc:IssueDate>
+        <cbc:DocumentType>YETKIBELGESI</cbc:DocumentType>
+        <cbc:DocumentDescription>UAB C2 yetki belgesi (uluslararası eşya taşımacılığı)</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>2140</cbc:ID>
+        <cbc:IssueDate>2026-10-06</cbc:IssueDate>
+        <cbc:DocumentType>MESAFE</cbc:DocumentType>
+        <cbc:DocumentDescription>Toplam güzergah mesafesi (km)</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>Çorlu</cbc:ID>
+        <cbc:IssueDate>2026-10-02</cbc:IssueDate>
+        <cbc:DocumentType>GUZERGAH</cbc:DocumentType>
+        <cbc:DocumentDescription>TR · Yükleme</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>Kapıkule</cbc:ID>
+        <cbc:IssueDate>2026-10-03</cbc:IssueDate>
+        <cbc:DocumentType>GUZERGAH</cbc:DocumentType>
+        <cbc:DocumentDescription>TR/BG · Çıkış</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>Kalotina</cbc:ID>
+        <cbc:IssueDate>2026-10-04</cbc:IssueDate>
+        <cbc:DocumentType>GUZERGAH</cbc:DocumentType>
+        <cbc:DocumentDescription>BG/RS · Transit</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>Röszke</cbc:ID>
+        <cbc:IssueDate>2026-10-04</cbc:IssueDate>
+        <cbc:DocumentType>GUZERGAH</cbc:DocumentType>
+        <cbc:DocumentDescription>RS/HU · AB girişi</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>Nickelsdorf</cbc:ID>
+        <cbc:IssueDate>2026-10-05</cbc:IssueDate>
+        <cbc:DocumentType>GUZERGAH</cbc:DocumentType>
+        <cbc:DocumentDescription>HU/AT · Transit</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>Suben</cbc:ID>
+        <cbc:IssueDate>2026-10-05</cbc:IssueDate>
+        <cbc:DocumentType>GUZERGAH</cbc:DocumentType>
+        <cbc:DocumentDescription>AT/DE · Transit</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>München</cbc:ID>
+        <cbc:IssueDate>2026-10-06</cbc:IssueDate>
+        <cbc:DocumentType>GUZERGAH</cbc:DocumentType>
+        <cbc:DocumentDescription>DE · Boşaltma</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">0681427593</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">0681427593</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Hadımköy Mah. Lojistik Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>18</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Arnavutköy</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34555</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.transeuropa.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">0681427593</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">0068142759300017</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Anadolu Transeuropa Uluslararası Nakliyat A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Hadımköy Mah. Lojistik Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>18</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Arnavutköy</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34555</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Büyükçekmece</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(212) 771 44 00</cbc:Telephone>
+                <cbc:ElectronicMail>operasyon@transeuropa.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.marmaraorme.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">6120593847</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Marmara Örme Tekstil İhracat A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Velimeşe OSB 3. Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>11</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Çorlu</cbc:CitySubdivisionName>
+                <cbc:CityName>Tekirdağ</cbc:CityName>
+                <cbc:PostalZone>59860</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Çorlu</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(282) 685 20 20</cbc:Telephone>
+                <cbc:ElectronicMail>lojistik@marmaraorme.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:Delivery>
+        <cbc:ActualDeliveryDate>2026-10-06</cbc:ActualDeliveryDate>
+        <cbc:ActualDeliveryTime>08:15:00</cbc:ActualDeliveryTime>
+        <cac:DeliveryAddress>
+            <cbc:StreetName>Landsberger Straße</cbc:StreetName>
+            <cbc:BuildingNumber>290</cbc:BuildingNumber>
+            <cbc:CitySubdivisionName>Laim</cbc:CitySubdivisionName>
+            <cbc:CityName>München</cbc:CityName>
+            <cbc:PostalZone>80687</cbc:PostalZone>
+            <cac:Country>
+                <cbc:IdentificationCode>DE</cbc:IdentificationCode>
+                <cbc:Name>Almanya</cbc:Name>
+            </cac:Country>
+        </cac:DeliveryAddress>
+        <cac:DeliveryParty>
+            <cac:PartyName>
+                <cbc:Name>Isar Moden Vertrieb GmbH</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Landsberger Straße</cbc:StreetName>
+                <cbc:BuildingNumber>290</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Laim</cbc:CitySubdivisionName>
+                <cbc:CityName>München</cbc:CityName>
+                <cbc:PostalZone>80687</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>DE</cbc:IdentificationCode>
+                    <cbc:Name>Almanya</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:Contact>
+                <cbc:Telephone>+49 89 5480 1120</cbc:Telephone>
+                <cbc:Name>Wareneingang · Rampe 3</cbc:Name>
+            </cac:Contact>
+        </cac:DeliveryParty>
+        <cac:Despatch>
+            <cbc:ActualDespatchDate>2026-10-02</cbc:ActualDespatchDate>
+            <cbc:ActualDespatchTime>16:30:00</cbc:ActualDespatchTime>
+            <cac:DespatchAddress>
+                <cbc:StreetName>Velimeşe OSB 3. Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>11</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Çorlu</cbc:CitySubdivisionName>
+                <cbc:CityName>Tekirdağ</cbc:CityName>
+                <cbc:PostalZone>59860</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:DespatchAddress>
+        </cac:Despatch>
+        <cac:Shipment>
+            <cbc:ID>ATN-SF-26-1184</cbc:ID>
+            <cbc:GrossWeightMeasure unitCode="KGM">18640</cbc:GrossWeightMeasure>
+            <cbc:GrossVolumeMeasure unitCode="MTQ">82</cbc:GrossVolumeMeasure>
+            <cbc:TotalTransportHandlingUnitQuantity>33</cbc:TotalTransportHandlingUnitQuantity>
+            <cac:ShipmentStage>
+                <cbc:TransportModeCode>3</cbc:TransportModeCode>
+                <cac:TransportMeans>
+                    <cac:RoadTransport>
+                        <cbc:LicensePlateID schemeID="PLAKA">34ATN482</cbc:LicensePlateID>
+                    </cac:RoadTransport>
+                </cac:TransportMeans>
+                <cac:DriverPerson>
+                    <cbc:FirstName>Kemal</cbc:FirstName>
+                    <cbc:FamilyName>Arslan</cbc:FamilyName>
+                    <cbc:Title>Şoför</cbc:Title>
+                    <cbc:NationalityID>27419385062</cbc:NationalityID>
+                </cac:DriverPerson>
+            </cac:ShipmentStage>
+            <cac:TransportHandlingUnit>
+                <cac:TransportEquipment>
+                    <cbc:ID schemeID="DORSEPLAKA">34ATN907</cbc:ID>
+                    <cbc:Description>Tenteli mega dorse · 13,6 m</cbc:Description>
+                </cac:TransportEquipment>
+            </cac:TransportHandlingUnit>
+        </cac:Shipment>
+    </cac:Delivery>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-11-05</cbc:PaymentDueDate>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR320006200041700009081457</cbc:ID>
+            <cbc:CurrencyCode>EUR</cbc:CurrencyCode>
+            <cbc:PaymentNote>Garanti BBVA — Hadımköy Ticari Şube (EUR hesabı)</cbc:PaymentNote>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:PaymentTerms>
+        <cbc:Note>Fatura tarihinden itibaren 30 gün vadeli, EUR hesabına havale.</cbc:Note>
+    </cac:PaymentTerms>
+    <cac:PricingExchangeRate>
+        <cbc:SourceCurrencyCode>EUR</cbc:SourceCurrencyCode>
+        <cbc:TargetCurrencyCode>TRY</cbc:TargetCurrencyCode>
+        <cbc:CalculationRate>49.8735</cbc:CalculationRate>
+        <cbc:Date>2026-10-06</cbc:Date>
+    </cac:PricingExchangeRate>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="EUR">0.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="EUR">4305.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="EUR">0.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>0</cbc:Percent>
+            <cac:TaxCategory>
+                <cbc:TaxExemptionReasonCode>311</cbc:TaxExemptionReasonCode>
+                <cbc:TaxExemptionReason>14/1 Uluslararası Taşımacılık</cbc:TaxExemptionReason>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="EUR">4305.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="EUR">4305.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="EUR">4305.00</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="EUR">0.00</cbc:AllowanceTotalAmount>
+        <cbc:PayableAmount currencyID="EUR">4305.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="EUR">3850.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="EUR">0.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="EUR">3850.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="EUR">0.00</cbc:TaxAmount>
+                <cbc:Percent>0</cbc:Percent>
+                <cac:TaxCategory>
+                    <cbc:TaxExemptionReasonCode>311</cbc:TaxExemptionReasonCode>
+                    <cbc:TaxExemptionReason>14/1 Uluslararası Taşımacılık</cbc:TaxExemptionReason>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>33 palet örme kumaş ve konfeksiyon · 18.640 kg brüt · tenteli mega dorse, parsiyelsiz</cbc:Description>
+            <cbc:Name>Komple TIR navlunu — Çorlu (TR) → München (DE)</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>NAV-TR-DE</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="EUR">3850.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="DAY">2</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="EUR">360.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="EUR">0.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="EUR">360.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="EUR">0.00</cbc:TaxAmount>
+                <cbc:Percent>0</cbc:Percent>
+                <cac:TaxCategory>
+                    <cbc:TaxExemptionReasonCode>311</cbc:TaxExemptionReasonCode>
+                    <cbc:TaxExemptionReason>14/1 Uluslararası Taşımacılık</cbc:TaxExemptionReason>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Kapıkule çıkışında yoğunluk nedeniyle 03-04.10.2026 tarihlerinde araç bekletme</cbc:Description>
+            <cbc:Name>Sınır kapısı bekleme bedeli (demuraj)</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>BKL-SNR</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="EUR">180.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="EUR">95.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="EUR">0.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="EUR">95.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="EUR">0.00</cbc:TaxAmount>
+                <cbc:Percent>0</cbc:Percent>
+                <cac:TaxCategory>
+                    <cbc:TaxExemptionReasonCode>311</cbc:TaxExemptionReasonCode>
+                    <cbc:TaxExemptionReason>14/1 Uluslararası Taşımacılık</cbc:TaxExemptionReason>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>TIR karnesi temini, CMR senedi düzenleme ve transit evrak takibi</cbc:Description>
+            <cbc:Name>TIR karnesi ve CMR düzenleme hizmeti</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>EVR-TIR</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="EUR">95.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>

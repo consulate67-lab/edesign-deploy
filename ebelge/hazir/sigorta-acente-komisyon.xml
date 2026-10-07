@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği — e-Sigorta Komisyon Gider Belgesi, sigorta şirketinden acenteye aylık komisyon (kurgusal veriler).
+  CreditNote · EARSIVBELGE / SIGORTAKOMISYONGIDERBELGESI · TR1.2.1. GİB SigortaKomisyonGider örneğindeki gibi her branş
+  satırında "Istihsal" (ChargeIndicator true) ve "IPTAL" (ChargeIndicator false) komisyonları; toplamlar
+  AllowanceTotalAmount (istihsal) ve ChargeTotalAmount (iptal) alanlarında. Oran MultiplierFactorNumeric, prim matrahı BaseAmount.
+  Satır tutarı ve ödenecek tutar net komisyondur (istihsal − iptal); resmi örnekte bu alanlar 0'dır.
+    İstihsal 248.451,50 | İptal 10.006,00 | Net komisyon 238.445,50
+-->
+<CreditNote xmlns="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2"
+    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+    xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2.1</cbc:CustomizationID>
+    <cbc:ProfileID>EARSIVBELGE</cbc:ProfileID>
+    <cbc:ID>PSK2026000004410</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>2F6A9D14-B37E-4C82-91D5-E0A84C3B6F27</cbc:UUID>
+    <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+    <cbc:IssueTime>09:30:00</cbc:IssueTime>
+    <cbc:CreditNoteTypeCode>SIGORTAKOMISYONGIDERBELGESI</cbc:CreditNoteTypeCode>
+    <cbc:Note>Yalnız İki Yüz Otuz Sekiz Bin Dört Yüz Kırk Beş Türk Lirası Elli Kuruştur.</cbc:Note>
+    <cbc:Note>Acente Levha No: T09-2015-44871 · Acente Kodu: 35-0417</cbc:Note>
+    <cbc:Note>Dönem içinde tanzim edilen poliçelerin istihsal komisyonundan, aynı dönemde iptal edilen poliçelerin komisyonu düşülmüştür.</cbc:Note>
+    <cbc:Note>Net komisyon tutarı 15.10.2026 tarihinde acente banka hesabına aktarılacaktır.</cbc:Note>
+    <cbc:Note>Bu belge 509 Sıra No'lu VUK Genel Tebliği kapsamında sigorta şirketi tarafından elektronik ortamda düzenlenmiştir.</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>4</cbc:LineCountNumeric>
+    <cac:InvoicePeriod>
+        <cbc:StartDate>2026-09-01</cbc:StartDate>
+        <cbc:EndDate>2026-09-30</cbc:EndDate>
+        <cbc:Description>EYLÜL - 2026</cbc:Description>
+    </cac:InvoicePeriod>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">7310594826</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">7310594826</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Barbaros Mahallesi Mor Sümbül Sokak Pusula Plaza</cbc:StreetName>
+                <cbc:BuildingNumber>9</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Ataşehir</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34746</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.pusulasigorta.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">7310594826</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TICARETSICILNO">418772-5</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">0731059482600019</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Pusula Sigorta A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Barbaros Mahallesi Mor Sümbül Sokak Pusula Plaza</cbc:StreetName>
+                <cbc:BuildingNumber>9</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Ataşehir</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34746</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Büyük Mükellefler</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(216) 444 78 78</cbc:Telephone>
+                <cbc:ElectronicMail>acentemuhasebe@pusulasigorta.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">6129048375</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Mavi Liman Sigorta Aracılık Hizmetleri Ltd. Şti.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Alsancak Mahallesi Kıbrıs Şehitleri Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>142/3</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Konak</cbc:CitySubdivisionName>
+                <cbc:CityName>İzmir</cbc:CityName>
+                <cbc:PostalZone>35220</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Kordon</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(232) 464 30 30</cbc:Telephone>
+                <cbc:ElectronicMail>muhasebe@mavilimansigorta.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-10-15</cbc:PaymentDueDate>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR19 0011 1000 0000 0087 4413 26</cbc:ID>
+            <cbc:CurrencyCode>TRY</cbc:CurrencyCode>
+            <cac:FinancialInstitutionBranch>
+                <cbc:Name>Alsancak Şubesi</cbc:Name>
+                <cac:FinancialInstitution>
+                    <cbc:Name>QNB Bank A.Ş.</cbc:Name>
+                </cac:FinancialInstitution>
+            </cac:FinancialInstitutionBranch>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">238445.50</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">238445.50</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">238445.50</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="TRY">248451.50</cbc:AllowanceTotalAmount>
+        <cbc:ChargeTotalAmount currencyID="TRY">10006.00</cbc:ChargeTotalAmount>
+        <cbc:PayableAmount currencyID="TRY">238445.50</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:CreditNoteLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:CreditedQuantity unitCode="C62">48</cbc:CreditedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">89130.00</cbc:LineExtensionAmount>
+        <cac:AllowanceCharge>
+            <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+            <cbc:AllowanceChargeReason>IPTAL</cbc:AllowanceChargeReason>
+            <cbc:MultiplierFactorNumeric>0.15</cbc:MultiplierFactorNumeric>
+            <cbc:Amount currencyID="TRY">2730.00</cbc:Amount>
+            <cbc:BaseAmount currencyID="TRY">18200.00</cbc:BaseAmount>
+        </cac:AllowanceCharge>
+        <cac:AllowanceCharge>
+            <cbc:ChargeIndicator>true</cbc:ChargeIndicator>
+            <cbc:AllowanceChargeReason>Istihsal</cbc:AllowanceChargeReason>
+            <cbc:MultiplierFactorNumeric>0.15</cbc:MultiplierFactorNumeric>
+            <cbc:Amount currencyID="TRY">91860.00</cbc:Amount>
+            <cbc:BaseAmount currencyID="TRY">612400.00</cbc:BaseAmount>
+        </cac:AllowanceCharge>
+        <cac:Item>
+            <cbc:Description>Kasko · Poliçe PSK-2026-0418801 … 0418848</cbc:Description>
+            <cbc:Name>Kara Araçları</cbc:Name>
+        </cac:Item>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:CreditedQuantity unitCode="C62">96</cbc:CreditedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">83904.00</cbc:LineExtensionAmount>
+        <cac:AllowanceCharge>
+            <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+            <cbc:AllowanceChargeReason>IPTAL</cbc:AllowanceChargeReason>
+            <cbc:MultiplierFactorNumeric>0.08</cbc:MultiplierFactorNumeric>
+            <cbc:Amount currencyID="TRY">4416.00</cbc:Amount>
+            <cbc:BaseAmount currencyID="TRY">55200.00</cbc:BaseAmount>
+        </cac:AllowanceCharge>
+        <cac:AllowanceCharge>
+            <cbc:ChargeIndicator>true</cbc:ChargeIndicator>
+            <cbc:AllowanceChargeReason>Istihsal</cbc:AllowanceChargeReason>
+            <cbc:MultiplierFactorNumeric>0.08</cbc:MultiplierFactorNumeric>
+            <cbc:Amount currencyID="TRY">88320.00</cbc:Amount>
+            <cbc:BaseAmount currencyID="TRY">1104000.00</cbc:BaseAmount>
+        </cac:AllowanceCharge>
+        <cac:Item>
+            <cbc:Description>Zorunlu Trafik · Poliçe PST-2026-1120455 … 1120550</cbc:Description>
+            <cbc:Name>Kara Araçları Sorumluluk</cbc:Name>
+        </cac:Item>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:CreditedQuantity unitCode="C62">61</cbc:CreditedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">11071.50</cbc:LineExtensionAmount>
+        <cac:AllowanceCharge>
+            <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+            <cbc:AllowanceChargeReason>IPTAL</cbc:AllowanceChargeReason>
+            <cbc:MultiplierFactorNumeric>0.15</cbc:MultiplierFactorNumeric>
+            <cbc:Amount currencyID="TRY">0.00</cbc:Amount>
+            <cbc:BaseAmount currencyID="TRY">0.00</cbc:BaseAmount>
+        </cac:AllowanceCharge>
+        <cac:AllowanceCharge>
+            <cbc:ChargeIndicator>true</cbc:ChargeIndicator>
+            <cbc:AllowanceChargeReason>Istihsal</cbc:AllowanceChargeReason>
+            <cbc:MultiplierFactorNumeric>0.15</cbc:MultiplierFactorNumeric>
+            <cbc:Amount currencyID="TRY">11071.50</cbc:Amount>
+            <cbc:BaseAmount currencyID="TRY">73810.00</cbc:BaseAmount>
+        </cac:AllowanceCharge>
+        <cac:Item>
+            <cbc:Description>DASK Zorunlu Deprem · Poliçe 2026-DSK-7741002 … 7741062</cbc:Description>
+            <cbc:Name>Yangın ve Doğal Afetler</cbc:Name>
+        </cac:Item>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>4</cbc:ID>
+        <cbc:CreditedQuantity unitCode="C62">22</cbc:CreditedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">54340.00</cbc:LineExtensionAmount>
+        <cac:AllowanceCharge>
+            <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+            <cbc:AllowanceChargeReason>IPTAL</cbc:AllowanceChargeReason>
+            <cbc:MultiplierFactorNumeric>0.20</cbc:MultiplierFactorNumeric>
+            <cbc:Amount currencyID="TRY">2860.00</cbc:Amount>
+            <cbc:BaseAmount currencyID="TRY">14300.00</cbc:BaseAmount>
+        </cac:AllowanceCharge>
+        <cac:AllowanceCharge>
+            <cbc:ChargeIndicator>true</cbc:ChargeIndicator>
+            <cbc:AllowanceChargeReason>Istihsal</cbc:AllowanceChargeReason>
+            <cbc:MultiplierFactorNumeric>0.20</cbc:MultiplierFactorNumeric>
+            <cbc:Amount currencyID="TRY">57200.00</cbc:Amount>
+            <cbc:BaseAmount currencyID="TRY">286000.00</cbc:BaseAmount>
+        </cac:AllowanceCharge>
+        <cac:Item>
+            <cbc:Description>Tamamlayıcı Sağlık · Poliçe PSS-2026-0099310 … 0099331</cbc:Description>
+            <cbc:Name>Hastalık / Sağlık</cbc:Name>
+        </cac:Item>
+    </cac:CreditNoteLine>
+</CreditNote>

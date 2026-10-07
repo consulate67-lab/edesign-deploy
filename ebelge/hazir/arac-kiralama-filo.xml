@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği — Kurumsal filo kiralama (operasyonel leasing) aylık e-Faturası (kurgusal veriler).
+  TICARIFATURA / SATIS; tüm kalemler %20 KDV. Her araç bir satır: plaka = SellersItemIdentification/ID,
+  marka/model = BrandName/ModelName, araç sözleşme no = Description, dönem ve aylık km satır notlarında
+  ("Dönem:", "KM:"). Son satır sözleşme limiti (2.500 km/ay) üstü kilometre aşım bedelidir (KMT).
+    7 araç 197.130,00 + km aşımı 3.420 km × 3,25 = 11.115,00 → 208.245,00 | KDV %20 41.649,00 | Ödenecek 249.894,00
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+    xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>TICARIFATURA</cbc:ProfileID>
+    <cbc:ID>AFK2026000003185</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>5B8E1F2A-7C34-4D90-A6E1-3F2C9B7D0A58</cbc:UUID>
+    <cbc:IssueDate>2026-10-01</cbc:IssueDate>
+    <cbc:IssueTime>09:05:00</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>SATIS</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız İki Yüz Kırk Dokuz Bin Sekiz Yüz Doksan Dört Türk Lirasıdır.</cbc:Note>
+    <cbc:Note>Kira Dönemi: Eylül 2026</cbc:Note>
+    <cbc:Note>Filo Sözleşmesi: AFK-2024-0387 · 36 ay · 01.03.2024 – 28.02.2027</cbc:Note>
+    <cbc:Note>KM Limiti: 2.500 km/ay/araç · aşım 3,25 TL/km</cbc:Note>
+    <cbc:Note>Filo Yöneticisi: Onur ÇELİK · filo@kuzeygida.com.tr</cbc:Note>
+    <cbc:Note>Periyodik bakım, lastik, kasko, trafik sigortası, MTV ve 7/24 yol yardımı kira bedeline dahildir.</cbc:Note>
+    <cbc:Note>Araç bazlı kilometre ve HGS dökümü FKR-2609-0387 numaralı raporla ayrıca iletilmiştir.</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>8</cbc:LineCountNumeric>
+    <cac:InvoicePeriod>
+        <cbc:StartDate>2026-09-01</cbc:StartDate>
+        <cbc:EndDate>2026-09-30</cbc:EndDate>
+        <cbc:Description>Eylül 2026 filo kira dönemi</cbc:Description>
+    </cac:InvoicePeriod>
+    <cac:ContractDocumentReference>
+        <cbc:ID>AFK-2024-0387</cbc:ID>
+        <cbc:IssueDate>2024-02-20</cbc:IssueDate>
+    </cac:ContractDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">0712946385</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">0712946385</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Saray Mahallesi Dr. Adnan Büyükdeniz Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>4</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Ümraniye</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34768</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_AFK2026000003185</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.anadolufilo.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">0712946385</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">0071294638500017</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TICARETSICILNO">İTO 498771</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Anadolu Filo Kiralama ve Operasyonel Leasing A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Saray Mahallesi Dr. Adnan Büyükdeniz Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>4</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Ümraniye</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34768</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Büyük Mükellefler</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0216 600 25 25</cbc:Telephone>
+                <cbc:ElectronicMail>fatura@anadolufilo.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.kuzeygida.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">5830164927</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Kuzey Gıda Dağıtım ve Pazarlama A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Güzeller OSB Mahallesi İnönü Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>38</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Gebze</cbc:CitySubdivisionName>
+                <cbc:CityName>Kocaeli</cbc:CityName>
+                <cbc:PostalZone>41400</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Gebze</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0262 751 30 30</cbc:Telephone>
+                <cbc:ElectronicMail>muhasebe@kuzeygida.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-10-15</cbc:PaymentDueDate>
+        <cbc:InstructionNote>Fatura tarihinden itibaren 14 gün vadeli; açıklamaya fatura numarasını yazınız.</cbc:InstructionNote>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR56 0004 6007 8888 8000 1234 56</cbc:ID>
+            <cbc:CurrencyCode>TRY</cbc:CurrencyCode>
+            <cac:FinancialInstitutionBranch>
+                <cbc:Name>Ümraniye Ticari Şubesi</cbc:Name>
+                <cac:FinancialInstitution>
+                    <cbc:Name>Akbank T.A.Ş.</cbc:Name>
+                </cac:FinancialInstitution>
+            </cac:FinancialInstitutionBranch>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">41649.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">208245.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">41649.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>20</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">208245.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">208245.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">249894.00</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="TRY">0.00</cbc:AllowanceTotalAmount>
+        <cbc:PayableAmount currencyID="TRY">249894.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:Note>Dönem: 01.09 – 30.09.2026</cbc:Note>
+        <cbc:Note>KM: 3180</cbc:Note>
+        <cbc:InvoicedQuantity unitCode="MON">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">24500.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">4900.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">24500.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">4900.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Sözleşme AFK-0387/01 · 36 ay · 2.500 km/ay</cbc:Description>
+            <cbc:Name>Operasyonel araç kiralama bedeli</cbc:Name>
+            <cbc:BrandName>Renault</cbc:BrandName>
+            <cbc:ModelName>Megane Sedan 1.3 TCe EDC</cbc:ModelName>
+            <cac:SellersItemIdentification>
+                <cbc:ID>34 AFK 101</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">24500.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:Note>Dönem: 01.09 – 30.09.2026</cbc:Note>
+        <cbc:Note>KM: 2210</cbc:Note>
+        <cbc:InvoicedQuantity unitCode="MON">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">24500.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">4900.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">24500.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">4900.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Sözleşme AFK-0387/02 · 36 ay · 2.500 km/ay</cbc:Description>
+            <cbc:Name>Operasyonel araç kiralama bedeli</cbc:Name>
+            <cbc:BrandName>Renault</cbc:BrandName>
+            <cbc:ModelName>Megane Sedan 1.3 TCe EDC</cbc:ModelName>
+            <cac:SellersItemIdentification>
+                <cbc:ID>34 AFK 102</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">24500.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:Note>Dönem: 01.09 – 30.09.2026</cbc:Note>
+        <cbc:Note>KM: 3940</cbc:Note>
+        <cbc:InvoicedQuantity unitCode="MON">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">21800.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">4360.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">21800.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">4360.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Sözleşme AFK-0387/03 · 36 ay · 2.500 km/ay</cbc:Description>
+            <cbc:Name>Operasyonel araç kiralama bedeli</cbc:Name>
+            <cbc:BrandName>Fiat</cbc:BrandName>
+            <cbc:ModelName>Doblo Cargo Maxi 1.6 MJet</cbc:ModelName>
+            <cac:SellersItemIdentification>
+                <cbc:ID>41 AFK 214</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">21800.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>4</cbc:ID>
+        <cbc:Note>Dönem: 01.09 – 30.09.2026</cbc:Note>
+        <cbc:Note>KM: 2650</cbc:Note>
+        <cbc:InvoicedQuantity unitCode="MON">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">32900.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">6580.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">32900.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">6580.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Sözleşme AFK-0387/04 · 36 ay · 2.500 km/ay</cbc:Description>
+            <cbc:Name>Operasyonel araç kiralama bedeli</cbc:Name>
+            <cbc:BrandName>Ford</cbc:BrandName>
+            <cbc:ModelName>Transit Custom 320L 2.0 EcoBlue</cbc:ModelName>
+            <cac:SellersItemIdentification>
+                <cbc:ID>41 AFK 215</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">32900.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>5</cbc:ID>
+        <cbc:Note>Dönem: 01.09 – 30.09.2026</cbc:Note>
+        <cbc:Note>KM: 1860</cbc:Note>
+        <cbc:InvoicedQuantity unitCode="MON">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">29750.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">5950.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">29750.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">5950.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Sözleşme AFK-0387/05 · 36 ay · 2.500 km/ay</cbc:Description>
+            <cbc:Name>Operasyonel araç kiralama bedeli</cbc:Name>
+            <cbc:BrandName>Toyota</cbc:BrandName>
+            <cbc:ModelName>Corolla 1.8 Hybrid Flame</cbc:ModelName>
+            <cac:SellersItemIdentification>
+                <cbc:ID>34 AFK 318</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">29750.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>6</cbc:ID>
+        <cbc:Note>Dönem: 01.09 – 30.09.2026</cbc:Note>
+        <cbc:Note>KM: 3650</cbc:Note>
+        <cbc:InvoicedQuantity unitCode="MON">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">46200.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">9240.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">46200.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">9240.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Sözleşme AFK-0387/06 · 36 ay · 2.500 km/ay</cbc:Description>
+            <cbc:Name>Operasyonel araç kiralama bedeli</cbc:Name>
+            <cbc:BrandName>Volkswagen</cbc:BrandName>
+            <cbc:ModelName>Passat 1.5 TSI Business DSG</cbc:ModelName>
+            <cac:SellersItemIdentification>
+                <cbc:ID>34 AFK 422</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">46200.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>7</cbc:ID>
+        <cbc:Note>Dönem: 12.09 – 30.09.2026</cbc:Note>
+        <cbc:Note>KM: 1540</cbc:Note>
+        <cbc:InvoicedQuantity unitCode="DAY">19</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">17480.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">3496.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">17480.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">3496.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Sözleşme AFK-0387/07 · kısmi dönem, 12.09 teslim (19/30 gün)</cbc:Description>
+            <cbc:Name>Operasyonel araç kiralama bedeli</cbc:Name>
+            <cbc:BrandName>Peugeot</cbc:BrandName>
+            <cbc:ModelName>2008 1.2 PureTech Allure</cbc:ModelName>
+            <cac:SellersItemIdentification>
+                <cbc:ID>16 AFK 519</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">920.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>8</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="KMT">3420</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">11115.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">2223.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">11115.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">2223.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>4 araç · limit üstü km (34 AFK 101: 680, 41 AFK 214: 1.440, 41 AFK 215: 150, 34 AFK 422: 1.150)</cbc:Description>
+            <cbc:Name>Sözleşme üstü kilometre aşım bedeli</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>KM-AŞIM</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">3.25</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>

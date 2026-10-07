@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CreditNote xmlns="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:n4="http://www.altova.com/samplexml/other-namespace" xsi:schemaLocation="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2 UBL-CreditNote-2.1.xsd">
+  <ext:UBLExtensions>
+    <ext:UBLExtension>
+      <ext:ExtensionContent>
+        <n4:auto-generated_for_wildcard/>
+      </ext:ExtensionContent>
+    </ext:UBLExtension>
+  </ext:UBLExtensions>
+  <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+  <cbc:CustomizationID>TR1.2.1</cbc:CustomizationID>
+  <cbc:ProfileID>EKIYMETLIMADENBELGE</cbc:ProfileID>
+  <cbc:ID>MHK2026000000862</cbc:ID>
+  <cbc:CopyIndicator>false</cbc:CopyIndicator>
+  <cbc:UUID>B8E35A07-2D64-4C19-9F3E-71A0C6D25B48</cbc:UUID>
+  <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+  <cbc:IssueTime>11:18:05</cbc:IssueTime>
+  <cbc:CreditNoteTypeCode>ALIM</cbc:CreditNoteTypeCode>
+  <cbc:Note>Analiz: Ürünler müşteri huzurunda tartılmış; ayarlar mihenk taşı ve XRF spektrometre ile tespit edilmiştir.</cbc:Note>
+  <cbc:Note>Tutanak: Ayar tespit tutanağı MHK-AT-2026-0862 düzenlenmiş, bir nüshası müşteriye verilmiştir.</cbc:Note>
+  <cbc:Note>Has fiyat: 07.10.2026 11:05 itibarıyla 24 ayar has altın gram alış fiyatı esas alınmıştır.</cbc:Note>
+  <cbc:Note>Satıcı, ürünlerin kendisine ait olduğunu ve yasal yollarla edinildiğini beyan etmiştir.</cbc:Note>
+  <cbc:Note>Yalnız: İki Yüz Kırk Bir Bin Altı Yüz Otuz Bir Türk Lirası Seksen Üç Kuruş</cbc:Note>
+  <cbc:LineCountNumeric>4</cbc:LineCountNumeric>
+  <cac:AdditionalDocumentReference>
+    <cbc:ID>31207</cbc:ID>
+    <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+    <cbc:DocumentTypeCode>ISTATISTIKNO</cbc:DocumentTypeCode>
+  </cac:AdditionalDocumentReference>
+  <cac:Signature>
+    <cbc:ID schemeID="VKN_TCKN">6182047395</cbc:ID>
+    <cac:SignatoryParty>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="VKN">6182047395</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PostalAddress>
+        <cbc:StreetName>Anafartalar Mah. Çıkrıkçılar Yokuşu, Kuyumcular Çarşısı</cbc:StreetName>
+        <cbc:BuildingNumber>41</cbc:BuildingNumber>
+        <cbc:CitySubdivisionName>Altındağ</cbc:CitySubdivisionName>
+        <cbc:CityName>Ankara</cbc:CityName>
+        <cbc:PostalZone>06050</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+          <cbc:Name>Türkiye</cbc:Name>
+        </cac:Country>
+      </cac:PostalAddress>
+    </cac:SignatoryParty>
+    <cac:DigitalSignatureAttachment>
+      <cac:ExternalReference>
+        <cbc:URI>#Signature_MHK2026000000862</cbc:URI>
+      </cac:ExternalReference>
+    </cac:DigitalSignatureAttachment>
+  </cac:Signature>
+  <cac:AccountingSupplierParty>
+    <cac:Party>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="VKN">6182047395</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="SUBENO">ANK-0218</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyName>
+        <cbc:Name>Mihenk Kuyumculuk ve Kıymetli Madenler Ltd. Şti.</cbc:Name>
+      </cac:PartyName>
+      <cac:PostalAddress>
+        <cbc:StreetName>Anafartalar Mah. Çıkrıkçılar Yokuşu, Kuyumcular Çarşısı</cbc:StreetName>
+        <cbc:BuildingNumber>41</cbc:BuildingNumber>
+        <cbc:CitySubdivisionName>Altındağ</cbc:CitySubdivisionName>
+        <cbc:CityName>Ankara</cbc:CityName>
+        <cbc:PostalZone>06050</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+          <cbc:Name>Türkiye</cbc:Name>
+        </cac:Country>
+      </cac:PostalAddress>
+      <cac:PartyTaxScheme>
+        <cac:TaxScheme>
+          <cbc:Name>Ulus</cbc:Name>
+        </cac:TaxScheme>
+      </cac:PartyTaxScheme>
+      <cac:Contact>
+        <cbc:Telephone>0312 311 44 62</cbc:Telephone>
+        <cbc:ElectronicMail>alim@mihenkkuyumculuk.com.tr</cbc:ElectronicMail>
+      </cac:Contact>
+    </cac:Party>
+  </cac:AccountingSupplierParty>
+  <cac:AccountingCustomerParty>
+    <cac:Party>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="TCKN">19374628051</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="MUSTERITURU">GERCEKKISI</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PostalAddress>
+        <cbc:StreetName>Bahçelievler Mah. 7. Cad.</cbc:StreetName>
+        <cbc:BuildingNumber>23 D: 5</cbc:BuildingNumber>
+        <cbc:CitySubdivisionName>Çankaya</cbc:CitySubdivisionName>
+        <cbc:CityName>Ankara</cbc:CityName>
+        <cbc:PostalZone>06490</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+          <cbc:Name>Türkiye</cbc:Name>
+        </cac:Country>
+      </cac:PostalAddress>
+      <cac:Contact>
+        <cbc:Telephone>0533 640 18 27</cbc:Telephone>
+      </cac:Contact>
+      <cac:Person>
+        <cbc:FirstName>Ayşe</cbc:FirstName>
+        <cbc:FamilyName>Kılınç</cbc:FamilyName>
+        <cbc:NationalityID>TR</cbc:NationalityID>
+      </cac:Person>
+    </cac:Party>
+  </cac:AccountingCustomerParty>
+  <cac:PaymentMeans>
+    <cbc:PaymentMeansCode listID="UN/4461">46</cbc:PaymentMeansCode>
+    <cbc:InstructionNote>Müşteri hesabı — bedel EFT ile yatırıldı</cbc:InstructionNote>
+    <cac:PayerFinancialAccount>
+      <cbc:ID>TR480001001745000037281466</cbc:ID>
+    </cac:PayerFinancialAccount>
+  </cac:PaymentMeans>
+  <cac:PaymentMeans>
+    <cbc:PaymentMeansCode listID="UN/4461">46</cbc:PaymentMeansCode>
+    <cbc:InstructionNote>Müessese ödeme hesabı</cbc:InstructionNote>
+    <cac:PayeeFinancialAccount>
+      <cbc:ID>TR170001500158007306418295</cbc:ID>
+      <cbc:CurrencyCode>TRY</cbc:CurrencyCode>
+      <cbc:PaymentNote>Vakıfbank — Ulus Şubesi</cbc:PaymentNote>
+    </cac:PayeeFinancialAccount>
+  </cac:PaymentMeans>
+  <cac:PricingExchangeRate>
+    <cbc:SourceCurrencyCode>XAU_24G</cbc:SourceCurrencyCode>
+    <cbc:TargetCurrencyCode>TRY</cbc:TargetCurrencyCode>
+    <cbc:CalculationRate>5480.000000</cbc:CalculationRate>
+  </cac:PricingExchangeRate>
+  <cac:PaymentExchangeRate>
+    <cbc:SourceCurrencyCode>XAU_24G</cbc:SourceCurrencyCode>
+    <cbc:TargetCurrencyCode>TRY</cbc:TargetCurrencyCode>
+    <cbc:CalculationRate>5480.000000</cbc:CalculationRate>
+  </cac:PaymentExchangeRate>
+  <cac:TaxTotal>
+    <cbc:TaxAmount currencyID="TRY">0.00</cbc:TaxAmount>
+    <cac:TaxSubtotal>
+      <cbc:TaxableAmount currencyID="TRY">241631.83</cbc:TaxableAmount>
+      <cbc:TaxAmount currencyID="TRY">0.00</cbc:TaxAmount>
+      <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+      <cbc:Percent>0</cbc:Percent>
+      <cac:TaxCategory>
+      <cbc:TaxExemptionReason>Vergi mükellefi olmayan gerçek kişiden hurda altın alımı; KDV hesaplanmamıştır.</cbc:TaxExemptionReason>
+        <cac:TaxScheme>
+          <cbc:Name>KDV</cbc:Name>
+          <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+        </cac:TaxScheme>
+      </cac:TaxCategory>
+    </cac:TaxSubtotal>
+  </cac:TaxTotal>
+  <cac:LegalMonetaryTotal>
+    <cbc:LineExtensionAmount currencyID="TRY">241631.83</cbc:LineExtensionAmount>
+    <cbc:TaxExclusiveAmount currencyID="TRY">241631.83</cbc:TaxExclusiveAmount>
+    <cbc:TaxInclusiveAmount currencyID="TRY">241631.83</cbc:TaxInclusiveAmount>
+    <cbc:PayableAmount currencyID="XAU_24G">44.0934</cbc:PayableAmount>
+  </cac:LegalMonetaryTotal>
+  <cac:CreditNoteLine>
+    <cbc:ID>1</cbc:ID>
+    <cbc:CreditedQuantity unitCode="GRM">30.5</cbc:CreditedQuantity>
+    <cbc:LineExtensionAmount currencyID="TRY">153100.24</cbc:LineExtensionAmount>
+    <cac:Item>
+      <cbc:Description>Ezik, kopuk kilit · damgalı</cbc:Description>
+      <cbc:Name>22 Ayar Hurda Burma Bilezik (2 adet)</cbc:Name>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="TRY">5019.68</cbc:PriceAmount>
+    </cac:Price>
+  </cac:CreditNoteLine>
+  <cac:CreditNoteLine>
+    <cbc:ID>2</cbc:ID>
+    <cbc:CreditedQuantity unitCode="GRM">12.4</cbc:CreditedQuantity>
+    <cbc:LineExtensionAmount currencyID="TRY">39751.92</cbc:LineExtensionAmount>
+    <cac:Item>
+      <cbc:Description>Kopuk, taşsız</cbc:Description>
+      <cbc:Name>14 Ayar Hurda Zincir Kolye</cbc:Name>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="TRY">3205.80</cbc:PriceAmount>
+    </cac:Price>
+  </cac:CreditNoteLine>
+  <cac:CreditNoteLine>
+    <cbc:ID>3</cbc:ID>
+    <cbc:CreditedQuantity unitCode="GRM">6.8</cbc:CreditedQuantity>
+    <cbc:LineExtensionAmount currencyID="TRY">27948.00</cbc:LineExtensionAmount>
+    <cac:Item>
+      <cbc:Description>Taş sökülmüş</cbc:Description>
+      <cbc:Name>18 Ayar Hurda Tektaş Yüzük</cbc:Name>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="TRY">4110.00</cbc:PriceAmount>
+    </cac:Price>
+  </cac:CreditNoteLine>
+  <cac:CreditNoteLine>
+    <cbc:ID>4</cbc:ID>
+    <cbc:CreditedQuantity unitCode="GRM">4.15</cbc:CreditedQuantity>
+    <cbc:LineExtensionAmount currencyID="TRY">20831.67</cbc:LineExtensionAmount>
+    <cac:Item>
+      <cbc:Description>Eşsiz parça</cbc:Description>
+      <cbc:Name>22 Ayar Kırık Halka Küpe (tek)</cbc:Name>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="TRY">5019.68</cbc:PriceAmount>
+    </cac:Price>
+  </cac:CreditNoteLine>
+</CreditNote>

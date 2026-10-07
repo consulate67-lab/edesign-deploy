@@ -1,0 +1,405 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:n4="http://www.altova.com/samplexml/other-namespace" xsi:schemaLocation="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2 UBL-Invoice-2.1.xsd">
+  <ext:UBLExtensions>
+    <ext:UBLExtension>
+      <ext:ExtensionContent>
+        <n4:auto-generated_for_wildcard/>
+      </ext:ExtensionContent>
+    </ext:UBLExtension>
+  </ext:UBLExtensions>
+  <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+  <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+  <cbc:ProfileID>EARSIVFATURA</cbc:ProfileID>
+  <cbc:ID>PTK2026000127045</cbc:ID>
+  <cbc:CopyIndicator>false</cbc:CopyIndicator>
+  <cbc:UUID>A63C9E10-4B7D-4F25-8E91-C05D2A7B3F86</cbc:UUID>
+  <cbc:IssueDate>2026-10-06</cbc:IssueDate>
+  <cbc:IssueTime>10:05:31</cbc:IssueTime>
+  <cbc:InvoiceTypeCode>SATIS</cbc:InvoiceTypeCode>
+  <cbc:Note>Bu satış internet üzerinden yapılmıştır.</cbc:Note>
+  <cbc:Note>Abonelik: Miyav Plan · 12 ay</cbc:Note>
+  <cbc:Note>Abonelik dönemi: 7 / 12</cbc:Note>
+  <cbc:Note>Abone No: PK-AB-208431</cbc:Note>
+  <cbc:Note>Dost: Pamuk · Yetişkin kedi · 3 yaş</cbc:Note>
+  <cbc:Note>Sonraki kutu: 05.11.2026</cbc:Note>
+  <cbc:Note>Kargo: Abonelere her ay ücretsiz.</cbc:Note>
+  <cbc:Note>Yalnız: Bin Otuz Dört Türk Lirası Doksan Yedi Kuruş</cbc:Note>
+  <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+  <cbc:LineCountNumeric>6</cbc:LineCountNumeric>
+  <cac:InvoicePeriod>
+    <cbc:StartDate>2026-10-01</cbc:StartDate>
+    <cbc:EndDate>2026-10-31</cbc:EndDate>
+    <cbc:Description>Ekim 2026 Kutusu</cbc:Description>
+  </cac:InvoicePeriod>
+  <cac:OrderReference>
+    <cbc:ID>PK-2026-10-208431</cbc:ID>
+    <cbc:IssueDate>2026-10-01</cbc:IssueDate>
+  </cac:OrderReference>
+  <cac:Signature>
+    <cbc:ID schemeID="VKN_TCKN">7019348265</cbc:ID>
+    <cac:SignatoryParty>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="VKN">7019348265</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PostalAddress>
+        <cbc:StreetName>Kazımdirik Mah. 372. Sok.</cbc:StreetName>
+        <cbc:BuildingNumber>8/3</cbc:BuildingNumber>
+        <cbc:CitySubdivisionName>Bornova</cbc:CitySubdivisionName>
+        <cbc:CityName>İzmir</cbc:CityName>
+        <cbc:PostalZone>35100</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+          <cbc:Name>Türkiye</cbc:Name>
+        </cac:Country>
+      </cac:PostalAddress>
+    </cac:SignatoryParty>
+    <cac:DigitalSignatureAttachment>
+      <cac:ExternalReference>
+        <cbc:URI>#Signature_PTK2026000127045</cbc:URI>
+      </cac:ExternalReference>
+    </cac:DigitalSignatureAttachment>
+  </cac:Signature>
+  <cac:AccountingSupplierParty>
+    <cac:Party>
+      <cbc:WebsiteURI>https://www.patikutu.com.tr</cbc:WebsiteURI>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="VKN">7019348265</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="MERSISNO">0701934826500015</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyName>
+        <cbc:Name>PatiKutu Online Mağazacılık Ltd. Şti.</cbc:Name>
+      </cac:PartyName>
+      <cac:PostalAddress>
+        <cbc:StreetName>Kazımdirik Mah. 372. Sok.</cbc:StreetName>
+        <cbc:BuildingNumber>8/3</cbc:BuildingNumber>
+        <cbc:CitySubdivisionName>Bornova</cbc:CitySubdivisionName>
+        <cbc:CityName>İzmir</cbc:CityName>
+        <cbc:PostalZone>35100</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+          <cbc:Name>Türkiye</cbc:Name>
+        </cac:Country>
+      </cac:PostalAddress>
+      <cac:PartyTaxScheme>
+        <cac:TaxScheme>
+          <cbc:Name>Bornova</cbc:Name>
+        </cac:TaxScheme>
+      </cac:PartyTaxScheme>
+      <cac:Contact>
+        <cbc:Telephone>0850 460 72 84</cbc:Telephone>
+        <cbc:ElectronicMail>merhaba@patikutu.com.tr</cbc:ElectronicMail>
+      </cac:Contact>
+    </cac:Party>
+  </cac:AccountingSupplierParty>
+  <cac:AccountingCustomerParty>
+    <cac:Party>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="TCKN">47152098364</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PostalAddress>
+        <cbc:StreetName>Hoşnudiye Mah. İsmet İnönü Cad.</cbc:StreetName>
+        <cbc:BuildingNumber>74 D: 12</cbc:BuildingNumber>
+        <cbc:CitySubdivisionName>Tepebaşı</cbc:CitySubdivisionName>
+        <cbc:CityName>Eskişehir</cbc:CityName>
+        <cbc:PostalZone>26130</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+          <cbc:Name>Türkiye</cbc:Name>
+        </cac:Country>
+      </cac:PostalAddress>
+      <cac:Contact>
+        <cbc:Telephone>0535 702 19 48</cbc:Telephone>
+        <cbc:ElectronicMail>deniz.karaca@example.com</cbc:ElectronicMail>
+      </cac:Contact>
+      <cac:Person>
+        <cbc:FirstName>Deniz</cbc:FirstName>
+        <cbc:FamilyName>Karaca</cbc:FamilyName>
+      </cac:Person>
+    </cac:Party>
+  </cac:AccountingCustomerParty>
+  <cac:Delivery>
+    <cbc:TrackingID>YK 4402 7319 8615</cbc:TrackingID>
+    <cac:DeliveryAddress>
+      <cbc:StreetName>Hoşnudiye Mah. İsmet İnönü Cad.</cbc:StreetName>
+      <cbc:BuildingNumber>74 D: 12</cbc:BuildingNumber>
+      <cbc:CitySubdivisionName>Tepebaşı</cbc:CitySubdivisionName>
+      <cbc:CityName>Eskişehir</cbc:CityName>
+      <cbc:PostalZone>26130</cbc:PostalZone>
+      <cac:Country>
+        <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+        <cbc:Name>Türkiye</cbc:Name>
+      </cac:Country>
+    </cac:DeliveryAddress>
+    <cac:CarrierParty>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="VKN">9480216735</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyName>
+        <cbc:Name>Yolda Kargo ve Dağıtım A.Ş.</cbc:Name>
+      </cac:PartyName>
+      <cac:PostalAddress>
+        <cbc:CitySubdivisionName>Gaziemir</cbc:CitySubdivisionName>
+        <cbc:CityName>İzmir</cbc:CityName>
+        <cac:Country>
+          <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+          <cbc:Name>Türkiye</cbc:Name>
+        </cac:Country>
+      </cac:PostalAddress>
+    </cac:CarrierParty>
+    <cac:Despatch>
+      <cbc:ActualDespatchDate>2026-10-06</cbc:ActualDespatchDate>
+      <cbc:ActualDespatchTime>16:30:00</cbc:ActualDespatchTime>
+    </cac:Despatch>
+  </cac:Delivery>
+  <cac:PaymentMeans>
+    <cbc:PaymentMeansCode>48</cbc:PaymentMeansCode>
+    <cbc:PaymentDueDate>2026-10-01</cbc:PaymentDueDate>
+    <cbc:InstructionNote>Kredi kartı (otomatik aylık yenileme) — Ödeme aracısı: Kolay Öde Ödeme ve Elektronik Para Hizmetleri A.Ş.</cbc:InstructionNote>
+  </cac:PaymentMeans>
+  <cac:TaxTotal>
+    <cbc:TaxAmount currencyID="TRY">117.82</cbc:TaxAmount>
+    <cac:TaxSubtotal>
+      <cbc:TaxableAmount currencyID="TRY">656.20</cbc:TaxableAmount>
+      <cbc:TaxAmount currencyID="TRY">65.63</cbc:TaxAmount>
+      <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+      <cbc:Percent>10</cbc:Percent>
+      <cac:TaxCategory>
+        <cac:TaxScheme>
+          <cbc:Name>KDV</cbc:Name>
+          <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+        </cac:TaxScheme>
+      </cac:TaxCategory>
+    </cac:TaxSubtotal>
+    <cac:TaxSubtotal>
+      <cbc:TaxableAmount currencyID="TRY">260.95</cbc:TaxableAmount>
+      <cbc:TaxAmount currencyID="TRY">52.19</cbc:TaxAmount>
+      <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+      <cbc:Percent>20</cbc:Percent>
+      <cac:TaxCategory>
+        <cac:TaxScheme>
+          <cbc:Name>KDV</cbc:Name>
+          <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+        </cac:TaxScheme>
+      </cac:TaxCategory>
+    </cac:TaxSubtotal>
+  </cac:TaxTotal>
+  <cac:LegalMonetaryTotal>
+    <cbc:LineExtensionAmount currencyID="TRY">1079.00</cbc:LineExtensionAmount>
+    <cbc:TaxExclusiveAmount currencyID="TRY">917.15</cbc:TaxExclusiveAmount>
+    <cbc:TaxInclusiveAmount currencyID="TRY">1034.97</cbc:TaxInclusiveAmount>
+    <cbc:AllowanceTotalAmount currencyID="TRY">161.85</cbc:AllowanceTotalAmount>
+    <cbc:PayableAmount currencyID="TRY">1034.97</cbc:PayableAmount>
+  </cac:LegalMonetaryTotal>
+  <cac:InvoiceLine>
+    <cbc:ID>1</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="TRY">415.65</cbc:LineExtensionAmount>
+    <cac:AllowanceCharge>
+      <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+      <cbc:AllowanceChargeReason>12 aylık plan indirimi %15</cbc:AllowanceChargeReason>
+      <cbc:MultiplierFactorNumeric>0.15</cbc:MultiplierFactorNumeric>
+      <cbc:Amount currencyID="TRY">73.35</cbc:Amount>
+      <cbc:BaseAmount currencyID="TRY">489.00</cbc:BaseAmount>
+    </cac:AllowanceCharge>
+    <cac:TaxTotal>
+      <cbc:TaxAmount currencyID="TRY">41.57</cbc:TaxAmount>
+      <cac:TaxSubtotal>
+        <cbc:TaxableAmount currencyID="TRY">415.65</cbc:TaxableAmount>
+        <cbc:TaxAmount currencyID="TRY">41.57</cbc:TaxAmount>
+        <cbc:Percent>10</cbc:Percent>
+        <cac:TaxCategory>
+          <cac:TaxScheme>
+            <cbc:Name>KDV</cbc:Name>
+            <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+          </cac:TaxScheme>
+        </cac:TaxCategory>
+      </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:Item>
+      <cbc:Name>Tahılsız Somonlu Yetişkin Kedi Maması 1,5 kg</cbc:Name>
+      <cac:SellersItemIdentification>
+        <cbc:ID>PK-MM-1501</cbc:ID>
+      </cac:SellersItemIdentification>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="TRY">489.00</cbc:PriceAmount>
+    </cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine>
+    <cbc:ID>2</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="PA">1</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="TRY">147.90</cbc:LineExtensionAmount>
+    <cac:AllowanceCharge>
+      <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+      <cbc:AllowanceChargeReason>12 aylık plan indirimi %15</cbc:AllowanceChargeReason>
+      <cbc:MultiplierFactorNumeric>0.15</cbc:MultiplierFactorNumeric>
+      <cbc:Amount currencyID="TRY">26.10</cbc:Amount>
+      <cbc:BaseAmount currencyID="TRY">174.00</cbc:BaseAmount>
+    </cac:AllowanceCharge>
+    <cac:TaxTotal>
+      <cbc:TaxAmount currencyID="TRY">14.79</cbc:TaxAmount>
+      <cac:TaxSubtotal>
+        <cbc:TaxableAmount currencyID="TRY">147.90</cbc:TaxableAmount>
+        <cbc:TaxAmount currencyID="TRY">14.79</cbc:TaxAmount>
+        <cbc:Percent>10</cbc:Percent>
+        <cac:TaxCategory>
+          <cac:TaxScheme>
+            <cbc:Name>KDV</cbc:Name>
+            <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+          </cac:TaxScheme>
+        </cac:TaxCategory>
+      </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:Item>
+      <cbc:Name>Ton Balıklı Yaş Mama 85 g (6’lı)</cbc:Name>
+      <cac:SellersItemIdentification>
+        <cbc:ID>PK-YM-0856</cbc:ID>
+      </cac:SellersItemIdentification>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="TRY">174.00</cbc:PriceAmount>
+    </cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine>
+    <cbc:ID>3</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="C62">2</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="TRY">92.65</cbc:LineExtensionAmount>
+    <cac:AllowanceCharge>
+      <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+      <cbc:AllowanceChargeReason>12 aylık plan indirimi %15</cbc:AllowanceChargeReason>
+      <cbc:MultiplierFactorNumeric>0.15</cbc:MultiplierFactorNumeric>
+      <cbc:Amount currencyID="TRY">16.35</cbc:Amount>
+      <cbc:BaseAmount currencyID="TRY">109.00</cbc:BaseAmount>
+    </cac:AllowanceCharge>
+    <cac:TaxTotal>
+      <cbc:TaxAmount currencyID="TRY">9.27</cbc:TaxAmount>
+      <cac:TaxSubtotal>
+        <cbc:TaxableAmount currencyID="TRY">92.65</cbc:TaxableAmount>
+        <cbc:TaxAmount currencyID="TRY">9.27</cbc:TaxAmount>
+        <cbc:Percent>10</cbc:Percent>
+        <cac:TaxCategory>
+          <cac:TaxScheme>
+            <cbc:Name>KDV</cbc:Name>
+            <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+          </cac:TaxScheme>
+        </cac:TaxCategory>
+      </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:Item>
+      <cbc:Name>Kıtır Ödül Maması Tavuklu 60 g</cbc:Name>
+      <cac:SellersItemIdentification>
+        <cbc:ID>PK-OD-0602</cbc:ID>
+      </cac:SellersItemIdentification>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="TRY">54.50</cbc:PriceAmount>
+    </cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine>
+    <cbc:ID>4</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="TRY">109.65</cbc:LineExtensionAmount>
+    <cac:AllowanceCharge>
+      <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+      <cbc:AllowanceChargeReason>12 aylık plan indirimi %15</cbc:AllowanceChargeReason>
+      <cbc:MultiplierFactorNumeric>0.15</cbc:MultiplierFactorNumeric>
+      <cbc:Amount currencyID="TRY">19.35</cbc:Amount>
+      <cbc:BaseAmount currencyID="TRY">129.00</cbc:BaseAmount>
+    </cac:AllowanceCharge>
+    <cac:TaxTotal>
+      <cbc:TaxAmount currencyID="TRY">21.93</cbc:TaxAmount>
+      <cac:TaxSubtotal>
+        <cbc:TaxableAmount currencyID="TRY">109.65</cbc:TaxableAmount>
+        <cbc:TaxAmount currencyID="TRY">21.93</cbc:TaxAmount>
+        <cbc:Percent>20</cbc:Percent>
+        <cac:TaxCategory>
+          <cac:TaxScheme>
+            <cbc:Name>KDV</cbc:Name>
+            <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+          </cac:TaxScheme>
+        </cac:TaxCategory>
+      </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:Item>
+      <cbc:Name>Tüylü Olta Oyuncak — Ekim Teması</cbc:Name>
+      <cac:SellersItemIdentification>
+        <cbc:ID>PK-OY-1010</cbc:ID>
+      </cac:SellersItemIdentification>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="TRY">129.00</cbc:PriceAmount>
+    </cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine>
+    <cbc:ID>5</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="TRY">84.15</cbc:LineExtensionAmount>
+    <cac:AllowanceCharge>
+      <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+      <cbc:AllowanceChargeReason>12 aylık plan indirimi %15</cbc:AllowanceChargeReason>
+      <cbc:MultiplierFactorNumeric>0.15</cbc:MultiplierFactorNumeric>
+      <cbc:Amount currencyID="TRY">14.85</cbc:Amount>
+      <cbc:BaseAmount currencyID="TRY">99.00</cbc:BaseAmount>
+    </cac:AllowanceCharge>
+    <cac:TaxTotal>
+      <cbc:TaxAmount currencyID="TRY">16.83</cbc:TaxAmount>
+      <cac:TaxSubtotal>
+        <cbc:TaxableAmount currencyID="TRY">84.15</cbc:TaxableAmount>
+        <cbc:TaxAmount currencyID="TRY">16.83</cbc:TaxAmount>
+        <cbc:Percent>20</cbc:Percent>
+        <cac:TaxCategory>
+          <cac:TaxScheme>
+            <cbc:Name>KDV</cbc:Name>
+            <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+          </cac:TaxScheme>
+        </cac:TaxCategory>
+      </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:Item>
+      <cbc:Name>Peluş Balık Catnip Oyuncak (Sürpriz)</cbc:Name>
+      <cac:SellersItemIdentification>
+        <cbc:ID>PK-OY-1011</cbc:ID>
+      </cac:SellersItemIdentification>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="TRY">99.00</cbc:PriceAmount>
+    </cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine>
+    <cbc:ID>6</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="TRY">67.15</cbc:LineExtensionAmount>
+    <cac:AllowanceCharge>
+      <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+      <cbc:AllowanceChargeReason>12 aylık plan indirimi %15</cbc:AllowanceChargeReason>
+      <cbc:MultiplierFactorNumeric>0.15</cbc:MultiplierFactorNumeric>
+      <cbc:Amount currencyID="TRY">11.85</cbc:Amount>
+      <cbc:BaseAmount currencyID="TRY">79.00</cbc:BaseAmount>
+    </cac:AllowanceCharge>
+    <cac:TaxTotal>
+      <cbc:TaxAmount currencyID="TRY">13.43</cbc:TaxAmount>
+      <cac:TaxSubtotal>
+        <cbc:TaxableAmount currencyID="TRY">67.15</cbc:TaxableAmount>
+        <cbc:TaxAmount currencyID="TRY">13.43</cbc:TaxAmount>
+        <cbc:Percent>20</cbc:Percent>
+        <cac:TaxCategory>
+          <cac:TaxScheme>
+            <cbc:Name>KDV</cbc:Name>
+            <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+          </cac:TaxScheme>
+        </cac:TaxCategory>
+      </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:Item>
+      <cbc:Name>Doğal Kedi Otu Yetiştirme Kiti</cbc:Name>
+      <cac:SellersItemIdentification>
+        <cbc:ID>PK-KO-0300</cbc:ID>
+      </cac:SellersItemIdentification>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="TRY">79.00</cbc:PriceAmount>
+    </cac:Price>
+  </cac:InvoiceLine>
+</Invoice>

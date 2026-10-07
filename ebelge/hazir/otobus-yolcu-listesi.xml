@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: Şehirlerarası otobüs seferi e-Yolcu Listesi (ebilet.xsd eYolcuListesi).
+  2+1 düzen 39 koltuklu araçta 14 yolcu; taşıtı işleten mükellef (komisyon ve KDV'si) bilgili.
+  Şemada cinsiyet ve biniş / iniş noktası alanı yoktur. İmza değerleri temsilidir; tüm kişi/firma bilgileri kurgusaldır.
+-->
+<ebilet:eYolcuListesi xmlns:ebilet="http://ebilet.efatura.gov.tr" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" xmlns:xades141="http://uri.etsi.org/01903/v1.4.1#">
+    <ebilet:baslik>
+        <ebilet:gonderen>
+            <ebilet:vkn>4061829375</ebilet:vkn>
+        </ebilet:gonderen>
+        <ebilet:baslangicTarihi>2026-10-06</ebilet:baslangicTarihi>
+        <ebilet:bitisTarihi>2026-10-06</ebilet:bitisTarihi>
+        <ebilet:versiyon>1.0</ebilet:versiyon>
+        <ebilet:uuid>9D3E6A14-52B7-4C80-A1F9-6E2B0C7D8F35</ebilet:uuid>
+        <ds:Signature Id="Signature_1">
+            <ds:SignedInfo>
+                <ds:CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
+                <ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+                <ds:Reference URI="">
+                    <ds:Transforms>
+                        <ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+                    </ds:Transforms>
+                    <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                    <ds:DigestValue>D5spG4+BfC7kEsONq5pPuD5110x4OzevGhU4z7oElQQ=</ds:DigestValue>
+                </ds:Reference>
+                <ds:Reference Type="http://uri.etsi.org/01903#SignedProperties" URI="#SignedProperties_1">
+                    <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                    <ds:DigestValue>C5kubmJpzWO2zhzYrll0iLiHWGvN1RjHqSSvoI7zpMg=</ds:DigestValue>
+                </ds:Reference>
+            </ds:SignedInfo>
+            <ds:SignatureValue>PRO1YCGhS4x17jbC/QfrhTWJk/v33yx6fLCj7+I2xuhuvHAL3OfCtXYXAOwHu4UBeb6xM14MP6ses5c3rVMUgg==</ds:SignatureValue>
+            <ds:KeyInfo>
+                <ds:X509Data>
+                    <ds:X509Certificate>MIIFlDCCBHygAwIBAgIGAIiEmAELMA0GCSqGSIb3DQEBCwUAMFwxCzAJBgNVBAYTAlRS</ds:X509Certificate>
+                </ds:X509Data>
+            </ds:KeyInfo>
+            <ds:Object>
+                <xades:QualifyingProperties Target="#Signature_1">
+                    <xades:SignedProperties Id="SignedProperties_1">
+                        <xades:SignedSignatureProperties>
+                            <xades:SigningTime>2026-10-06T21:40:00+03:00</xades:SigningTime>
+                            <xades:SigningCertificate>
+                                <xades:Cert>
+                                    <xades:CertDigest>
+                                        <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                                        <ds:DigestValue>+VSgWjpP9XlNGk6EM7WYWzHXQ2xrzUZLas1QR+IS7Rc=</ds:DigestValue>
+                                    </xades:CertDigest>
+                                    <xades:IssuerSerial>
+                                        <ds:X509IssuerName>CN=Mali Mühür Elektronik Sertifika Hizmet Sağlayıcısı - Sürüm 1,C=TR</ds:X509IssuerName>
+                                        <ds:X509SerialNumber>586340106507</ds:X509SerialNumber>
+                                    </xades:IssuerSerial>
+                                </xades:Cert>
+                            </xades:SigningCertificate>
+                        </xades:SignedSignatureProperties>
+                    </xades:SignedProperties>
+                </xades:QualifyingProperties>
+            </ds:Object>
+        </ds:Signature>
+    </ebilet:baslik>
+    <ebilet:yolcuListesi>
+        <ebilet:yolcuListesiNo>KVT2026000004127</ebilet:yolcuListesiNo>
+        <ebilet:ozetDeger>7f3a9c1e5b2d8046a1c7e9f03b5d2a8c64e1f0b97d3c5a2e8f6b1d4c09a7e352</ebilet:ozetDeger>
+        <ebilet:haraketZamani>2026-10-06T22:00:00</ebilet:haraketZamani>
+        <ebilet:hareketNoktasi>İstanbul Esenler Otogarı · Peron 52</ebilet:hareketNoktasi>
+        <ebilet:seferNumarasi>KV-2200-ANK</ebilet:seferNumarasi>
+        <ebilet:seferTarihi>2026-10-06</ebilet:seferTarihi>
+        <ebilet:aracPlakasi>34KVT104</ebilet:aracPlakasi>
+        <ebilet:toplamHasilat>8920.00</ebilet:toplamHasilat>
+        <ebilet:aracIsleten>
+            <ebilet:vkn>7302948165</ebilet:vkn>
+            <ebilet:komisyonTutar>892.00</ebilet:komisyonTutar>
+            <ebilet:komisyonKDV>178.40</ebilet:komisyonKDV>
+        </ebilet:aracIsleten>
+        <ebilet:koltukListesi>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>1</ebilet:koltukNo>
+                <ebilet:biletNo>KVT2026000081301</ebilet:biletNo>
+                <ebilet:tutar>650.00</ebilet:tutar>
+                <ebilet:adSoyad>Ahmet Yıldız</ebilet:adSoyad>
+                <ebilet:tcknYkn>93121426514</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>2</ebilet:koltukNo>
+                <ebilet:biletNo>KVT2026000081302</ebilet:biletNo>
+                <ebilet:tutar>650.00</ebilet:tutar>
+                <ebilet:adSoyad>Hatice Yıldız</ebilet:adSoyad>
+                <ebilet:tcknYkn>87018046510</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>4</ebilet:koltukNo>
+                <ebilet:biletNo>KVT2026000081303</ebilet:biletNo>
+                <ebilet:tutar>650.00</ebilet:tutar>
+                <ebilet:adSoyad>Mert Çelik</ebilet:adSoyad>
+                <ebilet:tcknYkn>74235669530</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>5</ebilet:koltukNo>
+                <ebilet:biletNo>KVT2026000081304</ebilet:biletNo>
+                <ebilet:tutar>590.00</ebilet:tutar>
+                <ebilet:adSoyad>Elif Nur Demir</ebilet:adSoyad>
+                <ebilet:tcknYkn>61422212808</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>7</ebilet:koltukNo>
+                <ebilet:biletNo>KVT2026000081305</ebilet:biletNo>
+                <ebilet:tutar>650.00</ebilet:tutar>
+                <ebilet:adSoyad>Kemal Aksoy</ebilet:adSoyad>
+                <ebilet:tcknYkn>18312835876</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>10</ebilet:koltukNo>
+                <ebilet:biletNo>KVT2026000081306</ebilet:biletNo>
+                <ebilet:tutar>650.00</ebilet:tutar>
+                <ebilet:adSoyad>Sevgi Kılıç</ebilet:adSoyad>
+                <ebilet:tcknYkn>92539458858</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>11</ebilet:koltukNo>
+                <ebilet:biletNo>KVT2026000081307</ebilet:biletNo>
+                <ebilet:tutar>590.00</ebilet:tutar>
+                <ebilet:adSoyad>Yusuf Kaya</ebilet:adSoyad>
+                <ebilet:tcknYkn>89426078824</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>14</ebilet:koltukNo>
+                <ebilet:biletNo>KVT2026000081308</ebilet:biletNo>
+                <ebilet:tutar>650.00</ebilet:tutar>
+                <ebilet:adSoyad>Gülay Erdem</ebilet:adSoyad>
+                <ebilet:tcknYkn>36613621110</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>17</ebilet:koltukNo>
+                <ebilet:biletNo>KVT2026000081309</ebilet:biletNo>
+                <ebilet:tutar>650.00</ebilet:tutar>
+                <ebilet:adSoyad>Barış Toprak</ebilet:adSoyad>
+                <ebilet:tcknYkn>20833244174</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>19</ebilet:koltukNo>
+                <ebilet:biletNo>KVT2026000081310</ebilet:biletNo>
+                <ebilet:tutar>650.00</ebilet:tutar>
+                <ebilet:adSoyad>Nazlı Şahin</ebilet:adSoyad>
+                <ebilet:tcknYkn>17720567140</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>22</ebilet:koltukNo>
+                <ebilet:biletNo>KVT2026000081311</ebilet:biletNo>
+                <ebilet:tutar>650.00</ebilet:tutar>
+                <ebilet:adSoyad>Onur Polat</ebilet:adSoyad>
+                <ebilet:tcknYkn>94917110440</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>25</ebilet:koltukNo>
+                <ebilet:biletNo>KVT2026000081312</ebilet:biletNo>
+                <ebilet:tutar>590.00</ebilet:tutar>
+                <ebilet:adSoyad>İrem Koç</ebilet:adSoyad>
+                <ebilet:tcknYkn>41804730434</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>28</ebilet:koltukNo>
+                <ebilet:biletNo>KVT2026000081313</ebilet:biletNo>
+                <ebilet:tutar>650.00</ebilet:tutar>
+                <ebilet:adSoyad>Serkan Uçar</ebilet:adSoyad>
+                <ebilet:tcknYkn>35024353498</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>31</ebilet:koltukNo>
+                <ebilet:biletNo>KVT2026000081314</ebilet:biletNo>
+                <ebilet:tutar>650.00</ebilet:tutar>
+                <ebilet:adSoyad>Derya Özkan</ebilet:adSoyad>
+                <ebilet:tcknYkn>22211976448</ebilet:tcknYkn>
+            </ebilet:koltuk>
+        </ebilet:koltukListesi>
+    </ebilet:yolcuListesi>
+</ebilet:eYolcuListesi>

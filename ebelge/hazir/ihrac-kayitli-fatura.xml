@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: İhraç kayıtlı iplik satış faturası (TICARIFATURA · IHRACKAYITLI · istisna kodu 702 — DİİB kapsamında satış).
+  KDV hesaplanır ancak tahsil edilmez (tecil): TaxInclusiveAmount = matrah + hesaplanan KDV, PayableAmount = TaxExclusiveAmount.
+  Satır GTİP: Delivery/Shipment/GoodsItem/RequiredCustomsID; DİİB satır kodları:
+  Delivery/Shipment/TransportHandlingUnit/CustomsDeclaration/IssuerParty/PartyIdentification/ID[@schemeID='SATICIDIBSATIRKOD' | 'ALICIDIBSATIRKOD'].
+  DİİB belgesi: AdditionalDocumentReference[DocumentType='DIIB']. Tüm kişi/firma bilgileri kurgusaldır.
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+    xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>TICARIFATURA</cbc:ProfileID>
+    <cbc:ID>CKI2026000000862</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>6C2E8F1A-93B4-4E07-A5D1-0B7F3C9E2A48</cbc:UUID>
+    <cbc:IssueDate>2026-10-02</cbc:IssueDate>
+    <cbc:IssueTime>10:45:00</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>IHRACKAYITLI</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız: Üç Milyon İki Bin İki Yüz Türk Lirasıdır.</cbc:Note>
+    <cbc:Note>Mallar 3065 sayılı KDV Kanunu 11/1-c maddesi kapsamında ihraç kaydıyla teslim edilmiş olup hesaplanan 600.440,00 TL KDV tahsil edilmemiş, tecil edilmiştir.</cbc:Note>
+    <cbc:Note>Alıcı ihracatçı, teslim edilen iplikleri 2026/D1-004812 sayılı Dahilde İşleme İzin Belgesi süresi içinde mamul (denim konfeksiyon) olarak ihraç etmekle yükümlüdür.</cbc:Note>
+    <cbc:Note>Teslim şekli: Sarıçam fabrika teslimi · 3 tır · Brüt 23.940 kg / Net 23.500 kg · 782 koli (bobin).</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>3</cbc:LineCountNumeric>
+    <cac:OrderReference>
+        <cbc:ID>BDK-PO-2026-0917</cbc:ID>
+        <cbc:IssueDate>2026-09-08</cbc:IssueDate>
+    </cac:OrderReference>
+    <cac:DespatchDocumentReference>
+        <cbc:ID>CKI2026000000841</cbc:ID>
+        <cbc:IssueDate>2026-10-02</cbc:IssueDate>
+    </cac:DespatchDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>2026/D1-004812</cbc:ID>
+        <cbc:IssueDate>2026-06-17</cbc:IssueDate>
+        <cbc:DocumentType>DIIB</cbc:DocumentType>
+        <cbc:DocumentDescription>Dahilde İşleme İzin Belgesi · Bosphorus Denim Konfeksiyon İhracat A.Ş. · İhracat taahhüdü 1.420.000 USD · Süre sonu 17.06.2027</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">2190573846</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">2190573846</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Hacı Sabancı OSB Mah. 12. Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>9</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Sarıçam</cbc:CitySubdivisionName>
+                <cbc:CityName>Adana</cbc:CityName>
+                <cbc:PostalZone>01350</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_CKI2026000000862</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.cukurovaiplik.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">2190573846</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">0219057384600017</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Çukurova İplik Sanayi A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Hacı Sabancı OSB Mah. 12. Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>9</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Sarıçam</cbc:CitySubdivisionName>
+                <cbc:CityName>Adana</cbc:CityName>
+                <cbc:PostalZone>01350</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Ziyapaşa</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(322) 394 60 00</cbc:Telephone>
+                <cbc:ElectronicMail>ihracat@cukurovaiplik.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.bosphorusdenim.com</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">1840927563</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Bosphorus Denim Konfeksiyon İhracat A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Mahmutbey Mah. Taşocağı Yolu Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>31</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Bağcılar</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34218</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Bağcılar</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(212) 446 72 00</cbc:Telephone>
+                <cbc:ElectronicMail>satinalma@bosphorusdenim.com</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-11-30</cbc:PaymentDueDate>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR540001200945300016204718</cbc:ID>
+            <cbc:CurrencyCode>TRY</cbc:CurrencyCode>
+            <cbc:PaymentNote>Türkiye Halk Bankası — Adana Ticari Şubesi</cbc:PaymentNote>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">600440.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">3002200.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">600440.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>20</cbc:Percent>
+            <cac:TaxCategory>
+                <cbc:TaxExemptionReasonCode>702</cbc:TaxExemptionReasonCode>
+                <cbc:TaxExemptionReason>DİİB ve geçici kabul rejimi kapsamındaki satışlar</cbc:TaxExemptionReason>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">3002200.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">3002200.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">3602640.00</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="TRY">0.00</cbc:AllowanceTotalAmount>
+        <cbc:PayableAmount currencyID="TRY">3002200.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="KGM">12000</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">1710000.00</cbc:LineExtensionAmount>
+        <cac:Delivery>
+            <cac:Shipment>
+                <cbc:ID/>
+                <cac:GoodsItem>
+                    <cbc:RequiredCustomsID>520524000000</cbc:RequiredCustomsID>
+                </cac:GoodsItem>
+                <cac:TransportHandlingUnit>
+                    <cac:CustomsDeclaration>
+                        <cbc:ID/>
+                        <cac:IssuerParty>
+                            <cac:PartyIdentification>
+                                <cbc:ID schemeID="SATICIDIBSATIRKOD">26010731401</cbc:ID>
+                            </cac:PartyIdentification>
+                            <cac:PartyIdentification>
+                                <cbc:ID schemeID="ALICIDIBSATIRKOD">26004812001</cbc:ID>
+                            </cac:PartyIdentification>
+                        </cac:IssuerParty>
+                    </cac:CustomsDeclaration>
+                </cac:TransportHandlingUnit>
+            </cac:Shipment>
+        </cac:Delivery>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">342000.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">1710000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">342000.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cbc:TaxExemptionReasonCode>702</cbc:TaxExemptionReasonCode>
+                    <cbc:TaxExemptionReason>DİİB ve geçici kabul rejimi kapsamındaki satışlar</cbc:TaxExemptionReason>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>%100 pamuk, penye (taranmış), tek kat · 500 bobin · nem %7,5 kondisyonlu</cbc:Description>
+            <cbc:Name>Ne 30/1 Penye Pamuk İpliği</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>CKP-NE30-PNY</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">142.50</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="KGM">8500</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">1003000.00</cbc:LineExtensionAmount>
+        <cac:Delivery>
+            <cac:Shipment>
+                <cbc:ID/>
+                <cac:GoodsItem>
+                    <cbc:RequiredCustomsID>520512000000</cbc:RequiredCustomsID>
+                </cac:GoodsItem>
+                <cac:TransportHandlingUnit>
+                    <cac:CustomsDeclaration>
+                        <cbc:ID/>
+                        <cac:IssuerParty>
+                            <cac:PartyIdentification>
+                                <cbc:ID schemeID="SATICIDIBSATIRKOD">26010731402</cbc:ID>
+                            </cac:PartyIdentification>
+                            <cac:PartyIdentification>
+                                <cbc:ID schemeID="ALICIDIBSATIRKOD">26004812002</cbc:ID>
+                            </cac:PartyIdentification>
+                        </cac:IssuerParty>
+                    </cac:CustomsDeclaration>
+                </cac:TransportHandlingUnit>
+            </cac:Shipment>
+        </cac:Delivery>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">200600.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">1003000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">200600.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cbc:TaxExemptionReasonCode>702</cbc:TaxExemptionReasonCode>
+                    <cbc:TaxExemptionReason>DİİB ve geçici kabul rejimi kapsamındaki satışlar</cbc:TaxExemptionReason>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>%100 pamuk, karde (taranmamış), tek kat · denim atkı ipliği · 196 bobin</cbc:Description>
+            <cbc:Name>Ne 20/1 Karde Pamuk İpliği</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>CKP-NE20-KRD</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">118.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="KGM">3000</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">289200.00</cbc:LineExtensionAmount>
+        <cac:Delivery>
+            <cac:Shipment>
+                <cbc:ID/>
+                <cac:GoodsItem>
+                    <cbc:RequiredCustomsID>540233000000</cbc:RequiredCustomsID>
+                </cac:GoodsItem>
+                <cac:TransportHandlingUnit>
+                    <cac:CustomsDeclaration>
+                        <cbc:ID/>
+                        <cac:IssuerParty>
+                            <cac:PartyIdentification>
+                                <cbc:ID schemeID="SATICIDIBSATIRKOD">26010731403</cbc:ID>
+                            </cac:PartyIdentification>
+                            <cac:PartyIdentification>
+                                <cbc:ID schemeID="ALICIDIBSATIRKOD">26004812003</cbc:ID>
+                            </cac:PartyIdentification>
+                        </cac:IssuerParty>
+                    </cac:CustomsDeclaration>
+                </cac:TransportHandlingUnit>
+            </cac:Shipment>
+        </cac:Delivery>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">57840.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">289200.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">57840.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cbc:TaxExemptionReasonCode>702</cbc:TaxExemptionReasonCode>
+                    <cbc:TaxExemptionReason>DİİB ve geçici kabul rejimi kapsamındaki satışlar</cbc:TaxExemptionReason>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Polyester tekstüre filament iplik, 150 denye / 48 filament · streç denim çözgü takviyesi</cbc:Description>
+            <cbc:Name>Polyester DTY 150D/48F</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>CKP-PES-150-48</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">96.40</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>

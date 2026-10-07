@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği — Bağımsız denetim kuruluşu e-Faturası, KDV tevkifatlı (kurgusal veriler).
+  TICARIFATURA / TEVKIFAT; finansal tablo denetimi, transfer fiyatlandırması raporu ve KDV iade tasdik hizmeti,
+  602 kodlu (etüt, plan-proje, danışmanlık, denetim ve benzeri) 9/10 KDV tevkifatı.
+  TaxTotal/TaxAmount = hesaplanan KDV - tevkifat (GİB TEVKIFAT örneğindeki gibi).
+    Hizmet toplamı 740.000,00 | KDV %20 148.000,00 | Tevkifat 9/10 133.200,00
+    Vergiler dahil 888.000,00 | Ödenecek 754.800,00
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+    xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>TICARIFATURA</cbc:ProfileID>
+    <cbc:ID>ADB2026000000612</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>3B8F6D2A-91C4-4E7B-A5D0-6C2E8F14B973</cbc:UUID>
+    <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+    <cbc:IssueTime>16:40:00</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>TEVKIFAT</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız Yedi Yüz Elli Dört Bin Sekiz Yüz Türk Lirasıdır.</cbc:Note>
+    <cbc:Note>KGK Yetki No: BDK-2019/148 · Kamu Gözetimi Kurumu tarafından bağımsız denetim kuruluşu olarak yetkilendirilmiştir.</cbc:Note>
+    <cbc:Note>SPK Listesi: Sermaye Piyasasında bağımsız denetim yapmaya yetkili kuruluşlar listesinde kayıtlıdır (Karar 2020/41).</cbc:Note>
+    <cbc:Note>Sorumlu Denetçi: Dr. Elif TUNA, YMM · KGK Sicil BD-28417</cbc:Note>
+    <cbc:Note>Denetim Kapsamı: 31.12.2026 tarihli konsolide finansal tabloların TFRS'ye göre bağımsız denetimi — 3. çeyrek ara dönem çalışmaları</cbc:Note>
+    <cbc:Note>KDV Genel Uygulama Tebliği I/C-2.1.3.2.2 kapsamında belirlenmiş alıcıya verilen denetim ve danışmanlık hizmetlerinde 9/10 oranında KDV tevkifatı uygulanmıştır.</cbc:Note>
+    <cbc:Note>Ödeme vadesi fatura tarihinden itibaren 30 gündür; geç ödemelerde sözleşmenin 9. maddesi uygulanır.</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>3</cbc:LineCountNumeric>
+    <cac:InvoicePeriod>
+        <cbc:StartDate>2026-07-01</cbc:StartDate>
+        <cbc:EndDate>2026-09-30</cbc:EndDate>
+        <cbc:Description>2026 hesap dönemi · 3. çeyrek çalışmaları</cbc:Description>
+    </cac:InvoicePeriod>
+    <cac:OrderReference>
+        <cbc:ID>KRE-PO-2026-00731</cbc:ID>
+        <cbc:IssueDate>2026-03-02</cbc:IssueDate>
+    </cac:OrderReference>
+    <cac:ContractDocumentReference>
+        <cbc:ID>AD-2026/044</cbc:ID>
+        <cbc:IssueDate>2026-02-18</cbc:IssueDate>
+    </cac:ContractDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">0712548396</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">0712548396</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Esentepe Mahallesi Büyükdere Caddesi Kanyon Ofis Kat 9</cbc:StreetName>
+                <cbc:BuildingNumber>185</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Şişli</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34394</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.ardicdenetim.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">0712548396</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">0071254839600015</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TICARETSICILNO">612874-5</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Ardıç Bağımsız Denetim ve Yeminli Mali Müşavirlik A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Esentepe Mahallesi Büyükdere Caddesi Kanyon Ofis Kat 9</cbc:StreetName>
+                <cbc:BuildingNumber>185</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Şişli</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34394</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Zincirlikuyu</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(212) 315 30 00</cbc:Telephone>
+                <cbc:ElectronicMail>fatura@ardicdenetim.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">5830264179</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Kuzeyrüzgarı Enerji Yatırımları A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Kavaklıdere Mahallesi Tunalı Hilmi Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>88/12</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Çankaya</cbc:CitySubdivisionName>
+                <cbc:CityName>Ankara</cbc:CityName>
+                <cbc:PostalZone>06680</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Büyük Mükellefler</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(312) 455 70 00</cbc:Telephone>
+                <cbc:ElectronicMail>efatura@kuzeyruzgari.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-11-06</cbc:PaymentDueDate>
+        <cbc:InstructionNote>Havale açıklamasına fatura numarası ve sözleşme numarasını yazınız.</cbc:InstructionNote>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR33 0001 0017 4512 8834 6150 01</cbc:ID>
+            <cbc:CurrencyCode>TRY</cbc:CurrencyCode>
+            <cac:FinancialInstitutionBranch>
+                <cbc:Name>Levent Kurumsal Şubesi</cbc:Name>
+                <cac:FinancialInstitution>
+                    <cbc:Name>T.C. Ziraat Bankası A.Ş.</cbc:Name>
+                </cac:FinancialInstitution>
+            </cac:FinancialInstitutionBranch>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">14800.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">740000.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">148000.00</cbc:TaxAmount>
+            <cbc:Percent>20</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:WithholdingTaxTotal>
+        <cbc:TaxAmount currencyID="TRY">133200.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">148000.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">133200.00</cbc:TaxAmount>
+            <cbc:Percent>90</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>ETÜT, PLAN-PROJE, DANIŞMANLIK, DENETİM VE BENZERİ HİZMETLER</cbc:Name>
+                    <cbc:TaxTypeCode>602</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:WithholdingTaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">740000.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">740000.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">888000.00</cbc:TaxInclusiveAmount>
+        <cbc:PayableAmount currencyID="TRY">754800.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:Note>Ekip: 1 sorumlu denetçi, 2 kıdemli denetçi, 3 denetçi yardımcısı</cbc:Note>
+        <cbc:InvoicedQuantity unitCode="HUR">320</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">480000.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">9600.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">480000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">96000.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:WithholdingTaxTotal>
+            <cbc:TaxAmount currencyID="TRY">86400.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">96000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">86400.00</cbc:TaxAmount>
+                <cbc:Percent>90</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>ETÜT, PLAN-PROJE, DANIŞMANLIK, DENETİM VE BENZERİ HİZMETLER</cbc:Name>
+                        <cbc:TaxTypeCode>602</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:WithholdingTaxTotal>
+        <cac:Item>
+            <cbc:Description>Ara dönem gözden geçirme, iç kontrol testleri, hasılat ve türev araçlar için maddi doğrulama prosedürleri</cbc:Description>
+            <cbc:Name>Bağımsız denetim — TFRS konsolide finansal tablolar</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>AUD-FS-2026</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">1500.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:Note>KVK md. 13 · 2025 hesap dönemi yıllık raporu</cbc:Note>
+        <cbc:InvoicedQuantity unitCode="HUR">110</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">165000.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">3300.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">165000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">33000.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:WithholdingTaxTotal>
+            <cbc:TaxAmount currencyID="TRY">29700.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">33000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">29700.00</cbc:TaxAmount>
+                <cbc:Percent>90</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>ETÜT, PLAN-PROJE, DANIŞMANLIK, DENETİM VE BENZERİ HİZMETLER</cbc:Name>
+                        <cbc:TaxTypeCode>602</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:WithholdingTaxTotal>
+        <cac:Item>
+            <cbc:Description>İlişkili kişi işlemleri fonksiyon analizi, emsal karşılaştırma (TNMM) ve örtülü kazanç risk değerlendirmesi</cbc:Description>
+            <cbc:Name>Transfer fiyatlandırması raporu</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>TAX-TP-2025</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">1500.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:Note>Rapor No: YMM-KDV-2026/0388</cbc:Note>
+        <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">95000.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">1900.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">95000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">19000.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:WithholdingTaxTotal>
+            <cbc:TaxAmount currencyID="TRY">17100.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">19000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">17100.00</cbc:TaxAmount>
+                <cbc:Percent>90</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>ETÜT, PLAN-PROJE, DANIŞMANLIK, DENETİM VE BENZERİ HİZMETLER</cbc:Name>
+                        <cbc:TaxTypeCode>602</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:WithholdingTaxTotal>
+        <cac:Item>
+            <cbc:Description>Haziran–Ağustos 2026 dönemleri yüklenilen KDV listeleri ve indirimli oran iadesi için YMM tasdik raporu</cbc:Description>
+            <cbc:Name>KDV iade tasdik raporu</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>YMM-KDV-IADE</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">95000.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>
