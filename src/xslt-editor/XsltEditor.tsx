@@ -1557,6 +1557,9 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     // Onaylanmış tasarımın sonraki indirmeleri ücretsizdir.
     // ------------------------------------------------------------------------
     const [approveOpen, setApproveOpen] = useState(false);
+    /** Onaylı dosya bu oturumda indirildi: kilit panelinde tekrar "İndir" yerine "Tamam" gösterilir. */
+    const [justDownloaded, setJustDownloaded] = useState(false);
+    const [lockNoticeClosed, setLockNoticeClosed] = useState(false);
     const handleApprove = useCallback(async (name: string, taxId?: string) => {
         if (!requireSaved()) return;
         flushSourceEditsRef.current();
@@ -1582,6 +1585,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             if (r.design.xml_content && r.design.xml_content !== xmlContent) setXmlContent(r.design.xml_content);
             setDesign({ id: r.design.id, key: r.design.design_key ?? undefined, paid: true, paidAt: r.design.paid_at, name: r.design.name, taxId: r.design.license_tax_id });
             downloadXslt(out);
+            setJustDownloaded(true);
             setApproveOpen(false);
             setSaveStatus('saved');
             const licensed = r.design.license_tax_id ? ` · ${r.design.license_tax_id} için lisanslı` : '';
@@ -3340,7 +3344,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                     transition: 'grid-template-columns 0.2s ease',
                 }}
             >
-                {design.paid && (
+                {design.paid && !lockNoticeClosed && (
                     <div
                         data-design-locked
                         style={{
@@ -3366,6 +3370,26 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     VKN/TCKN ile düzenlenen belgelerde TEST yazısı çıkar.
                                 </div>
                             )}
+                            {justDownloaded && (
+                                <div data-locked-downloaded style={{ fontSize: 13, fontWeight: 700, color: '#6ee7b7', marginTop: -6, marginBottom: 16 }}>
+                                    ✓ Dosya indirildi; bilgisayarınızın İndirilenler klasörüne kaydedildi.
+                                </div>
+                            )}
+                            {justDownloaded ? (
+                                <button
+                                    type="button"
+                                    data-locked-ok
+                                    autoFocus
+                                    onClick={() => (onBack ? onBack() : setLockNoticeClosed(true))}
+                                    style={{
+                                        display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 28px', borderRadius: 8,
+                                        border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 13, fontFamily: 'inherit',
+                                        background: 'linear-gradient(135deg, #10b981, #059669)', color: 'white',
+                                    }}
+                                >
+                                    <CheckCircle2 size={14} /> Tamam
+                                </button>
+                            ) : (
                             <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
                                 <button
                                     type="button"
@@ -3393,6 +3417,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     </button>
                                 )}
                             </div>
+                            )}
                         </div>
                     </div>
                 )}
