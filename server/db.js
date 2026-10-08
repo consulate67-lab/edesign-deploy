@@ -181,7 +181,7 @@ export const initDb = async () => {
         await probe.query(`CREATE INDEX IF NOT EXISTS idx_designs_user_id ON designs (user_id)`);
         await probe.query(`CREATE INDEX IF NOT EXISTS idx_designs_updated_at ON designs (updated_at DESC)`);
 
-        // Sprint 1.3 (2026-10-02) — Payments tablosu (iyzico webhook takibi)
+        // Paket ödemeleri; conversation_id = PayTR merchant_oid, token = PayTR iframe jetonu.
         await probe.query(`
             CREATE TABLE IF NOT EXISTS payments (
                 id                SERIAL PRIMARY KEY,
@@ -198,6 +198,7 @@ export const initDb = async () => {
         `);
         await probe.query(`CREATE INDEX IF NOT EXISTS idx_payments_user_id ON payments (user_id)`);
         await probe.query(`CREATE INDEX IF NOT EXISTS idx_payments_token ON payments (token)`);
+        await probe.query(`CREATE INDEX IF NOT EXISTS idx_payments_conversation_id ON payments (conversation_id)`);
         await probe.query(`CREATE INDEX IF NOT EXISTS idx_payments_status ON payments (status)`);
 
         await createSupportSchema(probe);

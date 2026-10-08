@@ -8,7 +8,7 @@ import {
 } from './tickets.js';
 import { cleanText, isPlainObject, optionalText, parseId } from './util.js';
 
-// iyzico callback'i başarılı ödemeyi 'success' olarak işaretler.
+// PayTR bildirimi başarılı ödemeyi 'success' olarak işaretler.
 const PAID_STATUSES = ['success', 'completed'];
 const MAX_CREDITS_DELTA = 100_000;
 const AI_JSON_MAX = 200_000;

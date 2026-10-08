@@ -146,8 +146,8 @@ export const buildSeedKb = (packages) => {
         {
             id: 's-satin',
             q: 'Nasıl satın alırım? Ödeme nasıl yapılır?',
-            keywords: 'satin al odeme kredi karti iyzico 3d secure taksit paket al nasil oderim',
-            a: `Önce üye olup giriş yapın, sonra seçim ekranının sağ üstündeki **Paket Al** düğmesine tıklayın.\n- Paketinizi seçip **Satın Al** deyin; ödeme **iyzico 3D Secure** ile yapılır, kart bilgileriniz sunucumuza ulaşmaz.\n- Ödeme başarılı olunca haklar hesabınıza otomatik yüklenir.\n\nPaketler ${tl(enUcuz.price)}'den başlar.`,
+            keywords: 'satin al odeme kredi karti paytr 3d secure taksit paket al nasil oderim',
+            a: `Önce üye olup giriş yapın, sonra seçim ekranının sağ üstündeki **Paket Al** düğmesine tıklayın.\n- Paketinizi seçip **Satın Al** deyin; güvenli ödeme formu aynı pencerede açılır. Ödeme **PayTR 3D Secure** ile yapılır, kart bilgileriniz sunucumuza ulaşmaz.\n- Ödeme başarılı olunca haklar hesabınıza otomatik yüklenir.\n\nPaketler ${tl(enUcuz.price)}'den başlar.`,
             actions: ['pricing', 'login'],
         },
         {
@@ -210,7 +210,7 @@ export const buildSeedKb = (packages) => {
             id: 's-kvkk',
             q: 'Verilerim güvende mi? Nerede saklanıyor?',
             keywords: 'veri guvenlik kvkk gizlilik saklama sunucu kisisel veri',
-            a: 'Kullanıcı ve tasarım verileriniz KVKK kapsamında PostgreSQL veritabanında saklanır; ödemelerde kart bilgileriniz sunucumuza ulaşmaz (iyzico 3D Secure). Ayrıntılar sayfanın altındaki **KVKK** ve **Çerez Politikası** metinlerindedir.',
+            a: 'Kullanıcı ve tasarım verileriniz KVKK kapsamında PostgreSQL veritabanında saklanır; ödemelerde kart bilgileriniz sunucumuza ulaşmaz (PayTR 3D Secure). Ayrıntılar sayfanın altındaki **KVKK** ve **Çerez Politikası** metinlerindedir.',
             actions: ['faq'],
         },
         {

@@ -1,38 +1,117 @@
-import React, { useState } from 'react';
-import { CreditCard, ShieldCheck, X, Sparkles, Check } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { ArrowLeft, CheckCircle2, Loader2, ShieldCheck, X, Sparkles, Check, XCircle } from 'lucide-react';
 import { api } from './api';
-import { PACKAGES_PLANS, type PackagePlan } from './pricing';
+import { PACKAGES_PLANS, type PackagePlan, type PlanId } from './pricing';
+import { useUiStore } from './store/uiStore';
 import { theme } from './theme';
 
 interface PaymentModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess: (newCredits: number) => void;
+    /** Verilirse paket listesi atlanır, doğrudan bu paketin ödemesi açılır. */
+    initialPlan?: PlanId;
 }
 
+type Step =
+    | { step: 'packages' }
+    | { step: 'starting'; plan: PackagePlan }
+    | { step: 'paying'; plan: PackagePlan; oid: string; iframeUrl: string; testMode: boolean; confirming: boolean }
+    | { step: 'done'; plan: PackagePlan; credits: number | null }
+    | { step: 'failed'; plan: PackagePlan; message: string };
+
 const formatTL = (n: number) => `${n.toLocaleString('tr-TR')} TL`;
+const POLL_MS = 3000;
+const RESIZER_SRC = 'https://www.paytr.com/js/iframeResizer.min.js';
 
-export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) => {
-    const [paymentState, setPaymentState] = useState<{ step: 'packages' | 'redirecting', planId?: string }>({ step: 'packages' });
+type ResizerWindow = Window & { iFrameResize?: (opts: object, selector: string) => void };
 
-    if (!isOpen) return null;
+/** PayTR'nin önerdiği iframeResizer betiği; form yüksekliğini içeriğe göre ayarlar. */
+const resizeFrame = () => {
+    const w = window as ResizerWindow;
+    const run = () => w.iFrameResize?.({}, '#paytriframe');
+    if (w.iFrameResize) return run();
+    if (document.querySelector(`script[src="${RESIZER_SRC}"]`)) return;
+    const s = document.createElement('script');
+    s.src = RESIZER_SRC;
+    s.onload = run;
+    document.head.appendChild(s);
+};
 
-    /** Paket seçilince iyzico checkout token alınır, ödeme sayfasına yönlendirilir. */
-    const handlePlanSelect = async (plan: PackagePlan) => {
-        setPaymentState({ step: 'redirecting', planId: plan.id });
-        try {
-            const result = await api.iyzicoCheckout(plan.id);
-            if (result.paymentPageUrl) {
-                window.location.href = result.paymentPageUrl;
-            } else {
-                window.alert('Ödeme başlatılamadı, lütfen tekrar deneyin.');
-                setPaymentState({ step: 'packages' });
-            }
-        } catch (err: any) {
-            window.alert('Ödeme hatası: ' + (err?.message ?? 'bilinmeyen'));
-            setPaymentState({ step: 'packages' });
-        }
+const requestPayment = async (plan: PackagePlan): Promise<Step> => {
+    try {
+        const r = await api.paytrCheckout(plan.id);
+        return { step: 'paying', plan, oid: r.merchantOid, iframeUrl: r.iframeUrl, testMode: r.testMode, confirming: false };
+    } catch (err) {
+        return { step: 'failed', plan, message: err instanceof Error ? err.message : 'Ödeme başlatılamadı.' };
+    }
+};
+
+export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, ...rest }) => (isOpen ? <PaymentDialog {...rest} /> : null);
+
+const PaymentDialog: React.FC<Omit<PaymentModalProps, 'isOpen'>> = ({ onClose, onSuccess, initialPlan }) => {
+    const firstPlan = PACKAGES_PLANS.find(p => p.id === initialPlan);
+    const [state, setState] = useState<Step>(() => (firstPlan ? { step: 'starting', plan: firstPlan } : { step: 'packages' }));
+    const autoStarted = useRef(false);
+
+    const startPayment = (plan: PackagePlan) => {
+        setState({ step: 'starting', plan });
+        void requestPayment(plan).then(setState);
     };
+
+    useEffect(() => {
+        if (!firstPlan || autoStarted.current) return;
+        autoStarted.current = true;
+        void requestPayment(firstPlan).then(setState);
+    }, [firstPlan]);
+
+    const paying = state.step === 'paying' ? state : null;
+    const oid = paying?.oid;
+    const payingPlan = paying?.plan;
+
+    const onSuccessRef = useRef(onSuccess);
+    useEffect(() => { onSuccessRef.current = onSuccess; }, [onSuccess]);
+
+    useEffect(() => {
+        if (!oid || !payingPlan) return;
+        let finished = false;
+        const check = async () => {
+            if (finished) return;
+            try {
+                const r = await api.paytrStatus(oid);
+                if (finished) return;
+                if (r.status === 'success') {
+                    finished = true;
+                    setState({ step: 'done', plan: payingPlan, credits: r.credits });
+                    if (typeof r.credits === 'number') onSuccessRef.current(r.credits);
+                    useUiStore.getState().pushToast({
+                        kind: 'success',
+                        title: 'Ödeme başarılı',
+                        description: `${payingPlan.credits} tasarım hakkı hesabınıza yüklendi.`,
+                        ttl: 8000,
+                    });
+                } else if (r.status === 'failed') {
+                    finished = true;
+                    setState({ step: 'failed', plan: payingPlan, message: 'Ödeme bankanız tarafından onaylanmadı. Kartınızdan çekim yapılmadıysa tekrar deneyebilirsiniz.' });
+                }
+            } catch { /* bir sonraki denemede tekrar sorulur */ }
+        };
+        resizeFrame();
+        const t = window.setInterval(() => void check(), POLL_MS);
+        const onMessage = (e: MessageEvent) => {
+            if (e.origin !== window.location.origin || e.data?.type !== 'paytr-result') return;
+            setState(s => (s.step === 'paying' ? { ...s, confirming: true } : s));
+            void check();
+        };
+        window.addEventListener('message', onMessage);
+        return () => {
+            finished = true;
+            window.clearInterval(t);
+            window.removeEventListener('message', onMessage);
+        };
+    }, [oid, payingPlan]);
+
+    const backToPackages = () => setState({ step: 'packages' });
 
     return (
         <div style={{
@@ -40,33 +119,34 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) =
             display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(10px)',
             padding: '2rem'
         }}>
-            <div style={{
+            <div data-payment-modal={state.step} style={{
                 background: theme.surface,
                 border: `1px solid ${theme.border}`,
-                padding: '2.5rem 2rem',
+                padding: state.step === 'paying' ? '1.5rem 1.25rem' : '2.5rem 2rem',
                 borderRadius: '1.5rem',
-                maxWidth: '960px',
+                maxWidth: state.step === 'paying' ? '720px' : '960px',
                 width: '100%',
                 position: 'relative',
                 boxShadow: theme.shadowLg,
                 maxHeight: '90vh',
                 overflowY: 'auto',
             }}>
+                <style>{'@keyframes pm-spin { to { transform: rotate(360deg); } } .pm-spin { animation: pm-spin 0.9s linear infinite; }'}</style>
                 <button
                     onClick={onClose}
                     aria-label="Kapat"
                     style={{
-                        position: 'absolute', top: '1.5rem', right: '1.5rem',
+                        position: 'absolute', top: '1.25rem', right: '1.25rem',
                         background: theme.surfaceAlt,
                         border: `1px solid ${theme.border}`,
                         color: theme.textMuted, cursor: 'pointer', padding: '0.4rem', borderRadius: '50%',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1,
                     }}
                 >
                     <X size={18} />
                 </button>
 
-                {paymentState.step === 'packages' && (
+                {state.step === 'packages' && (
                     <>
                         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
                             <div style={{
@@ -93,7 +173,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) =
                                 key={plan.id}
                                 type="button"
                                 data-buy-plan={plan.id}
-                                onClick={() => handlePlanSelect(plan)}
+                                onClick={() => startPayment(plan)}
                                 style={{
                                     display: 'flex', flexDirection: 'column',
                                     background: plan.highlight
@@ -151,25 +231,103 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) =
                             <ShieldCheck size={20} color={theme.green} style={{ flexShrink: 0 }} />
                             <div>
                                 <strong style={{ color: theme.text }}>3D Secure ile güvenli ödeme.</strong>{' '}
-                                Tüm işlemler iyzico PCI-DSS sertifikalı altyapıda işlenir.
+                                Ödemeler PayTR'nin PCI-DSS sertifikalı altyapısında işlenir.
                                 Kart bilgileri sunucumuza ulaşmaz.
                             </div>
                         </div>
                     </>
                 )}
 
-                {paymentState.step === 'redirecting' && (
-                    <div style={{
-                        textAlign: 'center', padding: '3rem 1rem',
-                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem',
-                    }}>
-                        <CreditCard size={48} color={theme.primary} />
+                {state.step === 'starting' && (
+                    <div style={{ textAlign: 'center', padding: '3rem 1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+                        <Loader2 size={44} color={theme.primary} className="pm-spin" />
                         <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: theme.text, margin: 0 }}>
-                            iyzico ödeme sayfasına yönlendiriliyorsunuz...
+                            Güvenli ödeme formu hazırlanıyor…
                         </h3>
                         <p style={{ color: theme.textMuted, fontSize: '0.9rem', margin: 0 }}>
-                            Lütfen bekleyin, ödeme sayfası açılacak.
+                            {state.plan.name} paketi · {formatTL(state.plan.price)}
                         </p>
+                    </div>
+                )}
+
+                {paying && (
+                    <>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', margin: '0 2.5rem 0.75rem 0' }}>
+                            <button type="button" onClick={backToPackages} style={{
+                                display: 'inline-flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', color: theme.primary,
+                                cursor: 'pointer', fontFamily: 'inherit', fontSize: '0.82rem', fontWeight: 700, padding: 0,
+                            }}>
+                                <ArrowLeft size={14} /> Paketler
+                            </button>
+                            <strong style={{ color: theme.text, fontSize: '1rem' }}>
+                                {paying.plan.name} paketi · {formatTL(paying.plan.price)}
+                            </strong>
+                            <span style={{ color: theme.textMuted, fontSize: '0.8rem' }}>{paying.plan.credits} tasarım hakkı</span>
+                            {paying.testMode && (
+                                <span data-payment-test-mode style={{
+                                    fontSize: '0.68rem', fontWeight: 800, padding: '2px 8px', borderRadius: 999,
+                                    background: '#fef3c7', color: '#92400e', border: '1px solid #fcd34d',
+                                }}>
+                                    TEST MODU · gerçek çekim yapılmaz
+                                </span>
+                            )}
+                        </div>
+                        {paying.confirming && (
+                            <div style={{
+                                display: 'flex', alignItems: 'center', gap: 8, padding: '0.6rem 0.8rem', marginBottom: '0.75rem',
+                                borderRadius: 10, background: theme.primarySoft, color: theme.primary, fontSize: '0.85rem', fontWeight: 600,
+                            }}>
+                                <Loader2 size={16} className="pm-spin" />
+                                Ödeme sonucu alındı, onaylanıyor…
+                            </div>
+                        )}
+                        <iframe
+                            id="paytriframe"
+                            title="PayTR güvenli ödeme"
+                            src={paying.iframeUrl}
+                            frameBorder={0}
+                            scrolling="no"
+                            style={{ width: '100%', minHeight: 560, border: 'none', display: 'block' }}
+                        />
+                    </>
+                )}
+
+                {state.step === 'done' && (
+                    <div data-payment-result="success" style={{ textAlign: 'center', padding: '2.5rem 1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.9rem' }}>
+                        <CheckCircle2 size={52} color={theme.green} />
+                        <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: theme.text, margin: 0 }}>Ödeme başarılı</h3>
+                        <p style={{ color: theme.textMuted, fontSize: '0.95rem', margin: 0 }}>
+                            {state.plan.credits} tasarım hakkı hesabınıza yüklendi
+                            {typeof state.credits === 'number' ? ` · toplam ${state.credits} hak` : ''}.
+                        </p>
+                        <button type="button" onClick={onClose} style={{
+                            marginTop: '0.5rem', padding: '0.7rem 1.6rem', borderRadius: '0.6rem', border: 'none', cursor: 'pointer',
+                            background: theme.gradient, color: 'white', fontWeight: 700, fontFamily: 'inherit', boxShadow: theme.shadowBrand,
+                        }}>
+                            Tasarıma devam et
+                        </button>
+                    </div>
+                )}
+
+                {state.step === 'failed' && (
+                    <div data-payment-result="failed" style={{ textAlign: 'center', padding: '2.5rem 1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.9rem' }}>
+                        <XCircle size={52} color={theme.redText} />
+                        <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: theme.text, margin: 0 }}>Ödeme tamamlanamadı</h3>
+                        <p style={{ color: theme.textMuted, fontSize: '0.95rem', margin: 0, maxWidth: 460 }}>{state.message}</p>
+                        <div style={{ display: 'flex', gap: 10, marginTop: '0.5rem' }}>
+                            <button type="button" onClick={() => startPayment(state.plan)} style={{
+                                padding: '0.7rem 1.4rem', borderRadius: '0.6rem', border: 'none', cursor: 'pointer',
+                                background: theme.gradient, color: 'white', fontWeight: 700, fontFamily: 'inherit',
+                            }}>
+                                Tekrar dene
+                            </button>
+                            <button type="button" onClick={backToPackages} style={{
+                                padding: '0.7rem 1.4rem', borderRadius: '0.6rem', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700,
+                                border: `1px solid ${theme.borderStrong}`, background: theme.surface, color: theme.text,
+                            }}>
+                                Paketlere dön
+                            </button>
+                        </div>
                     </div>
                 )}
             </div>

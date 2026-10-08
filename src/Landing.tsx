@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { ArrowRight, Sparkles, Zap, FileText, Globe, Layers, ChevronDown, Check, ShieldCheck } from 'lucide-react';
 import { KVKKModal, KullaniciSozlesmesiModal, CerezPolitikasiModal } from './legal/Legal';
 import { api } from './api';
-import { PACKAGES_PLANS, type PackagePlan } from './pricing';
+import { PACKAGES_PLANS, type PackagePlan, type PlanId } from './pricing';
+import { PaymentModal } from './PaymentModal';
 import { theme, techBackground, gradientTextStyle } from './theme';
 import { HeroPreview } from './landing/HeroPreview';
 
@@ -35,7 +36,7 @@ const SSS_ITEMS: SssItem[] = [
     },
     {
         q: 'Ödeme nasıl çalışır?',
-        a: 'Giriş yaptıktan sonra Paket Al ile seçtiğiniz paketi iyzico 3D Secure üzerinden satın alırsınız. Kaydetmek ve test indirmek ücretsizdir; tasarımı onayladığınızda 1 hak harcanır. Ödeme sonrası haklar hesabınıza otomatik yansır; bittiğinde yeni paket alabilirsiniz.',
+        a: 'Giriş yaptıktan sonra Paket Al ile seçtiğiniz paketi PayTR güvenli ödeme (3D Secure) ile satın alırsınız. Kaydetmek ve test indirmek ücretsizdir; tasarımı onayladığınızda 1 hak harcanır. Ödeme sonrası haklar hesabınıza otomatik yansır; bittiğinde yeni paket alabilirsiniz.',
     },
     {
         q: 'Verilerim Türkiye’de mi saklanıyor?',
@@ -164,6 +165,7 @@ const SectionTitle: React.FC<{ title: string; subtitle?: string; eyebrow?: strin
 export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
     const [openSss, setOpenSss] = useState<string | null>(null);
     const [legalModal, setLegalModal] = useState<'kvkk' | 'sozlesme' | 'cerez' | null>(null);
+    const [buyPlan, setBuyPlan] = useState<PlanId | null>(null);
     // step: kaçıncı dönüş; belge türü step % 15, aynı türün kaçıncı gelişi (galeriden sıradaki şablon) step / 15.
     const [step, setStep] = useState(0);
     const [previewHover, setPreviewHover] = useState(false);
@@ -177,25 +179,13 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
     const nextDoc = DOC_TYPES[(docIdx + 1) % DOC_TYPES.length];
     const round = Math.floor(step / DOC_TYPES.length);
 
-    const handleBuyPlan = async (plan: PackagePlan) => {
+    const handleBuyPlan = (plan: PackagePlan) => {
         // Satın alma yalnızca üyeler için — giriş yoksa giriş ekranına.
         if (!api.getToken()) {
             onLogin();
             return;
         }
-        try {
-            const result = await api.iyzicoCheckout(plan.id);
-            if (result.paymentPageUrl) {
-                // Iyzico 3D odeme sayfasina yonlendir
-                window.location.href = result.paymentPageUrl;
-            } else {
-                window.alert('Odeme baslatilamadi, lutfen tekrar deneyin.');
-            }
-        } catch (e) {
-            // eslint-disable-next-line no-console
-            console.error('[Landing] iyzicoCheckout hatasi:', e);
-            window.alert('Odeme baslatilamadi. Giris yaptiginizdan emin olun. ' + (e instanceof Error ? e.message : 'bilinmeyen'));
-        }
+        setBuyPlan(plan.id);
     };
 
     return (
@@ -997,6 +987,12 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
             {legalModal === 'kvkk' && <KVKKModal onClose={() => setLegalModal(null)} />}
             {legalModal === 'sozlesme' && <KullaniciSozlesmesiModal onClose={() => setLegalModal(null)} />}
             {legalModal === 'cerez' && <CerezPolitikasiModal onClose={() => setLegalModal(null)} />}
+            <PaymentModal
+                isOpen={!!buyPlan}
+                initialPlan={buyPlan ?? undefined}
+                onClose={() => setBuyPlan(null)}
+                onSuccess={() => {}}
+            />
         </div>
     );
 };

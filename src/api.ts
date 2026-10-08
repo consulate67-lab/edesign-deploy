@@ -434,26 +434,15 @@ export const api = {
         return { success: true, message: 'Tasarim silindi.' };
     },
 
-    // --- IYZICO CHECKOUT (Sprint 1.3, 2026-10-02) ---
-    // Plan satin alimi icin iyzico checkout form token al.
-    // Backend POST /api/payment/iyzico/checkout — sandbox/prod env'den okur.
-    iyzicoCheckout: async (plan: 'one' | 'basic' | 'pro') => {
-        if (!IS_DEV) {
-            return api.request('/payment/iyzico/checkout', {
-                method: 'POST',
-                body: JSON.stringify({ plan }),
-            });
-        }
-        // DEV mock — direkt basarili don (Selim'in local sandbox testi icin)
-        // eslint-disable-next-line no-console
-        console.log('[api.dev] iyzicoCheckout mock basarili donuluyor:', plan);
-        return {
-            success: true,
-            token: `mock-token-${plan}-${Date.now()}`,
-            paymentPageUrl: `/?payment=mock-${plan}`,
-            conversationId: `mock-conv-${Date.now()}`,
-        };
-    },
+    // --- PAYTR (iFrame API) ---
+    /** Paket için PayTR ödeme jetonu alır; ödeme formu dönen iframeUrl ile açılır. */
+    paytrCheckout: (plan: 'one' | 'basic' | 'pro'): Promise<{ merchantOid: string; iframeUrl: string; testMode: boolean }> =>
+        api.request('/payment/paytr/checkout', {
+            method: 'POST',
+            body: JSON.stringify({ plan, returnUrl: window.location.origin + window.location.pathname }),
+        }),
+    paytrStatus: (merchantOid: string): Promise<{ status: 'pending' | 'success' | 'failed'; credits: number | null }> =>
+        api.request(`/payment/paytr/status/${encodeURIComponent(merchantOid)}`),
 
     // --- TEMPLATE MANAGEMENT (Mock DB) ---
     // NOTE: These mock storage helpers are only used in DEV builds.

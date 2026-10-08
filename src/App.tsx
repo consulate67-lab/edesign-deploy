@@ -132,7 +132,7 @@ const App: React.FC = () => {
         });
     }, []);
 
-    // iyzico ödeme sonrası backend ?payment=success|fail|error|invalid ile geri yönlendirir.
+    // PayTR ödeme formu dönüş adresini iframe yerine sayfanın kendisinde açarsa ?payment=success|fail gelir.
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const payment = params.get('payment');
@@ -144,7 +144,7 @@ const App: React.FC = () => {
         useUiStore.getState().pushToast({
             kind: ok ? 'success' : 'error',
             title: ok ? 'Ödeme başarılı' : 'Ödeme tamamlanamadı',
-            description: ok ? 'Tasarım haklarınız hesabınıza yüklendi.' : 'Kartınızdan çekim yapılmadıysa tekrar deneyebilirsiniz.',
+            description: ok ? 'Ödemeniz alındı; tasarım haklarınız birkaç saniye içinde hesabınıza yüklenir.' : 'Kartınızdan çekim yapılmadıysa tekrar deneyebilirsiniz.',
             ttl: 8000,
         });
         if (api.getToken()) setView('selection');
