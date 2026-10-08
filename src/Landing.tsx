@@ -4,6 +4,7 @@ import { KVKKModal, KullaniciSozlesmesiModal, CerezPolitikasiModal } from './leg
 import { api } from './api';
 import { PACKAGES_PLANS, type PackagePlan } from './pricing';
 import { theme, techBackground, gradientTextStyle } from './theme';
+import { HeroPreview } from './landing/HeroPreview';
 
 interface LandingProps {
     onRegister: () => void;
@@ -43,21 +44,21 @@ const SSS_ITEMS: SssItem[] = [
 ];
 
 const DOC_TYPES = [
-    { label: 'e-Fatura', code: '01', a: '#2563eb' },
-    { label: 'e-Arşiv', code: '02', a: '#7c3aed' },
-    { label: 'e-İrsaliye', code: '03', a: '#0284c7' },
-    { label: 'e-İrsaliye Yanıtı', code: '04', a: '#0891b2' },
-    { label: 'e-İhracat', code: '05', a: '#059669' },
-    { label: 'e-SMM', code: '06', a: '#db2777' },
-    { label: 'e-Müstahsil', code: '07', a: '#65a30d' },
-    { label: 'e-Gider Pusulası', code: '08', a: '#4d7c0f' },
-    { label: 'e-Döviz / Kıymetli Maden', code: '09', a: '#b45309' },
-    { label: 'e-Dekont', code: '10', a: '#0d9488' },
-    { label: 'e-Sigorta Komisyon', code: '11', a: '#4f46e5' },
-    { label: 'e-Bilet', code: '12', a: '#ea580c' },
-    { label: 'e-Bilet Raporu', code: '13', a: '#c2410c' },
-    { label: 'e-Yolcu Listesi', code: '14', a: '#e11d48' },
-    { label: 'e-Makbuz', code: '15', a: '#0f766e' },
+    { label: 'e-Fatura', code: '01', id: 'fatura', a: '#2563eb' },
+    { label: 'e-Arşiv', code: '02', id: 'arsiv', a: '#7c3aed' },
+    { label: 'e-İrsaliye', code: '03', id: 'irsaliye', a: '#0284c7' },
+    { label: 'e-İrsaliye Yanıtı', code: '04', id: 'irsaliye-yanit', a: '#0891b2' },
+    { label: 'e-İhracat', code: '05', id: 'ihracat', a: '#059669' },
+    { label: 'e-SMM', code: '06', id: 'smm', a: '#db2777' },
+    { label: 'e-Müstahsil', code: '07', id: 'mustahsil', a: '#65a30d' },
+    { label: 'e-Gider Pusulası', code: '08', id: 'gider-pusulasi', a: '#4d7c0f' },
+    { label: 'e-Döviz / Kıymetli Maden', code: '09', id: 'doviz', a: '#b45309' },
+    { label: 'e-Dekont', code: '10', id: 'dekont', a: '#0d9488' },
+    { label: 'e-Sigorta Komisyon', code: '11', id: 'sigorta-komisyon', a: '#4f46e5' },
+    { label: 'e-Bilet', code: '12', id: 'bilet', a: '#ea580c' },
+    { label: 'e-Bilet Raporu', code: '13', id: 'bilet-rapor', a: '#c2410c' },
+    { label: 'e-Yolcu Listesi', code: '14', id: 'bilet-yolcu', a: '#e11d48' },
+    { label: 'e-Makbuz', code: '15', id: 'makbuz', a: '#0f766e' },
 ];
 
 const LOGO_URL = `${import.meta.env.BASE_URL}favicon.svg`;
@@ -70,11 +71,18 @@ const LANDING_CSS = `
 .ld-nav a:hover{color:${theme.primary}}
 .ld-card{transition:transform .2s, box-shadow .2s, border-color .2s}
 .ld-card:hover{transform:translateY(-3px);box-shadow:${theme.shadow}}
+.ld-hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,0.9fr);gap:56px;align-items:center}
+.ld-hero-text{text-align:left}
 .ld-bento{display:grid;grid-template-columns:1.4fr 1fr 1fr;grid-template-rows:auto auto;gap:16px}
 .ld-bento-hero{grid-row:1 / span 2}
 .ld-footer a{color:${theme.textSubtle};text-decoration:none;cursor:pointer;transition:color .15s}
 .ld-footer a:hover{color:${theme.primary}}
 @media (max-width: 960px){
+  .ld-hero{grid-template-columns:1fr;gap:40px}
+  .ld-hero-text{text-align:center}
+  .ld-hero-text [data-rotating-doctype]{justify-content:center}
+  .ld-hero-sub{margin-left:auto !important;margin-right:auto !important}
+  .ld-hero-ctas{justify-content:center}
   .ld-bento{grid-template-columns:1fr 1fr}
   .ld-bento-hero{grid-row:auto;grid-column:1 / -1}
 }
@@ -82,6 +90,7 @@ const LANDING_CSS = `
   .ld-nav{display:none !important}
   .ld-bento{grid-template-columns:1fr}
   .ld-header{padding:12px 16px !important}
+  .ld-brand{font-size:15px !important}
   .ld-section{padding-left:16px !important;padding-right:16px !important}
 }
 @media (prefers-reduced-motion: reduce){
@@ -89,21 +98,19 @@ const LANDING_CSS = `
 }
 `;
 
+const ROTATE_MS = 3200;
+
 /** Başlıkta belge türleri arasında dönen kelime. */
-const RotatingDocType: React.FC = () => {
-    const [i, setI] = useState(0);
-    useEffect(() => {
-        if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
-        const t = window.setInterval(() => setI(n => (n + 1) % DOC_TYPES.length), 2200);
-        return () => window.clearInterval(t);
-    }, []);
-    const dt = DOC_TYPES[i];
+const RotatingDocType: React.FC<{ dt: (typeof DOC_TYPES)[number] }> = ({ dt }) => {
+    // Uzun adlar küçültülür: satır hep tek kalsın, başlık yüksekliği değişmesin.
+    const fit = dt.label.length > 16 ? `${Math.max(0.6, 16 / dt.label.length).toFixed(3)}em` : '1em';
     return (
-        <span data-rotating-doctype style={{ display: 'inline-block', whiteSpace: 'nowrap' }}>
+        <span data-rotating-doctype style={{ display: 'flex', alignItems: 'flex-end', height: '1.1em', whiteSpace: 'nowrap' }}>
             <span
                 key={dt.label}
                 style={{
                     display: 'inline-block',
+                    fontSize: fit,
                     color: dt.a,
                     animation: 'edesign-word-in 0.45s ease-out',
                 }}
@@ -157,6 +164,18 @@ const SectionTitle: React.FC<{ title: string; subtitle?: string; eyebrow?: strin
 export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
     const [openSss, setOpenSss] = useState<string | null>(null);
     const [legalModal, setLegalModal] = useState<'kvkk' | 'sozlesme' | 'cerez' | null>(null);
+    // step: kaçıncı dönüş; belge türü step % 15, aynı türün kaçıncı gelişi (galeriden sıradaki şablon) step / 15.
+    const [step, setStep] = useState(0);
+    const [previewHover, setPreviewHover] = useState(false);
+    useEffect(() => {
+        if (previewHover || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+        const t = window.setInterval(() => setStep(n => n + 1), ROTATE_MS);
+        return () => window.clearInterval(t);
+    }, [previewHover]);
+    const docIdx = step % DOC_TYPES.length;
+    const activeDoc = DOC_TYPES[docIdx];
+    const nextDoc = DOC_TYPES[(docIdx + 1) % DOC_TYPES.length];
+    const round = Math.floor(step / DOC_TYPES.length);
 
     const handleBuyPlan = async (plan: PackagePlan) => {
         // Satın alma yalnızca üyeler için — giriş yoksa giriş ekranına.
@@ -223,7 +242,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                         style={{ display: 'inline-flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}
                     >
                         <img src={LOGO_URL} alt="" width={34} height={34} style={{ display: 'block', borderRadius: 10, boxShadow: theme.shadowBrand }} />
-                        <span style={{ fontSize: 17, fontWeight: 800, letterSpacing: '-0.02em', color: theme.text }}>
+                        <span className="ld-brand" style={{ fontSize: 17, fontWeight: 800, letterSpacing: '-0.02em', color: theme.text, whiteSpace: 'nowrap' }}>
                             eBelge <span style={gradientTextStyle}>Tasarımcı</span>
                         </span>
                     </a>
@@ -268,6 +287,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                                     gap: 6,
                                     boxShadow: theme.shadowBrand,
                                     fontFamily: 'inherit',
+                                    whiteSpace: 'nowrap',
                                 }}
                             >
                                 Üye ol <ArrowRight size={14} />
@@ -283,12 +303,13 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                 style={{
                     position: 'relative',
                     zIndex: 1,
-                    padding: '80px 32px 40px',
+                    padding: '64px 32px 40px',
                     maxWidth: 1280,
                     margin: '0 auto',
                 }}
             >
-                <div style={{ textAlign: 'center', maxWidth: 900, margin: '0 auto' }}>
+                <div className="ld-hero">
+                <div className="ld-hero-text">
                     <div
                         style={{
                             display: 'inline-flex',
@@ -326,26 +347,28 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
 
                     <h1
                         style={{
-                            fontSize: 'clamp(40px, 6vw, 80px)',
+                            fontSize: 'clamp(36px, 4.6vw, 62px)',
                             fontWeight: 800,
-                            lineHeight: 1.04,
+                            lineHeight: 1.06,
                             letterSpacing: '-0.035em',
                             margin: '0 0 22px',
                             color: theme.text,
                         }}
                     >
-                        <RotatingDocType /> tasarımı
+                        <RotatingDocType dt={activeDoc} />
+                        tasarımı artık
                         <br />
-                        <span style={gradientTextStyle}>artık çok kolay</span>
+                        <span style={gradientTextStyle}>çok kolay</span>
                     </h1>
 
                     <p
+                        className="ld-hero-sub"
                         style={{
-                            fontSize: 19,
+                            fontSize: 18,
                             color: theme.textMuted,
-                            margin: '0 auto 34px',
+                            margin: '0 0 32px',
                             lineHeight: 1.6,
-                            maxWidth: 660,
+                            maxWidth: 560,
                         }}
                     >
                         GİB uyumlu <strong style={{ color: theme.text }}>e-Fatura, e-Arşiv, e-İrsaliye</strong>{' '}
@@ -354,10 +377,10 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                     </p>
 
                     <div
+                        className="ld-hero-ctas"
                         style={{
                             display: 'flex',
                             gap: 12,
-                            justifyContent: 'center',
                             flexWrap: 'wrap',
                             marginBottom: 20,
                         }}
@@ -412,6 +435,16 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                             Zaten üyeyim
                         </a>
                     </div>
+                </div>
+                <HeroPreview
+                    docTypeId={activeDoc.id}
+                    docLabel={activeDoc.label}
+                    accent={activeDoc.a}
+                    round={round}
+                    nextDocTypeId={nextDoc.id}
+                    onClick={onRegister}
+                    onHoverChange={setPreviewHover}
+                />
                 </div>
             </section>
 
