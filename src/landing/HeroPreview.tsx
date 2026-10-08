@@ -18,10 +18,6 @@ interface PreviewSource {
 
 /** Galeride hazır şablonu olmayan türler için resmi / varsayılan görünüm. */
 const FALLBACKS: Record<string, PreviewSource> = {
-    'irsaliye-yanit': {
-        key: 'fb-irsaliye-yanit', name: 'GİB Resmi İrsaliye Yanıtı',
-        xslt: 'ebelge/gib/irsaliye-yaniti.xslt', xml: 'ebelge/samples/gib/IrsaliyeYaniti-Ornek1.xml',
-    },
     'bilet-rapor': {
         key: 'fb-bilet-rapor', name: 'e-Bilet Raporu Görünümü',
         xslt: 'ebelge/ebilet/ebilet-rapor.xslt', xml: 'ebelge/samples/gib/eBilet-Rapor-Karayolu.xml',

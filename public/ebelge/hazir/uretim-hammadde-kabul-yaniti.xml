@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ReceiptAdvice xmlns="urn:oasis:names:specification:ubl:schema:xsd:ReceiptAdvice-2"
+ xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+ xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+ xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+	<ext:UBLExtensions>
+		<ext:UBLExtension>
+			<ext:ExtensionContent/>
+		</ext:UBLExtension>
+	</ext:UBLExtensions>
+	<cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+	<cbc:CustomizationID>TR1.2.1</cbc:CustomizationID>
+	<cbc:ProfileID>TEMELIRSALIYE</cbc:ProfileID>
+	<cbc:ID>DMK2026000000867</cbc:ID>
+	<cbc:CopyIndicator>false</cbc:CopyIndicator>
+	<cbc:UUID>D2F4B8A1-6C37-4E95-8B10-94A7E3C5F026</cbc:UUID>
+	<cbc:IssueDate>2026-10-08</cbc:IssueDate>
+	<cbc:IssueTime>09:35:00</cbc:IssueTime>
+	<cbc:ReceiptAdviceTypeCode>SEVK</cbc:ReceiptAdviceTypeCode>
+	<cbc:Note>Ret edilen malzemeler karantina alanında (K-2) bekletilmektedir; tedarikçi tarafından 5 iş günü içinde teslim alınmalıdır.</cbc:Note>
+	<cbc:Note>Giriş kontrolü TS EN 10204 3.1 malzeme sertifikalarına göre yapılmıştır.</cbc:Note>
+	<cac:OrderReference>
+		<cbc:ID>SAS-2026-00418</cbc:ID>
+		<cbc:IssueDate>2026-09-22</cbc:IssueDate>
+	</cac:OrderReference>
+	<cac:DespatchDocumentReference>
+		<cbc:ID>0B7E3D95-2A61-4C8F-9E04-5F18C2A7B3D6</cbc:ID>
+		<cbc:IssueDate>2026-10-07</cbc:IssueDate>
+	</cac:DespatchDocumentReference>
+	<cac:AdditionalDocumentReference>
+		<cbc:ID>ECP2026000009133</cbc:ID>
+		<cbc:IssueDate>2026-10-07</cbc:IssueDate>
+		<cbc:DocumentTypeCode>DespatchAdviceID</cbc:DocumentTypeCode>
+		<cbc:DocumentType>DespatchAdvice ID</cbc:DocumentType>
+	</cac:AdditionalDocumentReference>
+	<cac:Signature>
+		<cbc:ID schemeID="VKN_TCKN">2950371184</cbc:ID>
+		<cac:SignatoryParty>
+			<cac:PartyIdentification>
+				<cbc:ID schemeID="VKN">2950371184</cbc:ID>
+			</cac:PartyIdentification>
+			<cac:PostalAddress>
+				<cbc:StreetName>Konya OSB, 3. Organize Cad.</cbc:StreetName>
+				<cbc:BuildingNumber>41</cbc:BuildingNumber>
+				<cbc:CitySubdivisionName>Selçuklu</cbc:CitySubdivisionName>
+				<cbc:CityName>Konya</cbc:CityName>
+				<cbc:PostalZone>42300</cbc:PostalZone>
+				<cac:Country>
+					<cbc:Name>Türkiye</cbc:Name>
+				</cac:Country>
+			</cac:PostalAddress>
+		</cac:SignatoryParty>
+		<cac:DigitalSignatureAttachment>
+			<cac:ExternalReference>
+				<cbc:URI>#Signature</cbc:URI>
+			</cac:ExternalReference>
+		</cac:DigitalSignatureAttachment>
+	</cac:Signature>
+	<cac:DeliveryCustomerParty>
+		<cac:Party>
+			<cbc:WebsiteURI>www.demirtasmakine.com.tr</cbc:WebsiteURI>
+			<cac:PartyIdentification>
+				<cbc:ID schemeID="VKN">2950371184</cbc:ID>
+			</cac:PartyIdentification>
+			<cac:PartyName>
+				<cbc:Name>Demirtaş Makine İmalat A.Ş.</cbc:Name>
+			</cac:PartyName>
+			<cac:PostalAddress>
+				<cbc:StreetName>Konya OSB, 3. Organize Cad.</cbc:StreetName>
+				<cbc:BuildingNumber>41</cbc:BuildingNumber>
+				<cbc:CitySubdivisionName>Selçuklu</cbc:CitySubdivisionName>
+				<cbc:CityName>Konya</cbc:CityName>
+				<cbc:PostalZone>42300</cbc:PostalZone>
+				<cac:Country>
+					<cbc:Name>Türkiye</cbc:Name>
+				</cac:Country>
+			</cac:PostalAddress>
+			<cac:PartyTaxScheme>
+				<cac:TaxScheme>
+					<cbc:Name>Selçuk</cbc:Name>
+				</cac:TaxScheme>
+			</cac:PartyTaxScheme>
+			<cac:Contact>
+				<cbc:Telephone>(332) 239 18 00</cbc:Telephone>
+				<cbc:ElectronicMail>kalite@demirtasmakine.com.tr</cbc:ElectronicMail>
+			</cac:Contact>
+		</cac:Party>
+		<cac:DeliveryContact>
+			<cbc:Name>Hakan Öztürk · Giriş Kalite Kontrol</cbc:Name>
+		</cac:DeliveryContact>
+	</cac:DeliveryCustomerParty>
+	<cac:DespatchSupplierParty>
+		<cac:Party>
+			<cbc:WebsiteURI>www.egecelikprofil.com.tr</cbc:WebsiteURI>
+			<cac:PartyIdentification>
+				<cbc:ID schemeID="VKN">3381046627</cbc:ID>
+			</cac:PartyIdentification>
+			<cac:PartyName>
+				<cbc:Name>Ege Çelik Profil San. A.Ş.</cbc:Name>
+			</cac:PartyName>
+			<cac:PostalAddress>
+				<cbc:StreetName>Atatürk OSB, 10001 Sok.</cbc:StreetName>
+				<cbc:BuildingNumber>18</cbc:BuildingNumber>
+				<cbc:CitySubdivisionName>Çiğli</cbc:CitySubdivisionName>
+				<cbc:CityName>İzmir</cbc:CityName>
+				<cbc:PostalZone>35620</cbc:PostalZone>
+				<cac:Country>
+					<cbc:Name>Türkiye</cbc:Name>
+				</cac:Country>
+			</cac:PostalAddress>
+			<cac:PartyTaxScheme>
+				<cac:TaxScheme>
+					<cbc:Name>Çiğli</cbc:Name>
+				</cac:TaxScheme>
+			</cac:PartyTaxScheme>
+			<cac:Contact>
+				<cbc:Telephone>(232) 376 44 00</cbc:Telephone>
+				<cbc:ElectronicMail>sevkiyat@egecelikprofil.com.tr</cbc:ElectronicMail>
+			</cac:Contact>
+		</cac:Party>
+		<cac:DespatchContact>
+			<cbc:Name>Okan Er</cbc:Name>
+		</cac:DespatchContact>
+	</cac:DespatchSupplierParty>
+	<cac:Shipment>
+		<cbc:ID>TIR-35-ECP-2201</cbc:ID>
+		<cac:Delivery>
+			<cbc:ActualDeliveryDate>2026-10-08</cbc:ActualDeliveryDate>
+			<cbc:ActualDeliveryTime>07:50:00</cbc:ActualDeliveryTime>
+		</cac:Delivery>
+	</cac:Shipment>
+	<cac:ReceiptLine>
+		<cbc:ID>1</cbc:ID>
+		<cbc:ReceivedQuantity unitCode="KGM">2450</cbc:ReceivedQuantity>
+		<cac:OrderLineReference>
+			<cbc:LineID>1</cbc:LineID>
+		</cac:OrderLineReference>
+		<cac:DespatchLineReference>
+			<cbc:LineID>1</cbc:LineID>
+		</cac:DespatchLineReference>
+		<cac:Item>
+			<cbc:Description>DC01 · 2 x 1250 x 2500 mm</cbc:Description>
+			<cbc:Name>DKP Sac Levha</cbc:Name>
+			<cac:BuyersItemIdentification>
+				<cbc:ID>HM-SAC-020</cbc:ID>
+			</cac:BuyersItemIdentification>
+			<cac:SellersItemIdentification>
+				<cbc:ID>EC-DKP-2125</cbc:ID>
+			</cac:SellersItemIdentification>
+			<cac:ItemInstance>
+				<cac:LotIdentification>
+					<cbc:LotNumberID>L-24117</cbc:LotNumberID>
+				</cac:LotIdentification>
+			</cac:ItemInstance>
+		</cac:Item>
+	</cac:ReceiptLine>
+	<cac:ReceiptLine>
+		<cbc:ID>2</cbc:ID>
+		<cbc:Note>Kalan 4 boy (24 m) 10.10.2026 tarihli sevkiyatla tamamlanacak.</cbc:Note>
+		<cbc:ReceivedQuantity unitCode="MTR">576</cbc:ReceivedQuantity>
+		<cbc:ShortQuantity unitCode="MTR">24</cbc:ShortQuantity>
+		<cac:OrderLineReference>
+			<cbc:LineID>2</cbc:LineID>
+		</cac:OrderLineReference>
+		<cac:DespatchLineReference>
+			<cbc:LineID>2</cbc:LineID>
+		</cac:DespatchLineReference>
+		<cac:Item>
+			<cbc:Description>S235JR · 40 x 40 x 2 mm · 6 m boy</cbc:Description>
+			<cbc:Name>Kutu Profil</cbc:Name>
+			<cac:BuyersItemIdentification>
+				<cbc:ID>HM-PRF-4040</cbc:ID>
+			</cac:BuyersItemIdentification>
+			<cac:SellersItemIdentification>
+				<cbc:ID>EC-KP-4040-2</cbc:ID>
+			</cac:SellersItemIdentification>
+			<cac:ItemInstance>
+				<cac:LotIdentification>
+					<cbc:LotNumberID>L-24120</cbc:LotNumberID>
+				</cac:LotIdentification>
+			</cac:ItemInstance>
+		</cac:Item>
+	</cac:ReceiptLine>
+	<cac:ReceiptLine>
+		<cbc:ID>3</cbc:ID>
+		<cbc:ReceivedQuantity unitCode="KGM">1200</cbc:ReceivedQuantity>
+		<cbc:RejectedQuantity unitCode="KGM">180</cbc:RejectedQuantity>
+		<cbc:RejectReason>Çap ölçümü tolerans dışı (Ø20,4 mm); 3.1 sertifikasındaki döküm no ile etiket uyuşmuyor.</cbc:RejectReason>
+		<cac:OrderLineReference>
+			<cbc:LineID>3</cbc:LineID>
+		</cac:OrderLineReference>
+		<cac:DespatchLineReference>
+			<cbc:LineID>3</cbc:LineID>
+		</cac:DespatchLineReference>
+		<cac:Item>
+			<cbc:Description>C45 · Ø20 mm · h9 çekme</cbc:Description>
+			<cbc:Name>Yuvarlak Çelik Çubuk</cbc:Name>
+			<cac:BuyersItemIdentification>
+				<cbc:ID>HM-CBK-020</cbc:ID>
+			</cac:BuyersItemIdentification>
+			<cac:SellersItemIdentification>
+				<cbc:ID>EC-C45-020</cbc:ID>
+			</cac:SellersItemIdentification>
+			<cac:ItemInstance>
+				<cac:LotIdentification>
+					<cbc:LotNumberID>D-88415</cbc:LotNumberID>
+				</cac:LotIdentification>
+			</cac:ItemInstance>
+		</cac:Item>
+	</cac:ReceiptLine>
+	<cac:ReceiptLine>
+		<cbc:ID>4</cbc:ID>
+		<cbc:ReceivedQuantity unitCode="C62">5200</cbc:ReceivedQuantity>
+		<cbc:OversupplyQuantity unitCode="C62">200</cbc:OversupplyQuantity>
+		<cac:OrderLineReference>
+			<cbc:LineID>4</cbc:LineID>
+		</cac:OrderLineReference>
+		<cac:DespatchLineReference>
+			<cbc:LineID>4</cbc:LineID>
+		</cac:DespatchLineReference>
+		<cac:Item>
+			<cbc:Description>DIN 933 · 8.8 · çinko kaplı</cbc:Description>
+			<cbc:Name>Altıgen Cıvata M12 x 40</cbc:Name>
+			<cac:BuyersItemIdentification>
+				<cbc:ID>HM-CVT-1240</cbc:ID>
+			</cac:BuyersItemIdentification>
+			<cac:SellersItemIdentification>
+				<cbc:ID>EC-M12-40</cbc:ID>
+			</cac:SellersItemIdentification>
+			<cac:ItemInstance>
+				<cac:LotIdentification>
+					<cbc:LotNumberID>B-5521</cbc:LotNumberID>
+				</cac:LotIdentification>
+			</cac:ItemInstance>
+		</cac:Item>
+	</cac:ReceiptLine>
+	<cac:ReceiptLine>
+		<cbc:ID>5</cbc:ID>
+		<cbc:ReceivedQuantity unitCode="MTR">300</cbc:ReceivedQuantity>
+		<cac:OrderLineReference>
+			<cbc:LineID>5</cbc:LineID>
+		</cac:OrderLineReference>
+		<cac:DespatchLineReference>
+			<cbc:LineID>5</cbc:LineID>
+		</cac:DespatchLineReference>
+		<cac:Item>
+			<cbc:Description>1" · 3,25 mm et · sıcak daldırma</cbc:Description>
+			<cbc:Name>Galvaniz Boru</cbc:Name>
+			<cac:BuyersItemIdentification>
+				<cbc:ID>HM-BRU-100</cbc:ID>
+			</cac:BuyersItemIdentification>
+			<cac:SellersItemIdentification>
+				<cbc:ID>EC-GB-1</cbc:ID>
+			</cac:SellersItemIdentification>
+			<cac:ItemInstance>
+				<cac:LotIdentification>
+					<cbc:LotNumberID>L-24098</cbc:LotNumberID>
+				</cac:LotIdentification>
+			</cac:ItemInstance>
+		</cac:Item>
+	</cac:ReceiptLine>
+	<cac:ReceiptLine>
+		<cbc:ID>6</cbc:ID>
+		<cbc:ReceivedQuantity unitCode="KGM">0</cbc:ReceivedQuantity>
+		<cbc:RejectedQuantity unitCode="KGM">150</cbc:RejectedQuantity>
+		<cbc:RejectReason>Ambalaj nemli, tel yüzeyinde korozyon başlangıcı tespit edildi.</cbc:RejectReason>
+		<cac:OrderLineReference>
+			<cbc:LineID>6</cbc:LineID>
+		</cac:OrderLineReference>
+		<cac:DespatchLineReference>
+			<cbc:LineID>6</cbc:LineID>
+		</cac:DespatchLineReference>
+		<cac:Item>
+			<cbc:Description>ER70S-6 · 1,0 mm · 15 kg makara</cbc:Description>
+			<cbc:Name>Gazaltı Kaynak Teli SG2</cbc:Name>
+			<cac:BuyersItemIdentification>
+				<cbc:ID>HM-KYN-010</cbc:ID>
+			</cac:BuyersItemIdentification>
+			<cac:SellersItemIdentification>
+				<cbc:ID>EC-SG2-10</cbc:ID>
+			</cac:SellersItemIdentification>
+			<cac:ItemInstance>
+				<cac:LotIdentification>
+					<cbc:LotNumberID>W-3307</cbc:LotNumberID>
+				</cac:LotIdentification>
+			</cac:ItemInstance>
+		</cac:Item>
+	</cac:ReceiptLine>
+</ReceiptAdvice>

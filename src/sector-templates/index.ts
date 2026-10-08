@@ -6,6 +6,7 @@ import { TASIMA_TEMPLATES } from './groups/tasima';
 import { TICARET2_TEMPLATES } from './groups/ticaret2';
 import { HIZMET2_TEMPLATES } from './groups/hizmet2';
 import { SANAYI2_TEMPLATES } from './groups/sanayi2';
+import { YANIT_TEMPLATES } from './groups/yanit';
 import { API_URL } from '../api';
 import type { GalleryDesign } from '../admin/contracts';
 import { SECTORS, type SectorId, type SectorTemplate } from './types';
@@ -21,6 +22,7 @@ export const SECTOR_TEMPLATES: SectorTemplate[] = [
     ...HIZMET2_TEMPLATES,
     ...SANAYI_TEMPLATES,
     ...SANAYI2_TEMPLATES,
+    ...YANIT_TEMPLATES,
 ];
 
 const toTemplate = (d: GalleryDesign): SectorTemplate => {

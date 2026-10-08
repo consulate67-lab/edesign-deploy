@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ReceiptAdvice xmlns="urn:oasis:names:specification:ubl:schema:xsd:ReceiptAdvice-2"
+ xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+ xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+ xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+	<ext:UBLExtensions>
+		<ext:UBLExtension>
+			<ext:ExtensionContent/>
+		</ext:UBLExtension>
+	</ext:UBLExtensions>
+	<cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+	<cbc:CustomizationID>TR1.2.1</cbc:CustomizationID>
+	<cbc:ProfileID>TEMELIRSALIYE</cbc:ProfileID>
+	<cbc:ID>MLY2026000000124</cbc:ID>
+	<cbc:CopyIndicator>false</cbc:CopyIndicator>
+	<cbc:UUID>6B1E2C4A-7D93-4F0B-9A55-3C2E81D4A7F1</cbc:UUID>
+	<cbc:IssueDate>2026-10-06</cbc:IssueDate>
+	<cbc:IssueTime>11:18:00</cbc:IssueTime>
+	<cbc:ReceiptAdviceTypeCode>SEVK</cbc:ReceiptAdviceTypeCode>
+	<cbc:Note>Eksik teslim edilen ürünler bir sonraki sevkiyatla tamamlanmalıdır.</cbc:Note>
+	<cbc:Note>Reddedilen ürünler iade irsaliyesi ile aynı araçla geri gönderilmiştir.</cbc:Note>
+	<cac:OrderReference>
+		<cbc:ID>SP-2026-0912</cbc:ID>
+		<cbc:IssueDate>2026-10-01</cbc:IssueDate>
+	</cac:OrderReference>
+	<cac:DespatchDocumentReference>
+		<cbc:ID>9C2F7A10-4B6E-4D2A-8E3B-71A5C0F9D244</cbc:ID>
+		<cbc:IssueDate>2026-10-05</cbc:IssueDate>
+	</cac:DespatchDocumentReference>
+	<cac:AdditionalDocumentReference>
+		<cbc:ID>ADG2026000004581</cbc:ID>
+		<cbc:IssueDate>2026-10-05</cbc:IssueDate>
+		<cbc:DocumentTypeCode>DespatchAdviceID</cbc:DocumentTypeCode>
+		<cbc:DocumentType>DespatchAdvice ID</cbc:DocumentType>
+	</cac:AdditionalDocumentReference>
+	<cac:Signature>
+		<cbc:ID schemeID="VKN_TCKN">6130458821</cbc:ID>
+		<cac:SignatoryParty>
+			<cac:PartyIdentification>
+				<cbc:ID schemeID="VKN">6130458821</cbc:ID>
+			</cac:PartyIdentification>
+			<cac:PostalAddress>
+				<cbc:StreetName>Güzeller OSB, İnönü Mah. 2. Cadde</cbc:StreetName>
+				<cbc:BuildingNumber>14</cbc:BuildingNumber>
+				<cbc:CitySubdivisionName>Gebze</cbc:CitySubdivisionName>
+				<cbc:CityName>Kocaeli</cbc:CityName>
+				<cbc:PostalZone>41400</cbc:PostalZone>
+				<cac:Country>
+					<cbc:Name>Türkiye</cbc:Name>
+				</cac:Country>
+			</cac:PostalAddress>
+		</cac:SignatoryParty>
+		<cac:DigitalSignatureAttachment>
+			<cac:ExternalReference>
+				<cbc:URI>#Signature</cbc:URI>
+			</cac:ExternalReference>
+		</cac:DigitalSignatureAttachment>
+	</cac:Signature>
+	<cac:DeliveryCustomerParty>
+		<cac:Party>
+			<cbc:WebsiteURI>www.marmaralojistik.com.tr</cbc:WebsiteURI>
+			<cac:PartyIdentification>
+				<cbc:ID schemeID="VKN">6130458821</cbc:ID>
+			</cac:PartyIdentification>
+			<cac:PartyName>
+				<cbc:Name>Marmara Lojistik Depolama A.Ş.</cbc:Name>
+			</cac:PartyName>
+			<cac:PostalAddress>
+				<cbc:StreetName>Güzeller OSB, İnönü Mah. 2. Cadde</cbc:StreetName>
+				<cbc:BuildingNumber>14</cbc:BuildingNumber>
+				<cbc:CitySubdivisionName>Gebze</cbc:CitySubdivisionName>
+				<cbc:CityName>Kocaeli</cbc:CityName>
+				<cbc:PostalZone>41400</cbc:PostalZone>
+				<cac:Country>
+					<cbc:Name>Türkiye</cbc:Name>
+				</cac:Country>
+			</cac:PostalAddress>
+			<cac:PartyTaxScheme>
+				<cac:TaxScheme>
+					<cbc:Name>Gebze</cbc:Name>
+				</cac:TaxScheme>
+			</cac:PartyTaxScheme>
+			<cac:Contact>
+				<cbc:Telephone>(262) 751 40 40</cbc:Telephone>
+				<cbc:ElectronicMail>malkabul@marmaralojistik.com.tr</cbc:ElectronicMail>
+			</cac:Contact>
+		</cac:Party>
+		<cac:DeliveryContact>
+			<cbc:Name>Burak Aydın · Mal Kabul Şefi</cbc:Name>
+		</cac:DeliveryContact>
+	</cac:DeliveryCustomerParty>
+	<cac:DespatchSupplierParty>
+		<cac:Party>
+			<cbc:WebsiteURI>www.anadolugida.com.tr</cbc:WebsiteURI>
+			<cac:PartyIdentification>
+				<cbc:ID schemeID="VKN">0710347296</cbc:ID>
+			</cac:PartyIdentification>
+			<cac:PartyName>
+				<cbc:Name>Anadolu Gıda Dağıtım A.Ş.</cbc:Name>
+			</cac:PartyName>
+			<cac:PostalAddress>
+				<cbc:StreetName>Atatürk Mah. Ertuğrul Gazi Sok.</cbc:StreetName>
+				<cbc:BuildingNumber>7</cbc:BuildingNumber>
+				<cbc:CitySubdivisionName>Ataşehir</cbc:CitySubdivisionName>
+				<cbc:CityName>İstanbul</cbc:CityName>
+				<cbc:PostalZone>34758</cbc:PostalZone>
+				<cac:Country>
+					<cbc:Name>Türkiye</cbc:Name>
+				</cac:Country>
+			</cac:PostalAddress>
+			<cac:PartyTaxScheme>
+				<cac:TaxScheme>
+					<cbc:Name>Kozyatağı</cbc:Name>
+				</cac:TaxScheme>
+			</cac:PartyTaxScheme>
+			<cac:Contact>
+				<cbc:Telephone>(216) 455 12 00</cbc:Telephone>
+				<cbc:ElectronicMail>sevkiyat@anadolugida.com.tr</cbc:ElectronicMail>
+			</cac:Contact>
+		</cac:Party>
+		<cac:DespatchContact>
+			<cbc:Name>Selin Koç</cbc:Name>
+		</cac:DespatchContact>
+	</cac:DespatchSupplierParty>
+	<cac:Shipment>
+		<cbc:ID>SVK-48210</cbc:ID>
+		<cac:Delivery>
+			<cbc:ActualDeliveryDate>2026-10-06</cbc:ActualDeliveryDate>
+			<cbc:ActualDeliveryTime>10:42:00</cbc:ActualDeliveryTime>
+		</cac:Delivery>
+	</cac:Shipment>
+	<cac:ReceiptLine>
+		<cbc:ID>1</cbc:ID>
+		<cbc:ReceivedQuantity unitCode="BX">120</cbc:ReceivedQuantity>
+		<cac:OrderLineReference>
+			<cbc:LineID>1</cbc:LineID>
+		</cac:OrderLineReference>
+		<cac:DespatchLineReference>
+			<cbc:LineID>1</cbc:LineID>
+		</cac:DespatchLineReference>
+		<cac:Item>
+			<cbc:Description>4 x 5 L</cbc:Description>
+			<cbc:Name>Ayçiçek Yağı 5 L</cbc:Name>
+			<cac:SellersItemIdentification>
+				<cbc:ID>AG-1001</cbc:ID>
+			</cac:SellersItemIdentification>
+		</cac:Item>
+	</cac:ReceiptLine>
+	<cac:ReceiptLine>
+		<cbc:ID>2</cbc:ID>
+		<cbc:ReceivedQuantity unitCode="BX">76</cbc:ReceivedQuantity>
+		<cbc:ShortQuantity unitCode="BX">4</cbc:ShortQuantity>
+		<cac:OrderLineReference>
+			<cbc:LineID>2</cbc:LineID>
+		</cac:OrderLineReference>
+		<cac:DespatchLineReference>
+			<cbc:LineID>2</cbc:LineID>
+		</cac:DespatchLineReference>
+		<cac:Item>
+			<cbc:Description>20 x 500 g</cbc:Description>
+			<cbc:Name>Burgu Makarna 500 g</cbc:Name>
+			<cac:SellersItemIdentification>
+				<cbc:ID>AG-2040</cbc:ID>
+			</cac:SellersItemIdentification>
+		</cac:Item>
+	</cac:ReceiptLine>
+	<cac:ReceiptLine>
+		<cbc:ID>3</cbc:ID>
+		<cbc:ReceivedQuantity unitCode="BX">60</cbc:ReceivedQuantity>
+		<cbc:RejectedQuantity unitCode="BX">6</cbc:RejectedQuantity>
+		<cbc:RejectReason>Ambalaj yırtık, ürün dökülmüş (6 koli).</cbc:RejectReason>
+		<cac:OrderLineReference>
+			<cbc:LineID>3</cbc:LineID>
+		</cac:OrderLineReference>
+		<cac:DespatchLineReference>
+			<cbc:LineID>3</cbc:LineID>
+		</cac:DespatchLineReference>
+		<cac:Item>
+			<cbc:Description>6 x 2 kg</cbc:Description>
+			<cbc:Name>Baldo Pirinç 2 kg</cbc:Name>
+			<cac:SellersItemIdentification>
+				<cbc:ID>AG-3115</cbc:ID>
+			</cac:SellersItemIdentification>
+		</cac:Item>
+	</cac:ReceiptLine>
+	<cac:ReceiptLine>
+		<cbc:ID>4</cbc:ID>
+		<cbc:ReceivedQuantity unitCode="BX">54</cbc:ReceivedQuantity>
+		<cbc:OversupplyQuantity unitCode="BX">6</cbc:OversupplyQuantity>
+		<cac:OrderLineReference>
+			<cbc:LineID>4</cbc:LineID>
+		</cac:OrderLineReference>
+		<cac:DespatchLineReference>
+			<cbc:LineID>4</cbc:LineID>
+		</cac:DespatchLineReference>
+		<cac:Item>
+			<cbc:Description>12 x 830 g</cbc:Description>
+			<cbc:Name>Domates Salçası 830 g</cbc:Name>
+			<cac:SellersItemIdentification>
+				<cbc:ID>AG-4210</cbc:ID>
+			</cac:SellersItemIdentification>
+		</cac:Item>
+	</cac:ReceiptLine>
+	<cac:ReceiptLine>
+		<cbc:ID>5</cbc:ID>
+		<cbc:ReceivedQuantity unitCode="BX">40</cbc:ReceivedQuantity>
+		<cac:OrderLineReference>
+			<cbc:LineID>5</cbc:LineID>
+		</cac:OrderLineReference>
+		<cac:DespatchLineReference>
+			<cbc:LineID>5</cbc:LineID>
+		</cac:DespatchLineReference>
+		<cac:Item>
+			<cbc:Description>4 x 5 kg</cbc:Description>
+			<cbc:Name>Toz Şeker 5 kg</cbc:Name>
+			<cac:SellersItemIdentification>
+				<cbc:ID>AG-5002</cbc:ID>
+			</cac:SellersItemIdentification>
+		</cac:Item>
+	</cac:ReceiptLine>
+	<cac:ReceiptLine>
+		<cbc:ID>6</cbc:ID>
+		<cbc:Note>Kalan 10 koli 08.10.2026 sevkiyatında gelecek.</cbc:Note>
+		<cbc:ReceivedQuantity unitCode="BX">30</cbc:ReceivedQuantity>
+		<cbc:ShortQuantity unitCode="BX">10</cbc:ShortQuantity>
+		<cbc:RejectedQuantity unitCode="BX">2</cbc:RejectedQuantity>
+		<cbc:RejectReason>Son kullanma tarihine 30 günden az kalmış.</cbc:RejectReason>
+		<cac:OrderLineReference>
+			<cbc:LineID>6</cbc:LineID>
+		</cac:OrderLineReference>
+		<cac:DespatchLineReference>
+			<cbc:LineID>6</cbc:LineID>
+		</cac:DespatchLineReference>
+		<cac:Item>
+			<cbc:Description>12 x 1 kg</cbc:Description>
+			<cbc:Name>Siyah Çay 1 kg</cbc:Name>
+			<cac:SellersItemIdentification>
+				<cbc:ID>AG-6033</cbc:ID>
+			</cac:SellersItemIdentification>
+		</cac:Item>
+	</cac:ReceiptLine>
+	<cac:ReceiptLine>
+		<cbc:ID>7</cbc:ID>
+		<cbc:ReceivedQuantity unitCode="BX">24</cbc:ReceivedQuantity>
+		<cac:OrderLineReference>
+			<cbc:LineID>7</cbc:LineID>
+		</cac:OrderLineReference>
+		<cac:DespatchLineReference>
+			<cbc:LineID>7</cbc:LineID>
+		</cac:DespatchLineReference>
+		<cac:Item>
+			<cbc:Description>24 x 1 L</cbc:Description>
+			<cbc:Name>Doğal Kaynak Suyu 1 L</cbc:Name>
+			<cac:SellersItemIdentification>
+				<cbc:ID>AG-7008</cbc:ID>
+			</cac:SellersItemIdentification>
+		</cac:Item>
+	</cac:ReceiptLine>
+</ReceiptAdvice>
