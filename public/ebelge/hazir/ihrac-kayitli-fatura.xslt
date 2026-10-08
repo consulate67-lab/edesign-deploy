@@ -318,7 +318,7 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
                             </div>
                         </div>
                         <div class="k">
-                            <span class="no">18</span><span class="lb"><xsl:text>Ödeme · Banka Bilgileri</xsl:text></span>
+                            <span class="no">18</span><span class="lb"><xsl:choose><xsl:when test="$f/cac:PaymentMeans/cac:PayeeFinancialAccount"><xsl:text>Ödeme · Banka Bilgileri</xsl:text></xsl:when><xsl:otherwise><xsl:text>Ödeme</xsl:text></xsl:otherwise></xsl:choose></span>
                             <xsl:for-each select="$f/cac:PaymentMeans">
                                 <xsl:for-each select="cac:PayeeFinancialAccount">
                                     <div class="v"><xsl:call-template name="iban"><xsl:with-param name="i" select="cbc:ID"/></xsl:call-template></div>

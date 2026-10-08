@@ -327,6 +327,7 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
                                         </xsl:for-each>
                                     </ul>
                                 </div>
+                                <xsl:if test="/n1:Invoice/cac:PaymentMeans[cac:PayeeFinancialAccount]">
                                 <div class="kutu">
                                     <div class="k"><xsl:text>Banka Bilgileri</xsl:text></div>
                                     <xsl:for-each select="/n1:Invoice/cac:PaymentMeans[cac:PayeeFinancialAccount]">
@@ -335,6 +336,7 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
                                         <xsl:if test="cbc:PaymentDueDate"><div><xsl:text>Son ödeme: </xsl:text><b><xsl:call-template name="tarih"><xsl:with-param name="d" select="cbc:PaymentDueDate"/></xsl:call-template></b></div></xsl:if>
                                     </xsl:for-each>
                                 </div>
+                                </xsl:if>
                             </div>
                             <div class="sagblok">
                                 <table class="toplam">

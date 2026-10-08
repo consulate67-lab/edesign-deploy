@@ -200,6 +200,7 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
             <table class="bottom">
               <tr>
                 <td style="padding-right:10px">
+                  <xsl:if test="cac:PaymentMeans[cac:PayeeFinancialAccount/cbc:ID]">
                   <div class="box">
                     <div class="h">BANKA HESAPLARIMIZ</div>
                     <div class="b">
@@ -215,6 +216,7 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
                       </table>
                     </div>
                   </div>
+                  </xsl:if>
                   <div class="box">
                     <div class="h">ÖDEME KOŞULLARI</div>
                     <div class="b">

@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { LayoutTemplate, Search, Eye, X, Download, ArrowRight, Loader2, Code2, FileText, ChevronDown, Check, Building2, RotateCcw } from 'lucide-react';
+import { LayoutTemplate, Search, Eye, X, Download, ArrowRight, Loader2, Code2, FileText, ChevronDown, Check, Building2, RotateCcw, Image as ImageIcon, ImageOff, Landmark, Ban, SlidersHorizontal } from 'lucide-react';
 import { SECTOR_TEMPLATES, SECTORS, CATEGORIES, cachedDbTemplates, loadDbTemplates, type CategoryId, type SectorId, type SectorTemplate } from './index';
+import { loadPrefs, personalizeXslt, prefsKey, savePrefs, type TemplatePrefs } from './personalize';
+import { TemplateQuestions, type QuestionStep, type TemplateAnswers } from './TemplateQuestions';
 import { WIZARD_DOC_TYPES, loadXmlFile } from '../wizard/docTypes';
 import { stripLeadingBom } from '../xslt-editor/utils/testWatermark';
 import { transformXmlWithXslt } from '../xsltTransformer';
@@ -48,18 +50,19 @@ const loadPair = async (t: SectorTemplate) => {
 };
 
 /** Dönüşümler sırayla ve araya boşluk bırakılarak yapılır; çok kart aynı anda görünürken arayüz donmasın. */
-const renderHtml = (t: SectorTemplate): Promise<string> => {
-    let p = htmlCache.get(t.id);
+const renderHtml = (t: SectorTemplate, prefs: TemplatePrefs): Promise<string> => {
+    const key = `${t.id}|${prefsKey(prefs)}`;
+    let p = htmlCache.get(key);
     if (!p) {
         p = loadPair(t).then(({ xslt, xml }) => {
             const job = renderChain.then(() => new Promise<string>(resolve => {
-                setTimeout(() => resolve(transformXmlWithXslt(xml, xslt)), 0);
+                setTimeout(() => resolve(transformXmlWithXslt(xml, personalizeXslt(xslt, prefs))), 0);
             }));
             renderChain = job.catch(() => undefined);
             return job;
         });
-        p.catch(() => htmlCache.delete(t.id));
-        htmlCache.set(t.id, p);
+        p.catch(() => htmlCache.delete(key));
+        htmlCache.set(key, p);
     }
     return p;
 };
@@ -136,7 +139,7 @@ const Tags: React.FC<{ tags: string[]; color: string }> = ({ tags, color }) => (
 );
 
 /** Kart görünür olunca şablonu örnek XML'iyle çizer; iframe A4 genişliğinde render edilip karta sığacak şekilde küçültülür. */
-const Thumbnail: React.FC<{ t: SectorTemplate }> = ({ t }) => {
+const Thumbnail: React.FC<{ t: SectorTemplate; prefs: TemplatePrefs }> = ({ t, prefs }) => {
     const boxRef = useRef<HTMLDivElement>(null);
     const [visible, setVisible] = useState(false);
     const [width, setWidth] = useState(300);
@@ -161,11 +164,11 @@ const Thumbnail: React.FC<{ t: SectorTemplate }> = ({ t }) => {
     useEffect(() => {
         if (!visible) return;
         let alive = true;
-        renderHtml(t)
-            .then(h => { if (alive) setHtml(withCss(h, THUMB_CSS)); })
+        renderHtml(t, prefs)
+            .then(h => { if (alive) { setHtml(withCss(h, THUMB_CSS)); setFailed(false); } })
             .catch(() => { if (alive) setFailed(true); });
         return () => { alive = false; };
-    }, [visible, t]);
+    }, [visible, t, prefs]);
 
     const scale = width / PAGE_W;
     return (
@@ -203,11 +206,12 @@ const Thumbnail: React.FC<{ t: SectorTemplate }> = ({ t }) => {
 
 const TemplateCard: React.FC<{
     t: SectorTemplate;
+    prefs: TemplatePrefs;
     busy: boolean;
     error?: string;
     onPreview: () => void;
     onUse: () => void;
-}> = ({ t, busy, error, onPreview, onUse }) => {
+}> = ({ t, prefs, busy, error, onPreview, onUse }) => {
     const [hover, setHover] = useState(false);
     const sectorColor = SECTOR_BY_ID.get(t.sector)?.color ?? t.accent;
     return (
@@ -232,7 +236,7 @@ const TemplateCard: React.FC<{
         >
             <div style={{ height: 4, background: `linear-gradient(90deg, ${t.accent}, ${sectorColor})` }} />
             <div style={{ position: 'relative', borderBottom: `1px solid ${theme.border}` }}>
-                <Thumbnail t={t} />
+                <Thumbnail t={t} prefs={prefs} />
                 <div style={{ position: 'absolute', top: 10, left: 10, right: 10, display: 'flex', justifyContent: 'space-between', gap: 6, pointerEvents: 'none' }}>
                     <SectorChip sector={t.sector} />
                     <DocBadge docTypeId={t.docTypeId} />
@@ -294,11 +298,12 @@ const TemplateCard: React.FC<{
 
 const TemplateModal: React.FC<{
     t: SectorTemplate;
+    prefs: TemplatePrefs;
     busy: boolean;
     error?: string;
     onClose: () => void;
     onUse: () => void;
-}> = ({ t, busy, error, onClose, onUse }) => {
+}> = ({ t, prefs, busy, error, onClose, onUse }) => {
     const [tab, setTab] = useState<'preview' | 'xml'>('preview');
     const [html, setHtml] = useState<string | null>(null);
     const [xml, setXml] = useState<string | null>(null);
@@ -307,10 +312,10 @@ const TemplateModal: React.FC<{
 
     useEffect(() => {
         let alive = true;
-        renderHtml(t).then(h => { if (alive) setHtml(h); }).catch(e => { if (alive) setLoadError(errorText(e)); });
+        renderHtml(t, prefs).then(h => { if (alive) setHtml(h); }).catch(e => { if (alive) setLoadError(errorText(e)); });
         loadXml(t).then(x => { if (alive) setXml(x); }).catch(e => { if (alive) setLoadError(errorText(e)); });
         return () => { alive = false; };
-    }, [t]);
+    }, [t, prefs]);
 
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -554,6 +559,54 @@ const FilterDropdown: React.FC<{
     );
 };
 
+const ANSWERED_KEY = 'tpl_questions_done';
+
+const chipStyle: React.CSSProperties = {
+    display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 10px', borderRadius: 999, fontSize: '0.78rem', fontWeight: 700,
+    background: theme.surface, border: `1px solid ${theme.border}`, color: theme.text, whiteSpace: 'nowrap',
+};
+const linkBtn: React.CSSProperties = {
+    display: 'inline-flex', alignItems: 'center', gap: 5, background: 'none', border: 'none', color: theme.primary,
+    cursor: 'pointer', fontFamily: 'inherit', fontSize: '0.8rem', fontWeight: 700, padding: '4px 2px',
+};
+
+/** Seçilen logo / banka tercihlerinin özeti; şablonların tamamına uygulanır. */
+const PrefsBar: React.FC<{
+    prefs: TemplatePrefs;
+    onChangeLogo: () => void;
+    onClearBank: () => void;
+    onRestart: () => void;
+}> = ({ prefs, onChangeLogo, onClearBank, onRestart }) => (
+    <div data-template-prefs style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+        <span style={{ fontSize: '0.78rem', color: theme.textMuted, fontWeight: 700 }}>Tercihleriniz:</span>
+        <span style={chipStyle} data-pref-logo={prefs.logo.mode}>
+            {prefs.logo.mode === 'custom' ? (
+                <><img src={prefs.logo.dataUrl} alt="" style={{ height: 16, maxWidth: 40, objectFit: 'contain' }} /> Logonuz</>
+            ) : prefs.logo.mode === 'none' ? (
+                <><ImageOff size={13} color={theme.textMuted} /> Logosuz</>
+            ) : (
+                <><ImageIcon size={13} color={theme.textMuted} /> Örnek logo</>
+            )}
+        </span>
+        {prefs.bank !== 'any' && (
+            <span style={chipStyle} data-pref-bank={prefs.bank}>
+                {prefs.bank === 'yes'
+                    ? <><Landmark size={13} color="#0f766e" /> Banka / IBAN bilgili</>
+                    : <><Ban size={13} color="#b45309" /> Banka bilgisi yok</>}
+                <button type="button" aria-label="Banka tercihini kaldır" onClick={onClearBank} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', color: theme.textSubtle }}>
+                    <X size={12} />
+                </button>
+            </span>
+        )}
+        <button type="button" data-pref-change-logo onClick={onChangeLogo} style={linkBtn}>
+            <ImageIcon size={13} /> Logoyu değiştir
+        </button>
+        <button type="button" data-pref-restart onClick={onRestart} style={{ ...linkBtn, marginLeft: 'auto' }}>
+            <SlidersHorizontal size={13} /> Soruları yeniden yanıtla
+        </button>
+    </div>
+);
+
 /**
  * Sektöre göre hazır tasarım galerisi: arama kutusunun yanında Fatura tipi ve
  * Firma kategorisi filtreleri (başta "Tümü"), canlı küçük önizlemeli kartlar,
@@ -575,9 +628,30 @@ export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => 
         return () => { alive = false; };
     }, []);
 
+    const [prefs, setPrefs] = useState<TemplatePrefs>(loadPrefs);
+    const [asking, setAsking] = useState<QuestionStep | null>(() => (sessionStorage.getItem(ANSWERED_KEY) ? null : 'doc'));
+
+    const answerDone = (a: TemplateAnswers) => {
+        setDocType(a.docType);
+        setCompany(a.category ? `c:${a.category}` : '');
+        setQuery('');
+        setPrefs(a.prefs);
+        savePrefs(a.prefs);
+        sessionStorage.setItem(ANSWERED_KEY, '1');
+        setAsking(null);
+    };
+    const skipQuestions = () => {
+        sessionStorage.setItem(ANSWERED_KEY, '1');
+        setAsking(null);
+    };
+    const updatePrefs = (p: TemplatePrefs) => { setPrefs(p); savePrefs(p); };
+
     const allTemplates = useMemo(() => [...dbTemplates, ...SECTOR_TEMPLATES], [dbTemplates]);
     const q = lower(query.trim());
-    const searched = useMemo(() => allTemplates.filter(t => matchesQuery(t, q)), [allTemplates, q]);
+    const searched = useMemo(
+        () => allTemplates.filter(t => matchesQuery(t, q) && (prefs.bank !== 'yes' || t.bank)),
+        [allTemplates, q, prefs.bank],
+    );
     const byCompany = useMemo(() => searched.filter(t => matchesCompany(t, company)), [searched, company]);
     const byDoc = useMemo(() => searched.filter(t => !docType || t.docTypeId === docType), [searched, docType]);
     const filtered = useMemo(() => byCompany.filter(t => !docType || t.docTypeId === docType), [byCompany, docType]);
@@ -598,7 +672,7 @@ export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => 
         });
         try {
             const { xslt, xml } = await loadPair(t);
-            onUse?.(t.moduleId, xslt, t.name, xml);
+            onUse?.(t.moduleId, personalizeXslt(xslt, prefs), t.name, xml);
         } catch (e) {
             setErrors(prev => ({ ...prev, [t.id]: errorText(e) }));
         } finally {
@@ -632,10 +706,27 @@ export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => 
                 <div style={{ flex: 1, minWidth: 0 }}>
                     <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>Sektörünüze Hazır Şablonlar</h2>
                     <p style={{ margin: '4px 0 0', color: theme.textMuted, fontSize: 14, lineHeight: 1.5 }}>
-                        Fatura tipini ve firma kategorinizi seçin; hazır tasarımı önizleyip tek tıkla tasarım ekranında açın.
+                        Birkaç soruyu yanıtlayın; size uygun şablonları logonuzla birlikte gösterelim ve tek tıkla tasarım ekranında açın.
                     </p>
                 </div>
             </div>
+
+            {asking ? (
+                <TemplateQuestions
+                    key={asking}
+                    templates={allTemplates}
+                    initial={{ docType, category: company.startsWith('c:') ? company.slice(2) : '', prefs }}
+                    startStep={asking}
+                    onDone={answerDone}
+                    onSkip={skipQuestions}
+                />
+            ) : (<>
+            <PrefsBar
+                prefs={prefs}
+                onChangeLogo={() => setAsking('logo')}
+                onClearBank={() => updatePrefs({ ...prefs, bank: 'any' })}
+                onRestart={() => setAsking('doc')}
+            />
 
             <div data-template-toolbar style={{
                 display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 16, padding: 10,
@@ -701,6 +792,7 @@ export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => 
                         <TemplateCard
                             key={t.id}
                             t={t}
+                            prefs={prefs}
                             busy={busyId === t.id}
                             error={errors[t.id]}
                             onPreview={() => setPreviewId(t.id)}
@@ -718,12 +810,26 @@ export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => 
                     >
                         Filtreleri temizle
                     </button>
+                    {prefs.bank === 'yes' && (
+                        <>
+                            {' · '}
+                            <button
+                                type="button"
+                                onClick={() => updatePrefs({ ...prefs, bank: 'any' })}
+                                style={{ background: 'none', border: 'none', color: theme.primary, cursor: 'pointer', fontFamily: 'inherit', fontSize: 'inherit', textDecoration: 'underline' }}
+                            >
+                                Banka bilgisi şartını kaldır
+                            </button>
+                        </>
+                    )}
                 </div>
             )}
+            </>)}
 
             {previewTemplate && (
                 <TemplateModal
                     t={previewTemplate}
+                    prefs={prefs}
                     busy={busyId === previewTemplate.id}
                     error={errors[previewTemplate.id]}
                     onClose={() => setPreviewId(null)}

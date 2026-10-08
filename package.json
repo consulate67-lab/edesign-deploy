@@ -9,6 +9,7 @@
     "build": "echo 'backend-only deploy, skipping frontend build' && exit 0",
     "build:frontend": "tsc -p tsconfig.app.json && vite build",
     "gen:xslt-defaults": "node scripts/gen-xslt-defaults.cjs",
+    "gen:template-features": "node scripts/gen-template-features.mjs",
     "start": "node server/index.js",
     "server:dev": "node --watch server/index.js",
     "lint": "eslint .",

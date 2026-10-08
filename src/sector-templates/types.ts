@@ -81,6 +81,8 @@ export interface SectorTemplate {
     inline?: { xslt: string; xml: string };
     /** 'admin': veritabanı galerisinden (yönetim paneli); verilmezse public/ altındaki hazır şablon. */
     source?: 'static' | 'admin';
+    /** Şablonda banka / IBAN bloğu var mı (index.ts doldurur). */
+    bank?: boolean;
 }
 
 export const CATEGORIES: CategoryInfo[] = [

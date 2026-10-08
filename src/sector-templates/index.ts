@@ -10,6 +10,8 @@ import { YANIT_TEMPLATES } from './groups/yanit';
 import { API_URL } from '../api';
 import type { GalleryDesign } from '../admin/contracts';
 import { SECTORS, type SectorId, type SectorTemplate } from './types';
+import { BANK_TEMPLATE_IDS } from './features.generated';
+import { hasStaticBank } from './personalize';
 
 export * from './types';
 
@@ -23,7 +25,7 @@ export const SECTOR_TEMPLATES: SectorTemplate[] = [
     ...SANAYI_TEMPLATES,
     ...SANAYI2_TEMPLATES,
     ...YANIT_TEMPLATES,
-];
+].map(t => ({ ...t, bank: BANK_TEMPLATE_IDS.has(t.id) }));
 
 const toTemplate = (d: GalleryDesign): SectorTemplate => {
     const id = `db-${d.id}`;
@@ -41,6 +43,7 @@ const toTemplate = (d: GalleryDesign): SectorTemplate => {
         tags: Array.isArray(d.tags) ? d.tags : [],
         inline: { xslt: d.xslt, xml: d.xml },
         source: 'admin',
+        bank: (/cac:PayeeFinancialAccount/.test(d.xslt) && /PayeeFinancialAccount/.test(d.xml)) || hasStaticBank(d.xslt),
     };
 };
 
