@@ -126,7 +126,7 @@ export const buildSeedKb = (packages) => {
             id: 's-sablon-logo',
             q: 'Hazır şablonları kendi logomla görebilir miyim? Banka bilgisi olmayan şablon var mı?',
             keywords: 'hazir sablon logo logomu yukle onizleme banka iban olmasin olsun soru sorular tercih logosuz',
-            a: '**Sektörünüze Hazır Şablonlar** bölümündeki sorularda logonuzu yükleyebilirsiniz; tüm şablon önizlemeleri ve açtığınız tasarım logonuzla gelir. **Örnek logo kalsın** ya da **Logo kullanmayacağım** da seçebilirsiniz.\n- Banka sorusunda **Evet** derseniz yalnızca banka/IBAN bölümü olan şablonlar listelenir; **Hayır** derseniz banka bölümü şablonlardan kaldırılır.\n- Tercihlerinizi listenin üstündeki **Logoyu değiştir** ve **Soruları yeniden yanıtla** düğmeleriyle değiştirebilirsiniz.',
+            a: '**Sektörünüze Hazır Şablonlar** bölümündeki sorularda logonuzu yükleyebilirsiniz; tüm şablon önizlemeleri ve açtığınız tasarım logonuzla gelir. **Örnek logo kalsın** ya da **Logo kullanmayacağım** da seçebilirsiniz.\n- Banka sorusunda **Evet** derseniz yalnızca banka/IBAN bölümü olan şablonlar listelenir; **Hayır** derseniz banka bölümü şablonlardan kaldırılır.\n- Tercihlerinizi listenin üstündeki **Logoyu değiştir** ve **Dizaynımı hazırla** düğmeleriyle değiştirebilirsiniz.',
             actions: ['register'],
         },
         {

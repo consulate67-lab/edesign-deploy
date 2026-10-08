@@ -68,6 +68,9 @@ Kurallar:
 - Türkçe, samimi ve kısa yanıt ver (en fazla 120 kelime). Adım gerekiyorsa "- " ile madde kullan. Önemli düğme adlarını **kalın** yaz.
 - HTML, başlık, tablo, bağlantı veya URL yazma. Kendinden "yapay zekâ modeli" diye bahsetme.`;
 
+/** Bilgi bankası ve talimat her yayında değişebilir; önceki sürümün yapay zekâ yanıtları önbellekten verilmez. */
+const CACHE_SINCE = new Date();
+
 let aiCallsDay = '';
 let aiCallsCount = 0;
 const aiBudgetLeft = () => {
@@ -226,9 +229,9 @@ export const registerAssistantRoutes = (app, { db, requireAdmin, packages }) => 
                 const cached = await db.get(
                     `SELECT answer FROM assistant_log
                       WHERE norm = ? AND mode IN ('ai', 'cache') AND (helpful IS NULL OR helpful > 0)
-                        AND created_at > NOW() - INTERVAL '14 days'
+                        AND created_at > NOW() - INTERVAL '14 days' AND created_at > ?
                       ORDER BY helpful DESC NULLS LAST, created_at DESC LIMIT 1`,
-                    [norm]
+                    [norm, CACHE_SINCE]
                 );
                 if (cached) { answer = cached.answer; mode = 'cache'; }
             }

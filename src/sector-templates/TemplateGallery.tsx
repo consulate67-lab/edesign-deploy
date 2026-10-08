@@ -602,7 +602,7 @@ const PrefsBar: React.FC<{
             <ImageIcon size={13} /> Logoyu değiştir
         </button>
         <button type="button" data-pref-restart onClick={onRestart} style={{ ...linkBtn, marginLeft: 'auto' }}>
-            <SlidersHorizontal size={13} /> Soruları yeniden yanıtla
+            <SlidersHorizontal size={13} /> Dizaynımı hazırla
         </button>
     </div>
 );
