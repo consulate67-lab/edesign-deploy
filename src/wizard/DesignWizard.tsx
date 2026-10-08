@@ -4,6 +4,7 @@ import { WIZARD_DOC_TYPES, FAMILY_INFO, loadSampleXml, loadXmlFile, type WizardD
 import { validateXslt, validateXml, stripBom, type ValidationResult } from './validate';
 import { designKeyOf } from '../api';
 import { hasTestWatermark, stripTestWatermark } from '../xslt-editor/utils/testWatermark';
+import { theme } from '../theme';
 
 export interface WizardResult {
     moduleId: string;
@@ -17,13 +18,17 @@ interface LoadedFile { name: string; size: number; text: string; result: Validat
 const MAX_BYTES = 5 * 1024 * 1024;
 const STEPS = ['Belge türü', 'Tasarım (XSLT)', 'Veri (XML)'];
 
-const card = (active: boolean, color = '#6366f1'): React.CSSProperties => ({
-    background: active ? `${color}22` : 'rgba(30, 41, 59, 0.45)',
-    border: `1px solid ${active ? color : 'rgba(255,255,255,0.08)'}`,
-    borderRadius: 14, padding: '14px 16px', cursor: 'pointer', color: 'white',
+const card = (active: boolean, color: string = theme.primary): React.CSSProperties => ({
+    background: active ? `${color}14` : theme.surface,
+    border: `1px solid ${active ? color : theme.border}`,
+    borderRadius: 14, padding: '14px 16px', cursor: 'pointer', color: theme.text,
     textAlign: 'left', fontFamily: 'inherit', transition: 'all 0.15s', width: '100%',
-    boxShadow: active ? `0 0 0 3px ${color}33` : 'none',
+    boxShadow: active ? `0 0 0 3px ${color}33` : theme.shadowSm,
 });
+
+const well: React.CSSProperties = {
+    background: theme.surfaceAlt, border: `1px solid ${theme.border}`, borderRadius: 12, padding: 12,
+};
 
 const readFile = (file: File): Promise<string> => new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -37,7 +42,7 @@ const CheckList: React.FC<{ result: ValidationResult }> = ({ result }) => (
         {result.checks.map((c, i) => (
             <div key={i} style={{
                 display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13,
-                color: c.level === 'ok' ? '#6ee7b7' : c.level === 'warn' ? '#fcd34d' : '#fca5a5',
+                color: c.level === 'ok' ? theme.greenText : c.level === 'warn' ? '#b45309' : theme.redText,
             }}>
                 {c.level === 'ok' ? <Check size={16} style={{ flexShrink: 0 }} /> : c.level === 'warn' ? <AlertTriangle size={16} style={{ flexShrink: 0 }} /> : <XCircle size={16} style={{ flexShrink: 0 }} />}
                 <span>{c.text}</span>
@@ -47,8 +52,8 @@ const CheckList: React.FC<{ result: ValidationResult }> = ({ result }) => (
             <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '4px 14px', marginTop: 8, fontSize: 12 }}>
                 {result.info.map(([k, v]) => (
                     <React.Fragment key={k}>
-                        <span style={{ color: '#64748b' }}>{k}</span>
-                        <span style={{ color: '#e2e8f0', wordBreak: 'break-word' }}>{v}</span>
+                        <span style={{ color: theme.textSubtle }}>{k}</span>
+                        <span style={{ color: theme.text, wordBreak: 'break-word' }}>{v}</span>
                     </React.Fragment>
                 ))}
             </div>
@@ -75,31 +80,31 @@ const FilePanel: React.FC<{
                 onDragLeave={() => setOver(false)}
                 onDrop={(e) => { e.preventDefault(); setOver(false); const f = e.dataTransfer.files?.[0]; if (f) onFile(f); }}
                 style={{
-                    border: `2px dashed ${over ? '#6366f1' : 'rgba(148,163,184,0.3)'}`, borderRadius: 14,
-                    padding: '22px 16px', textAlign: 'center', cursor: 'pointer', color: '#94a3b8',
-                    background: over ? 'rgba(99,102,241,0.08)' : 'rgba(15,23,42,0.4)',
+                    border: `2px dashed ${over ? theme.primary : theme.borderStrong}`, borderRadius: 14,
+                    padding: '22px 16px', textAlign: 'center', cursor: 'pointer', color: theme.textMuted,
+                    background: over ? theme.surfaceTint : theme.surfaceAlt,
                 }}
             >
-                {busy ? <Loader2 size={26} /> : <Upload size={26} />}
-                <div style={{ marginTop: 8, fontSize: 14, color: '#e2e8f0', fontWeight: 600 }}>
+                {busy ? <Loader2 size={26} color={theme.primary} /> : <Upload size={26} color={theme.primary} />}
+                <div style={{ marginTop: 8, fontSize: 14, color: theme.text, fontWeight: 600 }}>
                     {file ? 'Başka dosya seç' : 'Dosya seçin veya buraya sürükleyin'}
                 </div>
                 <div style={{ fontSize: 12, marginTop: 4 }}>{hint}</div>
             </div>
             {file && (
                 <div style={{ marginTop: 14, display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 14 }}>
-                    <div style={{ background: 'rgba(15,23,42,0.6)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: 12, minWidth: 0 }}>
+                    <div style={{ ...well, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 700, marginBottom: 8 }}>
-                            <FileCode size={16} color="#a5b4fc" />
+                            <FileCode size={16} color={theme.primary} />
                             <span data-wizard-file-name style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{file.name}</span>
-                            <span style={{ color: '#64748b', fontWeight: 400, marginLeft: 'auto', flexShrink: 0 }}>{(file.size / 1024).toFixed(1)} KB</span>
+                            <span style={{ color: theme.textSubtle, fontWeight: 400, marginLeft: 'auto', flexShrink: 0 }}>{(file.size / 1024).toFixed(1)} KB</span>
                         </div>
                         <pre style={{
                             margin: 0, maxHeight: 220, overflow: 'auto', fontSize: 11, lineHeight: 1.45,
-                            color: '#cbd5e1', background: '#020617', borderRadius: 8, padding: 10, whiteSpace: 'pre',
+                            color: theme.textMuted, background: theme.surface, border: `1px solid ${theme.border}`, borderRadius: 8, padding: 10, whiteSpace: 'pre',
                         }}>{stripBom(file.text).split('\n').slice(0, 40).join('\n')}</pre>
                     </div>
-                    <div style={{ background: 'rgba(15,23,42,0.6)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: 12 }}>
+                    <div style={well}>
                         <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 10 }}>Uygunluk kontrolü</div>
                         <CheckList result={file.result} />
                     </div>
@@ -230,20 +235,20 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
     const sectionTitle = (t: string, sub: string) => (
         <div style={{ marginBottom: 18 }}>
             <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>{t}</h2>
-            <p style={{ margin: '4px 0 0', color: '#94a3b8', fontSize: 14 }}>{sub}</p>
+            <p style={{ margin: '4px 0 0', color: theme.textMuted, fontSize: 14 }}>{sub}</p>
         </div>
     );
 
     return (
         <div data-design-wizard data-wizard-step={step} style={{
-            width: '100%', background: 'rgba(15, 23, 42, 0.7)', border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: 24, padding: '28px 28px 22px', boxShadow: '0 24px 60px rgba(0,0,0,0.35)', color: 'white',
+            width: '100%', background: theme.surface, border: `1px solid ${theme.border}`,
+            borderRadius: 24, padding: '28px 28px 22px', boxShadow: theme.shadow, color: theme.text,
         }}>
             <div style={{ display: 'flex', gap: 8, marginBottom: 26 }}>
                 {STEPS.map((s, i) => (
                     <div key={s} style={{ flex: 1 }}>
-                        <div style={{ height: 4, borderRadius: 4, background: i <= step ? 'linear-gradient(90deg,#6366f1,#0ea5e9)' : 'rgba(148,163,184,0.2)' }} />
-                        <div style={{ marginTop: 6, fontSize: 12, fontWeight: 700, color: i === step ? '#e2e8f0' : '#64748b' }}>
+                        <div style={{ height: 4, borderRadius: 4, background: i <= step ? theme.gradient : theme.border }} />
+                        <div style={{ marginTop: 6, fontSize: 12, fontWeight: 700, color: i === step ? theme.primary : theme.textSubtle }}>
                             {i + 1}. {s}{i < step && i === 0 && docType ? ` · ${docType.label}` : ''}
                         </div>
                     </div>
@@ -262,7 +267,7 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
                                     </div>
                                     <div>
                                         <div style={{ fontWeight: 700, fontSize: 15 }}>{t.label}</div>
-                                        <div style={{ color: '#94a3b8', fontSize: 12 }}>{t.description}</div>
+                                        <div style={{ color: theme.textMuted, fontSize: 12 }}>{t.description}</div>
                                     </div>
                                 </div>
                             </button>
@@ -278,10 +283,10 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
                         {docType.defaults.map(d => (
                             <button key={d.id} type="button" data-xslt-option={d.id} onClick={() => setXsltChoice(d.id)} style={card(xsltChoice === d.id, docType.color)}>
                                 <div style={{ fontWeight: 700, fontSize: 14, display: 'flex', alignItems: 'center', gap: 6 }}>
-                                    {xsltChoice === d.id && <Check size={15} color="#6ee7b7" />}{d.label}
+                                    {xsltChoice === d.id && <Check size={15} color={theme.green} />}{d.label}
                                 </div>
-                                <div style={{ color: '#94a3b8', fontSize: 12, marginTop: 3 }}>{d.description}</div>
-                                <div style={{ color: '#64748b', fontSize: 11, marginTop: 6 }}>Varsayılan şablon</div>
+                                <div style={{ color: theme.textMuted, fontSize: 12, marginTop: 3 }}>{d.description}</div>
+                                <div style={{ color: theme.textSubtle, fontSize: 11, marginTop: 6 }}>Varsayılan şablon</div>
                             </button>
                         ))}
                     </div>
@@ -289,7 +294,7 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
                         <div style={{ fontWeight: 700, fontSize: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
                             <Upload size={16} /> Kendi XSLT dosyamı kullan
                         </div>
-                        <div style={{ color: '#94a3b8', fontSize: 12, marginTop: 3 }}>
+                        <div style={{ color: theme.textMuted, fontSize: 12, marginTop: 3 }}>
                             Dosyanız {FAMILY_INFO[docType.family].label} yapısına ve {docType.label} türüne uygunluk için kontrol edilir.
                         </div>
                     </button>
@@ -299,7 +304,7 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
                     {xsltChoice === 'own' && ownXslt && ownXsltWasTest && (
                         <div data-test-file-note style={{
                             marginTop: 10, padding: '10px 12px', borderRadius: 10, fontSize: 12, lineHeight: 1.5,
-                            background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.35)', color: '#fde68a',
+                            background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.35)', color: '#b45309',
                         }}>
                             Bu bir TEST dosyası. TEST yazısı editörde kaldırıldı; tasarıma kaldığınız yerden devam edebilirsiniz.
                             Bitirdiğinizde "Onayla" ile TEST yazısız dosyayı alırsınız; onaydan sonra tasarım değiştirilemez.
@@ -315,7 +320,7 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
                         <div style={{ fontWeight: 700, fontSize: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
                             <Database size={16} /> Varsayılan örnek XML
                         </div>
-                        <div style={{ color: '#94a3b8', fontSize: 12, marginTop: 3 }}>{docType.label} için hazır örnek belge ({docType.sampleXml.split('/').pop()})</div>
+                        <div style={{ color: theme.textMuted, fontSize: 12, marginTop: 3 }}>{docType.label} için hazır örnek belge ({docType.sampleXml.split('/').pop()})</div>
                         {xmlChoice === 'default' && defaultXmlResult && <div style={{ marginTop: 10 }}><CheckList result={defaultXmlResult} /></div>}
                     </button>
                     {docType.officialSamples && docType.officialSamples.length > 0 && (
@@ -324,7 +329,7 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
                                 <div style={{ fontWeight: 700, fontSize: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
                                     <Landmark size={16} /> GİB resmi örnek belgeler ({docType.officialSamples.length})
                                 </div>
-                                <div style={{ color: '#94a3b8', fontSize: 12, marginTop: 3 }}>
+                                <div style={{ color: theme.textMuted, fontSize: 12, marginTop: 3 }}>
                                     {docType.officialNote ?? 'UBL-TR 1.2.1 ve e-Fatura paketindeki senaryo / tip örnekleri; tasarımınızı özel durumlarla deneyin.'}
                                 </div>
                             </button>
@@ -337,15 +342,15 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
                                                 <button key={s.file} type="button" data-gib-sample={s.file.split('/').pop()} disabled={busy} onClick={() => pickOfficial(s)}
                                                     style={{ ...card(active, '#0ea5e9'), padding: '9px 12px', borderRadius: 10 }}>
                                                     <div style={{ fontWeight: 600, fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
-                                                        {active && <Check size={14} color="#6ee7b7" />}{s.label}
+                                                        {active && <Check size={14} color={theme.green} />}{s.label}
                                                     </div>
-                                                    <div style={{ color: '#64748b', fontSize: 11, marginTop: 2 }}>{s.tag}</div>
+                                                    <div style={{ color: theme.textSubtle, fontSize: 11, marginTop: 2 }}>{s.tag}</div>
                                                 </button>
                                             );
                                         })}
                                     </div>
                                     {gibXml && (
-                                        <div style={{ marginTop: 12, background: 'rgba(15,23,42,0.6)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: 12 }}>
+                                        <div style={{ ...well, marginTop: 12 }}>
                                             <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 10 }}>Uygunluk kontrolü · {gibXml.name}</div>
                                             <CheckList result={gibXml.result} />
                                         </div>
@@ -358,7 +363,7 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
                         <div style={{ fontWeight: 700, fontSize: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
                             <Upload size={16} /> Kendi XML dosyamı seç
                         </div>
-                        <div style={{ color: '#94a3b8', fontSize: 12, marginTop: 3 }}>
+                        <div style={{ color: theme.textMuted, fontSize: 12, marginTop: 3 }}>
                             Gerçek bir {docType.label} XML’i ({FAMILY_INFO[docType.family].root}) yükleyin; seçtiğiniz şablonla denenir.
                         </div>
                     </button>
@@ -368,23 +373,24 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
                 </>
             )}
 
-            {error && <div style={{ marginTop: 14, color: '#fca5a5', fontSize: 13 }}>{error}</div>}
+            {error && <div style={{ marginTop: 14, color: theme.redText, fontSize: 13 }}>{error}</div>}
 
             <div data-wizard-footer style={{
                 display: 'flex', justifyContent: 'space-between', marginTop: 24,
                 position: 'sticky', bottom: 0, zIndex: 5, padding: '14px 0 12px',
-                background: 'linear-gradient(180deg, rgba(15,23,42,0) 0%, #111a2e 28%)',
+                background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, #ffffff 28%)',
             }}>
                 <button type="button" data-wizard-back disabled={step === 0} onClick={() => { setError(null); setStep(s => Math.max(0, s - 1)); }}
-                    style={{ padding: '10px 18px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.12)', background: 'transparent', color: step === 0 ? '#475569' : '#cbd5e1', cursor: step === 0 ? 'default' : 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'inherit' }}>
+                    style={{ padding: '10px 18px', borderRadius: 10, border: `1px solid ${theme.borderStrong}`, background: theme.surface, color: step === 0 ? theme.borderStrong : theme.text, cursor: step === 0 ? 'default' : 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'inherit' }}>
                     <ArrowLeft size={16} /> Geri
                 </button>
                 {step > 0 && (
                     <button type="button" data-wizard-next disabled={!canNext || busy} onClick={step === 1 ? goToData : finish}
                         style={{
                             padding: '10px 22px', borderRadius: 10, border: 'none', fontWeight: 700, fontFamily: 'inherit',
-                            background: canNext && !busy ? 'linear-gradient(135deg,#6366f1,#0ea5e9)' : 'rgba(148,163,184,0.2)',
-                            color: canNext && !busy ? 'white' : '#64748b', cursor: canNext && !busy ? 'pointer' : 'default',
+                            background: canNext && !busy ? theme.gradient : theme.surfaceAlt,
+                            boxShadow: canNext && !busy ? theme.shadowBrand : 'none',
+                            color: canNext && !busy ? 'white' : theme.textSubtle, cursor: canNext && !busy ? 'pointer' : 'default',
                             display: 'flex', alignItems: 'center', gap: 6,
                         }}>
                         {busy ? <Loader2 size={16} /> : null}

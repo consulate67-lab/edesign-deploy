@@ -4,6 +4,7 @@ import { api } from './api';
 import { ToastHost } from './store/ToastHost.tsx';
 import { useUiStore } from './store/uiStore';
 import { Landing } from './Landing.tsx';
+import { theme } from './theme';
 
 // Route-level code splitting: each screen ships in its own chunk so the
 // initial bundle stays small. The designer (~150KB after minify) is the
@@ -24,13 +25,15 @@ const SupportWidget = lazy(() => import('./support/SupportWidget').then((m) => (
 
 const isAdminHash = () => /^#\/(yonetim|admin)(\/|$)/i.test(window.location.hash);
 
-const ScreenFallback: React.FC = () => (
+const ScreenFallback: React.FC<{ light?: boolean }> = ({ light }) => (
     <div
         style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            minHeight: '60vh',
+            minHeight: light ? '100vh' : '60vh',
+            width: light ? '100%' : undefined,
+            background: light ? theme.bg : undefined,
             color: '#64748b',
             fontSize: 14,
         }}
@@ -211,7 +214,7 @@ const App: React.FC = () => {
                     <SupportWidget />
                 </Suspense>
             )}
-            <Suspense fallback={<ScreenFallback />}>
+            <Suspense fallback={<ScreenFallback light />}>
                 {view === 'landing' && (
                     <Landing onRegister={handleRegister} onLogin={handleLogin} />
                 )}

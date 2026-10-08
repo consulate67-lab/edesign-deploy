@@ -9,17 +9,18 @@
  */
 
 import React from 'react';
+import { theme } from '../theme';
 
 const baseTextStyle: React.CSSProperties = {
     fontSize: '14px',
     lineHeight: 1.6,
-    color: '#cbd5e1',
+    color: theme.textMuted,
 };
 
 const sectionTitleStyle: React.CSSProperties = {
     fontSize: '18px',
     fontWeight: 700,
-    color: '#f1f5f9',
+    color: theme.text,
     marginTop: '24px',
     marginBottom: '8px',
 };
@@ -86,7 +87,7 @@ export const KVKKModal: React.FC<{ onClose: () => void }> = ({ onClose }) => (
             yazılı talep ile başvurabilirsiniz.
         </p>
 
-        <p style={{ ...baseTextStyle, marginTop: '24px', fontSize: '12px', color: '#64748b' }}>
+        <p style={{ ...baseTextStyle, marginTop: '24px', fontSize: '12px', color: theme.textSubtle }}>
             Son güncelleme: 2026-10-02 · Bu metin taslak niteliğindedir, kesin metin için
             şirket avukatınıza danışın.
         </p>
@@ -148,7 +149,7 @@ export const KullaniciSozlesmesiModal: React.FC<{ onClose: () => void }> = ({ on
             Değişiklikler Platform'da yayımlandığı tarihte yürürlüğe girer.
         </p>
 
-        <p style={{ ...baseTextStyle, marginTop: '24px', fontSize: '12px', color: '#64748b' }}>
+        <p style={{ ...baseTextStyle, marginTop: '24px', fontSize: '12px', color: theme.textSubtle }}>
             Son güncelleme: 2026-10-02 · Taslak metin.
         </p>
     </LegalModal>
@@ -183,7 +184,7 @@ export const CerezPolitikasiModal: React.FC<{ onClose: () => void }> = ({ onClos
             devre dışı bırakılması Platform'un düzgün çalışmamasına neden olabilir.
         </p>
 
-        <p style={{ ...baseTextStyle, marginTop: '24px', fontSize: '12px', color: '#64748b' }}>
+        <p style={{ ...baseTextStyle, marginTop: '24px', fontSize: '12px', color: theme.textSubtle }}>
             Son güncelleme: 2026-10-02.
         </p>
     </LegalModal>
@@ -207,7 +208,7 @@ const LegalModal: React.FC<LegalModalProps> = ({ title, children, onClose }) => 
         style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(15, 23, 42, 0.85)',
+            background: 'rgba(15, 23, 42, 0.45)',
             backdropFilter: 'blur(8px)',
             display: 'flex',
             alignItems: 'center',
@@ -219,28 +220,28 @@ const LegalModal: React.FC<LegalModalProps> = ({ title, children, onClose }) => 
         <div
             onClick={(e) => e.stopPropagation()}
             style={{
-                background: '#1e293b',
-                borderRadius: '16px',
-                border: '1px solid #334155',
+                background: theme.surface,
+                borderRadius: '20px',
+                border: `1px solid ${theme.border}`,
                 maxWidth: '720px',
                 maxHeight: '85vh',
                 width: '100%',
                 overflowY: 'auto',
                 padding: '32px',
-                color: 'white',
-                boxShadow: '0 25px 50px rgba(0,0,0,0.5)',
+                color: theme.text,
+                boxShadow: theme.shadowLg,
             }}
         >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-                <h1 style={{ fontSize: '24px', fontWeight: 800, margin: 0, color: '#f1f5f9' }}>{title}</h1>
+                <h1 style={{ fontSize: '24px', fontWeight: 800, margin: 0, color: theme.text }}>{title}</h1>
                 <button
                     onClick={onClose}
                     aria-label="Kapat"
                     style={{
-                        background: 'transparent',
-                        border: '1px solid #475569',
+                        background: theme.surface,
+                        border: `1px solid ${theme.borderStrong}`,
                         borderRadius: '8px',
-                        color: '#cbd5e1',
+                        color: theme.textMuted,
                         cursor: 'pointer',
                         padding: '6px 12px',
                         fontSize: '14px',

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from 'react';
 import type { CobrowseController } from './CobrowseClient';
+import { theme } from '../../theme';
 
 const FONT = 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
 
@@ -12,7 +13,7 @@ const KEYFRAMES = `
 const pill: CSSProperties = {
     position: 'fixed', top: 12, left: '50%', transform: 'translateX(-50%)', zIndex: 2147483001,
     display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px 8px 14px', borderRadius: 999,
-    background: '#1f2937', color: '#fff', font: `500 13px/1.3 ${FONT}`, boxShadow: '0 8px 24px rgba(0,0,0,.25)',
+    background: theme.gradient, color: '#fff', font: `500 13px/1.3 ${FONT}`, boxShadow: theme.shadowBrand,
     animation: 'cobrowse-in 160ms ease-out', maxWidth: 'calc(100vw - 24px)',
 };
 
@@ -60,7 +61,7 @@ export function CobrowseOverlay({ controller }: { controller: CobrowseController
             {s.notice && s.phase === 'idle' && (
                 <div style={pill} role="status">
                     <span>{s.notice}</span>
-                    <button type="button" style={btn('transparent', '#d1d5db')} onClick={controller.dismissNotice} aria-label="Kapat">✕</button>
+                    <button type="button" style={btn('transparent', 'rgba(255,255,255,.85)')} onClick={controller.dismissNotice} aria-label="Kapat">✕</button>
                 </div>
             )}
 
@@ -68,30 +69,30 @@ export function CobrowseOverlay({ controller }: { controller: CobrowseController
                 <div style={pill} role="status">
                     <Spinner />
                     <span>{s.phase === 'waiting' ? 'Destek ekibi bekleniyor…' : `${s.adminName || 'Destek ekibi'} bağlanıyor…`}</span>
-                    <button type="button" style={btn('#374151')} onClick={controller.cancelWaiting}>İptal</button>
+                    <button type="button" style={btn('rgba(255,255,255,.2)')} onClick={controller.cancelWaiting}>İptal</button>
                 </div>
             )}
 
             {s.phase === 'invite' && (
-                <div style={{ position: 'fixed', inset: 0, zIndex: 2147483002, background: 'rgba(15,23,42,.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+                <div style={{ position: 'fixed', inset: 0, zIndex: 2147483002, background: 'rgba(15,23,42,.45)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
                     <div role="dialog" aria-modal="true" aria-labelledby="cobrowse-consent-title"
-                        style={{ width: 'min(440px, 100%)', background: '#fff', color: '#111827', borderRadius: 14, padding: 22, boxShadow: '0 20px 60px rgba(0,0,0,.35)', font: `14px/1.5 ${FONT}` }}>
+                        style={{ width: 'min(440px, 100%)', background: theme.surface, color: theme.text, border: `1px solid ${theme.border}`, borderRadius: 16, padding: 22, boxShadow: theme.shadowLg, font: `14px/1.5 ${FONT}` }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                            <span style={{ width: 36, height: 36, borderRadius: 10, background: '#fff7ed', color: '#ea580c', display: 'grid', placeItems: 'center', fontSize: 20 }}>🖥️</span>
+                            <span style={{ width: 36, height: 36, borderRadius: 10, background: theme.primarySoft, color: theme.primary, display: 'grid', placeItems: 'center', fontSize: 20 }}>🖥️</span>
                             <div>
                                 <div id="cobrowse-consent-title" style={{ fontWeight: 700, fontSize: 16 }}>Canlı destek isteği</div>
-                                {s.adminName && <div style={{ color: '#6b7280', fontSize: 12 }}>{s.adminName} · Destek ekibi</div>}
+                                {s.adminName && <div style={{ color: theme.textSubtle, fontSize: 12 }}>{s.adminName} · Destek ekibi</div>}
                             </div>
                         </div>
                         <p style={{ margin: '0 0 18px' }}>
                             Destek ekibi ekranınızı görmek ve size yardımcı olmak istiyor. Ekranınızı görebilecek ve sizin adınıza tıklayıp yazabilecek. İzin veriyor musunuz?
                         </p>
-                        <p style={{ margin: '0 0 18px', color: '#6b7280', fontSize: 12 }}>
+                        <p style={{ margin: '0 0 18px', color: theme.textMuted, fontSize: 12 }}>
                             Parola alanları hiçbir zaman paylaşılmaz. Bağlantıyı istediğiniz an üstteki çubuktan bitirebilirsiniz.
                         </p>
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-                            <button type="button" style={{ ...btn('#f3f4f6', '#111827'), padding: '9px 16px', fontSize: 13 }} onClick={controller.decline}>Reddet</button>
-                            <button type="button" autoFocus style={{ ...btn('#ea580c'), padding: '9px 16px', fontSize: 13 }} onClick={controller.accept}>İzin ver</button>
+                            <button type="button" style={{ ...btn(theme.surfaceAlt, theme.text), border: `1px solid ${theme.borderStrong}`, padding: '9px 16px', fontSize: 13 }} onClick={controller.decline}>Reddet</button>
+                            <button type="button" autoFocus style={{ ...btn(theme.gradient), boxShadow: theme.shadowBrand, padding: '9px 16px', fontSize: 13 }} onClick={controller.accept}>İzin ver</button>
                         </div>
                     </div>
                 </div>
@@ -120,32 +121,34 @@ export function CobrowseOverlay({ controller }: { controller: CobrowseController
                     {showChat && (
                         <div style={{
                             position: 'fixed', top: 58, left: '50%', transform: 'translateX(-50%)', zIndex: 2147483001,
-                            width: 'min(360px, calc(100vw - 24px))', background: '#fff', color: '#111827', borderRadius: 12,
-                            boxShadow: '0 12px 36px rgba(0,0,0,.28)', font: `13px/1.45 ${FONT}`, display: 'flex', flexDirection: 'column', overflow: 'hidden',
+                            width: 'min(360px, calc(100vw - 24px))', background: theme.surface, color: theme.text, borderRadius: 12,
+                            border: `1px solid ${theme.border}`, boxShadow: theme.shadowLg, font: `13px/1.45 ${FONT}`, display: 'flex', flexDirection: 'column', overflow: 'hidden',
                         }}>
-                            <div style={{ padding: '8px 12px', borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ padding: '8px 12px', borderBottom: `1px solid ${theme.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <strong>Destek ile mesajlaşma</strong>
-                                <button type="button" style={btn('transparent', '#6b7280')} onClick={() => setChatOpen(false)} aria-label="Kapat">✕</button>
+                                <button type="button" style={btn('transparent', theme.textSubtle)} onClick={() => setChatOpen(false)} aria-label="Kapat">✕</button>
                             </div>
-                            <div ref={listRef} style={{ maxHeight: 260, minHeight: 80, overflowY: 'auto', padding: 10, display: 'flex', flexDirection: 'column', gap: 6, background: '#f9fafb' }}>
-                                {s.chat.length === 0 && <div style={{ color: '#9ca3af', textAlign: 'center', padding: 12 }}>Henüz mesaj yok.</div>}
+                            <div ref={listRef} style={{ maxHeight: 260, minHeight: 80, overflowY: 'auto', padding: 10, display: 'flex', flexDirection: 'column', gap: 6, background: theme.surfaceAlt }}>
+                                {s.chat.length === 0 && <div style={{ color: theme.textSubtle, textAlign: 'center', padding: 12 }}>Henüz mesaj yok.</div>}
                                 {s.chat.map((m) => (
                                     <div key={m.id} style={{ alignSelf: m.from === 'user' ? 'flex-end' : 'flex-start', maxWidth: '85%' }}>
                                         <div style={{
-                                            background: m.from === 'user' ? '#ea580c' : '#fff', color: m.from === 'user' ? '#fff' : '#111827',
-                                            border: m.from === 'user' ? 'none' : '1px solid #e5e7eb', borderRadius: 10, padding: '6px 10px',
+                                            background: m.from === 'user' ? theme.gradient : theme.surface, color: m.from === 'user' ? '#fff' : theme.text,
+                                            border: m.from === 'user' ? 'none' : `1px solid ${theme.border}`, borderRadius: 10, padding: '6px 10px',
                                             whiteSpace: 'pre-wrap', wordBreak: 'break-word', opacity: m.pending ? .7 : 1,
                                         }}>{m.text}</div>
-                                        <div style={{ fontSize: 10, color: '#9ca3af', textAlign: m.from === 'user' ? 'right' : 'left', marginTop: 2 }}>
+                                        <div style={{ fontSize: 10, color: theme.textSubtle, textAlign: m.from === 'user' ? 'right' : 'left', marginTop: 2 }}>
                                             {m.from === 'admin' ? (s.adminName || 'Destek') : 'Siz'} · {timeOf(m.at)}
                                         </div>
                                     </div>
                                 ))}
                             </div>
-                            <form style={{ display: 'flex', gap: 6, padding: 8, borderTop: '1px solid #e5e7eb' }} onSubmit={(e) => { e.preventDefault(); send(); }}>
+                            <form style={{ display: 'flex', gap: 6, padding: 8, borderTop: `1px solid ${theme.border}` }} onSubmit={(e) => { e.preventDefault(); send(); }}>
                                 <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Mesajınızı yazın…" maxLength={2000}
-                                    style={{ flex: 1, border: '1px solid #d1d5db', borderRadius: 8, padding: '7px 10px', font: `13px ${FONT}`, outline: 'none', color: '#111827', background: '#fff' }} />
-                                <button type="submit" style={btn('#ea580c')} disabled={!draft.trim()}>Gönder</button>
+                                    onFocus={(e) => { e.currentTarget.style.borderColor = theme.primary; e.currentTarget.style.boxShadow = theme.focusRing; }}
+                                    onBlur={(e) => { e.currentTarget.style.borderColor = theme.borderStrong; e.currentTarget.style.boxShadow = 'none'; }}
+                                    style={{ flex: 1, border: `1px solid ${theme.borderStrong}`, borderRadius: 8, padding: '7px 10px', font: `13px ${FONT}`, outline: 'none', color: theme.text, background: '#fff' }} />
+                                <button type="submit" style={btn(theme.gradient)} disabled={!draft.trim()}>Gönder</button>
                             </form>
                         </div>
                     )}

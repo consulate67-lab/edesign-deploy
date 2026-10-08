@@ -5,6 +5,7 @@ import { PaymentModal } from './PaymentModal.tsx';
 import { DesignWizard } from './wizard/DesignWizard';
 import { MyDesigns, CompletedDesigns } from './MyDesigns';
 import { TemplateGallery } from './sector-templates/TemplateGallery';
+import { theme, techBackground, gradientTextStyle } from './theme';
 
 interface SelectionProps {
     onSelect: (moduleId: string, template: string, moduleName: string, customContent?: string, themeColor?: string) => void;
@@ -28,9 +29,9 @@ export const Selection: React.FC<SelectionProps> = ({ onLogout, onSelectXsltEdit
             overflowY: 'auto',
             width: '100%',
             display: 'flex',
-            background: '#0f172a',
-            fontFamily: 'Inter, sans-serif',
-            color: 'white',
+            ...techBackground,
+            fontFamily: theme.font,
+            color: theme.text,
             padding: '2rem',
             boxSizing: 'border-box',
             position: 'relative'
@@ -45,8 +46,8 @@ export const Selection: React.FC<SelectionProps> = ({ onLogout, onSelectXsltEdit
                         title="Kalan tasarım hakkı"
                         style={{
                             display: 'flex', alignItems: 'center', gap: '6px', padding: '0.6rem 1rem',
-                            borderRadius: '12px', border: '1px solid rgba(16,185,129,0.3)',
-                            background: 'rgba(16,185,129,0.1)', color: '#6ee7b7', fontSize: '0.85rem', fontWeight: 700,
+                            borderRadius: '12px', border: '1px solid #a7f3d0',
+                            background: theme.greenSoft, color: theme.greenText, fontSize: '0.85rem', fontWeight: 700,
                         }}
                     >
                         <CreditCard size={16} /> {userInfo.credits ?? 0} tasarım hakkı
@@ -55,10 +56,10 @@ export const Selection: React.FC<SelectionProps> = ({ onLogout, onSelectXsltEdit
                 <button
                     onClick={() => setShowPaymentModal(true)}
                     style={{
-                        background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)', border: 'none',
+                        background: theme.gradient, border: 'none',
                         padding: '0.6rem 1.4rem', borderRadius: '12px', color: 'white', cursor: 'pointer',
                         display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s',
-                        boxShadow: '0 4px 15px rgba(99, 102, 241, 0.3)', fontWeight: 'bold'
+                        boxShadow: theme.shadowBrand, fontWeight: 'bold'
                     }}
                     onMouseOver={(e) => (e.currentTarget.style.transform = 'translateY(-2px)')}
                     onMouseOut={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
@@ -70,33 +71,33 @@ export const Selection: React.FC<SelectionProps> = ({ onLogout, onSelectXsltEdit
                 <button
                     onClick={() => setShowProfileModal(true)}
                     style={{
-                        background: 'rgba(30, 41, 59, 0.6)', border: '1px solid rgba(255,255,255,0.1)',
-                        padding: '0.6rem 1.2rem', borderRadius: '12px', color: 'white', cursor: 'pointer',
+                        background: '#fff', border: `1px solid ${theme.border}`,
+                        padding: '0.6rem 1.2rem', borderRadius: '12px', color: theme.text, boxShadow: theme.shadowSm, cursor: 'pointer',
                         display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s',
                         backdropFilter: 'blur(10px)'
                     }}
-                    onMouseOver={(e) => (e.currentTarget.style.background = 'rgba(30, 41, 59, 0.9)')}
-                    onMouseOut={(e) => (e.currentTarget.style.background = 'rgba(30, 41, 59, 0.6)')}
+                    onMouseOver={(e) => (e.currentTarget.style.background = theme.primarySoft)}
+                    onMouseOut={(e) => (e.currentTarget.style.background = '#fff')}
                 >
-                    <User size={18} color="#818cf8" />
+                    <User size={18} color={theme.primary} />
                     <span style={{ fontSize: '0.9rem', fontWeight: '500' }}>Profilim</span>
                 </button>
 
                 <button
                     onClick={onLogout}
                     style={{
-                        background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)',
-                        padding: '0.6rem 1.2rem', borderRadius: '12px', color: '#f87171', cursor: 'pointer',
+                        background: '#fff', border: '1px solid #fecaca',
+                        padding: '0.6rem 1.2rem', borderRadius: '12px', color: theme.redText, cursor: 'pointer',
                         display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s',
                         backdropFilter: 'blur(10px)'
                     }}
                     onMouseOver={(e) => {
-                        e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)';
-                        e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+                        e.currentTarget.style.background = theme.redSoft;
+                        e.currentTarget.style.borderColor = '#fca5a5';
                     }}
                     onMouseOut={(e) => {
-                        e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
-                        e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.2)';
+                        e.currentTarget.style.background = '#fff';
+                        e.currentTarget.style.borderColor = '#fecaca';
                     }}
                 >
                     <LogOut size={18} />
@@ -107,65 +108,65 @@ export const Selection: React.FC<SelectionProps> = ({ onLogout, onSelectXsltEdit
             {/* Profile Modal */}
             {showProfileModal && userInfo && (
                 <div style={{
-                    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)',
+                    position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.45)', backdropFilter: 'blur(8px)',
                     zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem'
                 }}>
                     <div style={{
-                        background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '24px',
+                        background: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '24px', color: theme.text,
                         width: '100%', maxWidth: '450px', padding: '2.5rem', position: 'relative',
-                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+                        boxShadow: theme.shadowLg
                     }}>
                         <button
                             onClick={() => setShowProfileModal(false)}
-                            style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}
+                            style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'none', border: 'none', color: theme.textSubtle, cursor: 'pointer' }}
                         >
                             <X size={24} />
                         </button>
 
                         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
                             <div style={{
-                                width: '80px', height: '80px', background: '#6366f1', borderRadius: '24px',
+                                width: '80px', height: '80px', background: theme.gradient, borderRadius: '24px',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem',
-                                boxShadow: '0 10px 15px -3px rgba(99, 102, 241, 0.4)'
+                                boxShadow: theme.shadowBrand
                             }}>
                                 <User size={40} color="white" />
                             </div>
                             <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>{userInfo.full_name || 'Kullanıcı'}</h2>
-                            <span style={{ background: '#0f172a', padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', color: '#818cf8', border: '1px solid rgba(99, 102, 241, 0.2)' }}>
+                            <span style={{ background: theme.primarySoft, padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600, color: theme.primary, border: '1px solid rgba(124, 58, 237, 0.2)' }}>
                                 {userInfo.role === 'admin' ? 'Yönetici Hesabı' : 'Standart Hesap'}
                             </span>
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'rgba(15, 23, 42, 0.5)', padding: '1rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                <Building2 size={20} color="#94a3b8" />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: theme.surfaceAlt, padding: '1rem', borderRadius: '16px', border: `1px solid ${theme.border}` }}>
+                                <Building2 size={20} color={theme.textSubtle} />
                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                    <span style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '1px' }}>Firma</span>
+                                    <span style={{ fontSize: '0.65rem', color: theme.textSubtle, textTransform: 'uppercase', letterSpacing: '1px' }}>Firma</span>
                                     <span style={{ fontSize: '0.95rem' }}>{userInfo.company_name || '-'}</span>
                                 </div>
                             </div>
 
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'rgba(15, 23, 42, 0.5)', padding: '1rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                <Mail size={20} color="#94a3b8" />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: theme.surfaceAlt, padding: '1rem', borderRadius: '16px', border: `1px solid ${theme.border}` }}>
+                                <Mail size={20} color={theme.textSubtle} />
                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                    <span style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '1px' }}>E-Posta</span>
+                                    <span style={{ fontSize: '0.65rem', color: theme.textSubtle, textTransform: 'uppercase', letterSpacing: '1px' }}>E-Posta</span>
                                     <span style={{ fontSize: '0.95rem' }}>{userInfo.username}</span>
                                 </div>
                             </div>
 
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'rgba(15, 23, 42, 0.5)', padding: '1rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                <Phone size={20} color="#94a3b8" />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: theme.surfaceAlt, padding: '1rem', borderRadius: '16px', border: `1px solid ${theme.border}` }}>
+                                <Phone size={20} color={theme.textSubtle} />
                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                    <span style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '1px' }}>Telefon</span>
+                                    <span style={{ fontSize: '0.65rem', color: theme.textSubtle, textTransform: 'uppercase', letterSpacing: '1px' }}>Telefon</span>
                                     <span style={{ fontSize: '0.95rem' }}>{userInfo.phone_number || '-'}</span>
                                 </div>
                             </div>
 
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'linear-gradient(to right, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05))', padding: '1rem', borderRadius: '16px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
-                                <CreditCard size={20} color="#10b981" />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: theme.greenSoft, padding: '1rem', borderRadius: '16px', border: '1px solid #a7f3d0' }}>
+                                <CreditCard size={20} color={theme.greenText} />
                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                    <span style={{ fontSize: '0.65rem', color: '#10b981', textTransform: 'uppercase', letterSpacing: '1px' }}>Mevcut Kredi</span>
-                                    <span style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#10b981' }}>{userInfo.credits} <span style={{ fontSize: '0.8rem', fontWeight: 'normal' }}>Tasarım</span></span>
+                                    <span style={{ fontSize: '0.65rem', color: theme.greenText, textTransform: 'uppercase', letterSpacing: '1px' }}>Mevcut Kredi</span>
+                                    <span style={{ fontSize: '1.25rem', fontWeight: 'bold', color: theme.greenText }}>{userInfo.credits} <span style={{ fontSize: '0.8rem', fontWeight: 'normal' }}>Tasarım</span></span>
                                 </div>
                             </div>
                         </div>
@@ -182,18 +183,23 @@ export const Selection: React.FC<SelectionProps> = ({ onLogout, onSelectXsltEdit
                 alignItems: 'center'
             }}>
                 <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+                    <img
+                        src={`${import.meta.env.BASE_URL}favicon.svg`}
+                        alt=""
+                        width={64}
+                        height={64}
+                        style={{ display: 'block', margin: '0 auto 1.25rem', borderRadius: 18, boxShadow: theme.shadowBrand }}
+                    />
                     <h1 style={{
                         fontSize: 'clamp(2.5rem, 6vw, 3.5rem)',
                         fontWeight: '900',
                         marginBottom: '1rem',
-                        background: 'linear-gradient(135deg, #fff 0%, #94a3b8 100%)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
+                        ...gradientTextStyle,
                         letterSpacing: '-1px'
                     }}>
                         E-Belge Tasarımcı
                     </h1>
-                    <p style={{ color: '#94a3b8', fontSize: '1.1rem', maxWidth: '600px', margin: '0 auto' }}>
+                    <p style={{ color: theme.textMuted, fontSize: '1.1rem', maxWidth: '600px', margin: '0 auto' }}>
                         Yeni bir tasarım için adımları izleyin: belge türü, şablon ve veri.
                     </p>
                 </div>

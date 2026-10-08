@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { LogIn, UserPlus, ShieldCheck, ArrowLeft } from 'lucide-react';
+import { LogIn, UserPlus, ArrowLeft } from 'lucide-react';
 import { api } from './api';
+import { theme, techBackground } from './theme';
 
 type AuthMode = 'login' | 'register';
 
@@ -81,23 +82,24 @@ export const Auth: React.FC<AuthProps> = ({
     // Reusable input style helper
     const inputStyle = (field: string): React.CSSProperties => ({
         width: '100%',
-        background: 'rgba(15, 23, 42, 0.55)',
-        border: `1px solid ${focusedField === field ? '#6366f1' : 'rgba(148, 163, 184, 0.18)'}`,
+        boxSizing: 'border-box',
+        background: '#fff',
+        border: `1px solid ${focusedField === field ? theme.primary : theme.borderStrong}`,
         borderRadius: 12,
         padding: '12px 14px',
-        color: '#f8fafc',
+        color: theme.text,
         fontSize: 14,
         fontFamily: 'inherit',
         outline: 'none',
         transition: 'border-color 0.18s, box-shadow 0.18s, background 0.18s',
         boxShadow:
             focusedField === field
-                ? '0 0 0 3px rgba(99, 102, 241, 0.18), inset 0 0 0 1px rgba(99,102,241,0.4)'
+                ? theme.focusRing
                 : 'none',
     });
 
     const labelStyle: React.CSSProperties = {
-        color: '#94a3b8',
+        color: theme.textMuted,
         fontSize: 11,
         fontWeight: 600,
         marginBottom: 6,
@@ -116,60 +118,12 @@ export const Auth: React.FC<AuthProps> = ({
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                background:
-                    'linear-gradient(180deg, #020617 0%, #0a0f1f 55%, #1e1b4b 100%)',
-                fontFamily: 'Inter, sans-serif',
+                ...techBackground,
+                fontFamily: theme.font,
                 padding: '32px 24px',
                 overflow: 'hidden',
             }}
         >
-            {/* Ambient glow blobs (Landing ile aynı dil) */}
-            <div
-                aria-hidden
-                style={{
-                    position: 'absolute',
-                    top: '-120px',
-                    left: '-120px',
-                    width: 480,
-                    height: 480,
-                    borderRadius: '50%',
-                    background:
-                        'radial-gradient(circle, rgba(99,102,241,0.35) 0%, transparent 70%)',
-                    filter: 'blur(40px)',
-                    pointerEvents: 'none',
-                }}
-            />
-            <div
-                aria-hidden
-                style={{
-                    position: 'absolute',
-                    top: '40%',
-                    right: '-160px',
-                    width: 520,
-                    height: 520,
-                    borderRadius: '50%',
-                    background:
-                        'radial-gradient(circle, rgba(14,165,233,0.28) 0%, transparent 70%)',
-                    filter: 'blur(40px)',
-                    pointerEvents: 'none',
-                }}
-            />
-            <div
-                aria-hidden
-                style={{
-                    position: 'absolute',
-                    bottom: '-180px',
-                    left: '30%',
-                    width: 560,
-                    height: 560,
-                    borderRadius: '50%',
-                    background:
-                        'radial-gradient(circle, rgba(139,92,246,0.30) 0%, transparent 70%)',
-                    filter: 'blur(40px)',
-                    pointerEvents: 'none',
-                }}
-            />
-
             {/* Sticky back link */}
             {onBackToLanding && (
                 <button
@@ -180,12 +134,13 @@ export const Auth: React.FC<AuthProps> = ({
                         top: 24,
                         left: 24,
                         padding: '9px 16px',
-                        background: 'rgba(15, 23, 42, 0.55)',
+                        background: 'rgba(255, 255, 255, 0.9)',
                         backdropFilter: 'blur(10px)',
                         WebkitBackdropFilter: 'blur(10px)',
-                        border: '1px solid rgba(148, 163, 184, 0.18)',
+                        border: `1px solid ${theme.border}`,
                         borderRadius: 999,
-                        color: '#cbd5e1',
+                        color: theme.textMuted,
+                        boxShadow: theme.shadowSm,
                         fontSize: 13,
                         fontWeight: 500,
                         cursor: 'pointer',
@@ -196,14 +151,14 @@ export const Auth: React.FC<AuthProps> = ({
                         transition: 'background 0.18s, border-color 0.18s, color 0.18s',
                     }}
                     onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'rgba(99, 102, 241, 0.18)';
-                        e.currentTarget.style.borderColor = 'rgba(99, 102, 241, 0.5)';
-                        e.currentTarget.style.color = '#f8fafc';
+                        e.currentTarget.style.background = theme.primarySoft;
+                        e.currentTarget.style.borderColor = 'rgba(124, 58, 237, 0.4)';
+                        e.currentTarget.style.color = theme.primary;
                     }}
                     onMouseLeave={(e) => {
-                        e.currentTarget.style.background = 'rgba(15, 23, 42, 0.55)';
-                        e.currentTarget.style.borderColor = 'rgba(148, 163, 184, 0.18)';
-                        e.currentTarget.style.color = '#cbd5e1';
+                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)';
+                        e.currentTarget.style.borderColor = theme.border;
+                        e.currentTarget.style.color = theme.textMuted;
                     }}
                 >
                     <ArrowLeft size={14} /> Ana sayfa
@@ -217,40 +172,32 @@ export const Auth: React.FC<AuthProps> = ({
                     zIndex: 1,
                     width: '100%',
                     maxWidth: isLogin ? 440 : 560,
-                    background: 'rgba(15, 23, 42, 0.55)',
+                    background: 'rgba(255, 255, 255, 0.92)',
                     backdropFilter: 'blur(20px)',
                     WebkitBackdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(148, 163, 184, 0.14)',
+                    border: `1px solid ${theme.border}`,
                     borderRadius: 24,
                     padding: '40px 36px',
-                    boxShadow:
-                        '0 24px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255,255,255,0.02) inset',
+                    boxShadow: theme.shadowLg,
+                    overflow: 'hidden',
                     opacity: mounted ? 1 : 0,
                     transform: mounted ? 'translateY(0)' : 'translateY(12px)',
                     transition: 'opacity 0.35s ease, transform 0.35s ease, max-width 0.3s ease',
                 }}
             >
+                <div aria-hidden style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 4, background: theme.gradient }} />
                 {/* Header */}
                 <div style={{ textAlign: 'center', marginBottom: 28 }}>
-                    <div
-                        style={{
-                            width: 56,
-                            height: 56,
-                            margin: '0 auto 16px',
-                            background:
-                                'linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)',
-                            borderRadius: 16,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            boxShadow: '0 10px 24px rgba(99, 102, 241, 0.35)',
-                        }}
-                    >
-                        <ShieldCheck size={26} color="#ffffff" strokeWidth={2.4} />
-                    </div>
+                    <img
+                        src={`${import.meta.env.BASE_URL}favicon.svg`}
+                        alt=""
+                        width={56}
+                        height={56}
+                        style={{ display: 'block', margin: '0 auto 16px', borderRadius: 16, boxShadow: theme.shadowBrand }}
+                    />
                     <h1
                         style={{
-                            color: '#f8fafc',
+                            color: theme.text,
                             fontSize: 26,
                             fontWeight: 800,
                             letterSpacing: '-0.02em',
@@ -261,7 +208,7 @@ export const Auth: React.FC<AuthProps> = ({
                     </h1>
                     <p
                         style={{
-                            color: '#94a3b8',
+                            color: theme.textMuted,
                             fontSize: 14,
                             marginTop: 8,
                             lineHeight: 1.5,
@@ -278,9 +225,9 @@ export const Auth: React.FC<AuthProps> = ({
                     <div
                         role="alert"
                         style={{
-                            color: '#fecaca',
-                            background: 'rgba(127, 29, 29, 0.35)',
-                            border: '1px solid rgba(248, 113, 113, 0.25)',
+                            color: theme.redText,
+                            background: theme.redSoft,
+                            border: '1px solid #fecaca',
                             padding: '10px 14px',
                             borderRadius: 10,
                             marginBottom: 18,
@@ -294,9 +241,9 @@ export const Auth: React.FC<AuthProps> = ({
                     <div
                         role="status"
                         style={{
-                            color: '#bbf7d0',
-                            background: 'rgba(20, 83, 45, 0.35)',
-                            border: '1px solid rgba(74, 222, 128, 0.25)',
+                            color: theme.greenText,
+                            background: theme.greenSoft,
+                            border: '1px solid #a7f3d0',
                             padding: '10px 14px',
                             borderRadius: 10,
                             marginBottom: 18,
@@ -403,9 +350,8 @@ export const Auth: React.FC<AuthProps> = ({
                             fontWeight: 700,
                             color: '#ffffff',
                             cursor: isLoading ? 'wait' : 'pointer',
-                            background:
-                                'linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)',
-                            boxShadow: '0 12px 28px rgba(99, 102, 241, 0.35)',
+                            background: theme.gradient,
+                            boxShadow: theme.shadowBrand,
                             display: 'inline-flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -418,12 +364,11 @@ export const Auth: React.FC<AuthProps> = ({
                             if (isLoading) return;
                             e.currentTarget.style.transform = 'translateY(-1px)';
                             e.currentTarget.style.boxShadow =
-                                '0 16px 36px rgba(99, 102, 241, 0.45)';
+                                '0 16px 36px rgba(109, 40, 217, 0.38)';
                         }}
                         onMouseLeave={(e) => {
                             e.currentTarget.style.transform = 'translateY(0)';
-                            e.currentTarget.style.boxShadow =
-                                '0 12px 28px rgba(99, 102, 241, 0.35)';
+                            e.currentTarget.style.boxShadow = theme.shadowBrand;
                         }}
                     >
                         {isLoading ? (
@@ -447,8 +392,9 @@ export const Auth: React.FC<AuthProps> = ({
                         style={{
                             background: 'none',
                             border: 'none',
-                            color: '#a5b4fc',
+                            color: theme.primary,
                             fontSize: 13,
+                            fontWeight: 600,
                             cursor: 'pointer',
                             fontFamily: 'inherit',
                             padding: '6px 10px',
@@ -456,12 +402,11 @@ export const Auth: React.FC<AuthProps> = ({
                             transition: 'color 0.18s, background 0.18s',
                         }}
                         onMouseEnter={(e) => {
-                            e.currentTarget.style.color = '#f8fafc';
-                            e.currentTarget.style.background =
-                                'rgba(99, 102, 241, 0.10)';
+                            e.currentTarget.style.color = theme.primaryHover;
+                            e.currentTarget.style.background = theme.primarySoft;
                         }}
                         onMouseLeave={(e) => {
-                            e.currentTarget.style.color = '#a5b4fc';
+                            e.currentTarget.style.color = theme.primary;
                             e.currentTarget.style.background = 'transparent';
                         }}
                     >
@@ -478,7 +423,7 @@ export const Auth: React.FC<AuthProps> = ({
                     position: 'relative',
                     zIndex: 1,
                     marginTop: 24,
-                    color: '#64748b',
+                    color: theme.textSubtle,
                     fontSize: 12,
                     textAlign: 'center',
                 }}

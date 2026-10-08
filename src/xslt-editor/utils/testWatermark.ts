@@ -1,9 +1,10 @@
+import { TEST_WATERMARK_PNG } from './testWatermarkImage';
+
 /**
- * Onaylanmamış (ücretsiz) indirmelere eklenen TEST filigranı. Filigran XSLT
- * çıktısına sabit konumlu, sayfa ortasında büyük bir yazı olarak eklenir;
- * yazdırmada her sayfada tekrar eder. Düz bir <div> yerine xsl:element ile
- * üretilir ki dosyada kolayca aranıp silinmesin. Editöre geri yüklenen test
- * dosyasından tam eşleşmeyle çıkarılır.
+ * Onaylanmamış (ücretsiz) indirmelere eklenen TEST filigranı. Tasarımın kendisine
+ * dokunulmaz; yalnızca "Test İndir" anında indirilen kopyaya eklenir. Düz bir
+ * <div> yerine xsl:element ile üretilir ki dosyada kolayca aranıp silinmesin.
+ * Editöre geri yüklenen test dosyasından tam eşleşmeyle çıkarılır.
  */
 
 const buildWatermark = (overlayStyle: string, textStyle: string) =>
@@ -52,12 +53,55 @@ const buildTableWatermark = () => styled('div', [
             IMP('-webkit-print-color-adjust:exact'), IMP('print-color-adjust:exact'),
         ], `<xsl:value-of select="concat('TE','ST')"/>`))))));
 
-const WATERMARK = buildTableWatermark();
+// Güncel filigran: yazı önceden döndürülmüş bir PNG olarak gömülür, böylece
+// transform / filtre desteği olmayan görüntüleyici ve PDF dönüştürücülerde de
+// çapraz durur. Ekranda belgenin (body) ortasına, yazdırmada her sayfanın
+// ortasına yerleşir. IE7 belge modu (data URI yok) koşullu yorumla eski
+// filtre-döndürmeli yazıya düşer.
+const WM_CLASS = 'edx-test-wm';
+// Konum !important değil: yazdırma kuralı (stil bloğundaki !important) bunu ezebilmeli.
+const FILL = ['position:absolute', 'left:0', 'top:0', 'right:0', 'bottom:0', 'width:100%', 'height:100%'];
+const WM_CSS = `body{position:relative!important}`
+    + `@media print{.${WM_CLASS}{position:fixed!important;left:0!important;top:0!important;right:0!important;bottom:0!important;width:100%!important;height:100%!important}}`;
+const IE7_CSS = `.${WM_CLASS} img{display:none!important}.${WM_CLASS} span{display:inline-block!important}`;
+
+const buildImageWatermark = () =>
+    `<xsl:element name="style"><xsl:attribute name="type">text/css</xsl:attribute><xsl:text>${WM_CSS}</xsl:text></xsl:element>`
+    + `<xsl:comment>[if lte IE 7]&gt;&lt;style type="text/css"&gt;${IE7_CSS}&lt;/style&gt;&lt;![endif]</xsl:comment>`
+    + `<xsl:element name="div"><xsl:attribute name="class">${WM_CLASS}</xsl:attribute><xsl:attribute name="style">${css([
+        ...FILL, IMP('display:block'),
+        IMP('z-index:2147483647'), IMP('overflow:hidden'), IMP('pointer-events:none'), ...BOX_RESET,
+    ])}</xsl:attribute>`
+    + styled('table', [
+        IMP('display:table'), IMP('width:100%'), IMP('height:100%'), IMP('border-collapse:collapse'), IMP('table-layout:auto'), ...BOX_RESET,
+    ], styled('tbody', [IMP('display:table-row-group'), ...BOX_RESET],
+        styled('tr', [IMP('display:table-row'), IMP('height:100%'), ...BOX_RESET],
+            styled('td', [
+                IMP('display:table-cell'), IMP('width:100%'), IMP('height:100%'), IMP('font-size:0'), IMP('line-height:0'),
+                IMP('text-align:center'), IMP('vertical-align:middle'), ...BOX_RESET,
+            ],
+                `<xsl:element name="img"><xsl:attribute name="src">${TEST_WATERMARK_PNG}</xsl:attribute>`
+                + `<xsl:attribute name="alt">TEST</xsl:attribute><xsl:attribute name="style">${css([
+                    IMP('display:inline-block'), IMP('vertical-align:middle'), IMP('width:72%'), IMP('max-width:640px'),
+                    IMP('height:auto'), IMP('margin:0'), IMP('padding:0'), IMP('border:0'), IMP('background:transparent'),
+                    IMP('opacity:1'), IMP('transform:none'), IMP('filter:none'), IMP('box-shadow:none'),
+                    IMP('-webkit-print-color-adjust:exact'), IMP('print-color-adjust:exact'),
+                ])}</xsl:attribute></xsl:element>`
+                + styled('span', [
+                    'display:none', IMP('zoom:1'), IMP('vertical-align:middle'), `filter:${IE_ROTATE}`,
+                    IMP('font-family:Arial,Helvetica,sans-serif'), IMP('font-size:200px'), IMP('font-weight:900'),
+                    IMP('line-height:1'), IMP('letter-spacing:0.1em'), IMP('color:#f2a7a7'), IMP('white-space:nowrap'),
+                ], `<xsl:value-of select="concat('TE','ST')"/>`),
+            ))))
+    + `</xsl:element>`;
+
+const WATERMARK = buildImageWatermark();
 
 const PREV_ROTATE = 'translate(-50%,-50%) rotate(-30deg)';
 
 /** Önceki sürümlerin filigranları: eski TEST dosyaları da tanınıp temizlenir. */
 const LEGACY_WATERMARKS = [
+    buildTableWatermark(),
     buildWatermark(
         [
             'position:fixed', 'left:0', 'top:0', 'width:100%', 'height:100%',
