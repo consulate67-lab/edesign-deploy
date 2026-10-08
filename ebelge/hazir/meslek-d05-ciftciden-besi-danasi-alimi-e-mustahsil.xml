@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Meslek şablonu: D.05 Besicilik, Celeplik — Çiftçiden Besi Danası Alımı e-Müstahsil (e-Müstahsil Makbuzu)
+  Hayvan pazarında üreticiden besilik dana alımı; küpe no, borsa tescil ve mera fonu kesintili.
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<CreditNote xmlns="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2.1</cbc:CustomizationID>
+    <cbc:ProfileID>EARSIVBELGE</cbc:ProfileID>
+    <cbc:ID>OBH2026000088522</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>0938A572-7C6A-40CA-A114-E0E2707B6D3B</cbc:UUID>
+    <cbc:IssueDate>2026-10-05</cbc:IssueDate>
+    <cbc:IssueTime>13:34:03</cbc:IssueTime>
+    <cbc:CreditNoteTypeCode>MUSTAHSILMAKBUZ</cbc:CreditNoteTypeCode>
+    <cbc:Note>Yalnız: Yüz Doksan Sekiz Bin Yedi Yüz On Üç Türk Lirası Altmış Kuruş</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>3</cbc:LineCountNumeric>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>2026/25-11873</cbc:ID>
+        <cbc:IssueDate>2026-10-05</cbc:IssueDate>
+        <cbc:DocumentType>BORSATESCIL</cbc:DocumentType>
+        <cbc:DocumentDescription>Erzurum Ticaret Borsası</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">9555649626</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">9555649626</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Atatürk Mah. Lale Sok.</cbc:StreetName>
+                <cbc:BuildingNumber>58</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Palandöken</cbc:CitySubdivisionName>
+                <cbc:CityName>Erzurum</cbc:CityName>
+                <cbc:PostalZone>25345</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_OBH2026000088522</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">9555649626</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">09555649626000013</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Ova Besi ve Hayvancılık Tic. Ltd. Şti.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Atatürk Mah. Lale Sok.</cbc:StreetName>
+                <cbc:BuildingNumber>58</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Palandöken</cbc:CitySubdivisionName>
+                <cbc:CityName>Erzurum</cbc:CityName>
+                <cbc:PostalZone>25345</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Kazımkarabekir</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0442 134 57 58</cbc:Telephone>
+                <cbc:ElectronicMail>info@ovabesi.com.tr</cbc:ElectronicMail>
+                <cac:OtherCommunication>
+                    <cbc:ChannelCode name="SMS_PROVIDER">e-Belge Mobil Onay Hizmetleri A.Ş.</cbc:ChannelCode>
+                    <cbc:Value>5718564154</cbc:Value>
+                </cac:OtherCommunication>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">30607780326</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Sanayi Mah. Atatürk Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>118</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Palandöken</cbc:CitySubdivisionName>
+                <cbc:CityName>Erzurum</cbc:CityName>
+                <cbc:PostalZone>25416</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:Contact>
+                <cbc:ID>165317</cbc:ID>
+                <cbc:Name>SMS</cbc:Name>
+                <cbc:Telephone>0533 490 34 91</cbc:Telephone>
+            </cac:Contact>
+            <cac:Person>
+                <cbc:FirstName>Hasan</cbc:FirstName>
+                <cbc:FamilyName>Uçar</cbc:FamilyName>
+            </cac:Person>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:Delivery>
+        <cbc:ActualDeliveryDate>2026-10-04</cbc:ActualDeliveryDate>
+    </cac:Delivery>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-10-07</cbc:PaymentDueDate>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR720003204067541730483022</cbc:ID>
+            <cbc:CurrencyCode>TRY</cbc:CurrencyCode>
+            <cbc:PaymentNote>Türk Ekonomi Bankası (üretici hesabı)</cbc:PaymentNote>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">4886.40</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">203600.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">2036.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>1</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>GELİR VERGİSİ S. (MUHTASAR)</cbc:Name>
+                    <cbc:TaxTypeCode>0003</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">203600.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">407.20</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>2</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>0.2</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>BORSA TESCİL ÜCRETİ</cbc:Name>
+                    <cbc:TaxTypeCode>8001</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">203600.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">407.20</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>3</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>0.2</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>MERA FONU</cbc:Name>
+                    <cbc:TaxTypeCode>9040</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">203600.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">2036.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>4</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>1</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>SGK (BAĞ-KUR) PRİM KESİNTİSİ</cbc:Name>
+                    <cbc:TaxTypeCode>SGK_PRIM</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">203600.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">203600.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">203600.00</cbc:TaxInclusiveAmount>
+        <cbc:PayableAmount currencyID="TRY">198713.60</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:CreditNoteLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:CreditedQuantity unitCode="C62">1</cbc:CreditedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">64000.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">1536.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">64000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">640.00</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>1</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>GELİR VERGİSİ S. (MUHTASAR)</cbc:Name>
+                        <cbc:TaxTypeCode>0003</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">64000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">128.00</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>2</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>0.2</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>BORSA TESCİL ÜCRETİ</cbc:Name>
+                        <cbc:TaxTypeCode>8001</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">64000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">128.00</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>3</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>0.2</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>MERA FONU</cbc:Name>
+                        <cbc:TaxTypeCode>9040</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">64000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">640.00</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>4</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>1</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>SGK (BAĞ-KUR) PRİM KESİNTİSİ</cbc:Name>
+                        <cbc:TaxTypeCode>SGK_PRIM</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Besilik dana — Simental (küpe TR250004418)</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="KUPENO">TR250004418</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="IRK">Simental</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">64000</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:CreditedQuantity unitCode="C62">1</cbc:CreditedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">58000.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">1392.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">58000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">580.00</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>1</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>GELİR VERGİSİ S. (MUHTASAR)</cbc:Name>
+                        <cbc:TaxTypeCode>0003</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">58000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">116.00</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>2</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>0.2</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>BORSA TESCİL ÜCRETİ</cbc:Name>
+                        <cbc:TaxTypeCode>8001</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">58000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">116.00</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>3</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>0.2</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>MERA FONU</cbc:Name>
+                        <cbc:TaxTypeCode>9040</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">58000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">580.00</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>4</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>1</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>SGK (BAĞ-KUR) PRİM KESİNTİSİ</cbc:Name>
+                        <cbc:TaxTypeCode>SGK_PRIM</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Besilik dana — Montofon (küpe TR250004425)</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="KUPENO">TR250004425</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="IRK">Montofon</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">58000</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:CreditedQuantity unitCode="C62">12</cbc:CreditedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">81600.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">1958.40</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">81600.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">816.00</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>1</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>GELİR VERGİSİ S. (MUHTASAR)</cbc:Name>
+                        <cbc:TaxTypeCode>0003</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">81600.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">163.20</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>2</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>0.2</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>BORSA TESCİL ÜCRETİ</cbc:Name>
+                        <cbc:TaxTypeCode>8001</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">81600.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">163.20</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>3</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>0.2</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>MERA FONU</cbc:Name>
+                        <cbc:TaxTypeCode>9040</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">81600.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">816.00</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>4</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>1</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>SGK (BAĞ-KUR) PRİM KESİNTİSİ</cbc:Name>
+                        <cbc:TaxTypeCode>SGK_PRIM</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Kuzu (12 baş)</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">6800</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+</CreditNote>
