@@ -133,6 +133,41 @@ function placementOfBinding(xslt: string, bindings: XsltBinding[], index: number
     }
     return { tag, movable: true, detach, reason: null };
 }
+/**
+ * Veri alanının değerini (xsl:value-of) kendi <span>'ına alır; bulunamazsa null.
+ * Hücre yalnızca değer / sabit metin parçalarından oluşuyorsa ("385,00" + " TL")
+ * hücrenin tüm içeriği birlikte alınır. shift, eski metindeki bir konumun yeni
+ * metindeki karşılığını verir.
+ */
+function wrapBindingValue(xslt: string, bindings: XsltBinding[], index: number, style = ''): { xslt: string; shift: (pos: number) => number } | null {
+    const b = bindings[index];
+    const offset = b ? findBindingSourceOffset(xslt, bindings, b) : null;
+    let range = offset === null ? null : bindingElementRange(xslt, offset);
+    if (!range || offset === null) return null;
+    const cell = findEnclosingLiteralTag(xslt, offset);
+    if (cell && /^t[dh]$/i.test(cell.name)) {
+        const content = findElementContentRange(xslt, cell);
+        const inner = content ? xslt.slice(content.start, content.end) : '';
+        const onlyValues = !inner
+            .replace(/<xsl:(?:value-of|copy-of)\b[^>]*?\/>/g, '')
+            .replace(/<xsl:text\b[^>]*?(?:\/>|>[^<]*<\/xsl:text>)/g, '')
+            .replace(/<!--[\s\S]*?-->/g, '')
+            .trim();
+        if (content && onlyValues) {
+            const start = content.start + (inner.length - inner.trimStart().length);
+            const end = content.end - (inner.length - inner.trimEnd().length);
+            if (start <= range.start && end >= range.end) range = { start, end };
+        }
+    }
+    const { start: rs, end: re } = range;
+    const open = style ? `<span style="${style}">` : '<span>';
+    const close = '</span>';
+    return {
+        xslt: `${xslt.slice(0, rs)}${open}${xslt.slice(rs, re)}${close}${xslt.slice(re)}`,
+        shift: (pos) => pos + (pos >= re ? open.length + close.length : pos >= rs ? open.length : 0),
+    };
+}
+
 /** Taşınınca geçersiz HTML üreten ya da sayfanın kendisi olan etiketler. */
 const UNMOVABLE_TAGS = new Set(['html', 'head', 'body', 'style', 'script', 'meta', 'link', 'title', 'td', 'th', 'li', 'dt', 'dd', 'option', ...TABLE_PARTS]);
 
@@ -1719,7 +1754,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         doc.querySelectorAll('[data-xslt-selected]').forEach(n => n.removeAttribute('data-xslt-selected'));
         doc.querySelectorAll('[data-xslt-movable]').forEach(n => n.removeAttribute('data-xslt-movable'));
         selectedObject?.element?.setAttribute('data-xslt-selected', 'true');
-        if (selectedBindPlacement?.movable) selectedObject?.element?.setAttribute('data-xslt-movable', '');
+        if (selectedBindPlacement?.movable || selectedBindPlacement?.detach === 'cell') selectedObject?.element?.setAttribute('data-xslt-movable', '');
     }, [selectedObject, selectedBindPlacement]);
 
     const findPreviewElement = useCallback((locator: PreviewLocator | null): HTMLElement | null => {
@@ -2031,14 +2066,24 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
      */
     const moveBinding = useCallback((index: number, target: InsertTarget | null) => {
         flushSourceEditsRef.current();
-        const xslt = xsltContentRef.current;
-        const p = bindPlacement(xslt, index);
+        let xslt = xsltContentRef.current;
+        // Hedef, önizlemedeki (ayırmadan önceki) kaynağa göre numaralıdır.
+        let tag = target ? findLiteralTagByOrdinal(xslt, target.ordinal) : null;
+        if (target && !tag) return;
+        let p = bindPlacement(xslt, index);
+        if (!p.movable && p.detach === 'cell') {
+            // Hücredeki / gövdedeki değer önce kendi kutusuna alınır, sonra taşınır.
+            const wrapped = wrapBindingValue(xslt, bindingsRef.current, index);
+            if (wrapped) {
+                xslt = wrapped.xslt;
+                if (tag) tag = { ...tag, start: wrapped.shift(tag.start), end: wrapped.shift(tag.end) };
+                p = bindPlacement(xslt, index);
+            }
+        }
         if (!p.movable || !p.tag) {
-            setSaveMessage(`⚠ ${p.reason ?? 'Bu alan taşınamıyor.'}${p.detach ? ' Önce özellik panelinden "Hücreden ayır" deyin.' : ''}`);
+            setSaveMessage(`⚠ ${p.reason ?? 'Bu alan taşınamıyor.'}`);
             return;
         }
-        const tag = target ? findLiteralTagByOrdinal(xslt, target.ordinal) : null;
-        if (target && !tag) return;
         const position = target?.position ?? 'after';
         const at = tag ? insertOffset(xslt, tag, position) : documentEndOffset(xslt);
         if (at < 0) return;
@@ -2105,13 +2150,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     /** Veri alanının değerini kendi <span>'ına alır; hücreden / etiketinden bağımsız taşınabilir olur. */
     const detachBinding = useCallback((index: number) => {
         flushSourceEditsRef.current();
-        const xslt = xsltContentRef.current;
-        const bindings = bindingsRef.current;
-        const b = bindings[index];
-        const offset = b ? findBindingSourceOffset(xslt, bindings, b) : null;
-        const range = offset === null ? null : bindingElementRange(xslt, offset);
-        if (!range) return;
-        const next = `${xslt.slice(0, range.start)}<span>${xslt.slice(range.start, range.end)}</span>${xslt.slice(range.end)}`;
+        const next = wrapBindingValue(xsltContentRef.current, bindingsRef.current, index)?.xslt;
+        if (!next) return;
         pendingSelectRef.current = { kind: 'bind', index };
         xsltContentRef.current = next;
         setXsltContent(next);
@@ -2945,14 +2985,51 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         type DragState = {
             el: HTMLElement; locator: PreviewLocator; sx: number; sy: number; started: boolean;
             mode: PositionMode; unit: PositionUnit; left: number; top: number; scale: number;
+            /** Hücredeki veri: önizlemede kopyası sürüklenir, bırakınca değer hücreden ayrılıp oraya sabitlenir. */
+            source?: HTMLElement;
         };
         let drag: DragState | null = null;
+        const dropDetached = (d: DragState & { source: HTMLElement }) => {
+            const ghost = d.el;
+            const probe = doc.createElement('span');
+            probe.style.cssText = 'position:absolute;left:0;top:0;width:0;height:0;';
+            const previewRules = Array.from(doc.styleSheets).flatMap(s => {
+                try { return Array.from(s.cssRules); } catch { return []; }
+            }).filter((r): r is CSSStyleRule => 'selectorText' in r
+                && (r as CSSStyleRule).selectorText === '[data-render-index]' && (r as CSSStyleRule).style.position === 'relative');
+            previewRules.forEach(r => r.style.removeProperty('position'));
+            d.source.appendChild(probe);
+            const g = ghost.getBoundingClientRect();
+            const o = probe.getBoundingClientRect();
+            probe.remove();
+            previewRules.forEach(r => r.style.setProperty('position', 'relative'));
+            ghost.remove();
+            const left = Math.round((g.left - o.left) / d.scale);
+            const top = Math.round((g.top - o.top) / d.scale);
+            if (d.locator.kind !== 'bind') return;
+            const index = d.locator.index;
+            flushSourceEditsRef.current();
+            let next = wrapBindingValue(xsltContentRef.current, bindingsRef.current, index, `position:absolute;left:${left}px;top:${top}px`)?.xslt;
+            if (!next) return;
+            const bodyTag = body.hasAttribute('data-xsrc') ? findLiteralTagByOrdinal(next, Number(body.getAttribute('data-xsrc'))) : null;
+            if (bodyTag && bodyTag.name.toLowerCase() === 'body' && !/position\s*:/.test(next.slice(bodyTag.start, bodyTag.end))) {
+                next = setTagStyleProperty(next, bodyTag, 'position', 'relative');
+            }
+            pendingSelectRef.current = { kind: 'bind', index };
+            xsltContentRef.current = next;
+            setXsltContent(next);
+            setSaveMessage('↕ Veri alanı hücreden ayrılıp bırakılan yere taşındı; Konum alanlarından ince ayar yapabilirsiniz.');
+        };
         const endDrag = () => {
             const d = drag;
             drag = null;
             if (!d?.started) return;
             d.el.removeAttribute('data-xslt-dragging');
             suppressClickUntilRef.current = Date.now() + 300;
+            if (d.source) {
+                dropDetached({ ...d, source: d.source });
+                return;
+            }
             const left = formatLength(parseFloat(d.el.style.left) || 0, d.unit);
             const top = formatLength(parseFloat(d.el.style.top) || 0, d.unit);
             commitPosition(d.el, d.locator, d.mode, left, top);
@@ -2976,6 +3053,11 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 && bindPlacement(xsltContentRef.current, sel.locator.index).movable) {
                 el = sel.element;
                 locator = sel.locator;
+            } else if (sel?.element && sel.locator?.kind === 'bind' && sel.element.contains(target) && !design.paid
+                && bindPlacement(xsltContentRef.current, sel.locator.index).detach === 'cell') {
+                e.preventDefault();
+                drag = { el: sel.element, source: sel.element, locator: sel.locator, sx: e.clientX, sy: e.clientY, started: false, mode: 'absolute', unit: 'px', left: 0, top: 0, scale: 1 };
+                return;
             } else if (sel?.element && sel.locator?.kind === 'el' && sel.element.contains(target)
                 && placementOfElement(xsltContentRef.current, sel.locator.ordinal).movable) {
                 el = sel.element;
@@ -2992,6 +3074,34 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             const dy = e.clientY - drag.sy;
             if (!drag.started) {
                 if (Math.abs(dx) < 4 && Math.abs(dy) < 4) return;
+                if (drag.source) {
+                    const src = drag.source;
+                    const view = doc.defaultView;
+                    const scs = view?.getComputedStyle(src);
+                    if (view && view.getComputedStyle(body).position === 'static') body.style.position = 'relative';
+                    const ghost = doc.createElement('span');
+                    ghost.textContent = (src.textContent || '').trim().slice(0, 80) || '…';
+                    ghost.style.cssText = 'position:absolute;left:0;top:0;white-space:nowrap;pointer-events:none;z-index:2147483647;'
+                        + 'background:rgba(16,185,129,0.12);outline:2px dashed #10b981;';
+                    if (scs) {
+                        ghost.style.font = scs.font;
+                        ghost.style.color = scs.color;
+                    }
+                    body.appendChild(ghost);
+                    const origin = ghost.getBoundingClientRect();
+                    const scale = clientScale(ghost);
+                    const r = src.getBoundingClientRect();
+                    drag.scale = scale;
+                    drag.left = (r.left - origin.left) / scale + (parseFloat(scs?.paddingLeft || '') || 0);
+                    drag.top = (r.top - origin.top) / scale + (parseFloat(scs?.paddingTop || '') || 0);
+                    drag.el = ghost;
+                    drag.started = true;
+                    ghost.setAttribute('data-xslt-dragging', '');
+                    e.preventDefault();
+                    ghost.style.left = `${drag.left + dx / scale}px`;
+                    ghost.style.top = `${drag.top + dy / scale}px`;
+                    return;
+                }
                 const el = drag.el;
                 drag.started = true;
                 drag.unit = parseLength(el.style.left || '').unit;
@@ -3034,7 +3144,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             doc.removeEventListener('mouseup', endDrag);
             doc.removeEventListener('keydown', handleUndoRedoKey);
         };
-    }, [previewHtml, iframeLoadCount, handleIframeBodyClick, insertObject, insertField, moveBinding, bindPlacement, commitPosition, openSelection, handleUndoRedoKey]);
+    }, [previewHtml, iframeLoadCount, handleIframeBodyClick, insertObject, insertField, moveBinding, bindPlacement, commitPosition, openSelection, handleUndoRedoKey, design.paid]);
 
     // Taşıma modu bitince önizlemedeki hedef işareti kaldırılır.
     useEffect(() => {
@@ -4552,7 +4662,9 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     {(sel.locator?.kind === 'bind' || isLiteral) && el && selectedBindPlacement && !design.paid && (selectedBindPlacement.detach || !selectedBindPlacement.movable) && (
                                         <div data-bind-move-status>
                                             {sectionTitle('Taşıma', '#6ee7b7')}
-                                            {!selectedBindPlacement.movable && noteBox(selectedBindPlacement.reason, 'warn')}
+                                            {!selectedBindPlacement.movable && (selectedBindPlacement.detach === 'cell'
+                                                ? noteBox('Veri bir tablo hücresinde. Değeri önizlemede sürükleyip bırakabilir ya da ↕ Taşı ile başka yere koyabilirsiniz; değer hücreden otomatik ayrılır, hücre yerinde kalır.', 'info')
+                                                : noteBox(selectedBindPlacement.reason, 'warn'))}
                                             {selectedBindPlacement.detach && (
                                                 <button
                                                     type="button"
@@ -4835,7 +4947,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                             {isColumnCell ? '👁 Kolonu Gizle' : '👁 Gizle'}
                                         </button>
                                     )}
-                                    {((isObj && canPersist && sel.locator?.kind === 'obj') || (sel.locator?.kind === 'bind' && !!el && !!selectedBindPlacement?.movable && !design.paid) || (elMovable && canPersist)) && (
+                                    {((isObj && canPersist && sel.locator?.kind === 'obj') || (sel.locator?.kind === 'bind' && !!el && (!!selectedBindPlacement?.movable || selectedBindPlacement?.detach === 'cell') && !design.paid) || (elMovable && canPersist)) && (
                                         <button
                                             onClick={() => { flushSourceEdits(); setMoving(sel.locator); }}
                                             title={isObj ? 'Objeyi sayfada başka bir yere taşı' : isLiteral ? 'Öğeyi sayfada başka bir yere taşı' : 'Veri alanını sayfada başka bir yere taşı'}
