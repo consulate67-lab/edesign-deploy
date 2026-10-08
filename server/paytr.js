@@ -156,6 +156,12 @@ export function registerPaytrRoutes(app, { db, authenticateToken, packages, fron
         }
     });
 
+    app.get('/api/payment/paytr/callback', (_req, res) => {
+        res.type('text/plain').send(paytrConfigured()
+            ? 'PayTR bildirim adresi hazir. Bu adres yalnizca PayTR sunucusundan gelen POST bildirimlerini kabul eder.'
+            : 'PayTR bildirim adresi: magaza bilgileri henuz tanimlanmadi.');
+    });
+
     app.get('/api/payment/paytr/status/:oid', authenticateToken, async (req, res) => {
         const payment = await db.get(
             'SELECT status FROM payments WHERE conversation_id = ? AND user_id = ?',
