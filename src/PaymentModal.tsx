@@ -289,6 +289,13 @@ const PaymentDialog: React.FC<Omit<PaymentModalProps, 'isOpen'>> = ({ onClose, o
                             scrolling="no"
                             style={{ width: '100%', minHeight: 560, border: 'none', display: 'block' }}
                         />
+                        <p style={{ margin: '0.6rem 0 0', textAlign: 'center', fontSize: '0.78rem', color: theme.textMuted }}>
+                            Ödeme formu görünmüyor mu?{' '}
+                            <a href={paying.iframeUrl} target="_blank" rel="noopener noreferrer" data-payment-open-tab style={{ color: theme.primary, fontWeight: 700 }}>
+                                Ödeme sayfasını yeni sekmede açın
+                            </a>
+                            {' '}— ödeme tamamlanınca bu pencere kendiliğinden güncellenir.
+                        </p>
                     </>
                 )}
 
