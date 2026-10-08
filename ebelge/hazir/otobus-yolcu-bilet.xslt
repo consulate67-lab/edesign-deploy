@@ -6,12 +6,7 @@
   altında bileti düzenleyen (unvan, adres, vergi dairesi, VKN), bilet bilgileri, ücret dökümü (KDV dahil),
   yalnız, yolculuk notları ve ödeme türü. e-Bilet görselinde GİB karekodu bulunmaz.
 -->
-<xsl:stylesheet version="1.0"
-    xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-    xmlns:n1="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
-    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
-    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
-    exclude-result-prefixes="n1 cac cbc">
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:n1="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" exclude-result-prefixes="n1 cac cbc">
     <xsl:output method="html" encoding="UTF-8" indent="no"/>
     <xsl:decimal-format name="edesign-tr" decimal-separator="," grouping-separator="." NaN=""/>
 
@@ -124,7 +119,7 @@
                     .yol .bus span { display: inline-block; background: #ea580c; color: #ffffff; border-radius: 6px 10px 4px 4px; font-size: 9px; font-weight: 800; padding: 3px 9px; letter-spacing: 1px; }
                     .yol .sure { margin-top: 12px; font-size: 10px; color: #9a5b34; font-weight: 700; }
                     .alanlar { display: grid; grid-template-columns: 2fr 1.3fr 1fr; gap: 0; margin: 8px 16px 0 16px; border-top: 1px solid #fde1cb; }
-                    .alanlar > div { padding: 7px 0 6px 0; border-bottom: 1px solid #fde1cb; }
+                    .alanlar &gt; div { padding: 7px 0 6px 0; border-bottom: 1px solid #fde1cb; }
                     .alan .k { font-size: 8px; font-weight: 800; letter-spacing: 1.8px; color: #c2410c; text-transform: uppercase; }
                     .alan .d { font-size: 13px; font-weight: 800; margin-top: 1px; }
                     .alan .d.m { font-family: Consolas, monospace; font-size: 12.5px; letter-spacing: .5px; }
@@ -140,8 +135,8 @@
                     .kocan .koltuk { font-size: 52px; font-weight: 900; line-height: 1; color: #ea580c; letter-spacing: -2px; }
                     .kocan .kacik { font-size: 8.5px; color: #9a5b34; margin-bottom: 8px; }
                     .kocan .ikili { display: flex; border-top: 1px dashed #fdba74; border-bottom: 1px dashed #fdba74; margin-bottom: 8px; }
-                    .kocan .ikili > div { flex: 1; padding: 5px 0; }
-                    .kocan .ikili > div + div { border-left: 1px dashed #fdba74; }
+                    .kocan .ikili &gt; div { flex: 1; padding: 5px 0; }
+                    .kocan .ikili &gt; div + div { border-left: 1px dashed #fdba74; }
                     .kocan .ikili .d { font-size: 17px; font-weight: 900; }
                     .kocan .ad { font-weight: 800; font-size: 11px; text-transform: uppercase; }
                     .kocan .gri { color: #9a5b34; font-size: 9px; margin-bottom: 8px; }
@@ -332,7 +327,7 @@
                                 </xsl:for-each>
                             </div>
                         </div>
-                    </div>
+                    <xsl:if test="/*/cbc:DocumentCurrencyCode != 'TRY' and number(/*/cac:PricingExchangeRate/cbc:CalculationRate) &gt; 0"><xsl:variable name="tlKur" select="number(/*/cac:PricingExchangeRate/cbc:CalculationRate)"/><xsl:variable name="tlKurTarih" select="(/*/cac:PricingExchangeRate/cbc:Date | /*/cbc:IssueDate)[1]"/><div data-tl-karsilik="1" style="margin-top:8px;padding:7px 9px;border:1px dashed #94a3b8;border-radius:6px;background:#f8fafc;font-size:0.92em;color:#0f172a;page-break-inside:avoid"><div style="font-weight:700">TL Karşılıkları</div><div style="font-size:0.88em;color:#475569;margin:1px 0 4px">1 <xsl:value-of select="/*/cbc:DocumentCurrencyCode"/> = <xsl:value-of select="format-number($tlKur, '###.##0,0000', 'edesign-tr')"/> TL (TCMB döviz alış, <xsl:value-of select="concat(substring($tlKurTarih, 9, 2), '.', substring($tlKurTarih, 6, 2), '.', substring($tlKurTarih, 1, 4))"/>)</div><table style="width:100%;border-collapse:collapse"><tr><td style="padding:2px 0">Mal / Hizmet Toplamı (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap"><xsl:value-of select="format-number(/*/cac:LegalMonetaryTotal/cbc:LineExtensionAmount * $tlKur, '###.##0,00', 'edesign-tr')"/><xsl:text> TL</xsl:text></td></tr><xsl:if test="/*/cac:LegalMonetaryTotal/cbc:AllowanceTotalAmount &gt; 0"><tr><td style="padding:2px 0">Toplam İskonto (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap"><xsl:text>− </xsl:text><xsl:value-of select="format-number(/*/cac:LegalMonetaryTotal/cbc:AllowanceTotalAmount * $tlKur, '###.##0,00', 'edesign-tr')"/><xsl:text> TL</xsl:text></td></tr></xsl:if><tr><td style="padding:2px 0">Hesaplanan KDV (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap"><xsl:value-of select="format-number(sum(/*/cac:TaxTotal/cac:TaxSubtotal[cac:TaxCategory/cac:TaxScheme/cbc:TaxTypeCode='0015']/cbc:TaxAmount) * $tlKur, '###.##0,00', 'edesign-tr')"/><xsl:text> TL</xsl:text></td></tr><xsl:if test="/*/cac:WithholdingTaxTotal"><tr><td style="padding:2px 0">KDV Tevkifatı (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap"><xsl:text>− </xsl:text><xsl:value-of select="format-number(sum(/*/cac:WithholdingTaxTotal/cbc:TaxAmount) * $tlKur, '###.##0,00', 'edesign-tr')"/><xsl:text> TL</xsl:text></td></tr></xsl:if><tr><td style="padding:2px 0">Vergiler Dahil Toplam (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap"><xsl:value-of select="format-number(/*/cac:LegalMonetaryTotal/cbc:TaxInclusiveAmount * $tlKur, '###.##0,00', 'edesign-tr')"/><xsl:text> TL</xsl:text></td></tr><tr><td style="padding:2px 0;font-weight:700">Ödenecek Tutar (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap;font-weight:700"><xsl:value-of select="format-number(/*/cac:LegalMonetaryTotal/cbc:PayableAmount * $tlKur, '###.##0,00', 'edesign-tr')"/><xsl:text> TL</xsl:text></td></tr></table></div></xsl:if></div>
                     <div class="dip">
                         <span>509 sıra no.lu VUK Genel Tebliği kapsamında düzenlenen e-Bilettir.</span>
                         <span>ETTN: <xsl:value-of select="$f/cbc:UUID"/></span>

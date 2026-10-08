@@ -6,12 +6,7 @@
   KPI: AdditionalDocumentReference[DocumentType='KAPASITE' | 'URETIM' | 'BAGLANTI'] · proje: ContractDocumentReference
   · garanti: Item/AdditionalItemProperty[ID='GARANTI'].
 -->
-<xsl:stylesheet version="1.0"
-    xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-    xmlns:n1="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
-    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
-    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
-    exclude-result-prefixes="n1 cac cbc">
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:n1="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" exclude-result-prefixes="n1 cac cbc">
     <xsl:output method="html" encoding="UTF-8" indent="no"/>
     <xsl:decimal-format name="edesign-tr" decimal-separator="," grouping-separator="." NaN=""/>
 
@@ -82,8 +77,8 @@
                     .bilgi td.d { font-weight: 700; text-align: right; }
                     .bilgi .ettn { font-family: Consolas, monospace; font-size: 8px; color: #5b7088; }
                     .kpi { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 6mm 10mm 0 10mm; }
-                    .kpi > div { border-radius: 10px; padding: 8px 11px; background: #f7fafc; border: 1px solid #dbe5ee; position: relative; overflow: hidden; }
-                    .kpi > div:after { content: ''; position: absolute; right: -14px; top: -14px; width: 44px; height: 44px; border-radius: 50%; background: rgba(245,158,11,.12); }
+                    .kpi &gt; div { border-radius: 10px; padding: 8px 11px; background: #f7fafc; border: 1px solid #dbe5ee; position: relative; overflow: hidden; }
+                    .kpi &gt; div:after { content: ''; position: absolute; right: -14px; top: -14px; width: 44px; height: 44px; border-radius: 50%; background: rgba(245,158,11,.12); }
                     .kpi .k { font-size: 8px; letter-spacing: 1.2px; text-transform: uppercase; color: #5b7088; font-weight: 700; }
                     .kpi .v { font-size: 16px; font-weight: 800; margin-top: 2px; color: #0f2a44; white-space: nowrap; }
                     .kpi .v.kucuk { font-size: 11px; }
@@ -131,7 +126,7 @@
             <body>
                 <div class="sayfa">
                     <div class="panel">
-                        <div class="gunes"></div>
+                        <div class="gunes"/>
                         <div class="baslik">
                             <div class="k"><xsl:text>Güneş Enerji Santrali · Anahtar Teslim</xsl:text></div>
                             <h1><b><xsl:text>GES Kurulum</xsl:text></b><xsl:text> Faturası</xsl:text></h1>
@@ -211,7 +206,7 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
 
                         <table class="bilesenler">
                             <tr>
-                                <th style="width:30px"></th>
+                                <th style="width:30px"/>
                                 <th><xsl:text>Bileşen / Hizmet</xsl:text></th>
                                 <th class="sag"><xsl:text>Miktar</xsl:text></th>
                                 <th class="sag"><xsl:text>Birim Fiyat</xsl:text></th>
@@ -226,7 +221,7 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
                                         <span class="kod"><xsl:value-of select="cac:Item/cac:SellersItemIdentification/cbc:ID"/></span>
                                         <div class="acik"><xsl:value-of select="cac:Item/cbc:Description"/></div>
                                         <xsl:for-each select="cac:Item/cac:AdditionalItemProperty[cbc:ID='GARANTI']">
-                                            <span class="garanti"><i></i><xsl:text>Garanti: </xsl:text><xsl:value-of select="cbc:Value"/></span>
+                                            <span class="garanti"><i/><xsl:text>Garanti: </xsl:text><xsl:value-of select="cbc:Value"/></span>
                                         </xsl:for-each>
                                     </td>
                                     <td class="sag" style="white-space:nowrap">
@@ -272,7 +267,7 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
                                     <span class="v"><xsl:value-of select="format-number($f/cac:LegalMonetaryTotal/cbc:PayableAmount, '###.##0,00', 'edesign-tr')"/><xsl:text> </xsl:text><xsl:value-of select="$pb"/></span>
                                 </div>
                                 <div class="vade"><xsl:text>Son ödeme tarihi: </xsl:text><b><xsl:call-template name="tarih"><xsl:with-param name="d" select="$f/cac:PaymentMeans/cbc:PaymentDueDate"/></xsl:call-template></b></div>
-                            </div>
+                            <xsl:if test="/*/cbc:DocumentCurrencyCode != 'TRY' and number(/*/cac:PricingExchangeRate/cbc:CalculationRate) &gt; 0"><xsl:variable name="tlKur" select="number(/*/cac:PricingExchangeRate/cbc:CalculationRate)"/><xsl:variable name="tlKurTarih" select="(/*/cac:PricingExchangeRate/cbc:Date | /*/cbc:IssueDate)[1]"/><div data-tl-karsilik="1" style="margin-top:8px;padding:7px 9px;border:1px dashed #94a3b8;border-radius:6px;background:#f8fafc;font-size:0.92em;color:#0f172a;page-break-inside:avoid"><div style="font-weight:700">TL Karşılıkları</div><div style="font-size:0.88em;color:#475569;margin:1px 0 4px">1 <xsl:value-of select="/*/cbc:DocumentCurrencyCode"/> = <xsl:value-of select="format-number($tlKur, '###.##0,0000', 'edesign-tr')"/> TL (TCMB döviz alış, <xsl:value-of select="concat(substring($tlKurTarih, 9, 2), '.', substring($tlKurTarih, 6, 2), '.', substring($tlKurTarih, 1, 4))"/>)</div><table style="width:100%;border-collapse:collapse"><tr><td style="padding:2px 0">Mal / Hizmet Toplamı (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap"><xsl:value-of select="format-number(/*/cac:LegalMonetaryTotal/cbc:LineExtensionAmount * $tlKur, '###.##0,00', 'edesign-tr')"/><xsl:text> TL</xsl:text></td></tr><xsl:if test="/*/cac:LegalMonetaryTotal/cbc:AllowanceTotalAmount &gt; 0"><tr><td style="padding:2px 0">Toplam İskonto (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap"><xsl:text>− </xsl:text><xsl:value-of select="format-number(/*/cac:LegalMonetaryTotal/cbc:AllowanceTotalAmount * $tlKur, '###.##0,00', 'edesign-tr')"/><xsl:text> TL</xsl:text></td></tr></xsl:if><tr><td style="padding:2px 0">Hesaplanan KDV (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap"><xsl:value-of select="format-number(sum(/*/cac:TaxTotal/cac:TaxSubtotal[cac:TaxCategory/cac:TaxScheme/cbc:TaxTypeCode='0015']/cbc:TaxAmount) * $tlKur, '###.##0,00', 'edesign-tr')"/><xsl:text> TL</xsl:text></td></tr><xsl:if test="/*/cac:WithholdingTaxTotal"><tr><td style="padding:2px 0">KDV Tevkifatı (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap"><xsl:text>− </xsl:text><xsl:value-of select="format-number(sum(/*/cac:WithholdingTaxTotal/cbc:TaxAmount) * $tlKur, '###.##0,00', 'edesign-tr')"/><xsl:text> TL</xsl:text></td></tr></xsl:if><tr><td style="padding:2px 0">Vergiler Dahil Toplam (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap"><xsl:value-of select="format-number(/*/cac:LegalMonetaryTotal/cbc:TaxInclusiveAmount * $tlKur, '###.##0,00', 'edesign-tr')"/><xsl:text> TL</xsl:text></td></tr><tr><td style="padding:2px 0;font-weight:700">Ödenecek Tutar (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap;font-weight:700"><xsl:value-of select="format-number(/*/cac:LegalMonetaryTotal/cbc:PayableAmount * $tlKur, '###.##0,00', 'edesign-tr')"/><xsl:text> TL</xsl:text></td></tr></table></div></xsl:if></div>
                         </div>
                     </div>
                     <div class="dip">

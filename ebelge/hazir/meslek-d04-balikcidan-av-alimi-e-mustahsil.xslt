@@ -135,6 +135,7 @@
                     .toplam td.r { white-space: nowrap; }
                     .toplam tr.eksi td.r { color: #b42318; }
                     .toplam tr.ara td { font-weight: 700; }
+                    .toplam tr.kur td { padding-top: 3.2mm; color: var(--a); }
                     .odenecek { display: flex; justify-content: space-between; align-items: center; gap: 3mm; padding: 2.6mm 3mm; margin-top: 2mm; font-weight: 700; font-size: 11pt; }
                     .odenecek small { display: block; font-size: 7pt; font-weight: 400; opacity: 0.85; }
                     .yaziyla { font-style: italic; color: var(--soft); margin-bottom: 2mm; }

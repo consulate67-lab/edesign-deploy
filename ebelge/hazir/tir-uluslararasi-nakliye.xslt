@@ -80,6 +80,12 @@
         <xsl:variable name="sev" select="$tes/cac:Despatch"/>
         <xsl:variable name="shp" select="$tes/cac:Shipment"/>
         <xsl:variable name="kur" select="/n1:Invoice/cac:PricingExchangeRate/cbc:CalculationRate"/>
+        <xsl:variable name="kurTarih">
+            <xsl:choose>
+                <xsl:when test="/n1:Invoice/cac:PricingExchangeRate/cbc:Date"><xsl:value-of select="/n1:Invoice/cac:PricingExchangeRate/cbc:Date"/></xsl:when>
+                <xsl:otherwise><xsl:value-of select="/n1:Invoice/cbc:IssueDate"/></xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
         <html lang="tr">
             <head>
                 <meta charset="utf-8"/>
@@ -181,6 +187,10 @@
                     .odenecek .v { font-size: 20px; font-weight: 900; }
                     .tlk { background: #facc15; color: #0b1f4d; display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; font-weight: 800; }
                     .tlk small { font-weight: 600; font-size: 9px; }
+                    .tlt { width: 100%; border-collapse: collapse; margin-top: 6px; }
+                    .tlt td { padding: 3px 12px; border-bottom: 1px solid #e2e8f0; }
+                    .tlt td.t { text-align: right; white-space: nowrap; }
+                    .tlt tr.bas td { font-weight: 700; color: #0b1f4d; background: #fef9c3; font-size: 0.92em; }
                     .dip { margin-top: 12px; font-size: 8.5px; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 6px; line-height: 1.5; }
                     @media print { body { background: #ffffff; } .sayfa { margin: 0; } }
                 </style>
@@ -284,6 +294,7 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
                                     <span class="rozet dvz">
                                         <xsl:value-of select="/n1:Invoice/cbc:DocumentCurrencyCode"/><xsl:text> · Kur </xsl:text>
                                         <xsl:value-of select="format-number($kur, '###.##0,0000', 'edesign-tr')"/>
+                                        <xsl:text> TL · TCMB </xsl:text><xsl:call-template name="tarih"><xsl:with-param name="d" select="$kurTarih"/></xsl:call-template>
                                     </span>
                                 </xsl:if>
                             </div>
@@ -468,8 +479,17 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
                                     <span class="v"><xsl:value-of select="format-number(/n1:Invoice/cac:LegalMonetaryTotal/cbc:PayableAmount, '###.##0,00', 'edesign-tr')"/><xsl:text> </xsl:text><xsl:value-of select="$pb"/></span>
                                 </div>
                                 <xsl:if test="$kur and /n1:Invoice/cbc:DocumentCurrencyCode!='TRY'">
+                                    <table class="tlt">
+                                        <tr class="bas"><td colspan="2"><xsl:text>TL Karşılıkları · 1 </xsl:text><xsl:value-of select="/n1:Invoice/cbc:DocumentCurrencyCode"/><xsl:text> = </xsl:text><xsl:value-of select="format-number($kur, '###.##0,0000', 'edesign-tr')"/><xsl:text> TL (TCMB döviz alış, </xsl:text><xsl:call-template name="tarih"><xsl:with-param name="d" select="$kurTarih"/></xsl:call-template><xsl:text>)</xsl:text></td></tr>
+                                        <tr><td><xsl:text>Mal / Hizmet Toplamı</xsl:text></td><td class="t"><xsl:value-of select="format-number(/n1:Invoice/cac:LegalMonetaryTotal/cbc:LineExtensionAmount * $kur, '###.##0,00', 'edesign-tr')"/><xsl:text> TL</xsl:text></td></tr>
+                                        <xsl:if test="/n1:Invoice/cac:LegalMonetaryTotal/cbc:AllowanceTotalAmount &gt; 0">
+                                            <tr><td><xsl:text>Toplam İskonto</xsl:text></td><td class="t"><xsl:text>− </xsl:text><xsl:value-of select="format-number(/n1:Invoice/cac:LegalMonetaryTotal/cbc:AllowanceTotalAmount * $kur, '###.##0,00', 'edesign-tr')"/><xsl:text> TL</xsl:text></td></tr>
+                                        </xsl:if>
+                                        <tr><td><xsl:text>Hesaplanan KDV</xsl:text></td><td class="t"><xsl:value-of select="format-number(sum(/n1:Invoice/cac:TaxTotal/cbc:TaxAmount) * $kur, '###.##0,00', 'edesign-tr')"/><xsl:text> TL</xsl:text></td></tr>
+                                        <tr><td><xsl:text>Vergiler Dahil Toplam</xsl:text></td><td class="t"><xsl:value-of select="format-number(/n1:Invoice/cac:LegalMonetaryTotal/cbc:TaxInclusiveAmount * $kur, '###.##0,00', 'edesign-tr')"/><xsl:text> TL</xsl:text></td></tr>
+                                    </table>
                                     <div class="tlk">
-                                        <span><xsl:text>TL KARŞILIĞI </xsl:text><small><xsl:text>(1 </xsl:text><xsl:value-of select="/n1:Invoice/cbc:DocumentCurrencyCode"/><xsl:text> = </xsl:text><xsl:value-of select="format-number($kur, '###.##0,0000', 'edesign-tr')"/><xsl:text> TL)</xsl:text></small></span>
+                                        <span><xsl:text>ÖDENECEK (TL KARŞILIĞI)</xsl:text></span>
                                         <span><xsl:value-of select="format-number(/n1:Invoice/cac:LegalMonetaryTotal/cbc:PayableAmount * $kur, '###.##0,00', 'edesign-tr')"/><xsl:text> TL</xsl:text></span>
                                     </div>
                                 </xsl:if>
