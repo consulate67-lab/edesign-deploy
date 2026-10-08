@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: Kişiye özel ölçülü abiye elbisenin İngiltere'deki bireysel alıcıya mikro ihracatı (ETGB) — EARSIVFATURA · ISTISNA (301), GBP.
+  Satırda GOGUS, BEL, BASEN, BOY (cm) ölçü ek tanımları, KUMAS, RENK, GTIP; FedEx ekspres gönderi.
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>EARSIVFATURA</cbc:ProfileID>
+    <cbc:ID>ADF2026000000371</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>D304331D-DFF2-4340-AC41-7FE9FF672368</cbc:UUID>
+    <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+    <cbc:IssueTime>17:10:00</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>ISTISNA</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız: Bin Dört Yüz Doksan Beş İngiliz Sterlini</cbc:Note>
+    <cbc:Note>Bu fatura ETGB kapsamında mikro ihracat (e-ihracat) faturasıdır; KDV 3065 s. Kanun 11/1-a uyarınca istisnadır.</cbc:Note>
+    <cbc:Note>Elbise müşteri ölçülerine göre dikilmiştir; kişiye özel ürünlerde cayma hakkı uygulanmaz.</cbc:Note>
+    <cbc:DocumentCurrencyCode>GBP</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>3</cbc:LineCountNumeric>
+    <cac:OrderReference>
+        <cbc:ID>AD-UK-0371</cbc:ID>
+        <cbc:IssueDate>2026-09-12</cbc:IssueDate>
+    </cac:OrderReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>26341300EX009245</cbc:ID>
+        <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+        <cbc:DocumentType>ETGB</cbc:DocumentType>
+        <cbc:DocumentDescription>Elektronik Ticaret Gümrük Beyannamesi</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">0817263945</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">0817263945</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Nişantaşı Mah. Abdi İpekçi Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>42/3</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Şişli</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34367</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_ADF2026000000371</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.atelierdefne.com</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">0817263945</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">0081726394500012</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Atelier Defne Abiye Moda Ltd. Şti.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Nişantaşı Mah. Abdi İpekçi Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>42/3</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Şişli</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34367</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Şişli</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>+90 212 296 18 42</cbc:Telephone>
+                <cbc:ElectronicMail>couture@atelierdefne.com</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">2222222222</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Charlotte Evans</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Wilmslow Road</cbc:StreetName>
+                <cbc:BuildingNumber>77</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Didsbury</cbc:CitySubdivisionName>
+                <cbc:CityName>Manchester</cbc:CityName>
+                <cbc:PostalZone>M20 5WG</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>GB</cbc:IdentificationCode>
+                    <cbc:Name>Birleşik Krallık</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:Contact>
+                <cbc:Telephone>+44 161 555 0129</cbc:Telephone>
+                <cbc:ElectronicMail>charlotte.evans@example.com</cbc:ElectronicMail>
+            </cac:Contact>
+            <cac:Person>
+                <cbc:FirstName>Charlotte</cbc:FirstName>
+                <cbc:FamilyName>Evans</cbc:FamilyName>
+            </cac:Person>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:Delivery>
+        <cbc:TrackingID>7731 4482 0916</cbc:TrackingID>
+        <cac:DeliveryAddress>
+            <cbc:StreetName>Wilmslow Road</cbc:StreetName>
+            <cbc:BuildingNumber>77</cbc:BuildingNumber>
+            <cbc:CitySubdivisionName>Didsbury</cbc:CitySubdivisionName>
+            <cbc:CityName>Manchester</cbc:CityName>
+            <cbc:PostalZone>M20 5WG</cbc:PostalZone>
+            <cac:Country>
+                <cbc:IdentificationCode>GB</cbc:IdentificationCode>
+                <cbc:Name>Birleşik Krallık</cbc:Name>
+            </cac:Country>
+        </cac:DeliveryAddress>
+        <cac:CarrierParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">3880530286</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>FedEx Express</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:CitySubdivisionName>Esenyurt</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:CarrierParty>
+        <cac:Despatch>
+            <cbc:ActualDespatchDate>2026-10-08</cbc:ActualDespatchDate>
+            <cbc:ActualDespatchTime>14:00:00</cbc:ActualDespatchTime>
+        </cac:Despatch>
+    </cac:Delivery>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>48</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-09-12</cbc:PaymentDueDate>
+        <cbc:InstructionNote>Kredi kartı · %50 kapora + %50 teslimden önce · Ödeme aracısı: PayTR</cbc:InstructionNote>
+    </cac:PaymentMeans>
+    <cac:PricingExchangeRate>
+        <cbc:SourceCurrencyCode>GBP</cbc:SourceCurrencyCode>
+        <cbc:TargetCurrencyCode>TRY</cbc:TargetCurrencyCode>
+        <cbc:CalculationRate>57.284</cbc:CalculationRate>
+        <cbc:Date>2026-10-07</cbc:Date>
+    </cac:PricingExchangeRate>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="GBP">0.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="GBP">1495.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="GBP">0.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>0</cbc:Percent>
+            <cac:TaxCategory>
+                <cbc:TaxExemptionReasonCode>301</cbc:TaxExemptionReasonCode>
+                <cbc:TaxExemptionReason>11/1-a Mal ihracatı</cbc:TaxExemptionReason>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="GBP">1495.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="GBP">1495.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="GBP">1495.00</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="GBP">0.00</cbc:AllowanceTotalAmount>
+        <cbc:PayableAmount currencyID="GBP">1495.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="GBP">1180.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="GBP">0.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="GBP">1180.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="GBP">0.00</cbc:TaxAmount>
+                <cbc:Percent>0</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Made-to-measure lace evening gown</cbc:Description>
+            <cbc:Name>Dantel işlemeli abiye elbise</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>AD-EG-2611</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="GOGUS">88</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEL">68</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BASEN">96</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BOY">168</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="KUMAS">Fransız danteli · ipek astar</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Şampanya</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="GTIP">620443000000</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="GBP">1180</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="GBP">220.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="GBP">0.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="GBP">220.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="GBP">0.00</cbc:TaxAmount>
+                <cbc:Percent>0</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Embroidered tulle bolero</cbc:Description>
+            <cbc:Name>Tül bolero</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>AD-BL-0412</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="KUMAS">İşlemeli tül</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Şampanya</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="GTIP">620433000000</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="GBP">220</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="GBP">95.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="GBP">0.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="GBP">95.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="GBP">0.00</cbc:TaxAmount>
+                <cbc:Percent>0</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Satin clutch with crystal clasp</cbc:Description>
+            <cbc:Name>Saten clutch çanta</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>AD-CL-0207</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="KUMAS">İpek saten</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Altın</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="GTIP">420232000000</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="GBP">95</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>

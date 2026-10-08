@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: Kesimhaneden fason dikim atölyesine kesilmiş parça (demet) sevkiyatı — TEMELIRSALIYE · SEVK; ana firma
+  BuyerCustomerParty. Satırda PASTAL, KAT (pastal kat adedi), DEMET, KUMAS, PARCA (parça listesi) ve BEDEN-xx dağılımı.
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<DespatchAdvice xmlns="urn:oasis:names:specification:ubl:schema:xsd:DespatchAdvice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2.1</cbc:CustomizationID>
+    <cbc:ProfileID>TEMELIRSALIYE</cbc:ProfileID>
+    <cbc:ID>DKS2026000001263</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>47AEAAF1-97A1-4732-A36A-93656BC622C5</cbc:UUID>
+    <cbc:IssueDate>2026-10-08</cbc:IssueDate>
+    <cbc:IssueTime>11:20:00</cbc:IssueTime>
+    <cbc:DespatchAdviceTypeCode>SEVK</cbc:DespatchAdviceTypeCode>
+    <cbc:Note>Demetler beden etiketli ve numaralıdır; parça sayımı demet fişine göre yapılmalıdır.</cbc:Note>
+    <cbc:Note>Fason dikim sonrası ürünler Atlas Konfeksiyon'a teslim edilecektir.</cbc:Note>
+    <cbc:LineCountNumeric>3</cbc:LineCountNumeric>
+    <cac:OrderReference>
+        <cbc:ID>ATL-FS-26-0412</cbc:ID>
+        <cbc:IssueDate>2026-10-01</cbc:IssueDate>
+    </cac:OrderReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>KF-26-118/120</cbc:ID>
+        <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+        <cbc:DocumentType>KESIMFOYU</cbc:DocumentType>
+        <cbc:DocumentDescription>Kesim föyü</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">2840193756</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">2840193756</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Merter Keresteciler Sitesi Fatih Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>33</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Güngören</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34173</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_DKS2026000001263</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:DespatchSupplierParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">2840193756</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Doğru Kesim Tekstil Ltd. Şti.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Merter Keresteciler Sitesi Fatih Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>33</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Güngören</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34173</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Merter</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0212 504 77 33</cbc:Telephone>
+                <cbc:ElectronicMail>kesim@dogrukesim.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+        <cac:DespatchContact>
+            <cbc:Name>Cem Aydın (Kesim Şefi)</cbc:Name>
+        </cac:DespatchContact>
+    </cac:DespatchSupplierParty>
+    <cac:DeliveryCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">41827365910</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Usta Eller Dikim Atölyesi</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Yenibosna Merkez Mah. 29 Ekim Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>9/2</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Bahçelievler</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34197</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Bahçelievler</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0532 640 18 27</cbc:Telephone>
+            </cac:Contact>
+            <cac:Person>
+                <cbc:FirstName>Hatice</cbc:FirstName>
+                <cbc:FamilyName>Demir</cbc:FamilyName>
+            </cac:Person>
+        </cac:Party>
+    </cac:DeliveryCustomerParty>
+    <cac:BuyerCustomerParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.atlaskonfeksiyon.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">1093847562</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Atlas Konfeksiyon Ltd. Şti.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Güneşli Mah. Koçman Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>41</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Bağcılar</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34212</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Güneşli</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0212 651 22 80</cbc:Telephone>
+                <cbc:ElectronicMail>kumas@atlaskonfeksiyon.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:BuyerCustomerParty>
+    <cac:Shipment>
+        <cbc:ID>DKS-SVK-1263</cbc:ID>
+        <cbc:GrossWeightMeasure unitCode="KGM">168.000</cbc:GrossWeightMeasure>
+        <cbc:TotalGoodsItemQuantity>3</cbc:TotalGoodsItemQuantity>
+        <cbc:TotalTransportHandlingUnitQuantity>42</cbc:TotalTransportHandlingUnitQuantity>
+        <cac:ShipmentStage>
+            <cac:TransportMeans>
+                <cac:RoadTransport>
+                    <cbc:LicensePlateID schemeID="PLAKA">34 DKS 052</cbc:LicensePlateID>
+                </cac:RoadTransport>
+            </cac:TransportMeans>
+            <cac:DriverPerson>
+                <cbc:FirstName>Yusuf</cbc:FirstName>
+                <cbc:FamilyName>Bayram</cbc:FamilyName>
+                <cbc:Title>Şoför</cbc:Title>
+                <cbc:NationalityID>52918374620</cbc:NationalityID>
+            </cac:DriverPerson>
+        </cac:ShipmentStage>
+        <cac:Delivery>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>Yenibosna Merkez Mah. 29 Ekim Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>9/2</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Bahçelievler</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34197</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:Despatch>
+                <cbc:ActualDespatchDate>2026-10-08</cbc:ActualDespatchDate>
+                <cbc:ActualDespatchTime>11:40:00</cbc:ActualDespatchTime>
+            </cac:Despatch>
+        </cac:Delivery>
+    </cac:Shipment>
+    <cac:DespatchLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:DeliveredQuantity unitCode="C62">960</cbc:DeliveredQuantity>
+        <cac:OrderLineReference>
+            <cbc:LineID>1</cbc:LineID>
+        </cac:OrderLineReference>
+        <cac:Item>
+            <cbc:Name>Erkek Polo Yaka Tişört — Kesilmiş Parça</cbc:Name>
+            <cbc:ModelName>ATL-PL-2611</cbc:ModelName>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="PASTAL">P-118</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="KAT">80</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="DEMET">16</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="KUMAS">Pike %100 pamuk · Lacivert</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="PARCA">Ön beden ×1|Arka beden ×1|Kol ×2|Yaka ×1|Pat ×2</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-S">160</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-M">320</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-L">320</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-XL">160</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+    </cac:DespatchLine>
+    <cac:DespatchLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:DeliveredQuantity unitCode="C62">480</cbc:DeliveredQuantity>
+        <cac:OrderLineReference>
+            <cbc:LineID>2</cbc:LineID>
+        </cac:OrderLineReference>
+        <cac:Item>
+            <cbc:Name>Kadın Basic Elbise — Kesilmiş Parça</cbc:Name>
+            <cbc:ModelName>ATL-EL-2622</cbc:ModelName>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="PASTAL">P-119</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="KAT">60</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="DEMET">12</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="KUMAS">Viskon dokuma · Kiremit</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="PARCA">Ön ×1|Arka ×2|Kol ×2|Yaka pervazı ×1</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-S">120</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-M">160</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-L">120</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-XL">80</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+    </cac:DespatchLine>
+    <cac:DespatchLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:DeliveredQuantity unitCode="C62">720</cbc:DeliveredQuantity>
+        <cac:OrderLineReference>
+            <cbc:LineID>3</cbc:LineID>
+        </cac:OrderLineReference>
+        <cac:Item>
+            <cbc:Name>Çocuk Eşofman Altı — Kesilmiş Parça</cbc:Name>
+            <cbc:ModelName>ATL-CE-2630</cbc:ModelName>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="PASTAL">P-120</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="KAT">90</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="DEMET">14</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="KUMAS">İki iplik · Haki</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="PARCA">Ön paça ×2|Arka paça ×2|Bel ×1|Cep ×2</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-4-5Y">180</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-6-7Y">240</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-8-9Y">180</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-10-11Y">120</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+    </cac:DespatchLine>
+</DespatchAdvice>

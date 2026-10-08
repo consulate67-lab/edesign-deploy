@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: Fason boyahaneden konfeksiyona boyalı kumaş top sevkiyatı — TEMELIRSALIYE · SEVK, miktar metre (MTR).
+  Satırda RENK, RENKKOD (#hex), PANTONE, LOT, TOP (top adedi), KG, EN, GRAMAJ ve YIKAMA / SURTME / ISIK haslık notları (1–5).
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<DespatchAdvice xmlns="urn:oasis:names:specification:ubl:schema:xsd:DespatchAdvice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2.1</cbc:CustomizationID>
+    <cbc:ProfileID>TEMELIRSALIYE</cbc:ProfileID>
+    <cbc:ID>RNK2026000000882</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>9B38A4F2-7C17-4612-A160-12CEAEE2F0FA</cbc:UUID>
+    <cbc:IssueDate>2026-10-08</cbc:IssueDate>
+    <cbc:IssueTime>09:40:00</cbc:IssueTime>
+    <cbc:DespatchAdviceTypeCode>SEVK</cbc:DespatchAdviceTypeCode>
+    <cbc:Note>Fason boya-apre işlemi sonrası iadedir; ham kumaş Atlas Konfeksiyon'a aittir.</cbc:Note>
+    <cbc:Note>Renk onayı lab-dip numunelerine göre verilmiştir, ±%3 metraj toleransı vardır.</cbc:Note>
+    <cbc:LineCountNumeric>4</cbc:LineCountNumeric>
+    <cac:OrderReference>
+        <cbc:ID>ATL-BY-26-118</cbc:ID>
+        <cbc:IssueDate>2026-09-24</cbc:IssueDate>
+    </cac:OrderReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>RNK-IE-2026-0882</cbc:ID>
+        <cbc:IssueDate>2026-09-29</cbc:IssueDate>
+        <cbc:DocumentType>ISEMRI</cbc:DocumentType>
+        <cbc:DocumentDescription>Boya-apre iş emri</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">7349102856</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">7349102856</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Velimeşe OSB 3. Cadde</cbc:StreetName>
+                <cbc:BuildingNumber>22</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Ergene</cbc:CitySubdivisionName>
+                <cbc:CityName>Tekirdağ</cbc:CityName>
+                <cbc:PostalZone>59930</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_RNK2026000000882</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:DespatchSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.renkhaneboya.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">7349102856</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">0734910285600011</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Renkhane Boya Apre Sanayi ve Ticaret A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Velimeşe OSB 3. Cadde</cbc:StreetName>
+                <cbc:BuildingNumber>22</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Ergene</cbc:CitySubdivisionName>
+                <cbc:CityName>Tekirdağ</cbc:CityName>
+                <cbc:PostalZone>59930</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Çorlu</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0282 674 30 30</cbc:Telephone>
+                <cbc:ElectronicMail>sevk@renkhaneboya.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+        <cac:DespatchContact>
+            <cbc:Name>Gökhan Er (Kalite Kontrol)</cbc:Name>
+        </cac:DespatchContact>
+    </cac:DespatchSupplierParty>
+    <cac:DeliveryCustomerParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.atlaskonfeksiyon.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">1093847562</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Atlas Konfeksiyon Ltd. Şti.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Güneşli Mah. Koçman Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>41</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Bağcılar</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34212</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Güneşli</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0212 651 22 80</cbc:Telephone>
+                <cbc:ElectronicMail>kumas@atlaskonfeksiyon.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:DeliveryCustomerParty>
+    <cac:Shipment>
+        <cbc:ID>RNK-SVK-0882</cbc:ID>
+        <cbc:GrossWeightMeasure unitCode="KGM">1846.200</cbc:GrossWeightMeasure>
+        <cbc:TotalGoodsItemQuantity>4</cbc:TotalGoodsItemQuantity>
+        <cbc:TotalTransportHandlingUnitQuantity>38</cbc:TotalTransportHandlingUnitQuantity>
+        <cac:ShipmentStage>
+            <cac:TransportMeans>
+                <cac:RoadTransport>
+                    <cbc:LicensePlateID schemeID="PLAKA">59 RNK 220</cbc:LicensePlateID>
+                </cac:RoadTransport>
+            </cac:TransportMeans>
+            <cac:DriverPerson>
+                <cbc:FirstName>Hüseyin</cbc:FirstName>
+                <cbc:FamilyName>Kurt</cbc:FamilyName>
+                <cbc:Title>Şoför</cbc:Title>
+                <cbc:NationalityID>19283746510</cbc:NationalityID>
+            </cac:DriverPerson>
+        </cac:ShipmentStage>
+        <cac:Delivery>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>Güneşli Mah. Koçman Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>41</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Bağcılar</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34212</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:Despatch>
+                <cbc:ActualDespatchDate>2026-10-08</cbc:ActualDespatchDate>
+                <cbc:ActualDespatchTime>10:15:00</cbc:ActualDespatchTime>
+            </cac:Despatch>
+        </cac:Delivery>
+    </cac:Shipment>
+    <cac:DespatchLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:DeliveredQuantity unitCode="MTR">1520</cbc:DeliveredQuantity>
+        <cac:OrderLineReference>
+            <cbc:LineID>1</cbc:LineID>
+        </cac:OrderLineReference>
+        <cac:Item>
+            <cbc:Description>%100 pamuk 30/1 penye · reaktif boya</cbc:Description>
+            <cbc:Name>Süprem Örme Kumaş</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Gece Mavisi</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENKKOD">#1e3a8a</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="PANTONE">19-3933 TCX</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="LOT">L-26-4411</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="TOP">12</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="KG">486.4</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="EN">180 cm</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="GRAMAJ">160 g/m²</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="YIKAMA">4.5</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="SURTME">4</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="ISIK">5</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+    </cac:DespatchLine>
+    <cac:DespatchLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:DeliveredQuantity unitCode="MTR">640</cbc:DeliveredQuantity>
+        <cac:OrderLineReference>
+            <cbc:LineID>2</cbc:LineID>
+        </cac:OrderLineReference>
+        <cac:Item>
+            <cbc:Description>%95 pamuk %5 elastan · 1×1</cbc:Description>
+            <cbc:Name>Ribana Kumaş</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Bordo</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENKKOD">#9f1239</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="PANTONE">19-1934 TCX</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="LOT">L-26-4412</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="TOP">6</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="KG">211.2</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="EN">120 cm tüp</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="GRAMAJ">240 g/m²</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="YIKAMA">4</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="SURTME">4</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="ISIK">4.5</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+    </cac:DespatchLine>
+    <cac:DespatchLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:DeliveredQuantity unitCode="MTR">1180</cbc:DeliveredQuantity>
+        <cac:OrderLineReference>
+            <cbc:LineID>3</cbc:LineID>
+        </cac:OrderLineReference>
+        <cac:Item>
+            <cbc:Description>Şardonlu, %100 pamuk</cbc:Description>
+            <cbc:Name>İki İplik Kumaş</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Haki</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENKKOD">#556b2f</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="PANTONE">18-0523 TCX</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="LOT">L-26-4413</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="TOP">10</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="KG">531</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="EN">185 cm</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="GRAMAJ">260 g/m²</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="YIKAMA">4</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="SURTME">3.5</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="ISIK">4.5</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+    </cac:DespatchLine>
+    <cac:DespatchLine>
+        <cbc:ID>4</cbc:ID>
+        <cbc:DeliveredQuantity unitCode="MTR">980</cbc:DeliveredQuantity>
+        <cac:OrderLineReference>
+            <cbc:LineID>4</cbc:LineID>
+        </cac:OrderLineReference>
+        <cac:Item>
+            <cbc:Description>Pamuklu görünüm, yumuşak tuşe</cbc:Description>
+            <cbc:Name>Viskon Dokuma</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Kiremit</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENKKOD">#c2410c</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="PANTONE">17-1340 TCX</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="LOT">L-26-4414</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="TOP">10</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="KG">617.6</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="EN">145 cm</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="GRAMAJ">125 g/m²</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="YIKAMA">3.5</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="SURTME">4</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="ISIK">4</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+    </cac:DespatchLine>
+</DespatchAdvice>

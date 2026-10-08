@@ -209,6 +209,15 @@ export const WIZARD_DOC_TYPES: WizardDocType[] = [
         ],
     },
     {
+        id: 'mikro-ihracat', label: 'e-Mikro İhracat', description: 'ETGB ile posta / kargo ihracatı (e-Arşiv)', color: '#9f1239',
+        family: 'invoice', profileIds: ['EARSIVFATURA'], typeCodes: ['ISTISNA'],
+        sampleXml: 'ebelge/hazir/atolye-deri-canta-mikro.xml',
+        defaults: [
+            gibOption('mikro_ihracat'),
+            { id: 'mikro-ihracat', label: 'e-Mikro İhracat Şablonu', description: 'ETGB, taşıyıcı ve döviz alanlı', moduleId: 'mikro_ihracat', load: inline('community/IRPTeam-eFatura.xslt') },
+        ],
+    },
+    {
         id: 'smm', label: 'e-SMM', description: 'Serbest meslek makbuzu', color: '#14b8a6',
         family: 'invoice', profileIds: ['EARSIVBELGE'], typeCodes: ['SERBESTMESLEKMAKBUZU'],
         sampleXml: 'ebelge/samples/e-SMM-TEMEL.xml',

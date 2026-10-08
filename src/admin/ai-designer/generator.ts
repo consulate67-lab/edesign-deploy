@@ -378,6 +378,7 @@ const PARTY_LABELS: Record<string, [string, string]> = {
     fatura: ['Satıcı', 'Alıcı'],
     arsiv: ['Satıcı', 'Alıcı'],
     ihracat: ['İhracatçı / Satıcı', 'Alıcı (Yurt Dışı)'],
+    'mikro-ihracat': ['İhracatçı / Satıcı', 'Alıcı (Yurt Dışı)'],
     smm: ['Serbest Meslek Erbabı', 'Müşteri'],
     bilet: ['Bileti Düzenleyen', 'Yolcu / İzleyici'],
     irsaliye: ['Gönderen', 'Alıcı (Teslim Alan)'],
@@ -390,7 +391,7 @@ const PARTY_LABELS: Record<string, [string, string]> = {
 };
 
 const NO_LABELS: Record<string, string> = {
-    fatura: 'Fatura No', arsiv: 'Fatura No', ihracat: 'Fatura No', smm: 'Makbuz No', bilet: 'Bilet No', irsaliye: 'İrsaliye No',
+    fatura: 'Fatura No', arsiv: 'Fatura No', ihracat: 'Fatura No', 'mikro-ihracat': 'Fatura No', smm: 'Makbuz No', bilet: 'Bilet No', irsaliye: 'İrsaliye No',
     'irsaliye-yanit': 'Yanıt No', mustahsil: 'Makbuz No', 'gider-pusulasi': 'Belge No', doviz: 'Belge No', dekont: 'Dekont No', 'sigorta-komisyon': 'Belge No',
 };
 
@@ -400,6 +401,7 @@ function titleOf(dt: WizardDocType): string {
             return '<xsl:choose><xsl:when test="cbc:ProfileID=\'EARSIVFATURA\'">e-ARŞİV FATURA</xsl:when><xsl:when test="cbc:ProfileID=\'TEMELFATURA\' or cbc:ProfileID=\'TICARIFATURA\'">e-FATURA</xsl:when><xsl:otherwise>e-FATURA</xsl:otherwise></xsl:choose>';
         case 'arsiv': return 'e-ARŞİV FATURA';
         case 'ihracat': return '<xsl:choose><xsl:when test="cbc:ProfileID=\'YOLCUBERABERFATURA\'">YOLCU BERABER FATURA</xsl:when><xsl:otherwise>İHRACAT FATURASI</xsl:otherwise></xsl:choose>';
+        case 'mikro-ihracat': return 'e-ARŞİV FATURA · MİKRO İHRACAT';
         case 'smm': return 'e-SERBEST MESLEK MAKBUZU';
         case 'bilet': return 'e-BİLET';
         case 'irsaliye': return 'e-İRSALİYE';

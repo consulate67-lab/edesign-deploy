@@ -11,6 +11,7 @@ export type CategoryId =
     | 'hizmet'
     | 'finans'
     | 'sanayi'
+    | 'moda'
     | 'tarim';
 
 export type SectorId =
@@ -41,6 +42,8 @@ export type SectorId =
     | 'ihracat'
     | 'otomotiv'
     | 'enerji'
+    | 'tekstil'
+    | 'ayakkabi'
     | 'tarim';
 
 export interface CategoryInfo {
@@ -92,6 +95,7 @@ export const CATEGORIES: CategoryInfo[] = [
     { id: 'hizmet', label: 'Profesyonel Hizmetler', color: '#14b8a6' },
     { id: 'finans', label: 'Finans & Sigorta', color: '#4f46e5' },
     { id: 'sanayi', label: 'Sanayi & Üretim', color: '#d97706' },
+    { id: 'moda', label: 'Tekstil, Ayakkabı & Moda', color: '#be185d' },
     { id: 'tarim', label: 'Tarım & Gıda', color: '#65a30d' },
 ];
 
@@ -123,6 +127,8 @@ export const SECTORS: SectorInfo[] = [
     { id: 'ihracat', category: 'sanayi', label: 'İhracat', color: '#10b981' },
     { id: 'otomotiv', category: 'sanayi', label: 'Otomotiv & Servis', color: '#dc2626' },
     { id: 'enerji', category: 'sanayi', label: 'Enerji & Akaryakıt', color: '#16a34a' },
+    { id: 'tekstil', category: 'moda', label: 'Tekstil & Konfeksiyon', color: '#a21caf' },
+    { id: 'ayakkabi', category: 'moda', label: 'Ayakkabı & Deri', color: '#b45309' },
     { id: 'tarim', category: 'tarim', label: 'Tarım & Hayvancılık', color: '#65a30d' },
 ];
 

@@ -16,7 +16,7 @@ export const SANAYI2_TEMPLATES: SectorTemplate[] = [
     },
     {
         id: 'tekstil-fason-fatura',
-        sector: 'uretim',
+        sector: 'tekstil',
         name: 'Tekstil Fason Dikim Faturası (Tevkifatlı)',
         description: 'Konfeksiyon atölyeleri için sezon, model kodu, renk kartelası, beden dağılımı ve sipariş-irsaliye referanslı; fason tekstil işlerinde KDV tevkifatlı askılı etiket görünümlü fatura.',
         docTypeId: 'fatura',

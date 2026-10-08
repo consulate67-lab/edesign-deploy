@@ -13,14 +13,14 @@ import { isHex, rgbToHex } from './utils';
 // ---------------------------------------------------------------------------
 // Belge tipi grupları
 // ---------------------------------------------------------------------------
-export const INVOICE_DOCS = ['fatura', 'arsiv', 'ihracat', 'smm', 'bilet'];
+export const INVOICE_DOCS = ['fatura', 'arsiv', 'ihracat', 'mikro-ihracat', 'smm', 'bilet'];
 export const CREDIT_NOTE_DOCS = ['mustahsil', 'gider-pusulasi', 'doviz', 'dekont', 'sigorta-komisyon'];
 export const DESPATCH_DOCS = ['irsaliye'];
 export const RECEIPT_ADVICE_DOCS = ['irsaliye-yanit'];
 export const EBILET_DOCS = ['bilet-rapor', 'bilet-yolcu'];
 export const UBL_DOCS = [...INVOICE_DOCS, ...DESPATCH_DOCS, ...RECEIPT_ADVICE_DOCS, ...CREDIT_NOTE_DOCS];
 /** Banka hesabı sorusunun sorulduğu belgeler (tahsilat yapılan belgeler). */
-export const BANK_DOCS = ['fatura', 'arsiv', 'ihracat', 'smm', 'sigorta-komisyon'];
+export const BANK_DOCS = ['fatura', 'arsiv', 'ihracat', 'mikro-ihracat', 'smm', 'sigorta-komisyon'];
 /** Karekod taşıyan belgeler (GİB karekod standardı). */
 export const QR_DOCS = [...INVOICE_DOCS, ...DESPATCH_DOCS, ...CREDIT_NOTE_DOCS];
 /** 80 mm fiş düzeni sunulan belgeler. */
@@ -51,31 +51,31 @@ export const SECTION_DEFS: SectionDef[] = [
     { id: 'notlar', label: 'Belge notları', docTypes: UBL_DOCS, defaultOn: '*', keywords: ['not', 'notlar', 'aciklamalar'] },
     {
         id: 'kdvDokum', label: 'KDV / vergi oranları dökümü', help: 'Oran bazında matrah ve vergi tablosu',
-        docTypes: ['fatura', 'arsiv', 'ihracat', 'bilet', 'gider-pusulasi', 'dekont', 'sigorta-komisyon'], defaultOn: ['fatura', 'arsiv', 'gider-pusulasi'],
+        docTypes: ['fatura', 'arsiv', 'ihracat', 'mikro-ihracat', 'bilet', 'gider-pusulasi', 'dekont', 'sigorta-komisyon'], defaultOn: ['fatura', 'arsiv', 'gider-pusulasi'],
         keywords: ['kdv dokumu', 'vergi dokumu', 'kdv oranlari', 'kdv detay', 'oran dokumu', 'matrah'],
     },
-    { id: 'iskonto', label: 'İskonto sütunu', docTypes: ['fatura', 'arsiv', 'ihracat'], defaultOn: ['fatura', 'arsiv'], keywords: ['iskonto', 'indirim', 'iskontolu'] },
+    { id: 'iskonto', label: 'İskonto sütunu', docTypes: ['fatura', 'arsiv', 'ihracat', 'mikro-ihracat'], defaultOn: ['fatura', 'arsiv'], keywords: ['iskonto', 'indirim', 'iskontolu'] },
     { id: 'kdvSutun', label: 'Satırda KDV tutarı', docTypes: ['fatura', 'arsiv', 'ihracat', 'bilet', 'gider-pusulasi'], defaultOn: [], keywords: ['kdv sutunu', 'satir kdv', 'kdv tutari sutun'] },
     {
         id: 'tevkifat', label: 'Tevkifat / istisna bölümü', help: 'KDV tevkifatı satırları ve istisna / muafiyet sebepleri',
-        docTypes: ['fatura', 'arsiv', 'ihracat', 'smm'], defaultOn: ['fatura', 'arsiv', 'ihracat', 'smm'], keywords: ['tevkifat', 'istisna', 'muafiyet', 'tevkifatli'],
+        docTypes: ['fatura', 'arsiv', 'ihracat', 'mikro-ihracat', 'smm'], defaultOn: ['fatura', 'arsiv', 'ihracat', 'mikro-ihracat', 'smm'], keywords: ['tevkifat', 'istisna', 'muafiyet', 'tevkifatli'],
     },
     {
-        id: 'odeme', label: 'Ödeme koşulları ve vade', docTypes: ['fatura', 'arsiv', 'ihracat', 'smm', 'bilet'], defaultOn: ['fatura', 'ihracat', 'bilet'],
+        id: 'odeme', label: 'Ödeme koşulları ve vade', docTypes: ['fatura', 'arsiv', 'ihracat', 'mikro-ihracat', 'smm', 'bilet'], defaultOn: ['fatura', 'ihracat', 'bilet'],
         keywords: ['vade', 'odeme kosul', 'odeme bilgi', 'odeme sekli', 'odeme sartlari', 'vade tarihi'],
     },
     {
-        id: 'referans', label: 'Sipariş / irsaliye referansları', docTypes: ['fatura', 'arsiv', 'ihracat', 'irsaliye', 'irsaliye-yanit'],
+        id: 'referans', label: 'Sipariş / irsaliye referansları', docTypes: ['fatura', 'arsiv', 'ihracat', 'mikro-ihracat', 'irsaliye', 'irsaliye-yanit'],
         defaultOn: ['fatura', 'ihracat', 'irsaliye', 'irsaliye-yanit'], keywords: ['siparis', 'irsaliye no', 'referans', 'siparis no'],
     },
-    { id: 'kur', label: 'Döviz kuru gösterimi', docTypes: ['fatura', 'arsiv', 'ihracat', 'smm', 'doviz'], defaultOn: ['fatura', 'ihracat', 'smm', 'doviz'], keywords: ['kur', 'doviz kuru', 'kur bilgisi', 'tl karsiligi'] },
+    { id: 'kur', label: 'Döviz kuru gösterimi', docTypes: ['fatura', 'arsiv', 'ihracat', 'mikro-ihracat', 'smm', 'doviz'], defaultOn: ['fatura', 'ihracat', 'mikro-ihracat', 'smm', 'doviz'], keywords: ['kur', 'doviz kuru', 'kur bilgisi', 'tl karsiligi'] },
     {
         id: 'yaziyla', label: '“Yalnız … TL” yazıyla toplam', docTypes: INV_CN.filter(d => d !== 'doviz'), defaultOn: ['fatura', 'arsiv', 'smm', 'mustahsil', 'gider-pusulasi'],
         keywords: ['yaziyla', 'yalniz', 'yazi ile', 'yaziyla toplam'],
     },
     {
         id: 'internetSatis', label: 'İnternet satışı bilgileri', help: 'Gönderim tarihi, taşıyıcı (kargo), ödeme aracı ve satış sitesi',
-        docTypes: ['arsiv'], defaultOn: [], keywords: ['internet satis', 'internetten', 'e-ticaret', 'eticaret', 'online satis', 'kargo', 'tasiyici'],
+        docTypes: ['arsiv', 'mikro-ihracat'], defaultOn: ['mikro-ihracat'], keywords: ['internet satis', 'internetten', 'e-ticaret', 'eticaret', 'online satis', 'kargo', 'tasiyici'],
     },
     { id: 'ihracatBilgi', label: 'Teslim şartı, GTİP ve gümrük', docTypes: ['ihracat'], defaultOn: ['ihracat'], keywords: ['gtip', 'teslim sarti', 'incoterm', 'gumruk'] },
     { id: 'sefer', label: 'Sefer / etkinlik kartı', docTypes: ['bilet'], defaultOn: ['bilet'], keywords: ['sefer', 'etkinlik', 'ucus', 'yolculuk'] },

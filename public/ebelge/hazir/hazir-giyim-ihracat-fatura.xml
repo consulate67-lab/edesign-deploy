@@ -1,0 +1,463 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: Kadın hazır giyim ihracatı, İngiltere — IHRACAT · ISTISNA (301), GBP, FOB Ambarlı, denizyolu (1).
+  Satırda GTİP, kap no / adet, STIL, RENK, KOMPOZISYON ve ORAN (koli içi beden oranı) ek tanımları.
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>IHRACAT</cbc:ProfileID>
+    <cbc:ID>MLL2026000000127</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>A9E14097-2592-4B23-A0D1-5F54D7B0C169</cbc:UUID>
+    <cbc:IssueDate>2026-10-06</cbc:IssueDate>
+    <cbc:IssueTime>16:40:00</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>ISTISNA</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız: Yetmiş Bir Bin Dört Yüz Doksan Altı İngiliz Sterlini</cbc:Note>
+    <cbc:Note>Port of loading: Ambarlı, İstanbul — Port of discharge: Felixstowe · Vessel: CMA CGM TANGO 0FX4KW</cbc:Note>
+    <cbc:Note>Shipping marks: H&amp;F / LONDON / AW26 / C/No 1-196</cbc:Note>
+    <cbc:DocumentCurrencyCode>GBP</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>4</cbc:LineCountNumeric>
+    <cac:OrderReference>
+        <cbc:ID>HF-AW26-0412</cbc:ID>
+        <cbc:IssueDate>2026-07-22</cbc:IssueDate>
+    </cac:OrderReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">6120394857</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">6120394857</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Mahmutbey Mah. Taşocağı Yolu Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>19</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Bağcılar</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34218</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_MLL2026000000127</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.maisonlale.com</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">6120394857</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">0612039485700019</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Maison Lale Tekstil ve Dış Ticaret A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Mahmutbey Mah. Taşocağı Yolu Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>19</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Bağcılar</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34218</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Güneşli</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>+90 212 444 52 53</cbc:Telephone>
+                <cbc:ElectronicMail>export@maisonlale.com</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">1460415308</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Ticaret Bakanlığı Gümrükler Genel Müdürlüğü - Bilgi İşlem Dairesi Başkanlığı</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:CitySubdivisionName>Çankaya</cbc:CitySubdivisionName>
+                <cbc:CityName>Ankara</cbc:CityName>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Ulus</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:BuyerCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="PARTYTYPE">EXPORT</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Harrow &amp; Finch Ltd.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Great Portland Street</cbc:StreetName>
+                <cbc:BuildingNumber>48</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Fitzrovia</cbc:CitySubdivisionName>
+                <cbc:CityName>London</cbc:CityName>
+                <cbc:PostalZone>W1W 7ND</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>GB</cbc:IdentificationCode>
+                    <cbc:Name>Birleşik Krallık</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyLegalEntity>
+                <cbc:RegistrationName>Harrow &amp; Finch Ltd.</cbc:RegistrationName>
+                <cbc:CompanyID>GB 412 7781 06</cbc:CompanyID>
+            </cac:PartyLegalEntity>
+            <cac:Contact>
+                <cbc:Telephone>+44 20 7946 0318</cbc:Telephone>
+                <cbc:ElectronicMail>buying@harrowfinch.co.uk</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:BuyerCustomerParty>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-12-05</cbc:PaymentDueDate>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR180006400000211230046127</cbc:ID>
+            <cbc:CurrencyCode>GBP</cbc:CurrencyCode>
+            <cbc:PaymentNote>Türkiye İş Bankası — Güneşli Ticari Şube · SWIFT ISBKTRIS</cbc:PaymentNote>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:PaymentTerms>
+        <cbc:Note>60 gün vadeli mal mukabili · Open account, 60 days</cbc:Note>
+    </cac:PaymentTerms>
+    <cac:PricingExchangeRate>
+        <cbc:SourceCurrencyCode>GBP</cbc:SourceCurrencyCode>
+        <cbc:TargetCurrencyCode>TRY</cbc:TargetCurrencyCode>
+        <cbc:CalculationRate>57.284</cbc:CalculationRate>
+        <cbc:Date>2026-10-06</cbc:Date>
+    </cac:PricingExchangeRate>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="GBP">0.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="GBP">71496.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="GBP">0.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>0</cbc:Percent>
+            <cac:TaxCategory>
+                <cbc:TaxExemptionReasonCode>301</cbc:TaxExemptionReasonCode>
+                <cbc:TaxExemptionReason>11/1-a Mal ihracatı</cbc:TaxExemptionReason>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="GBP">71496.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="GBP">71496.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="GBP">71496.00</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="GBP">0.00</cbc:AllowanceTotalAmount>
+        <cbc:PayableAmount currencyID="GBP">71496.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">480</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="GBP">32640.00</cbc:LineExtensionAmount>
+        <cac:Delivery>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>Great Portland Street</cbc:StreetName>
+                <cbc:BuildingNumber>48</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Fitzrovia</cbc:CitySubdivisionName>
+                <cbc:CityName>London</cbc:CityName>
+                <cbc:PostalZone>W1W 7ND</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>GB</cbc:IdentificationCode>
+                    <cbc:Name>Birleşik Krallık</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:DeliveryTerms>
+                <cbc:ID schemeID="INCOTERMS">FOB</cbc:ID>
+            </cac:DeliveryTerms>
+            <cac:Shipment>
+                <cbc:ID/>
+                <cac:GoodsItem>
+                    <cbc:RequiredCustomsID>620231000000</cbc:RequiredCustomsID>
+                </cac:GoodsItem>
+                <cac:ShipmentStage>
+                    <cbc:TransportModeCode>1</cbc:TransportModeCode>
+                </cac:ShipmentStage>
+                <cac:TransportHandlingUnit>
+                    <cac:ActualPackage>
+                        <cbc:ID>1-80</cbc:ID>
+                        <cbc:Quantity>80</cbc:Quantity>
+                        <cbc:PackagingTypeCode>CT</cbc:PackagingTypeCode>
+                    </cac:ActualPackage>
+                </cac:TransportHandlingUnit>
+            </cac:Shipment>
+        </cac:Delivery>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="GBP">0.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="GBP">32640.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="GBP">0.00</cbc:TaxAmount>
+                <cbc:Percent>0</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Women's double-breasted wool coat</cbc:Description>
+            <cbc:Name>Kadın kruvaze yün kaban</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>AW26-CT-01</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Camel</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="KOMPOZISYON">70% Wool · 30% Polyamide</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="ORAN">S1 · M2 · L2 · XL1</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="GBP">68</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">360</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="GBP">15300.00</cbc:LineExtensionAmount>
+        <cac:Delivery>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>Great Portland Street</cbc:StreetName>
+                <cbc:BuildingNumber>48</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Fitzrovia</cbc:CitySubdivisionName>
+                <cbc:CityName>London</cbc:CityName>
+                <cbc:PostalZone>W1W 7ND</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>GB</cbc:IdentificationCode>
+                    <cbc:Name>Birleşik Krallık</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:DeliveryTerms>
+                <cbc:ID schemeID="INCOTERMS">FOB</cbc:ID>
+            </cac:DeliveryTerms>
+            <cac:Shipment>
+                <cbc:ID/>
+                <cac:GoodsItem>
+                    <cbc:RequiredCustomsID>620433900000</cbc:RequiredCustomsID>
+                </cac:GoodsItem>
+                <cac:ShipmentStage>
+                    <cbc:TransportModeCode>1</cbc:TransportModeCode>
+                </cac:ShipmentStage>
+                <cac:TransportHandlingUnit>
+                    <cac:ActualPackage>
+                        <cbc:ID>81-126</cbc:ID>
+                        <cbc:Quantity>46</cbc:Quantity>
+                        <cbc:PackagingTypeCode>CT</cbc:PackagingTypeCode>
+                    </cac:ActualPackage>
+                </cac:TransportHandlingUnit>
+            </cac:Shipment>
+        </cac:Delivery>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="GBP">0.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="GBP">15300.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="GBP">0.00</cbc:TaxAmount>
+                <cbc:Percent>0</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Tailored crepe blazer</cbc:Description>
+            <cbc:Name>Kadın krep blazer ceket</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>AW26-BL-07</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Ivory</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="KOMPOZISYON">64% Polyester · 32% Viscose · 4% Elastane</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="ORAN">S2 · M3 · L2 · XL1</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="GBP">42.5</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">600</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="GBP">13080.00</cbc:LineExtensionAmount>
+        <cac:Delivery>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>Great Portland Street</cbc:StreetName>
+                <cbc:BuildingNumber>48</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Fitzrovia</cbc:CitySubdivisionName>
+                <cbc:CityName>London</cbc:CityName>
+                <cbc:PostalZone>W1W 7ND</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>GB</cbc:IdentificationCode>
+                    <cbc:Name>Birleşik Krallık</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:DeliveryTerms>
+                <cbc:ID schemeID="INCOTERMS">FOB</cbc:ID>
+            </cac:DeliveryTerms>
+            <cac:Shipment>
+                <cbc:ID/>
+                <cac:GoodsItem>
+                    <cbc:RequiredCustomsID>620463900000</cbc:RequiredCustomsID>
+                </cac:GoodsItem>
+                <cac:ShipmentStage>
+                    <cbc:TransportModeCode>1</cbc:TransportModeCode>
+                </cac:ShipmentStage>
+                <cac:TransportHandlingUnit>
+                    <cac:ActualPackage>
+                        <cbc:ID>127-166</cbc:ID>
+                        <cbc:Quantity>40</cbc:Quantity>
+                        <cbc:PackagingTypeCode>CT</cbc:PackagingTypeCode>
+                    </cac:ActualPackage>
+                </cac:TransportHandlingUnit>
+            </cac:Shipment>
+        </cac:Delivery>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="GBP">0.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="GBP">13080.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="GBP">0.00</cbc:TaxAmount>
+                <cbc:Percent>0</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Wide-leg pleated trousers</cbc:Description>
+            <cbc:Name>Kadın pileli bol paça pantolon</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>AW26-TR-12</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Black</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="KOMPOZISYON">100% Polyester</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="ORAN">S3 · M5 · L4 · XL3</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="GBP">21.8</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>4</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">540</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="GBP">10476.00</cbc:LineExtensionAmount>
+        <cac:Delivery>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>Great Portland Street</cbc:StreetName>
+                <cbc:BuildingNumber>48</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Fitzrovia</cbc:CitySubdivisionName>
+                <cbc:CityName>London</cbc:CityName>
+                <cbc:PostalZone>W1W 7ND</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>GB</cbc:IdentificationCode>
+                    <cbc:Name>Birleşik Krallık</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:DeliveryTerms>
+                <cbc:ID schemeID="INCOTERMS">FOB</cbc:ID>
+            </cac:DeliveryTerms>
+            <cac:Shipment>
+                <cbc:ID/>
+                <cac:GoodsItem>
+                    <cbc:RequiredCustomsID>611011100000</cbc:RequiredCustomsID>
+                </cac:GoodsItem>
+                <cac:ShipmentStage>
+                    <cbc:TransportModeCode>1</cbc:TransportModeCode>
+                </cac:ShipmentStage>
+                <cac:TransportHandlingUnit>
+                    <cac:ActualPackage>
+                        <cbc:ID>167-196</cbc:ID>
+                        <cbc:Quantity>30</cbc:Quantity>
+                        <cbc:PackagingTypeCode>CT</cbc:PackagingTypeCode>
+                    </cac:ActualPackage>
+                </cac:TransportHandlingUnit>
+            </cac:Shipment>
+        </cac:Delivery>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="GBP">0.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="GBP">10476.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="GBP">0.00</cbc:TaxAmount>
+                <cbc:Percent>0</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Merino crew-neck jumper</cbc:Description>
+            <cbc:Name>Kadın merino triko kazak</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>AW26-KN-04</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Charcoal</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="KOMPOZISYON">100% Merino Wool</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="ORAN">S4 · M6 · L5 · XL3</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="GBP">19.4</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>

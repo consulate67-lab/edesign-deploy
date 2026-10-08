@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: El tezgâhı peştamal ve hamam ürünlerinin Avustralya'daki bireysel alıcıya mikro ihracatı (ETGB) —
+  EARSIVFATURA · ISTISNA (301), AUD. PTT EMS gönderisi; satırda DOKUMA, EBAT, RENK, GTIP ek tanımları.
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>EARSIVFATURA</cbc:ProfileID>
+    <cbc:ID>EGP2026000000614</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>15EC1599-74D4-480E-A217-B2537C72E9DE</cbc:UUID>
+    <cbc:IssueDate>2026-10-05</cbc:IssueDate>
+    <cbc:IssueTime>20:40:00</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>ISTISNA</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız: İki Yüz Yetmiş Sekiz Avustralya Doları</cbc:Note>
+    <cbc:Note>Bu fatura ETGB kapsamında mikro ihracat (e-ihracat) faturasıdır; KDV 3065 s. Kanun 11/1-a uyarınca istisnadır.</cbc:Note>
+    <cbc:Note>Peştamallar Buldan'da el tezgâhında dokunmuştur; ilk yıkamada hafif çekme olabilir.</cbc:Note>
+    <cbc:DocumentCurrencyCode>AUD</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>3</cbc:LineCountNumeric>
+    <cac:OrderReference>
+        <cbc:ID>EP-AU-0614</cbc:ID>
+        <cbc:IssueDate>2026-10-02</cbc:IssueDate>
+    </cac:OrderReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>26200100EX002964</cbc:ID>
+        <cbc:IssueDate>2026-10-05</cbc:IssueDate>
+        <cbc:DocumentType>ETGB</cbc:DocumentType>
+        <cbc:DocumentDescription>Elektronik Ticaret Gümrük Beyannamesi</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">24618397520</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">24618397520</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Cumhuriyet Mah. Kanbur Sok.</cbc:StreetName>
+                <cbc:BuildingNumber>6</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Buldan</cbc:CitySubdivisionName>
+                <cbc:CityName>Denizli</cbc:CityName>
+                <cbc:PostalZone>20400</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_EGP2026000000614</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.egepestamal.com</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">24618397520</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Ege Peştamal</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Cumhuriyet Mah. Kanbur Sok.</cbc:StreetName>
+                <cbc:BuildingNumber>6</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Buldan</cbc:CitySubdivisionName>
+                <cbc:CityName>Denizli</cbc:CityName>
+                <cbc:PostalZone>20400</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Buldan</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>+90 535 288 41 06</cbc:Telephone>
+                <cbc:ElectronicMail>merhaba@egepestamal.com</cbc:ElectronicMail>
+            </cac:Contact>
+            <cac:Person>
+                <cbc:FirstName>Zeynep</cbc:FirstName>
+                <cbc:FamilyName>Arslan</cbc:FamilyName>
+            </cac:Person>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">2222222222</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Olivia Thompson</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Glebe Point Road</cbc:StreetName>
+                <cbc:BuildingNumber>118</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Glebe</cbc:CitySubdivisionName>
+                <cbc:CityName>Sydney NSW</cbc:CityName>
+                <cbc:PostalZone>2037</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>AU</cbc:IdentificationCode>
+                    <cbc:Name>Avustralya</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:Contact>
+                <cbc:Telephone>+61 2 5550 1844</cbc:Telephone>
+                <cbc:ElectronicMail>olivia.thompson@example.com</cbc:ElectronicMail>
+            </cac:Contact>
+            <cac:Person>
+                <cbc:FirstName>Olivia</cbc:FirstName>
+                <cbc:FamilyName>Thompson</cbc:FamilyName>
+            </cac:Person>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:Delivery>
+        <cbc:TrackingID>EE402918463TR</cbc:TrackingID>
+        <cac:DeliveryAddress>
+            <cbc:StreetName>Glebe Point Road</cbc:StreetName>
+            <cbc:BuildingNumber>118</cbc:BuildingNumber>
+            <cbc:CitySubdivisionName>Glebe</cbc:CitySubdivisionName>
+            <cbc:CityName>Sydney NSW</cbc:CityName>
+            <cbc:PostalZone>2037</cbc:PostalZone>
+            <cac:Country>
+                <cbc:IdentificationCode>AU</cbc:IdentificationCode>
+                <cbc:Name>Avustralya</cbc:Name>
+            </cac:Country>
+        </cac:DeliveryAddress>
+        <cac:CarrierParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">7320068060</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>PTT A.Ş. — Uluslararası Kargo (EMS)</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:CitySubdivisionName>Altındağ</cbc:CitySubdivisionName>
+                <cbc:CityName>Ankara</cbc:CityName>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:CarrierParty>
+        <cac:Despatch>
+            <cbc:ActualDespatchDate>2026-10-06</cbc:ActualDespatchDate>
+            <cbc:ActualDespatchTime>11:15:00</cbc:ActualDespatchTime>
+        </cac:Despatch>
+    </cac:Delivery>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>48</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-10-02</cbc:PaymentDueDate>
+        <cbc:InstructionNote>Kredi kartı · Ödeme aracısı: PayTR</cbc:InstructionNote>
+    </cac:PaymentMeans>
+    <cac:PricingExchangeRate>
+        <cbc:SourceCurrencyCode>AUD</cbc:SourceCurrencyCode>
+        <cbc:TargetCurrencyCode>TRY</cbc:TargetCurrencyCode>
+        <cbc:CalculationRate>28.145</cbc:CalculationRate>
+        <cbc:Date>2026-10-05</cbc:Date>
+    </cac:PricingExchangeRate>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="AUD">0.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="AUD">278.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="AUD">0.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>0</cbc:Percent>
+            <cac:TaxCategory>
+                <cbc:TaxExemptionReasonCode>301</cbc:TaxExemptionReasonCode>
+                <cbc:TaxExemptionReason>11/1-a Mal ihracatı</cbc:TaxExemptionReason>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="AUD">278.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="AUD">278.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="AUD">278.00</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="AUD">0.00</cbc:AllowanceTotalAmount>
+        <cbc:PayableAmount currencyID="AUD">278.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">4</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="AUD">128.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="AUD">0.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="AUD">128.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="AUD">0.00</cbc:TaxAmount>
+                <cbc:Percent>0</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Handwoven Turkish towel (peshtemal)</cbc:Description>
+            <cbc:Name>El tezgâhı peştamal</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>EP-PS-01</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="DOKUMA">Balıksırtı, %100 pamuk</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="EBAT">100×180 cm</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Turkuaz · Lacivert</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENKKOD">#0e7490</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="GTIP">630260000000</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="AUD">32</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">2</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="AUD">92.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="AUD">0.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="AUD">92.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="AUD">0.00</cbc:TaxAmount>
+                <cbc:Percent>0</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Silk-blend peshtemal, tasselled</cbc:Description>
+            <cbc:Name>İpek karışımlı peştamal</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>EP-PS-07</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="DOKUMA">Düz dokuma, %70 pamuk %30 ipek</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="EBAT">95×175 cm</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Nar çiçeği</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENKKOD">#b91c1c</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="GTIP">630260000000</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="AUD">46</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="SET">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="AUD">58.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="AUD">0.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="AUD">58.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="AUD">0.00</cbc:TaxAmount>
+                <cbc:Percent>0</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Kese, olive oil soap &amp; copper bowl</cbc:Description>
+            <cbc:Name>Hamam seti</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>EP-HM-03</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="DOKUMA">Kese + zeytinyağı sabunu + bakır tas</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="EBAT">3 parça</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Bakır</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENKKOD">#b45309</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="GTIP">741810000000</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="AUD">58</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>
