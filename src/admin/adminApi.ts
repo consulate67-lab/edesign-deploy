@@ -1,8 +1,8 @@
 import { API_URL } from '../api';
 import type {
     AdminIdentity, AdminLoginResponse, AdminSettingsStatus, AdminStats, AdminUserDetail, AdminUserRow,
-    AdminVerifyResponse, AiMemoryEntry, AiMemoryInput, GalleryDesign, GalleryDesignInput, RemoteSession,
-    SupportMessage, SupportTicket, TicketStatus,
+    AdminVerifyResponse, AiMemoryEntry, AiMemoryInput, AssistantBuiltinEntry, AssistantKbEntry, AssistantKbInput, AssistantLog,
+    AssistantLogFilter, AssistantOverview, GalleryDesign, GalleryDesignInput, RemoteSession, SupportMessage, SupportTicket, TicketStatus,
 } from './contracts';
 
 /** Yönetici oturumu kullanıcı oturumundan ayrıdır; aynı sekmede ikisi birlikte açık kalabilir. */
@@ -120,6 +120,16 @@ export const adminApi = {
     saveAiMemory: (input: AiMemoryInput) => request<AiMemoryEntry>('/admin/ai/memory', { method: 'POST', body: input }),
     updateAiMemory: (id: number, patch: { rating?: -1 | 0 | 1; published?: boolean; gallery_id?: number | null }) =>
         request<AiMemoryEntry>(`/admin/ai/memory/${id}`, { method: 'PATCH', body: patch }),
+
+    assistantOverview: () => request<AssistantOverview>('/admin/assistant/overview'),
+    assistantKb: () => request<{ entries: AssistantKbEntry[]; builtin: AssistantBuiltinEntry[] }>('/admin/assistant/kb'),
+    createAssistantKb: (input: AssistantKbInput) => request<AssistantKbEntry>('/admin/assistant/kb', { method: 'POST', body: input }),
+    updateAssistantKb: (id: number, input: AssistantKbInput) =>
+        request<AssistantKbEntry>(`/admin/assistant/kb/${id}`, { method: 'PUT', body: input }),
+    deleteAssistantKb: (id: number) => request<{ success: true }>(`/admin/assistant/kb/${id}`, { method: 'DELETE' }),
+    assistantLogs: (filter: AssistantLogFilter) => request<AssistantLog[]>(`/admin/assistant/logs${qs({ filter })}`),
+    resolveAssistantLog: (id: number, resolved: boolean) =>
+        request<AssistantLog>(`/admin/assistant/logs/${id}`, { method: 'PATCH', body: { resolved } }),
 
     settingsStatus: () => request<AdminSettingsStatus>('/admin/settings/status'),
     telegramTest: () => request<{ success: true }>('/admin/settings/telegram-test', { method: 'POST' }),

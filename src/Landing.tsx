@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowRight, MessageCircle, Sparkles, Zap, FileText, Globe, Layers, ChevronDown, Check, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Sparkles, Zap, FileText, Globe, Layers, ChevronDown, Check, ShieldCheck } from 'lucide-react';
 import { KVKKModal, KullaniciSozlesmesiModal, CerezPolitikasiModal } from './legal/Legal';
 import { api } from './api';
 import { PACKAGES_PLANS, type PackagePlan } from './pricing';
@@ -35,7 +35,7 @@ const SSS_ITEMS: SssItem[] = [
     },
     {
         q: 'Ödeme nasıl çalışır?',
-        a: 'Giriş yaptıktan sonra Paket Al ile seçtiğiniz paketi iyzico 3D Secure üzerinden satın alırsınız. Her tasarım kaydı 1 hak harcar. Ödeme sonrası haklar hesabınıza otomatik yansır; bittiğinde yeni paket alabilirsiniz.',
+        a: 'Giriş yaptıktan sonra Paket Al ile seçtiğiniz paketi iyzico 3D Secure üzerinden satın alırsınız. Kaydetmek ve test indirmek ücretsizdir; tasarımı onayladığınızda 1 hak harcanır. Ödeme sonrası haklar hesabınıza otomatik yansır; bittiğinde yeni paket alabilirsiniz.',
     },
     {
         q: 'Verilerim Türkiye’de mi saklanıyor?',
@@ -993,46 +993,6 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                     <a href="https://wa.me/905336660125" target="_blank" rel="noopener noreferrer">İletişim</a>
                 </div>
             </footer>
-
-            {/* ====================== WHATSAPP DESTEK ====================== */}
-            <a
-                href="https://wa.me/905336660125"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="WhatsApp ile iletişime geç"
-                style={{
-                    position: 'fixed',
-                    bottom: 20,
-                    right: 20,
-                    background: 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)',
-                    color: '#fff',
-                    textDecoration: 'none',
-                    borderRadius: 999,
-                    padding: '12px 20px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    cursor: 'pointer',
-                    fontSize: 13,
-                    fontWeight: 700,
-                    letterSpacing: 0.4,
-                    boxShadow: '0 10px 28px rgba(18, 140, 126, 0.35)',
-                    zIndex: 30,
-                    fontFamily: 'inherit',
-                    transition: 'transform 0.18s, box-shadow 0.2s',
-                }}
-                onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-1px)';
-                    e.currentTarget.style.boxShadow = '0 14px 36px rgba(18, 140, 126, 0.45)';
-                }}
-                onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 10px 28px rgba(18, 140, 126, 0.35)';
-                }}
-            >
-                <MessageCircle size={15} />
-                WhatsApp · 0533 666 01 25
-            </a>
 
             {legalModal === 'kvkk' && <KVKKModal onClose={() => setLegalModal(null)} />}
             {legalModal === 'sozlesme' && <KullaniciSozlesmesiModal onClose={() => setLegalModal(null)} />}

@@ -22,6 +22,7 @@ const XSLTEditor = lazy(() =>
 // Yönetim paneli yalnızca #/yonetim (veya #/admin) ile açılır; sitede bağlantısı yoktur.
 const AdminApp = lazy(() => import('./admin/AdminApp').then((m) => ({ default: m.AdminApp })));
 const SupportWidget = lazy(() => import('./support/SupportWidget').then((m) => ({ default: m.SupportWidget })));
+const AssistantWidget = lazy(() => import('./assistant/AssistantWidget').then((m) => ({ default: m.AssistantWidget })));
 
 const isAdminHash = () => /^#\/(yonetim|admin)(\/|$)/i.test(window.location.hash);
 
@@ -159,6 +160,12 @@ const App: React.FC = () => {
         setView('auth');
     };
 
+    const showSection = (id: string) => {
+        const wasLanding = view === 'landing';
+        setView('landing');
+        window.setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), wasLanding ? 0 : 150);
+    };
+
     const handleLogout = () => {
         api.logout();
         setSelectedDoc(null);
@@ -212,6 +219,11 @@ const App: React.FC = () => {
             {userArea && api.getToken() && (
                 <Suspense fallback={null}>
                     <SupportWidget />
+                </Suspense>
+            )}
+            {(view === 'landing' || view === 'auth') && (
+                <Suspense fallback={null}>
+                    <AssistantWidget page={view} onRegister={handleRegister} onLogin={handleLogin} onSection={showSection} />
                 </Suspense>
             )}
             <Suspense fallback={<ScreenFallback light />}>

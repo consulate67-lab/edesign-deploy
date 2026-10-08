@@ -6,6 +6,7 @@ import { randomUUID } from 'node:crypto';
 import { initDb } from './db.js';
 import { createRequireAdmin, registerAdminAuthRoutes } from './admin-auth.js';
 import { registerAdminRoutes } from './admin.js';
+import { registerAssistantRoutes } from './assistant.js';
 import { registerGalleryRoutes } from './gallery.js';
 import { attachRealtime, touchLastSeen } from './realtime.js';
 import { registerSupportRoutes } from './support.js';
@@ -75,6 +76,7 @@ initDb().then(async _db => {
     registerAdminRoutes(app, { db, requireAdmin });
     registerGalleryRoutes(app, { db, requireAdmin });
     registerSupportRoutes(app, { db, authenticateToken });
+    registerAssistantRoutes(app, { db, requireAdmin, packages: PACKAGE_PRICES });
     app.use((err, _req, res, _next) => {
         const status = err.status || err.statusCode || 500;
         if (status >= 500) console.error('[server] error:', err);

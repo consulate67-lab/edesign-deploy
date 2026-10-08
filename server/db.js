@@ -330,6 +330,43 @@ const createSupportSchema = async (client) => {
         )
     `);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_ai_memory_doc_type ON ai_memory (doc_type_id, created_at DESC)`);
+
+    await client.query(`
+        CREATE TABLE IF NOT EXISTS assistant_log (
+            id          SERIAL PRIMARY KEY,
+            session     TEXT,
+            question    TEXT NOT NULL,
+            norm        TEXT NOT NULL,
+            answer      TEXT NOT NULL,
+            mode        TEXT NOT NULL,
+            score       REAL,
+            kb_ref      TEXT,
+            page        TEXT,
+            helpful     SMALLINT CHECK (helpful IN (-1, 1)),
+            resolved    BOOLEAN NOT NULL DEFAULT FALSE,
+            created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_assistant_log_norm ON assistant_log (norm, created_at DESC)`);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_assistant_log_created ON assistant_log (created_at DESC)`);
+
+    await client.query(`
+        CREATE TABLE IF NOT EXISTS assistant_kb (
+            id          SERIAL PRIMARY KEY,
+            question    TEXT NOT NULL,
+            answer      TEXT NOT NULL,
+            keywords    TEXT NOT NULL DEFAULT '',
+            actions     JSONB NOT NULL DEFAULT '[]'::jsonb,
+            status      TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'pending', 'disabled')),
+            source      TEXT NOT NULL DEFAULT 'admin' CHECK (source IN ('admin', 'learned')),
+            norm        TEXT NOT NULL DEFAULT '',
+            log_id      INTEGER REFERENCES assistant_log(id) ON DELETE SET NULL,
+            hits        INTEGER NOT NULL DEFAULT 0,
+            created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_assistant_kb_status ON assistant_kb (status)`);
 };
 
 /**

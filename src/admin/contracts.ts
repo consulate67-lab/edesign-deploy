@@ -250,3 +250,59 @@ export type WsMessage =
     | { t: 'error'; message: string }
     | { t: 'ping' }
     | { t: 'pong' };
+
+// ---------------------------------------------------------------- site asistanı (Edi)
+
+export type AssistantActionCode = 'register' | 'login' | 'pricing' | 'docs' | 'faq' | 'product' | 'contact';
+export type AssistantKbStatus = 'active' | 'pending' | 'disabled';
+
+export interface AssistantOverview {
+    ai: { configured: boolean; model: string; provider: string; dailyLimit: number; usedToday: number };
+    stats: {
+        total: number; today: number; unanswered: number; negative: number; positive: number; ai: number;
+        kbActive: number; kbPending: number; builtin: number;
+    };
+}
+
+export interface AssistantKbEntry {
+    id: number;
+    question: string;
+    answer: string;
+    keywords: string;
+    actions: AssistantActionCode[];
+    status: AssistantKbStatus;
+    source: 'admin' | 'learned';
+    hits: number;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface AssistantKbInput {
+    question: string;
+    answer: string;
+    keywords: string;
+    actions: AssistantActionCode[];
+    status: AssistantKbStatus;
+    log_id?: number;
+}
+
+export interface AssistantBuiltinEntry {
+    id: string;
+    question: string;
+    answer: string;
+    actions: AssistantActionCode[];
+}
+
+export interface AssistantLog {
+    id: number;
+    question: string;
+    answer: string;
+    mode: 'kb' | 'ai' | 'cache' | 'hint' | 'none' | 'smalltalk';
+    score: number | null;
+    helpful: 1 | -1 | null;
+    resolved: boolean;
+    page: string | null;
+    created_at: string;
+}
+
+export type AssistantLogFilter = 'review' | 'unanswered' | 'negative' | 'positive' | 'all';

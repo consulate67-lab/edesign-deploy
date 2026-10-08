@@ -1,6 +1,6 @@
 import React, { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-    Bell, BellOff, Bot, ChevronsLeft, ChevronsRight, Images, LayoutDashboard, LifeBuoy, LogOut, Menu, MonitorSmartphone,
+    Bell, BellOff, Bot, ChevronsLeft, ChevronsRight, Images, LayoutDashboard, LifeBuoy, LogOut, Menu, MessagesSquare, MonitorSmartphone,
     Settings as SettingsIcon, ShieldCheck, Users as UsersIcon,
 } from 'lucide-react';
 import { useUiStore } from '../store/uiStore';
@@ -21,6 +21,7 @@ import { Gallery } from './sections/Gallery';
 import { Settings } from './sections/Settings';
 
 const AiSection = lazy(() => import('./sections/AiSection').then(m => ({ default: m.AiSection })));
+const AssistantSection = lazy(() => import('./sections/AssistantSection').then(m => ({ default: m.AssistantSection })));
 const CobrowseViewer = lazy(() => import('../support/cobrowse/CobrowseViewer').then(m => ({ default: m.CobrowseViewer })));
 
 const SECTION_KEY = 'admin_section';
@@ -31,6 +32,7 @@ const NAV: { id: SectionId; label: string; icon: React.ReactNode }[] = [
     { id: 'tickets', label: 'Destek talepleri', icon: <LifeBuoy size={18} /> },
     { id: 'remote', label: 'Online destek', icon: <MonitorSmartphone size={18} /> },
     { id: 'ai', label: 'Tasarım yapay zekası', icon: <Bot size={18} /> },
+    { id: 'assistant', label: 'Site asistanı', icon: <MessagesSquare size={18} /> },
     { id: 'gallery', label: 'Galeri tasarımları', icon: <Images size={18} /> },
     { id: 'settings', label: 'Ayarlar', icon: <SettingsIcon size={18} /> },
 ];
@@ -304,6 +306,13 @@ const AdminShell: React.FC<{ identity: AdminIdentity; onLogout: () => void }> = 
                             <SectionBoundary>
                                 <Suspense fallback={<div style={{ display: 'flex', gap: 8, color: C.muted, padding: 20 }}><Spinner /> Yükleniyor…</div>}>
                                     <AiSection />
+                                </Suspense>
+                            </SectionBoundary>
+                        )}
+                        {section === 'assistant' && (
+                            <SectionBoundary>
+                                <Suspense fallback={<div style={{ display: 'flex', gap: 8, color: C.muted, padding: 20 }}><Spinner /> Yükleniyor…</div>}>
+                                    <AssistantSection />
                                 </Suspense>
                             </SectionBoundary>
                         )}
