@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Meslek şablonu: J.10 Otobüsçülük — Yurt Dışı Tur Seferi (İstisna 311) (e-Fatura)
+  Tur operatörüne Bursa–Sofya–Belgrad tur otobüsü taşıması; KDV 14/1 istisnası, EUR.
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>TICARIFATURA</cbc:ProfileID>
+    <cbc:ID>UTS2026000060375</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>3669A5B4-A2C4-4671-A564-E93A54818BD6</cbc:UUID>
+    <cbc:IssueDate>2026-10-06</cbc:IssueDate>
+    <cbc:IssueTime>09:47:29</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>ISTISNA</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız: Altı Bin Sekiz Yüz Avro</cbc:Note>
+    <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>1</cbc:LineCountNumeric>
+    <cac:InvoicePeriod>
+        <cbc:StartDate>2026-11-20</cbc:StartDate>
+        <cbc:StartTime>06:00:00</cbc:StartTime>
+        <cbc:EndDate>2026-11-25</cbc:EndDate>
+        <cbc:EndTime>22:00:00</cbc:EndTime>
+        <cbc:Description>Balkan turu</cbc:Description>
+    </cac:InvoicePeriod>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">5638852039</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">5638852039</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Gültepe Mah. Sanayi Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>7</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>İnegöl</cbc:CitySubdivisionName>
+                <cbc:CityName>Bursa</cbc:CityName>
+                <cbc:PostalZone>16897</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_UTS2026000060375</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">5638852039</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">05638852039000013</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Uludağ Turizm Seyahat A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Gültepe Mah. Sanayi Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>7</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>İnegöl</cbc:CitySubdivisionName>
+                <cbc:CityName>Bursa</cbc:CityName>
+                <cbc:PostalZone>16897</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>İnegöl</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0224 192 08 88</cbc:Telephone>
+                <cbc:ElectronicMail>info@uludagturizm.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">8627014800</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Balkan Rotası Turizm Seyahat Ltd. Şti.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>İstiklal Mah. Sanayi Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>103/6</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Osmangazi</cbc:CitySubdivisionName>
+                <cbc:CityName>Bursa</cbc:CityName>
+                <cbc:PostalZone>16631</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Çekirge</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0224 855 01 69</cbc:Telephone>
+                <cbc:ElectronicMail>info@balkanrotasi.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-10-06</cbc:PaymentDueDate>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR190013405906345831092939</cbc:ID>
+            <cbc:CurrencyCode>EUR</cbc:CurrencyCode>
+            <cbc:PaymentNote>Denizbank — Bursa Şubesi</cbc:PaymentNote>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:PricingExchangeRate>
+        <cbc:SourceCurrencyCode>EUR</cbc:SourceCurrencyCode>
+        <cbc:TargetCurrencyCode>TRY</cbc:TargetCurrencyCode>
+        <cbc:CalculationRate>49.912</cbc:CalculationRate>
+        <cbc:Date>2026-10-06</cbc:Date>
+    </cac:PricingExchangeRate>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="EUR">0.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="EUR">6800.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="EUR">0.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>0</cbc:Percent>
+            <cac:TaxCategory>
+                <cbc:TaxExemptionReasonCode>311</cbc:TaxExemptionReasonCode>
+                <cbc:TaxExemptionReason>14/1 Uluslararası taşımacılık</cbc:TaxExemptionReason>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="EUR">6800.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="EUR">6800.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="EUR">6800.00</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="EUR">0.00</cbc:AllowanceTotalAmount>
+        <cbc:PayableAmount currencyID="EUR">6800.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="EUR">6800.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="EUR">0.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="EUR">6800.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="EUR">0.00</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>0</cbc:Percent>
+                <cac:TaxCategory>
+                    <cbc:TaxExemptionReasonCode>311</cbc:TaxExemptionReasonCode>
+                    <cbc:TaxExemptionReason>14/1 Uluslararası taşımacılık</cbc:TaxExemptionReason>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Uluslararası tur otobüsü (5 gün)</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="PLAKA">16 UT 1648</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="GUZERGAH">Bursa – Kapıkule – Sofya – Belgrad</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="EUR">6800</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>

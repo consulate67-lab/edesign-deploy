@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Meslek şablonu: H.07 Dökümcülük — Hurdadan Külçe Teslimi (Tevkifat 617) (e-Fatura)
+  Hurda alüminyumdan elde edilen külçelerin sanayiciye satışı; 7/10 tevkifat.
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>TICARIFATURA</cbc:ProfileID>
+    <cbc:ID>KDS2026000042754</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>DF6F4677-20C1-4529-AF5A-B3F714DE2733</cbc:UUID>
+    <cbc:IssueDate>2026-10-01</cbc:IssueDate>
+    <cbc:IssueTime>10:51:49</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>TEVKIFAT</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız: İki Milyon Yüz Otuz Altı Bin Dokuz Yüz Altmış Türk Lirası</cbc:Note>
+    <cbc:Note>KDV Genel Uygulama Tebliği uyarınca 617 kodlu &quot;hurda metalden elde edilen külçe teslimleri&quot; için 7/10 oranında KDV tevkifatı uygulanmıştır.</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>1</cbc:LineCountNumeric>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>Spektral analiz raporu SA-26-118</cbc:ID>
+        <cbc:IssueDate>2026-10-01</cbc:IssueDate>
+        <cbc:DocumentType>ANALIZ</cbc:DocumentType>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">8251969562</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">8251969562</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Organize Sanayi Bölgesi 12. Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>115/1</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Karatay</cbc:CitySubdivisionName>
+                <cbc:CityName>Konya</cbc:CityName>
+                <cbc:PostalZone>42584</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_KDS2026000042754</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">8251969562</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">08251969562000010</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Konya Döküm Sanayi Ltd. Şti.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Organize Sanayi Bölgesi 12. Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>115/1</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Karatay</cbc:CitySubdivisionName>
+                <cbc:CityName>Konya</cbc:CityName>
+                <cbc:PostalZone>42584</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Mevlana</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0332 033 53 39</cbc:Telephone>
+                <cbc:ElectronicMail>info@konyadokum.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">0956248142</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">00956248142000011</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Anadolu Alüminyum Jant San. A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Küçük Sanayi Sitesi 5. Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>54</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Meram</cbc:CitySubdivisionName>
+                <cbc:CityName>Konya</cbc:CityName>
+                <cbc:PostalZone>42552</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Meram</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0332 088 09 02</cbc:Telephone>
+                <cbc:ElectronicMail>info@anadolualuminyum.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-10-31</cbc:PaymentDueDate>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR400003206968786458407693</cbc:ID>
+            <cbc:CurrencyCode>TRY</cbc:CurrencyCode>
+            <cbc:PaymentNote>Türk Ekonomi Bankası — Konya Şubesi</cbc:PaymentNote>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">403200.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">2016000.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">403200.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>20</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:WithholdingTaxTotal>
+        <cbc:TaxAmount currencyID="TRY">282240.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">403200.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">282240.00</cbc:TaxAmount>
+            <cbc:Percent>70</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>HURDA METALDEN ELDE EDİLEN KÜLÇE TESLİMLERİ</cbc:Name>
+                    <cbc:TaxTypeCode>617</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:WithholdingTaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">2016000.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">2016000.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">2419200.00</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="TRY">0.00</cbc:AllowanceTotalAmount>
+        <cbc:PayableAmount currencyID="TRY">2136960.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="KGM">18000</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">2016000.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">403200.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">2016000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">403200.00</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:WithholdingTaxTotal>
+            <cbc:TaxAmount currencyID="TRY">282240.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">403200.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">282240.00</cbc:TaxAmount>
+                <cbc:Percent>70</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>HURDA METALDEN ELDE EDİLEN KÜLÇE TESLİMLERİ</cbc:Name>
+                        <cbc:TaxTypeCode>617</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:WithholdingTaxTotal>
+        <cac:Item>
+            <cbc:Name>Alüminyum külçe (AlSi7Mg, hurdadan)</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="PARTINO">KD-ALK-2609</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">112</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>

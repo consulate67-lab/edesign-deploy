@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Meslek şablonu: I.02 Pazarda Bitki, Hayvan, Su Ürünleri Ticareti — Balıkçıdan Av Alımı e-Müstahsil (e-Müstahsil Makbuzu)
+  Ruhsatlı küçük balıkçı teknesinden sabah avı alımı; %1 GV stopajı ve Bağ-Kur kesintisi.
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<CreditNote xmlns="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2.1</cbc:CustomizationID>
+    <cbc:ProfileID>EARSIVBELGE</cbc:ProfileID>
+    <cbc:ID>DPB2026000054051</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>4BC45F13-CFBD-4FD9-A73A-0608969A0F3F</cbc:UUID>
+    <cbc:IssueDate>2026-10-03</cbc:IssueDate>
+    <cbc:IssueTime>14:26:01</cbc:IssueTime>
+    <cbc:CreditNoteTypeCode>MUSTAHSILMAKBUZ</cbc:CreditNoteTypeCode>
+    <cbc:Note>Yalnız: Otuz Dört Bin Üç Yüz Doksan Sekiz Türk Lirası</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>2</cbc:LineCountNumeric>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>Yıldız Reis — 55-SM-0418</cbc:ID>
+        <cbc:IssueDate>2026-10-03</cbc:IssueDate>
+        <cbc:DocumentType>TEKNE</cbc:DocumentType>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>SÜR-55-2026-1182</cbc:ID>
+        <cbc:IssueDate>2026-10-03</cbc:IssueDate>
+        <cbc:DocumentType>RUHSAT</cbc:DocumentType>
+        <cbc:DocumentDescription>Su ürünleri ruhsat tezkeresi</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">74687886486</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">74687886486</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Sanayi Mah. Mevlana Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>93/4</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Bafra</cbc:CitySubdivisionName>
+                <cbc:CityName>Samsun</cbc:CityName>
+                <cbc:PostalZone>55301</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_DPB2026000054051</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">74687886486</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Deniz Pazar Balık ve Fide</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Sanayi Mah. Mevlana Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>93/4</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Bafra</cbc:CitySubdivisionName>
+                <cbc:CityName>Samsun</cbc:CityName>
+                <cbc:PostalZone>55301</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Bafra</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0362 970 42 47</cbc:Telephone>
+                <cbc:ElectronicMail>info@denizpazar.com.tr</cbc:ElectronicMail>
+                <cac:OtherCommunication>
+                    <cbc:ChannelCode name="SMS_PROVIDER">Anadolu Mesaj Teknolojileri A.Ş.</cbc:ChannelCode>
+                    <cbc:Value>8235850705</cbc:Value>
+                </cac:OtherCommunication>
+            </cac:Contact>
+            <cac:Person>
+                <cbc:FirstName>Yusuf</cbc:FirstName>
+                <cbc:FamilyName>Kılıç</cbc:FamilyName>
+            </cac:Person>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">70214691370</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Çarşı Mah. Çarşı Sok.</cbc:StreetName>
+                <cbc:BuildingNumber>116/4</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Atakum</cbc:CitySubdivisionName>
+                <cbc:CityName>Samsun</cbc:CityName>
+                <cbc:PostalZone>55757</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:Contact>
+                <cbc:ID>722187</cbc:ID>
+                <cbc:Name>SMS</cbc:Name>
+                <cbc:Telephone>0559 054 28 87</cbc:Telephone>
+                <cbc:ElectronicMail>selim.celik@example.com</cbc:ElectronicMail>
+            </cac:Contact>
+            <cac:Person>
+                <cbc:FirstName>Selim</cbc:FirstName>
+                <cbc:FamilyName>Çelik</cbc:FamilyName>
+            </cac:Person>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:Delivery>
+        <cbc:ActualDeliveryDate>2026-10-02</cbc:ActualDeliveryDate>
+    </cac:Delivery>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-10-05</cbc:PaymentDueDate>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR200006703523410148839717</cbc:ID>
+            <cbc:CurrencyCode>TRY</cbc:CurrencyCode>
+            <cbc:PaymentNote>Yapı ve Kredi Bankası (üretici hesabı)</cbc:PaymentNote>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">702.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">35100.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">351.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>1</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>GELİR VERGİSİ S. (MUHTASAR)</cbc:Name>
+                    <cbc:TaxTypeCode>0003</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">35100.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">351.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>2</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>1</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>SGK (BAĞ-KUR) PRİM KESİNTİSİ</cbc:Name>
+                    <cbc:TaxTypeCode>SGK_PRIM</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">35100.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">35100.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">35100.00</cbc:TaxInclusiveAmount>
+        <cbc:PayableAmount currencyID="TRY">34398.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:CreditNoteLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:CreditedQuantity unitCode="KGM">260</cbc:CreditedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">24700.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">494.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">24700.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">247.00</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>1</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>GELİR VERGİSİ S. (MUHTASAR)</cbc:Name>
+                        <cbc:TaxTypeCode>0003</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">24700.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">247.00</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>2</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>1</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>SGK (BAĞ-KUR) PRİM KESİNTİSİ</cbc:Name>
+                        <cbc:TaxTypeCode>SGK_PRIM</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Hamsi (taze)</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">95</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:CreditedQuantity unitCode="KGM">80</cbc:CreditedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">10400.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">208.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">10400.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">104.00</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>1</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>GELİR VERGİSİ S. (MUHTASAR)</cbc:Name>
+                        <cbc:TaxTypeCode>0003</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">10400.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">104.00</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>2</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>1</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>SGK (BAĞ-KUR) PRİM KESİNTİSİ</cbc:Name>
+                        <cbc:TaxTypeCode>SGK_PRIM</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>İstavrit</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">130</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+</CreditNote>

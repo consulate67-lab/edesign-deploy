@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Meslek şablonu: H.09 Hurdacılık — Hurda Sevk İrsaliyesi (e-İrsaliye)
+  Hurda sahasından çelikhaneye tır ile sevk; kantar ağırlıkları ve plaka.
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<DespatchAdvice xmlns="urn:oasis:names:specification:ubl:schema:xsd:DespatchAdvice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2.1</cbc:CustomizationID>
+    <cbc:ProfileID>TEMELIRSALIYE</cbc:ProfileID>
+    <cbc:ID>DHG2026000022896</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>479D3CFF-690E-46E6-A614-089847319901</cbc:UUID>
+    <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+    <cbc:IssueTime>13:26:04</cbc:IssueTime>
+    <cbc:DespatchAdviceTypeCode>SEVK</cbc:DespatchAdviceTypeCode>
+    <cbc:LineCountNumeric>2</cbc:LineCountNumeric>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>DHG-KF-26-8840</cbc:ID>
+        <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+        <cbc:DocumentType>KANTARFISI</cbc:DocumentType>
+        <cbc:DocumentDescription>Çıkış kantarı</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">3467738116</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">3467738116</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Organize Sanayi Bölgesi 7. Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>86/1</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Gebze</cbc:CitySubdivisionName>
+                <cbc:CityName>Kocaeli</cbc:CityName>
+                <cbc:PostalZone>41841</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_DHG2026000022896</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:DespatchSupplierParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">3467738116</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">03467738116000016</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Demir Hurda Geri Dönüşüm Ltd. Şti.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Organize Sanayi Bölgesi 7. Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>86/1</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Gebze</cbc:CitySubdivisionName>
+                <cbc:CityName>Kocaeli</cbc:CityName>
+                <cbc:PostalZone>41841</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Gebze</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0262 258 09 09</cbc:Telephone>
+                <cbc:ElectronicMail>info@demirhurda.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:DespatchSupplierParty>
+    <cac:DeliveryCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">3147972055</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">03147972055000016</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Marmara Çelik Haddecilik A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Küçük Sanayi Sitesi 3. Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>109</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Dilovası</cbc:CitySubdivisionName>
+                <cbc:CityName>Kocaeli</cbc:CityName>
+                <cbc:PostalZone>41140</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Gebze</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0262 742 88 59</cbc:Telephone>
+                <cbc:ElectronicMail>info@marmaracelik.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:DeliveryCustomerParty>
+    <cac:Shipment>
+        <cbc:ID>1</cbc:ID>
+        <cbc:GrossWeightMeasure unitCode="KGM">86000.000</cbc:GrossWeightMeasure>
+        <cbc:TotalTransportHandlingUnitQuantity>3</cbc:TotalTransportHandlingUnitQuantity>
+        <cac:ShipmentStage>
+            <cac:TransportMeans>
+                <cac:RoadTransport>
+                    <cbc:LicensePlateID schemeID="PLAKA">41R100</cbc:LicensePlateID>
+                </cac:RoadTransport>
+            </cac:TransportMeans>
+            <cac:DriverPerson>
+                <cbc:FirstName>Aslı</cbc:FirstName>
+                <cbc:FamilyName>Kaya</cbc:FamilyName>
+                <cbc:Title>Şoför</cbc:Title>
+                <cbc:NationalityID>20746348464</cbc:NationalityID>
+            </cac:DriverPerson>
+        </cac:ShipmentStage>
+        <cac:Delivery>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>Küçük Sanayi Sitesi 3. Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>109</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Dilovası</cbc:CitySubdivisionName>
+                <cbc:CityName>Kocaeli</cbc:CityName>
+                <cbc:PostalZone>41140</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:Despatch>
+                <cbc:ActualDespatchDate>2026-10-07</cbc:ActualDespatchDate>
+                <cbc:ActualDespatchTime>15:15:00</cbc:ActualDespatchTime>
+            </cac:Despatch>
+        </cac:Delivery>
+        <cac:TransportHandlingUnit>
+            <cac:TransportEquipment>
+                <cbc:ID schemeID="DORSEPLAKA">41CR191</cbc:ID>
+            </cac:TransportEquipment>
+        </cac:TransportHandlingUnit>
+    </cac:Shipment>
+    <cac:DespatchLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:DeliveredQuantity unitCode="TNE">64</cbc:DeliveredQuantity>
+        <cac:OrderLineReference>
+            <cbc:LineID>1</cbc:LineID>
+        </cac:OrderLineReference>
+        <cac:Item>
+            <cbc:Name>HMS 1 ağır hurda</cbc:Name>
+        </cac:Item>
+    </cac:DespatchLine>
+    <cac:DespatchLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:DeliveredQuantity unitCode="TNE">22</cbc:DeliveredQuantity>
+        <cac:OrderLineReference>
+            <cbc:LineID>2</cbc:LineID>
+        </cac:OrderLineReference>
+        <cac:Item>
+            <cbc:Name>Paket hurda (balyalı)</cbc:Name>
+        </cac:Item>
+    </cac:DespatchLine>
+</DespatchAdvice>

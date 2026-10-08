@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Meslek şablonu: E.12 Konfeksiyonculuk — Hazır Giyim İhracat Faturası (FCA) (e-Fatura (İhracat))
+  Hollanda’daki zincire tişört ve sweatshirt ihracatı; asorti koli.
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>IHRACAT</cbc:ProfileID>
+    <cbc:ID>MHK2026000094026</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>ADC31D0B-73E9-4EC0-A5B9-4F7FE7BA8260</cbc:UUID>
+    <cbc:IssueDate>2026-10-06</cbc:IssueDate>
+    <cbc:IssueTime>09:43:42</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>ISTISNA</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız: Elli Dört Bin Dört Yüz Seksen Avro</cbc:Note>
+    <cbc:Note>Mal ihracatı KDV Kanunu 11/1-a maddesi uyarınca KDV’den istisnadır. Gümrük beyannamesi bilgileri GİB tarafından fatura ile eşleştirilir.</cbc:Note>
+    <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>2</cbc:LineCountNumeric>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">0982190807</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">0982190807</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Organize Sanayi Bölgesi 8. Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>132</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Ümraniye</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34117</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_MHK2026000094026</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">0982190807</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">00982190807000016</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Moda Hat Konfeksiyon San. Ltd. Şti.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Organize Sanayi Bölgesi 8. Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>132</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Ümraniye</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34117</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Ümraniye</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0212 240 34 02</cbc:Telephone>
+                <cbc:ElectronicMail>info@modahat.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">1460415308</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Ticaret Bakanlığı Gümrükler Genel Müdürlüğü - Bilgi İşlem Dairesi Başkanlığı</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:CitySubdivisionName>Çankaya</cbc:CitySubdivisionName>
+                <cbc:CityName>Ankara</cbc:CityName>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Ulus</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:BuyerCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="PARTYTYPE">EXPORT</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Van der Berg Trading B.V.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Waalhaven Z.z. 44</cbc:StreetName>
+                <cbc:CitySubdivisionName>Zuid-Holland</cbc:CitySubdivisionName>
+                <cbc:CityName>Rotterdam</cbc:CityName>
+                <cbc:PostalZone>3089 JH</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>NL</cbc:IdentificationCode>
+                    <cbc:Name>Hollanda</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:Contact>
+                <cbc:Telephone>+81 657 5933</cbc:Telephone>
+                <cbc:ElectronicMail>purchasing@vander.com</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:BuyerCustomerParty>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-11-05</cbc:PaymentDueDate>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR480001503376116294518973</cbc:ID>
+            <cbc:CurrencyCode>EUR</cbc:CurrencyCode>
+            <cbc:PaymentNote>Türkiye Vakıflar Bankası — İstanbul Şubesi</cbc:PaymentNote>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:PricingExchangeRate>
+        <cbc:SourceCurrencyCode>EUR</cbc:SourceCurrencyCode>
+        <cbc:TargetCurrencyCode>TRY</cbc:TargetCurrencyCode>
+        <cbc:CalculationRate>49.912</cbc:CalculationRate>
+        <cbc:Date>2026-10-06</cbc:Date>
+    </cac:PricingExchangeRate>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="EUR">0.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="EUR">54480.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="EUR">0.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>0</cbc:Percent>
+            <cac:TaxCategory>
+                <cbc:TaxExemptionReasonCode>301</cbc:TaxExemptionReasonCode>
+                <cbc:TaxExemptionReason>11/1-a Mal ihracatı</cbc:TaxExemptionReason>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="EUR">54480.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="EUR">54480.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="EUR">54480.00</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="EUR">0.00</cbc:AllowanceTotalAmount>
+        <cbc:PayableAmount currencyID="EUR">54480.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">6000</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="EUR">27600.00</cbc:LineExtensionAmount>
+        <cac:Delivery>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>Waalhaven Z.z. 44</cbc:StreetName>
+                <cbc:CitySubdivisionName>Zuid-Holland</cbc:CitySubdivisionName>
+                <cbc:CityName>Rotterdam</cbc:CityName>
+                <cbc:PostalZone>3089 JH</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>NL</cbc:IdentificationCode>
+                    <cbc:Name>Hollanda</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:DeliveryTerms>
+                <cbc:ID schemeID="INCOTERMS">FCA</cbc:ID>
+            </cac:DeliveryTerms>
+            <cac:Shipment>
+                <cbc:ID/>
+                <cac:GoodsItem>
+                    <cbc:RequiredCustomsID>610910000000</cbc:RequiredCustomsID>
+                </cac:GoodsItem>
+                <cac:ShipmentStage>
+                    <cbc:TransportModeCode>3</cbc:TransportModeCode>
+                </cac:ShipmentStage>
+                <cac:TransportHandlingUnit>
+                    <cac:ActualPackage>
+                        <cbc:ID>MHK-01</cbc:ID>
+                        <cbc:Quantity>120</cbc:Quantity>
+                        <cbc:PackagingTypeCode>CT</cbc:PackagingTypeCode>
+                    </cac:ActualPackage>
+                </cac:TransportHandlingUnit>
+            </cac:Shipment>
+        </cac:Delivery>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="EUR">0.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="EUR">27600.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="EUR">0.00</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>0</cbc:Percent>
+                <cac:TaxCategory>
+                    <cbc:TaxExemptionReasonCode>301</cbc:TaxExemptionReasonCode>
+                    <cbc:TaxExemptionReason>11/1-a Mal ihracatı</cbc:TaxExemptionReason>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Pamuklu tişört</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN">S-XL asorti</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="EUR">4.6</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">2400</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="EUR">26880.00</cbc:LineExtensionAmount>
+        <cac:Delivery>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>Waalhaven Z.z. 44</cbc:StreetName>
+                <cbc:CitySubdivisionName>Zuid-Holland</cbc:CitySubdivisionName>
+                <cbc:CityName>Rotterdam</cbc:CityName>
+                <cbc:PostalZone>3089 JH</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>NL</cbc:IdentificationCode>
+                    <cbc:Name>Hollanda</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:DeliveryTerms>
+                <cbc:ID schemeID="INCOTERMS">FCA</cbc:ID>
+            </cac:DeliveryTerms>
+            <cac:Shipment>
+                <cbc:ID/>
+                <cac:GoodsItem>
+                    <cbc:RequiredCustomsID>611020100000</cbc:RequiredCustomsID>
+                </cac:GoodsItem>
+                <cac:ShipmentStage>
+                    <cbc:TransportModeCode>3</cbc:TransportModeCode>
+                </cac:ShipmentStage>
+                <cac:TransportHandlingUnit>
+                    <cac:ActualPackage>
+                        <cbc:ID>MHK-02</cbc:ID>
+                        <cbc:Quantity>80</cbc:Quantity>
+                        <cbc:PackagingTypeCode>CT</cbc:PackagingTypeCode>
+                    </cac:ActualPackage>
+                </cac:TransportHandlingUnit>
+            </cac:Shipment>
+        </cac:Delivery>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="EUR">0.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="EUR">26880.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="EUR">0.00</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>0</cbc:Percent>
+                <cac:TaxCategory>
+                    <cbc:TaxExemptionReasonCode>301</cbc:TaxExemptionReasonCode>
+                    <cbc:TaxExemptionReason>11/1-a Mal ihracatı</cbc:TaxExemptionReason>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Sweatshirt</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="EUR">11.2</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>

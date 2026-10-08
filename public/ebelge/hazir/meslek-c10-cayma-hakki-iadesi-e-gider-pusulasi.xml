@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Meslek şablonu: C.10 Elektrikli Ev Aletleri Ticareti — Cayma Hakkı İadesi e-Gider Pusulası (e-Gider Pusulası)
+  Tüketicinin 14 gün içinde iade ettiği kahve makinesi için iade gider pusulası; iade edilen e-Arşiv faturası referanslı.
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<CreditNote xmlns="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2.1</cbc:CustomizationID>
+    <cbc:ProfileID>GIDERPUSULASI</cbc:ProfileID>
+    <cbc:ID>PEE2026000065807</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>3E4FE960-73A1-4701-A7B3-B37EB0A07889</cbc:UUID>
+    <cbc:IssueDate>2026-10-02</cbc:IssueDate>
+    <cbc:IssueTime>15:51:46</cbc:IssueTime>
+    <cbc:CreditNoteTypeCode>IADE</cbc:CreditNoteTypeCode>
+    <cbc:Note>Yalnız: On Bin Altı Yüz Seksen Türk Lirası</cbc:Note>
+    <cbc:Note>6502 sayılı Kanun kapsamında cayma hakkı kullanılmıştır.</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>1</cbc:LineCountNumeric>
+    <cac:BillingReference>
+        <cac:InvoiceDocumentReference>
+            <cbc:ID schemeID="EARSIV_FATURA">PEE2026000070726</cbc:ID>
+            <cbc:IssueDate>2026-09-23</cbc:IssueDate>
+        </cac:InvoiceDocumentReference>
+    </cac:BillingReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">60885662618</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">60885662618</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Barbaros Mah. Ankara Yolu Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>64</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Tepebaşı</cbc:CitySubdivisionName>
+                <cbc:CityName>Eskişehir</cbc:CityName>
+                <cbc:PostalZone>26773</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_PEE2026000065807</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">60885662618</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Pratik Ev Elektroniği</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Barbaros Mah. Ankara Yolu Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>64</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Tepebaşı</cbc:CitySubdivisionName>
+                <cbc:CityName>Eskişehir</cbc:CityName>
+                <cbc:PostalZone>26773</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Kurtuluş</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0222 401 82 68</cbc:Telephone>
+                <cbc:ElectronicMail>info@pratikev.com.tr</cbc:ElectronicMail>
+                <cac:OtherCommunication>
+                    <cbc:ChannelCode name="SMS_PROVIDER">Anadolu Mesaj Teknolojileri A.Ş.</cbc:ChannelCode>
+                    <cbc:Value>2461035929</cbc:Value>
+                </cac:OtherCommunication>
+            </cac:Contact>
+            <cac:Person>
+                <cbc:FirstName>Gizem</cbc:FirstName>
+                <cbc:FamilyName>Korkmaz</cbc:FamilyName>
+            </cac:Person>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">30327037038</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Barbaros Mah. Hal Yolu Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>48</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Odunpazarı</cbc:CitySubdivisionName>
+                <cbc:CityName>Eskişehir</cbc:CityName>
+                <cbc:PostalZone>26052</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:Contact>
+                <cbc:ID>087605</cbc:ID>
+                <cbc:Name>IADEKODU</cbc:Name>
+                <cbc:Telephone>0552 411 79 41</cbc:Telephone>
+                <cbc:ElectronicMail>ebru.sahin@example.com</cbc:ElectronicMail>
+            </cac:Contact>
+            <cac:Person>
+                <cbc:FirstName>Ebru</cbc:FirstName>
+                <cbc:FamilyName>Şahin</cbc:FamilyName>
+            </cac:Person>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:Delivery>
+        <cbc:ActualDeliveryDate>2026-10-02</cbc:ActualDeliveryDate>
+        <cac:DeliveryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">8989312431</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Hızır Kargo ve Lojistik A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Atatürk Mah. Cumhuriyet Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>42</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Bağcılar</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34993</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Bağcılar</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0212 664 09 50</cbc:Telephone>
+                <cbc:ElectronicMail>info@hizirkargo.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:DeliveryParty>
+    </cac:Delivery>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>48</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-10-02</cbc:PaymentDueDate>
+        <cbc:InstructionNote>İade tutarı müşterinin kartına iade edilmiştir.</cbc:InstructionNote>
+    </cac:PaymentMeans>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">1780.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">8900.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">1780.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>20</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">8900.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">8900.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">10680.00</cbc:TaxInclusiveAmount>
+        <cbc:PayableAmount currencyID="TRY">10680.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:CreditNoteLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:CreditedQuantity unitCode="C62">1</cbc:CreditedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">8900.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">1780.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">8900.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">1780.00</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Espresso makinesi 15 bar (iade)</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">8900</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+</CreditNote>

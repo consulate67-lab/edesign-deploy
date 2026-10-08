@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Meslek şablonu: H.01 Alüminyum Ürün İmalatı — Şantiyeye Profil Sevk İrsaliyesi (e-İrsaliye)
+  Fabrikadan şantiyeye boy profil sevki; ağırlık ve paket bilgisi.
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<DespatchAdvice xmlns="urn:oasis:names:specification:ubl:schema:xsd:DespatchAdvice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2.1</cbc:CustomizationID>
+    <cbc:ProfileID>TEMELIRSALIYE</cbc:ProfileID>
+    <cbc:ID>EAD2026000095571</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>12A9EFB9-337C-449C-A127-93ABD24EBA0B</cbc:UUID>
+    <cbc:IssueDate>2026-10-03</cbc:IssueDate>
+    <cbc:IssueTime>15:31:50</cbc:IssueTime>
+    <cbc:DespatchAdviceTypeCode>SEVK</cbc:DespatchAdviceTypeCode>
+    <cbc:LineCountNumeric>2</cbc:LineCountNumeric>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">9036502458</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">9036502458</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Organize Sanayi Bölgesi 6. Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>68</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Konak</cbc:CitySubdivisionName>
+                <cbc:CityName>İzmir</cbc:CityName>
+                <cbc:PostalZone>35857</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_EAD2026000095571</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:DespatchSupplierParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">9036502458</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">09036502458000010</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Ege Alüminyum Doğrama San. Tic. Ltd. Şti.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Organize Sanayi Bölgesi 6. Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>68</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Konak</cbc:CitySubdivisionName>
+                <cbc:CityName>İzmir</cbc:CityName>
+                <cbc:PostalZone>35857</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Kordon</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0232 286 77 78</cbc:Telephone>
+                <cbc:ElectronicMail>info@egealuminyum.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:DespatchSupplierParty>
+    <cac:DeliveryCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">3804318621</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">03804318621000013</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Kordon Yapı İnşaat Taahhüt A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Yıldız Mah. Fevzi Çakmak Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>113/4</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Konak</cbc:CitySubdivisionName>
+                <cbc:CityName>İzmir</cbc:CityName>
+                <cbc:PostalZone>35783</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Kordon</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0232 900 56 82</cbc:Telephone>
+                <cbc:ElectronicMail>info@kordonyapi.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:DeliveryCustomerParty>
+    <cac:Shipment>
+        <cbc:ID>1</cbc:ID>
+        <cbc:GrossWeightMeasure unitCode="KGM">5800.000</cbc:GrossWeightMeasure>
+        <cbc:TotalTransportHandlingUnitQuantity>42</cbc:TotalTransportHandlingUnitQuantity>
+        <cac:ShipmentStage>
+            <cac:TransportMeans>
+                <cac:RoadTransport>
+                    <cbc:LicensePlateID schemeID="PLAKA">35RF544</cbc:LicensePlateID>
+                </cac:RoadTransport>
+            </cac:TransportMeans>
+            <cac:DriverPerson>
+                <cbc:FirstName>Serkan</cbc:FirstName>
+                <cbc:FamilyName>Kaya</cbc:FamilyName>
+                <cbc:Title>Şoför</cbc:Title>
+                <cbc:NationalityID>12681293282</cbc:NationalityID>
+            </cac:DriverPerson>
+        </cac:ShipmentStage>
+        <cac:Delivery>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>Yıldız Mah. Fevzi Çakmak Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>113/4</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Konak</cbc:CitySubdivisionName>
+                <cbc:CityName>İzmir</cbc:CityName>
+                <cbc:PostalZone>35783</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:Despatch>
+                <cbc:ActualDespatchDate>2026-10-03</cbc:ActualDespatchDate>
+                <cbc:ActualDespatchTime>15:15:00</cbc:ActualDespatchTime>
+            </cac:Despatch>
+        </cac:Delivery>
+    </cac:Shipment>
+    <cac:DespatchLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:DeliveredQuantity unitCode="KGM">4200</cbc:DeliveredQuantity>
+        <cac:OrderLineReference>
+            <cbc:LineID>1</cbc:LineID>
+        </cac:OrderLineReference>
+        <cac:Item>
+            <cbc:Name>Isı yalıtımlı pencere profili (eloksal)</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BOY">6,5 m · 28 paket</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+    </cac:DespatchLine>
+    <cac:DespatchLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:DeliveredQuantity unitCode="KGM">1600</cbc:DeliveredQuantity>
+        <cac:OrderLineReference>
+            <cbc:LineID>2</cbc:LineID>
+        </cac:OrderLineReference>
+        <cac:Item>
+            <cbc:Name>Cephe kapak profili</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BOY">6,5 m · 14 paket</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+    </cac:DespatchLine>
+</DespatchAdvice>

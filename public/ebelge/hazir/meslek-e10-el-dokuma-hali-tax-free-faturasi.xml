@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Meslek şablonu: E.10 Halıcılık, Kilimcilik — El Dokuma Halı Tax Free Faturası (e-Fatura (Yolcu Beraberi))
+  Yabancı turiste ipek halı satışı; düğüm sayısı ve ebat satırda, pasaport ve aracı kurum bilgisi.
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>YOLCUBERABERFATURA</cbc:ProfileID>
+    <cbc:ID>KHK2026000070035</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>D9E4BCC5-1A46-49EC-A1F5-8BBB23FD3AD9</cbc:UUID>
+    <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+    <cbc:IssueTime>10:17:12</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>ISTISNA</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız: Yüz Doksan Bin Sekiz Yüz Türk Lirası</cbc:Note>
+    <cbc:Note>Yolcu beraberi eşya: KDV hesaplanmış olup eşyanın 3 ay içinde yurt dışına çıkarılması ve gümrük onayı ile aracı kurum üzerinden iade edilecektir.</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>2</cbc:LineCountNumeric>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>KHK-ORJ-26-0412</cbc:ID>
+        <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+        <cbc:DocumentType>SERTIFIKA</cbc:DocumentType>
+        <cbc:DocumentDescription>El dokuma orijinallik sertifikası</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">7940955511</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">7940955511</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Orhangazi Mah. Gazi Bulvarı</cbc:StreetName>
+                <cbc:BuildingNumber>124</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Ürgüp</cbc:CitySubdivisionName>
+                <cbc:CityName>Nevşehir</cbc:CityName>
+                <cbc:PostalZone>50168</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_KHK2026000070035</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">7940955511</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">07940955511000013</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Kapadokya Halı Kilim Evi Ltd. Şti.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Orhangazi Mah. Gazi Bulvarı</cbc:StreetName>
+                <cbc:BuildingNumber>124</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Ürgüp</cbc:CitySubdivisionName>
+                <cbc:CityName>Nevşehir</cbc:CityName>
+                <cbc:PostalZone>50168</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Ürgüp</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0384 689 40 69</cbc:Telephone>
+                <cbc:ElectronicMail>info@kapadokyahali.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">1460415308</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Ticaret Bakanlığı Gümrükler Genel Müdürlüğü - Bilgi İşlem Dairesi Başkanlığı</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:CitySubdivisionName>Çankaya</cbc:CitySubdivisionName>
+                <cbc:CityName>Ankara</cbc:CityName>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Ulus</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:BuyerCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="PARTYTYPE">TAXFREE</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>21 Via Roma</cbc:StreetName>
+                <cbc:CitySubdivisionName>Massachusetts</cbc:CitySubdivisionName>
+                <cbc:CityName>Boston</cbc:CityName>
+                <cbc:PostalZone>02108</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>US</cbc:IdentificationCode>
+                    <cbc:Name>Amerika Birleşik Devletleri</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:Contact>
+                <cbc:ElectronicMail>emily.carter@example.com</cbc:ElectronicMail>
+            </cac:Contact>
+            <cac:Person>
+                <cbc:FirstName>Emily</cbc:FirstName>
+                <cbc:FamilyName>Carter</cbc:FamilyName>
+                <cbc:NationalityID>US</cbc:NationalityID>
+                <cac:IdentityDocumentReference>
+                    <cbc:ID>96572430</cbc:ID>
+                    <cbc:IssueDate>2023-02-15</cbc:IssueDate>
+                </cac:IdentityDocumentReference>
+            </cac:Person>
+        </cac:Party>
+    </cac:BuyerCustomerParty>
+    <cac:TaxRepresentativeParty>
+        <cac:PartyIdentification>
+            <cbc:ID schemeID="ARACIKURUMVKN">7242984016</cbc:ID>
+        </cac:PartyIdentification>
+        <cac:PartyIdentification>
+            <cbc:ID schemeID="ARACIKURUMETIKET">urn:mail:taxfreegb@globaliade.com.tr</cbc:ID>
+        </cac:PartyIdentification>
+        <cac:PartyName>
+            <cbc:Name>Global İade Aracı Kurum Hizmetleri A.Ş.</cbc:Name>
+        </cac:PartyName>
+        <cac:PostalAddress>
+            <cbc:StreetName>Büyükdere Cad.</cbc:StreetName>
+            <cbc:BuildingNumber>127</cbc:BuildingNumber>
+            <cbc:CitySubdivisionName>Şişli</cbc:CitySubdivisionName>
+            <cbc:CityName>İstanbul</cbc:CityName>
+            <cbc:PostalZone>34394</cbc:PostalZone>
+            <cac:Country>
+                <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                <cbc:Name>Türkiye</cbc:Name>
+            </cac:Country>
+        </cac:PostalAddress>
+    </cac:TaxRepresentativeParty>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>48</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-10-07</cbc:PaymentDueDate>
+    </cac:PaymentMeans>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">31800.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">159000.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">31800.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>20</cbc:Percent>
+            <cac:TaxCategory>
+                <cbc:TaxExemptionReasonCode>501</cbc:TaxExemptionReasonCode>
+                <cbc:TaxExemptionReason>Yolcu beraberi eşya satışı (KDV hesaplanır, yurt dışına çıkışta iade edilir)</cbc:TaxExemptionReason>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">159000.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">159000.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">190800.00</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="TRY">0.00</cbc:AllowanceTotalAmount>
+        <cbc:PayableAmount currencyID="TRY">190800.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">145000.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">29000.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">145000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">29000.00</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cbc:TaxExemptionReasonCode>501</cbc:TaxExemptionReasonCode>
+                    <cbc:TaxExemptionReason>Yolcu beraberi eşya satışı (KDV hesaplanır, yurt dışına çıkışta iade edilir)</cbc:TaxExemptionReason>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>İpek Hereke halı 100x150</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="DUGUM">100x100 / cm²</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="OLCU">100 x 150 cm</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">145000</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">14000.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">2800.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">14000.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">2800.00</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cbc:TaxExemptionReasonCode>501</cbc:TaxExemptionReasonCode>
+                    <cbc:TaxExemptionReason>Yolcu beraberi eşya satışı (KDV hesaplanır, yurt dışına çıkışta iade edilir)</cbc:TaxExemptionReason>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Yün kilim 80x120</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="OLCU">80 x 120 cm</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">14000</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>

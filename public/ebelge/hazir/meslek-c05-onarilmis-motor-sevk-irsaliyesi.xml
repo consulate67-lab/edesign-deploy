@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Meslek şablonu: C.05 Elektrik Makineleri İmalatı, Kurulumu, Onarımı — Onarılmış Motor Sevk İrsaliyesi (e-İrsaliye)
+  Onarımı tamamlanan motorların müşteri fabrikasına sevki.
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<DespatchAdvice xmlns="urn:oasis:names:specification:ubl:schema:xsd:DespatchAdvice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2.1</cbc:CustomizationID>
+    <cbc:ProfileID>TEMELIRSALIYE</cbc:ProfileID>
+    <cbc:ID>VEM2026000009319</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>C72F58E3-C893-4D6D-AC43-E4D2C33AFC54</cbc:UUID>
+    <cbc:IssueDate>2026-10-02</cbc:IssueDate>
+    <cbc:IssueTime>13:49:59</cbc:IssueTime>
+    <cbc:DespatchAdviceTypeCode>SEVK</cbc:DespatchAdviceTypeCode>
+    <cbc:Note>Mallar onarım amaçlı alınmış olup müşteriye iade sevkiyatıdır.</cbc:Note>
+    <cbc:LineCountNumeric>2</cbc:LineCountNumeric>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>VLT-26-0441</cbc:ID>
+        <cbc:IssueDate>2026-10-02</cbc:IssueDate>
+        <cbc:DocumentType>IS_EMRI</cbc:DocumentType>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">2901958154</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">2901958154</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Sanayi Sitesi 12. Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>96/9</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Karatay</cbc:CitySubdivisionName>
+                <cbc:CityName>Konya</cbc:CityName>
+                <cbc:PostalZone>42689</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_VEM2026000009319</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:DespatchSupplierParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">2901958154</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">02901958154000013</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Volt Elektrik Motor Sargı San. Ltd. Şti.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Sanayi Sitesi 12. Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>96/9</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Karatay</cbc:CitySubdivisionName>
+                <cbc:CityName>Konya</cbc:CityName>
+                <cbc:PostalZone>42689</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Mevlana</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0332 589 74 78</cbc:Telephone>
+                <cbc:ElectronicMail>info@voltelektrik.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:DespatchSupplierParty>
+    <cac:DeliveryCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">7519804769</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">07519804769000017</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Selçuklu Un Sanayi A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Organize Sanayi Bölgesi 11. Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>37</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Selçuklu</cbc:CitySubdivisionName>
+                <cbc:CityName>Konya</cbc:CityName>
+                <cbc:PostalZone>42013</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Selçuk</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0332 586 99 11</cbc:Telephone>
+                <cbc:ElectronicMail>info@selcukluun.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:DeliveryCustomerParty>
+    <cac:Shipment>
+        <cbc:ID>1</cbc:ID>
+        <cbc:GrossWeightMeasure unitCode="KGM">1180.000</cbc:GrossWeightMeasure>
+        <cbc:TotalTransportHandlingUnitQuantity>3</cbc:TotalTransportHandlingUnitQuantity>
+        <cac:ShipmentStage>
+            <cac:TransportMeans>
+                <cac:RoadTransport>
+                    <cbc:LicensePlateID schemeID="PLAKA">42Z332</cbc:LicensePlateID>
+                </cac:RoadTransport>
+            </cac:TransportMeans>
+            <cac:DriverPerson>
+                <cbc:FirstName>Sevgi</cbc:FirstName>
+                <cbc:FamilyName>Şimşek</cbc:FamilyName>
+                <cbc:Title>Şoför</cbc:Title>
+                <cbc:NationalityID>28443001002</cbc:NationalityID>
+            </cac:DriverPerson>
+        </cac:ShipmentStage>
+        <cac:Delivery>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>Organize Sanayi Bölgesi 11. Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>37</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Selçuklu</cbc:CitySubdivisionName>
+                <cbc:CityName>Konya</cbc:CityName>
+                <cbc:PostalZone>42013</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:Despatch>
+                <cbc:ActualDespatchDate>2026-10-02</cbc:ActualDespatchDate>
+                <cbc:ActualDespatchTime>10:15:00</cbc:ActualDespatchTime>
+            </cac:Despatch>
+        </cac:Delivery>
+    </cac:Shipment>
+    <cac:DespatchLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:DeliveredQuantity unitCode="C62">1</cbc:DeliveredQuantity>
+        <cac:OrderLineReference>
+            <cbc:LineID>1</cbc:LineID>
+        </cac:OrderLineReference>
+        <cac:Item>
+            <cbc:Name>75 kW elektrik motoru (onarılmış)</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>ONR-75</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="SERINO">GMT-75-1192</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+    </cac:DespatchLine>
+    <cac:DespatchLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:DeliveredQuantity unitCode="C62">2</cbc:DeliveredQuantity>
+        <cac:OrderLineReference>
+            <cbc:LineID>2</cbc:LineID>
+        </cac:OrderLineReference>
+        <cac:Item>
+            <cbc:Name>22 kW elektrik motoru (onarılmış)</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>ONR-22</cbc:ID>
+            </cac:SellersItemIdentification>
+        </cac:Item>
+    </cac:DespatchLine>
+</DespatchAdvice>

@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Meslek şablonu: D.21 Şarküteri Ürünleri İmalatı, Ticareti — Köylüden Peynir Alımı e-Müstahsil (e-Müstahsil Makbuzu)
+  Köydeki üreticiden tam yağlı peynir ve tereyağı alımı; %1 stopaj.
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<CreditNote xmlns="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2.1</cbc:CustomizationID>
+    <cbc:ProfileID>EARSIVBELGE</cbc:ProfileID>
+    <cbc:ID>TSG2026000020899</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>6A4F779C-4C1A-471A-A132-4EDB4F23CE57</cbc:UUID>
+    <cbc:IssueDate>2026-10-06</cbc:IssueDate>
+    <cbc:IssueTime>15:16:22</cbc:IssueTime>
+    <cbc:CreditNoteTypeCode>MUSTAHSILMAKBUZ</cbc:CreditNoteTypeCode>
+    <cbc:Note>Yalnız: Yetmiş Bir Bin Beş Yüz Kırk Türk Lirası</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>2</cbc:LineCountNumeric>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">0084642828</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">0084642828</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Gültepe Mah. Zafer Sok.</cbc:StreetName>
+                <cbc:BuildingNumber>125/8</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Çorlu</cbc:CitySubdivisionName>
+                <cbc:CityName>Tekirdağ</cbc:CityName>
+                <cbc:PostalZone>59309</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_TSG2026000020899</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">0084642828</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">00084642828000018</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Trakya Şarküteri Gıda Ltd. Şti.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Gültepe Mah. Zafer Sok.</cbc:StreetName>
+                <cbc:BuildingNumber>125/8</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Çorlu</cbc:CitySubdivisionName>
+                <cbc:CityName>Tekirdağ</cbc:CityName>
+                <cbc:PostalZone>59309</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Çorlu</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0282 364 60 55</cbc:Telephone>
+                <cbc:ElectronicMail>info@trakyasarkuteri.com.tr</cbc:ElectronicMail>
+                <cac:OtherCommunication>
+                    <cbc:ChannelCode name="SMS_PROVIDER">Tebliğ SMS Bilişim Ltd. Şti.</cbc:ChannelCode>
+                    <cbc:Value>1070059562</cbc:Value>
+                </cac:OtherCommunication>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">49722170080</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Sanayi Mah. Çarşı Sok.</cbc:StreetName>
+                <cbc:BuildingNumber>132</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Çorlu</cbc:CitySubdivisionName>
+                <cbc:CityName>Tekirdağ</cbc:CityName>
+                <cbc:PostalZone>59157</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:Contact>
+                <cbc:ID>286254</cbc:ID>
+                <cbc:Name>SMS</cbc:Name>
+                <cbc:Telephone>0555 933 51 70</cbc:Telephone>
+                <cbc:ElectronicMail>canan.demir@example.com</cbc:ElectronicMail>
+            </cac:Contact>
+            <cac:Person>
+                <cbc:FirstName>Canan</cbc:FirstName>
+                <cbc:FamilyName>Demir</cbc:FamilyName>
+            </cac:Person>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:Delivery>
+        <cbc:ActualDeliveryDate>2026-10-05</cbc:ActualDeliveryDate>
+    </cac:Delivery>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-10-08</cbc:PaymentDueDate>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR530020509544551114158995</cbc:ID>
+            <cbc:CurrencyCode>TRY</cbc:CurrencyCode>
+            <cbc:PaymentNote>Kuveyt Türk Katılım Bankası (üretici hesabı)</cbc:PaymentNote>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">1460.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">73000.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">730.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>1</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>GELİR VERGİSİ S. (MUHTASAR)</cbc:Name>
+                    <cbc:TaxTypeCode>0003</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">73000.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">730.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>2</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>1</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>SGK (BAĞ-KUR) PRİM KESİNTİSİ</cbc:Name>
+                    <cbc:TaxTypeCode>SGK_PRIM</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">73000.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">73000.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">73000.00</cbc:TaxInclusiveAmount>
+        <cbc:PayableAmount currencyID="TRY">71540.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:CreditNoteLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:CreditedQuantity unitCode="KGM">180</cbc:CreditedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">52200.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">1044.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">52200.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">522.00</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>1</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>GELİR VERGİSİ S. (MUHTASAR)</cbc:Name>
+                        <cbc:TaxTypeCode>0003</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">52200.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">522.00</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>2</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>1</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>SGK (BAĞ-KUR) PRİM KESİNTİSİ</cbc:Name>
+                        <cbc:TaxTypeCode>SGK_PRIM</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Tam yağlı beyaz peynir (köy)</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">290</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:CreditedQuantity unitCode="KGM">40</cbc:CreditedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">20800.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">416.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">20800.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">208.00</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>1</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>GELİR VERGİSİ S. (MUHTASAR)</cbc:Name>
+                        <cbc:TaxTypeCode>0003</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">20800.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">208.00</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>2</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>1</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>SGK (BAĞ-KUR) PRİM KESİNTİSİ</cbc:Name>
+                        <cbc:TaxTypeCode>SGK_PRIM</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Köy tereyağı</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">520</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+</CreditNote>

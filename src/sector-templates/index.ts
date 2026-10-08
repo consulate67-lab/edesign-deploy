@@ -8,6 +8,7 @@ import { HIZMET2_TEMPLATES } from './groups/hizmet2';
 import { SANAYI2_TEMPLATES } from './groups/sanayi2';
 import { YANIT_TEMPLATES } from './groups/yanit';
 import { MODA_TEMPLATES } from './groups/moda';
+import { MESLEK_TEMPLATES } from './groups/meslek.generated';
 import { API_URL } from '../api';
 import type { GalleryDesign } from '../admin/contracts';
 import { SECTORS, type SectorId, type SectorTemplate } from './types';
@@ -27,6 +28,7 @@ export const SECTOR_TEMPLATES: SectorTemplate[] = [
     ...SANAYI2_TEMPLATES,
     ...MODA_TEMPLATES,
     ...YANIT_TEMPLATES,
+    ...MESLEK_TEMPLATES,
 ].map(t => ({ ...t, bank: BANK_TEMPLATE_IDS.has(t.id) }));
 
 const toTemplate = (d: GalleryDesign): SectorTemplate => {

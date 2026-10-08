@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Meslek şablonu: H.25 Oto Yedek Parça İmalatı — Fren Parçası İhracat Faturası (FCA) (e-Fatura (İhracat))
+  Almanya'daki distribütöre fren balatası ihracatı; GTİP 8708.
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>IHRACAT</cbc:ProfileID>
+    <cbc:ID>MFS2026000089931</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>A9000C53-F90C-4E34-AFD0-EC79EDC7F561</cbc:UUID>
+    <cbc:IssueDate>2026-10-01</cbc:IssueDate>
+    <cbc:IssueTime>09:30:55</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>ISTISNA</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız: Yüz Otuz Altı Bin Avro</cbc:Note>
+    <cbc:Note>Mal ihracatı KDV Kanunu 11/1-a maddesi uyarınca KDV’den istisnadır. Gümrük beyannamesi bilgileri GİB tarafından fatura ile eşleştirilir.</cbc:Note>
+    <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>2</cbc:LineCountNumeric>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">7741853693</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">7741853693</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Sanayi Sitesi 2. Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>112/4</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Nilüfer</cbc:CitySubdivisionName>
+                <cbc:CityName>Bursa</cbc:CityName>
+                <cbc:PostalZone>16391</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_MFS2026000089931</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">7741853693</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">07741853693000016</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Marmara Fren Sistemleri San. A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Sanayi Sitesi 2. Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>112/4</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Nilüfer</cbc:CitySubdivisionName>
+                <cbc:CityName>Bursa</cbc:CityName>
+                <cbc:PostalZone>16391</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Ertuğrulgazi</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0224 724 68 12</cbc:Telephone>
+                <cbc:ElectronicMail>info@marmarafren.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">1460415308</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Ticaret Bakanlığı Gümrükler Genel Müdürlüğü - Bilgi İşlem Dairesi Başkanlığı</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:CitySubdivisionName>Çankaya</cbc:CitySubdivisionName>
+                <cbc:CityName>Ankara</cbc:CityName>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Ulus</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:BuyerCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="PARTYTYPE">EXPORT</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Bayern Import KG</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Landsberger Str. 302</cbc:StreetName>
+                <cbc:CitySubdivisionName>Bayern</cbc:CitySubdivisionName>
+                <cbc:CityName>München</cbc:CityName>
+                <cbc:PostalZone>80687</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>DE</cbc:IdentificationCode>
+                    <cbc:Name>Almanya</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:Contact>
+                <cbc:Telephone>+65 195 0480</cbc:Telephone>
+                <cbc:ElectronicMail>purchasing@bayernimport.com</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:BuyerCustomerParty>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-10-31</cbc:PaymentDueDate>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR960020505314669763407065</cbc:ID>
+            <cbc:CurrencyCode>EUR</cbc:CurrencyCode>
+            <cbc:PaymentNote>Kuveyt Türk Katılım Bankası — Bursa Şubesi</cbc:PaymentNote>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:PricingExchangeRate>
+        <cbc:SourceCurrencyCode>EUR</cbc:SourceCurrencyCode>
+        <cbc:TargetCurrencyCode>TRY</cbc:TargetCurrencyCode>
+        <cbc:CalculationRate>49.912</cbc:CalculationRate>
+        <cbc:Date>2026-10-01</cbc:Date>
+    </cac:PricingExchangeRate>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="EUR">0.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="EUR">136000.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="EUR">0.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>0</cbc:Percent>
+            <cac:TaxCategory>
+                <cbc:TaxExemptionReasonCode>301</cbc:TaxExemptionReasonCode>
+                <cbc:TaxExemptionReason>11/1-a Mal ihracatı</cbc:TaxExemptionReason>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="EUR">136000.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="EUR">136000.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="EUR">136000.00</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="EUR">0.00</cbc:AllowanceTotalAmount>
+        <cbc:PayableAmount currencyID="EUR">136000.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="SET">12000</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="EUR">88800.00</cbc:LineExtensionAmount>
+        <cac:Delivery>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>Landsberger Str. 302</cbc:StreetName>
+                <cbc:CitySubdivisionName>Bayern</cbc:CitySubdivisionName>
+                <cbc:CityName>München</cbc:CityName>
+                <cbc:PostalZone>80687</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>DE</cbc:IdentificationCode>
+                    <cbc:Name>Almanya</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:DeliveryTerms>
+                <cbc:ID schemeID="INCOTERMS">FCA</cbc:ID>
+            </cac:DeliveryTerms>
+            <cac:Shipment>
+                <cbc:ID/>
+                <cac:GoodsItem>
+                    <cbc:RequiredCustomsID>870830910000</cbc:RequiredCustomsID>
+                </cac:GoodsItem>
+                <cac:ShipmentStage>
+                    <cbc:TransportModeCode>3</cbc:TransportModeCode>
+                </cac:ShipmentStage>
+                <cac:TransportHandlingUnit>
+                    <cac:ActualPackage>
+                        <cbc:ID>MFS-01</cbc:ID>
+                        <cbc:Quantity>24</cbc:Quantity>
+                        <cbc:PackagingTypeCode>PX</cbc:PackagingTypeCode>
+                    </cac:ActualPackage>
+                </cac:TransportHandlingUnit>
+            </cac:Shipment>
+        </cac:Delivery>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="EUR">0.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="EUR">88800.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="EUR">0.00</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>0</cbc:Percent>
+                <cac:TaxCategory>
+                    <cbc:TaxExemptionReasonCode>301</cbc:TaxExemptionReasonCode>
+                    <cbc:TaxExemptionReason>11/1-a Mal ihracatı</cbc:TaxExemptionReason>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Fren balatası seti (aftermarket)</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="EUR">7.4</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">4000</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="EUR">47200.00</cbc:LineExtensionAmount>
+        <cac:Delivery>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>Landsberger Str. 302</cbc:StreetName>
+                <cbc:CitySubdivisionName>Bayern</cbc:CitySubdivisionName>
+                <cbc:CityName>München</cbc:CityName>
+                <cbc:PostalZone>80687</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>DE</cbc:IdentificationCode>
+                    <cbc:Name>Almanya</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:DeliveryTerms>
+                <cbc:ID schemeID="INCOTERMS">FCA</cbc:ID>
+            </cac:DeliveryTerms>
+            <cac:Shipment>
+                <cbc:ID/>
+                <cac:GoodsItem>
+                    <cbc:RequiredCustomsID>870830910000</cbc:RequiredCustomsID>
+                </cac:GoodsItem>
+                <cac:ShipmentStage>
+                    <cbc:TransportModeCode>3</cbc:TransportModeCode>
+                </cac:ShipmentStage>
+                <cac:TransportHandlingUnit>
+                    <cac:ActualPackage>
+                        <cbc:ID>MFS-02</cbc:ID>
+                        <cbc:Quantity>16</cbc:Quantity>
+                        <cbc:PackagingTypeCode>PX</cbc:PackagingTypeCode>
+                    </cac:ActualPackage>
+                </cac:TransportHandlingUnit>
+            </cac:Shipment>
+        </cac:Delivery>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="EUR">0.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="EUR">47200.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="EUR">0.00</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>0</cbc:Percent>
+                <cac:TaxCategory>
+                    <cbc:TaxExemptionReasonCode>301</cbc:TaxExemptionReasonCode>
+                    <cbc:TaxExemptionReason>11/1-a Mal ihracatı</cbc:TaxExemptionReason>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Fren diski</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="EUR">11.8</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>

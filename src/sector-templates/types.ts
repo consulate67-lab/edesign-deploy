@@ -44,7 +44,20 @@ export type SectorId =
     | 'enerji'
     | 'tekstil'
     | 'ayakkabi'
-    | 'tarim';
+    | 'tarim'
+    | 'mobilya'
+    | 'metal'
+    | 'eglence'
+    | 'teknik-servis'
+    | 'temizlik'
+    | 'buro'
+    | 'medya'
+    | 'spor'
+    | 'genel-hizmet'
+    | 'emlak'
+    | 'elektronik'
+    | 'pazar'
+    | 'gida';
 
 export interface CategoryInfo {
     id: CategoryId;
@@ -64,6 +77,8 @@ export interface SectorTemplate {
     /** Benzersiz, kebab-case; public dosya adlarıyla aynı. */
     id: string;
     sector: SectorId;
+    /** Esnaf meslek kodu (meslekler.generated.ts), ör. "J.10"; meslek şablonlarında dolu. */
+    meslek?: string;
     /** Kart başlığı, ör. "Kafe & Restoran Adisyon Faturası". */
     name: string;
     /** Kısa açıklama (1-2 cümle): kime, hangi durumda. */
@@ -130,6 +145,19 @@ export const SECTORS: SectorInfo[] = [
     { id: 'tekstil', category: 'moda', label: 'Tekstil & Konfeksiyon', color: '#a21caf' },
     { id: 'ayakkabi', category: 'moda', label: 'Ayakkabı & Deri', color: '#b45309' },
     { id: 'tarim', category: 'tarim', label: 'Tarım & Hayvancılık', color: '#65a30d' },
+    { id: 'gida', category: 'tarim', label: 'Gıda Üretim & Satış', color: '#ca8a04' },
+    { id: 'pazar', category: 'ticaret', label: 'Pazar & Seyyar', color: '#9333ea' },
+    { id: 'elektronik', category: 'ticaret', label: 'Elektronik & İletişim', color: '#2563eb' },
+    { id: 'emlak', category: 'hizmet', label: 'Emlak & Gayrimenkul', color: '#1e3a8a' },
+    { id: 'teknik-servis', category: 'hizmet', label: 'Teknik Servis & Onarım', color: '#0891b2' },
+    { id: 'temizlik', category: 'hizmet', label: 'Temizlik & İlaçlama', color: '#0d9488' },
+    { id: 'buro', category: 'hizmet', label: 'Büro & Danışmanlık', color: '#7c3aed' },
+    { id: 'medya', category: 'hizmet', label: 'Medya, Reklam & Basım', color: '#e11d48' },
+    { id: 'spor', category: 'hizmet', label: 'Spor & Rekreasyon', color: '#16a34a' },
+    { id: 'genel-hizmet', category: 'hizmet', label: 'Kişisel & Genel Hizmetler', color: '#64748b' },
+    { id: 'eglence', category: 'turizm', label: 'Eğlence & Kültür', color: '#c026d3' },
+    { id: 'mobilya', category: 'sanayi', label: 'Ağaç & Mobilya', color: '#92400e' },
+    { id: 'metal', category: 'sanayi', label: 'Metal & Makine', color: '#52525b' },
 ];
 
 export const hazirPath = (id: string, ext: 'xslt' | 'xml') => `ebelge/hazir/${id}.${ext}`;

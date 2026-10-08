@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Meslek şablonu: F.04 Çeşitli Malların Ticareti — Irak'a TIR ile İhracat Faturası (DAP) (e-Fatura (İhracat))
+  Erbil'deki toptancıya ev gereçleri ihracatı; GTİP ve koli bilgisi satırda, kara yolu.
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>IHRACAT</cbc:ProfileID>
+    <cbc:ID>YTE2026000040847</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>973E555B-1535-4ADB-ACF1-9C3D5659C31A</cbc:UUID>
+    <cbc:IssueDate>2026-10-01</cbc:IssueDate>
+    <cbc:IssueTime>16:46:22</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>ISTISNA</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız: Yirmi Bir Bin ABD Doları</cbc:Note>
+    <cbc:Note>Mal ihracatı KDV Kanunu 11/1-a maddesi uyarınca KDV’den istisnadır. Gümrük beyannamesi bilgileri GİB tarafından fatura ile eşleştirilir.</cbc:Note>
+    <cbc:DocumentCurrencyCode>USD</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>3</cbc:LineCountNumeric>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>26270100EX00211846</cbc:ID>
+        <cbc:IssueDate>2026-10-01</cbc:IssueDate>
+        <cbc:DocumentType>BEYANNAME</cbc:DocumentType>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">8206020883</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">8206020883</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Çarşı Mah. Kordon Boyu Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>118/8</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Nizip</cbc:CitySubdivisionName>
+                <cbc:CityName>Gaziantep</cbc:CityName>
+                <cbc:PostalZone>27543</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_YTE2026000040847</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">8206020883</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">08206020883000015</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Yıldız Toptan Ev Gereçleri Tic. Ltd. Şti.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Çarşı Mah. Kordon Boyu Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>118/8</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Nizip</cbc:CitySubdivisionName>
+                <cbc:CityName>Gaziantep</cbc:CityName>
+                <cbc:PostalZone>27543</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Nizip</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0342 982 73 55</cbc:Telephone>
+                <cbc:ElectronicMail>info@yildiztoptan.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">1460415308</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Ticaret Bakanlığı Gümrükler Genel Müdürlüğü - Bilgi İşlem Dairesi Başkanlığı</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:CitySubdivisionName>Çankaya</cbc:CitySubdivisionName>
+                <cbc:CityName>Ankara</cbc:CityName>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Ulus</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:BuyerCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="PARTYTYPE">EXPORT</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Dijla Trading Company</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>60 Meter St.</cbc:StreetName>
+                <cbc:CitySubdivisionName>Kürdistan Bölgesi</cbc:CitySubdivisionName>
+                <cbc:CityName>Erbil</cbc:CityName>
+                <cbc:PostalZone>44001</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>IQ</cbc:IdentificationCode>
+                    <cbc:Name>Irak</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:Contact>
+                <cbc:Telephone>+33 917 7169</cbc:Telephone>
+                <cbc:ElectronicMail>purchasing@dijlatrading.com</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:BuyerCustomerParty>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-10-31</cbc:PaymentDueDate>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR520020500559805666308758</cbc:ID>
+            <cbc:CurrencyCode>USD</cbc:CurrencyCode>
+            <cbc:PaymentNote>Kuveyt Türk Katılım Bankası — Gaziantep Şubesi</cbc:PaymentNote>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:PricingExchangeRate>
+        <cbc:SourceCurrencyCode>USD</cbc:SourceCurrencyCode>
+        <cbc:TargetCurrencyCode>TRY</cbc:TargetCurrencyCode>
+        <cbc:CalculationRate>42.653</cbc:CalculationRate>
+        <cbc:Date>2026-10-01</cbc:Date>
+    </cac:PricingExchangeRate>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="USD">0.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="USD">21000.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="USD">0.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>0</cbc:Percent>
+            <cac:TaxCategory>
+                <cbc:TaxExemptionReasonCode>301</cbc:TaxExemptionReasonCode>
+                <cbc:TaxExemptionReason>11/1-a Mal ihracatı</cbc:TaxExemptionReason>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="USD">21000.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="USD">21000.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="USD">21000.00</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="USD">0.00</cbc:AllowanceTotalAmount>
+        <cbc:PayableAmount currencyID="USD">21000.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="SET">3000</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="USD">7200.00</cbc:LineExtensionAmount>
+        <cac:Delivery>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>60 Meter St.</cbc:StreetName>
+                <cbc:CitySubdivisionName>Kürdistan Bölgesi</cbc:CitySubdivisionName>
+                <cbc:CityName>Erbil</cbc:CityName>
+                <cbc:PostalZone>44001</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>IQ</cbc:IdentificationCode>
+                    <cbc:Name>Irak</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:DeliveryTerms>
+                <cbc:ID schemeID="INCOTERMS">DAP</cbc:ID>
+            </cac:DeliveryTerms>
+            <cac:Shipment>
+                <cbc:ID/>
+                <cac:GoodsItem>
+                    <cbc:RequiredCustomsID>392410000000</cbc:RequiredCustomsID>
+                </cac:GoodsItem>
+                <cac:ShipmentStage>
+                    <cbc:TransportModeCode>3</cbc:TransportModeCode>
+                </cac:ShipmentStage>
+                <cac:TransportHandlingUnit>
+                    <cac:ActualPackage>
+                        <cbc:ID>YTE-01</cbc:ID>
+                        <cbc:Quantity>250</cbc:Quantity>
+                        <cbc:PackagingTypeCode>CT</cbc:PackagingTypeCode>
+                    </cac:ActualPackage>
+                </cac:TransportHandlingUnit>
+            </cac:Shipment>
+        </cac:Delivery>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="USD">0.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="USD">7200.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="USD">0.00</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>0</cbc:Percent>
+                <cac:TaxCategory>
+                    <cbc:TaxExemptionReasonCode>301</cbc:TaxExemptionReasonCode>
+                    <cbc:TaxExemptionReason>11/1-a Mal ihracatı</cbc:TaxExemptionReason>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Plastik saklama kabı seti</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="USD">2.4</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="SET">800</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="USD">7600.00</cbc:LineExtensionAmount>
+        <cac:Delivery>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>60 Meter St.</cbc:StreetName>
+                <cbc:CitySubdivisionName>Kürdistan Bölgesi</cbc:CitySubdivisionName>
+                <cbc:CityName>Erbil</cbc:CityName>
+                <cbc:PostalZone>44001</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>IQ</cbc:IdentificationCode>
+                    <cbc:Name>Irak</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:DeliveryTerms>
+                <cbc:ID schemeID="INCOTERMS">DAP</cbc:ID>
+            </cac:DeliveryTerms>
+            <cac:Shipment>
+                <cbc:ID/>
+                <cac:GoodsItem>
+                    <cbc:RequiredCustomsID>732393000000</cbc:RequiredCustomsID>
+                </cac:GoodsItem>
+                <cac:ShipmentStage>
+                    <cbc:TransportModeCode>3</cbc:TransportModeCode>
+                </cac:ShipmentStage>
+                <cac:TransportHandlingUnit>
+                    <cac:ActualPackage>
+                        <cbc:ID>YTE-02</cbc:ID>
+                        <cbc:Quantity>100</cbc:Quantity>
+                        <cbc:PackagingTypeCode>CT</cbc:PackagingTypeCode>
+                    </cac:ActualPackage>
+                </cac:TransportHandlingUnit>
+            </cac:Shipment>
+        </cac:Delivery>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="USD">0.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="USD">7600.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="USD">0.00</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>0</cbc:Percent>
+                <cac:TaxCategory>
+                    <cbc:TaxExemptionReasonCode>301</cbc:TaxExemptionReasonCode>
+                    <cbc:TaxExemptionReason>11/1-a Mal ihracatı</cbc:TaxExemptionReason>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Paslanmaz çaydanlık takımı</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="USD">9.5</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">2000</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="USD">6200.00</cbc:LineExtensionAmount>
+        <cac:Delivery>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>60 Meter St.</cbc:StreetName>
+                <cbc:CitySubdivisionName>Kürdistan Bölgesi</cbc:CitySubdivisionName>
+                <cbc:CityName>Erbil</cbc:CityName>
+                <cbc:PostalZone>44001</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>IQ</cbc:IdentificationCode>
+                    <cbc:Name>Irak</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:DeliveryTerms>
+                <cbc:ID schemeID="INCOTERMS">DAP</cbc:ID>
+            </cac:DeliveryTerms>
+            <cac:Shipment>
+                <cbc:ID/>
+                <cac:GoodsItem>
+                    <cbc:RequiredCustomsID>660191000000</cbc:RequiredCustomsID>
+                </cac:GoodsItem>
+                <cac:ShipmentStage>
+                    <cbc:TransportModeCode>3</cbc:TransportModeCode>
+                </cac:ShipmentStage>
+                <cac:TransportHandlingUnit>
+                    <cac:ActualPackage>
+                        <cbc:ID>YTE-03</cbc:ID>
+                        <cbc:Quantity>80</cbc:Quantity>
+                        <cbc:PackagingTypeCode>CT</cbc:PackagingTypeCode>
+                    </cac:ActualPackage>
+                </cac:TransportHandlingUnit>
+            </cac:Shipment>
+        </cac:Delivery>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="USD">0.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="USD">6200.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="USD">0.00</cbc:TaxAmount>
+                <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+                <cbc:Percent>0</cbc:Percent>
+                <cac:TaxCategory>
+                    <cbc:TaxExemptionReasonCode>301</cbc:TaxExemptionReasonCode>
+                    <cbc:TaxExemptionReason>11/1-a Mal ihracatı</cbc:TaxExemptionReason>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Şemsiye</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="USD">3.1</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>

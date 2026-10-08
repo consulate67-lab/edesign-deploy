@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { LayoutTemplate, Search, Eye, X, Download, ArrowRight, Loader2, Code2, FileText, ChevronDown, Check, Building2, RotateCcw, Image as ImageIcon, ImageOff, Landmark, Ban, SlidersHorizontal } from 'lucide-react';
+import { LayoutTemplate, Search, Eye, X, Download, ArrowRight, Loader2, Code2, FileText, ChevronDown, Check, Building2, RotateCcw, Image as ImageIcon, ImageOff, Landmark, Ban, SlidersHorizontal, Briefcase } from 'lucide-react';
 import { SECTOR_TEMPLATES, SECTORS, CATEGORIES, cachedDbTemplates, loadDbTemplates, type CategoryId, type SectorId, type SectorTemplate } from './index';
+import { MESLEK_GROUPS, MESLEK_NAME } from './meslekler.generated';
 import { loadPrefs, personalizeXslt, prefsKey, savePrefs, type TemplatePrefs } from './personalize';
 import { TemplateQuestions, type QuestionStep, type TemplateAnswers } from './TemplateQuestions';
 import { WIZARD_DOC_TYPES, loadXmlFile } from '../wizard/docTypes';
@@ -441,9 +442,28 @@ interface FilterOption { id: string; label: string; color: string; count: number
 const matchesQuery = (t: SectorTemplate, q: string) => {
     if (!q) return true;
     const s = SECTOR_BY_ID.get(t.sector);
-    const hay = [t.name, t.description, ...t.tags, s?.label ?? '', CATEGORY_BY_ID.get(s?.category as CategoryId)?.label ?? '', docTypeOf(t.docTypeId)?.label ?? ''].join(' ');
+    const hay = [t.name, t.description, ...t.tags, s?.label ?? '', CATEGORY_BY_ID.get(s?.category as CategoryId)?.label ?? '', docTypeOf(t.docTypeId)?.label ?? '', t.meslek ?? '', t.meslek ? MESLEK_NAME[t.meslek] ?? '' : ''].join(' ');
     return lower(hay).includes(q);
 };
+
+/** Meslek filtresi değeri: '' (tümü), 'g:<grup>' (ör. g:J) veya 'm:<kod>' (ör. m:J.10). */
+const matchesMeslek = (t: SectorTemplate, meslek: string) => {
+    if (!meslek) return true;
+    if (!t.meslek) return false;
+    return meslek.startsWith('m:') ? t.meslek === meslek.slice(2) : t.meslek.split('.')[0] === meslek.slice(2);
+};
+
+const MESLEK_COLORS = ['#92400e', '#c026d3', '#2563eb', '#0d9488', '#be185d', '#7c3aed', '#0891b2', '#52525b', '#9333ea', '#0284c7', '#d97706'];
+
+const meslekOptions = (items: SectorTemplate[]): FilterOption[] => MESLEK_GROUPS.flatMap((g, i) => {
+    const color = MESLEK_COLORS[i % MESLEK_COLORS.length];
+    const profs = g.items.flatMap(p => {
+        const count = items.filter(t => t.meslek === p.code).length;
+        return count ? [{ id: `m:${p.code}`, label: `${p.code} ${p.name}`, color, count, depth: 1 as const }] : [];
+    });
+    const count = profs.reduce((n, p) => n + p.count, 0);
+    return count ? [{ id: `g:${g.id}`, label: `${g.id} · ${g.label}`, color, count, depth: 0 as const }, ...profs] : [];
+});
 
 /** Firma filtresi değeri: '' (tümü), 'c:<kategori>' veya 's:<sektör>'. */
 const matchesCompany = (t: SectorTemplate, company: string) => {
@@ -616,6 +636,7 @@ const PrefsBar: React.FC<{
 export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => {
     const [docType, setDocType] = useState('');
     const [company, setCompany] = useState('');
+    const [meslek, setMeslek] = useState('');
     const [query, setQuery] = useState('');
     const [previewId, setPreviewId] = useState<string | null>(null);
     const [busyId, setBusyId] = useState<string | null>(null);
@@ -634,6 +655,7 @@ export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => 
     const answerDone = (a: TemplateAnswers) => {
         setDocType(a.docType);
         setCompany(a.category ? `c:${a.category}` : '');
+        setMeslek('');
         setQuery('');
         setPrefs(a.prefs);
         savePrefs(a.prefs);
@@ -652,13 +674,15 @@ export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => 
         () => allTemplates.filter(t => matchesQuery(t, q) && (prefs.bank !== 'yes' || t.bank)),
         [allTemplates, q, prefs.bank],
     );
-    const byCompany = useMemo(() => searched.filter(t => matchesCompany(t, company)), [searched, company]);
-    const byDoc = useMemo(() => searched.filter(t => !docType || t.docTypeId === docType), [searched, docType]);
-    const filtered = useMemo(() => byCompany.filter(t => !docType || t.docTypeId === docType), [byCompany, docType]);
-    const docOpts = useMemo(() => docOptions(byCompany), [byCompany]);
-    const companyOpts = useMemo(() => companyOptions(byDoc), [byDoc]);
-    const anyFilter = !!(docType || company || q);
-    const clearAll = () => { setDocType(''); setCompany(''); setQuery(''); };
+    const forDoc = useMemo(() => searched.filter(t => matchesCompany(t, company) && matchesMeslek(t, meslek)), [searched, company, meslek]);
+    const forCompany = useMemo(() => searched.filter(t => (!docType || t.docTypeId === docType) && matchesMeslek(t, meslek)), [searched, docType, meslek]);
+    const forMeslek = useMemo(() => searched.filter(t => (!docType || t.docTypeId === docType) && matchesCompany(t, company)), [searched, docType, company]);
+    const filtered = useMemo(() => forDoc.filter(t => !docType || t.docTypeId === docType), [forDoc, docType]);
+    const docOpts = useMemo(() => docOptions(forDoc), [forDoc]);
+    const companyOpts = useMemo(() => companyOptions(forCompany), [forCompany]);
+    const meslekOpts = useMemo(() => meslekOptions(forMeslek), [forMeslek]);
+    const anyFilter = !!(docType || company || meslek || q);
+    const clearAll = () => { setDocType(''); setCompany(''); setMeslek(''); setQuery(''); };
 
     const previewTemplate = previewId ? allTemplates.find(t => t.id === previewId) ?? null : null;
 
@@ -761,7 +785,7 @@ export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => 
                     icon={<FileText size={14} color={theme.primary} style={{ flexShrink: 0 }} />}
                     value={docType}
                     options={docOpts}
-                    total={byCompany.length}
+                    total={forDoc.length}
                     onChange={setDocType}
                 />
                 <FilterDropdown
@@ -770,8 +794,17 @@ export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => 
                     icon={<Building2 size={14} color={theme.primary} style={{ flexShrink: 0 }} />}
                     value={company}
                     options={companyOpts}
-                    total={byDoc.length}
+                    total={forCompany.length}
                     onChange={setCompany}
+                />
+                <FilterDropdown
+                    name="meslek"
+                    title="Meslek"
+                    icon={<Briefcase size={14} color={theme.primary} style={{ flexShrink: 0 }} />}
+                    value={meslek}
+                    options={meslekOpts}
+                    total={forMeslek.length}
+                    onChange={setMeslek}
                 />
                 <span data-template-count style={{ marginLeft: 'auto', fontSize: '0.8rem', color: theme.textMuted, whiteSpace: 'nowrap' }}>
                     <b style={{ color: theme.text }}>{filtered.length}</b> şablon
