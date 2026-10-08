@@ -1,0 +1,424 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: Hazır giyim zincirinin dağıtım merkezinden mağazasına sevkiyat (şubeler arası) — TEMELIRSALIYE · SEVK.
+  Satırda SEVK (ASKILI / KATLI), REYON, RENK, RENKKOD, TASIMA (askı arabası / koli) ve BEDEN-xx dağılımı; taşıyıcı firma ve mühür no.
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<DespatchAdvice xmlns="urn:oasis:names:specification:ubl:schema:xsd:DespatchAdvice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2.1</cbc:CustomizationID>
+    <cbc:ProfileID>TEMELIRSALIYE</cbc:ProfileID>
+    <cbc:ID>LNA2026000055821</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>D164000B-1DAC-4DD9-A3EC-E3E40FEE4B14</cbc:UUID>
+    <cbc:IssueDate>2026-10-08</cbc:IssueDate>
+    <cbc:IssueTime>05:45:00</cbc:IssueTime>
+    <cbc:DespatchAdviceTypeCode>SEVK</cbc:DespatchAdviceTypeCode>
+    <cbc:Note>Askılı ürünler askı arabasıyla, katlı ürünler numaralı kolilerle sevk edilmiştir.</cbc:Note>
+    <cbc:Note>Mağaza kabulünde mühür no ve taşıma birimi sayısı kontrol edilmelidir.</cbc:Note>
+    <cbc:LineCountNumeric>6</cbc:LineCountNumeric>
+    <cac:OrderReference>
+        <cbc:ID>RPL-BRS118-2641</cbc:ID>
+        <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+    </cac:OrderReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>MHR-448120</cbc:ID>
+        <cbc:IssueDate>2026-10-08</cbc:IssueDate>
+        <cbc:DocumentType>MUHUR</cbc:DocumentType>
+        <cbc:DocumentDescription>Araç kapı mühür no</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">6082913745</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">6082913745</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Aydınlı Mah. Lojistik Sok.</cbc:StreetName>
+                <cbc:BuildingNumber>5</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Tuzla</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34953</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_LNA2026000055821</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:DespatchSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.linagiyim.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">6082913745</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">0608291374500017</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Lina Giyim Mağazacılık A.Ş. — Tuzla Dağıtım Merkezi</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Aydınlı Mah. Lojistik Sok.</cbc:StreetName>
+                <cbc:BuildingNumber>5</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Tuzla</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34953</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Tuzla</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0216 593 40 40</cbc:Telephone>
+                <cbc:ElectronicMail>dagitim@linagiyim.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+        <cac:DespatchContact>
+            <cbc:Name>Elif Tan (Dağıtım Planlama)</cbc:Name>
+        </cac:DespatchContact>
+    </cac:DespatchSupplierParty>
+    <cac:DeliveryCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">6082913745</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="SUBENO">BRS-118</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Lina Giyim — Bursa Kent Meydanı Mağazası</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Santral Garaj Mah. Kent Meydanı AVM Kat:1</cbc:StreetName>
+                <cbc:BuildingNumber>118</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Osmangazi</cbc:CitySubdivisionName>
+                <cbc:CityName>Bursa</cbc:CityName>
+                <cbc:PostalZone>16200</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Tuzla</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0224 270 11 18</cbc:Telephone>
+                <cbc:ElectronicMail>bursakentmeydani@linagiyim.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:DeliveryCustomerParty>
+    <cac:Shipment>
+        <cbc:ID>HH-26-55821</cbc:ID>
+        <cbc:GrossWeightMeasure unitCode="KGM">286.400</cbc:GrossWeightMeasure>
+        <cbc:TotalGoodsItemQuantity>6</cbc:TotalGoodsItemQuantity>
+        <cbc:TotalTransportHandlingUnitQuantity>14</cbc:TotalTransportHandlingUnitQuantity>
+        <cac:ShipmentStage>
+            <cac:TransportMeans>
+                <cac:RoadTransport>
+                    <cbc:LicensePlateID schemeID="PLAKA">34 HHL 707</cbc:LicensePlateID>
+                </cac:RoadTransport>
+            </cac:TransportMeans>
+            <cac:DriverPerson>
+                <cbc:FirstName>Onur</cbc:FirstName>
+                <cbc:FamilyName>Kılıç</cbc:FamilyName>
+                <cbc:Title>Şoför</cbc:Title>
+                <cbc:NationalityID>37462819054</cbc:NationalityID>
+            </cac:DriverPerson>
+        </cac:ShipmentStage>
+        <cac:Delivery>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>Santral Garaj Mah. Kent Meydanı AVM Kat:1</cbc:StreetName>
+                <cbc:BuildingNumber>118</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Osmangazi</cbc:CitySubdivisionName>
+                <cbc:CityName>Bursa</cbc:CityName>
+                <cbc:PostalZone>16200</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:CarrierParty>
+                <cac:PartyIdentification>
+                    <cbc:ID schemeID="VKN">4567012398</cbc:ID>
+                </cac:PartyIdentification>
+                <cac:PartyName>
+                    <cbc:Name>Hızlı Hat Lojistik A.Ş.</cbc:Name>
+                </cac:PartyName>
+                <cac:PostalAddress>
+                    <cbc:StreetName>Gebze OSB 1600. Sok.</cbc:StreetName>
+                    <cbc:BuildingNumber>1604</cbc:BuildingNumber>
+                    <cbc:CitySubdivisionName>Gebze</cbc:CitySubdivisionName>
+                    <cbc:CityName>Kocaeli</cbc:CityName>
+                    <cbc:PostalZone>41400</cbc:PostalZone>
+                    <cac:Country>
+                        <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                        <cbc:Name>Türkiye</cbc:Name>
+                    </cac:Country>
+                </cac:PostalAddress>
+            </cac:CarrierParty>
+            <cac:Despatch>
+                <cbc:ActualDespatchDate>2026-10-08</cbc:ActualDespatchDate>
+                <cbc:ActualDespatchTime>06:00:00</cbc:ActualDespatchTime>
+            </cac:Despatch>
+        </cac:Delivery>
+    </cac:Shipment>
+    <cac:DespatchLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:DeliveredQuantity unitCode="C62">24</cbc:DeliveredQuantity>
+        <cac:OrderLineReference>
+            <cbc:LineID>1</cbc:LineID>
+        </cac:OrderLineReference>
+        <cac:Item>
+            <cbc:Name>Yün Karışımlı Kaban</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>LN-KB-2601</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="SEVK">ASKILI</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="REYON">Kadın Dış Giyim</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Deve tüyü</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENKKOD">#c8a27a</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="TASIMA">Askı arabası A1</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-S">4</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-M">8</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-L">8</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-XL">4</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+    </cac:DespatchLine>
+    <cac:DespatchLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:DeliveredQuantity unitCode="C62">36</cbc:DeliveredQuantity>
+        <cac:OrderLineReference>
+            <cbc:LineID>2</cbc:LineID>
+        </cac:OrderLineReference>
+        <cac:Item>
+            <cbc:Name>Midi Saten Elbise</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>LN-EL-2614</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="SEVK">ASKILI</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="REYON">Kadın Elbise</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Zümrüt</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENKKOD">#047857</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="TASIMA">Askı arabası A2</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-S">8</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-M">12</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-L">10</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-XL">6</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+    </cac:DespatchLine>
+    <cac:DespatchLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:DeliveredQuantity unitCode="C62">30</cbc:DeliveredQuantity>
+        <cac:OrderLineReference>
+            <cbc:LineID>3</cbc:LineID>
+        </cac:OrderLineReference>
+        <cac:Item>
+            <cbc:Name>Tek Düğme Blazer Ceket</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>LN-BL-2620</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="SEVK">ASKILI</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="REYON">Kadın Ceket</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Siyah</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENKKOD">#18181b</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="TASIMA">Askı arabası A3</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-S">6</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-M">10</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-L">9</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-XL">5</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+    </cac:DespatchLine>
+    <cac:DespatchLine>
+        <cbc:ID>4</cbc:ID>
+        <cbc:DeliveredQuantity unitCode="C62">120</cbc:DeliveredQuantity>
+        <cac:OrderLineReference>
+            <cbc:LineID>4</cbc:LineID>
+        </cac:OrderLineReference>
+        <cac:Item>
+            <cbc:Name>Basic Bisiklet Yaka Tişört</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>LN-TS-2602</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="SEVK">KATLI</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="REYON">Basic</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Beyaz</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENKKOD">#f4f4f5</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="TASIMA">Koli K1–K4</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-S">30</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-M">40</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-L">30</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-XL">20</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+    </cac:DespatchLine>
+    <cac:DespatchLine>
+        <cbc:ID>5</cbc:ID>
+        <cbc:DeliveredQuantity unitCode="C62">60</cbc:DeliveredQuantity>
+        <cac:OrderLineReference>
+            <cbc:LineID>5</cbc:LineID>
+        </cac:OrderLineReference>
+        <cac:Item>
+            <cbc:Name>Balıkçı Yaka Triko Kazak</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>LN-TR-2633</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="SEVK">KATLI</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="REYON">Triko</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Bordo</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENKKOD">#881337</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="TASIMA">Koli K5–K7</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-S">12</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-M">20</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-L">18</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-XL">10</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+    </cac:DespatchLine>
+    <cac:DespatchLine>
+        <cbc:ID>6</cbc:ID>
+        <cbc:DeliveredQuantity unitCode="C62">72</cbc:DeliveredQuantity>
+        <cac:OrderLineReference>
+            <cbc:LineID>6</cbc:LineID>
+        </cac:OrderLineReference>
+        <cac:Item>
+            <cbc:Name>Yüksek Bel Mom Jean</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>LN-DN-2641</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="SEVK">KATLI</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="REYON">Denim</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Açık mavi</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENKKOD">#93c5fd</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="TASIMA">Koli K8–K11</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-26">12</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-28">22</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-30">22</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN-32">16</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+    </cac:DespatchLine>
+</DespatchAdvice>

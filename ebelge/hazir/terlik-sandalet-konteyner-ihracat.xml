@@ -1,0 +1,458 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: Terlik ve sandalet ihracatı, Birleşik Arap Emirlikleri — IHRACAT · ISTISNA (301), USD, FCA Mersin, denizyolu (1).
+  Konteyner (KONTEYNER) ve konşimento (KONSIMENTO) belge referansları; satırda GTİP, koli no / adet, KOLIICI (koli içi çift) ve RENK.
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>IHRACAT</cbc:ProfileID>
+    <cbc:ID>AKT2026000000561</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>D73AA838-1FB6-4FB4-A726-4FB557CE7205</cbc:UUID>
+    <cbc:IssueDate>2026-10-06</cbc:IssueDate>
+    <cbc:IssueTime>09:20:00</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>ISTISNA</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız: Yetmiş Altı Bin Yedi Yüz Elli İki ABD Doları</cbc:Note>
+    <cbc:Note>Port of loading: Mersin (TRMER) — Port of discharge: Jebel Ali (AEJEA) · Vessel: MAERSK KOLKATA 641E</cbc:Note>
+    <cbc:Note>Shipping marks: GULF STEPS / JEBEL ALI / C/No 1-1180</cbc:Note>
+    <cbc:DocumentCurrencyCode>USD</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>4</cbc:LineCountNumeric>
+    <cac:OrderReference>
+        <cbc:ID>GS-PO-26-1180</cbc:ID>
+        <cbc:IssueDate>2026-09-02</cbc:IssueDate>
+    </cac:OrderReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>MSKU4826137</cbc:ID>
+        <cbc:IssueDate>2026-10-06</cbc:IssueDate>
+        <cbc:DocumentType>KONTEYNER</cbc:DocumentType>
+        <cbc:DocumentDescription>40' HC · 45G1 · Mühür ML-TR2271845</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>MAEU264418805</cbc:ID>
+        <cbc:IssueDate>2026-10-06</cbc:IssueDate>
+        <cbc:DocumentType>KONSIMENTO</cbc:DocumentType>
+        <cbc:DocumentDescription>Bill of Lading · MAERSK KOLKATA 641E</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">0391827465</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">0391827465</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Mersin-Tarsus OSB 3. Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>27</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Akdeniz</cbc:CitySubdivisionName>
+                <cbc:CityName>Mersin</cbc:CityName>
+                <cbc:PostalZone>33140</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_AKT2026000000561</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.akdenizterlik.com</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">0391827465</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">0039182746500011</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Akdeniz Terlik ve Plastik Sanayi A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Mersin-Tarsus OSB 3. Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>27</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Akdeniz</cbc:CitySubdivisionName>
+                <cbc:CityName>Mersin</cbc:CityName>
+                <cbc:PostalZone>33140</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Uray</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>+90 324 676 20 20</cbc:Telephone>
+                <cbc:ElectronicMail>export@akdenizterlik.com</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">1460415308</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Ticaret Bakanlığı Gümrükler Genel Müdürlüğü - Bilgi İşlem Dairesi Başkanlığı</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:CitySubdivisionName>Çankaya</cbc:CitySubdivisionName>
+                <cbc:CityName>Ankara</cbc:CityName>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Ulus</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:BuyerCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="PARTYTYPE">EXPORT</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Gulf Steps General Trading LLC</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Al Ras, Old Souk Building</cbc:StreetName>
+                <cbc:BuildingNumber>B-14</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Deira</cbc:CitySubdivisionName>
+                <cbc:CityName>Dubai</cbc:CityName>
+                <cac:Country>
+                    <cbc:IdentificationCode>AE</cbc:IdentificationCode>
+                    <cbc:Name>Birleşik Arap Emirlikleri</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyLegalEntity>
+                <cbc:RegistrationName>Gulf Steps General Trading LLC</cbc:RegistrationName>
+                <cbc:CompanyID>DED-1048213</cbc:CompanyID>
+            </cac:PartyLegalEntity>
+            <cac:Contact>
+                <cbc:Telephone>+971 4 226 1840</cbc:Telephone>
+                <cbc:ElectronicMail>purchase@gulfsteps.ae</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:BuyerCustomerParty>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-10-30</cbc:PaymentDueDate>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR120001500158007309845561</cbc:ID>
+            <cbc:CurrencyCode>USD</cbc:CurrencyCode>
+            <cbc:PaymentNote>Vakıfbank — Mersin Serbest Bölge Şubesi · SWIFT TVBATR2A</cbc:PaymentNote>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:PaymentTerms>
+        <cbc:Note>%30 peşin, %70 konşimento kopyası karşılığı · 30% T/T advance, 70% against copy B/L</cbc:Note>
+    </cac:PaymentTerms>
+    <cac:PricingExchangeRate>
+        <cbc:SourceCurrencyCode>USD</cbc:SourceCurrencyCode>
+        <cbc:TargetCurrencyCode>TRY</cbc:TargetCurrencyCode>
+        <cbc:CalculationRate>42.653</cbc:CalculationRate>
+        <cbc:Date>2026-10-06</cbc:Date>
+    </cac:PricingExchangeRate>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="USD">0.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="USD">76752.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="USD">0.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>0</cbc:Percent>
+            <cac:TaxCategory>
+                <cbc:TaxExemptionReasonCode>301</cbc:TaxExemptionReasonCode>
+                <cbc:TaxExemptionReason>11/1-a Mal ihracatı</cbc:TaxExemptionReason>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="USD">76752.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="USD">76752.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="USD">76752.00</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="USD">0.00</cbc:AllowanceTotalAmount>
+        <cbc:PayableAmount currencyID="USD">76752.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="PR">14400</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="USD">19440.00</cbc:LineExtensionAmount>
+        <cac:Delivery>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>Al Ras, Old Souk Building</cbc:StreetName>
+                <cbc:BuildingNumber>B-14</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Deira</cbc:CitySubdivisionName>
+                <cbc:CityName>Dubai</cbc:CityName>
+                <cac:Country>
+                    <cbc:IdentificationCode>AE</cbc:IdentificationCode>
+                    <cbc:Name>Birleşik Arap Emirlikleri</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:DeliveryTerms>
+                <cbc:ID schemeID="INCOTERMS">FCA</cbc:ID>
+            </cac:DeliveryTerms>
+            <cac:Shipment>
+                <cbc:ID/>
+                <cac:GoodsItem>
+                    <cbc:RequiredCustomsID>640220000000</cbc:RequiredCustomsID>
+                </cac:GoodsItem>
+                <cac:ShipmentStage>
+                    <cbc:TransportModeCode>1</cbc:TransportModeCode>
+                </cac:ShipmentStage>
+                <cac:TransportHandlingUnit>
+                    <cac:ActualPackage>
+                        <cbc:ID>1-400</cbc:ID>
+                        <cbc:Quantity>400</cbc:Quantity>
+                        <cbc:PackagingTypeCode>CT</cbc:PackagingTypeCode>
+                    </cac:ActualPackage>
+                </cac:TransportHandlingUnit>
+            </cac:Shipment>
+        </cac:Delivery>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="USD">0.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="USD">19440.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="USD">0.00</cbc:TaxAmount>
+                <cbc:Percent>0</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>EVA flip-flops, unisex</cbc:Description>
+            <cbc:Name>EVA plaj terliği</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>AK-FF-101</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="KOLIICI">36</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">6 renk asorti</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="USD">1.35</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="PR">7200</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="USD">27360.00</cbc:LineExtensionAmount>
+        <cac:Delivery>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>Al Ras, Old Souk Building</cbc:StreetName>
+                <cbc:BuildingNumber>B-14</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Deira</cbc:CitySubdivisionName>
+                <cbc:CityName>Dubai</cbc:CityName>
+                <cac:Country>
+                    <cbc:IdentificationCode>AE</cbc:IdentificationCode>
+                    <cbc:Name>Birleşik Arap Emirlikleri</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:DeliveryTerms>
+                <cbc:ID schemeID="INCOTERMS">FCA</cbc:ID>
+            </cac:DeliveryTerms>
+            <cac:Shipment>
+                <cbc:ID/>
+                <cac:GoodsItem>
+                    <cbc:RequiredCustomsID>640299980000</cbc:RequiredCustomsID>
+                </cac:GoodsItem>
+                <cac:ShipmentStage>
+                    <cbc:TransportModeCode>1</cbc:TransportModeCode>
+                </cac:ShipmentStage>
+                <cac:TransportHandlingUnit>
+                    <cac:ActualPackage>
+                        <cbc:ID>401-700</cbc:ID>
+                        <cbc:Quantity>300</cbc:Quantity>
+                        <cbc:PackagingTypeCode>CT</cbc:PackagingTypeCode>
+                    </cac:ActualPackage>
+                </cac:TransportHandlingUnit>
+            </cac:Shipment>
+        </cac:Delivery>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="USD">0.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="USD">27360.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="USD">0.00</cbc:TaxAmount>
+                <cbc:Percent>0</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Women's PU strap sandals</cbc:Description>
+            <cbc:Name>Kadın bantlı sandalet</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>AK-SD-214</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="KOLIICI">24</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Siyah · Taba · Beyaz</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="USD">3.8</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="PR">9600</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="USD">18720.00</cbc:LineExtensionAmount>
+        <cac:Delivery>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>Al Ras, Old Souk Building</cbc:StreetName>
+                <cbc:BuildingNumber>B-14</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Deira</cbc:CitySubdivisionName>
+                <cbc:CityName>Dubai</cbc:CityName>
+                <cac:Country>
+                    <cbc:IdentificationCode>AE</cbc:IdentificationCode>
+                    <cbc:Name>Birleşik Arap Emirlikleri</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:DeliveryTerms>
+                <cbc:ID schemeID="INCOTERMS">FCA</cbc:ID>
+            </cac:DeliveryTerms>
+            <cac:Shipment>
+                <cbc:ID/>
+                <cac:GoodsItem>
+                    <cbc:RequiredCustomsID>640520990000</cbc:RequiredCustomsID>
+                </cac:GoodsItem>
+                <cac:ShipmentStage>
+                    <cbc:TransportModeCode>1</cbc:TransportModeCode>
+                </cac:ShipmentStage>
+                <cac:TransportHandlingUnit>
+                    <cac:ActualPackage>
+                        <cbc:ID>701-1000</cbc:ID>
+                        <cbc:Quantity>300</cbc:Quantity>
+                        <cbc:PackagingTypeCode>CT</cbc:PackagingTypeCode>
+                    </cac:ActualPackage>
+                </cac:TransportHandlingUnit>
+            </cac:Shipment>
+        </cac:Delivery>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="USD">0.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="USD">18720.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="USD">0.00</cbc:TaxAmount>
+                <cbc:Percent>0</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Plush home slippers</cbc:Description>
+            <cbc:Name>Peluş ev terliği</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>AK-HS-330</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="KOLIICI">32</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Gri · Pudra · Lacivert</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="USD">1.95</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>4</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="PR">4320</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="USD">11232.00</cbc:LineExtensionAmount>
+        <cac:Delivery>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>Al Ras, Old Souk Building</cbc:StreetName>
+                <cbc:BuildingNumber>B-14</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Deira</cbc:CitySubdivisionName>
+                <cbc:CityName>Dubai</cbc:CityName>
+                <cac:Country>
+                    <cbc:IdentificationCode>AE</cbc:IdentificationCode>
+                    <cbc:Name>Birleşik Arap Emirlikleri</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:DeliveryTerms>
+                <cbc:ID schemeID="INCOTERMS">FCA</cbc:ID>
+            </cac:DeliveryTerms>
+            <cac:Shipment>
+                <cbc:ID/>
+                <cac:GoodsItem>
+                    <cbc:RequiredCustomsID>640299980000</cbc:RequiredCustomsID>
+                </cac:GoodsItem>
+                <cac:ShipmentStage>
+                    <cbc:TransportModeCode>1</cbc:TransportModeCode>
+                </cac:ShipmentStage>
+                <cac:TransportHandlingUnit>
+                    <cac:ActualPackage>
+                        <cbc:ID>1001-1180</cbc:ID>
+                        <cbc:Quantity>180</cbc:Quantity>
+                        <cbc:PackagingTypeCode>CT</cbc:PackagingTypeCode>
+                    </cac:ActualPackage>
+                </cac:TransportHandlingUnit>
+            </cac:Shipment>
+        </cac:Delivery>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="USD">0.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="USD">11232.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="USD">0.00</cbc:TaxAmount>
+                <cbc:Percent>0</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Kids' light-up sandals</cbc:Description>
+            <cbc:Name>Işıklı çocuk sandaleti</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>AK-KS-045</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="KOLIICI">24</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Pembe · Mavi</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="USD">2.6</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>

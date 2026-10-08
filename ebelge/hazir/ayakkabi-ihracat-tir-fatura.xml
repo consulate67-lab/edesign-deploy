@@ -1,0 +1,456 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: Ayakkabı ihracatı, TIR ile Irak'a (Habur çıkışlı) — IHRACAT · ISTISNA (301), USD, DAP Erbil, karayolu (3).
+  AccountingCustomerParty Gümrükler Genel Müdürlüğü, BuyerCustomerParty PARTYTYPE EXPORT; satırda GTİP, kap no / adet, NUMARA ve RENK.
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>IHRACAT</cbc:ProfileID>
+    <cbc:ID>ZGM2026000000318</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>25126E62-C222-4A06-A88A-AC49C029128C</cbc:UUID>
+    <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+    <cbc:IssueTime>15:30:00</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>ISTISNA</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız: Altmış Üç Bin İki Yüz Dört ABD Doları</cbc:Note>
+    <cbc:Note>Çıkış gümrüğü: Habur Gümrük Müdürlüğü — Varış: İbrahim Halil / Erbil</cbc:Note>
+    <cbc:Note>TIR: 27 ZGM 318 · Dorse 27 ZGM 319 · Sürücü: Ahmet Çelik</cbc:Note>
+    <cbc:Note>Shipping marks: AL-RAFIDAIN / ERBIL / C/No 1-340</cbc:Note>
+    <cbc:DocumentCurrencyCode>USD</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>4</cbc:LineCountNumeric>
+    <cac:OrderReference>
+        <cbc:ID>ARF-PO-2026-077</cbc:ID>
+        <cbc:IssueDate>2026-09-15</cbc:IssueDate>
+    </cac:OrderReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>TR-TIR-2611842</cbc:ID>
+        <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+        <cbc:DocumentType>TIRKARNESI</cbc:DocumentType>
+        <cbc:DocumentDescription>TIR karnesi</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>CMR-ZGM-0318</cbc:ID>
+        <cbc:IssueDate>2026-10-07</cbc:IssueDate>
+        <cbc:DocumentType>CMR</cbc:DocumentType>
+        <cbc:DocumentDescription>Karayolu taşıma senedi</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">9912034857</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">9912034857</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Başpınar OSB 5. Bölge 83524 Nolu Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>6</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Şehitkamil</cbc:CitySubdivisionName>
+                <cbc:CityName>Gaziantep</cbc:CityName>
+                <cbc:PostalZone>27600</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_ZGM2026000000318</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.zeugmashoes.com</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">9912034857</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">0991203485700014</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Zeugma Ayakkabı Sanayi ve Dış Ticaret A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Başpınar OSB 5. Bölge 83524 Nolu Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>6</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Şehitkamil</cbc:CitySubdivisionName>
+                <cbc:CityName>Gaziantep</cbc:CityName>
+                <cbc:PostalZone>27600</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Gaziantep Kurumlar</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>+90 342 337 82 00</cbc:Telephone>
+                <cbc:ElectronicMail>export@zeugmashoes.com</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">1460415308</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Ticaret Bakanlığı Gümrükler Genel Müdürlüğü - Bilgi İşlem Dairesi Başkanlığı</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:CitySubdivisionName>Çankaya</cbc:CitySubdivisionName>
+                <cbc:CityName>Ankara</cbc:CityName>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Ulus</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:BuyerCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="PARTYTYPE">EXPORT</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Al-Rafidain Footwear Trading Co.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>60 Meter Street</cbc:StreetName>
+                <cbc:BuildingNumber>214</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Ankawa</cbc:CitySubdivisionName>
+                <cbc:CityName>Erbil</cbc:CityName>
+                <cbc:PostalZone>44001</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>IQ</cbc:IdentificationCode>
+                    <cbc:Name>Irak</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyLegalEntity>
+                <cbc:RegistrationName>Al-Rafidain Footwear Trading Co.</cbc:RegistrationName>
+                <cbc:CompanyID>IQ-ERB-0048213</cbc:CompanyID>
+            </cac:PartyLegalEntity>
+            <cac:Contact>
+                <cbc:Telephone>+964 750 448 2130</cbc:Telephone>
+                <cbc:ElectronicMail>import@alrafidain-shoes.iq</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:BuyerCustomerParty>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-11-06</cbc:PaymentDueDate>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR710001200945200058000318</cbc:ID>
+            <cbc:CurrencyCode>USD</cbc:CurrencyCode>
+            <cbc:PaymentNote>Halkbank — Gaziantep Ticari Şube · SWIFT TRHBTR2A</cbc:PaymentNote>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:PaymentTerms>
+        <cbc:Note>%30 peşin, bakiye vesaik mukabili · 30% advance, balance CAD</cbc:Note>
+    </cac:PaymentTerms>
+    <cac:PricingExchangeRate>
+        <cbc:SourceCurrencyCode>USD</cbc:SourceCurrencyCode>
+        <cbc:TargetCurrencyCode>TRY</cbc:TargetCurrencyCode>
+        <cbc:CalculationRate>42.653</cbc:CalculationRate>
+        <cbc:Date>2026-10-07</cbc:Date>
+    </cac:PricingExchangeRate>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="USD">0.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="USD">63204.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="USD">0.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>0</cbc:Percent>
+            <cac:TaxCategory>
+                <cbc:TaxExemptionReasonCode>301</cbc:TaxExemptionReasonCode>
+                <cbc:TaxExemptionReason>11/1-a Mal ihracatı</cbc:TaxExemptionReason>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="USD">63204.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="USD">63204.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="USD">63204.00</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="USD">0.00</cbc:AllowanceTotalAmount>
+        <cbc:PayableAmount currencyID="USD">63204.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="PR">1440</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="USD">26496.00</cbc:LineExtensionAmount>
+        <cac:Delivery>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>60 Meter Street</cbc:StreetName>
+                <cbc:BuildingNumber>214</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Ankawa</cbc:CitySubdivisionName>
+                <cbc:CityName>Erbil</cbc:CityName>
+                <cbc:PostalZone>44001</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>IQ</cbc:IdentificationCode>
+                    <cbc:Name>Irak</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:DeliveryTerms>
+                <cbc:ID schemeID="INCOTERMS">DAP</cbc:ID>
+            </cac:DeliveryTerms>
+            <cac:Shipment>
+                <cbc:ID/>
+                <cac:GoodsItem>
+                    <cbc:RequiredCustomsID>640399930000</cbc:RequiredCustomsID>
+                </cac:GoodsItem>
+                <cac:ShipmentStage>
+                    <cbc:TransportModeCode>3</cbc:TransportModeCode>
+                </cac:ShipmentStage>
+                <cac:TransportHandlingUnit>
+                    <cac:ActualPackage>
+                        <cbc:ID>1-120</cbc:ID>
+                        <cbc:Quantity>120</cbc:Quantity>
+                        <cbc:PackagingTypeCode>CT</cbc:PackagingTypeCode>
+                    </cac:ActualPackage>
+                </cac:TransportHandlingUnit>
+            </cac:Shipment>
+        </cac:Delivery>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="USD">0.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="USD">26496.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="USD">0.00</cbc:TaxAmount>
+                <cbc:Percent>0</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Men's leather dress shoes</cbc:Description>
+            <cbc:Name>Erkek deri klasik ayakkabı</cbc:Name>
+            <cbc:ModelName>ZG-M-410</cbc:ModelName>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="NUMARA">40–45</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Siyah / Black</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="USD">18.4</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="PR">720</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="USD">17640.00</cbc:LineExtensionAmount>
+        <cac:Delivery>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>60 Meter Street</cbc:StreetName>
+                <cbc:BuildingNumber>214</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Ankawa</cbc:CitySubdivisionName>
+                <cbc:CityName>Erbil</cbc:CityName>
+                <cbc:PostalZone>44001</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>IQ</cbc:IdentificationCode>
+                    <cbc:Name>Irak</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:DeliveryTerms>
+                <cbc:ID schemeID="INCOTERMS">DAP</cbc:ID>
+            </cac:DeliveryTerms>
+            <cac:Shipment>
+                <cbc:ID/>
+                <cac:GoodsItem>
+                    <cbc:RequiredCustomsID>640391960000</cbc:RequiredCustomsID>
+                </cac:GoodsItem>
+                <cac:ShipmentStage>
+                    <cbc:TransportModeCode>3</cbc:TransportModeCode>
+                </cac:ShipmentStage>
+                <cac:TransportHandlingUnit>
+                    <cac:ActualPackage>
+                        <cbc:ID>121-180</cbc:ID>
+                        <cbc:Quantity>60</cbc:Quantity>
+                        <cbc:PackagingTypeCode>CT</cbc:PackagingTypeCode>
+                    </cac:ActualPackage>
+                </cac:TransportHandlingUnit>
+            </cac:Shipment>
+        </cac:Delivery>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="USD">0.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="USD">17640.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="USD">0.00</cbc:TaxAmount>
+                <cbc:Percent>0</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Men's leather ankle boots</cbc:Description>
+            <cbc:Name>Erkek deri bot</cbc:Name>
+            <cbc:ModelName>ZG-M-455</cbc:ModelName>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="NUMARA">40–45</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Kahve / Brown</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="USD">24.5</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="PR">1200</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="USD">14100.00</cbc:LineExtensionAmount>
+        <cac:Delivery>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>60 Meter Street</cbc:StreetName>
+                <cbc:BuildingNumber>214</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Ankawa</cbc:CitySubdivisionName>
+                <cbc:CityName>Erbil</cbc:CityName>
+                <cbc:PostalZone>44001</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>IQ</cbc:IdentificationCode>
+                    <cbc:Name>Irak</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:DeliveryTerms>
+                <cbc:ID schemeID="INCOTERMS">DAP</cbc:ID>
+            </cac:DeliveryTerms>
+            <cac:Shipment>
+                <cbc:ID/>
+                <cac:GoodsItem>
+                    <cbc:RequiredCustomsID>640411000000</cbc:RequiredCustomsID>
+                </cac:GoodsItem>
+                <cac:ShipmentStage>
+                    <cbc:TransportModeCode>3</cbc:TransportModeCode>
+                </cac:ShipmentStage>
+                <cac:TransportHandlingUnit>
+                    <cac:ActualPackage>
+                        <cbc:ID>181-280</cbc:ID>
+                        <cbc:Quantity>100</cbc:Quantity>
+                        <cbc:PackagingTypeCode>CT</cbc:PackagingTypeCode>
+                    </cac:ActualPackage>
+                </cac:TransportHandlingUnit>
+            </cac:Shipment>
+        </cac:Delivery>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="USD">0.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="USD">14100.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="USD">0.00</cbc:TaxAmount>
+                <cbc:Percent>0</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Women's sneakers, textile upper</cbc:Description>
+            <cbc:Name>Kadın sneaker</cbc:Name>
+            <cbc:ModelName>ZG-W-218</cbc:ModelName>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="NUMARA">36–41</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Beyaz / White</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="USD">11.75</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>4</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="PR">720</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="USD">4968.00</cbc:LineExtensionAmount>
+        <cac:Delivery>
+            <cac:DeliveryAddress>
+                <cbc:StreetName>60 Meter Street</cbc:StreetName>
+                <cbc:BuildingNumber>214</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Ankawa</cbc:CitySubdivisionName>
+                <cbc:CityName>Erbil</cbc:CityName>
+                <cbc:PostalZone>44001</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>IQ</cbc:IdentificationCode>
+                    <cbc:Name>Irak</cbc:Name>
+                </cac:Country>
+            </cac:DeliveryAddress>
+            <cac:DeliveryTerms>
+                <cbc:ID schemeID="INCOTERMS">DAP</cbc:ID>
+            </cac:DeliveryTerms>
+            <cac:Shipment>
+                <cbc:ID/>
+                <cac:GoodsItem>
+                    <cbc:RequiredCustomsID>640299980000</cbc:RequiredCustomsID>
+                </cac:GoodsItem>
+                <cac:ShipmentStage>
+                    <cbc:TransportModeCode>3</cbc:TransportModeCode>
+                </cac:ShipmentStage>
+                <cac:TransportHandlingUnit>
+                    <cac:ActualPackage>
+                        <cbc:ID>281-340</cbc:ID>
+                        <cbc:Quantity>60</cbc:Quantity>
+                        <cbc:PackagingTypeCode>CT</cbc:PackagingTypeCode>
+                    </cac:ActualPackage>
+                </cac:TransportHandlingUnit>
+            </cac:Shipment>
+        </cac:Delivery>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="USD">0.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="USD">4968.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="USD">0.00</cbc:TaxAmount>
+                <cbc:Percent>0</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>Kids' sandals, PU sole</cbc:Description>
+            <cbc:Name>Çocuk sandalet</cbc:Name>
+            <cbc:ModelName>ZG-K-077</cbc:ModelName>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="NUMARA">26–31</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Karışık / Assorted</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="USD">6.9</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>
