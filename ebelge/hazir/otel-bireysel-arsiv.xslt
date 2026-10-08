@@ -318,7 +318,7 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
                                     </xsl:for-each>
                                 </ul>
                                 <div class="pays">
-                                    <xsl:for-each select="$inv/cac:PaymentMeans">
+                                    <xsl:for-each select="$inv/cac:PaymentMeans[cac:PayeeFinancialAccount or cbc:PaymentMeansCode = '48' or cbc:PaymentMeansCode = '54' or cbc:PaymentMeansCode = '55' or cbc:PaymentMeansCode = '10']">
                                         <div>
                                             <b>
                                                 <xsl:choose>
