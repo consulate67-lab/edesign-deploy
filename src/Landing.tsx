@@ -19,7 +19,7 @@ interface SssItem {
 const SSS_ITEMS: SssItem[] = [
     {
         q: 'Nasıl satın alırım?',
-        a: 'Önce üye olup giriş yapın, ardından size uygun paketi satın alın: One (600 TL, 1 tasarım hakkı), Basic (2.500 TL, 10 tasarım hakkı) veya Pro (4.000 TL, 25 tasarım hakkı). Tüm paketler tek seferlik ödemedir; aylık abonelik yoktur. Haklarınız süresizdir.',
+        a: 'Önce üye olup giriş yapın, ardından size uygun paketi satın alın: One (1.500 TL, 1 tasarım hakkı), Basic (4.500 TL, 10 tasarım hakkı) veya Pro (9.000 TL, 25 tasarım hakkı). Tüm paketler tek seferlik ödemedir; aylık abonelik yoktur. Haklarınız süresizdir.',
     },
     {
         q: 'Hangi e-belge tiplerini tasarlayabilirim?',
@@ -936,7 +936,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                             İlk tasarımınızı bugün oluşturun
                         </h2>
                         <p style={{ fontSize: 17, color: 'rgba(255,255,255,0.92)', margin: '0 0 30px', lineHeight: 1.5 }}>
-                            Üye olun, 600 TL'den başlayan paketlerle tasarıma başlayın.
+                            Üye olun, 1.500 TL'den başlayan paketlerle tasarıma başlayın.
                         </p>
                         <button
                             type="button"
