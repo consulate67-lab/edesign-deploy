@@ -6,12 +6,7 @@
   kapora / kalan ödeme akışı, noter / alış / ekspertiz belge çipleri.
   Plaka: ItemInstance/RegistrationID · şasi: ItemInstance/SerialID · künye: AdditionalItemProperty[ID] · alış bedeli: AdditionalItemProperty[ID='ALISBEDELI'].
 -->
-<xsl:stylesheet version="1.0"
-    xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-    xmlns:n1="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
-    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
-    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
-    exclude-result-prefixes="n1 cac cbc">
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:n1="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" exclude-result-prefixes="n1 cac cbc">
     <xsl:output method="html" encoding="UTF-8" indent="no"/>
     <xsl:decimal-format name="edesign-tr" decimal-separator="," grouping-separator="." NaN=""/>
 
@@ -100,9 +95,9 @@
                     .sayac small { color: #a8a29a; font-size: 9px; letter-spacing: 1.5px; }
                     .govde { padding: 7mm 10mm 0 10mm; }
                     .kunye { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border: 1px solid #e2dccf; background: #ffffff; }
-                    .kunye > div { padding: 7px 10px; border-right: 1px solid #efeae0; border-bottom: 1px solid #efeae0; }
-                    .kunye > div:nth-child(4n) { border-right: 0; }
-                    .kunye > div:nth-last-child(-n+4) { border-bottom: 0; }
+                    .kunye &gt; div { padding: 7px 10px; border-right: 1px solid #efeae0; border-bottom: 1px solid #efeae0; }
+                    .kunye &gt; div:nth-child(4n) { border-right: 0; }
+                    .kunye &gt; div:nth-last-child(-n+4) { border-bottom: 0; }
                     .kunye .k { font-size: 7.8px; letter-spacing: 1.5px; text-transform: uppercase; color: #9a8a6a; }
                     .kunye .v { font-size: 11px; font-weight: 700; margin-top: 2px; }
                     .kunye .v.mono { font-family: Consolas, monospace; font-size: 10px; letter-spacing: .5px; }
@@ -122,9 +117,9 @@
                     table.satis .mono { font-family: Consolas, monospace; font-size: 9.5px; }
                     table.satis .bedel { font-size: 13px; font-weight: 700; white-space: nowrap; }
                     .om { margin-top: 10px; display: flex; align-items: stretch; background: #ffffff; border: 1px solid #e2dccf; }
-                    .om > div { flex: 1; padding: 7px 9px; text-align: center; position: relative; }
-                    .om > div + div:before { content: ''; position: absolute; left: -7px; top: 50%; margin-top: -9px; width: 14px; height: 18px; line-height: 18px; font-size: 13px; font-weight: 700; color: #9a8a6a; background: #ffffff; }
-                    .om > div.eksi:before { content: '−'; } .om > div.esit:before { content: '='; } .om > div.ok:before { content: '→'; }
+                    .om &gt; div { flex: 1; padding: 7px 9px; text-align: center; position: relative; }
+                    .om &gt; div + div:before { content: ''; position: absolute; left: -7px; top: 50%; margin-top: -9px; width: 14px; height: 18px; line-height: 18px; font-size: 13px; font-weight: 700; color: #9a8a6a; background: #ffffff; }
+                    .om &gt; div.eksi:before { content: '−'; } .om &gt; div.esit:before { content: '='; } .om &gt; div.ok:before { content: '→'; }
                     .om .k { font-size: 7.8px; letter-spacing: 1px; text-transform: uppercase; color: #9a8a6a; }
                     .om .v { font-size: 11.5px; font-weight: 700; margin-top: 2px; white-space: nowrap; }
                     .om .s { font-size: 8px; color: #8a8170; }
@@ -360,7 +355,7 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
                                 </xsl:for-each>
                             </div>
                         </div>
-                    </div>
+                    <xsl:if test="/*/cbc:DocumentCurrencyCode != 'TRY' and number(/*/cac:PricingExchangeRate/cbc:CalculationRate) &gt; 0"><xsl:variable name="tlKur" select="number(/*/cac:PricingExchangeRate/cbc:CalculationRate)"/><xsl:variable name="tlKurTarih" select="(/*/cac:PricingExchangeRate/cbc:Date | /*/cbc:IssueDate)[1]"/><div data-tl-karsilik="1" style="margin-top:8px;padding:7px 9px;border:1px dashed #94a3b8;border-radius:6px;background:#f8fafc;font-size:0.92em;color:#0f172a;page-break-inside:avoid"><div style="font-weight:700">TL Karşılıkları</div><div style="font-size:0.88em;color:#475569;margin:1px 0 4px">1 <xsl:value-of select="/*/cbc:DocumentCurrencyCode"/> = <xsl:value-of select="format-number($tlKur, '###.##0,0000', 'edesign-tr')"/> TL (TCMB döviz alış, <xsl:value-of select="concat(substring($tlKurTarih, 9, 2), '.', substring($tlKurTarih, 6, 2), '.', substring($tlKurTarih, 1, 4))"/>)</div><table style="width:100%;border-collapse:collapse"><tr><td style="padding:2px 0">Mal / Hizmet Toplamı (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap"><xsl:value-of select="format-number(/*/cac:LegalMonetaryTotal/cbc:LineExtensionAmount * $tlKur, '###.##0,00', 'edesign-tr')"/><xsl:text> TL</xsl:text></td></tr><xsl:if test="/*/cac:LegalMonetaryTotal/cbc:AllowanceTotalAmount &gt; 0"><tr><td style="padding:2px 0">Toplam İskonto (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap"><xsl:text>− </xsl:text><xsl:value-of select="format-number(/*/cac:LegalMonetaryTotal/cbc:AllowanceTotalAmount * $tlKur, '###.##0,00', 'edesign-tr')"/><xsl:text> TL</xsl:text></td></tr></xsl:if><tr><td style="padding:2px 0">Hesaplanan KDV (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap"><xsl:value-of select="format-number(sum(/*/cac:TaxTotal/cac:TaxSubtotal[cac:TaxCategory/cac:TaxScheme/cbc:TaxTypeCode='0015']/cbc:TaxAmount) * $tlKur, '###.##0,00', 'edesign-tr')"/><xsl:text> TL</xsl:text></td></tr><xsl:if test="/*/cac:WithholdingTaxTotal"><tr><td style="padding:2px 0">KDV Tevkifatı (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap"><xsl:text>− </xsl:text><xsl:value-of select="format-number(sum(/*/cac:WithholdingTaxTotal/cbc:TaxAmount) * $tlKur, '###.##0,00', 'edesign-tr')"/><xsl:text> TL</xsl:text></td></tr></xsl:if><tr><td style="padding:2px 0">Vergiler Dahil Toplam (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap"><xsl:value-of select="format-number(/*/cac:LegalMonetaryTotal/cbc:TaxInclusiveAmount * $tlKur, '###.##0,00', 'edesign-tr')"/><xsl:text> TL</xsl:text></td></tr><tr><td style="padding:2px 0;font-weight:700">Ödenecek Tutar (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap;font-weight:700"><xsl:value-of select="format-number(/*/cac:LegalMonetaryTotal/cbc:PayableAmount * $tlKur, '###.##0,00', 'edesign-tr')"/><xsl:text> TL</xsl:text></td></tr></table></div></xsl:if></div>
                     <div class="dip"><xsl:text>Bu fatura e-Arşiv uygulaması kapsamında elektronik ortamda düzenlenmiştir. Araç, görülmüş ve beğenilmiş olarak teslim edilmiştir.</xsl:text></div>
                 </div>
             </body>

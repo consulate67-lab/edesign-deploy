@@ -1,4 +1,5 @@
 import {
+    kurMetni,
     invoice, xslt, v, t, num, int, dt, unit, each, iff, choose, attr, P, pName, pAddr, pTax, pContact,
     SUP, CUS, LMT, tlKarsilik, yalniz, notes, totals, qr, logo, svg,
 } from './lib.mjs';
@@ -13,7 +14,7 @@ const takip = v(`${DLV}/cbc:TrackingID`);
 const gonderim = dt(`${DLV}/cac:Despatch/cbc:ActualDespatchDate`);
 const etgb = "$f/cac:AdditionalDocumentReference[cbc:DocumentType='ETGB']";
 const odeme = v('$f/cac:PaymentMeans/cbc:InstructionNote');
-const kur = `${t('1 ')}${v('$f/cbc:DocumentCurrencyCode')}${t(' = ')}${num('$kur', '###.##0,0000')}${t(' TL')}`;
+const kur = kurMetni();
 const tarih = `${dt('$f/cbc:IssueDate')}${t(' ')}${v('substring($f/cbc:IssueTime,1,5)')}`;
 const dAddr = [
     v(`${DLV}/cac:DeliveryAddress/cbc:StreetName`), iff(`${DLV}/cac:DeliveryAddress/cbc:BuildingNumber`, `${t(' ')}${v(`${DLV}/cac:DeliveryAddress/cbc:BuildingNumber`)}`), t(', '),

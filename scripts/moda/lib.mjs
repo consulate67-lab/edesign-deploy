@@ -359,7 +359,23 @@ export const totals = (row) => [
     )),
     each('$f/cac:WithholdingTaxTotal/cac:TaxSubtotal', row(`${t('KDV Tevkifatı (')}${v('cac:TaxCategory/cac:TaxScheme/cbc:TaxTypeCode')}${t(' · ')}${v('cbc:Percent div 10')}${t('/10)')}`, `${t('− ')}${money('cbc:TaxAmount')}`, 'tvk')),
     row(t('Vergiler Dahil Toplam'), money(`${LMT}/cbc:TaxInclusiveAmount`), 'ara'),
+    kurRows(row, 'tvk'),
 ].join('');
+
+const kurTl = (s) => `${num(`${s} * $kur`)}${t(' TL')}`;
+/** 1 EUR = 49,9120 TL (TCMB döviz alış, 08.10.2026); kur tarihi yoksa belge tarihi. */
+export const kurMetni = () => `${t('1 ')}${v('$f/cbc:DocumentCurrencyCode')}${t(' = ')}${num('$kur', '###.##0,0000')}${t(' TL (TCMB döviz alış, ')}${choose(['$f/cac:PricingExchangeRate/cbc:Date', dt('$f/cac:PricingExchangeRate/cbc:Date')], [null, dt('$f/cbc:IssueDate')])}${t(')')}`;
+
+/** Döviz cinsinden belgede günün kuruyla TL karşılıkları (VUK: döviz faturada TL karşılığı gösterilir); row(etiket, tutar, sınıf). */
+export const kurRows = (row, negCls) => iff('$kur', [
+    row(`<b>${t('TL Karşılıkları')}</b><div style="font-weight:400;font-size:0.9em;opacity:0.8">${kurMetni()}</div>`, '', 'kur'),
+    row(t('Mal / Hizmet Toplamı (TL)'), kurTl(`${LMT}/cbc:LineExtensionAmount`), ''),
+    iff(`${LMT}/cbc:AllowanceTotalAmount &gt; 0`, row(t('Toplam İskonto (TL)'), `${t('− ')}${kurTl(`${LMT}/cbc:AllowanceTotalAmount`)}`, negCls)),
+    row(t('Hesaplanan KDV (TL)'), kurTl("sum($f/cac:TaxTotal/cac:TaxSubtotal[cac:TaxCategory/cac:TaxScheme/cbc:TaxTypeCode='0015']/cbc:TaxAmount)"), ''),
+    iff('$f/cac:WithholdingTaxTotal', row(t('KDV Tevkifatı (TL)'), `${t('− ')}${kurTl('sum($f/cac:WithholdingTaxTotal/cbc:TaxAmount)')}`, negCls)),
+    row(t('Vergiler Dahil Toplam (TL)'), kurTl(`${LMT}/cbc:TaxInclusiveAmount`), ''),
+    row(t('Ödenecek Tutar (TL)'), kurTl(`${LMT}/cbc:PayableAmount`), 'ara'),
+].join(''));
 
 /** İhracat satırı (InvoiceLine bağlamında) teslim / gümrük alanları. */
 export const LX = {

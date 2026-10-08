@@ -1,7 +1,7 @@
 // Meslek şablonlarının XSLT parçaları: belge ailesine (Invoice / CreditNote / DespatchAdvice) göre taraf,
 // kalem tablosu, toplamlar, referans, dönem, teslimat ve ödeme blokları. Yerleşimler (layouts.mjs) bu
 // parçaları kendi düzenlerinde birleştirir. Her blok yalnızca XML'de ilgili alan varsa görünür.
-import { v, t, num, dt, iban, each, iff, choose, pName, pAddr, pTax, pContact, qr, svg } from '../moda/lib.mjs';
+import { v, t, num, dt, iban, each, iff, choose, pName, pAddr, pTax, pContact, qr, svg, kurMetni, kurRows } from '../moda/lib.mjs';
 
 export { v, t, num, dt, each, iff, choose, qr, svg, pName };
 
@@ -120,7 +120,7 @@ export function metaRows(K) {
         [t('Düzenleme'), `${dt('$f/cbc:IssueDate')}${iff('$f/cbc:IssueTime', `${t(' ')}${saat('$f/cbc:IssueTime')}`)}`],
         [t('Senaryo'), v('$f/cbc:ProfileID')],
         [t('Belge Tipi'), v(`$f/${F.type}`)],
-        ...(K.fam === 'invoice' ? [['$kur', `${v('$f/cbc:DocumentCurrencyCode')}${t(' kuru: ')}${num('$kur', '###.##0,0000')}${t(' TL')}`]] : []),
+        ...(K.fam === 'invoice' ? [['$kur', kurMetni()]] : []),
     ];
 }
 
@@ -233,6 +233,7 @@ export function totalRows(K, row) {
     }
     base.push(iff(`${LMT}/cbc:TaxInclusiveAmount != ${LMT}/cbc:PayableAmount or ${LMT}/cbc:TaxInclusiveAmount != ${LMT}/cbc:LineExtensionAmount`,
         row(t('Vergiler Dahil Toplam'), money(`${LMT}/cbc:TaxInclusiveAmount`), 'ara')));
+    if (K.fam === 'invoice') base.push(kurRows(row, 'eksi'));
     return base.join('');
 }
 

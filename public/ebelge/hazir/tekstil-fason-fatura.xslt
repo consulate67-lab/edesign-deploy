@@ -6,12 +6,7 @@
   Model: Item/ModelName · renk: AdditionalItemProperty[ID='RENK'] · beden: AdditionalItemProperty[ID='BEDEN'] (Name = beden, Value = adet)
   · sezon: AdditionalDocumentReference[DocumentType='SEZON'].
 -->
-<xsl:stylesheet version="1.0"
-    xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-    xmlns:n1="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
-    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
-    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
-    exclude-result-prefixes="n1 cac cbc">
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:n1="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" exclude-result-prefixes="n1 cac cbc">
     <xsl:output method="html" encoding="UTF-8" indent="no"/>
     <xsl:decimal-format name="edesign-tr" decimal-separator="," grouping-separator="." NaN=""/>
 
@@ -80,10 +75,10 @@
                     .etiket td.d { text-align: right; font-weight: 700; }
                     .etiket td.ettn { font-family: Consolas, monospace; font-size: 8px; font-weight: 400; }
                     .etiket .qr { display: flex; justify-content: center; margin-top: 8px; }
-                    .etiket .qr > div { background: #ffffff; padding: 5px; border-radius: 4px; }
+                    .etiket .qr &gt; div { background: #ffffff; padding: 5px; border-radius: 4px; }
                     .sezon { display: flex; margin: 12px 0 10px 0; border-top: 1.5px dashed #c4a5c2; border-bottom: 1.5px dashed #c4a5c2; }
-                    .sezon > div { flex: 1; padding: 6px 10px; border-right: 1px solid #efe4ee; }
-                    .sezon > div:last-child { border-right: 0; }
+                    .sezon &gt; div { flex: 1; padding: 6px 10px; border-right: 1px solid #efe4ee; }
+                    .sezon &gt; div:last-child { border-right: 0; }
                     .sezon .k { font-size: 8px; font-weight: 800; color: #a21caf; letter-spacing: 1.5px; text-transform: uppercase; }
                     .sezon .v { font-size: 12px; font-weight: 800; margin-top: 1px; }
                     .sezon .s { font-size: 8.5px; color: #7a6578; }
@@ -324,7 +319,7 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
                                 <span class="k"><xsl:text>ÖDENECEK TUTAR</xsl:text></span>
                                 <span class="v"><xsl:value-of select="format-number($f/cac:LegalMonetaryTotal/cbc:PayableAmount, '###.##0,00', 'edesign-tr')"/><xsl:text> </xsl:text><xsl:value-of select="$pb"/></span>
                             </div>
-                        </div>
+                        <xsl:if test="/*/cbc:DocumentCurrencyCode != 'TRY' and number(/*/cac:PricingExchangeRate/cbc:CalculationRate) &gt; 0"><xsl:variable name="tlKur" select="number(/*/cac:PricingExchangeRate/cbc:CalculationRate)"/><xsl:variable name="tlKurTarih" select="(/*/cac:PricingExchangeRate/cbc:Date | /*/cbc:IssueDate)[1]"/><div data-tl-karsilik="1" style="margin-top:8px;padding:7px 9px;border:1px dashed #94a3b8;border-radius:6px;background:#f8fafc;font-size:0.92em;color:#0f172a;page-break-inside:avoid"><div style="font-weight:700">TL Karşılıkları</div><div style="font-size:0.88em;color:#475569;margin:1px 0 4px">1 <xsl:value-of select="/*/cbc:DocumentCurrencyCode"/> = <xsl:value-of select="format-number($tlKur, '###.##0,0000', 'edesign-tr')"/> TL (TCMB döviz alış, <xsl:value-of select="concat(substring($tlKurTarih, 9, 2), '.', substring($tlKurTarih, 6, 2), '.', substring($tlKurTarih, 1, 4))"/>)</div><table style="width:100%;border-collapse:collapse"><tr><td style="padding:2px 0">Mal / Hizmet Toplamı (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap"><xsl:value-of select="format-number(/*/cac:LegalMonetaryTotal/cbc:LineExtensionAmount * $tlKur, '###.##0,00', 'edesign-tr')"/><xsl:text> TL</xsl:text></td></tr><xsl:if test="/*/cac:LegalMonetaryTotal/cbc:AllowanceTotalAmount &gt; 0"><tr><td style="padding:2px 0">Toplam İskonto (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap"><xsl:text>− </xsl:text><xsl:value-of select="format-number(/*/cac:LegalMonetaryTotal/cbc:AllowanceTotalAmount * $tlKur, '###.##0,00', 'edesign-tr')"/><xsl:text> TL</xsl:text></td></tr></xsl:if><tr><td style="padding:2px 0">Hesaplanan KDV (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap"><xsl:value-of select="format-number(sum(/*/cac:TaxTotal/cac:TaxSubtotal[cac:TaxCategory/cac:TaxScheme/cbc:TaxTypeCode='0015']/cbc:TaxAmount) * $tlKur, '###.##0,00', 'edesign-tr')"/><xsl:text> TL</xsl:text></td></tr><xsl:if test="/*/cac:WithholdingTaxTotal"><tr><td style="padding:2px 0">KDV Tevkifatı (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap"><xsl:text>− </xsl:text><xsl:value-of select="format-number(sum(/*/cac:WithholdingTaxTotal/cbc:TaxAmount) * $tlKur, '###.##0,00', 'edesign-tr')"/><xsl:text> TL</xsl:text></td></tr></xsl:if><tr><td style="padding:2px 0">Vergiler Dahil Toplam (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap"><xsl:value-of select="format-number(/*/cac:LegalMonetaryTotal/cbc:TaxInclusiveAmount * $tlKur, '###.##0,00', 'edesign-tr')"/><xsl:text> TL</xsl:text></td></tr><tr><td style="padding:2px 0;font-weight:700">Ödenecek Tutar (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap;font-weight:700"><xsl:value-of select="format-number(/*/cac:LegalMonetaryTotal/cbc:PayableAmount * $tlKur, '###.##0,00', 'edesign-tr')"/><xsl:text> TL</xsl:text></td></tr></table></div></xsl:if></div>
                     </div>
 
                     <div class="dip">

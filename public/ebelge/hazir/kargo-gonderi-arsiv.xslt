@@ -5,12 +5,7 @@
   teslimat şubesi kodu (DeliveryLocation), alıcı / gönderici, desi / kg / parça, ödeme tipi damgası;
   "buradan kesiniz" çizgisinin altında kalem tablosu, KDV toplamları, yalnız, notlar ve ödeme bilgisi.
 -->
-<xsl:stylesheet version="1.0"
-    xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-    xmlns:n1="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
-    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
-    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
-    exclude-result-prefixes="n1 cac cbc">
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:n1="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" exclude-result-prefixes="n1 cac cbc">
     <xsl:output method="html" encoding="UTF-8" indent="no"/>
     <xsl:decimal-format name="edesign-tr" decimal-separator="," grouping-separator="." NaN=""/>
 
@@ -132,8 +127,8 @@
                     .damga { width: 140px; flex: none; border: 3px solid #0a0a0a; outline: 2px solid #f59e0b; outline-offset: -7px; padding: 12px 8px; text-align: center; transform: rotate(-6deg); font-family: 'Arial Black', Arial, sans-serif; font-size: 15px; line-height: 1.1; text-transform: uppercase; }
                     .damga small { display: block; font-family: Arial, sans-serif; font-size: 8px; font-weight: 700; letter-spacing: 1.5px; margin-top: 4px; text-transform: none; }
                     .e-alt { display: flex; }
-                    .e-alt > div { flex: 1; padding: 5px 10px; border-right: 2px solid #0a0a0a; }
-                    .e-alt > div:last-child { border-right: 0; }
+                    .e-alt &gt; div { flex: 1; padding: 5px 10px; border-right: 2px solid #0a0a0a; }
+                    .e-alt &gt; div:last-child { border-right: 0; }
                     .e-alt .k { font-size: 7.5px; font-weight: 900; letter-spacing: 1.5px; color: #57534e; }
                     .e-alt .d { font-size: 11px; font-weight: 700; }
                     .kes { display: flex; align-items: center; gap: 8px; margin: 12px 0 10px 0; color: #78716c; font-size: 8.5px; letter-spacing: 2px; }
@@ -151,7 +146,7 @@
                     table.bilgi td.d { text-align: right; font-weight: 700; }
                     table.bilgi td.m { font-family: Consolas, monospace; font-size: 8.6px; }
                     .musteri { display: flex; gap: 12px; margin: 9px 0; }
-                    .musteri > div { flex: 1; border-left: 4px solid #f59e0b; background: #fafaf9; padding: 5px 9px; line-height: 1.5; }
+                    .musteri &gt; div { flex: 1; border-left: 4px solid #f59e0b; background: #fafaf9; padding: 5px 9px; line-height: 1.5; }
                     .musteri .k { font-size: 8px; font-weight: 900; letter-spacing: 1.5px; color: #57534e; }
                     table.kalem { width: 100%; border-collapse: collapse; }
                     table.kalem th { text-align: left; font-size: 8.5px; font-weight: 900; letter-spacing: 1px; padding: 5px 6px; border-top: 2.5px solid #0a0a0a; border-bottom: 1.5px solid #0a0a0a; text-transform: uppercase; }
@@ -336,7 +331,7 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
                                     <tr><td>Vergiler Dahil Toplam</td><td class="d"><xsl:value-of select="format-number($lmt/cbc:TaxInclusiveAmount,'#.##0,00','edesign-tr')"/><xsl:text> </xsl:text><xsl:value-of select="$pb"/></td></tr>
                                 </table>
                                 <div class="odenecek"><span class="k">ÖDENECEK TUTAR</span><span class="s"><xsl:value-of select="format-number($lmt/cbc:PayableAmount,'#.##0,00','edesign-tr')"/><xsl:text> </xsl:text><xsl:value-of select="$pb"/></span></div>
-                            </div>
+                            <xsl:if test="/*/cbc:DocumentCurrencyCode != 'TRY' and number(/*/cac:PricingExchangeRate/cbc:CalculationRate) &gt; 0"><xsl:variable name="tlKur" select="number(/*/cac:PricingExchangeRate/cbc:CalculationRate)"/><xsl:variable name="tlKurTarih" select="(/*/cac:PricingExchangeRate/cbc:Date | /*/cbc:IssueDate)[1]"/><div data-tl-karsilik="1" style="margin-top:8px;padding:7px 9px;border:1px dashed #94a3b8;border-radius:6px;background:#f8fafc;font-size:0.92em;color:#0f172a;page-break-inside:avoid"><div style="font-weight:700">TL Karşılıkları</div><div style="font-size:0.88em;color:#475569;margin:1px 0 4px">1 <xsl:value-of select="/*/cbc:DocumentCurrencyCode"/> = <xsl:value-of select="format-number($tlKur, '###.##0,0000', 'edesign-tr')"/> TL (TCMB döviz alış, <xsl:value-of select="concat(substring($tlKurTarih, 9, 2), '.', substring($tlKurTarih, 6, 2), '.', substring($tlKurTarih, 1, 4))"/>)</div><table style="width:100%;border-collapse:collapse"><tr><td style="padding:2px 0">Mal / Hizmet Toplamı (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap"><xsl:value-of select="format-number(/*/cac:LegalMonetaryTotal/cbc:LineExtensionAmount * $tlKur, '###.##0,00', 'edesign-tr')"/><xsl:text> TL</xsl:text></td></tr><xsl:if test="/*/cac:LegalMonetaryTotal/cbc:AllowanceTotalAmount &gt; 0"><tr><td style="padding:2px 0">Toplam İskonto (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap"><xsl:text>− </xsl:text><xsl:value-of select="format-number(/*/cac:LegalMonetaryTotal/cbc:AllowanceTotalAmount * $tlKur, '###.##0,00', 'edesign-tr')"/><xsl:text> TL</xsl:text></td></tr></xsl:if><tr><td style="padding:2px 0">Hesaplanan KDV (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap"><xsl:value-of select="format-number(sum(/*/cac:TaxTotal/cac:TaxSubtotal[cac:TaxCategory/cac:TaxScheme/cbc:TaxTypeCode='0015']/cbc:TaxAmount) * $tlKur, '###.##0,00', 'edesign-tr')"/><xsl:text> TL</xsl:text></td></tr><xsl:if test="/*/cac:WithholdingTaxTotal"><tr><td style="padding:2px 0">KDV Tevkifatı (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap"><xsl:text>− </xsl:text><xsl:value-of select="format-number(sum(/*/cac:WithholdingTaxTotal/cbc:TaxAmount) * $tlKur, '###.##0,00', 'edesign-tr')"/><xsl:text> TL</xsl:text></td></tr></xsl:if><tr><td style="padding:2px 0">Vergiler Dahil Toplam (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap"><xsl:value-of select="format-number(/*/cac:LegalMonetaryTotal/cbc:TaxInclusiveAmount * $tlKur, '###.##0,00', 'edesign-tr')"/><xsl:text> TL</xsl:text></td></tr><tr><td style="padding:2px 0;font-weight:700">Ödenecek Tutar (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap;font-weight:700"><xsl:value-of select="format-number(/*/cac:LegalMonetaryTotal/cbc:PayableAmount * $tlKur, '###.##0,00', 'edesign-tr')"/><xsl:text> TL</xsl:text></td></tr></table></div></xsl:if></div>
                         </div>
                     </div>
                     <div class="dip">

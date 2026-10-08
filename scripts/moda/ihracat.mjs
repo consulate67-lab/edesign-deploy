@@ -1,4 +1,5 @@
 import {
+    kurMetni,
     invoice, xslt, v, t, num, int, dt, unit, iban, each, iff, choose, attr, P, pName, pAddr, pTax, pContact,
     SUP, CUS, BUY, LMT, LX, LX1, gtip, tasima, kap, tlKarsilik, yalniz, notes, totals, bank, qr, logo, svg,
 } from './lib.mjs';
@@ -15,7 +16,7 @@ const exp = (incoterm, gtipNo, mode, pkg) => ({ incoterm, gtip: gtipNo, mode, pk
 const doc = (type) => `$f/cac:AdditionalDocumentReference[cbc:DocumentType='${type}']`;
 const buyerName = v(`${BUY}/cac:PartyName/cbc:Name`);
 const legal = iff('cac:PartyLegalEntity/cbc:CompanyID', `${t(' · Reg. ')}${v('cac:PartyLegalEntity/cbc:CompanyID')}`);
-const kur = `${t('1 ')}${v('$f/cbc:DocumentCurrencyCode')}${t(' = ')}${num('$kur', '###.##0,0000')}${t(' TL')}`;
+const kur = kurMetni();
 const tarih = `${dt('$f/cbc:IssueDate')}${t(' ')}${v('substring($f/cbc:IssueTime,1,5)')}`;
 const kapLine = `${v(`${LX.pkg}/cbc:ID`)}${t(' · ')}${v(`${LX.pkg}/cbc:Quantity`)}${t(' ')}${kap(`${LX.pkg}/cbc:PackagingTypeCode`)}`;
 

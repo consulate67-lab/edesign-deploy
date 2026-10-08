@@ -5,12 +5,7 @@
   Notlar: "Diploma / Uzmanlık Tescil No:" başlıkta, "Protokol No:" hasta kartında,
   "POS İşyeri No:", "POS Terminal No:", "Kart No:", "Kart Sahibi:", "Onay Kodu:" kartlı tahsilat panelinde (VUK GT 509 V.5.4).
 -->
-<xsl:stylesheet version="1.0"
-    xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-    xmlns:n1="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
-    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
-    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
-    exclude-result-prefixes="n1 cac cbc">
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:n1="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" exclude-result-prefixes="n1 cac cbc">
 
     <xsl:output method="html" encoding="UTF-8" indent="no"/>
     <xsl:decimal-format name="tr" decimal-separator="," grouping-separator="." NaN=""/>
@@ -157,7 +152,7 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
             </head>
             <body>
                 <div class="page">
-                    <div class="strip"></div>
+                    <div class="strip"/>
                     <table class="head">
                         <tr>
                             <td style="width:66px"><img class="logo" alt="Logo" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2314b8a6'/%3E%3Cstop offset='1' stop-color='%2338bdf8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='60' cy='60' r='58' fill='url(%23g)'/%3E%3Cpath d='M50 30h20v20h20v20H70v20H50V70H30V50h20z' fill='%23ffffff'/%3E%3Cpath d='M60 64c-4-5-12-4-12 3 0 6 12 12 12 12s12-6 12-12c0-7-8-8-12-3z' fill='%2314b8a6'/%3E%3C/svg%3E"/></td>
@@ -245,7 +240,7 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
                             <xsl:for-each select="//cac:InvoiceLine">
                                 <tr>
                                     <td>
-                                        <div class="item"><span class="dot"></span><xsl:value-of select="cac:Item/cbc:Name"/></div>
+                                        <div class="item"><span class="dot"/><xsl:value-of select="cac:Item/cbc:Name"/></div>
                                         <xsl:if test="normalize-space(cac:Item/cbc:Description)"><div class="desc"><xsl:value-of select="cac:Item/cbc:Description"/></div></xsl:if>
                                     </td>
                                     <td class="num"><xsl:value-of select="format-number(cbc:InvoicedQuantity, '###.##0,##', 'tr')"/></td>
@@ -308,7 +303,7 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
                                             <tr><td class="gk">Tahsil Edilen</td><td class="gv"><xsl:call-template name="tutar"><xsl:with-param name="v" select="$tahsilat"/></xsl:call-template></td></tr>
                                         </table>
                                     </div>
-                                </div>
+                                <xsl:if test="/*/cbc:DocumentCurrencyCode != 'TRY' and number(/*/cac:PricingExchangeRate/cbc:CalculationRate) &gt; 0"><xsl:variable name="tlKur" select="number(/*/cac:PricingExchangeRate/cbc:CalculationRate)"/><xsl:variable name="tlKurTarih" select="(/*/cac:PricingExchangeRate/cbc:Date | /*/cbc:IssueDate)[1]"/><div data-tl-karsilik="1" style="margin-top:8px;padding:7px 9px;border:1px dashed #94a3b8;border-radius:6px;background:#f8fafc;font-size:0.92em;color:#0f172a;page-break-inside:avoid"><div style="font-weight:700">TL Karşılıkları</div><div style="font-size:0.88em;color:#475569;margin:1px 0 4px">1 <xsl:value-of select="/*/cbc:DocumentCurrencyCode"/> = <xsl:value-of select="format-number($tlKur, '###.##0,0000', 'tr')"/> TL (TCMB döviz alış, <xsl:value-of select="concat(substring($tlKurTarih, 9, 2), '.', substring($tlKurTarih, 6, 2), '.', substring($tlKurTarih, 1, 4))"/>)</div><table style="width:100%;border-collapse:collapse"><tr><td style="padding:2px 0">Brüt Ücret (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap"><xsl:value-of select="format-number(number($brut) * $tlKur, '###.##0,00', 'tr')"/><xsl:text> TL</xsl:text></td></tr><xsl:if test="$stopaj &gt; 0"><tr><td style="padding:2px 0">Stopaj (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap"><xsl:text>− </xsl:text><xsl:value-of select="format-number(number($stopaj) * $tlKur, '###.##0,00', 'tr')"/><xsl:text> TL</xsl:text></td></tr></xsl:if><tr><td style="padding:2px 0">Net Ücret (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap"><xsl:value-of select="format-number(number($net) * $tlKur, '###.##0,00', 'tr')"/><xsl:text> TL</xsl:text></td></tr><tr><td style="padding:2px 0">Hesaplanan KDV (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap"><xsl:value-of select="format-number(number($kdv) * $tlKur, '###.##0,00', 'tr')"/><xsl:text> TL</xsl:text></td></tr><xsl:if test="$tevkifat &gt; 0"><tr><td style="padding:2px 0">KDV Tevkifatı (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap"><xsl:text>− </xsl:text><xsl:value-of select="format-number(number($tevkifat) * $tlKur, '###.##0,00', 'tr')"/><xsl:text> TL</xsl:text></td></tr></xsl:if><tr><td style="padding:2px 0;font-weight:700">Tahsil Edilen Tutar (TL)</td><td style="padding:2px 0;text-align:right;white-space:nowrap;font-weight:700"><xsl:value-of select="format-number(number($tahsilat) * $tlKur, '###.##0,00', 'tr')"/><xsl:text> TL</xsl:text></td></tr></table></div></xsl:if></div>
                             </td>
                         </tr>
                     </table>
