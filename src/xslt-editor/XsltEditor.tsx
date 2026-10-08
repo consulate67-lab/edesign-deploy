@@ -1356,7 +1356,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     // alır. Onaylı tasarım kilitlidir: düzenlenemez, yalnızca tekrar indirilir.
     // ------------------------------------------------------------------------
     const flushSourceEditsRef = useRef<() => void>(() => {});
-    const [design, setDesign] = useState<{ id?: number; key?: string; paid: boolean; paidAt?: string | null; name?: string }>(
+    const [design, setDesign] = useState<{ id?: number; key?: string; paid: boolean; paidAt?: string | null; name?: string; taxId?: string | null }>(
         { id: initialDesignId, paid: false }
     );
     const [showPayment, setShowPayment] = useState(false);
@@ -1366,7 +1366,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         let cancelled = false;
         api.getDesignByKey(key).then(d => {
             if (cancelled || !d) return;
-            setDesign({ id: d.id, key: d.design_key ?? key, paid: d.paid, paidAt: d.paid_at, name: d.name });
+            setDesign({ id: d.id, key: d.design_key ?? key, paid: d.paid, paidAt: d.paid_at, name: d.name, taxId: d.license_tax_id });
             if (d.paid) {
                 setSaveStatus('saved');
                 setSaveMessage('🔒 Onaylanmış tasarım — yalnızca indirilebilir');
@@ -1379,14 +1379,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     useEffect(() => {
         if (!initialDesignId) return;
         let cancelled = false;
-        api.getDesign(initialDesignId).then((r: { design?: { id: number; design_key?: string | null; paid?: boolean; paid_at?: string | null; name?: string } }) => {
+        api.getDesign(initialDesignId).then((r: { design?: { id: number; design_key?: string | null; paid?: boolean; paid_at?: string | null; name?: string; license_tax_id?: string | null } }) => {
             const d = r?.design;
             if (cancelled || !d) return;
             if (!d.paid) {
                 setDesign(prev => ({ ...prev, id: d.id, name: d.name }));
                 return;
             }
-            setDesign({ id: d.id, key: d.design_key ?? undefined, paid: true, paidAt: d.paid_at, name: d.name });
+            setDesign({ id: d.id, key: d.design_key ?? undefined, paid: true, paidAt: d.paid_at, name: d.name, taxId: d.license_tax_id });
             setSaveStatus('saved');
             setSaveMessage('🔒 Onaylanmış tasarım — yalnızca indirilebilir');
         }).catch(err => console.warn('[XSLTEditor] Tasarım durumu alınamadı:', err));
@@ -1501,7 +1501,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     // Onaylanmış tasarımın sonraki indirmeleri ücretsizdir.
     // ------------------------------------------------------------------------
     const [approveOpen, setApproveOpen] = useState(false);
-    const handleApprove = useCallback(async (name: string) => {
+    const handleApprove = useCallback(async (name: string, taxId?: string) => {
         if (!requireSaved()) return;
         flushSourceEditsRef.current();
         setSaveStatus('saving');
@@ -1514,6 +1514,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 module_id: moduleId,
                 xslt_content: stripLeadingBom(stripTestWatermark(xsltContentRef.current)),
                 xml_content: xmlContent,
+                license_tax_id: taxId,
             });
             const out = r.design.xslt_content ?? xsltContentRef.current;
             // Onaylanan tasarım kilitlenir; önceki adımlara geri dönülemez.
@@ -1522,13 +1523,15 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 xsltContentRef.current = out;
                 setXsltContent(out);
             }
-            setDesign({ id: r.design.id, key: r.design.design_key ?? undefined, paid: true, paidAt: r.design.paid_at, name: r.design.name });
+            if (r.design.xml_content && r.design.xml_content !== xmlContent) setXmlContent(r.design.xml_content);
+            setDesign({ id: r.design.id, key: r.design.design_key ?? undefined, paid: true, paidAt: r.design.paid_at, name: r.design.name, taxId: r.design.license_tax_id });
             downloadXslt(out);
             setApproveOpen(false);
             setSaveStatus('saved');
+            const licensed = r.design.license_tax_id ? ` · ${r.design.license_tax_id} için lisanslı` : '';
             setSaveMessage(r.charged
-                ? `✅ Onaylandı ve indirildi · 1 tasarım hakkı kullanıldı (kalan ${r.credits}).`
-                : '✅ İndirildi · ücretsiz (onaylı tasarım)');
+                ? `✅ Onaylandı ve indirildi${licensed} · 1 tasarım hakkı kullanıldı (kalan ${r.credits}).`
+                : `✅ İndirildi · ücretsiz (onaylı tasarım${licensed})`);
             setSelectedObject(null);
         } catch (err) {
             const e = err as Error & { paymentRequired?: boolean };
@@ -3242,6 +3245,12 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 Onaylanmış (satın alınmış) tasarımlar tekrar düzenlenemez. Onaylanan dosyayı
                                 istediğiniz zaman buradan veya "Tamamlanan Tasarımlar" listesinden ücretsiz indirebilirsiniz.
                             </div>
+                            {design.taxId && (
+                                <div data-locked-tax-id style={{ fontSize: 12, lineHeight: 1.5, color: '#fcd34d', marginTop: -8, marginBottom: 16 }}>
+                                    {design.taxId.length === 11 ? 'TCKN' : 'VKN'} {design.taxId} için lisanslı; başka bir
+                                    VKN/TCKN ile düzenlenen belgelerde TEST yazısı çıkar.
+                                </div>
+                            )}
                             <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
                                 <button
                                     type="button"

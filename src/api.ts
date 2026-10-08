@@ -39,6 +39,7 @@ export interface SavedDesign {
     xslt_content: string | null;
     xml_content: string | null;
     design_key: string | null;
+    license_tax_id?: string | null;
     paid: boolean;
     paid_at: string | null;
     status: string;
@@ -343,6 +344,7 @@ export const api = {
         module_id: string;
         xslt_content: string;
         xml_content?: string;
+        license_tax_id?: string;
     }): Promise<{ success: boolean; charged: boolean; credits: number; design: SavedDesign }> => {
         if (!IS_DEV) return api.request('/designs/export', { method: 'POST', body: JSON.stringify(payload) });
         const designs: SavedDesign[] = JSON.parse(localStorage.getItem('mock_designs') || '[]');
@@ -358,6 +360,12 @@ export const api = {
             localStorage.setItem('mock_designs', JSON.stringify([again, ...designs.filter(d => d.id !== again.id)]));
             return { success: true, charged: false, credits: user.credits, design: again };
         }
+        const { applyLicenseLock, hasLicenseLock, isValidTaxId, normalizeTaxId, withIssuerTaxId } = await import('../shared/license-lock.js');
+        const taxId = normalizeTaxId(payload.license_tax_id);
+        if (!isValidTaxId(taxId)) throw new Error('Tasarımın kullanılacağı geçerli bir VKN (10 hane) ya da TCKN (11 hane) girin.');
+        if (hasLicenseLock(payload.xslt_content)) throw new Error('Bu dosya başka bir lisansa kilitli; tekrar onaylanamaz.');
+        const locked = applyLicenseLock(payload.xslt_content, taxId);
+        const baseXml = payload.xml_content ?? existing?.xml_content ?? null;
         let charged = false;
         if (user.role !== 'admin') {
             if (user.credits <= 0) {
@@ -373,9 +381,10 @@ export const api = {
             ...(existing ?? { id: Date.now(), created_at: now, download_count: 0 }),
             name: payload.name,
             module_id: payload.module_id,
-            xslt_content: embedDesignKey(payload.xslt_content, key),
-            xml_content: payload.xml_content ?? existing?.xml_content ?? null,
+            xslt_content: embedDesignKey(locked, key),
+            xml_content: baseXml ? withIssuerTaxId(baseXml, taxId) : null,
             design_key: key,
+            license_tax_id: taxId,
             paid: true,
             paid_at: existing?.paid_at ?? now,
             status: 'downloaded',

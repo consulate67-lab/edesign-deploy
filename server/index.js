@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { randomUUID } from 'node:crypto';
 import { initDb } from './db.js';
+import { applyLicenseLock, hasLicenseLock, isValidTaxId, normalizeTaxId, withIssuerTaxId } from '../shared/license-lock.js';
 import { createRequireAdmin, registerAdminAuthRoutes } from './admin-auth.js';
 import { registerAdminRoutes } from './admin.js';
 import { registerAssistantRoutes } from './assistant.js';
@@ -341,6 +342,7 @@ const serializeDesign = (row) => row ? ({
     sections: row.sections_json || null,   // JSONB -> otomatik parse
     status: row.status,
     design_key: row.design_key || null,
+    license_tax_id: row.license_tax_id || null,
     xml_content: row.xml_content || null,
     paid: !!row.paid_at,
     paid_at: row.paid_at || null,
@@ -495,11 +497,12 @@ app.get('/api/designs/by-key/:key', authenticateToken, async (req, res) => {
     }
 });
 
-// POST /api/designs/export — Onay: 1 tasarım hakkı düşer, içerik ve önizleme
-// XML'i saklanır, anahtar XSLT'ye yazılıp geri döner. Onaylı tasarımda
-// (paid_at dolu) gönderilen içerik yok sayılır, saklanan dosya ücretsiz döner.
+// POST /api/designs/export — Onay: 1 tasarım hakkı düşer, XSLT lisans
+// VKN/TCKN'sine kilitlenir, içerik ve önizleme XML'i saklanır, anahtar XSLT'ye
+// yazılıp geri döner. Onaylı tasarımda (paid_at dolu) gönderilen içerik yok
+// sayılır, saklanan dosya ücretsiz döner.
 app.post('/api/designs/export', authenticateToken, async (req, res) => {
-    const { design_id, design_key, name, module_id, xslt_content, xml_content } = req.body || {};
+    const { design_id, design_key, name, module_id, xslt_content, xml_content, license_tax_id } = req.body || {};
     if (typeof xslt_content !== 'string' || !xslt_content.trim()) {
         return res.status(400).json({ error: 'xslt_content zorunludur.' });
     }
@@ -539,6 +542,23 @@ app.post('/api/designs/export', authenticateToken, async (req, res) => {
             return res.json({ success: true, charged: false, credits, design: serializeDesign(row) });
         }
 
+        const taxId = normalizeTaxId(license_tax_id);
+        if (!isValidTaxId(taxId)) {
+            await client.query('ROLLBACK');
+            return res.status(400).json({ error: 'Tasarimin kullanilacagi gecerli bir VKN (10 hane) ya da TCKN (11 hane) girin.' });
+        }
+        if (hasLicenseLock(xslt_content)) {
+            await client.query('ROLLBACK');
+            return res.status(400).json({ error: 'Bu dosya baska bir lisansa kilitli; tekrar onaylanamaz.' });
+        }
+        let lockedXslt;
+        try {
+            lockedXslt = applyLicenseLock(xslt_content, taxId);
+        } catch (e) {
+            await client.query('ROLLBACK');
+            return res.status(400).json({ error: `Lisans kilidi eklenemedi: ${e.message}` });
+        }
+
         let charged = false;
         if (user.role !== 'admin') {
             if (user.credits <= 0) {
@@ -550,19 +570,21 @@ app.post('/api/designs/export', authenticateToken, async (req, res) => {
         }
 
         const key = existing?.design_key || randomUUID();
-        const content = embedDesignKey(xslt_content, key);
+        const content = embedDesignKey(lockedXslt, key);
+        const baseXml = xml ?? existing?.xml_content ?? null;
+        const previewXml = baseXml ? withIssuerTaxId(baseXml, taxId) : null;
         const row = existing
             ? (await client.query(
                 `UPDATE designs SET name = $1, module_id = $2, xslt_content = $3, xml_content = COALESCE($4, xml_content),
                         design_key = $5, paid_at = COALESCE(paid_at, NOW()), status = 'downloaded',
-                        download_count = download_count + 1, updated_at = NOW()
+                        download_count = download_count + 1, license_tax_id = $7, updated_at = NOW()
                   WHERE id = $6 RETURNING *`,
-                [designName, module_id, content, xml, key, existing.id]
+                [designName, module_id, content, previewXml, key, existing.id, taxId]
             )).rows[0]
             : (await client.query(
-                `INSERT INTO designs (user_id, name, module_id, xslt_content, xml_content, design_key, paid_at, status, download_count)
-                 VALUES ($1, $2, $3, $4, $5, $6, NOW(), 'downloaded', 1) RETURNING *`,
-                [user.id, designName, module_id, content, xml, key]
+                `INSERT INTO designs (user_id, name, module_id, xslt_content, xml_content, design_key, paid_at, status, download_count, license_tax_id)
+                 VALUES ($1, $2, $3, $4, $5, $6, NOW(), 'downloaded', 1, $7) RETURNING *`,
+                [user.id, designName, module_id, content, previewXml, key, taxId]
             )).rows[0];
         await client.query('COMMIT');
         console.log(`[designs] user=${user.id} export design #${row.id} charged=${charged}`);

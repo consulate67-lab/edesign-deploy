@@ -4,6 +4,7 @@ import { WIZARD_DOC_TYPES, FAMILY_INFO, loadSampleXml, loadXmlFile, type WizardD
 import { validateXslt, validateXml, stripBom, type ValidationResult } from './validate';
 import { designKeyOf } from '../api';
 import { hasTestWatermark, stripTestWatermark } from '../xslt-editor/utils/testWatermark';
+import { hasLicenseLock } from '../../shared/license-lock.js';
 import { theme } from '../theme';
 
 export interface WizardResult {
@@ -180,7 +181,7 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
             const wasTest = kind === 'xslt' && hasTestWatermark(raw);
             const text = wasTest ? stripTestWatermark(raw) : raw;
             if (kind === 'xslt') setOwnXsltWasTest(wasTest);
-            const approved = kind === 'xslt' && !!designKeyOf(text);
+            const approved = kind === 'xslt' && (!!designKeyOf(text) || hasLicenseLock(text));
             const result: ValidationResult = approved
                 ? { ok: false, info: [], checks: [{ level: 'error', text: 'Bu dosya onaylanmış (satın alınmış) bir tasarım; tekrar düzenlenemez. Dosyayı "Tamamlanan Tasarımlar" listesinden tekrar indirebilirsiniz.' }] }
                 : kind === 'xslt' ? validateXslt(text, docType, sampleXml) : validateXml(text, docType, xsltText);

@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { CheckCircle2, Download, Loader2, X, AlertTriangle, Lock } from 'lucide-react';
 import { api } from '../api';
+import { isValidTaxId, normalizeTaxId } from '../../shared/license-lock.js';
 
 interface ApproveDialogProps {
     defaultName: string;
     onTestDownload: () => void;
     /** Hata fırlatırsa ekran açık kalır ve mesaj gösterilir. */
-    onApprove: (name: string) => Promise<void>;
+    onApprove: (name: string, taxId: string) => Promise<void>;
     onBuy: () => void;
     onClose: () => void;
 }
@@ -33,6 +34,7 @@ const PagePreview: React.FC<{ test: boolean }> = ({ test }) => (
 /** Onay ekranı: tasarım onaylanınca TEST yazısız dosya indirilir, 1 tasarım hakkı düşer. */
 export const ApproveDialog: React.FC<ApproveDialogProps> = ({ defaultName, onTestDownload, onApprove, onBuy, onClose }) => {
     const [name, setName] = useState(defaultName);
+    const [taxInput, setTaxInput] = useState('');
     const [checked, setChecked] = useState(false);
     const [credits, setCredits] = useState<number | null>(null);
     const [isAdmin, setIsAdmin] = useState(false);
@@ -49,13 +51,19 @@ export const ApproveDialog: React.FC<ApproveDialogProps> = ({ defaultName, onTes
     }, []);
 
     const noCredits = !isAdmin && credits !== null && credits <= 0;
-    const canApprove = !busy && checked && !!name.trim() && !noCredits;
+    const taxId = normalizeTaxId(taxInput);
+    const taxValid = isValidTaxId(taxId);
+    const taxError = !taxId ? null
+        : taxId.length !== 10 && taxId.length !== 11 ? 'VKN 10, TCKN 11 haneli olmalı.'
+        : !taxValid ? `Bu ${taxId.length === 10 ? 'VKN' : 'TCKN'} geçerli değil; haneleri kontrol edin.`
+        : null;
+    const canApprove = !busy && checked && !!name.trim() && taxValid && !noCredits;
 
     const approve = async () => {
         setBusy(true);
         setError(null);
         try {
-            await onApprove(name.trim());
+            await onApprove(name.trim(), taxId);
         } catch (e) {
             setError((e as Error).message);
             setBusy(false);
@@ -114,6 +122,27 @@ export const ApproveDialog: React.FC<ApproveDialogProps> = ({ defaultName, onTes
                     }}
                 />
 
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#cbd5e1', marginBottom: 6 }}>
+                    Tasarımı kullanacak firmanın VKN / TCKN'si
+                </label>
+                <input
+                    data-approve-tax-id
+                    value={taxInput}
+                    onChange={e => setTaxInput(e.target.value)}
+                    inputMode="numeric"
+                    autoComplete="off"
+                    maxLength={16}
+                    placeholder="10 haneli VKN ya da 11 haneli TCKN"
+                    style={{
+                        width: '100%', boxSizing: 'border-box', padding: '9px 12px', borderRadius: 8, fontSize: 15,
+                        letterSpacing: 1, fontFamily: 'monospace', background: 'rgba(15, 23, 42, 0.9)', color: '#f1f5f9',
+                        border: `1px solid ${taxError ? 'rgba(239, 68, 68, 0.6)' : taxValid ? 'rgba(16, 185, 129, 0.6)' : 'rgba(148, 163, 184, 0.25)'}`,
+                    }}
+                />
+                <div data-approve-tax-note style={{ fontSize: 12, lineHeight: 1.5, margin: '6px 0 16px', color: taxError ? '#fca5a5' : '#94a3b8' }}>
+                    {taxError ?? 'Tasarım yalnızca bu VKN/TCKN ile düzenlenen belgelerde TEST yazısız görünür; başka firmada, logo ya da IBAN değiştirilirse TEST yazısı çıkar. Onaydan sonra değiştirilemez.'}
+                </div>
+
                 <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 16px', display: 'flex', flexDirection: 'column', gap: 8, fontSize: 13 }}>
                     <li style={{ display: 'flex', gap: 8 }}>
                         <CheckCircle2 size={16} color="#10b981" style={{ flexShrink: 0 }} />
@@ -155,7 +184,7 @@ export const ApproveDialog: React.FC<ApproveDialogProps> = ({ defaultName, onTes
 
                 <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: '#cbd5e1', marginBottom: 18, cursor: 'pointer' }}>
                     <input data-approve-check type="checkbox" checked={checked} onChange={e => setChecked(e.target.checked)} style={{ marginTop: 2 }} />
-                    Tasarımı kontrol ettim, onaylıyorum. Onaydan sonra değişiklik yapamayacağımı biliyorum.
+                    Tasarımı ve VKN/TCKN'yi kontrol ettim, onaylıyorum. Onaydan sonra değişiklik yapamayacağımı biliyorum.
                 </label>
 
                 {noCredits && (

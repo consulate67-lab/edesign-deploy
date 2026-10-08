@@ -207,6 +207,11 @@ export const CompletedDesigns: React.FC = () => {
                                             <span style={{ fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 260 }}>{d.name}</span>
                                             <Lock size={12} color={theme.textSubtle} style={{ flexShrink: 0 }} />
                                         </div>
+                                        {d.license_tax_id && (
+                                            <div data-license-tax-id style={{ fontSize: '11px', color: theme.textMuted, marginTop: '2px', paddingLeft: '24px' }}>
+                                                {d.license_tax_id.length === 11 ? 'TCKN' : 'VKN'} {d.license_tax_id} için lisanslı
+                                            </div>
+                                        )}
                                     </td>
                                     <td style={td}>{moduleLabel(d.module_id)}</td>
                                     <td style={{ ...td, whiteSpace: 'nowrap', color: theme.textMuted }}>{formatDate(d.paid_at ?? d.updated_at, true)}</td>

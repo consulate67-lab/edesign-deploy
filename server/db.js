@@ -176,6 +176,8 @@ export const initDb = async () => {
         await ensureDesignsColumn(probe, 'xml_content', 'TEXT');
         await ensureDesignsColumn(probe, 'paid_at', 'TIMESTAMPTZ');
         await ensureDesignsColumn(probe, 'download_count', 'INTEGER NOT NULL DEFAULT 0');
+        // Onaylanan XSLT'nin kilitlendiği VKN/TCKN (shared/license-lock.js).
+        await ensureDesignsColumn(probe, 'license_tax_id', 'TEXT');
         await probe.query(`CREATE UNIQUE INDEX IF NOT EXISTS idx_designs_design_key ON designs (design_key) WHERE design_key IS NOT NULL`);
 
         await probe.query(`CREATE INDEX IF NOT EXISTS idx_designs_user_id ON designs (user_id)`);
