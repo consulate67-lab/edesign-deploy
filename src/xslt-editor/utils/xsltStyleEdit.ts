@@ -185,6 +185,19 @@ export function findLiteralTagByOrdinal(xslt: string, ordinal: number): SourceTa
     return null;
 }
 
+/** offset'te başlayan literal etiketin sıra numarası (findLiteralTagByOrdinal'ın tersi). */
+export function literalOrdinalAt(xslt: string, offset: number): number | null {
+    const re = new RegExp(TAG_RE.source, 'g');
+    let n = 0;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(xslt)) !== null && m.index <= offset) {
+        if (!m[2] || m[1] === '/' || m[2].includes(':')) continue;
+        if (m.index === offset) return n;
+        n++;
+    }
+    return null;
+}
+
 /** Öğenin kapanış etiketinin bittiği offset (self-closing ise açılış etiketinin sonu). */
 export function elementEnd(xslt: string, tag: SourceTag): number {
     const range = findElementContentRange(xslt, tag);

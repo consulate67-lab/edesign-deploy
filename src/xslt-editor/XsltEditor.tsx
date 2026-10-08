@@ -54,7 +54,7 @@ import {
     setTagAttribute, setTagStyleProperty, replaceElementContent, removeElement, escapeXmlText,
     annotateLiteralTags, findLiteralTagByOrdinal, insertAtTag, moveElement, documentEndOffset,
     bindingSourceOffsets, bindingElementRange, moveElementTracked, insertOffset, elementEnd, findParentTag, findElementContentRange,
-    type SourceTag, type InsertPosition,
+    literalOrdinalAt, type SourceTag, type InsertPosition,
 } from './utils/xsltStyleEdit';
 import { xpathPaths, xmlFieldName, xsltVariables, resolveVariablePath } from './utils/xpathNames';
 import { findLineTableCell, addColumnAfterCell, editColumn, countHiddenColumnCells, showHiddenColumns, type ColumnAction } from './utils/tableColumns';
@@ -133,6 +133,26 @@ function placementOfBinding(xslt: string, bindings: XsltBinding[], index: number
     }
     return { tag, movable: true, detach, reason: null };
 }
+/** Taşınınca geçersiz HTML üreten ya da sayfanın kendisi olan etiketler. */
+const UNMOVABLE_TAGS = new Set(['html', 'head', 'body', 'style', 'script', 'meta', 'link', 'title', 'td', 'th', 'li', 'dt', 'dd', 'option', ...TABLE_PARTS]);
+
+/** Önizlemede seçilen herhangi bir literal öğenin (metin kutusu, çizgi, tablo...) taşınabilirliği. */
+function placementOfElement(xslt: string, ordinal: number): BindPlacement {
+    const tag = findLiteralTagByOrdinal(xslt, ordinal);
+    if (!tag) return { tag: null, movable: false, detach: null, reason: 'Bu öğenin XSLT\'deki karşılığı bulunamadı.' };
+    const name = tag.name.toLowerCase();
+    if (name === 'td' || name === 'th') {
+        return { tag, movable: false, detach: null, reason: 'Tablo hücresi yerinden oynatılamaz; ölçü ve boşluklarını aşağıdan değiştirebilir, içindeki öğeleri taşıyabilirsiniz.' };
+    }
+    if (UNMOVABLE_TAGS.has(name)) {
+        return { tag, movable: false, detach: null, reason: 'Bu öğe tek başına taşınamaz; ölçü ve boşluklarını aşağıdan değiştirebilirsiniz.' };
+    }
+    if (isInLineContext(xslt, tag.start)) {
+        return { tag, movable: false, detach: null, reason: 'Kalem satırlarındaki öğeler her satırda tekrarlanır; tek başına taşınamaz. Ölçü değişiklikleri tüm satırlara uygulanır.' };
+    }
+    return { tag, movable: true, detach: null, reason: null };
+}
+
 const decodeAttr = (v: string) => v
     .replace(/\{\{/g, '{').replace(/\}\}/g, '}')
     .replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
@@ -348,6 +368,41 @@ const FieldText: React.FC<{ label: string; currentValue: string; onChange: (v: s
             />
         </div>
     );
+};
+/** Ölçü alanı: yalnızca sayı yazılırsa px kabul edilir (mm, %, auto da yazılabilir). */
+const FieldLength: React.FC<{ label: string; currentValue: string; placeholder?: string; onChange: (v: string) => void; attr?: string }> = ({ label, currentValue, placeholder, onChange, attr }) => {
+    const [value, setValue] = useState(currentValue);
+    return (
+        <div style={{ minWidth: 0 }}>
+            <label style={fieldLabelStyle}>{label}</label>
+            <input
+                type="text"
+                value={value}
+                placeholder={placeholder}
+                data-length-field={attr}
+                onChange={(e) => {
+                    const raw = e.target.value;
+                    setValue(raw);
+                    const v = raw.trim().replace(',', '.');
+                    onChange(/^-?\d*\.?\d+$/.test(v) ? `${v}px` : v);
+                }}
+                style={fieldInputStyle}
+                onFocus={(e) => e.currentTarget.style.borderColor = '#6366f1'}
+                onBlur={(e) => e.currentTarget.style.borderColor = '#334155'}
+            />
+        </div>
+    );
+};
+const roundPx = (v: string) => {
+    const n = parseFloat(v);
+    return Number.isFinite(n) ? `${Math.round(n * 10) / 10}px` : v;
+};
+/** Kenarın hesaplanmış çizgisi (yoksa boş): "1px solid rgb(0, 0, 0)". */
+const sideBorder = (cs: CSSStyleDeclaration, side: 'top' | 'right' | 'bottom' | 'left') => {
+    const cap = side[0].toUpperCase() + side.slice(1) as 'Top' | 'Right' | 'Bottom' | 'Left';
+    const w = parseFloat(cs[`border${cap}Width`]);
+    const style = cs[`border${cap}Style`];
+    return w > 0 && style !== 'none' && style !== 'hidden' ? `${roundPx(cs[`border${cap}Width`])} ${style} ${cs[`border${cap}Color`]}` : '';
 };
 const isImagePlaceholder = (src: string) => src.startsWith('data:image/svg+xml,%3Csvg') && src.includes('%3EResim');
 
@@ -1114,7 +1169,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     type PreviewLocator =
         | { kind: 'bind'; index: number }
         | { kind: 'img'; src: string; ordinal: number }
-        | { kind: 'obj'; id: string };
+        | { kind: 'obj'; id: string }
+        | { kind: 'el'; ordinal: number; nth: number };
     type SelectedObject = {
         id: number;
         binding: XsltBinding | null;
@@ -1646,7 +1702,9 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         [],
     );
     const selectedBindPlacement = useMemo(
-        () => (selectedObject?.locator?.kind === 'bind' ? placementOfBinding(xsltContent, xsltInstrumented.bindings, selectedObject.locator.index) : null),
+        () => (selectedObject?.locator?.kind === 'bind' ? placementOfBinding(xsltContent, xsltInstrumented.bindings, selectedObject.locator.index)
+            : selectedObject?.locator?.kind === 'el' ? placementOfElement(xsltContent, selectedObject.locator.ordinal)
+            : null),
         [selectedObject, xsltContent, xsltInstrumented.bindings],
     );
 
@@ -1669,6 +1727,10 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         if (locator.kind === 'obj') {
             return doc.querySelector<HTMLElement>(`[data-xslt-obj="${CSS.escape(locator.id)}"]`);
         }
+        if (locator.kind === 'el') {
+            const same = doc.querySelectorAll<HTMLElement>(`[data-xsrc="${locator.ordinal}"]`);
+            return same[locator.nth] ?? same[0] ?? null;
+        }
         const imgs = Array.from(doc.querySelectorAll('img')).filter(img => img.getAttribute('src') === locator.src);
         return imgs[locator.ordinal] ?? null;
     }, []);
@@ -1677,6 +1739,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         if (!locator) return null;
         if (locator.kind === 'img') return findImgTagBySrc(xslt, locator.src, locator.ordinal);
         if (locator.kind === 'obj') return findObjTag(xslt, locator.id);
+        if (locator.kind === 'el') return findLiteralTagByOrdinal(xslt, locator.ordinal);
         const bindings = bindingsRef.current;
         const b = bindings[locator.index];
         if (!b) return null;
@@ -1997,6 +2060,44 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         console.log(`[XSLTEditor] Veri alanı taşındı: B${index + 1} <${p.tag.name}> → ${tag ? `<${tag.name}> ${position === 'inside' ? 'içine' : 'altına'}` : 'sayfa sonu'}`);
     }, [bindPlacement]);
 
+    /** Önizlemede seçilen literal öğeyi (metin kutusu, çizgi, tablo...) içindekilerle birlikte taşır. */
+    const moveLiteral = useCallback((ordinal: number, target: InsertTarget | null) => {
+        flushSourceEdits();
+        const xslt = xsltContentRef.current;
+        const p = placementOfElement(xslt, ordinal);
+        if (!p.movable || !p.tag) {
+            setSaveMessage(`⚠ ${p.reason ?? 'Bu öğe taşınamıyor.'}`);
+            return;
+        }
+        const tag = target ? findLiteralTagByOrdinal(xslt, target.ordinal) : null;
+        if (target && !tag) return;
+        const position = target?.position ?? 'after';
+        const at = tag ? insertOffset(xslt, tag, position) : documentEndOffset(xslt);
+        if (at < 0) return;
+        if (isInLineContext(xslt, at)) {
+            setSaveMessage('⚠ Öğe kalem satırlarının içine taşınamaz (her satırda tekrarlanırdı).');
+            return;
+        }
+        const contextOf = contextPathResolver(xslt);
+        if (contextOf(p.tag.start) !== contextOf(at) && hasRelativeSelect(xslt.slice(p.tag.start, elementEnd(xslt, p.tag)))) {
+            setSaveMessage('⚠ Hedef farklı bir veri bölümünde; içindeki alanlar orada boş görünürdü. Aynı bölüm içinde bir yere taşıyın.');
+            return;
+        }
+        const moved = moveElementTracked(xslt, p.tag, tag, position);
+        if (!moved) {
+            setSaveMessage('⚠ Öğe kendi içine taşınamaz.');
+            return;
+        }
+        if (moved.xslt === xslt) return;
+        const newOrdinal = literalOrdinalAt(moved.xslt, moved.start);
+        if (newOrdinal !== null) pendingSelectRef.current = { kind: 'el', ordinal: newOrdinal, nth: 0 };
+        if (!tag) pendingPreviewScrollRef.current = Number.MAX_SAFE_INTEGER;
+        xsltContentRef.current = moved.xslt;
+        setXsltContent(moved.xslt);
+        setSaveMessage('↕ Öğe taşındı.');
+        console.log(`[XSLTEditor] Öğe taşındı: <${p.tag.name}> → ${tag ? `<${tag.name}> ${position === 'inside' ? 'içine' : 'altına'}` : 'sayfa sonu'}`);
+    }, [flushSourceEdits]);
+
     /** Veri alanının değerini kendi <span>'ına alır; hücreden / etiketinden bağımsız taşınabilir olur. */
     const detachBinding = useCallback((index: number) => {
         flushSourceEditsRef.current();
@@ -2016,7 +2117,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const moveTo = useCallback((loc: PreviewLocator, target: InsertTarget | null) => {
         if (loc.kind === 'obj') moveObject(loc.id, target);
         else if (loc.kind === 'bind') moveBinding(loc.index, target);
-    }, [moveObject, moveBinding]);
+        else if (loc.kind === 'el') moveLiteral(loc.ordinal, target);
+    }, [moveObject, moveBinding, moveLiteral]);
 
     /**
      * Konumlandırmayı (position/left/top) önizlemeye ve hemen XSLT'ye yazar.
@@ -2594,6 +2696,15 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             const sameSrc = Array.from(indexedEl.ownerDocument.querySelectorAll('img'))
                 .filter(img => img.getAttribute('src') === src);
             locator = { kind: 'img', src, ordinal: sameSrc.indexOf(indexedEl as HTMLImageElement) };
+        } else {
+            const srcEl = indexedEl.closest<HTMLElement>('[data-xsrc]');
+            const ordinal = Number(srcEl?.getAttribute('data-xsrc'));
+            if (srcEl && Number.isInteger(ordinal)) {
+                const same = Array.from(srcEl.ownerDocument.querySelectorAll(`[data-xsrc="${ordinal}"]`));
+                locator = { kind: 'el', ordinal, nth: Math.max(0, same.indexOf(srcEl)) };
+                openSelection(null, srcEl, locator);
+                return;
+            }
         }
         openSelection(binding, indexedEl, locator);
         console.log(`[XSLTEditor] Preview click → ${indexedEl.tagName} render-index=${renderIndex ?? '(yok — sadece stil paneli)'}`);
@@ -2859,6 +2970,10 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 locator = sel.locator;
             } else if (sel?.element && sel.locator?.kind === 'bind' && sel.element.contains(target)
                 && bindPlacement(xsltContentRef.current, sel.locator.index).movable) {
+                el = sel.element;
+                locator = sel.locator;
+            } else if (sel?.element && sel.locator?.kind === 'el' && sel.element.contains(target)
+                && placementOfElement(xsltContentRef.current, sel.locator.ordinal).movable) {
                 el = sel.element;
                 locator = sel.locator;
             }
@@ -4255,6 +4370,11 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         const isFormula = objKind === 'formula';
                         const isField = objKind === 'field';
                         const isKarekod = objKind === 'karekod';
+                        const isCell = tag === 'td' || tag === 'th';
+                        const isLiteral = sel.locator?.kind === 'el';
+                        const elRect = el?.getBoundingClientRect();
+                        const isLine = !!el && !isImg && (tag === 'hr'
+                            || (!(el.textContent || '').trim() && !el.querySelector('img') && !!elRect && (elRect.height <= 6 || elRect.width <= 6)));
                         const bindingIndex = sel.locator?.kind === 'bind'
                             ? sel.locator.index
                             : (b ? xsltInstrumented.bindings.indexOf(b) : -1);
@@ -4262,7 +4382,10 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             : kind === 'static' ? 'Statik Metin'
                             : kind === 'element' ? 'Element Yapısı'
                             : isObj ? `Eklenen Obje · ${isFormula ? 'Formül' : isField ? 'Veri Alanı' : isKarekod ? 'Karekod' : isImg ? 'Resim' : isTable ? 'Tablo' : isInput ? 'Input' : 'Metin'}`
-                            : isImg ? 'Resim' : 'Önizleme Öğesi';
+                            : isImg ? 'Resim'
+                            : isLine ? 'Çizgi / Ayraç'
+                            : isCell ? 'Tablo Hücresi'
+                            : isLiteral ? 'Tasarım Öğesi' : 'Önizleme Öğesi';
                         const kindColor = kind === 'dropdown' ? '#a5b4fc'
                             : kind === 'static' ? '#6ee7b7'
                             : '#fcd34d';
@@ -4287,7 +4410,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         // Satır tablosunda hücrenin kendisi seçiliyse tek hücreyi silmek /
                         // gizlemek başlık ile veriyi kaydırır; işlem tüm kolona uygulanır.
                         const isColumnCell = !!selectedLineCell && (tag === 'td' || tag === 'th') && selectedLineCell.cell === el;
-                        const removable = isColumnCell || !!b || ((sel.locator?.kind === 'img' || isObj) && canPersist);
+                        const elMovable = isLiteral && !!el && !!selectedBindPlacement?.movable && !design.paid;
+                        const removable = isColumnCell || !!b || ((sel.locator?.kind === 'img' || isObj) && canPersist) || (elMovable && canPersist);
                         const handleRemove = () => {
                             if (isColumnCell) {
                                 applyColumnEdit('remove');
@@ -4400,7 +4524,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                         </>
                                     )}
 
-                                    {sel.locator?.kind === 'bind' && el && selectedBindPlacement && !design.paid && (selectedBindPlacement.detach || !selectedBindPlacement.movable) && (
+                                    {(sel.locator?.kind === 'bind' || isLiteral) && el && selectedBindPlacement && !design.paid && (selectedBindPlacement.detach || !selectedBindPlacement.movable) && (
                                         <div data-bind-move-status>
                                             {sectionTitle('Taşıma', '#6ee7b7')}
                                             {!selectedBindPlacement.movable && noteBox(selectedBindPlacement.reason, 'warn')}
@@ -4419,15 +4543,22 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                         </div>
                                     )}
 
-                                    {!b && el && (() => {
-                                        const inner = Array.from(el.querySelectorAll<HTMLElement>('[data-render-indexes]'))
-                                            .flatMap(n => (n.getAttribute('data-render-indexes') || '').split(/\s+/).map(Number))
-                                            .filter((n, i, all) => Number.isInteger(n) && all.indexOf(n) === i)
-                                            .slice(0, 15);
-                                        if (!inner.length) return null;
+                                    {kind !== 'element' && el && (() => {
+                                        const all = [el, ...Array.from(el.querySelectorAll<HTMLElement>('[data-render-indexes]'))]
+                                            .flatMap(n => (n.getAttribute('data-render-indexes') || '').split(/\s+/).filter(Boolean).map(Number))
+                                            .filter((n, i, list) => Number.isInteger(n) && n !== bindingIndex && list.indexOf(n) === i && !!xsltInstrumented.bindings[n]);
+                                        const dynamic = all.filter(i => (xsltInstrumented.bindings[i].kind || 'dropdown') === 'dropdown');
+                                        const inner = (kind === 'dropdown' ? dynamic : [...dynamic, ...all.filter(i => !dynamic.includes(i))]).slice(0, 15);
+                                        if (kind === 'dropdown' && !dynamic.length) return null;
                                         return (
                                             <div data-contained-fields>
-                                                {sectionTitle(`Bu öğedeki veri alanları (${inner.length})`, '#a5b4fc')}
+                                                {sectionTitle(kind === 'dropdown' ? `Bu kutudaki diğer veri alanları (${dynamic.length})`
+                                                    : dynamic.length ? `Veri Alanı (XML) · bu öğede ${dynamic.length} alan` : 'Veri Alanı (XML)', '#a5b4fc')}
+                                                {!dynamic.length && (
+                                                    <div data-no-xml-field style={{ fontSize: '11px', color: '#94a3b8', marginBottom: '6px' }}>
+                                                        {kind === 'static' ? 'Sabit metin — XML\'den gelmez; metni aşağıdan değiştirebilirsiniz.' : 'Bu öğe XML\'den veri almıyor (sabit tasarım öğesi).'}
+                                                    </div>
+                                                )}
                                                 {inner.map(i => {
                                                     const ib = xsltInstrumented.bindings[i];
                                                     if (!ib) return null;
@@ -4544,7 +4675,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                         </>
                                     )}
 
-                                    {el && canPersist && sel.locator && (isObj || sel.locator.kind === 'img' || (sel.locator.kind === 'bind' && !!selectedBindPlacement?.movable)) && (
+                                    {el && canPersist && sel.locator && (isObj || sel.locator.kind === 'img' || ((sel.locator.kind === 'bind' || isLiteral) && !!selectedBindPlacement?.movable)) && (
                                         <>
                                             {sectionTitle('Konum', '#6ee7b7')}
                                             <PositionEditor
@@ -4558,6 +4689,56 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                             />
                                         </>
                                     )}
+
+                                    {el && cs && (() => {
+                                        const grid: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' };
+                                        const spacing = isCell ? 'padding' : 'margin';
+                                        const sides = [['top', 'Üstten', 'Üst'], ['left', 'Soldan', 'Sol'], ['bottom', 'Alttan', 'Alt'], ['right', 'Sağdan', 'Sağ']] as const;
+                                        return (
+                                            <div data-dimension-editor>
+                                                {sectionTitle(isLine ? 'Ölçü ve Boşluk (çizgi)' : 'Ölçü ve Boşluk', '#67e8f9')}
+                                                {!isImg && (
+                                                    <div style={grid}>
+                                                        <FieldLength key={fieldKey('dim-width')} attr="width" label="Genişlik" currentValue={el.style.width} placeholder={roundPx(cs.width)} onChange={(v) => handleStyleChange('width', v)} />
+                                                        <FieldLength key={fieldKey('dim-height')} attr="height" label={isLine ? 'Yükseklik (kalınlık)' : 'Yükseklik'} currentValue={el.style.height} placeholder={roundPx(cs.height)} onChange={(v) => handleStyleChange('height', v)} />
+                                                    </div>
+                                                )}
+                                                <div style={grid}>
+                                                    {sides.map(([side, text]) => (
+                                                        <FieldLength
+                                                            key={fieldKey(`${spacing}-${side}`)}
+                                                            attr={`${spacing}-${side}`}
+                                                            label={`${text} ${isCell ? 'iç boşluk' : 'boşluk'}`}
+                                                            currentValue={el.style.getPropertyValue(`${spacing}-${side}`)}
+                                                            placeholder={roundPx(cs.getPropertyValue(`${spacing}-${side}`))}
+                                                            onChange={(v) => handleStyleChange(`${spacing}-${side}`, v)}
+                                                        />
+                                                    ))}
+                                                </div>
+                                                <div style={{ fontSize: '10px', color: '#64748b', lineHeight: 1.5, marginBottom: '6px' }}>
+                                                    Sayı yazarsanız px kabul edilir (ör. 12); 5mm, 50%, auto da yazılabilir. Boş bırakılan alan tasarımdaki değerine döner.
+                                                    {isCell ? ' Hücrelerde dış boşluk uygulanmadığı için iç boşluk (padding) kullanılır.' : ''}
+                                                </div>
+
+                                                {sectionTitle('Çizgi / Kenarlık', '#67e8f9')}
+                                                <FieldText key={fieldKey('border')} label="Tüm kenarlar (border)" currentValue={el.style.border || ''} placeholder="ör. 1px solid #000" onChange={(v) => handleStyleChange('border', v)} />
+                                                <div style={{ ...grid, marginBottom: 0 }}>
+                                                    {sides.map(([side, , short]) => (
+                                                        <FieldText
+                                                            key={fieldKey(`border-${side}`)}
+                                                            label={`${short} çizgi`}
+                                                            currentValue={el.style.getPropertyValue(`border-${side}`) || sideBorder(cs, side)}
+                                                            placeholder="yok"
+                                                            onChange={(v) => handleStyleChange(`border-${side}`, v)}
+                                                        />
+                                                    ))}
+                                                </div>
+                                                <div style={{ fontSize: '10px', color: '#64748b', lineHeight: 1.5 }}>
+                                                    Biçim: kalınlık stil renk (ör. 2px solid #1e3a8a; stil: solid, dashed, dotted, double). Çizgiyi kaldırmak için none yazın.
+                                                </div>
+                                            </div>
+                                        );
+                                    })()}
 
                                     {el && cs && isImg && (
                                         <>
@@ -4580,6 +4761,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
 
                                     {el && cs && !isImg && (
                                         <>
+                                            {!isLine && <>
                                             {sectionTitle('Yazı', '#fcd34d')}
                                             <FieldText key={fieldKey('font-family')} label="Yazı tipi (font-family)" currentValue={cs.fontFamily} onChange={(v) => handleStyleChange('font-family', v)} />
                                             <FieldText key={fieldKey('font-size')} label="Boyut (font-size)" currentValue={cs.fontSize} onChange={(v) => handleStyleChange('font-size', v)} />
@@ -4588,13 +4770,11 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                             <FieldSelect key={fieldKey('text-decoration-line')} label="Çizgi (text-decoration)" currentValue={cs.textDecorationLine} options={['none', 'underline', 'line-through', 'overline']} onChange={(v) => handleStyleChange('text-decoration-line', v)} />
                                             <FieldColor key={fieldKey('color')} label="Yazı rengi (color)" currentValue={cs.color} onChange={(v) => handleStyleChange('color', v)} />
                                             <FieldSelect key={fieldKey('text-align')} label="Hizalama (text-align)" currentValue={cs.textAlign} options={['left', 'right', 'center', 'justify', 'start', 'end']} onChange={(v) => handleStyleChange('text-align', v)} />
+                                            </>}
 
                                             {sectionTitle('Kutu', '#fcd34d')}
                                             <FieldColor key={fieldKey('background-color')} label="Arka plan (background-color)" currentValue={transparentToEmpty(cs.backgroundColor)} onChange={(v) => handleStyleChange('background-color', v)} />
                                             <FieldText key={fieldKey('padding')} label="İç boşluk (padding)" currentValue={cs.padding} onChange={(v) => handleStyleChange('padding', v)} />
-                                            <FieldText key={fieldKey('border')} label="Kenarlık (border)" currentValue={el.style.border || ''} placeholder="ör. 1px solid #000" onChange={(v) => handleStyleChange('border', v)} />
-                                            <FieldText key={fieldKey('width')} label="Genişlik (width)" currentValue={el.style.width || ''} placeholder={cs.width} onChange={(v) => handleStyleChange('width', v)} />
-                                            <FieldText key={fieldKey('height')} label="Yükseklik (height)" currentValue={el.style.height || ''} placeholder={cs.height} onChange={(v) => handleStyleChange('height', v)} />
 
                                             {isInput && (
                                                 <>
@@ -4630,10 +4810,10 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                             {isColumnCell ? '👁 Kolonu Gizle' : '👁 Gizle'}
                                         </button>
                                     )}
-                                    {((isObj && canPersist && sel.locator?.kind === 'obj') || (sel.locator?.kind === 'bind' && !!el && !!selectedBindPlacement?.movable && !design.paid)) && (
+                                    {((isObj && canPersist && sel.locator?.kind === 'obj') || (sel.locator?.kind === 'bind' && !!el && !!selectedBindPlacement?.movable && !design.paid) || (elMovable && canPersist)) && (
                                         <button
                                             onClick={() => { flushSourceEdits(); setMoving(sel.locator); }}
-                                            title={isObj ? 'Objeyi sayfada başka bir yere taşı' : 'Veri alanını sayfada başka bir yere taşı'}
+                                            title={isObj ? 'Objeyi sayfada başka bir yere taşı' : isLiteral ? 'Öğeyi sayfada başka bir yere taşı' : 'Veri alanını sayfada başka bir yere taşı'}
                                             data-move-object
                                             style={{ flex: 1, padding: '6px 8px', background: moving ? 'rgba(16, 185, 129, 0.3)' : 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.4)', borderRadius: '4px', color: '#6ee7b7', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
                                         >
