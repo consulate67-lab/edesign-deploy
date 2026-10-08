@@ -74,9 +74,9 @@ const CodeInput: React.FC<{ value: string[]; onChange: (v: string[]) => void; on
                     onFocus={e => e.target.select()}
                     style={{
                         width: 46, height: 56, textAlign: 'center', fontSize: '1.5rem', fontWeight: 800, borderRadius: 12,
-                        border: `1.5px solid ${value[i] ? 'rgba(129, 140, 248, 0.8)' : C.borderStrong}`, outline: 'none',
-                        background: 'rgba(15, 23, 42, 0.85)', color: C.text, fontFamily: 'inherit', boxSizing: 'border-box',
-                        caretColor: '#818cf8', transition: 'border-color 0.15s, box-shadow 0.15s',
+                        border: `1.5px solid ${value[i] ? C.accent : C.borderStrong}`, outline: 'none',
+                        background: value[i] ? '#f5f3ff' : '#ffffff', color: C.text, fontFamily: 'inherit', boxSizing: 'border-box',
+                        caretColor: C.accent, transition: 'border-color 0.15s, box-shadow 0.15s',
                     }}
                 />
             ))}
@@ -153,18 +153,18 @@ export const AdminLogin: React.FC<{ onSuccess: (token: string, user: AdminIdenti
     return (
         <div className="adm-root" style={{
             minHeight: '100vh', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, boxSizing: 'border-box',
-            background: `radial-gradient(1200px 600px at 20% -10%, rgba(99,102,241,0.18), transparent 60%), radial-gradient(900px 500px at 110% 110%, rgba(139,92,246,0.14), transparent 60%), ${C.bg}`,
+            background: `radial-gradient(1000px 600px at 10% -10%, rgba(99,102,241,0.35), transparent 60%), radial-gradient(900px 560px at 110% 110%, rgba(217,70,239,0.3), transparent 60%), radial-gradient(700px 420px at 100% 0%, rgba(14,165,233,0.22), transparent 60%), ${C.bg}`,
             fontFamily: 'Inter, sans-serif', color: C.text,
         }}>
             <div data-admin-login style={{
-                width: 'min(420px, 100%)', background: 'rgba(15, 23, 42, 0.85)', border: `1px solid ${C.borderStrong}`, borderRadius: 22,
-                padding: '34px 30px 28px', boxShadow: '0 30px 80px rgba(0,0,0,0.5)', backdropFilter: 'blur(12px)', boxSizing: 'border-box',
+                width: 'min(420px, 100%)', background: 'rgba(255, 255, 255, 0.92)', border: `1px solid ${C.borderStrong}`, borderRadius: 22,
+                padding: '34px 30px 28px', boxShadow: '0 30px 80px rgba(79, 70, 229, 0.22)', backdropFilter: 'blur(12px)', boxSizing: 'border-box',
                 animation: 'modalEnter 0.25s ease-out',
             }}>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, marginBottom: 24, textAlign: 'center' }}>
                     <div style={{
                         width: 56, height: 56, borderRadius: 16, background: GRADIENT, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        boxShadow: '0 12px 30px rgba(99,102,241,0.4)',
+                        boxShadow: '0 12px 30px rgba(168, 85, 247, 0.4)',
                     }}>
                         {step === 'creds' ? <ShieldCheck size={28} color="white" /> : <KeyRound size={28} color="white" />}
                     </div>
@@ -206,7 +206,7 @@ export const AdminLogin: React.FC<{ onSuccess: (token: string, user: AdminIdenti
                         {info && (
                             <div data-admin-otp-destination style={{
                                 display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 12px', borderRadius: 12,
-                                background: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99, 102, 241, 0.25)', color: '#c7d2fe', fontSize: '0.82rem', lineHeight: 1.45,
+                                background: 'rgba(99, 102, 241, 0.08)', border: '1px solid rgba(99, 102, 241, 0.25)', color: '#4338ca', fontSize: '0.82rem', lineHeight: 1.45,
                             }}>
                                 <span style={{ marginTop: 1, flexShrink: 0 }}>{info.icon}</span>
                                 <span>{info.text}</span>
@@ -214,15 +214,15 @@ export const AdminLogin: React.FC<{ onSuccess: (token: string, user: AdminIdenti
                         )}
                         <CodeInput value={code} onChange={setCode} onComplete={c => void verify(c)} disabled={busy} />
                         {challenge?.devCode && (
-                            <div data-admin-dev-code style={{ textAlign: 'center', fontSize: '0.78rem', color: '#fcd34d', background: 'rgba(245, 158, 11, 0.1)', border: '1px dashed rgba(245, 158, 11, 0.4)', borderRadius: 10, padding: '8px 10px' }}>
+                            <div data-admin-dev-code style={{ textAlign: 'center', fontSize: '0.78rem', color: C.amberText, background: '#fffbeb', border: '1px dashed rgba(245, 158, 11, 0.4)', borderRadius: 10, padding: '8px 10px' }}>
                                 Geliştirme ipucu: kod <b style={{ letterSpacing: 2, fontSize: '0.9rem' }}>{challenge.devCode}</b>
                                 <button type="button" onClick={() => { const d = challenge.devCode!.split('').slice(0, CODE_LEN); setCode(d); void verify(d.join('')); }}
-                                    style={{ ...btn('ghost', true), marginLeft: 8, color: '#fcd34d', borderColor: 'rgba(245, 158, 11, 0.4)' }}>
+                                    style={{ ...btn('ghost', true), marginLeft: 8, color: C.amberText, borderColor: 'rgba(245, 158, 11, 0.4)' }}>
                                     Doldur
                                 </button>
                             </div>
                         )}
-                        <div style={{ textAlign: 'center', fontSize: '0.8rem', color: remaining > 0 ? C.muted : '#fca5a5' }}>
+                        <div style={{ textAlign: 'center', fontSize: '0.8rem', color: remaining > 0 ? C.muted : C.redText }}>
                             {remaining > 0 ? <>Kodun geçerlilik süresi: <b style={{ color: C.text, fontVariantNumeric: 'tabular-nums' }}>{mm}:{ss}</b></> : 'Kodun süresi doldu.'}
                         </div>
                         {error && <ErrorBox>{error}</ErrorBox>}

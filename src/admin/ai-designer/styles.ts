@@ -1,19 +1,19 @@
 import type React from 'react';
 
 export const C = {
-    bg: '#0b1120',
-    panel: 'rgba(15, 23, 42, 0.78)',
-    panel2: 'rgba(30, 41, 59, 0.55)',
-    border: 'rgba(148, 163, 184, 0.22)',
-    text: '#e2e8f0',
-    strong: '#f8fafc',
-    muted: '#94a3b8',
-    faint: '#64748b',
+    bg: '#f3f5ff',
+    panel: '#ffffff',
+    panel2: '#f6f7ff',
+    border: 'rgba(99, 102, 241, 0.2)',
+    text: '#334155',
+    strong: '#1e1b4b',
+    muted: '#575f7a',
+    faint: '#8c93ab',
     brand: '#6366f1',
-    brand2: '#a855f7',
-    ok: '#22c55e',
-    warn: '#f59e0b',
-    err: '#ef4444',
+    brand2: '#d946ef',
+    ok: '#16a34a',
+    warn: '#d97706',
+    err: '#dc2626',
 };
 
 export const btn = (bg: string, extra: React.CSSProperties = {}): React.CSSProperties => ({
@@ -23,23 +23,23 @@ export const btn = (bg: string, extra: React.CSSProperties = {}): React.CSSPrope
 });
 
 export const ghostBtn = (extra: React.CSSProperties = {}): React.CSSProperties => ({
-    ...btn('rgba(148, 163, 184, 0.12)'), color: C.text, border: `1px solid ${C.border}`, ...extra,
+    ...btn('#ffffff'), color: C.strong, border: `1px solid ${C.border}`, ...extra,
 });
 
 export const chip = (active: boolean, color = C.brand): React.CSSProperties => ({
     display: 'inline-flex', alignItems: 'center', gap: 7, padding: '7px 12px', borderRadius: 999, cursor: 'pointer',
-    border: `1px solid ${active ? color : C.border}`, background: active ? `${color}33` : 'rgba(15, 23, 42, 0.6)',
+    border: `1px solid ${active ? color : C.border}`, background: active ? `${color}1f` : '#ffffff',
     color: active ? C.strong : C.text, fontWeight: active ? 800 : 600, fontSize: '0.8rem', fontFamily: 'inherit',
     boxShadow: active ? `0 0 0 2px ${color}33` : 'none', transition: 'background 0.15s, box-shadow 0.15s',
 });
 
 export const input: React.CSSProperties = {
     width: '100%', boxSizing: 'border-box', padding: '9px 11px', borderRadius: 10, border: `1px solid ${C.border}`,
-    background: 'rgba(2, 6, 23, 0.6)', color: C.strong, fontFamily: 'inherit', fontSize: '0.86rem', outline: 'none',
+    background: '#ffffff', color: C.strong, fontFamily: 'inherit', fontSize: '0.86rem', outline: 'none',
 };
 
 export const card: React.CSSProperties = {
-    background: C.panel, border: `1px solid ${C.border}`, borderRadius: 16, boxShadow: '0 12px 40px rgba(0,0,0,0.35)',
+    background: C.panel, border: `1px solid ${C.border}`, borderRadius: 16, boxShadow: '0 4px 18px rgba(79, 70, 229, 0.08)',
 };
 
 export const label: React.CSSProperties = { fontSize: '0.72rem', fontWeight: 800, color: C.muted, letterSpacing: 0.4, textTransform: 'uppercase' };

@@ -53,8 +53,10 @@ import {
     findBindingSourceOffset, findEnclosingLiteralTag, findImgTagBySrc, findObjTag,
     setTagAttribute, setTagStyleProperty, replaceElementContent, removeElement, escapeXmlText,
     annotateLiteralTags, findLiteralTagByOrdinal, insertAtTag, moveElement, documentEndOffset,
+    bindingSourceOffsets, bindingElementRange, moveElementTracked, insertOffset, elementEnd, findParentTag, findElementContentRange,
     type SourceTag, type InsertPosition,
 } from './utils/xsltStyleEdit';
+import { xpathPaths, xmlFieldName, xsltVariables, resolveVariablePath } from './utils/xpathNames';
 import { findLineTableCell, addColumnAfterCell, editColumn, countHiddenColumnCells, showHiddenColumns, type ColumnAction } from './utils/tableColumns';
 import { BG_FITS, readPageBackground, writePageBackground, imageFileToDataUrl, type PageBackground } from './utils/pageBackground';
 import { addTestWatermark, stripTestWatermark, stripLeadingBom } from './utils/testWatermark';
@@ -87,6 +89,50 @@ const VOID_TAGS = new Set(['img', 'input', 'br', 'hr', 'meta', 'link', 'area', '
  * null → gövdenin sonu.
  */
 type InsertTarget = { el: HTMLElement; ordinal: number; position: InsertPosition };
+
+/** Parçadaki select / test ifadelerinden biri bağlama göre (göreli) mi? */
+function hasRelativeSelect(snippet: string): boolean {
+    for (const m of snippet.matchAll(/\s(?:select|test)\s*=\s*"([^"]*)"/g)) {
+        if (xpathPaths(m[1].replace(/&apos;/g, "'")).some(p => !p.startsWith('/') && !p.startsWith('$'))) return true;
+    }
+    return false;
+}
+
+/** Önizlemedeki veri alanının XSLT'de taşınabilirliği. */
+type BindPlacement = { tag: SourceTag | null; movable: boolean; detach: 'cell' | 'value' | null; reason: string | null };
+const UNWRAPPABLE_PARENT = /^xsl:(attribute|variable|param|with-param|sort|message|comment|text|element)$/;
+
+function placementOfBinding(xslt: string, bindings: XsltBinding[], index: number): BindPlacement {
+    const b = bindings[index];
+    const offset = b ? findBindingSourceOffset(xslt, bindings, b) : null;
+    const tag = offset === null ? null : findEnclosingLiteralTag(xslt, offset);
+    if (offset === null || !tag) {
+        return { tag: null, movable: false, detach: null, reason: 'Bu alanın XSLT\'de taşınabilir bir kapsayıcısı bulunamadı.' };
+    }
+    if (isInLineContext(xslt, offset)) {
+        return { tag, movable: false, detach: null, reason: 'Kalem satırlarındaki alanlar her satırda tekrarlanır; tek başına taşınamaz. Kolon olarak düzenleyin.' };
+    }
+    const parent = findParentTag(xslt, offset);
+    const range = bindingElementRange(xslt, offset);
+    const canWrap = !!range && !(parent && UNWRAPPABLE_PARENT.test(parent.name));
+    const name = tag.name.toLowerCase();
+    if (name === 'td' || name === 'th' || name === 'table' || TABLE_PARTS.has(name)) {
+        return { tag, movable: false, detach: canWrap ? 'cell' : null, reason: 'Veri bir tablo hücresinin içinde; hücre yerinden oynatılamaz.' };
+    }
+    if (name === 'body' || name === 'html') {
+        return { tag, movable: false, detach: canWrap ? 'cell' : null, reason: 'Veri doğrudan sayfa gövdesinde; önce ayrı bir kutuya alınmalı.' };
+    }
+    let detach: 'value' | null = null;
+    const content = canWrap && range ? findElementContentRange(xslt, tag) : null;
+    if (content && range) {
+        const rest = (xslt.slice(content.start, range.start) + xslt.slice(range.end, content.end))
+            .replace(/<xsl:(?:value-of|copy-of)\b[^>]*?\/>/g, '')
+            .replace(/<!--[\s\S]*?-->|<\/?xsl:[^>]*>/g, '')
+            .trim();
+        if (rest) detach = 'value';
+    }
+    return { tag, movable: true, detach, reason: null };
+}
 const decodeAttr = (v: string) => v
     .replace(/\{\{/g, '{').replace(/\}\}/g, '}')
     .replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
@@ -309,13 +355,46 @@ const isImagePlaceholder = (src: string) => src.startsWith('data:image/svg+xml,%
  * Resim kaynağı: dosya seçilir, `data:<tür>;base64,...` değeri otomatik
  * üretilir. Harici adres (URL) isteyenler için ayrıca metin alanı vardır.
  */
-const ImageSourceField: React.FC<{ currentValue: string; onChange: (v: string) => void }> = ({ currentValue, onChange }) => {
+const BASE64_MIME_PREFIXES: [string, string][] = [
+    ['iVBOR', 'image/png'], ['/9j/', 'image/jpeg'], ['R0lGOD', 'image/gif'], ['UklGR', 'image/webp'],
+    ['PHN2Zy', 'image/svg+xml'], ['PD94', 'image/svg+xml'], ['Qk', 'image/bmp'],
+];
+const utf8ToBase64 = (text: string) => {
+    let bin = '';
+    for (const byte of new TextEncoder().encode(text)) bin += String.fromCharCode(byte);
+    return btoa(bin);
+};
+/** data URL'nin base64 karşılığı (URL-kodlu data URL'ler base64'e çevrilir; harici adres için boş). */
+const base64Part = (src: string) => {
+    const m = src.match(/^data:([^;,]+)((?:;[^;,]*)*),([\s\S]*)$/);
+    if (!m) return null;
+    if (/;base64$/i.test(m[2])) return { mime: m[1], data: m[3] };
+    try {
+        return { mime: m[1], data: utf8ToBase64(decodeURIComponent(m[3])) };
+    } catch {
+        return null;
+    }
+};
+/** Yapıştırılan saf base64 ya da data URL → data URL; tür ilk baytlardan bulunur. */
+const base64ToDataUrl = (raw: string): string | null => {
+    const v = raw.trim();
+    const part = v.startsWith('data:') ? base64Part(v) : null;
+    const data = (part ? part.data : v).replace(/\s+/g, '');
+    if (!data || !/^[A-Za-z0-9+/]+=*$/.test(data)) return null;
+    const mime = part?.mime ?? BASE64_MIME_PREFIXES.find(([p]) => data.startsWith(p))?.[1];
+    return mime ? `data:${mime};base64,${data}` : null;
+};
+
+const ImageSourceField: React.FC<{ currentValue: string; onChange: (v: string) => void; readOnly?: boolean }> = ({ currentValue, onChange, readOnly }) => {
     const [src, setSrc] = useState(currentValue);
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [url, setUrl] = useState(currentValue.startsWith('data:') ? '' : currentValue);
+    const [b64Draft, setB64Draft] = useState<string | null>(null);
+    const [copied, setCopied] = useState(false);
     const placeholder = !src || isImagePlaceholder(src);
     const format = placeholder ? null : dataUrlFormat(src);
+    const b64 = placeholder ? null : base64Part(src);
     const choose = async () => {
         setError(null);
         const file = await pickImageFile();
@@ -325,6 +404,7 @@ const ImageSourceField: React.FC<{ currentValue: string; onChange: (v: string) =
             const img = await readImageFile(file);
             setSrc(img.dataUrl);
             setUrl('');
+            setB64Draft(null);
             onChange(img.dataUrl);
         } catch (e) {
             setError(e instanceof Error ? e.message : String(e));
@@ -332,6 +412,86 @@ const ImageSourceField: React.FC<{ currentValue: string; onChange: (v: string) =
             setBusy(false);
         }
     };
+    const applyBase64 = () => {
+        if (b64Draft === null) return;
+        const dataUrl = base64ToDataUrl(b64Draft);
+        if (!dataUrl) {
+            setError('Geçerli bir base64 resim değeri değil (PNG, JPEG, GIF, WEBP, SVG veya BMP olmalı).');
+            return;
+        }
+        setError(null);
+        setSrc(dataUrl);
+        setUrl('');
+        setB64Draft(null);
+        onChange(dataUrl);
+    };
+    const copyBase64 = async () => {
+        if (!b64) return;
+        try {
+            await navigator.clipboard.writeText(b64.data);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1500);
+        } catch {
+            setError('Panoya kopyalanamadı; değeri kutudan seçip kopyalayın.');
+        }
+    };
+    const smallBtn: React.CSSProperties = {
+        padding: '4px 8px', borderRadius: '4px', border: '1px solid #334155', background: '#1e293b',
+        color: '#cbd5e1', fontSize: '10px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+    };
+    const base64Box = (
+        <div data-image-base64-box>
+            <label style={{ ...fieldLabelStyle, marginTop: '10px' }}>
+                Base64 değeri{b64 ? ` · ${b64.mime} · ${b64.data.length.toLocaleString('tr-TR')} karakter` : ''}
+            </label>
+            <textarea
+                data-image-base64
+                value={b64Draft ?? b64?.data ?? ''}
+                readOnly={readOnly}
+                spellCheck={false}
+                placeholder={readOnly ? 'Bu resim base64 değil (harici adres).' : 'Base64 değerini (iVBORw0KGgo…) ya da data:image/...;base64,… yapıştırın'}
+                onChange={(e) => { setB64Draft(e.target.value); setError(null); }}
+                rows={4}
+                style={{ ...fieldInputStyle, fontFamily: 'monospace', fontSize: '10px', lineHeight: 1.35, resize: 'vertical', wordBreak: 'break-all', minHeight: '64px' }}
+            />
+            <div style={{ display: 'flex', gap: '6px', marginTop: '6px' }}>
+                <button type="button" data-image-base64-copy disabled={!b64} onClick={copyBase64} style={{ ...smallBtn, opacity: b64 ? 1 : 0.5 }}>
+                    {copied ? '✓ Kopyalandı' : 'Kopyala'}
+                </button>
+                {!readOnly && b64Draft !== null && (
+                    <>
+                        <button type="button" data-image-base64-apply onClick={applyBase64} style={{ ...smallBtn, borderColor: 'rgba(16, 185, 129, 0.5)', color: '#6ee7b7' }}>
+                            Uygula
+                        </button>
+                        <button type="button" onClick={() => { setB64Draft(null); setError(null); }} style={smallBtn}>
+                            Vazgeç
+                        </button>
+                    </>
+                )}
+            </div>
+        </div>
+    );
+    if (readOnly) {
+        return (
+            <div data-image-source style={{ marginBottom: '10px' }}>
+                <label style={fieldLabelStyle}>Resim</label>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <div style={{
+                        width: '64px', height: '48px', flexShrink: 0, borderRadius: '4px', border: '1px solid #334155',
+                        background: 'repeating-conic-gradient(#1e293b 0% 25%, #273449 0% 50%) 50% / 12px 12px',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
+                    }}>
+                        {placeholder ? <ImageIcon size={18} color="#64748b" /> : <img src={src} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />}
+                    </div>
+                    <div style={{ fontSize: '11px', color: '#fcd34d', lineHeight: 1.4 }}>
+                        Bu resim belgenin XML'inden geliyor (ör. EmbeddedDocumentBinaryObject); her belgede değişir, burada değiştirilemez.
+                    </div>
+                </div>
+                {base64Box}
+                {error && <div style={{ marginTop: '6px', fontSize: '11px', color: '#fca5a5' }}>{error}</div>}
+            </div>
+        );
+    }
     return (
         <div data-image-source style={{ marginBottom: '10px' }}>
             <label style={fieldLabelStyle}>Resim</label>
@@ -368,6 +528,7 @@ const ImageSourceField: React.FC<{ currentValue: string; onChange: (v: string) =
                 <ImageIcon size={14} /> {busy ? 'Yükleniyor…' : placeholder ? 'Resim Seç' : 'Resmi Değiştir'}
             </button>
             {error && <div style={{ marginTop: '6px', fontSize: '11px', color: '#fca5a5' }}>{error}</div>}
+            {base64Box}
             <label style={{ ...fieldLabelStyle, marginTop: '10px' }}>veya resim adresi (URL)</label>
             <input
                 type="text"
@@ -969,10 +1130,12 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const pendingSelectRef = useRef<PreviewLocator | null>(null);
     // Tıklayarak eklemede konum; 'end' gövdenin sonu, diğerleri seçili öğeye göre.
     const [insertMode, setInsertMode] = useState<'end' | InsertPosition>('after');
-    // Taşıma modu: id'si verilen obje, önizlemede tıklanan hedefe taşınır.
-    const [moveObjId, setMoveObjId] = useState<string | null>(null);
-    const moveObjIdRef = useRef<string | null>(null);
-    moveObjIdRef.current = moveObjId;
+    // Taşıma modu: seçili obje / veri alanı, önizlemede tıklanan hedefe taşınır.
+    const [moving, setMoving] = useState<PreviewLocator | null>(null);
+    const movingRef = useRef<PreviewLocator | null>(null);
+    movingRef.current = moving;
+    // Taşınan veri alanı yeni önizlemede kaynak aralığındaki sırasıyla yeniden seçilir.
+    const pendingBindRangeRef = useRef<{ start: number; end: number; nth: number } | null>(null);
     /** Önizlemede sürükleme bitince Konum alanlarını yeniden okutmak için. */
     const [positionRev, setPositionRev] = useState(0);
     const suppressClickUntilRef = useRef(0);
@@ -1388,17 +1551,38 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const catalog = useMemo(() => getCatalog(docRootOf(xmlContent)), [xmlContent]);
     const catalogRef = useRef(catalog);
     catalogRef.current = catalog;
-    /** Tasarımdaki veri alanlarının Türkçe adları (katalogla eşleşenler). */
-    const bindingLabels = useMemo(() => {
+    /**
+     * Tasarımdaki veri alanlarının Türkçe adları (katalogla eşleşenler) ve
+     * XML'deki adları. İfadedeki her yol ayrı adlandırılır; `$değişken/...`
+     * yolları değişkenin select'iyle açılır.
+     */
+    const bindingInfo = useMemo(() => {
         const lineStarts = [0];
         for (let i = xsltContent.indexOf('\n'); i >= 0; i = xsltContent.indexOf('\n', i + 1)) lineStarts.push(i + 1);
         const contextOf = contextPathResolver(xsltContent);
-        return new Map(xsltInstrumented.bindings.map((b): [XsltBinding, string | null] => {
-            if ((b.kind || 'dropdown') !== 'dropdown') return [b, null];
+        const vars = xsltVariables(xsltContent);
+        const unique = (xs: (string | null)[]) => [...new Set(xs.filter((x): x is string => !!x))];
+        return new Map(xsltInstrumented.bindings.map((b): [XsltBinding, { label: string | null; xml: string }] => {
+            if ((b.kind || 'dropdown') !== 'dropdown') return [b, { label: null, xml: '' }];
             const offset = (lineStarts[b.line - 1] ?? 0) + Math.max(0, b.column - 1);
-            return [b, bindingLabel(b.xpath, catalog, contextOf(offset))];
+            const context = contextOf(offset);
+            const paths = xpathPaths(b.xpath).map(p => {
+                const r = resolveVariablePath(p, offset, vars, contextOf);
+                return { path: r.path, context: r.context ?? context };
+            });
+            const labels = unique(paths.map(p => bindingLabel(p.path, catalog, p.context)));
+            const direct = bindingLabel(b.xpath, catalog, context);
+            const label = labels.length ? labels.join(' + ') : direct;
+            const xml = unique(paths.map(p => xmlFieldName(p.path, p.context)))
+                .filter(n => n !== '.' && !n.startsWith('$'))
+                .join(', ');
+            return [b, { label, xml }];
         }));
     }, [xsltInstrumented.bindings, catalog, xsltContent]);
+    const bindingLabels = useMemo(
+        () => new Map([...bindingInfo].map(([b, info]): [XsltBinding, string | null] => [b, info.label])),
+        [bindingInfo],
+    );
     // Element yapısı (xsl:if / for-each) tasarım yapan kullanıcı için anlamlı
     // olmadığından listelenmez.
     const filteredBindingsByGroup = useMemo(() => {
@@ -1407,11 +1591,12 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         for (const b of xsltInstrumented.bindings) {
             const kind = b.kind || 'dropdown';
             if (kind === 'element') continue;
-            if (q && !b.xpath.toLocaleLowerCase('tr').includes(q) && !(bindingLabels.get(b) ?? '').toLocaleLowerCase('tr').includes(q)) continue;
+            const info = bindingInfo.get(b);
+            if (q && !`${b.xpath} ${info?.label ?? ''} ${info?.xml ?? ''}`.toLocaleLowerCase('tr').includes(q)) continue;
             groups[kind].push(b);
         }
         return groups;
-    }, [xsltInstrumented.bindings, xsltSearch, bindingLabels]);
+    }, [xsltInstrumented.bindings, xsltSearch, bindingInfo]);
     const xmlDoc = useMemo(() => {
         const doc = new DOMParser().parseFromString(xmlContent.replace(/^\uFEFF/, ''), 'application/xml');
         return doc.getElementsByTagName('parsererror').length ? null : doc;
@@ -1453,13 +1638,24 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const xsltContentRef = useRef(xsltContent);
     xsltContentRef.current = xsltContent;
 
-    /** Seçili öğe önizlemede turuncu çerçeveyle işaretlenir. */
+    const bindPlacement = useCallback(
+        (xslt: string, index: number) => placementOfBinding(xslt, bindingsRef.current, index),
+        [],
+    );
+    const selectedBindPlacement = useMemo(
+        () => (selectedObject?.locator?.kind === 'bind' ? placementOfBinding(xsltContent, xsltInstrumented.bindings, selectedObject.locator.index) : null),
+        [selectedObject, xsltContent, xsltInstrumented.bindings],
+    );
+
+    /** Seçili öğe önizlemede turuncu çerçeveyle işaretlenir; taşınabilir veri alanı sürükleme imleci alır. */
     useEffect(() => {
         const doc = iframeRef.current?.contentDocument;
         if (!doc) return;
         doc.querySelectorAll('[data-xslt-selected]').forEach(n => n.removeAttribute('data-xslt-selected'));
+        doc.querySelectorAll('[data-xslt-movable]').forEach(n => n.removeAttribute('data-xslt-movable'));
         selectedObject?.element?.setAttribute('data-xslt-selected', 'true');
-    }, [selectedObject]);
+        if (selectedBindPlacement?.movable) selectedObject?.element?.setAttribute('data-xslt-movable', '');
+    }, [selectedObject, selectedBindPlacement]);
 
     const findPreviewElement = useCallback((locator: PreviewLocator | null): HTMLElement | null => {
         const doc = iframeRef.current?.contentDocument;
@@ -1760,6 +1956,66 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     }, []);
 
     /**
+     * XML'den gelen veri alanını (kapsayıcı etiketiyle) hedefin altına /
+     * içine taşır. Bağlamı değişecek (değeri boş kalacak) taşımalar reddedilir.
+     */
+    const moveBinding = useCallback((index: number, target: InsertTarget | null) => {
+        flushSourceEditsRef.current();
+        const xslt = xsltContentRef.current;
+        const p = bindPlacement(xslt, index);
+        if (!p.movable || !p.tag) {
+            setSaveMessage(`⚠ ${p.reason ?? 'Bu alan taşınamıyor.'}${p.detach ? ' Önce özellik panelinden "Hücreden ayır" deyin.' : ''}`);
+            return;
+        }
+        const tag = target ? findLiteralTagByOrdinal(xslt, target.ordinal) : null;
+        if (target && !tag) return;
+        const position = target?.position ?? 'after';
+        const at = tag ? insertOffset(xslt, tag, position) : documentEndOffset(xslt);
+        if (at < 0) return;
+        if (isInLineContext(xslt, at)) {
+            setSaveMessage('⚠ Alan kalem satırlarının içine taşınamaz (her satırda tekrarlanırdı).');
+            return;
+        }
+        const contextOf = contextPathResolver(xslt);
+        if (contextOf(p.tag.start) !== contextOf(at) && hasRelativeSelect(xslt.slice(p.tag.start, elementEnd(xslt, p.tag)))) {
+            setSaveMessage('⚠ Hedef farklı bir veri bölümünde; alan orada boş görünürdü. Aynı bölüm içinde bir yere taşıyın.');
+            return;
+        }
+        const moved = moveElementTracked(xslt, p.tag, tag, position);
+        if (!moved || moved.xslt === xslt) return;
+        const offsets = bindingSourceOffsets(xslt, bindingsRef.current);
+        const own = offsets[index] ?? p.tag.start;
+        const nth = offsets.filter(o => o !== null && o >= p.tag!.start && o < own).length;
+        pendingBindRangeRef.current = { start: moved.start, end: moved.end, nth };
+        if (!tag) pendingPreviewScrollRef.current = Number.MAX_SAFE_INTEGER;
+        xsltContentRef.current = moved.xslt;
+        setXsltContent(moved.xslt);
+        setSaveMessage('↕ Veri alanı taşındı.');
+        console.log(`[XSLTEditor] Veri alanı taşındı: B${index + 1} <${p.tag.name}> → ${tag ? `<${tag.name}> ${position === 'inside' ? 'içine' : 'altına'}` : 'sayfa sonu'}`);
+    }, [bindPlacement]);
+
+    /** Veri alanının değerini kendi <span>'ına alır; hücreden / etiketinden bağımsız taşınabilir olur. */
+    const detachBinding = useCallback((index: number) => {
+        flushSourceEditsRef.current();
+        const xslt = xsltContentRef.current;
+        const bindings = bindingsRef.current;
+        const b = bindings[index];
+        const offset = b ? findBindingSourceOffset(xslt, bindings, b) : null;
+        const range = offset === null ? null : bindingElementRange(xslt, offset);
+        if (!range) return;
+        const next = `${xslt.slice(0, range.start)}<span>${xslt.slice(range.start, range.end)}</span>${xslt.slice(range.end)}`;
+        pendingSelectRef.current = { kind: 'bind', index };
+        xsltContentRef.current = next;
+        setXsltContent(next);
+        setSaveMessage('✂ Alan ayrıldı; artık sürükleyerek, Konum alanlarıyla veya ↕ Taşı ile yerini değiştirebilirsiniz.');
+    }, []);
+
+    const moveTo = useCallback((loc: PreviewLocator, target: InsertTarget | null) => {
+        if (loc.kind === 'obj') moveObject(loc.id, target);
+        else if (loc.kind === 'bind') moveBinding(loc.index, target);
+    }, [moveObject, moveBinding]);
+
+    /**
      * Konumlandırmayı (position/left/top) önizlemeye ve hemen XSLT'ye yazar.
      * Mutlak konum body'ye göre olsun diye XSLT'deki <body>'ye de
      * position:relative eklenir (zaten bir position yoksa).
@@ -1860,7 +2116,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         if (!selectedObject) return;
         const onKey = (e: KeyboardEvent) => {
             if (e.key === 'Escape') {
-                if (moveObjIdRef.current) setMoveObjId(null);
+                if (movingRef.current) setMoving(null);
                 else closeSelection();
                 e.stopPropagation();
             }
@@ -1929,7 +2185,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         h.current = target;
         h.key = null;
         // Seçim / taşıma eski dokümana ait olabilir; geri yüklenen tasarım temiz açılır.
-        setMoveObjId(null);
+        setMoving(null);
+        pendingBindRangeRef.current = null;
         selectedObjectRef.current = null;
         setSelectedObject(null);
         pendingSelectRef.current = null;
@@ -2253,12 +2510,12 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             e.stopPropagation();
             return;
         }
-        const movingId = moveObjIdRef.current;
-        if (movingId) {
+        const movingLoc = movingRef.current;
+        if (movingLoc) {
             e.preventDefault();
             e.stopPropagation();
-            setMoveObjId(null);
-            moveObject(movingId, resolveInsertTarget(target, 'auto'));
+            setMoving(null);
+            moveTo(movingLoc, resolveInsertTarget(target, 'auto'));
             return;
         }
         // Sprint 16 Aşama 3 — Tüm elementlere tıklama desteği. Önceki kod
@@ -2337,7 +2594,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         }
         openSelection(binding, indexedEl, locator);
         console.log(`[XSLTEditor] Preview click → ${indexedEl.tagName} render-index=${renderIndex ?? '(yok — sadece stil paneli)'}`);
-    }, [openSelection, moveObject]);
+    }, [openSelection, moveTo]);
 
     /**
      * iframe yüklendiğinde:
@@ -2373,7 +2630,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             style.id = '__xslt-preview-layout';
             style.textContent = 'body{margin-left:auto !important;margin-right:auto !important;}'
                 + '[data-xslt-selected]{outline:2px solid #f59e0b !important;outline-offset:2px;}'
-                + '[data-xslt-obj],img[data-xslt-selected]{cursor:move;}[data-xslt-obj]:hover{outline:2px dashed #6366f1;outline-offset:2px;}'
+                + '[data-xslt-obj],img[data-xslt-selected],[data-xslt-movable]{cursor:move !important;}[data-xslt-obj]:hover{outline:2px dashed #6366f1;outline-offset:2px;}'
                 + '[data-xslt-dragging]{opacity:0.85;outline:2px solid #10b981 !important;}'
                 + '[data-xslt-drop=inside]{outline:2px dashed #10b981 !important;outline-offset:-2px;background-color:rgba(16,185,129,0.08) !important;}'
                 + '[data-xslt-drop=after]{box-shadow:0 3px 0 0 #10b981 !important;}';
@@ -2469,19 +2726,34 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             const sel = selectedObjectRef.current;
             if (sel?.locator) {
                 const el = findPreviewElement(sel.locator);
-                if (el !== sel.element) {
-                    const updated = { ...sel, element: el };
+                const binding = sel.locator.kind === 'bind' ? bindingsRef.current[sel.locator.index] ?? sel.binding : sel.binding;
+                if (el !== sel.element || binding !== sel.binding) {
+                    const updated = { ...sel, element: el, binding };
                     selectedObjectRef.current = updated;
                     setSelectedObject(updated);
                 }
             }
             doc.defaultView?.scrollTo(0, previewScrollRef.current);
-            const toSelect = pendingSelectRef.current;
+            let toSelect = pendingSelectRef.current;
             pendingSelectRef.current = null;
+            const movedRange = pendingBindRangeRef.current;
+            pendingBindRangeRef.current = null;
+            if (movedRange) {
+                const inside = bindingSourceOffsets(xsltContentRef.current, bindingsRef.current)
+                    .map((o, i): [number | null, number] => [o, i])
+                    .filter((x): x is [number, number] => x[0] !== null && x[0] >= movedRange.start && x[0] < movedRange.end)
+                    .sort((a, b) => a[0] - b[0]);
+                const hit = inside[movedRange.nth] ?? inside[0];
+                if (hit) toSelect = { kind: 'bind', index: hit[1] };
+                else {
+                    selectedObjectRef.current = null;
+                    setSelectedObject(null);
+                }
+            }
             const newEl = toSelect ? findPreviewElement(toSelect) : null;
-            if (newEl) {
+            if (newEl && toSelect) {
                 newEl.scrollIntoView({ block: 'center' });
-                openSelection(null, newEl, toSelect);
+                openSelection(toSelect.kind === 'bind' ? bindingsRef.current[toSelect.index] ?? null : null, newEl, toSelect);
             }
             setTimeout(() => {
                 if (!autoFitRef.current) return;
@@ -2526,9 +2798,9 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         };
         const dragOverHandler = (e: DragEvent) => {
             const dt = e.dataTransfer;
-            if (dt && (dt.types.includes('text/x-xslt-element') || dt.types.includes('text/x-xslt-field'))) {
+            if (dt && (dt.types.includes('text/x-xslt-element') || dt.types.includes('text/x-xslt-field') || dt.types.includes('text/x-xslt-bind'))) {
                 e.preventDefault();
-                dt.dropEffect = 'copy';
+                dt.dropEffect = dt.types.includes('text/x-xslt-bind') ? 'move' : 'copy';
                 markDropTarget(resolveInsertTarget(e.target as Element, 'auto'));
             }
         };
@@ -2538,16 +2810,18 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         const dropHandler = (e: DragEvent) => {
             const type = e.dataTransfer?.getData('text/x-xslt-element') as XsltInsertType | 'formula' | 'karekod' | '';
             const fieldKey = e.dataTransfer?.getData('text/x-xslt-field') ?? '';
+            const bindIndex = e.dataTransfer?.getData('text/x-xslt-bind') ?? '';
             markDropTarget(null);
-            if (!type && !fieldKey) return;
+            if (!type && !fieldKey && !bindIndex) return;
             e.preventDefault();
             e.stopPropagation();
             const target = resolveInsertTarget(e.target as Element, 'auto');
             if (type) insertObject(type, target);
-            else insertField(fieldKey, target);
+            else if (fieldKey) insertField(fieldKey, target);
+            else moveBinding(Number(bindIndex), target);
         };
         const moveOverHandler = (e: MouseEvent) => {
-            if (moveObjIdRef.current) markDropTarget(resolveInsertTarget(e.target as Element, 'auto'));
+            if (movingRef.current) markDropTarget(resolveInsertTarget(e.target as Element, 'auto'));
         };
         // Eklenen objeler (ve seçili resim) önizlemede sürüklenerek konumlandırılır.
         type DragState = {
@@ -2568,7 +2842,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             setPositionRev(r => r + 1);
         };
         const mouseDownHandler = (e: MouseEvent) => {
-            if (e.button !== 0 || moveObjIdRef.current) return;
+            if (e.button !== 0 || movingRef.current) return;
             const target = e.target as HTMLElement;
             const obj = target.closest?.('[data-xslt-obj]') as HTMLElement | null;
             const sel = selectedObjectRef.current;
@@ -2578,6 +2852,10 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 el = obj;
                 locator = { kind: 'obj', id: obj.getAttribute('data-xslt-obj') || '' };
             } else if (sel?.element && sel.locator?.kind === 'img' && sel.element.contains(target)) {
+                el = sel.element;
+                locator = sel.locator;
+            } else if (sel?.element && sel.locator?.kind === 'bind' && sel.element.contains(target)
+                && bindPlacement(xsltContentRef.current, sel.locator.index).movable) {
                 el = sel.element;
                 locator = sel.locator;
             }
@@ -2634,14 +2912,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             doc.removeEventListener('mouseup', endDrag);
             doc.removeEventListener('keydown', handleUndoRedoKey);
         };
-    }, [previewHtml, iframeLoadCount, handleIframeBodyClick, insertObject, insertField, commitPosition, openSelection, handleUndoRedoKey]);
+    }, [previewHtml, iframeLoadCount, handleIframeBodyClick, insertObject, insertField, moveBinding, bindPlacement, commitPosition, openSelection, handleUndoRedoKey]);
 
     // Taşıma modu bitince önizlemedeki hedef işareti kaldırılır.
     useEffect(() => {
-        if (moveObjId) return;
+        if (moving) return;
         iframeRef.current?.contentDocument?.querySelectorAll('[data-xslt-drop]')
             .forEach(n => n.removeAttribute('data-xslt-drop'));
-    }, [moveObjId]);
+    }, [moving]);
 
     // ------------------------------------------------------------------------
     // Render
@@ -3219,10 +3497,13 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                         : `1px solid ${itemBorder}`;
                                                     const itemTextColor = showRenderStatus && isRendered ? '#d1fae5' : '#e2e8f0';
                                                     const itemOpacity = showRenderStatus && !isRendered && !isSelected ? 0.55 : 1;
-                                                    const trLabel = bindingLabels.get(b);
-                                                    const displayText = b.kind === 'static'
+                                                    const info = bindingInfo.get(b);
+                                                    const trLabel = info?.label ?? null;
+                                                    const xmlName = info?.xml ?? '';
+                                                    const isStatic = b.kind === 'static';
+                                                    const displayText = isStatic
                                                         ? b.xpath.replace(/^static:\s*/, '').slice(0, 36)
-                                                        : trLabel ?? b.xpath;
+                                                        : trLabel ?? (xmlName || b.xpath);
                                                     return (
                                                         <div
                                                             key={idx}
@@ -3230,8 +3511,13 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                             data-bind-line={b.line}
                                                             data-bind-col={b.column}
                                                             onClick={() => handleBindingClick(b)}
+                                                            draggable={!design.paid && isRendered}
+                                                            onDragStart={(e) => {
+                                                                e.dataTransfer.setData('text/x-xslt-bind', String(globalIndex - 1));
+                                                                e.dataTransfer.effectAllowed = 'move';
+                                                            }}
                                                             data-rendered={showRenderStatus ? String(isRendered) : undefined}
-                                                            title={`Satır ${b.line}, col ${b.column} — ${b.xpath}${showRenderStatus ? (isRendered ? '  ✓ Tasarımda görünüyor' : '  ✗ Tasarımda görünmüyor') : ''}`}
+                                                            title={`${trLabel ? `${trLabel}\n` : ''}${xmlName ? `XML: ${xmlName}\n` : ''}XPath: ${b.xpath}\nSatır ${b.line}, col ${b.column}${showRenderStatus ? (isRendered ? '\n✓ Tasarımda görünüyor — önizlemeye sürükleyerek taşıyabilirsiniz' : '\n✗ Tasarımda görünmüyor') : ''}`}
                                                             style={{
                                                                 display: 'flex',
                                                                 alignItems: 'center',
@@ -3269,16 +3555,30 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                             }}>
                                                                 B{globalIndex}
                                                             </span>
-                                                            <span style={{
-                                                                flex: 1,
-                                                                fontSize: trLabel ? '11px' : '10px',
-                                                                color: itemTextColor,
-                                                                fontFamily: trLabel ? 'inherit' : 'monospace',
-                                                                whiteSpace: 'nowrap',
-                                                                overflow: 'hidden',
-                                                                textOverflow: 'ellipsis',
-                                                            }}>
-                                                                {displayText}
+                                                            <span style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+                                                                <span style={{
+                                                                    fontSize: trLabel || isStatic ? '11px' : '10px',
+                                                                    color: itemTextColor,
+                                                                    fontFamily: trLabel || isStatic ? 'inherit' : 'monospace',
+                                                                    whiteSpace: 'nowrap',
+                                                                    overflow: 'hidden',
+                                                                    textOverflow: 'ellipsis',
+                                                                }}>
+                                                                    {displayText}
+                                                                </span>
+                                                                {!isStatic && (
+                                                                    <span data-bind-xml-name style={{
+                                                                        fontSize: '9px',
+                                                                        color: '#7dd3fc',
+                                                                        fontFamily: 'monospace',
+                                                                        whiteSpace: 'nowrap',
+                                                                        overflow: 'hidden',
+                                                                        textOverflow: 'ellipsis',
+                                                                        opacity: 0.85,
+                                                                    }}>
+                                                                        {trLabel ? `XML: ${xmlName || b.xpath}` : b.xpath}
+                                                                    </span>
+                                                                )}
                                                             </span>
                                                             <span style={{
                                                                 fontSize: '9px',
@@ -3784,7 +4084,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         </div>
                     )}
 
-                    {moveObjId && (
+                    {moving && (
                         <div
                             data-move-banner
                             style={{
@@ -3798,13 +4098,13 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 ↕ Taşıma: önizlemede hedef öğeye tıklayın — hücre / kutu ise içine, diğerlerinde altına konur. Esc ile iptal.
                             </span>
                             <button
-                                onClick={() => { const id = moveObjId; setMoveObjId(null); moveObject(id, null); }}
+                                onClick={() => { const loc = moving; setMoving(null); moveTo(loc, null); }}
                                 style={{ padding: '4px 8px', background: 'transparent', border: '1px solid rgba(16, 185, 129, 0.5)', borderRadius: '4px', color: '#6ee7b7', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
                             >
                                 Sayfa sonuna
                             </button>
                             <button
-                                onClick={() => setMoveObjId(null)}
+                                onClick={() => setMoving(null)}
                                 style={{ padding: '4px 8px', background: 'transparent', border: '1px solid #334155', borderRadius: '4px', color: '#94a3b8', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
                             >
                                 İptal
@@ -3931,7 +4231,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 >
                     {selectedObject && (() => {
                         const sel = selectedObject;
-                        const b = sel.binding;
+                        const liveB = sel.locator?.kind === 'bind' ? xsltInstrumented.bindings[sel.locator.index] : undefined;
+                        const b = liveB && sel.binding && liveB.xpath === sel.binding.xpath ? liveB : sel.binding;
                         const el = sel.element;
                         const kind = b ? (b.kind || 'dropdown') : null;
                         const tag = el ? el.tagName.toLowerCase() : '';
@@ -4060,6 +4361,13 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     {kind === 'dropdown' && b && (
                                         <>
                                             {sectionTitle('Veri Alanı (XML)', '#a5b4fc')}
+                                            <div data-bind-info style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '6px 10px', fontSize: '11px', alignItems: 'baseline' }}>
+                                                <span style={{ color: '#94a3b8' }}>Alan adı</span>
+                                                <span data-bind-label style={{ color: '#e2e8f0', fontWeight: 700 }}>{bindingInfo.get(b)?.label ?? '—'}</span>
+                                                <span style={{ color: '#94a3b8' }}>XML alanı</span>
+                                                <span data-bind-xml style={{ color: '#7dd3fc', fontFamily: 'monospace', wordBreak: 'break-all' }}>{bindingInfo.get(b)?.xml || '—'}</span>
+                                            </div>
+                                            <label style={{ ...fieldLabelStyle, marginTop: '10px' }}>XPath ifadesi</label>
                                             <div
                                                 data-readonly-xpath
                                                 style={{
@@ -4074,14 +4382,63 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                             {el && (
                                                 <div style={{ marginTop: '8px', fontSize: '11px', color: '#94a3b8' }}>
                                                     Önizlemedeki değer:{' '}
-                                                    <span style={{ color: '#e2e8f0', fontWeight: 600 }}>
+                                                    <span style={{ color: '#e2e8f0', fontWeight: 600, wordBreak: 'break-all' }}>
                                                         {(el.textContent || '').trim().slice(0, 120) || '(boş)'}
                                                     </span>
                                                 </div>
                                             )}
-                                            {noteBox('🔒 Veri XML\'den gelir; bu alanın kaynağı değiştirilemez. Görünüm özelliklerini aşağıdan düzenleyebilirsiniz.', 'info')}
+                                            {noteBox('🔒 Veri XML\'den gelir; bu alanın kaynağı değiştirilemez. Yerini sürükleyerek, Konum alanlarıyla veya ↕ Taşı ile; görünümünü aşağıdan değiştirebilirsiniz.', 'info')}
                                         </>
                                     )}
+
+                                    {sel.locator?.kind === 'bind' && el && selectedBindPlacement && !design.paid && (selectedBindPlacement.detach || !selectedBindPlacement.movable) && (
+                                        <div data-bind-move-status>
+                                            {sectionTitle('Taşıma', '#6ee7b7')}
+                                            {!selectedBindPlacement.movable && noteBox(selectedBindPlacement.reason, 'warn')}
+                                            {selectedBindPlacement.detach && (
+                                                <button
+                                                    type="button"
+                                                    data-bind-detach
+                                                    onClick={() => { if (sel.locator?.kind === 'bind') detachBinding(sel.locator.index); }}
+                                                    title="Değeri kendi kutusuna (<span>) alır; hücre ve yanındaki etiketler yerinde kalır"
+                                                    style={{ width: '100%', marginTop: '8px', padding: '7px 10px', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.45)', borderRadius: '4px', color: '#6ee7b7', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+                                                >
+                                                    ✂ {selectedBindPlacement.detach === 'cell' ? 'Hücreden ayır (taşınabilir yap)' : 'Sadece değeri ayır'}
+                                                </button>
+                                            )}
+                                            {selectedBindPlacement.detach === 'value' && noteBox('Şu an alan, bulunduğu kutudaki diğer yazılarla birlikte taşınır. Yalnızca değeri taşımak için önce ayırın.', 'info')}
+                                        </div>
+                                    )}
+
+                                    {!b && el && (() => {
+                                        const inner = Array.from(el.querySelectorAll<HTMLElement>('[data-render-indexes]'))
+                                            .flatMap(n => (n.getAttribute('data-render-indexes') || '').split(/\s+/).map(Number))
+                                            .filter((n, i, all) => Number.isInteger(n) && all.indexOf(n) === i)
+                                            .slice(0, 15);
+                                        if (!inner.length) return null;
+                                        return (
+                                            <div data-contained-fields>
+                                                {sectionTitle(`Bu öğedeki veri alanları (${inner.length})`, '#a5b4fc')}
+                                                {inner.map(i => {
+                                                    const ib = xsltInstrumented.bindings[i];
+                                                    if (!ib) return null;
+                                                    const ii = bindingInfo.get(ib);
+                                                    return (
+                                                        <button
+                                                            key={i}
+                                                            type="button"
+                                                            onClick={() => handleBindingClick(ib)}
+                                                            title={ib.xpath}
+                                                            style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width: '100%', marginBottom: '3px', padding: '5px 8px', background: '#1e293b', border: '1px solid #334155', borderRadius: '4px', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}
+                                                        >
+                                                            <span style={{ fontSize: '11px', color: '#e2e8f0', fontWeight: 600 }}>B{i + 1} · {ii?.label ?? (ib.kind === 'static' ? ib.xpath.replace(/^static:\s*/, '').slice(0, 40) : ii?.xml || ib.xpath)}</span>
+                                                            {ib.kind !== 'static' && <span style={{ fontSize: '9px', color: '#7dd3fc', fontFamily: 'monospace', wordBreak: 'break-all' }}>XML: {ii?.xml || ib.xpath}</span>}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        );
+                                    })()}
 
                                     {kind === 'static' && (
                                         <>
@@ -4178,7 +4535,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                         </>
                                     )}
 
-                                    {el && canPersist && sel.locator && (isObj || sel.locator.kind === 'img') && (
+                                    {el && canPersist && sel.locator && (isObj || sel.locator.kind === 'img' || (sel.locator.kind === 'bind' && !!selectedBindPlacement?.movable)) && (
                                         <>
                                             {sectionTitle('Konum', '#6ee7b7')}
                                             <PositionEditor
@@ -4198,6 +4555,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                             {sectionTitle('Resim', '#fcd34d')}
                                             <ImageSourceField
                                                 key={fieldKey('src')}
+                                                readOnly={!canPersist}
                                                 currentValue={el.getAttribute('src') || ''}
                                                 onChange={(v) => {
                                                     handleAttrChange('src', v);
@@ -4263,12 +4621,12 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                             {isColumnCell ? '👁 Kolonu Gizle' : '👁 Gizle'}
                                         </button>
                                     )}
-                                    {isObj && canPersist && sel.locator?.kind === 'obj' && (
+                                    {((isObj && canPersist && sel.locator?.kind === 'obj') || (sel.locator?.kind === 'bind' && !!el && !!selectedBindPlacement?.movable && !design.paid)) && (
                                         <button
-                                            onClick={() => { flushSourceEdits(); setMoveObjId(sel.locator?.kind === 'obj' ? sel.locator.id : null); }}
-                                            title="Objeyi sayfada başka bir yere taşı"
+                                            onClick={() => { flushSourceEdits(); setMoving(sel.locator); }}
+                                            title={isObj ? 'Objeyi sayfada başka bir yere taşı' : 'Veri alanını sayfada başka bir yere taşı'}
                                             data-move-object
-                                            style={{ flex: 1, padding: '6px 8px', background: moveObjId ? 'rgba(16, 185, 129, 0.3)' : 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.4)', borderRadius: '4px', color: '#6ee7b7', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
+                                            style={{ flex: 1, padding: '6px 8px', background: moving ? 'rgba(16, 185, 129, 0.3)' : 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.4)', borderRadius: '4px', color: '#6ee7b7', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
                                         >
                                             ↕ Taşı
                                         </button>

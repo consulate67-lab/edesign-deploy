@@ -15,10 +15,11 @@ const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: React.Re
         data-admin-stat={label}
         style={{
             position: 'relative', overflow: 'hidden', padding: '16px 16px 14px', borderRadius: 16, cursor: onClick ? 'pointer' : 'default',
-            background: C.card, border: `1px solid ${C.border}`, display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0,
+            background: `linear-gradient(160deg, #ffffff 55%, ${color}14)`, border: `1px solid ${color}40`, borderTop: `3px solid ${color}`,
+            boxShadow: `0 6px 20px ${color}1f`, display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0,
         }}>
         <div style={{ position: 'absolute', top: -30, right: -30, width: 90, height: 90, borderRadius: 999, background: `${color}1f` }} />
-        <div style={{ width: 34, height: 34, borderRadius: 10, background: `${color}26`, color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{icon}</div>
+        <div style={{ width: 34, height: 34, borderRadius: 10, background: color, color: 'white', boxShadow: `0 6px 14px ${color}55`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{icon}</div>
         <div style={{ fontSize: '1.55rem', fontWeight: 800, color: C.text, fontVariantNumeric: 'tabular-nums', lineHeight: 1.1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{value}</div>
         <div style={{ fontSize: '0.76rem', color: C.muted, fontWeight: 600 }}>{label}</div>
     </div>
@@ -73,12 +74,12 @@ export const Overview: React.FC = () => {
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16 }}>
-                <Card title={<><PlugZap size={16} color="#fca5a5" /> Bekleyen online destek {pending.length > 0 && <CountBadge n={pending.length} />}</>}
+                <Card title={<><PlugZap size={16} color={C.red} /> Bekleyen online destek {pending.length > 0 && <CountBadge n={pending.length} />}</>}
                     actions={<button type="button" style={btn('ghost', true)} onClick={() => go('remote')}>Tümü</button>}>
                     {pending.length === 0 && active.length === 0 ? <Empty>Bekleyen istek yok.</Empty> : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                             {[...pending, ...active].map(s => (
-                                <div key={s.id} data-admin-pending={s.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 12, background: 'rgba(15, 23, 42, 0.6)', border: `1px solid ${s.status === 'active' ? 'rgba(16,185,129,0.35)' : 'rgba(245,158,11,0.35)'}` }}>
+                                <div key={s.id} data-admin-pending={s.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 12, background: s.status === 'active' ? '#ecfdf5' : '#fffbeb', border: `1px solid ${s.status === 'active' ? 'rgba(16,185,129,0.4)' : 'rgba(245,158,11,0.45)'}` }}>
                                     <Avatar name={displayName(s.user)} size={30} />
                                     <div style={{ flex: 1, minWidth: 0 }}>
                                         <div style={{ fontWeight: 700, fontSize: '0.84rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{displayName(s.user)}</div>
@@ -95,7 +96,7 @@ export const Overview: React.FC = () => {
                     )}
                 </Card>
 
-                <Card title={<><LifeBuoy size={16} color="#fcd34d" /> Son destek talepleri</>}
+                <Card title={<><LifeBuoy size={16} color={C.amber} /> Son destek talepleri</>}
                     actions={<button type="button" style={btn('ghost', true)} onClick={() => go('tickets')}>Tümü</button>}>
                     {recent.length === 0 ? <Empty>Henüz destek talebi yok.</Empty> : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -115,7 +116,7 @@ export const Overview: React.FC = () => {
                     )}
                 </Card>
 
-                <Card title={<><Activity size={16} color="#6ee7b7" /> Çevrimiçi kullanıcılar <Badge color={C.green}>{presence.length}</Badge></>}
+                <Card title={<><Activity size={16} color={C.green} /> Çevrimiçi kullanıcılar <Badge color={C.green}>{presence.length}</Badge></>}
                     actions={<button type="button" style={btn('ghost', true)} onClick={() => go('remote')}>Online destek</button>}>
                     {presence.length === 0 ? <Empty>Şu an çevrimiçi kullanıcı yok.</Empty> : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 320, overflowY: 'auto' }} className="adm-scroll">

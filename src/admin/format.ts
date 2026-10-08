@@ -2,24 +2,32 @@ import type React from 'react';
 import type { RemoteStatus, TicketStatus } from './contracts';
 
 export const C = {
-    bg: '#0b1120',
-    panel: '#0f172a',
-    card: 'rgba(30, 41, 59, 0.55)',
-    cardSolid: '#1e293b',
-    border: 'rgba(148, 163, 184, 0.16)',
-    borderStrong: 'rgba(148, 163, 184, 0.28)',
-    text: '#f1f5f9',
-    muted: '#94a3b8',
-    dim: '#64748b',
+    bg: '#f3f5ff',
+    panel: '#ffffff',
+    card: '#ffffff',
+    cardSolid: '#ffffff',
+    soft: '#f6f7ff',
+    border: 'rgba(99, 102, 241, 0.16)',
+    borderStrong: 'rgba(99, 102, 241, 0.3)',
+    text: '#1e1b4b',
+    muted: '#575f7a',
+    dim: '#8c93ab',
     accent: '#6366f1',
-    accent2: '#8b5cf6',
+    accent2: '#d946ef',
     green: '#10b981',
     amber: '#f59e0b',
     red: '#ef4444',
     sky: '#0ea5e9',
+    accentText: '#4f46e5',
+    greenText: '#047857',
+    amberText: '#b45309',
+    redText: '#dc2626',
+    skyText: '#0369a1',
+    shadow: '0 4px 18px rgba(79, 70, 229, 0.08)',
 };
 
-export const GRADIENT = `linear-gradient(135deg, ${C.accent} 0%, ${C.accent2} 100%)`;
+export const GRADIENT = `linear-gradient(135deg, ${C.accent} 0%, #a855f7 50%, ${C.accent2} 100%)`;
+export const SIDEBAR_GRADIENT = 'linear-gradient(180deg, #4338ca 0%, #6d28d9 52%, #c026d3 100%)';
 
 export type BtnVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'success';
 
@@ -28,16 +36,16 @@ export const btn = (variant: BtnVariant = 'secondary', small = false): React.CSS
     padding: small ? '5px 10px' : '8px 14px', borderRadius: 10, cursor: 'pointer',
     fontFamily: 'inherit', fontWeight: 700, fontSize: small ? '0.76rem' : '0.84rem', whiteSpace: 'nowrap',
     transition: 'background 0.15s, border-color 0.15s, opacity 0.15s',
-    ...(variant === 'primary' && { background: GRADIENT, color: 'white', border: 'none', boxShadow: '0 4px 14px rgba(99,102,241,0.3)' }),
-    ...(variant === 'secondary' && { background: 'rgba(51, 65, 85, 0.7)', color: C.text, border: `1px solid ${C.border}` }),
+    ...(variant === 'primary' && { background: GRADIENT, color: 'white', border: 'none', boxShadow: '0 4px 14px rgba(168, 85, 247, 0.32)' }),
+    ...(variant === 'secondary' && { background: '#ffffff', color: C.text, border: `1px solid ${C.borderStrong}` }),
     ...(variant === 'ghost' && { background: 'transparent', color: C.muted, border: `1px solid ${C.border}` }),
-    ...(variant === 'danger' && { background: 'rgba(239, 68, 68, 0.12)', color: '#fca5a5', border: '1px solid rgba(239, 68, 68, 0.3)' }),
-    ...(variant === 'success' && { background: 'rgba(16, 185, 129, 0.15)', color: '#6ee7b7', border: '1px solid rgba(16, 185, 129, 0.35)' }),
+    ...(variant === 'danger' && { background: 'rgba(239, 68, 68, 0.08)', color: C.redText, border: '1px solid rgba(239, 68, 68, 0.35)' }),
+    ...(variant === 'success' && { background: 'rgba(16, 185, 129, 0.1)', color: C.greenText, border: '1px solid rgba(16, 185, 129, 0.4)' }),
 });
 
 export const inputStyle: React.CSSProperties = {
     width: '100%', boxSizing: 'border-box', padding: '9px 12px', borderRadius: 10,
-    border: `1px solid ${C.borderStrong}`, background: 'rgba(15, 23, 42, 0.8)', color: C.text,
+    border: `1px solid ${C.borderStrong}`, background: '#ffffff', color: C.text,
     fontSize: '0.86rem', fontFamily: 'inherit', outline: 'none',
 };
 
@@ -46,7 +54,7 @@ export const labelStyle: React.CSSProperties = {
 };
 
 export const cardStyle: React.CSSProperties = {
-    background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: 18, boxSizing: 'border-box',
+    background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: 18, boxSizing: 'border-box', boxShadow: C.shadow,
 };
 
 export const errorText = (e: unknown) => (e instanceof Error ? e.message : String(e));

@@ -48,6 +48,31 @@ export function findBindingSourceOffset(xslt: string, bindings: XsltBinding[], b
     return null;
 }
 
+/** Tüm binding'lerin kaynak offset'leri tek geçişte (findBindingSourceOffset ile aynı sayım). */
+export function bindingSourceOffsets(xslt: string, bindings: XsltBinding[]): (number | null)[] {
+    const found = { dropdown: [] as number[], static: [] as number[] };
+    for (const m of xslt.matchAll(new RegExp(PASS1_RE.source, 'g'))) {
+        if (/select="[^"]+"/.test(m[0])) found.dropdown.push(m.index ?? 0);
+    }
+    for (const m of xslt.matchAll(new RegExp(XSL_TEXT_RE.source, 'g'))) {
+        if ((m[1] || '').trim()) found.static.push(m.index ?? 0);
+    }
+    const seen = { dropdown: 0, static: 0 };
+    return bindings.map(b => {
+        const kind = b.kind || 'dropdown';
+        if (kind === 'element') return null;
+        return found[kind][seen[kind]++] ?? null;
+    });
+}
+
+/** offset'te başlayan xsl:value-of / copy-of öğesinin aralığı. */
+export function bindingElementRange(xslt: string, offset: number): { start: number; end: number } | null {
+    const re = new RegExp(PASS1_RE.source, 'y');
+    re.lastIndex = offset;
+    const m = re.exec(xslt);
+    return m ? { start: offset, end: offset + m[0].length } : null;
+}
+
 /** offset konumunu saran en yakın literal (namespace'siz) HTML etiketi. */
 export function findEnclosingLiteralTag(xslt: string, offset: number): SourceTag | null {
     const stack: SourceTag[] = [];
@@ -214,7 +239,7 @@ export function childElements(xslt: string, parent: SourceTag): { children: Sour
 
 export type InsertPosition = 'after' | 'inside';
 
-function insertOffset(xslt: string, tag: SourceTag, position: InsertPosition): number {
+export function insertOffset(xslt: string, tag: SourceTag, position: InsertPosition): number {
     if (position === 'inside') {
         const range = findElementContentRange(xslt, tag);
         if (range) return range.end;
@@ -242,14 +267,22 @@ export function documentEndOffset(xslt: string): number {
  * Hedef öğenin kendi içindeyse null.
  */
 export function moveElement(xslt: string, src: SourceTag, target: SourceTag | null, position: InsertPosition): string | null {
+    return moveElementTracked(xslt, src, target, position)?.xslt ?? null;
+}
+
+/** moveElement; taşınan öğenin yeni kaynak aralığıyla birlikte. */
+export function moveElementTracked(
+    xslt: string, src: SourceTag, target: SourceTag | null, position: InsertPosition,
+): { xslt: string; start: number; end: number } | null {
     const srcEnd = elementEnd(xslt, src);
     if (target && target.start >= src.start && target.start < srcEnd) return null;
     const snippet = xslt.slice(src.start, srcEnd);
     let at = target ? insertOffset(xslt, target, position) : documentEndOffset(xslt);
     if (at < 0) return null;
+    if (at > src.start && at < srcEnd) return null;
     const removed = xslt.slice(0, src.start) + xslt.slice(srcEnd);
     if (at >= srcEnd) at -= srcEnd - src.start;
-    return removed.slice(0, at) + snippet + removed.slice(at);
+    return { xslt: removed.slice(0, at) + snippet + removed.slice(at), start: at, end: at + snippet.length };
 }
 
 /** Metin düğümü için XML kaçışı. */

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Loader2, X } from 'lucide-react';
-import { C, cardStyle } from './format';
+import { C, GRADIENT, cardStyle } from './format';
 
 export const Spinner: React.FC<{ size?: number; color?: string }> = ({ size = 16, color = C.muted }) => (
     <Loader2 size={size} color={color} className="adm-spin" />
@@ -20,7 +20,7 @@ export const Badge: React.FC<{ color: string; children: React.ReactNode; solid?:
     <span title={title} style={{
         display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap',
         fontSize: '0.68rem', fontWeight: 800, letterSpacing: 0.2,
-        background: solid ? color : `${color}22`, color: solid ? 'white' : color, border: `1px solid ${color}55`,
+        background: solid ? color : `${color}1c`, color: solid ? 'white' : `color-mix(in srgb, ${color} 72%, #0f172a)`, border: `1px solid ${color}55`,
     }}>
         {children}
     </span>
@@ -51,7 +51,7 @@ export const SectionHeader: React.FC<{ icon: React.ReactNode; title: string; sub
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 20, flexWrap: 'wrap' }}>
         <div style={{
             width: 42, height: 42, borderRadius: 12, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: 'rgba(99, 102, 241, 0.15)', border: '1px solid rgba(99, 102, 241, 0.3)', color: '#a5b4fc',
+            background: GRADIENT, color: 'white', boxShadow: '0 8px 20px rgba(168, 85, 247, 0.3)',
         }}>
             {icon}
         </div>
@@ -69,8 +69,8 @@ export const Empty: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
 export const ErrorBox: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     <div role="alert" style={{
-        padding: '10px 12px', borderRadius: 10, background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)',
-        color: '#fca5a5', fontSize: '0.82rem', lineHeight: 1.45,
+        padding: '10px 12px', borderRadius: 10, background: '#fef2f2', border: '1px solid rgba(239, 68, 68, 0.35)',
+        color: C.redText, fontSize: '0.82rem', lineHeight: 1.45,
     }}>
         {children}
     </div>
@@ -85,7 +85,7 @@ export const Avatar: React.FC<{ name: string; size?: number; online?: boolean }>
         <span style={{ position: 'relative', flexShrink: 0, display: 'inline-flex' }}>
             <span style={{
                 width: size, height: size, borderRadius: 999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                background: `hsl(${hue} 55% 38%)`, color: 'white', fontWeight: 800, fontSize: size * 0.38,
+                background: `linear-gradient(135deg, hsl(${hue} 78% 56%), hsl(${(hue + 40) % 360} 74% 48%))`, color: 'white', fontWeight: 800, fontSize: size * 0.38,
             }}>
                 {initials}
             </span>
@@ -109,8 +109,8 @@ const useEscape = (onClose: () => void) => {
 
 const CloseBtn: React.FC<{ onClick: () => void }> = ({ onClick }) => (
     <button type="button" title="Kapat (Esc)" onClick={onClick} style={{
-        background: 'rgba(15, 23, 42, 0.6)', border: `1px solid ${C.border}`, borderRadius: 999, width: 32, height: 32,
-        color: '#cbd5e1', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+        background: C.soft, border: `1px solid ${C.border}`, borderRadius: 999, width: 32, height: 32,
+        color: C.muted, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
     }}>
         <X size={16} />
     </button>
@@ -119,10 +119,10 @@ const CloseBtn: React.FC<{ onClick: () => void }> = ({ onClick }) => (
 export const Drawer: React.FC<{ title: React.ReactNode; onClose: () => void; children: React.ReactNode; width?: number }> = ({ title, onClose, children, width = 560 }) => {
     useEscape(onClose);
     return (
-        <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 900, background: 'rgba(2, 6, 23, 0.6)', backdropFilter: 'blur(3px)', animation: 'fadeIn 0.15s ease-out' }}>
+        <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 900, background: 'rgba(30, 27, 75, 0.28)', backdropFilter: 'blur(3px)', animation: 'fadeIn 0.15s ease-out' }}>
             <aside onClick={e => e.stopPropagation()} style={{
                 position: 'absolute', top: 0, right: 0, bottom: 0, width: `min(${width}px, 100vw)`, background: C.panel,
-                borderLeft: `1px solid ${C.borderStrong}`, boxShadow: '-20px 0 60px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column',
+                borderLeft: `1px solid ${C.borderStrong}`, boxShadow: '-20px 0 60px rgba(49, 46, 129, 0.18)', display: 'flex', flexDirection: 'column',
                 animation: 'adm-slide-in 0.2s ease-out',
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 18px', borderBottom: `1px solid ${C.border}` }}>
@@ -139,12 +139,12 @@ export const Modal: React.FC<{ title: React.ReactNode; onClose: () => void; chil
     useEscape(onClose);
     return (
         <div onClick={onClose} style={{
-            position: 'fixed', inset: 0, zIndex: 950, background: 'rgba(2, 6, 23, 0.78)', backdropFilter: 'blur(6px)',
+            position: 'fixed', inset: 0, zIndex: 950, background: 'rgba(30, 27, 75, 0.42)', backdropFilter: 'blur(6px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, animation: 'fadeIn 0.15s ease-out',
         }}>
             <div onClick={e => e.stopPropagation()} style={{
                 width: `min(${width}px, 100%)`, height, maxHeight: '94vh', display: 'flex', flexDirection: 'column', background: C.panel,
-                borderRadius: 18, border: `1px solid ${C.borderStrong}`, overflow: 'hidden', boxShadow: '0 30px 80px rgba(0,0,0,0.6)',
+                borderRadius: 18, border: `1px solid ${C.borderStrong}`, overflow: 'hidden', boxShadow: '0 30px 80px rgba(49, 46, 129, 0.25)',
                 animation: 'modalEnter 0.2s ease-out',
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 18px', borderBottom: `1px solid ${C.border}` }}>
@@ -168,7 +168,7 @@ export class SectionBoundary extends React.Component<{ children: React.ReactNode
             <ErrorBox>
                 Bu bölüm yüklenemedi: {this.state.error.message}
                 <div style={{ marginTop: 8 }}>
-                    <button type="button" onClick={() => this.setState({ error: null })} style={{ background: 'none', border: 'none', color: '#a5b4fc', cursor: 'pointer', fontWeight: 700, padding: 0, fontFamily: 'inherit' }}>
+                    <button type="button" onClick={() => this.setState({ error: null })} style={{ background: 'none', border: 'none', color: C.accentText, cursor: 'pointer', fontWeight: 700, padding: 0, fontFamily: 'inherit' }}>
                         Tekrar dene
                     </button>
                 </div>
@@ -187,14 +187,17 @@ export const AdminGlobalStyles: React.FC = () => (
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes modalEnter { from { transform: translateY(12px) scale(0.98); opacity: 0; } to { transform: none; opacity: 1; } }
         .adm-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.82rem; }
-        .adm-table th { position: sticky; top: 0; z-index: 1; background: #131c2f; text-align: left; font-weight: 700; color: ${C.muted}; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.4px; padding: 10px 12px; border-bottom: 1px solid ${C.border}; white-space: nowrap; }
-        .adm-table td { padding: 10px 12px; border-bottom: 1px solid rgba(148, 163, 184, 0.08); color: #e2e8f0; vertical-align: middle; }
+        .adm-table th { position: sticky; top: 0; z-index: 1; background: #eef0ff; text-align: left; font-weight: 800; color: #4338ca; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.4px; padding: 10px 12px; border-bottom: 1px solid ${C.border}; white-space: nowrap; }
+        .adm-table td { padding: 10px 12px; border-bottom: 1px solid rgba(99, 102, 241, 0.09); color: ${C.text}; vertical-align: middle; }
+        .adm-table tbody tr:nth-child(even) td { background: #fafbff; }
         .adm-table tbody tr.adm-click { cursor: pointer; }
         .adm-table tbody tr.adm-click:hover td { background: rgba(99, 102, 241, 0.08); }
         .adm-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
-        .adm-scroll::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.25); border-radius: 8px; }
-        .adm-root input::placeholder, .adm-root textarea::placeholder { color: #475569; }
-        .adm-root select option { background: #0f172a; color: #f1f5f9; }
-        .adm-nav-btn:hover { background: rgba(148, 163, 184, 0.08) !important; }
+        .adm-scroll::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.25); border-radius: 8px; }
+        .adm-root input::placeholder, .adm-root textarea::placeholder { color: #9aa1b9; }
+        .adm-root select option { background: #ffffff; color: ${C.text}; }
+        .adm-root input:focus, .adm-root textarea:focus, .adm-root select:focus { border-color: ${C.accent} !important; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15); }
+        .adm-nav-btn:hover { background: rgba(99, 102, 241, 0.07) !important; }
+        .adm-side-btn:hover { background: rgba(255, 255, 255, 0.16) !important; color: #ffffff !important; }
     `}</style>
 );

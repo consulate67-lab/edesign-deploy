@@ -113,13 +113,13 @@ const KbForm: React.FC<{ state: FormState; onClose: () => void; onSaved: () => v
 };
 
 const Stat: React.FC<{ label: string; value: React.ReactNode; color?: string }> = ({ label, value, color = C.text }) => (
-    <div style={{ flex: '1 1 130px', padding: '12px 14px', borderRadius: 12, background: 'rgba(15,23,42,0.55)', border: `1px solid ${C.border}` }}>
+    <div style={{ flex: '1 1 130px', padding: '12px 14px', borderRadius: 12, background: C.soft, border: `1px solid ${C.border}` }}>
         <div style={{ fontSize: '0.72rem', color: C.muted, fontWeight: 700 }}>{label}</div>
         <div style={{ fontSize: '1.35rem', fontWeight: 800, color, marginTop: 2 }}>{value}</div>
     </div>
 );
 
-const clip: React.CSSProperties = { whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontSize: '0.8rem', lineHeight: 1.5, color: '#cbd5e1' };
+const clip: React.CSSProperties = { whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontSize: '0.8rem', lineHeight: 1.5, color: '#334155' };
 
 export const AssistantSection: React.FC = () => {
     const pushToast = useUiStore(s => s.pushToast);
@@ -178,12 +178,12 @@ export const AssistantSection: React.FC = () => {
 
             <Card title={<><Sparkles size={16} color={overview?.ai.configured ? C.accent2 : C.dim} /> Yapay zekâ durumu</>}>
                 {!overview ? <Spinner /> : overview.ai.configured ? (
-                    <div style={{ fontSize: '0.84rem', color: '#cbd5e1', lineHeight: 1.6 }}>
+                    <div style={{ fontSize: '0.84rem', color: '#334155', lineHeight: 1.6 }}>
                         <Badge color={C.green}>Açık</Badge> {overview.ai.provider} · <b>{overview.ai.model}</b> · bugün {overview.ai.usedToday} / {overview.ai.dailyLimit} çağrı.
                         Bilgi bankası yanıtların temelidir; yapay zekâ yalnızca onu doğal dille özetler ve site dışı soruları reddeder.
                     </div>
                 ) : (
-                    <div style={{ fontSize: '0.84rem', color: '#cbd5e1', lineHeight: 1.6 }}>
+                    <div style={{ fontSize: '0.84rem', color: '#334155', lineHeight: 1.6 }}>
                         <Badge color={C.amber}>Kapalı</Badge> Edi şu an yalnızca bilgi bankasından yanıt veriyor.
                         Ücretsiz Google Gemini anahtarı (aistudio.google.com) alıp sunucuda <code>GEMINI_API_KEY</code> olarak tanımlarsanız
                         sorular doğal dille ve bağlama göre yanıtlanır.
@@ -221,7 +221,7 @@ export const AssistantSection: React.FC = () => {
                     {!logs ? <Spinner /> : logs.length === 0 ? <Empty>Bu filtrede soru yok.</Empty> : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                             {logs.map(l => (
-                                <div key={l.id} style={{ padding: 12, borderRadius: 12, background: 'rgba(15,23,42,0.55)', border: `1px solid ${C.border}`, opacity: l.resolved ? 0.6 : 1 }}>
+                                <div key={l.id} style={{ padding: 12, borderRadius: 12, background: C.soft, border: `1px solid ${C.border}`, opacity: l.resolved ? 0.6 : 1 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                                         <b style={{ color: C.text, fontSize: '0.88rem', flex: '1 1 240px' }}>{l.question}</b>
                                         <Badge color={MODE[l.mode].color}>{MODE[l.mode].label}</Badge>
@@ -260,7 +260,7 @@ export const AssistantSection: React.FC = () => {
                     {!kb ? <Spinner /> : kb.entries.length === 0 ? <Empty>Henüz eklenen yanıt yok. Yerleşik yanıtlar aşağıda.</Empty> : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                             {kb.entries.map(e => (
-                                <div key={e.id} style={{ padding: 12, borderRadius: 12, background: 'rgba(15,23,42,0.55)', border: `1px solid ${e.status === 'pending' ? 'rgba(245,158,11,0.4)' : C.border}` }}>
+                                <div key={e.id} style={{ padding: 12, borderRadius: 12, background: C.soft, border: `1px solid ${e.status === 'pending' ? 'rgba(245,158,11,0.4)' : C.border}` }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                                         <b style={{ color: C.text, fontSize: '0.88rem', flex: '1 1 240px' }}>{e.question}</b>
                                         <Badge color={STATUS[e.status].color}>{STATUS[e.status].label}</Badge>

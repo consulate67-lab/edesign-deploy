@@ -9,7 +9,7 @@ import { adminApi, adminSession, createAdminRealtime, type AdminRealtime } from 
 import { AdminContext, type AdminCtx, type GalleryDraft, type SectionId } from './adminContext';
 import { AdminLogin } from './AdminLogin';
 import type { AdminIdentity, AdminSettingsStatus, PresenceEntry, RemoteSession, SupportTicket } from './contracts';
-import { C, GRADIENT, btn, displayName, errorText } from './format';
+import { C, SIDEBAR_GRADIENT, btn, displayName, errorText } from './format';
 import { useMediaQuery } from './hooks';
 import { notificationPermission, playChime, requestNotificationPermission, showBrowserNotification } from './notify';
 import { AdminGlobalStyles, CountBadge, Dot, SectionBoundary, Spinner } from './ui';
@@ -53,7 +53,7 @@ const upsertSession = (list: RemoteSession[], s: RemoteSession) => {
 const StatusPill: React.FC<{ label: string; ok: boolean | null; title: string }> = ({ label, ok, title }) => (
     <span title={title} style={{
         display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 999, fontSize: '0.72rem', fontWeight: 700,
-        background: 'rgba(30, 41, 59, 0.7)', border: `1px solid ${C.border}`, color: C.muted, whiteSpace: 'nowrap',
+        background: C.soft, border: `1px solid ${C.border}`, color: C.muted, whiteSpace: 'nowrap',
     }}>
         <Dot color={ok === null ? C.dim : ok ? C.green : C.red} />
         {label}
@@ -203,17 +203,17 @@ const AdminShell: React.FC<{ identity: AdminIdentity; onLogout: () => void }> = 
 
     const sidebar = (
         <aside data-admin-sidebar style={{
-            width: sidebarW, flexShrink: 0, background: C.panel, borderRight: `1px solid ${C.border}`, display: 'flex', flexDirection: 'column',
-            transition: 'width 0.18s', height: '100%', boxSizing: 'border-box',
+            width: sidebarW, flexShrink: 0, background: SIDEBAR_GRADIENT, display: 'flex', flexDirection: 'column',
+            transition: 'width 0.18s', height: '100%', boxSizing: 'border-box', boxShadow: '4px 0 24px rgba(79, 70, 229, 0.18)',
         }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: showLabels ? '18px 18px 14px' : '18px 0 14px', justifyContent: showLabels ? 'flex-start' : 'center' }}>
-                <div style={{ width: 36, height: 36, borderRadius: 11, background: GRADIENT, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 8px 20px rgba(99,102,241,0.35)' }}>
+                <div style={{ width: 36, height: 36, borderRadius: 11, background: 'rgba(255, 255, 255, 0.2)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <ShieldCheck size={19} color="white" />
                 </div>
                 {showLabels && (
                     <div style={{ minWidth: 0 }}>
-                        <div style={{ fontWeight: 800, fontSize: '0.95rem', color: C.text }}>e-Tasarım</div>
-                        <div style={{ fontSize: '0.7rem', color: C.dim, fontWeight: 600 }}>Yönetim paneli</div>
+                        <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#ffffff' }}>e-Tasarım</div>
+                        <div style={{ fontSize: '0.7rem', color: 'rgba(255, 255, 255, 0.72)', fontWeight: 600 }}>Yönetim paneli</div>
                     </div>
                 )}
             </div>
@@ -222,15 +222,15 @@ const AdminShell: React.FC<{ identity: AdminIdentity; onLogout: () => void }> = 
                     const active = n.id === section;
                     const badge = badgeFor(n.id);
                     return (
-                        <button key={n.id} type="button" data-admin-nav={n.id} title={n.label} onClick={() => go(n.id)} className={active ? undefined : 'adm-nav-btn'}
+                        <button key={n.id} type="button" data-admin-nav={n.id} title={n.label} onClick={() => go(n.id)} className={active ? undefined : 'adm-side-btn'}
                             style={{
                                 position: 'relative', display: 'flex', alignItems: 'center', gap: 11, padding: showLabels ? '10px 12px' : '11px 0',
                                 justifyContent: showLabels ? 'flex-start' : 'center', borderRadius: 10, border: 'none', cursor: 'pointer', fontFamily: 'inherit',
                                 fontSize: '0.86rem', fontWeight: active ? 800 : 600, textAlign: 'left',
-                                background: active ? 'rgba(99, 102, 241, 0.16)' : 'transparent', color: active ? '#e0e7ff' : C.muted,
-                                boxShadow: active ? 'inset 3px 0 0 #818cf8' : 'none',
+                                background: active ? '#ffffff' : 'transparent', color: active ? '#4338ca' : 'rgba(255, 255, 255, 0.86)',
+                                boxShadow: active ? '0 6px 18px rgba(30, 27, 75, 0.25)' : 'none',
                             }}>
-                            <span style={{ color: active ? '#a5b4fc' : C.muted, display: 'flex' }}>{n.icon}</span>
+                            <span style={{ color: active ? '#c026d3' : 'inherit', display: 'flex' }}>{n.icon}</span>
                             {showLabels && <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{n.label}</span>}
                             {badge > 0 && (showLabels ? <CountBadge n={badge} /> : (
                                 <span style={{ position: 'absolute', top: 5, right: 9 }}><CountBadge n={badge} /></span>
@@ -241,7 +241,8 @@ const AdminShell: React.FC<{ identity: AdminIdentity; onLogout: () => void }> = 
             </nav>
             {tablet && (
                 <button type="button" onClick={() => setCollapsedPref(!collapsed)} title={collapsed ? 'Menüyü genişlet' : 'Menüyü daralt'}
-                    style={{ ...btn('ghost', true), margin: 10, border: 'none', justifyContent: showLabels ? 'flex-start' : 'center' }}>
+                    className="adm-side-btn"
+                    style={{ ...btn('ghost', true), margin: 10, border: 'none', color: 'rgba(255, 255, 255, 0.8)', justifyContent: showLabels ? 'flex-start' : 'center' }}>
                     {collapsed ? <ChevronsRight size={16} /> : <><ChevronsLeft size={16} /> Daralt</>}
                 </button>
             )}
@@ -252,16 +253,16 @@ const AdminShell: React.FC<{ identity: AdminIdentity; onLogout: () => void }> = 
 
     return (
         <AdminContext.Provider value={ctx}>
-            <div className="adm-root" style={{ display: 'flex', height: '100vh', width: '100%', background: C.bg, color: C.text, fontFamily: 'Inter, sans-serif', overflow: 'hidden' }}>
+            <div className="adm-root" style={{ display: 'flex', height: '100vh', width: '100%', background: `radial-gradient(900px 500px at 100% 0%, rgba(217, 70, 239, 0.08), transparent 60%), radial-gradient(900px 500px at 0% 100%, rgba(14, 165, 233, 0.08), transparent 60%), ${C.bg}`, color: C.text, fontFamily: 'Inter, sans-serif', overflow: 'hidden' }}>
                 {tablet ? sidebar : mobileNav && (
-                    <div onClick={() => setMobileNav(false)} style={{ position: 'fixed', inset: 0, zIndex: 800, background: 'rgba(2,6,23,0.6)' }}>
+                    <div onClick={() => setMobileNav(false)} style={{ position: 'fixed', inset: 0, zIndex: 800, background: 'rgba(30, 27, 75, 0.35)' }}>
                         <div onClick={e => e.stopPropagation()} style={{ height: '100%', width: 236 }}>{sidebar}</div>
                     </div>
                 )}
                 <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
                     <header data-admin-topbar style={{
                         height: 58, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 10, padding: '0 18px',
-                        borderBottom: `1px solid ${C.border}`, background: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(10px)',
+                        borderBottom: `1px solid ${C.border}`, background: 'rgba(255, 255, 255, 0.88)', backdropFilter: 'blur(10px)',
                     }}>
                         {!tablet && (
                             <button type="button" aria-label="Menü" onClick={() => setMobileNav(true)} style={{ ...btn('ghost', true), padding: 7 }}>
@@ -269,7 +270,7 @@ const AdminShell: React.FC<{ identity: AdminIdentity; onLogout: () => void }> = 
                             </button>
                         )}
                         <div style={{ fontWeight: 800, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-                            <span style={{ color: '#a5b4fc', display: 'flex' }}>{current.icon}</span>
+                            <span style={{ color: '#c026d3', display: 'flex' }}>{current.icon}</span>
                             <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{current.label}</span>
                         </div>
                         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -285,11 +286,11 @@ const AdminShell: React.FC<{ identity: AdminIdentity; onLogout: () => void }> = 
                                 <button type="button" data-admin-notif
                                     title={notifPerm === 'granted' ? 'Masaüstü bildirimleri açık' : notifPerm === 'denied' ? 'Bildirimler tarayıcıda engellenmiş' : 'Masaüstü bildirimlerini aç'}
                                     onClick={() => { playChime(); void requestNotificationPermission().then(setNotifPerm); }}
-                                    style={{ ...btn('ghost', true), padding: 7, color: notifPerm === 'granted' ? '#6ee7b7' : C.muted }}>
+                                    style={{ ...btn('ghost', true), padding: 7, color: notifPerm === 'granted' ? C.greenText : C.muted }}>
                                     {notifPerm === 'denied' ? <BellOff size={16} /> : <Bell size={16} />}
                                 </button>
                             )}
-                            <span data-admin-identity style={{ fontSize: '0.82rem', fontWeight: 700, color: '#e2e8f0', whiteSpace: 'nowrap', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            <span data-admin-identity style={{ fontSize: '0.82rem', fontWeight: 700, color: C.text, whiteSpace: 'nowrap', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                 {displayName(identity)}
                             </span>
                             <button type="button" data-admin-logout onClick={onLogout} style={btn('danger', true)}>

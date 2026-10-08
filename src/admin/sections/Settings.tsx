@@ -3,24 +3,24 @@ import { CheckCircle2, MessageSquare, RefreshCw, Send, Settings as SettingsIcon,
 import { useUiStore } from '../../store/uiStore';
 import { adminApi } from '../adminApi';
 import type { AdminSettingsStatus } from '../contracts';
-import { C, btn, errorText } from '../format';
+import { C, GRADIENT, btn, errorText } from '../format';
 import { Card, ErrorBox, SectionHeader, Spinner } from '../ui';
 
 const Check: React.FC<{ ok: boolean; children: React.ReactNode }> = ({ ok, children }) => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.84rem', color: ok ? '#d1fae5' : '#fecaca' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.84rem', color: ok ? C.greenText : C.redText }}>
         {ok ? <CheckCircle2 size={16} color={C.green} /> : <XCircle size={16} color={C.red} />} {children}
     </div>
 );
 
 const Code: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <code style={{ padding: '1px 6px', borderRadius: 6, background: 'rgba(99,102,241,0.15)', color: '#c7d2fe', fontSize: '0.8rem', fontFamily: 'Consolas, "Cascadia Code", monospace' }}>{children}</code>
+    <code style={{ padding: '1px 6px', borderRadius: 6, background: 'rgba(99,102,241,0.1)', color: '#4338ca', fontSize: '0.8rem', fontFamily: 'Consolas, "Cascadia Code", monospace' }}>{children}</code>
 );
 
 const Steps: React.FC<{ items: React.ReactNode[] }> = ({ items }) => (
     <ol style={{ margin: 0, paddingLeft: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10, counterReset: 'step' }}>
         {items.map((item, i) => (
-            <li key={i} style={{ display: 'flex', gap: 10, fontSize: '0.84rem', lineHeight: 1.55, color: '#cbd5e1' }}>
-                <span style={{ width: 22, height: 22, borderRadius: 999, flexShrink: 0, background: 'rgba(99,102,241,0.2)', color: '#a5b4fc', fontWeight: 800, fontSize: '0.72rem', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 1 }}>{i + 1}</span>
+            <li key={i} style={{ display: 'flex', gap: 10, fontSize: '0.84rem', lineHeight: 1.55, color: '#334155' }}>
+                <span style={{ width: 22, height: 22, borderRadius: 999, flexShrink: 0, background: GRADIENT, color: 'white', fontWeight: 800, fontSize: '0.72rem', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 1 }}>{i + 1}</span>
                 <div>{item}</div>
             </li>
         ))}
@@ -75,7 +75,7 @@ export const Settings: React.FC<{ onStatus?: (s: AdminSettingsStatus) => void }>
             {error && <div style={{ marginBottom: 14 }}><ErrorBox>{error}</ErrorBox></div>}
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 16, marginBottom: 16 }}>
-                <Card title={<><Send size={16} color="#38bdf8" /> Telegram</>}
+                <Card title={<><Send size={16} color={C.sky} /> Telegram</>}
                     actions={<button type="button" data-admin-telegram-test disabled={testing || !tg?.configured || !tg?.chatConfigured} onClick={() => void testTelegram()}
                         style={{ ...btn('primary', true), opacity: testing || !tg?.configured || !tg?.chatConfigured ? 0.55 : 1 }}>
                         {testing ? <Spinner size={13} color="white" /> : <Send size={13} />} Test mesajı gönder
@@ -88,7 +88,7 @@ export const Settings: React.FC<{ onStatus?: (s: AdminSettingsStatus) => void }>
                         </div>
                     )}
                 </Card>
-                <Card title={<><MessageSquare size={16} color="#6ee7b7" /> SMS</>}>
+                <Card title={<><MessageSquare size={16} color={C.green} /> SMS</>}>
                     {!status ? <div style={{ color: C.muted, display: 'flex', gap: 8 }}><Spinner /> Yükleniyor…</div> : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                             <Check ok={!!status.sms.provider}>Sağlayıcı: {status.sms.provider ?? 'seçilmemiş'}</Check>
@@ -96,9 +96,9 @@ export const Settings: React.FC<{ onStatus?: (s: AdminSettingsStatus) => void }>
                         </div>
                     )}
                 </Card>
-                <Card title={<><ShieldCheck size={16} color="#a5b4fc" /> Giriş doğrulaması</>}>
+                <Card title={<><ShieldCheck size={16} color={C.accent} /> Giriş doğrulaması</>}>
                     {!status ? <div style={{ color: C.muted, display: 'flex', gap: 8 }}><Spinner /> Yükleniyor…</div> : (
-                        <div style={{ fontSize: '0.84rem', color: '#cbd5e1', lineHeight: 1.55 }}>
+                        <div style={{ fontSize: '0.84rem', color: '#334155', lineHeight: 1.55 }}>
                             Doğrulama kodu şu kanaldan gönderiliyor: <b style={{ color: C.text }}>{OTP_CHANNEL[status.otpChannel]}</b>.
                             <div style={{ color: C.dim, fontSize: '0.78rem', marginTop: 6 }}>Öncelik: SMS → Telegram → sunucu günlüğü. Üretimde en az birini yapılandırın.</div>
                         </div>

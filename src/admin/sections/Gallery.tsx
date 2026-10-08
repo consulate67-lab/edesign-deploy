@@ -47,13 +47,13 @@ const PreviewFrame: React.FC<{ xml: string; xslt: string; title: string }> = ({ 
 };
 
 const Checks: React.FC<{ title: string; result: ValidationResult }> = ({ title, result }) => (
-    <div style={{ flex: '1 1 260px', minWidth: 0, padding: 12, borderRadius: 12, background: 'rgba(15,23,42,0.6)', border: `1px solid ${result.ok ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.35)'}` }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 800, fontSize: '0.82rem', marginBottom: 8, color: result.ok ? '#6ee7b7' : '#fca5a5' }}>
+    <div style={{ flex: '1 1 260px', minWidth: 0, padding: 12, borderRadius: 12, background: result.ok ? '#f0fdf8' : '#fef2f2', border: `1px solid ${result.ok ? 'rgba(16,185,129,0.4)' : 'rgba(239,68,68,0.4)'}` }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 800, fontSize: '0.82rem', marginBottom: 8, color: result.ok ? C.greenText : C.redText }}>
             {result.ok ? <CheckCircle2 size={15} /> : <XCircle size={15} />} {title}: {result.ok ? 'uygun' : 'hatalı'}
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             {result.checks.map((c, i) => (
-                <div key={i} style={{ display: 'flex', gap: 6, fontSize: '0.76rem', lineHeight: 1.4, color: c.level === 'error' ? '#fca5a5' : c.level === 'warn' ? '#fcd34d' : '#cbd5e1' }}>
+                <div key={i} style={{ display: 'flex', gap: 6, fontSize: '0.76rem', lineHeight: 1.4, color: c.level === 'error' ? C.redText : c.level === 'warn' ? C.amberText : '#334155' }}>
                     <span style={{ flexShrink: 0, marginTop: 1 }}>{c.level === 'error' ? <XCircle size={12} /> : c.level === 'warn' ? <AlertTriangle size={12} /> : <CheckCircle2 size={12} color={C.green} />}</span>
                     {c.text}
                 </div>
@@ -61,7 +61,7 @@ const Checks: React.FC<{ title: string; result: ValidationResult }> = ({ title, 
         </div>
         {result.info.length > 0 && (
             <div style={{ marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                {result.info.map(([k, v]) => <span key={k} style={{ fontSize: '0.7rem', color: C.muted }}><b style={{ color: '#cbd5e1' }}>{k}:</b> {v}</span>)}
+                {result.info.map(([k, v]) => <span key={k} style={{ fontSize: '0.7rem', color: C.muted }}><b style={{ color: C.text }}>{k}:</b> {v}</span>)}
             </div>
         )}
     </div>
@@ -317,7 +317,7 @@ export const Gallery: React.FC = () => {
                                         <td>
                                             <button type="button" role="switch" aria-checked={d.published} data-admin-gallery-toggle={d.id} disabled={busyId === d.id} onClick={() => void togglePublished(d)}
                                                 title={d.published ? 'Yayından kaldır' : 'Yayınla'}
-                                                style={{ width: 40, height: 22, borderRadius: 999, border: 'none', cursor: 'pointer', position: 'relative', background: d.published ? C.green : '#334155', transition: 'background 0.15s', opacity: busyId === d.id ? 0.6 : 1 }}>
+                                                style={{ width: 40, height: 22, borderRadius: 999, border: 'none', cursor: 'pointer', position: 'relative', background: d.published ? C.green : '#cbd5e1', transition: 'background 0.15s', opacity: busyId === d.id ? 0.6 : 1 }}>
                                                 <span style={{ position: 'absolute', top: 3, left: d.published ? 21 : 3, width: 16, height: 16, borderRadius: 999, background: 'white', transition: 'left 0.15s' }} />
                                             </button>
                                         </td>

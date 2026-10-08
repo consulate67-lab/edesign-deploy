@@ -108,7 +108,7 @@ const CheckList: React.FC<{ checks: Check[] }> = ({ checks }) => {
                 {errors.length ? `${errors.length} hata` : warns.length ? `${warns.length} uyarı` : `GİB denetimi geçti (${oks.length} kontrol)`}
             </div>
             {[...errors, ...warns].map((c, i) => (
-                <div key={i} style={{ color: c.level === 'error' ? '#fca5a5' : '#fcd34d', paddingLeft: 21 }}>{c.text}</div>
+                <div key={i} style={{ color: c.level === 'error' ? C.err : C.warn, paddingLeft: 21 }}>{c.text}</div>
             ))}
         </div>
     );
@@ -121,7 +121,7 @@ const Thumb: React.FC<{ html: string; active: boolean; caption: string; onClick:
     }}>
         <iframe title={caption} tabIndex={-1} sandbox="allow-scripts" srcDoc={withCss(html, 'html,body{overflow:hidden!important}')}
             style={{ width: 794, height: 1060, border: 0, transform: 'scale(0.189)', transformOrigin: '0 0', pointerEvents: 'none' }} />
-        <span style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: '4px 0', background: active ? C.brand : 'rgba(15,23,42,0.8)', color: 'white', fontSize: '0.72rem', fontWeight: 800 }}>
+        <span style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: '4px 0', background: active ? C.brand : 'rgba(30, 27, 75, 0.72)', color: 'white', fontSize: '0.72rem', fontWeight: 800 }}>
             {caption}
         </span>
     </button>
@@ -154,7 +154,7 @@ const QuestionInput: React.FC<QuestionInputProps> = ({ q, answers, learned, logo
                         <button key={o.id} type="button" title={o.help} data-ai-option={o.id} onClick={() => onAnswer(o.id)} style={chip(suggested === o.id, o.color ?? C.brand)}>
                             {o.color && <span style={{ width: 9, height: 9, borderRadius: 99, background: o.color }} />}
                             {o.label}
-                            {suggested === o.id && learnedValue(q, learned) !== undefined && <Sparkles size={12} color="#fcd34d" />}
+                            {suggested === o.id && learnedValue(q, learned) !== undefined && <Sparkles size={12} color={C.warn} />}
                         </button>
                     ))}
                     {skip}
@@ -256,7 +256,7 @@ const QuestionInput: React.FC<QuestionInputProps> = ({ q, answers, learned, logo
                             }
                         }} />
                     </label>
-                    {err && <div style={{ color: '#fca5a5', fontSize: '0.8rem' }}>{err}</div>}
+                    {err && <div style={{ color: C.err, fontSize: '0.8rem' }}>{err}</div>}
                     <div style={{ display: 'flex', gap: 8 }}>
                         <button type="button" onClick={() => onAnswer('')} style={ghostBtn()}>Logosuz devam et</button>
                     </div>
@@ -282,7 +282,7 @@ const QuestionInput: React.FC<QuestionInputProps> = ({ q, answers, learned, logo
                                 placeholder="TR00 0000 0000 0000 0000 0000 00" value={b.iban}
                                 onChange={e => set(i, { iban: e.target.value })} onBlur={() => !validateIban(b.iban) && set(i, { iban: formatIban(b.iban) })} />
                             <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.76rem' }}>
-                                <span style={{ color: problems[i] ? '#fca5a5' : C.ok }}>{problems[i] ?? 'IBAN geçerli'}</span>
+                                <span style={{ color: problems[i] ? C.err : C.ok }}>{problems[i] ?? 'IBAN geçerli'}</span>
                                 <button type="button" onClick={() => setValue(banks.filter((_, j) => j !== i))} style={ghostBtn({ padding: '4px 8px' })}><Trash2 size={13} /> Kaldır</button>
                             </div>
                         </div>
@@ -520,7 +520,7 @@ export const AiDesigner: React.FC<AiDesignerProps> = ({ service, onOpenInEditor 
                     </div>
                 ))}
             </div>
-            {memoryError && <div style={{ color: '#fca5a5', fontSize: '0.78rem' }}>Hafıza okunamadı: {memoryError}</div>}
+            {memoryError && <div style={{ color: C.err, fontSize: '0.78rem' }}>Hafıza okunamadı: {memoryError}</div>}
             <ul style={{ margin: 0, paddingLeft: 18, display: 'grid', gap: 7, color: C.text, fontSize: '0.8rem', lineHeight: 1.45 }}>
                 {insights.map((t, i) => <li key={i}>{t}</li>)}
             </ul>
@@ -529,7 +529,7 @@ export const AiDesigner: React.FC<AiDesignerProps> = ({ service, onOpenInEditor 
 
     const suggestionChips = learned && learned.suggestions.length > 0 && (
         <BotBubble>
-            <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 6, fontWeight: 700 }}><Sparkles size={14} color="#fcd34d" /> Önceki tasarımlardan öğrendim:</div>
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 6, fontWeight: 700 }}><Sparkles size={14} color={C.warn} /> Önceki tasarımlardan öğrendim:</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                 {learned.suggestions.slice(0, 6).map(s => (
                     <span key={s.key} style={{ ...chip(true, C.brand2), cursor: 'default' }} title={`${s.votes} olumlu oy`}>{s.label}</span>
@@ -606,7 +606,7 @@ export const AiDesigner: React.FC<AiDesignerProps> = ({ service, onOpenInEditor 
                     <span style={label}>Tasarım istemi</span>
                     <textarea data-ai-prompt value={promptText} onChange={e => setPromptText(e.target.value)}
                         style={{ ...input, minHeight: 280, resize: 'vertical', lineHeight: 1.55, fontFamily: 'Consolas, "Segoe UI", monospace', fontSize: '0.82rem' }} />
-                    {sampleError && <div style={{ color: '#fca5a5', fontSize: '0.8rem' }}>Örnek XML yüklenemedi: {sampleError}</div>}
+                    {sampleError && <div style={{ color: C.err, fontSize: '0.8rem' }}>Örnek XML yüklenemedi: {sampleError}</div>}
                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                         <button type="button" data-ai-generate onClick={generate} disabled={!xml} style={btn(C.brand, { opacity: xml ? 1 : 0.5 })}>
                             {xml ? <Sparkles size={15} /> : <Loader2 size={15} className="spin" />} Tasarımı oluştur
@@ -646,10 +646,10 @@ export const AiDesigner: React.FC<AiDesignerProps> = ({ service, onOpenInEditor 
                             <div style={{ color: C.strong, fontWeight: 800 }}>{current?.design?.name}</div>
                             <CheckList checks={checks} />
                             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                                <button type="button" data-ai-like disabled={!!busy} onClick={() => rate(1)} style={btn(saved?.rating === 1 && saved.sig === signature() ? C.ok : 'rgba(34,197,94,0.25)')}>
+                                <button type="button" data-ai-like disabled={!!busy} onClick={() => rate(1)} style={btn(saved?.rating === 1 && saved.sig === signature() ? C.ok : 'rgba(34,197,94,0.14)', { color: saved?.rating === 1 && saved.sig === signature() ? 'white' : C.ok })}>
                                     <ThumbsUp size={14} /> Beğendim
                                 </button>
-                                <button type="button" data-ai-dislike disabled={!!busy} onClick={() => rate(-1)} style={btn(saved?.rating === -1 && saved.sig === signature() ? C.err : 'rgba(239,68,68,0.22)')}>
+                                <button type="button" data-ai-dislike disabled={!!busy} onClick={() => rate(-1)} style={btn(saved?.rating === -1 && saved.sig === signature() ? C.err : 'rgba(239,68,68,0.12)', { color: saved?.rating === -1 && saved.sig === signature() ? 'white' : C.err })}>
                                     <ThumbsDown size={14} /> Beğenmedim
                                 </button>
                             </div>
@@ -665,7 +665,7 @@ export const AiDesigner: React.FC<AiDesignerProps> = ({ service, onOpenInEditor 
                                 )}
                             </div>
                             {busy && <div style={{ color: C.muted, fontSize: '0.8rem', display: 'flex', gap: 6, alignItems: 'center' }}><Loader2 size={14} className="spin" /> Kaydediliyor…</div>}
-                            {notice && <div data-ai-notice style={{ color: notice.ok ? '#86efac' : '#fca5a5', fontSize: '0.8rem' }}>{notice.text}</div>}
+                            {notice && <div data-ai-notice style={{ color: notice.ok ? C.ok : C.err, fontSize: '0.8rem' }}>{notice.text}</div>}
                         </div>
 
                         {pub && (

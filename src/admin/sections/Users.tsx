@@ -58,7 +58,7 @@ const UserDetail: React.FC<{ userId: number; onClose: () => void; onChanged: (ro
                 <div style={{ minWidth: 0 }}>
                     <div style={{ fontWeight: 800, fontSize: '1.05rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{displayName(user)}</div>
                     <div style={{ fontSize: '0.76rem', color: C.muted }}>
-                        {online ? <span style={{ color: '#6ee7b7' }}>Çevrimiçi · {viewLabel(p?.view ?? user.current_view)}</span> : `Son görülme: ${fmtRelative(user.last_seen_at, now)}`}
+                        {online ? <span style={{ color: C.greenText }}>Çevrimiçi · {viewLabel(p?.view ?? user.current_view)}</span> : `Son görülme: ${fmtRelative(user.last_seen_at, now)}`}
                     </div>
                 </div>
             </div>
@@ -69,15 +69,15 @@ const UserDetail: React.FC<{ userId: number; onClose: () => void; onChanged: (ro
                 <div data-admin-user-detail={user.id} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 10 }}>
                         {[
-                            { icon: <Mail size={15} />, label: 'E-posta', value: <a href={`mailto:${user.username}`} style={{ color: '#a5b4fc' }}>{user.username}</a> },
-                            { icon: <Phone size={15} />, label: 'Telefon', value: user.phone_number ? <a href={`tel:${user.phone_number.replace(/[^\d+]/g, '')}`} style={{ color: '#a5b4fc' }}>{user.phone_number}</a> : '—' },
+                            { icon: <Mail size={15} />, label: 'E-posta', value: <a href={`mailto:${user.username}`} style={{ color: C.accentText }}>{user.username}</a> },
+                            { icon: <Phone size={15} />, label: 'Telefon', value: user.phone_number ? <a href={`tel:${user.phone_number.replace(/[^\d+]/g, '')}`} style={{ color: C.accentText }}>{user.phone_number}</a> : '—' },
                             { icon: <Building2 size={15} />, label: 'Firma', value: user.company_name || '—' },
                             { icon: <CreditCard size={15} />, label: 'Tasarım hakkı', value: <b>{fmtNumber(user.credits)}</b> },
                             { icon: <FileStack size={15} />, label: 'Tasarım / ücretli', value: `${user.design_count} / ${user.paid_design_count}` },
                             { icon: <Wallet size={15} />, label: 'Ödeme toplamı', value: fmtMoney(user.payment_total) },
                         ].map(f => (
-                            <div key={f.label} style={{ display: 'flex', gap: 10, alignItems: 'center', padding: '10px 12px', borderRadius: 12, background: 'rgba(30, 41, 59, 0.5)', border: `1px solid ${C.border}` }}>
-                                <span style={{ color: '#818cf8', display: 'flex' }}>{f.icon}</span>
+                            <div key={f.label} style={{ display: 'flex', gap: 10, alignItems: 'center', padding: '10px 12px', borderRadius: 12, background: C.soft, border: `1px solid ${C.border}` }}>
+                                <span style={{ color: C.accent, display: 'flex' }}>{f.icon}</span>
                                 <div style={{ minWidth: 0 }}>
                                     <div style={{ fontSize: '0.68rem', color: C.dim, fontWeight: 700 }}>{f.label}</div>
                                     <div style={{ fontSize: '0.86rem', color: C.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.value}</div>
@@ -234,7 +234,7 @@ export const Users: React.FC = () => {
                                                 <Avatar name={displayName(u)} size={30} online={online} />
                                                 <div style={{ minWidth: 0 }}>
                                                     <div style={{ fontWeight: 700 }}>{u.full_name || '—'}</div>
-                                                    {online && <div style={{ fontSize: '0.7rem', color: '#6ee7b7', display: 'flex', alignItems: 'center', gap: 4 }}><Dot color={C.green} size={6} /> {viewLabel(p?.view ?? u.current_view)}</div>}
+                                                    {online && <div style={{ fontSize: '0.7rem', color: C.greenText, display: 'flex', alignItems: 'center', gap: 4 }}><Dot color={C.green} size={6} /> {viewLabel(p?.view ?? u.current_view)}</div>}
                                                 </div>
                                             </div>
                                         </td>
@@ -242,11 +242,11 @@ export const Users: React.FC = () => {
                                         <td>{u.username}</td>
                                         <td style={{ whiteSpace: 'nowrap', color: C.muted }}>{u.phone_number || '—'}</td>
                                         <td style={{ textAlign: 'right', fontWeight: 700 }}>{fmtNumber(u.credits)}</td>
-                                        <td style={{ textAlign: 'right' }}>{u.design_count} / <span style={{ color: '#6ee7b7' }}>{u.paid_design_count}</span></td>
+                                        <td style={{ textAlign: 'right' }}>{u.design_count} / <span style={{ color: C.greenText }}>{u.paid_design_count}</span></td>
                                         <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>{fmtMoney(u.payment_total)}</td>
                                         <td style={{ textAlign: 'right' }}>{u.ticket_count}</td>
                                         <td style={{ whiteSpace: 'nowrap', color: C.muted }}>{fmtDate(u.created_at)}</td>
-                                        <td style={{ whiteSpace: 'nowrap', color: online ? '#6ee7b7' : C.muted }}>{online ? 'Şimdi' : fmtRelative(u.last_seen_at, now)}</td>
+                                        <td style={{ whiteSpace: 'nowrap', color: online ? C.greenText : C.muted }}>{online ? 'Şimdi' : fmtRelative(u.last_seen_at, now)}</td>
                                     </tr>
                                 );
                             })}

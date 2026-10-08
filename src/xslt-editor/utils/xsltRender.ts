@@ -13,6 +13,7 @@
  * pipeline'ı (instrumentXslt / xsltInstrumenter) farklı, dokunulmuyor.
  */
 import { documentEndOffset } from './xsltStyleEdit';
+import { xmlFieldName, xpathPaths } from './xpathNames';
 import { restoreScriptText, stripXsltDeprecationBanner } from '../../xsltTransformer';
 
 const INDEXED_TAGS = new Set([
@@ -460,7 +461,11 @@ export function renderAndAnnotateXslt(
                         target.setAttribute('data-render-indexes', all ? `${all} ${idx}` : String(idx));
                         if (!target.hasAttribute('data-render-index')) {
                             target.setAttribute('data-render-index', String(idx));
-                            target.setAttribute('data-bind-index', `B${idx + 1}`);
+                            const xmlNames = (b.kind || 'dropdown') === 'dropdown'
+                                ? xpathPaths(b.xpath).map(p => xmlFieldName(p)).filter(n => n && n !== '.' && !n.startsWith('$'))
+                                : [];
+                            target.setAttribute('data-bind-index', xmlNames.length ? `B${idx + 1} · ${xmlNames.join(', ')}` : `B${idx + 1}`);
+                            if (!target.hasAttribute('title') && xmlNames.length) target.setAttribute('title', `XML: ${xmlNames.join(', ')}\n${b.xpath}`);
                             target.setAttribute('data-xpath', b.xpath);
                             target.setAttribute('data-line', String(b.line));
                             target.setAttribute('data-column', String(b.column));
@@ -518,6 +523,10 @@ export function renderAndAnnotateXslt(
 }
 [data-render-index]:hover::after {
     content: attr(data-bind-index);
+    white-space: nowrap;
+    font-family: system-ui, sans-serif;
+    font-style: normal;
+    text-transform: none;
     position: absolute;
     top: -10px;
     right: -2px;

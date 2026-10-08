@@ -206,7 +206,7 @@ const App: React.FC = () => {
         return (
             <>
                 <ToastHost />
-                <Suspense fallback={<ScreenFallback />}>
+                <Suspense fallback={<ScreenFallback light />}>
                     <AdminApp />
                 </Suspense>
             </>

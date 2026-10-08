@@ -6,7 +6,7 @@ import { useUiStore } from '../../store/uiStore';
 import { adminApi } from '../adminApi';
 import { useAdmin } from '../adminContext';
 import type { SupportTicket, TicketStatus } from '../contracts';
-import { C, TICKET_STATUS, browserSummary, btn, displayName, errorText, fmtDateTime, fmtRelative, fmtTime, inputStyle, viewLabel } from '../format';
+import { C, GRADIENT, TICKET_STATUS, browserSummary, btn, displayName, errorText, fmtDateTime, fmtRelative, fmtTime, inputStyle, viewLabel } from '../format';
 import { useMediaQuery, useNow } from '../hooks';
 import { Avatar, Badge, CountBadge, Empty, ErrorBox, SectionHeader, Spinner } from '../ui';
 
@@ -20,10 +20,10 @@ const FILTERS: { id: Filter; label: string }[] = [
 
 const InfoRow: React.FC<{ icon: React.ReactNode; label: string; children: React.ReactNode }> = ({ icon, label, children }) => (
     <div style={{ display: 'flex', gap: 9, alignItems: 'flex-start', fontSize: '0.8rem' }}>
-        <span style={{ color: '#818cf8', display: 'flex', marginTop: 1 }}>{icon}</span>
+        <span style={{ color: C.accent, display: 'flex', marginTop: 1 }}>{icon}</span>
         <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: '0.66rem', color: C.dim, fontWeight: 700 }}>{label}</div>
-            <div style={{ color: '#e2e8f0', wordBreak: 'break-word' }}>{children}</div>
+            <div style={{ color: C.text, wordBreak: 'break-word' }}>{children}</div>
         </div>
     </div>
 );
@@ -94,12 +94,12 @@ const Conversation: React.FC<{ ticketId: number; onBack?: () => void }> = ({ tic
                 <Avatar name={displayName(u)} size={36} online={!!online} />
                 <div style={{ minWidth: 0 }}>
                     <div style={{ fontWeight: 800, fontSize: '0.88rem' }}>{displayName(u)}</div>
-                    <div style={{ fontSize: '0.72rem', color: online ? '#6ee7b7' : C.dim }}>{online ? `Çevrimiçi · ${viewLabel(online.view)}` : 'Çevrimdışı'}</div>
+                    <div style={{ fontSize: '0.72rem', color: online ? C.greenText : C.dim }}>{online ? `Çevrimiçi · ${viewLabel(online.view)}` : 'Çevrimdışı'}</div>
                 </div>
             </div>
             {u?.company_name && <InfoRow icon={<Building2 size={14} />} label="Firma">{u.company_name}</InfoRow>}
-            {u?.username && <InfoRow icon={<Mail size={14} />} label="E-posta"><a href={`mailto:${u.username}`} style={{ color: '#a5b4fc' }}>{u.username}</a></InfoRow>}
-            {u?.phone_number && <InfoRow icon={<Phone size={14} />} label="Telefon"><a href={`tel:${u.phone_number.replace(/[^\d+]/g, '')}`} style={{ color: '#a5b4fc' }}>{u.phone_number}</a></InfoRow>}
+            {u?.username && <InfoRow icon={<Mail size={14} />} label="E-posta"><a href={`mailto:${u.username}`} style={{ color: C.accentText }}>{u.username}</a></InfoRow>}
+            {u?.phone_number && <InfoRow icon={<Phone size={14} />} label="Telefon"><a href={`tel:${u.phone_number.replace(/[^\d+]/g, '')}`} style={{ color: C.accentText }}>{u.phone_number}</a></InfoRow>}
             <div style={{ height: 1, background: C.border }} />
             <InfoRow icon={<Monitor size={14} />} label="Talep açtığı ekran">{viewLabel(ctx.view)}</InfoRow>
             {(ctx.docName || ctx.moduleId) && <InfoRow icon={<FileText size={14} />} label="Açık belge">{ctx.docName || '—'}{ctx.moduleId ? ` (${ctx.moduleId})` : ''}</InfoRow>}
@@ -126,12 +126,12 @@ const Conversation: React.FC<{ ticketId: number; onBack?: () => void }> = ({ tic
                         <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>#{ticket.id} · {ticket.subject}</div>
                         <div style={{ fontSize: '0.72rem', color: C.dim }}>{displayName(u)} · açıldı {fmtDateTime(ticket.created_at)}</div>
                     </div>
-                    <div style={{ display: 'flex', gap: 4, padding: 3, borderRadius: 10, background: 'rgba(15,23,42,0.7)', border: `1px solid ${C.border}` }}>
+                    <div style={{ display: 'flex', gap: 4, padding: 3, borderRadius: 10, background: C.soft, border: `1px solid ${C.border}` }}>
                         {(['open', 'answered', 'closed'] as TicketStatus[]).map(s => (
                             <button key={s} type="button" data-admin-ticket-status={s} onClick={() => void setStatus(s)}
                                 style={{
                                     padding: '4px 10px', borderRadius: 7, border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: '0.74rem', fontWeight: 700,
-                                    background: ticket.status === s ? `${TICKET_STATUS[s].color}33` : 'transparent', color: ticket.status === s ? TICKET_STATUS[s].color : C.muted,
+                                    background: ticket.status === s ? TICKET_STATUS[s].color : 'transparent', color: ticket.status === s ? 'white' : C.muted,
                                 }}>
                                 {TICKET_STATUS[s].label}
                             </button>
@@ -145,12 +145,12 @@ const Conversation: React.FC<{ ticketId: number; onBack?: () => void }> = ({ tic
                             <div key={m.id} data-admin-message={m.id} style={{ display: 'flex', justifyContent: mine ? 'flex-end' : 'flex-start' }}>
                                 <div style={{
                                     maxWidth: 'min(560px, 80%)', padding: '9px 12px', borderRadius: 14, fontSize: '0.86rem', lineHeight: 1.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word',
-                                    background: mine ? 'linear-gradient(135deg, rgba(99,102,241,0.9), rgba(139,92,246,0.9))' : 'rgba(51, 65, 85, 0.8)',
-                                    color: 'white', borderBottomRightRadius: mine ? 4 : 14, borderBottomLeftRadius: mine ? 14 : 4,
+                                    background: mine ? GRADIENT : '#eef0fb', border: mine ? 'none' : `1px solid ${C.border}`,
+                                    color: mine ? 'white' : C.text, borderBottomRightRadius: mine ? 4 : 14, borderBottomLeftRadius: mine ? 14 : 4,
                                 }}>
                                     {m.body}
                                     <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', alignItems: 'center', marginTop: 4, fontSize: '0.66rem', opacity: 0.75 }}>
-                                        {m.via === 'telegram' && <span data-admin-via-telegram style={{ padding: '0 6px', borderRadius: 999, background: 'rgba(14,165,233,0.35)', fontWeight: 700 }}>Telegram</span>}
+                                        {m.via === 'telegram' && <span data-admin-via-telegram style={{ padding: '0 6px', borderRadius: 999, background: C.sky, color: 'white', fontWeight: 700 }}>Telegram</span>}
                                         <span title={fmtDateTime(m.created_at)}>{mine ? 'Destek' : displayName(u)} · {fmtTime(m.created_at)}</span>
                                     </div>
                                 </div>
@@ -226,7 +226,7 @@ export const Tickets: React.FC = () => {
                         style={{
                             display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 10px', borderRadius: 9, border: 'none', cursor: 'pointer',
                             fontFamily: 'inherit', fontSize: '0.78rem', fontWeight: 700,
-                            background: filter === f.id ? 'rgba(99,102,241,0.2)' : 'transparent', color: filter === f.id ? '#e0e7ff' : C.muted,
+                            background: filter === f.id ? 'rgba(99,102,241,0.12)' : 'transparent', color: filter === f.id ? '#4338ca' : C.muted,
                         }}>
                         {f.label} <span style={{ color: C.dim, fontWeight: 600 }}>{counts[f.id].total}</span>
                         <CountBadge n={counts[f.id].unread} />
@@ -245,7 +245,7 @@ export const Tickets: React.FC = () => {
                         <button key={t.id} type="button" data-admin-ticket={t.id} onClick={() => setSelected(t.id)} className={active ? undefined : 'adm-nav-btn'}
                             style={{
                                 display: 'flex', gap: 10, width: '100%', padding: '10px 10px', borderRadius: 12, border: 'none', cursor: 'pointer', textAlign: 'left',
-                                fontFamily: 'inherit', color: C.text, background: active ? 'rgba(99,102,241,0.16)' : 'transparent', marginBottom: 2,
+                                fontFamily: 'inherit', color: C.text, background: active ? 'rgba(99,102,241,0.12)' : 'transparent', boxShadow: active ? `inset 3px 0 0 ${C.accent}` : 'none', marginBottom: 2,
                             }}>
                             <Avatar name={displayName(t.user)} size={32} />
                             <div style={{ flex: 1, minWidth: 0 }}>
