@@ -4,7 +4,7 @@ import { buildSeedKb, SUGGESTIONS } from './assistant-kb.js';
 
 const AI_KEY = process.env.ASSISTANT_AI_KEY || process.env.GEMINI_API_KEY || '';
 const AI_URL = process.env.ASSISTANT_AI_URL || 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
-const AI_MODEL = process.env.ASSISTANT_AI_MODEL || 'gemini-2.5-flash';
+const AI_MODEL = process.env.ASSISTANT_AI_MODEL || 'gemini-3.5-flash';
 const AI_DAILY_LIMIT = Number(process.env.ASSISTANT_AI_DAILY_LIMIT || 400);
 
 const QUESTION_MAX = 500;
@@ -64,6 +64,7 @@ Kurallar:
 - Yalnızca BİLGİ BANKASI'ndaki bilgilere dayan. Fiyat, hak sayısı, düğme adı gibi bilgileri aynen oradan al; uydurma.
 - Bilgi bankasında olmayan site sorularında "Bu konuda kesin bilgim yok" de ve destek ekibine yazmayı öner.
 - Site ve e-belge tasarımı dışındaki konularda (genel sohbet, kod yazma, vergi/muhasebe danışmanlığı, başka ürünler vb.) kibarca yalnızca bu site hakkında yardımcı olabileceğini söyle ve ilgili bir site konusuna yönlendir.
+- Selamlama yapma ve kendini tanıtma ("Merhaba", "Ben Edi" gibi); doğrudan yanıta geç. Yanıtı "Başka bir konuda yardımcı olabilir miyim?" gibi kalıplarla bitirme.
 - Türkçe, samimi ve kısa yanıt ver (en fazla 120 kelime). Adım gerekiyorsa "- " ile madde kullan. Önemli düğme adlarını **kalın** yaz.
 - HTML, başlık, tablo, bağlantı veya URL yazma. Kendinden "yapay zekâ modeli" diye bahsetme.`;
 
