@@ -2,9 +2,10 @@ import express from 'express';
 import cors from 'cors';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { randomUUID } from 'node:crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 import { initDb } from './db.js';
 import { applyLicenseLock, hasLicenseLock, isValidTaxId, normalizeTaxId, withIssuerTaxId } from '../shared/license-lock.js';
+import { TEST_WATERMARK_PNG } from '../shared/test-watermark-png.js';
 import { createRequireAdmin, registerAdminAuthRoutes } from './admin-auth.js';
 import { registerAdminRoutes } from './admin.js';
 import { registerAssistantRoutes } from './assistant.js';
@@ -39,6 +40,55 @@ const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS
 
 // Railway önünde tek proxy katmanı var; req.ip gerçek istemci adresi olur (giriş sınırlaması için).
 app.set('trust proxy', 1);
+
+// Çevrimiçi lisans mührü (shared/license-lock.js → buildSeal). XSLT'nin açıldığı her
+// yerden (ERP, entegratör, tarayıcı) arka plan resmi olarak çağrılır; bu yüzden CORS
+// denetiminden önce tanımlıdır. Geçerli lisansta saydam, değilse TEST resmi döner.
+// Sunucu hatasında saydam döner: karar XSLT'deki çevrimdışı kilide kalır.
+const TRANSPARENT_PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 'base64');
+const SEAL_TEST_PNG = Buffer.from(TEST_WATERMARK_PNG.slice(TEST_WATERMARK_PNG.indexOf(',') + 1), 'base64');
+const sealUrlsFor = (token) => (process.env.LICENSE_SEAL_URLS
+    || `https://${process.env.RAILWAY_PUBLIC_DOMAIN || 'edesign-deploy-production.up.railway.app'}/api/designs/seal/{token}/t{taxId}.png,https://www.edxdocu.com/seal.php?t={token}&v={taxId}`)
+    .split(',').map(u => u.trim()).filter(Boolean).map(u => u.replace('{token}', token));
+
+app.get('/api/designs/seal/:token/:file', async (req, res) => {
+    res.set({
+        'Content-Type': 'image/png',
+        'Cache-Control': 'no-store, max-age=0',
+        'Access-Control-Allow-Origin': '*',
+        'Cross-Origin-Resource-Policy': 'cross-origin',
+    });
+    const token = String(req.params.token || '').toLowerCase();
+    const taxId = String(req.params.file || '').match(/^t(\d{0,11})\.png$/)?.[1] ?? '';
+    try {
+        if (!db?.pool) return res.send(TRANSPARENT_PNG);
+        const row = /^[0-9a-f]{32}$/.test(token)
+            ? (await db.pool.query('SELECT id, license_tax_id FROM designs WHERE license_token = $1', [token])).rows[0]
+            : null;
+        if (!row) return res.send(SEAL_TEST_PNG);
+        let licensed = row.license_tax_id;
+        if (!licensed && isValidTaxId(taxId)) {
+            // Lisansı VKN'siz kalmış tasarım: ilk açıldığı VKN/TCKN'ye bağlanır.
+            licensed = (await db.pool.query(
+                'UPDATE designs SET license_tax_id = COALESCE(license_tax_id, $1) WHERE id = $2 RETURNING license_tax_id', [taxId, row.id]
+            )).rows[0]?.license_tax_id;
+        }
+        const ok = !!taxId && taxId === licensed;
+        const header = (name, fallback) => String(req.get(name) || fallback || '').slice(0, 300) || null;
+        await db.pool.query(
+            `INSERT INTO license_checks (design_id, tax_id, ok, last_ip, last_agent, last_referer)
+             VALUES ($1, $2, $3, $4, $5, $6)
+             ON CONFLICT (design_id, tax_id) DO UPDATE SET ok = EXCLUDED.ok, hits = license_checks.hits + 1, last_seen = NOW(),
+                 last_ip = EXCLUDED.last_ip, last_agent = EXCLUDED.last_agent, last_referer = EXCLUDED.last_referer`,
+            [row.id, taxId || '-', ok, header('x-seal-client', req.ip), header('x-seal-agent', req.get('user-agent')), header('x-seal-referer', req.get('referer'))]
+        ).catch(e => console.warn('[seal] log error:', e.message));
+        if (!ok) console.log(`[seal] design #${row.id} opened with tax id ${taxId || '(yok)'} — TEST`);
+        res.send(ok ? TRANSPARENT_PNG : SEAL_TEST_PNG);
+    } catch (e) {
+        console.warn('[seal] error:', e.message);
+        res.send(TRANSPARENT_PNG);
+    }
+});
 
 // Middleware
 app.use(cors({
@@ -551,9 +601,10 @@ app.post('/api/designs/export', authenticateToken, async (req, res) => {
             await client.query('ROLLBACK');
             return res.status(400).json({ error: 'Bu dosya baska bir lisansa kilitli; tekrar onaylanamaz.' });
         }
+        const licenseToken = existing?.license_token || randomBytes(16).toString('hex');
         let lockedXslt;
         try {
-            lockedXslt = applyLicenseLock(xslt_content, taxId);
+            lockedXslt = applyLicenseLock(xslt_content, taxId, { sealUrls: sealUrlsFor(licenseToken) });
         } catch (e) {
             await client.query('ROLLBACK');
             return res.status(400).json({ error: `Lisans kilidi eklenemedi: ${e.message}` });
@@ -577,14 +628,14 @@ app.post('/api/designs/export', authenticateToken, async (req, res) => {
             ? (await client.query(
                 `UPDATE designs SET name = $1, module_id = $2, xslt_content = $3, xml_content = COALESCE($4, xml_content),
                         design_key = $5, paid_at = COALESCE(paid_at, NOW()), status = 'downloaded',
-                        download_count = download_count + 1, license_tax_id = $7, updated_at = NOW()
+                        download_count = download_count + 1, license_tax_id = $7, license_token = $8, updated_at = NOW()
                   WHERE id = $6 RETURNING *`,
-                [designName, module_id, content, previewXml, key, existing.id, taxId]
+                [designName, module_id, content, previewXml, key, existing.id, taxId, licenseToken]
             )).rows[0]
             : (await client.query(
-                `INSERT INTO designs (user_id, name, module_id, xslt_content, xml_content, design_key, paid_at, status, download_count, license_tax_id)
-                 VALUES ($1, $2, $3, $4, $5, $6, NOW(), 'downloaded', 1, $7) RETURNING *`,
-                [user.id, designName, module_id, content, previewXml, key, taxId]
+                `INSERT INTO designs (user_id, name, module_id, xslt_content, xml_content, design_key, paid_at, status, download_count, license_tax_id, license_token)
+                 VALUES ($1, $2, $3, $4, $5, $6, NOW(), 'downloaded', 1, $7, $8) RETURNING *`,
+                [user.id, designName, module_id, content, previewXml, key, taxId, licenseToken]
             )).rows[0];
         await client.query('COMMIT');
         console.log(`[designs] user=${user.id} export design #${row.id} charged=${charged}`);

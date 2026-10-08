@@ -178,7 +178,25 @@ export const initDb = async () => {
         await ensureDesignsColumn(probe, 'download_count', 'INTEGER NOT NULL DEFAULT 0');
         // Onaylanan XSLT'nin kilitlendiği VKN/TCKN (shared/license-lock.js).
         await ensureDesignsColumn(probe, 'license_tax_id', 'TEXT');
+        // Çevrimiçi lisans mührünün adresindeki tahmin edilemez anahtar.
+        await ensureDesignsColumn(probe, 'license_token', 'TEXT');
         await probe.query(`CREATE UNIQUE INDEX IF NOT EXISTS idx_designs_design_key ON designs (design_key) WHERE design_key IS NOT NULL`);
+        await probe.query(`CREATE UNIQUE INDEX IF NOT EXISTS idx_designs_license_token ON designs (license_token) WHERE license_token IS NOT NULL`);
+        // Onaylı XSLT'nin açıldığı her VKN/TCKN: nerede, kaç kez, geçerli mi.
+        await probe.query(`
+            CREATE TABLE IF NOT EXISTS license_checks (
+                design_id     INTEGER NOT NULL REFERENCES designs(id) ON DELETE CASCADE,
+                tax_id        TEXT NOT NULL,
+                ok            BOOLEAN NOT NULL,
+                hits          INTEGER NOT NULL DEFAULT 1,
+                first_seen    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                last_seen     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                last_ip       TEXT,
+                last_agent    TEXT,
+                last_referer  TEXT,
+                PRIMARY KEY (design_id, tax_id)
+            )
+        `);
 
         await probe.query(`CREATE INDEX IF NOT EXISTS idx_designs_user_id ON designs (user_id)`);
         await probe.query(`CREATE INDEX IF NOT EXISTS idx_designs_updated_at ON designs (updated_at DESC)`);

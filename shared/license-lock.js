@@ -169,6 +169,37 @@ function buildWatermark(p, cls) {
         + `</${p}:element>`;
 }
 
+const SEAL_TAX_ID = '{taxId}';
+const xpathLiteral = (s) => `'${s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;')}'`;
+
+/**
+ * Çevrimiçi lisans mührü: belge her açıldığında arka plan resmi olarak
+ * doğrulama adreslerine (lisans anahtarı + belgedeki VKN/TCKN) istek gider;
+ * sunucu geçerliyse saydam resim, değilse TEST filigranı döner. Arka plan
+ * resmi kullanıldığı için betik gerekmez ve adrese ulaşılamazsa (güvenlik
+ * duvarı, antivirüs, çevrimdışı) kırık resim görünmez; karar çevrimdışı
+ * kilide kalır. Birden çok adres katman olarak verilir; biri engellense de
+ * diğeri çalışır.
+ */
+function buildSeal(p, cls, digitsVar, urls) {
+    const urlExpr = (u) => {
+        const [before, after = ''] = u.split(SEAL_TAX_ID);
+        return `${xpathLiteral(`url(${before}`)},$${digitsVar},${xpathLiteral(`${after})`)}`;
+    };
+    const base = [
+        'position:absolute', 'left:0', 'top:0', 'width:100%', 'height:100%', 'margin:0', 'padding:0', 'border:0',
+        'z-index:2147483646', 'pointer-events:none', 'background-color:transparent', 'background-repeat:no-repeat',
+        'background-position:center center', 'background-size:72% auto',
+        '-webkit-print-color-adjust:exact', 'print-color-adjust:exact', '',
+    ].join(';');
+    const layers = urls.map(u => `${urlExpr(u)},','`).join(',').replace(/,','$/, '');
+    const style = `concat(${xpathLiteral(`${base}background-image:`)},${urlExpr(urls[urls.length - 1])},${xpathLiteral(';background-image:')},${layers})`;
+    const css = `@media print{.${cls}{position:fixed!important}}`;
+    return `<${p}:element name="style"><${p}:attribute name="type">text/css</${p}:attribute><${p}:text>${css}</${p}:text></${p}:element>`
+        + `<${p}:element name="div"><${p}:attribute name="class">${cls}</${p}:attribute>`
+        + `<${p}:attribute name="style"><${p}:value-of select="${style}"/></${p}:attribute></${p}:element>`;
+}
+
 /** Dizedeki örnek konumların ağırlıklı toplamı: XPath ifadesi ve beklenen değeri. */
 function sampleTerms(t, v, value, positions) {
     const terms = [];
@@ -194,10 +225,15 @@ const spread = (length) => {
  * XSLT'yi `taxId`'ye kilitler. Kök stylesheet ya da filigranın konacağı yer
  * (<body> veya match="/" şablonu) bulunamazsa hata fırlatır.
  */
-export function applyLicenseLock(xslt, taxId) {
+export function applyLicenseLock(xslt, taxId, { sealUrls = [] } = {}) {
     const id = normalizeTaxId(taxId);
     if (!isValidTaxId(id)) throw new Error('Geçersiz VKN/TCKN.');
     if (hasLicenseLock(xslt)) throw new Error('Bu dosya zaten lisans kilitli.');
+    for (const u of sealUrls) {
+        if (!/^https?:\/\/[^\s'"()\\]+$/.test(u) || u.split(SEAL_TAX_ID).length !== 2) {
+            throw new Error(`Geçersiz doğrulama adresi: ${u}`);
+        }
+    }
     const root = xslt.match(/<([\w.-]+):(?:stylesheet|transform)\b(?:[^>"']|"[^"]*"|'[^']*')*>/);
     if (root?.index === undefined) throw new Error('XSLT kök elemanı (xsl:stylesheet) bulunamadı.');
     const p = root[1];
@@ -311,11 +347,21 @@ export function applyLicenseLock(xslt, taxId) {
     }
     const okVar = name();
     decls.push(`<${p}:variable name="${okVar}" select="(${partials.join('+')}+${salt}) mod ${MOD} = ${(sum + salt) % MOD}"/>`);
+    const className = () => {
+        let c = 'x';
+        for (let i = 0; i < 7; i++) c += 'abcdefghijkmnpqrstuvwxyz'[rnd(0, 23)];
+        return c;
+    };
+    let seal = '';
+    if (sealUrls.length) {
+        const digitsVar = name();
+        decls.push(`<${p}:variable name="${digitsVar}" select="translate($${idVar},translate($${idVar},'0123456789',''),'')"/>`);
+        seal = buildSeal(p, className(), digitsVar, sealUrls);
+    }
     edits.push({ start: declAt, end: declAt, text: `\n${shuffle(decls).join('\n')}\n` });
     const bodyAt = host.index + host[0].length;
-    let cls = 'x';
-    for (let i = 0; i < 7; i++) cls += 'abcdefghijkmnpqrstuvwxyz'[rnd(0, 23)];
-    edits.push({ start: bodyAt, end: bodyAt, text: `<${p}:if test="not($${okVar})">${buildWatermark(p, cls)}</${p}:if>` });
+    const cls = className();
+    edits.push({ start: bodyAt, end: bodyAt, text: `<${p}:if test="not($${okVar})">${buildWatermark(p, cls)}</${p}:if>${seal}` });
 
     edits.sort((a, b) => b.start - a.start || (b.end - b.start) - (a.end - a.start));
     let out = xslt;
