@@ -147,7 +147,7 @@ export const buildSeedKb = (packages) => {
             id: 's-satin',
             q: 'Nasıl satın alırım? Ödeme nasıl yapılır?',
             keywords: 'satin al odeme kredi karti paytr 3d secure taksit paket al nasil oderim',
-            a: `Önce üye olup giriş yapın, sonra seçim ekranının sağ üstündeki **Paket Al** düğmesine tıklayın.\n- Paketinizi seçip **Satın Al** deyin; güvenli ödeme formu aynı pencerede açılır. Ödeme **PayTR 3D Secure** ile yapılır, kart bilgileriniz sunucumuza ulaşmaz.\n- Ödeme başarılı olunca haklar hesabınıza otomatik yüklenir.\n\nPaketler ${tl(enUcuz.price)}'den başlar.`,
+            a: `Önce üye olup giriş yapın, sonra seçim ekranının sağ üstündeki **Paket Al** düğmesine tıklayın.\n- Paketinizi seçin, fatura bilgilerinizi girin (firma ünvanı ve vergi numarası; şahıs firmasında T.C. kimlik numarası) ve **Ödemeye geç** deyin. Ödeme **PayTR 3D Secure** ile yapılır, kart bilgileriniz sunucumuza ulaşmaz.\n- Ödeme başarılı olunca haklar hesabınıza otomatik yüklenir. Fatura bu bilgilere göre hazırlanır.\n\nPaketler ${tl(enUcuz.price)}'den başlar.`,
             actions: ['pricing', 'login'],
         },
         {
@@ -196,7 +196,7 @@ export const buildSeedKb = (packages) => {
             id: 's-destek',
             q: 'Destek ekibine nasıl ulaşırım?',
             keywords: 'destek iletisim ulas telefon whatsapp mail e-posta yardim canli destek musteri hizmetleri',
-            a: 'Üye girişi yaptıysanız sağ alttaki **Destek** düğmesinden **Yeni talep** açabilir veya **Online destek iste** ile ekranınızı onayınızla paylaşarak canlı yardım alabilirsiniz. Giriş yapmadan da sayfanın altındaki **İletişim** bağlantısından WhatsApp ile bize yazabilirsiniz.',
+            a: 'Üye girişi yaptıysanız sağ alttaki **Destek** düğmesinden **Yeni talep** açabilir veya **Online destek iste** ile ekranınızı onayınızla paylaşarak canlı yardım alabilirsiniz. Giriş yapmadan da bize ulaşabilirsiniz:\n- **Telefon / WhatsApp:** 0533 666 01 25\n- **E-posta:** destek@edxdocu.com\n- **Adres:** Merkez Mahallesi Ege Sokak No:4 Kağıthane / İstanbul\n\nAdresin haritası sayfanın altındaki **İletişim** bağlantısında.',
             actions: ['contact', 'login'],
         },
         {

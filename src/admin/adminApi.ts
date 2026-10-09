@@ -1,8 +1,9 @@
 import { API_URL } from '../api';
 import type {
-    AdminIdentity, AdminLoginResponse, AdminSettingsStatus, AdminStats, AdminUserDetail, AdminUserRow,
+    AdminIdentity, AdminInvoice, AdminInvoiceList, AdminLoginResponse, AdminSettingsStatus, AdminStats, AdminUserDetail, AdminUserRow,
     AdminVerifyResponse, AiMemoryEntry, AiMemoryInput, AssistantBuiltinEntry, AssistantKbEntry, AssistantKbInput, AssistantLog,
-    AssistantLogFilter, AssistantOverview, GalleryDesign, GalleryDesignInput, RemoteSession, SupportMessage, SupportTicket, TicketStatus,
+    AssistantLogFilter, AssistantOverview, GalleryDesign, GalleryDesignInput, InvoiceScope, InvoiceUpdateInput, RemoteSession,
+    SupportMessage, SupportTicket, TicketStatus,
 } from './contracts';
 
 /** Yönetici oturumu kullanıcı oturumundan ayrıdır; aynı sekmede ikisi birlikte açık kalabilir. */
@@ -98,6 +99,12 @@ export const adminApi = {
     user: (id: number) => request<AdminUserDetail>(`/admin/users/${id}`),
     changeCredits: (id: number, delta: number) =>
         request<AdminUserRow>(`/admin/users/${id}`, { method: 'PATCH', body: { credits_delta: delta } }),
+
+    invoices: (status: InvoiceScope = 'ready') => request<AdminInvoiceList>(`/admin/invoices${qs({ status })}`),
+    updateInvoice: (id: number, input: InvoiceUpdateInput) =>
+        request<AdminInvoice>(`/admin/invoices/${id}`, { method: 'PATCH', body: input }),
+    setInvoiceStatus: (id: number, status: 'issued' | 'ready', number?: string) =>
+        request<AdminInvoice>(`/admin/invoices/${id}/status`, { method: 'POST', body: { status, number } }),
 
     tickets: (status?: TicketStatus) => request<SupportTicket[]>(`/admin/tickets${qs({ status })}`),
     ticket: (id: number) => request<SupportTicket>(`/admin/tickets/${id}`),

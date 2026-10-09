@@ -55,7 +55,7 @@ const KbForm: React.FC<{ state: FormState; onClose: () => void; onSaved: () => v
         try {
             if (state.id) await adminApi.updateAssistantKb(state.id, form);
             else await adminApi.createAssistantKb(form);
-            pushToast({ kind: 'success', title: 'Bilgi bankası güncellendi', description: form.status === 'active' ? 'Edi bu yanıtı hemen kullanmaya başlar.' : 'Kayıt yayında değil.', ttl: 4000 });
+            pushToast({ kind: 'success', title: 'Bilgi bankası güncellendi', description: form.status === 'active' ? 'Sarp bu yanıtı hemen kullanmaya başlar.' : 'Kayıt yayında değil.', ttl: 4000 });
             onSaved();
         } catch (e) {
             setError(errorText(e));
@@ -170,8 +170,8 @@ export const AssistantSection: React.FC = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <SectionHeader
                 icon={<MessagesSquare size={20} />}
-                title="Site asistanı (Edi)"
-                subtitle="Ziyaretçilerin sağ alttaki robota sorduğu sorular. Yanıtlanamayan veya beğenilmeyen soruları buradan yanıtlayın; Edi eklediğiniz yanıtları hemen kullanmaya başlar."
+                title="Site asistanı (Sarp)"
+                subtitle="Ziyaretçilerin sağ alttaki robota sorduğu sorular. Yanıtlanamayan veya beğenilmeyen soruları buradan yanıtlayın; Sarp eklediğiniz yanıtları hemen kullanmaya başlar."
                 actions={<button type="button" onClick={() => void load()} style={btn('secondary', true)}><RefreshCw size={13} /> Yenile</button>}
             />
             {error && <ErrorBox>{error}</ErrorBox>}
@@ -184,7 +184,7 @@ export const AssistantSection: React.FC = () => {
                     </div>
                 ) : (
                     <div style={{ fontSize: '0.84rem', color: '#334155', lineHeight: 1.6 }}>
-                        <Badge color={C.amber}>Kapalı</Badge> Edi şu an yalnızca bilgi bankasından yanıt veriyor.
+                        <Badge color={C.amber}>Kapalı</Badge> Sarp şu an yalnızca bilgi bankasından yanıt veriyor.
                         Ücretsiz Google Gemini anahtarı (aistudio.google.com) alıp sunucuda <code>GEMINI_API_KEY</code> olarak tanımlarsanız
                         sorular doğal dille ve bağlama göre yanıtlanır.
                     </div>
@@ -231,7 +231,7 @@ export const AssistantSection: React.FC = () => {
                                         <span style={{ fontSize: '0.72rem', color: C.dim }}>{fmtDateTime(l.created_at)}</span>
                                     </div>
                                     <details style={{ marginTop: 6 }}>
-                                        <summary style={{ cursor: 'pointer', fontSize: '0.76rem', color: C.muted }}>Edi'nin yanıtı</summary>
+                                        <summary style={{ cursor: 'pointer', fontSize: '0.76rem', color: C.muted }}>Sarp'ın yanıtı</summary>
                                         <div style={{ ...clip, marginTop: 6 }}>{l.answer}</div>
                                     </details>
                                     {!l.resolved && (
@@ -255,7 +255,7 @@ export const AssistantSection: React.FC = () => {
                     actions={<button type="button" onClick={() => setForm({ id: null, input: { question: '', answer: '', keywords: '', actions: [], status: 'active' } })} style={btn('primary', true)}><Plus size={13} /> Yeni yanıt</button>}
                 >
                     <p style={{ margin: '0 0 12px', fontSize: '0.78rem', color: C.muted, lineHeight: 1.5 }}>
-                        Ziyaretçinin beğendiği yapay zekâ yanıtları "Onay bekliyor" olarak buraya düşer; onayladığınızda Edi o soruyu yapay zekâya sormadan bu yanıtla karşılar.
+                        Ziyaretçinin beğendiği yapay zekâ yanıtları "Onay bekliyor" olarak buraya düşer; onayladığınızda Sarp o soruyu yapay zekâya sormadan bu yanıtla karşılar.
                     </p>
                     {!kb ? <Spinner /> : kb.entries.length === 0 ? <Empty>Henüz eklenen yanıt yok. Yerleşik yanıtlar aşağıda.</Empty> : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

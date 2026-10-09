@@ -34,7 +34,7 @@ export async function requestNotificationPermission() {
 export function showBrowserNotification(title: string, body: string, tag?: string) {
     if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
     try {
-        const n = new Notification(title, { body, tag, icon: `${import.meta.env.BASE_URL}favicon.svg` });
+        const n = new Notification(title, { body, tag, icon: `${import.meta.env.BASE_URL}favicon-192.png` });
         n.onclick = () => { window.focus(); n.close(); };
     } catch { /* bazı tarayıcılar yalnızca service worker ile bildirim gösterir */ }
 }

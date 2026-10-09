@@ -145,6 +145,7 @@ export const initDb = async () => {
         await ensureColumn(probe, 'phone_number', 'TEXT');
         await ensureColumn(probe, 'free_design_used', 'INTEGER NOT NULL DEFAULT 0');
         await ensureColumn(probe, 'last_seen_at', 'TIMESTAMPTZ');
+        await ensureColumn(probe, 'billing_profile', 'JSONB');
 
         // Useful indexes for the auth query path.
         await probe.query(`CREATE INDEX IF NOT EXISTS idx_users_username ON users (username)`);
@@ -220,6 +221,12 @@ export const initDb = async () => {
         await probe.query(`CREATE INDEX IF NOT EXISTS idx_payments_token ON payments (token)`);
         await probe.query(`CREATE INDEX IF NOT EXISTS idx_payments_conversation_id ON payments (conversation_id)`);
         await probe.query(`CREATE INDEX IF NOT EXISTS idx_payments_status ON payments (status)`);
+        await ensureTableColumn(probe, 'payments', 'billing', 'JSONB');
+        await ensureTableColumn(probe, 'payments', 'invoice_status', 'TEXT');
+        await ensureTableColumn(probe, 'payments', 'invoice_draft', 'JSONB');
+        await ensureTableColumn(probe, 'payments', 'invoice_number', 'TEXT');
+        await ensureTableColumn(probe, 'payments', 'invoice_issued_at', 'TIMESTAMPTZ');
+        await probe.query(`CREATE INDEX IF NOT EXISTS idx_payments_invoice_status ON payments (invoice_status) WHERE invoice_status IS NOT NULL`);
 
         await createSupportSchema(probe);
         await promoteAdmins(probe);
@@ -234,6 +241,22 @@ export const initDb = async () => {
 /**
  * Idempotent designs tablosu kolon ekleme (ensureColumn'in designs versiyonu).
  */
+const ensureTableColumn = async (client, table, column, definition) => {
+    if (!/^[a-z_]+$/.test(table) || !/^[a-z_]+$/.test(column)) throw new Error(`Geçersiz kolon: ${table}.${column}`);
+    const { rows } = await client.query(
+        `SELECT column_name
+           FROM information_schema.columns
+          WHERE table_schema = 'public'
+            AND table_name   = $1
+            AND column_name  = $2`,
+        [table, column]
+    );
+    if (rows.length > 0) return false;
+    console.log(`[db] Migration: adding column ${table}.${column}`);
+    await client.query(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+    return true;
+};
+
 const ensureDesignsColumn = async (client, column, definition) => {
     const { rows } = await client.query(
         `SELECT column_name

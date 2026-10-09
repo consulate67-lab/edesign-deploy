@@ -184,11 +184,12 @@ export const Selection: React.FC<SelectionProps> = ({ onLogout, onSelectXsltEdit
             }}>
                 <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
                     <img
-                        src={`${import.meta.env.BASE_URL}favicon.svg`}
-                        alt=""
-                        width={64}
-                        height={64}
-                        style={{ display: 'block', margin: '0 auto 1.25rem', borderRadius: 18, boxShadow: theme.shadowBrand }}
+                        src={`${import.meta.env.BASE_URL}logo-300x100.png`}
+                        srcSet={`${import.meta.env.BASE_URL}logo-600x200.png 2x`}
+                        alt="edXdocu"
+                        width={300}
+                        height={100}
+                        style={{ display: 'block', height: 72, width: 'auto', margin: '0 auto 1.25rem' }}
                     />
                     <h1 style={{
                         fontSize: 'clamp(2.5rem, 6vw, 3.5rem)',

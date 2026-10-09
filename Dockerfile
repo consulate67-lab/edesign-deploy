@@ -5,8 +5,11 @@
 #
 # Touched 2026-09-23 to force Railway snapshot re-upload (file hash change)
 
+# Base image comes from the AWS mirror of the official Docker library;
+# Railway builds hit Docker Hub's anonymous pull limit (429).
+
 # ---------- Stage 1: deps ----------
-FROM node:20-alpine AS deps
+FROM public.ecr.aws/docker/library/node:20-alpine AS deps
 WORKDIR /app
 
 # Install deps with npm ci for reproducible installs
@@ -14,7 +17,7 @@ COPY package.json package-lock.json ./
 RUN npm ci --include=dev
 
 # ---------- Stage 2: runtime ----------
-FROM node:20-alpine AS runtime
+FROM public.ecr.aws/docker/library/node:20-alpine AS runtime
 WORKDIR /app
 
 ENV NODE_ENV=production \

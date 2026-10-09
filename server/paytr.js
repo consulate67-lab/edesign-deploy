@@ -6,6 +6,7 @@
 //  3) /status/:oid: Ödeme penceresi sonucu buradan izler.
 
 import { createHmac, timingSafeEqual } from 'node:crypto';
+import { buildInvoiceDraft, istanbulDate, parseBilling } from '../shared/invoice-billing.js';
 
 const MERCHANT_ID = process.env.PAYTR_MERCHANT_ID || '';
 const MERCHANT_KEY = process.env.PAYTR_MERCHANT_KEY || '';
@@ -40,11 +41,23 @@ export function registerPaytrRoutes(app, { db, authenticateToken, packages, fron
         return frontendUrl;
     };
 
+    const siteOrigin = (() => {
+        try { return new URL(frontendUrl).origin; } catch { return 'https://edesign-deploy.com'; }
+    })();
+
+    app.get('/api/payment/billing', authenticateToken, async (req, res) => {
+        const row = await db.get('SELECT billing_profile FROM users WHERE id = ?', [req.user.id]);
+        res.json({ billing: row?.billing_profile ?? null });
+    });
+
     app.post('/api/payment/paytr/checkout', authenticateToken, async (req, res) => {
-        if (!paytrConfigured()) return res.status(503).json({ error: 'Ödeme altyapısı henüz yapılandırılmadı.' });
         const planId = req.body?.plan;
         const plan = packages[planId];
         if (!plan) return res.status(400).json({ error: 'Geçersiz paket.' });
+        const parsed = parseBilling(req.body?.billing);
+        if (parsed.error) return res.status(400).json({ error: parsed.error });
+        const billing = parsed.billing;
+        if (!paytrConfigured()) return res.status(503).json({ error: 'Ödeme altyapısı henüz yapılandırılmadı.' });
 
         const user = await db.get('SELECT id, username, full_name, company_name, phone_number FROM users WHERE id = ?', [req.user.id]);
         if (!user) return res.status(401).json({ error: 'Oturum geçersiz.' });
@@ -99,9 +112,17 @@ export function registerPaytrRoutes(app, { db, authenticateToken, packages, fron
                 return res.status(502).json({ error: `Ödeme başlatılamadı: ${data.reason || 'PayTR yanıt vermedi'}` });
             }
             await db.run(
-                `INSERT INTO payments (user_id, plan_id, conversation_id, token, amount, status)
-                 VALUES (?, ?, ?, ?, ?, 'pending')`,
-                [user.id, planId, merchantOid, data.token, amount]
+                `INSERT INTO payments (user_id, plan_id, conversation_id, token, amount, status, billing)
+                 VALUES (?, ?, ?, ?, ?, 'pending', ?::jsonb)`,
+                [user.id, planId, merchantOid, data.token, amount, JSON.stringify(billing)]
+            );
+            await db.run(
+                `UPDATE users
+                    SET billing_profile = ?::jsonb,
+                        company_name = CASE WHEN company_name IS NULL OR btrim(company_name) = '' THEN ? ELSE company_name END,
+                        updated_at = NOW()
+                  WHERE id = ?`,
+                [JSON.stringify(billing), billing.title, user.id]
             );
             console.log(`[paytr] checkout user=${user.id} plan=${planId} oid=${merchantOid} test=${TEST_MODE}`);
             res.json({ success: true, merchantOid, iframeUrl: IFRAME_URL + data.token, testMode: TEST_MODE === '1' });
@@ -138,9 +159,31 @@ export function registerPaytrRoutes(app, { db, authenticateToken, packages, fron
             }
             const plan = packages[payment.plan_id];
             if (status === 'success' && plan) {
-                await client.query(`UPDATE payments SET status = 'success', completed_at = NOW() WHERE id = $1`, [payment.id]);
+                let invoiceStatus = null;
+                let invoiceDraft = null;
+                if (payment.billing) {
+                    const buyer = await client.query(
+                        'SELECT username, phone_number FROM users WHERE id = $1',
+                        [payment.user_id]
+                    );
+                    invoiceDraft = buildInvoiceDraft({
+                        plan: { ...plan, price: payment.amount },
+                        billing: payment.billing,
+                        user: buyer.rows[0],
+                        merchantOid: oid,
+                        issueDate: istanbulDate(),
+                        website: siteOrigin,
+                    });
+                    invoiceStatus = 'ready';
+                }
+                await client.query(
+                    `UPDATE payments
+                        SET status = 'success', completed_at = NOW(), invoice_status = $2, invoice_draft = $3::jsonb
+                      WHERE id = $1`,
+                    [payment.id, invoiceStatus, invoiceDraft ? JSON.stringify(invoiceDraft) : null]
+                );
                 await client.query('UPDATE users SET credits = credits + $1 WHERE id = $2', [plan.credits, payment.user_id]);
-                console.log(`[paytr] ödeme başarılı user=${payment.user_id} oid=${oid} +${plan.credits} hak test=${req.body.test_mode}`);
+                console.log(`[paytr] ödeme başarılı user=${payment.user_id} oid=${oid} +${plan.credits} hak fatura=${invoiceStatus || 'yok'} test=${req.body.test_mode}`);
             } else {
                 await client.query(`UPDATE payments SET status = 'failed', completed_at = NOW() WHERE id = $1`, [payment.id]);
                 console.warn(`[paytr] ödeme başarısız oid=${oid} kod=${req.body.failed_reason_code} ${req.body.failed_reason_msg || ''}`);

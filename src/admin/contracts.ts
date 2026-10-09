@@ -11,6 +11,9 @@
  *     GET  /admin/stats                                      → AdminStats
  *     GET  /admin/users?q=                                   → AdminUserRow[]
  *     GET  /admin/users/:id                                  → AdminUserDetail
+ *     GET  /admin/invoices?status=ready|issued|missing|all   → AdminInvoiceList (varsayılan: kesime hazır)
+ *     PATCH /admin/invoices/:id InvoiceUpdateInput           → AdminInvoice (taslak yeniden hesaplanır)
+ *     POST /admin/invoices/:id/status {status, number?}      → AdminInvoice (issued: EDM fatura no işlenir)
  *     PATCH /admin/users/:id   {credits_delta?}              → AdminUserRow
  *     GET  /admin/tickets?status=open|answered|closed        → SupportTicket[] (messages yok)
  *     GET  /admin/tickets/:id                                → SupportTicket (messages dolu, admin için okundu sayılır)
@@ -63,6 +66,8 @@ export interface AdminStats {
     onlineUsers: number;
     pendingRemote: number;
     revenueTotal: number;
+    invoicesReady: number;
+    paidWithoutBilling: number;
     galleryDesigns: number;
 }
 
@@ -87,8 +92,111 @@ export interface AdminUserRow {
 
 export interface AdminUserDetail extends AdminUserRow {
     designs: { id: number; name: string; module_id: string; status: string; paid: boolean; download_count: number; updated_at: string }[];
-    payments: { id: number; plan_id: string; amount: number; currency: string; status: string; created_at: string; completed_at: string | null }[];
+    payments: { id: number; plan_id: string; amount: number; currency: string; status: string; invoice_status: string | null; created_at: string; completed_at: string | null }[];
     tickets: SupportTicket[];
+}
+
+export type InvoicePartyType = 'company' | 'sole';
+
+export interface InvoiceBilling {
+    partyType: InvoicePartyType;
+    title: string;
+    taxId: string;
+    scheme: 'VKN' | 'TCKN';
+    taxOffice: string;
+    city: string;
+    address: string;
+}
+
+export type InvoiceDocumentMode = 'auto' | 'EFATURA' | 'EARSIV';
+
+export interface InvoiceDraft {
+    integrator: 'edm';
+    issueDate: string;
+    currency: string;
+    /** Eski taslaklarda yok. */
+    notes?: string[];
+    document: {
+        /** Eski taslaklarda yok (= auto). */
+        mode?: InvoiceDocumentMode;
+        preferred: 'EFATURA' | 'EARSIV';
+        profileId: string;
+        invoiceTypeCode: string;
+        fallback: string | null;
+        checkUserBeforeSend: boolean;
+    };
+    customer: InvoiceBilling & { email: string | null; phone: string | null };
+    supplier: { source: string; note: string };
+    lines: {
+        id: number;
+        name: string;
+        description: string;
+        quantity: number;
+        unitCode: string;
+        unitPrice: number;
+        vatRate: number;
+        vatAmount: number;
+        lineExtension: number;
+    }[];
+    totals: {
+        taxExclusive: number;
+        vat: number;
+        taxInclusive: number;
+        payable: number;
+        vatRate: number;
+        pricesIncludeVat: boolean;
+    };
+    payment: {
+        meansCode: string;
+        channel: string;
+        agent: string;
+        merchantOid: string | null;
+        internetSale: boolean;
+        website: string | null;
+    };
+    edm: {
+        method: string;
+        earchive: boolean;
+        internetSales: boolean;
+        receiverVkn: string;
+        invoiceDate: string;
+        payableAmount: number;
+        checkUserBeforeSend: boolean;
+    };
+}
+
+export interface AdminInvoice {
+    id: number;
+    user_id: number;
+    username: string;
+    full_name: string | null;
+    phone_number: string | null;
+    plan_id: string;
+    amount: number;
+    currency: string;
+    merchant_oid: string | null;
+    paid_at: string | null;
+    invoice_status: 'ready' | 'issued' | null;
+    invoice_number: string | null;
+    invoice_issued_at: string | null;
+    /** Fatura bilgisi alınmadan ödenmişse null. */
+    billing: InvoiceBilling | null;
+    draft: InvoiceDraft | null;
+}
+
+export type InvoiceScope = 'ready' | 'issued' | 'missing' | 'all';
+
+export interface AdminInvoiceList {
+    items: AdminInvoice[];
+    paidWithoutBilling: number;
+}
+
+export interface InvoiceUpdateInput {
+    billing: Omit<InvoiceBilling, 'scheme'>;
+    documentMode: InvoiceDocumentMode;
+    /** YYYY-MM-DD, bugünden ileri olamaz. */
+    issueDate: string;
+    note: string;
 }
 
 export type TicketStatus = 'open' | 'answered' | 'closed';
@@ -251,7 +359,7 @@ export type WsMessage =
     | { t: 'ping' }
     | { t: 'pong' };
 
-// ---------------------------------------------------------------- site asistanı (Edi)
+// ---------------------------------------------------------------- site asistanı (Sarp)
 
 export type AssistantActionCode = 'register' | 'login' | 'pricing' | 'docs' | 'faq' | 'product' | 'contact';
 export type AssistantKbStatus = 'active' | 'pending' | 'disabled';

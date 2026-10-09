@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ArrowRight, Sparkles, Zap, FileText, Globe, Layers, ChevronDown, Check, ShieldCheck } from 'lucide-react';
-import { KVKKModal, KullaniciSozlesmesiModal, CerezPolitikasiModal } from './legal/Legal';
+import { KVKKModal, KullaniciSozlesmesiModal, CerezPolitikasiModal, IletisimModal } from './legal/Legal';
 import { api } from './api';
 import { PACKAGES_PLANS, type PackagePlan, type PlanId } from './pricing';
 import { PaymentModal } from './PaymentModal';
@@ -20,7 +20,7 @@ interface SssItem {
 const SSS_ITEMS: SssItem[] = [
     {
         q: 'Nasıl satın alırım?',
-        a: 'Önce üye olup giriş yapın, ardından size uygun paketi satın alın: One (1.500 TL, 1 tasarım hakkı), Basic (4.500 TL, 10 tasarım hakkı) veya Pro (9.000 TL, 25 tasarım hakkı). Tüm paketler tek seferlik ödemedir; aylık abonelik yoktur. Haklarınız süresizdir.',
+        a: 'Önce üye olup giriş yapın, ardından size uygun paketi satın alın: One (3.000 TL, 1 tasarım hakkı), Basic (10.000 TL, 10 tasarım hakkı) veya Pro (15.000 TL, 25 tasarım hakkı). Tüm paketler tek seferlik ödemedir; aylık abonelik yoktur. Haklarınız süresizdir.',
     },
     {
         q: 'Hangi e-belge tiplerini tasarlayabilirim?',
@@ -62,7 +62,9 @@ const DOC_TYPES = [
     { label: 'e-Makbuz', code: '15', id: 'makbuz', a: '#0f766e' },
 ];
 
-const LOGO_URL = `${import.meta.env.BASE_URL}favicon.svg`;
+const LOGO_URL = `${import.meta.env.BASE_URL}logo-300x100.png`;
+const LOGO_SRCSET = `${import.meta.env.BASE_URL}logo-600x200.png 2x`;
+const MARK_URL = `${import.meta.env.BASE_URL}favicon-192.png`;
 
 const LANDING_CSS = `
 @keyframes edesign-word-in{from{opacity:0;transform:translateY(0.35em)}to{opacity:1;transform:none}}
@@ -91,7 +93,7 @@ const LANDING_CSS = `
   .ld-nav{display:none !important}
   .ld-bento{grid-template-columns:1fr}
   .ld-header{padding:12px 16px !important}
-  .ld-brand{font-size:15px !important}
+  .ld-logo{height:36px !important}
   .ld-section{padding-left:16px !important;padding-right:16px !important}
 }
 @media (prefers-reduced-motion: reduce){
@@ -164,7 +166,7 @@ const SectionTitle: React.FC<{ title: string; subtitle?: string; eyebrow?: strin
  */
 export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
     const [openSss, setOpenSss] = useState<string | null>(null);
-    const [legalModal, setLegalModal] = useState<'kvkk' | 'sozlesme' | 'cerez' | null>(null);
+    const [legalModal, setLegalModal] = useState<'kvkk' | 'sozlesme' | 'cerez' | 'iletisim' | null>(null);
     const [buyPlan, setBuyPlan] = useState<PlanId | null>(null);
     // step: kaçıncı dönüş; belge türü step % 15, aynı türün kaçıncı gelişi (galeriden sıradaki şablon) step / 15.
     const [step, setStep] = useState(0);
@@ -231,10 +233,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                         onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                         style={{ display: 'inline-flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}
                     >
-                        <img src={LOGO_URL} alt="" width={34} height={34} style={{ display: 'block', borderRadius: 10, boxShadow: theme.shadowBrand }} />
-                        <span className="ld-brand" style={{ fontSize: 17, fontWeight: 800, letterSpacing: '-0.02em', color: theme.text, whiteSpace: 'nowrap' }}>
-                            eBelge <span style={gradientTextStyle}>Tasarımcı</span>
-                        </span>
+                        <img className="ld-logo" src={LOGO_URL} srcSet={LOGO_SRCSET} alt="edXdocu" width={300} height={100} style={{ display: 'block', height: 46, width: 'auto' }} />
                     </a>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
                         <nav className="ld-nav" style={{ display: 'flex', gap: 28, fontSize: 14, fontWeight: 600 }}>
@@ -562,7 +561,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                         >
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                                 <div style={{ fontSize: 10, fontWeight: 800, color: theme.primary }}>e-Arşiv Fatura</div>
-                                <img src={LOGO_URL} alt="" width={18} height={18} style={{ borderRadius: 5 }} />
+                                <img src={MARK_URL} alt="" width={18} height={18} style={{ borderRadius: 5 }} />
                             </div>
                             <div style={{ height: 3, background: theme.gradient, borderRadius: 2, marginBottom: 8 }} />
                             <div style={{ fontSize: 8, color: '#475569', lineHeight: 1.5 }}>
@@ -926,7 +925,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                             İlk tasarımınızı bugün oluşturun
                         </h2>
                         <p style={{ fontSize: 17, color: 'rgba(255,255,255,0.92)', margin: '0 0 30px', lineHeight: 1.5 }}>
-                            Üye olun, 1.500 TL'den başlayan paketlerle tasarıma başlayın.
+                            Üye olun, 3.000 TL'den başlayan paketlerle tasarıma başlayın.
                         </p>
                         <button
                             type="button"
@@ -972,7 +971,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                 }}
             >
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
-                    <img src={LOGO_URL} alt="" width={22} height={22} style={{ borderRadius: 6 }} />
+                    <img src={LOGO_URL} srcSet={LOGO_SRCSET} alt="edXdocu" width={300} height={100} style={{ display: 'block', height: 28, width: 'auto' }} />
                     © 2026 · eBelge Tasarımcı · GİB UBL-TR
                 </div>
                 <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
@@ -980,13 +979,14 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                     <a href="#kvkk" onClick={(e) => { e.preventDefault(); setLegalModal('kvkk'); }}>KVKK</a>
                     <a href="#sozlesme" onClick={(e) => { e.preventDefault(); setLegalModal('sozlesme'); }}>Kullanıcı Sözleşmesi</a>
                     <a href="#cerez" onClick={(e) => { e.preventDefault(); setLegalModal('cerez'); }}>Çerez Politikası</a>
-                    <a href="https://wa.me/905336660125" target="_blank" rel="noopener noreferrer">İletişim</a>
+                    <a href="#iletisim" onClick={(e) => { e.preventDefault(); setLegalModal('iletisim'); }}>İletişim</a>
                 </div>
             </footer>
 
             {legalModal === 'kvkk' && <KVKKModal onClose={() => setLegalModal(null)} />}
             {legalModal === 'sozlesme' && <KullaniciSozlesmesiModal onClose={() => setLegalModal(null)} />}
             {legalModal === 'cerez' && <CerezPolitikasiModal onClose={() => setLegalModal(null)} />}
+            {legalModal === 'iletisim' && <IletisimModal onClose={() => setLegalModal(null)} />}
             <PaymentModal
                 isOpen={!!buyPlan}
                 initialPlan={buyPlan ?? undefined}

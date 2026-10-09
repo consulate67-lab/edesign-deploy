@@ -1,6 +1,6 @@
 import React, { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-    Bell, BellOff, Bot, ChevronsLeft, ChevronsRight, Images, LayoutDashboard, LifeBuoy, LogOut, Menu, MessagesSquare, MonitorSmartphone,
+    Bell, BellOff, Bot, ChevronsLeft, ChevronsRight, Images, LayoutDashboard, LifeBuoy, LogOut, Menu, MessagesSquare, MonitorSmartphone, Receipt,
     Settings as SettingsIcon, ShieldCheck, Users as UsersIcon,
 } from 'lucide-react';
 import { useUiStore } from '../store/uiStore';
@@ -15,6 +15,7 @@ import { notificationPermission, playChime, requestNotificationPermission, showB
 import { AdminGlobalStyles, CountBadge, Dot, SectionBoundary, Spinner } from './ui';
 import { Overview } from './sections/Overview';
 import { Users } from './sections/Users';
+import { Invoices } from './sections/Invoices';
 import { Tickets } from './sections/Tickets';
 import { RemoteSupport } from './sections/RemoteSupport';
 import { Gallery } from './sections/Gallery';
@@ -29,6 +30,7 @@ const SECTION_KEY = 'admin_section';
 const NAV: { id: SectionId; label: string; icon: React.ReactNode }[] = [
     { id: 'overview', label: 'Genel bakış', icon: <LayoutDashboard size={18} /> },
     { id: 'users', label: 'Kullanıcılar', icon: <UsersIcon size={18} /> },
+    { id: 'invoices', label: 'Faturalar', icon: <Receipt size={18} /> },
     { id: 'tickets', label: 'Destek talepleri', icon: <LifeBuoy size={18} /> },
     { id: 'remote', label: 'Online destek', icon: <MonitorSmartphone size={18} /> },
     { id: 'ai', label: 'Tasarım yapay zekası', icon: <Bot size={18} /> },
@@ -301,6 +303,7 @@ const AdminShell: React.FC<{ identity: AdminIdentity; onLogout: () => void }> = 
                     <main className="adm-scroll" style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: tablet ? 24 : 14 }}>
                         {section === 'overview' && <Overview />}
                         {section === 'users' && <Users />}
+                        {section === 'invoices' && <Invoices />}
                         {section === 'tickets' && <Tickets />}
                         {section === 'remote' && <RemoteSupport />}
                         {section === 'ai' && (

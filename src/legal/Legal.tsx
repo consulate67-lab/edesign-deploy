@@ -9,7 +9,18 @@
  */
 
 import React from 'react';
+import { MapPin, Phone, Mail, MessageCircle, ExternalLink } from 'lucide-react';
 import { theme } from '../theme';
+
+export const CONTACT = {
+    email: 'destek@edxdocu.com',
+    phone: '0533 666 01 25',
+    phoneHref: 'tel:+905336660125',
+    whatsapp: 'https://wa.me/905336660125',
+    address: 'Merkez Mahallesi Ege Sokak No:4 Kağıthane / İstanbul',
+} as const;
+
+const MAP_QUERY = encodeURIComponent('Merkez Mahallesi Ege Sokak No:4, Kağıthane, İstanbul');
 
 const baseTextStyle: React.CSSProperties = {
     fontSize: '14px',
@@ -83,7 +94,7 @@ export const KVKKModal: React.FC<{ onClose: () => void }> = ({ onClose }) => (
             <li>Otomatik sistemlerle aleyhine sonuç doğan analizlere itiraz etme</li>
         </ul>
         <p style={baseTextStyle}>
-            Bu haklarınızı kullanmak için <strong>destek@edesignaplus.com</strong> adresine
+            Bu haklarınızı kullanmak için <a href={`mailto:${CONTACT.email}`} style={{ color: theme.primary, fontWeight: 700 }}>{CONTACT.email}</a> adresine
             yazılı talep ile başvurabilirsiniz.
         </p>
 
@@ -187,6 +198,90 @@ export const CerezPolitikasiModal: React.FC<{ onClose: () => void }> = ({ onClos
         <p style={{ ...baseTextStyle, marginTop: '24px', fontSize: '12px', color: theme.textSubtle }}>
             Son güncelleme: 2026-10-02.
         </p>
+    </LegalModal>
+);
+
+// ============================================================================
+// İletişim
+// ============================================================================
+
+const contactRow: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: 12,
+    padding: '14px 16px',
+    background: theme.surfaceAlt,
+    border: `1px solid ${theme.border}`,
+    borderRadius: 14,
+    color: theme.text,
+    textDecoration: 'none',
+    fontSize: 14,
+    lineHeight: 1.5,
+};
+
+const contactLabel: React.CSSProperties = {
+    display: 'block',
+    fontSize: 11,
+    fontWeight: 700,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    color: theme.textSubtle,
+    marginBottom: 2,
+};
+
+export const IletisimModal: React.FC<{ onClose: () => void }> = ({ onClose }) => (
+    <LegalModal title="İletişim" onClose={onClose}>
+        <div style={{ display: 'grid', gap: 10 }}>
+            <div data-contact-address style={contactRow}>
+                <MapPin size={20} color={theme.primary} style={{ flexShrink: 0, marginTop: 2 }} />
+                <div>
+                    <span style={contactLabel}>Adres</span>
+                    {CONTACT.address}
+                </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 10 }}>
+                <a data-contact-phone href={CONTACT.phoneHref} style={contactRow}>
+                    <Phone size={20} color={theme.primary} style={{ flexShrink: 0, marginTop: 2 }} />
+                    <div>
+                        <span style={contactLabel}>Telefon</span>
+                        {CONTACT.phone}
+                    </div>
+                </a>
+                <a data-contact-email href={`mailto:${CONTACT.email}`} style={contactRow}>
+                    <Mail size={20} color={theme.primary} style={{ flexShrink: 0, marginTop: 2 }} />
+                    <div>
+                        <span style={contactLabel}>E-posta</span>
+                        {CONTACT.email}
+                    </div>
+                </a>
+            </div>
+            <a data-contact-whatsapp href={CONTACT.whatsapp} target="_blank" rel="noopener noreferrer" style={{ ...contactRow, background: '#dcfce7', borderColor: '#bbf7d0', color: '#15803d', fontWeight: 700, alignItems: 'center' }}>
+                <MessageCircle size={20} style={{ flexShrink: 0 }} />
+                WhatsApp ile yazın
+            </a>
+        </div>
+
+        <div style={{ marginTop: 16, borderRadius: 16, overflow: 'hidden', border: `1px solid ${theme.border}`, background: theme.surfaceAlt }}>
+            <iframe
+                data-contact-map
+                title="Adres haritası"
+                src={`https://maps.google.com/maps?q=${MAP_QUERY}&z=16&hl=tr&output=embed`}
+                width="100%"
+                height="320"
+                style={{ display: 'block', border: 0 }}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                allowFullScreen
+            />
+        </div>
+        <a
+            href={`https://www.google.com/maps/search/?api=1&query=${MAP_QUERY}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 10, fontSize: 13, fontWeight: 600, color: theme.primary, textDecoration: 'none' }}
+        >
+            Google Haritalar'da aç <ExternalLink size={13} />
+        </a>
     </LegalModal>
 );
 

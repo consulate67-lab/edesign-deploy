@@ -289,8 +289,8 @@ const MODULES: ModuleDef[] = [
     { id: 'makbuz',        label: 'e-Makbuz',          inlineKey: 'community/hzkucuk-eFatura-makbuz.xslt' },
 
     // Sprint 9 — Antrepo profesyonel şablonlar (public/ altından, ?raw inline)
-    { id: 'antrepo-fatura', label: 'Antrepo e-Fatura',  antrepoId: 'antrepo-fatura', isAntrepo: true },
-    { id: 'antrepo-arsiv',  label: 'Antrepo e-Arşiv',   antrepoId: 'antrepo-arsiv',  isAntrepo: true },
+    { id: 'antrepo-fatura', label: 'GİB Resmi e-Fatura', antrepoId: 'antrepo-fatura', isAntrepo: true },
+    { id: 'antrepo-arsiv',  label: 'GİB Resmi e-Arşiv',  antrepoId: 'antrepo-arsiv',  isAntrepo: true },
 ];
 
 // ============================================================================

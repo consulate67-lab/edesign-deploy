@@ -189,11 +189,12 @@ export const Auth: React.FC<AuthProps> = ({
                 {/* Header */}
                 <div style={{ textAlign: 'center', marginBottom: 28 }}>
                     <img
-                        src={`${import.meta.env.BASE_URL}favicon.svg`}
-                        alt=""
-                        width={56}
-                        height={56}
-                        style={{ display: 'block', margin: '0 auto 16px', borderRadius: 16, boxShadow: theme.shadowBrand }}
+                        src={`${import.meta.env.BASE_URL}logo-300x100.png`}
+                        srcSet={`${import.meta.env.BASE_URL}logo-600x200.png 2x`}
+                        alt="edXdocu"
+                        width={300}
+                        height={100}
+                        style={{ display: 'block', height: 52, width: 'auto', margin: '0 auto 16px' }}
                     />
                     <h1
                         style={{

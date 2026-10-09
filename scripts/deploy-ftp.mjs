@@ -6,6 +6,7 @@
 //   FTP_USER=...
 //   FTP_PASS=...
 //   FTP_DIR=httpdocs
+//   FTP_SECURE=0          (only if the host does not support FTPS)
 //
 // Usage: npm run deploy:web            (build + upload)
 //        npm run deploy:web -- --no-build
@@ -29,6 +30,7 @@ loadEnvFile(path.join(root, '.env.ftp'));
 
 const { FTP_HOST, FTP_USER, FTP_PASS } = process.env;
 const FTP_DIR = (process.env.FTP_DIR || 'httpdocs').replace(/^\/+|\/+$/g, '');
+const FTP_SECURE = process.env.FTP_SECURE !== '0';
 if (!FTP_HOST || !FTP_USER || !FTP_PASS) {
     console.error('FTP_HOST / FTP_USER / FTP_PASS eksik (.env.ftp dosyasına yazın).');
     process.exit(1);
@@ -73,7 +75,7 @@ try {
         host: FTP_HOST,
         user: FTP_USER,
         password: FTP_PASS,
-        secure: true,
+        secure: FTP_SECURE,
         // Shared hosting presents the provider's certificate, not ftp.<domain>.
         secureOptions: { rejectUnauthorized: false },
     });

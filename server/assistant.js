@@ -58,13 +58,13 @@ const search = (index, question, limit = 6) => {
 
 /* ------------------------------------------------------------ yapay zekâ */
 
-const SYSTEM_PROMPT = `Sen "Edi" adında, eBelge Tasarımcı (edxdocu.com) web sitesinin güler yüzlü yardım asistanısın.
+const SYSTEM_PROMPT = `Sen "Sarp" adında, eBelge Tasarımcı (edxdocu.com) web sitesinin güler yüzlü yardım asistanısın.
 Görevin: ziyaretçilere bu sitenin ne işe yaradığını, nasıl kullanıldığını, üyelik, paketler, ödeme, tasarım hakları, şablonlar, tasarım ekranı ve destek konularında yol göstermek.
 Kurallar:
 - Yalnızca BİLGİ BANKASI'ndaki bilgilere dayan. Fiyat, hak sayısı, düğme adı gibi bilgileri aynen oradan al; uydurma.
 - Bilgi bankasında olmayan site sorularında "Bu konuda kesin bilgim yok" de ve destek ekibine yazmayı öner.
 - Site ve e-belge tasarımı dışındaki konularda (genel sohbet, kod yazma, vergi/muhasebe danışmanlığı, başka ürünler vb.) kibarca yalnızca bu site hakkında yardımcı olabileceğini söyle ve ilgili bir site konusuna yönlendir.
-- Selamlama yapma ve kendini tanıtma ("Merhaba", "Ben Edi" gibi); doğrudan yanıta geç. Yanıtı "Başka bir konuda yardımcı olabilir miyim?" gibi kalıplarla bitirme.
+- Selamlama yapma ve kendini tanıtma ("Merhaba", "Ben Sarp" gibi); doğrudan yanıta geç. Yanıtı "Başka bir konuda yardımcı olabilir miyim?" gibi kalıplarla bitirme.
 - Türkçe, samimi ve kısa yanıt ver (en fazla 120 kelime). Adım gerekiyorsa "- " ile madde kullan. Önemli düğme adlarını **kalın** yaz.
 - HTML, başlık, tablo, bağlantı veya URL yazma. Kendinden "yapay zekâ modeli" diye bahsetme.`;
 
@@ -132,9 +132,9 @@ setInterval(() => {
 /* ------------------------------------------------------------ yardımcılar */
 
 const SMALL_TALK = [
-    { re: /^(merhaba|selam|selamlar|hey|iyi gunler|gunaydin|iyi aksamlar|slm|mrb)\b/, a: 'Merhaba! Ben **Edi**, eBelge Tasarımcı asistanıyım. Site, paketler, tasarım ekranı veya hesabınızla ilgili ne sormak istersiniz?' },
+    { re: /^(merhaba|selam|selamlar|hey|iyi gunler|gunaydin|iyi aksamlar|slm|mrb)\b/, a: 'Merhaba! Ben **Sarp**, eBelge Tasarımcı asistanıyım. Site, paketler, tasarım ekranı veya hesabınızla ilgili ne sormak istersiniz?' },
     { re: /^(tesekkur|tesekkurler|sagol|sag ol|eyvallah|cok sagol|tsk)/, a: 'Rica ederim! Başka bir sorunuz olursa buradayım.' },
-    { re: /^(sen kimsin|kimsin|adin ne|bot musun|robot musun)/, a: 'Ben **Edi**, bu sitenin yardım asistanıyım. Sitenin nasıl kullanıldığı, paketler, tasarım ve destek konularında yol gösteririm.' },
+    { re: /^(sen kimsin|kimsin|adin ne|bot musun|robot musun)/, a: 'Ben **Sarp**, bu sitenin yardım asistanıyım. Sitenin nasıl kullanıldığı, paketler, tasarım ve destek konularında yol gösteririm.' },
 ];
 
 const OFF_TOPIC = 'Bu konuda yardımcı olamıyorum; ben yalnızca **eBelge Tasarımcı** sitesi, e-belge tasarımı, paketler ve hesabınızla ilgili sorulara yanıt veriyorum. Aşağıdaki konulardan birini seçebilir ya da sorunuzu farklı sözcüklerle yazabilirsiniz.';
@@ -196,7 +196,7 @@ export const registerAssistantRoutes = (app, { db, requireAdmin, packages }) => 
     };
 
     app.get('/api/assistant/info', (_req, res) => {
-        res.json({ name: 'Edi', ai: !!AI_KEY, suggestions: SUGGESTIONS });
+        res.json({ name: 'Sarp', ai: !!AI_KEY, suggestions: SUGGESTIONS });
     });
 
     app.post('/api/assistant/ask', async (req, res) => {

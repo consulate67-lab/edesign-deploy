@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, CheckCircle2, Loader2, ShieldCheck, X, Sparkles, Check, XCircle } from 'lucide-react';
 import { api } from './api';
 import { PACKAGES_PLANS, type PackagePlan, type PlanId } from './pricing';
+import { parseBilling } from '../shared/invoice-billing.js';
 import { useUiStore } from './store/uiStore';
 import { theme } from './theme';
 
@@ -13,8 +14,22 @@ interface PaymentModalProps {
     initialPlan?: PlanId;
 }
 
+type PartyType = 'company' | 'sole';
+
+interface BillingForm {
+    partyType: PartyType;
+    title: string;
+    taxId: string;
+    taxOffice: string;
+    city: string;
+    address: string;
+}
+
+const EMPTY_BILLING: BillingForm = { partyType: 'company', title: '', taxId: '', taxOffice: '', city: '', address: '' };
+
 type Step =
     | { step: 'packages' }
+    | { step: 'billing'; plan: PackagePlan }
     | { step: 'starting'; plan: PackagePlan }
     | { step: 'paying'; plan: PackagePlan; oid: string; iframeUrl: string; testMode: boolean; confirming: boolean }
     | { step: 'done'; plan: PackagePlan; credits: number | null }
@@ -38,9 +53,9 @@ const resizeFrame = () => {
     document.head.appendChild(s);
 };
 
-const requestPayment = async (plan: PackagePlan): Promise<Step> => {
+const requestPayment = async (plan: PackagePlan, billing: BillingForm): Promise<Step> => {
     try {
-        const r = await api.paytrCheckout(plan.id);
+        const r = await api.paytrCheckout(plan.id, billing);
         return { step: 'paying', plan, oid: r.merchantOid, iframeUrl: r.iframeUrl, testMode: r.testMode, confirming: false };
     } catch (err) {
         return { step: 'failed', plan, message: err instanceof Error ? err.message : 'Ödeme başlatılamadı.' };
@@ -49,21 +64,57 @@ const requestPayment = async (plan: PackagePlan): Promise<Step> => {
 
 export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, ...rest }) => (isOpen ? <PaymentDialog {...rest} /> : null);
 
+const fieldStyle: React.CSSProperties = {
+    width: '100%', boxSizing: 'border-box', padding: '0.7rem 0.8rem', borderRadius: '0.7rem',
+    border: `1px solid ${theme.borderStrong}`, background: theme.surface, color: theme.text,
+    fontSize: '0.92rem', fontFamily: 'inherit', outline: 'none',
+};
+
 const PaymentDialog: React.FC<Omit<PaymentModalProps, 'isOpen'>> = ({ onClose, onSuccess, initialPlan }) => {
     const firstPlan = PACKAGES_PLANS.find(p => p.id === initialPlan);
-    const [state, setState] = useState<Step>(() => (firstPlan ? { step: 'starting', plan: firstPlan } : { step: 'packages' }));
-    const autoStarted = useRef(false);
-
-    const startPayment = (plan: PackagePlan) => {
-        setState({ step: 'starting', plan });
-        void requestPayment(plan).then(setState);
-    };
+    const [state, setState] = useState<Step>(() => (firstPlan ? { step: 'billing', plan: firstPlan } : { step: 'packages' }));
+    const [billing, setBilling] = useState<BillingForm>(EMPTY_BILLING);
+    const [billingError, setBillingError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!firstPlan || autoStarted.current) return;
-        autoStarted.current = true;
-        void requestPayment(firstPlan).then(setState);
-    }, [firstPlan]);
+        let alive = true;
+        api.paymentBilling()
+            .then(r => {
+                if (!alive || !r.billing) return;
+                const b = r.billing;
+                setBilling(prev => {
+                    if (prev.title || prev.taxId || prev.taxOffice || prev.city) return prev;
+                    return {
+                        partyType: b.partyType === 'sole' ? 'sole' : 'company',
+                        title: b.title || '',
+                        taxId: b.taxId || '',
+                        taxOffice: b.taxOffice || '',
+                        city: b.city || '',
+                        address: b.address && b.address !== b.city ? b.address : '',
+                    };
+                });
+            })
+            .catch(() => { /* kayıtlı fatura bilgisi yoksa form boş kalır */ });
+        return () => { alive = false; };
+    }, []);
+
+    const openBilling = (plan: PackagePlan) => {
+        setBillingError(null);
+        setState({ step: 'billing', plan });
+    };
+
+    const startPayment = (plan: PackagePlan) => {
+        const parsed = parseBilling(billing);
+        if ('error' in parsed && parsed.error) {
+            setBillingError(parsed.error);
+            setState({ step: 'billing', plan });
+            return;
+        }
+        if (!('billing' in parsed) || !parsed.billing) return;
+        setBillingError(null);
+        setState({ step: 'starting', plan });
+        void requestPayment(plan, parsed.billing).then(setState);
+    };
 
     const paying = state.step === 'paying' ? state : null;
     const oid = paying?.oid;
@@ -122,16 +173,16 @@ const PaymentDialog: React.FC<Omit<PaymentModalProps, 'isOpen'>> = ({ onClose, o
             <div data-payment-modal={state.step} style={{
                 background: theme.surface,
                 border: `1px solid ${theme.border}`,
-                padding: state.step === 'paying' ? '1.5rem 1.25rem' : '2.5rem 2rem',
+                padding: state.step === 'paying' || state.step === 'billing' ? '1.5rem 1.25rem' : '2.5rem 2rem',
                 borderRadius: '1.5rem',
-                maxWidth: state.step === 'paying' ? '720px' : '960px',
+                maxWidth: state.step === 'paying' ? '720px' : state.step === 'billing' ? '560px' : '960px',
                 width: '100%',
                 position: 'relative',
                 boxShadow: theme.shadowLg,
                 maxHeight: '90vh',
                 overflowY: 'auto',
             }}>
-                <style>{'@keyframes pm-spin { to { transform: rotate(360deg); } } .pm-spin { animation: pm-spin 0.9s linear infinite; }'}</style>
+                <style>{'@keyframes pm-spin { to { transform: rotate(360deg); } } .pm-spin { animation: pm-spin 0.9s linear infinite; } @media (max-width: 560px) { .pm-bill-grid { grid-template-columns: 1fr !important; } }'}</style>
                 <button
                     onClick={onClose}
                     aria-label="Kapat"
@@ -173,7 +224,7 @@ const PaymentDialog: React.FC<Omit<PaymentModalProps, 'isOpen'>> = ({ onClose, o
                                 key={plan.id}
                                 type="button"
                                 data-buy-plan={plan.id}
-                                onClick={() => startPayment(plan)}
+                                onClick={() => openBilling(plan)}
                                 style={{
                                     display: 'flex', flexDirection: 'column',
                                     background: plan.highlight
@@ -236,6 +287,81 @@ const PaymentDialog: React.FC<Omit<PaymentModalProps, 'isOpen'>> = ({ onClose, o
                             </div>
                         </div>
                     </>
+                )}
+
+                {state.step === 'billing' && (
+                    <form data-payment-billing onSubmit={e => { e.preventDefault(); startPayment(state.plan); }} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                        <button type="button" onClick={backToPackages} style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', color: theme.primary,
+                            cursor: 'pointer', fontFamily: 'inherit', fontSize: '0.82rem', fontWeight: 700, padding: 0, alignSelf: 'flex-start',
+                        }}>
+                            <ArrowLeft size={14} /> Paketler
+                        </button>
+                        <div>
+                            <h2 style={{ color: theme.text, fontSize: '1.35rem', fontWeight: 800, margin: 0 }}>Fatura bilgileri</h2>
+                            <p style={{ color: theme.textMuted, fontSize: '0.88rem', margin: '0.35rem 0 0' }}>
+                                {state.plan.name} paketi · {formatTL(state.plan.price)} · KDV dahil. Ödeme onaylanınca bu bilgilerle fatura taslağı hazırlanır.
+                            </p>
+                        </div>
+                        <div className="pm-bill-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                            {([
+                                ['company', 'Tüzel kişi'],
+                                ['sole', 'Şahıs firması'],
+                            ] as const).map(([id, label]) => {
+                                const on = billing.partyType === id;
+                                return (
+                                    <button key={id} type="button" data-billing-party={id} onClick={() => { setBilling(b => ({ ...b, partyType: id, taxId: '' })); setBillingError(null); }}
+                                        style={{
+                                            padding: '0.7rem', borderRadius: '0.7rem', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700,
+                                            border: on ? `2px solid ${theme.primary}` : `1px solid ${theme.border}`,
+                                            background: on ? theme.primarySoft : theme.surface, color: on ? theme.primary : theme.text,
+                                        }}>
+                                        {label}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                        <label style={{ display: 'flex', flexDirection: 'column', gap: 6, color: theme.textMuted, fontSize: '0.78rem', fontWeight: 700 }}>
+                            Firma ünvanı
+                            <input data-billing-title required value={billing.title} onChange={e => setBilling(b => ({ ...b, title: e.target.value }))}
+                                placeholder={billing.partyType === 'sole' ? 'Ad soyad veya tabela ünvanı' : 'Ticaret ünvanı'} style={fieldStyle} />
+                        </label>
+                        <label style={{ display: 'flex', flexDirection: 'column', gap: 6, color: theme.textMuted, fontSize: '0.78rem', fontWeight: 700 }}>
+                            {billing.partyType === 'sole' ? 'T.C. kimlik numarası' : 'Vergi numarası'}
+                            <input data-billing-tax inputMode="numeric" autoComplete="off" required value={billing.taxId}
+                                onChange={e => setBilling(b => ({ ...b, taxId: e.target.value.replace(/\D/g, '').slice(0, billing.partyType === 'sole' ? 11 : 10) }))}
+                                placeholder={billing.partyType === 'sole' ? '11 hane' : '10 hane'} style={fieldStyle} />
+                        </label>
+                        <div className="pm-bill-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem' }}>
+                            <label style={{ display: 'flex', flexDirection: 'column', gap: 6, color: theme.textMuted, fontSize: '0.78rem', fontWeight: 700 }}>
+                                Vergi dairesi
+                                <input data-billing-office required value={billing.taxOffice} onChange={e => setBilling(b => ({ ...b, taxOffice: e.target.value }))} style={fieldStyle} />
+                            </label>
+                            <label style={{ display: 'flex', flexDirection: 'column', gap: 6, color: theme.textMuted, fontSize: '0.78rem', fontWeight: 700 }}>
+                                İl
+                                <input data-billing-city required value={billing.city} onChange={e => setBilling(b => ({ ...b, city: e.target.value }))} style={fieldStyle} />
+                            </label>
+                        </div>
+                        <label style={{ display: 'flex', flexDirection: 'column', gap: 6, color: theme.textMuted, fontSize: '0.78rem', fontWeight: 700 }}>
+                            Adres
+                            <input data-billing-address value={billing.address} onChange={e => setBilling(b => ({ ...b, address: e.target.value }))}
+                                placeholder="Mahalle, sokak, no — boşsa il kullanılır" style={fieldStyle} />
+                        </label>
+                        {billingError && (
+                            <div data-billing-error style={{ padding: '0.7rem 0.8rem', borderRadius: '0.7rem', background: theme.redSoft, color: theme.redText, fontSize: '0.85rem' }}>
+                                {billingError}
+                            </div>
+                        )}
+                        <button type="submit" data-billing-submit style={{
+                            marginTop: '0.2rem', padding: '0.8rem', borderRadius: '0.7rem', border: 'none', cursor: 'pointer',
+                            background: theme.gradient, color: 'white', fontWeight: 800, fontFamily: 'inherit', boxShadow: theme.shadowBrand,
+                        }}>
+                            Ödemeye geç · {formatTL(state.plan.price)}
+                        </button>
+                        <p style={{ margin: 0, fontSize: '0.75rem', color: theme.textSubtle, lineHeight: 1.45 }}>
+                            Şahıs firmasında vergi numarası yerine T.C. kimlik numarası alınır. Kart bilgisi bu forma yazılmaz; sonraki adım PayTR 3D Secure ekranıdır.
+                        </p>
+                    </form>
                 )}
 
                 {state.step === 'starting' && (

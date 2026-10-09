@@ -135,7 +135,11 @@ const UserDetail: React.FC<{ userId: number; onClose: () => void; onChanged: (ro
                                                 <tr key={pay.id}>
                                                     <td>{pay.plan_id}</td>
                                                     <td style={{ fontVariantNumeric: 'tabular-nums' }}>{pay.currency === 'TRY' || !pay.currency ? fmtMoney(pay.amount) : `${pay.amount} ${pay.currency}`}</td>
-                                                    <td><Badge color={st.color}>{st.label}</Badge></td>
+                                                    <td>
+                                                        <Badge color={st.color}>{st.label}</Badge>
+                                                        {pay.invoice_status === 'ready' && <span style={{ marginLeft: 6 }}><Badge color={C.amber}>Fatura hazır</Badge></span>}
+                                                        {pay.invoice_status === 'issued' && <span style={{ marginLeft: 6 }}><Badge color={C.green}>Fatura kesildi</Badge></span>}
+                                                    </td>
                                                     <td style={{ color: C.muted, whiteSpace: 'nowrap' }}>{fmtDateTime(pay.completed_at ?? pay.created_at)}</td>
                                                 </tr>
                                             );

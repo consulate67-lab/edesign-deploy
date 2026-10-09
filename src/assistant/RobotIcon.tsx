@@ -1,6 +1,6 @@
 import React, { useId } from 'react';
 
-/** Edi: göz kırpan, yanakları pembe küçük robot. Animasyon sınıfları AssistantWidget'taki stil bloğunda. */
+/** Sarp: göz kırpan, yanakları pembe küçük robot. Animasyon sınıfları AssistantWidget'taki stil bloğunda. */
 export const RobotIcon: React.FC<{ size?: number; animated?: boolean }> = ({ size = 40, animated = true }) => {
     const uid = useId().replace(/:/g, '');
     const head = `edi-head-${uid}`;

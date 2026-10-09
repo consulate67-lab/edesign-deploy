@@ -125,7 +125,7 @@ initDb().then(async _db => {
     db = _db;
     const requireAdmin = createRequireAdmin({ db, secret: EFFECTIVE_SECRET });
     registerAdminAuthRoutes(app, { db, secret: EFFECTIVE_SECRET, requireAdmin });
-    registerAdminRoutes(app, { db, requireAdmin });
+    registerAdminRoutes(app, { db, requireAdmin, packages: PACKAGE_PRICES, website: new URL(FRONTEND_URL).origin });
     registerGalleryRoutes(app, { db, requireAdmin });
     registerSupportRoutes(app, { db, authenticateToken });
     registerAssistantRoutes(app, { db, requireAdmin, packages: PACKAGE_PRICES });
@@ -230,9 +230,9 @@ app.get('/api/me', authenticateToken, async (req, res) => {
 // Plan prices MUST stay in sync with the Landing page (Landing.tsx → PACKAGES_PLANS)
 // and the in-app PaymentModal.tsx → PACKAGES_PLANS.
 const PLAN_AMOUNT_TO_CREDITS = {
-    1500: 1,      // One
-    4500: 10,     // Basic
-    9000: 25,     // Pro
+    3000: 1,      // One
+    10000: 10,    // Basic
+    15000: 25,    // Pro
 };
 
 app.post('/api/payment/mock', authenticateToken, async (req, res) => {
@@ -655,9 +655,9 @@ app.post('/api/designs/export', authenticateToken, async (req, res) => {
 
 // Tek seferlik paket; Landing.tsx ve PaymentModal.tsx → PACKAGES_PLANS ile aynı tutulmalı.
 const PACKAGE_PRICES = {
-    one: { name: 'One', price: '1500', credits: 1 },
-    basic: { name: 'Basic', price: '4500', credits: 10 },
-    pro: { name: 'Pro', price: '9000', credits: 25 },
+    one: { name: 'One', price: '3000', credits: 1 },
+    basic: { name: 'Basic', price: '10000', credits: 10 },
+    pro: { name: 'Pro', price: '15000', credits: 25 },
 };
 
 // Ödeme dönüş adresi izinli bir ön yüz değilse kullanılacak varsayılan (GitHub Pages).

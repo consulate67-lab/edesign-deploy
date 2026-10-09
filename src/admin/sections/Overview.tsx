@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-    Activity, Banknote, FileStack, Images, LayoutDashboard, LifeBuoy, MonitorSmartphone, PlugZap, RefreshCw, UserPlus, Users, Wifi, BadgeCheck,
+    Activity, Banknote, FileStack, Images, LayoutDashboard, LifeBuoy, MonitorSmartphone, PlugZap, Receipt, RefreshCw, UserPlus, Users, Wifi, BadgeCheck,
 } from 'lucide-react';
 import { adminApi } from '../adminApi';
 import { useAdmin } from '../adminContext';
@@ -70,6 +70,7 @@ export const Overview: React.FC = () => {
                 <StatCard icon={<Wifi size={18} />} label="Çevrimiçi" value={stats ? fmtNumber(Math.max(stats.onlineUsers, presence.length)) : '…'} color="#10b981" onClick={() => go('remote')} />
                 <StatCard icon={<PlugZap size={18} />} label="Bekleyen online destek" value={stats ? fmtNumber(Math.max(stats.pendingRemote, pending.length)) : '…'} color="#ef4444" onClick={() => go('remote')} />
                 <StatCard icon={<Banknote size={18} />} label="Toplam gelir" value={stats ? fmtMoney(stats.revenueTotal) : '…'} color="#22c55e" />
+                <StatCard icon={<Receipt size={18} />} label="Kesime hazır fatura" value={stats ? fmtNumber(stats.invoicesReady) : '…'} color="#d946ef" onClick={() => go('invoices')} hint="Ödemesi alınmış, faturası henüz kesilmemiş firmalar" />
                 <StatCard icon={<Images size={18} />} label="Galeri tasarımları" value={stats ? fmtNumber(stats.galleryDesigns) : '…'} color="#ec4899" onClick={() => go('gallery')} />
             </div>
 

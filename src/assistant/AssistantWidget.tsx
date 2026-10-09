@@ -11,7 +11,7 @@ const SESSION_KEY = 'edi_session';
 const GREETED_KEY = 'edi_greeted';
 const WHATSAPP_URL = 'https://wa.me/905336660125';
 const DEFAULT_SUGGESTIONS = ['Bu site ne işe yarar?', 'Fiyatlar nedir?', 'İlk tasarımı nasıl yaparım?', 'Tasarım hakkı ne zaman harcanır?'];
-const WELCOME = 'Merhaba! Ben **Edi**, eBelge Tasarımcı asistanıyım.\nSiteyi kullanma, paketler, tasarım hakkı ve tasarım ekranı hakkındaki sorularınızı yanıtlarım. Ne öğrenmek istersiniz?';
+const WELCOME = 'Merhaba! Ben **Sarp**, eBelge Tasarımcı asistanıyım.\nSiteyi kullanma, paketler, tasarım hakkı ve tasarım ekranı hakkındaki sorularınızı yanıtlarım. Ne öğrenmek istersiniz?';
 
 interface Message {
     key: string;
@@ -116,7 +116,7 @@ export interface AssistantWidgetProps {
     onSection: (id: string) => void;
 }
 
-/** Sağ altta "Edi" yardım asistanı: siteyle ilgili soruları bilgi bankası + (varsa) yapay zekâ ile yanıtlar. */
+/** Sağ altta "Sarp" yardım asistanı: siteyle ilgili soruları bilgi bankası + (varsa) yapay zekâ ile yanıtlar. */
 export const AssistantWidget: React.FC<AssistantWidgetProps> = ({ page, onRegister, onLogin, onSection }) => {
     const [open, setOpen] = useState(false);
     const [greeting, setGreeting] = useState(false);
@@ -226,7 +226,7 @@ export const AssistantWidget: React.FC<AssistantWidgetProps> = ({ page, onRegist
                     }}
                     onClick={toggle}
                 >
-                    <strong>Merhaba, ben Edi!</strong> Site, paketler veya tasarım hakkında sorunuz varsa yardımcı olabilirim.
+                    <strong>Merhaba, ben Sarp!</strong> Site, paketler veya tasarım hakkında sorunuz varsa yardımcı olabilirim.
                     <button
                         type="button"
                         aria-label="Kapat"
@@ -240,7 +240,7 @@ export const AssistantWidget: React.FC<AssistantWidgetProps> = ({ page, onRegist
 
             {open && (
                 <section
-                    aria-label="Edi yardım asistanı"
+                    aria-label="Sarp yardım asistanı"
                     style={{
                         position: 'fixed', right: 20, bottom: 96, zIndex: 9999, width: 'min(380px, calc(100vw - 24px))',
                         height: 'min(580px, calc(100vh - 120px))', display: 'flex', flexDirection: 'column', background: '#fff',
@@ -253,7 +253,7 @@ export const AssistantWidget: React.FC<AssistantWidgetProps> = ({ page, onRegist
                             <RobotIcon size={34} />
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontWeight: 800, fontSize: '1rem', letterSpacing: '-0.01em' }}>Edi · eBelge Asistanı</div>
+                            <div style={{ fontWeight: 800, fontSize: '1rem', letterSpacing: '-0.01em' }}>Sarp · eBelge Asistanı</div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.74rem', opacity: 0.95, marginTop: 2 }}>
                                 <span style={{ width: 7, height: 7, borderRadius: 4, background: '#4ade80', boxShadow: '0 0 0 2px rgba(255,255,255,0.35)' }} />
                                 <span>Çevrimiçi</span>
@@ -365,7 +365,7 @@ export const AssistantWidget: React.FC<AssistantWidgetProps> = ({ page, onRegist
                         </button>
                     </form>
                     <div style={{ padding: '0 12px 9px', background: '#fff', fontSize: '0.68rem', color: theme.textSubtle, textAlign: 'center' }}>
-                        Edi yalnızca bu siteyle ilgili sorulara yanıt verir; yanıtlar bilgilendirme amaçlıdır.
+                        Sarp yalnızca bu siteyle ilgili sorulara yanıt verir; yanıtlar bilgilendirme amaçlıdır.
                     </div>
                 </section>
             )}
@@ -374,8 +374,8 @@ export const AssistantWidget: React.FC<AssistantWidgetProps> = ({ page, onRegist
                 type="button"
                 className={open ? undefined : 'edi-fab'}
                 onClick={toggle}
-                aria-label={open ? 'Asistanı kapat' : 'Edi asistanına soru sorun'}
-                title={open ? 'Kapat' : 'Edi asistanına soru sorun'}
+                aria-label={open ? 'Asistanı kapat' : 'Sarp asistanına soru sorun'}
+                title={open ? 'Kapat' : 'Sarp asistanına soru sorun'}
                 style={{
                     position: 'fixed', right: 20, bottom: 20, zIndex: 9999, width: 64, height: 64, borderRadius: 32, padding: 0, cursor: 'pointer',
                     display: 'grid', placeItems: 'center', border: '3px solid transparent',

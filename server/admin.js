@@ -7,6 +7,9 @@ import {
     BODY_MAX, TICKET_STATUSES, addMessage, getTicket, listTickets, markRead, serializeTicket, setTicketStatus, withMessages,
 } from './tickets.js';
 import { cleanText, isPlainObject, optionalText, parseId } from './util.js';
+import {
+    DOCUMENT_MODES, INVOICE_NOTE_MAX, INVOICE_NUMBER_RE, buildInvoiceDraft, istanbulDate, isIsoDate, parseBilling,
+} from '../shared/invoice-billing.js';
 
 // PayTR bildirimi başarılı ödemeyi 'success' olarak işaretler.
 const PAID_STATUSES = ['success', 'completed'];
@@ -48,7 +51,7 @@ const serializeMemory = (row) => ({
 const escapeLike = (text) => text.replace(/[\\%_]/g, (c) => `\\${c}`);
 const jsonFits = (value) => isPlainObject(value) && JSON.stringify(value).length <= AI_JSON_MAX;
 
-export const registerAdminRoutes = (app, { db, requireAdmin }) => {
+export const registerAdminRoutes = (app, { db, requireAdmin, packages = {}, website = null }) => {
     const getUser = (id) => db.get(`${USER_SELECT} WHERE u.id = ?`, [id]);
 
     app.get('/api/admin/stats', requireAdmin, async (_req, res) => {
@@ -60,6 +63,8 @@ export const registerAdminRoutes = (app, { db, requireAdmin }) => {
                    (SELECT COUNT(*)::int FROM support_tickets WHERE status = 'open') AS "openTickets",
                    (SELECT COUNT(*)::int FROM remote_sessions WHERE status = 'requested') AS "pendingRemote",
                    (SELECT COALESCE(SUM(amount), 0)::float8 FROM payments WHERE status = ANY(?)) AS "revenueTotal",
+                   (SELECT COUNT(*)::int FROM payments WHERE status = 'success' AND invoice_status = 'ready') AS "invoicesReady",
+                   (SELECT COUNT(*)::int FROM payments WHERE status = 'success' AND billing IS NULL) AS "paidWithoutBilling",
                    (SELECT COUNT(*)::int FROM gallery_designs) AS "galleryDesigns"`,
         [PAID_STATUSES]);
         res.json({ ...row, onlineUsers: presenceList().length });
@@ -91,7 +96,7 @@ export const registerAdminRoutes = (app, { db, requireAdmin }) => {
                 [id]
             ),
             db.all(
-                `SELECT id, plan_id, amount::float8 AS amount, currency, status, created_at, completed_at
+                `SELECT id, plan_id, amount::float8 AS amount, currency, status, created_at, completed_at, invoice_status
                    FROM payments WHERE user_id = ? ORDER BY created_at DESC LIMIT 500`,
                 [id]
             ),
@@ -118,6 +123,131 @@ export const registerAdminRoutes = (app, { db, requireAdmin }) => {
         const user = await getUser(id);
         if (!user) return res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
         res.json(serializeUser(user));
+    });
+
+    // ------------------------------------------------------------ faturalar
+
+    const INVOICE_LIST = `
+        SELECT p.id, p.user_id, p.plan_id, p.amount::float8 AS amount, p.currency, p.conversation_id,
+               p.completed_at, p.invoice_status, p.billing, p.invoice_draft, p.invoice_number, p.invoice_issued_at,
+               u.username, u.full_name, u.phone_number
+          FROM payments p
+          JOIN users u ON u.id = p.user_id
+         WHERE p.status = 'success'`;
+    const INVOICE_SCOPES = {
+        ready: `AND p.invoice_status = 'ready'`,
+        issued: `AND p.invoice_status = 'issued'`,
+        missing: 'AND p.billing IS NULL',
+        all: '',
+    };
+
+    const serializeInvoice = (row) => ({
+        id: row.id,
+        user_id: row.user_id,
+        username: row.username,
+        full_name: row.full_name,
+        phone_number: row.phone_number,
+        plan_id: row.plan_id,
+        amount: row.amount,
+        currency: row.currency,
+        merchant_oid: row.conversation_id,
+        paid_at: row.completed_at,
+        invoice_status: row.invoice_status,
+        invoice_number: row.invoice_number,
+        invoice_issued_at: row.invoice_issued_at,
+        billing: row.billing,
+        draft: row.invoice_draft,
+    });
+
+    const getInvoice = (id) => db.get(`${INVOICE_LIST} AND p.id = ?`, [id]);
+
+    const findInvoice = async (req, res) => {
+        const id = parseId(req.params.id);
+        const row = id && await getInvoice(id);
+        if (!row) res.status(404).json({ error: 'Fatura kaydı bulunamadı.' });
+        return row || null;
+    };
+
+    app.get('/api/admin/invoices', requireAdmin, async (req, res) => {
+        const scope = Object.hasOwn(INVOICE_SCOPES, req.query.status) ? req.query.status : 'ready';
+        const rows = await db.all(
+            `${INVOICE_LIST} ${INVOICE_SCOPES[scope]}
+             ORDER BY p.completed_at DESC NULLS LAST, p.id DESC
+             LIMIT 500`
+        );
+        const missing = await db.get(
+            `SELECT COUNT(*)::int AS n FROM payments WHERE status = 'success' AND billing IS NULL`
+        );
+        res.json({ paidWithoutBilling: missing?.n ?? 0, items: rows.map(serializeInvoice) });
+    });
+
+    // Alıcı bilgisi, belge türü, tarih ve not düzeltilir; taslak ödenen tutardan yeniden hesaplanır.
+    app.patch('/api/admin/invoices/:id', requireAdmin, async (req, res) => {
+        const row = await findInvoice(req, res);
+        if (!row) return;
+        if (row.invoice_status === 'issued') {
+            return res.status(409).json({ error: 'Kesilmiş fatura düzenlenemez. Önce "Kesime geri al" ile işareti kaldırın.' });
+        }
+        const parsed = parseBilling(req.body?.billing);
+        if (parsed.error) return res.status(400).json({ error: parsed.error });
+        const documentMode = req.body?.documentMode ?? 'auto';
+        if (!DOCUMENT_MODES.includes(documentMode)) return res.status(400).json({ error: 'Geçersiz belge türü.' });
+        const issueDate = req.body?.issueDate || istanbulDate();
+        if (!isIsoDate(issueDate)) return res.status(400).json({ error: 'Fatura tarihi YYYY-AA-GG biçiminde olmalı.' });
+        if (issueDate > istanbulDate()) return res.status(400).json({ error: 'Fatura tarihi bugünden ileri olamaz.' });
+        const note = optionalText(req.body?.note, INVOICE_NOTE_MAX);
+        if (note === null) return res.status(400).json({ error: `Not en fazla ${INVOICE_NOTE_MAX} karakter olabilir.` });
+
+        const known = packages[row.plan_id];
+        const draft = buildInvoiceDraft({
+            plan: { name: known?.name || row.plan_id, credits: known?.credits ?? 0, price: row.amount },
+            billing: parsed.billing,
+            user: row,
+            merchantOid: row.conversation_id,
+            issueDate,
+            website: row.invoice_draft?.payment?.website ?? website,
+            documentMode,
+            note,
+        });
+        await db.run(
+            `UPDATE payments SET billing = ?::jsonb, invoice_draft = ?::jsonb, invoice_status = 'ready' WHERE id = ?`,
+            [JSON.stringify(parsed.billing), JSON.stringify(draft), row.id]
+        );
+        console.log(`[admin] ${req.admin.username}: fatura taslağı güncellendi payment=${row.id} belge=${draft.document.preferred}`);
+        res.json(serializeInvoice(await getInvoice(row.id)));
+    });
+
+    // EDM'de kesilen faturanın numarası işlenir ya da işaret kaldırılıp kesime geri alınır.
+    app.post('/api/admin/invoices/:id/status', requireAdmin, async (req, res) => {
+        const row = await findInvoice(req, res);
+        if (!row) return;
+        if (!row.billing || !row.invoice_draft) return res.status(400).json({ error: 'Önce fatura bilgilerini girin.' });
+        const status = req.body?.status;
+        if (status === 'issued') {
+            const number = typeof req.body?.number === 'string' ? req.body.number.trim().toUpperCase() : '';
+            if (!INVOICE_NUMBER_RE.test(number)) {
+                return res.status(400).json({ error: 'Fatura numarası 16 karakter olmalı: 3 harf/rakam seri + yıl + 9 hane sıra (ör. EDX2026000000001).' });
+            }
+            const taken = await db.get(
+                `SELECT id FROM payments WHERE invoice_number = ? AND id <> ? LIMIT 1`,
+                [number, row.id]
+            );
+            if (taken) return res.status(409).json({ error: `Bu fatura numarası #${taken.id} numaralı ödemede kullanılmış.` });
+            await db.run(
+                `UPDATE payments SET invoice_status = 'issued', invoice_number = ?, invoice_issued_at = NOW() WHERE id = ?`,
+                [number, row.id]
+            );
+            console.log(`[admin] ${req.admin.username}: fatura kesildi payment=${row.id} no=${number}`);
+        } else if (status === 'ready') {
+            await db.run(
+                `UPDATE payments SET invoice_status = 'ready', invoice_number = NULL, invoice_issued_at = NULL WHERE id = ?`,
+                [row.id]
+            );
+            console.log(`[admin] ${req.admin.username}: fatura kesime geri alındı payment=${row.id}`);
+        } else {
+            return res.status(400).json({ error: 'Geçersiz fatura durumu.' });
+        }
+        res.json(serializeInvoice(await getInvoice(row.id)));
     });
 
     // ------------------------------------------------------------ destek talepleri

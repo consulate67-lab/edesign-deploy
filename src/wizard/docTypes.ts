@@ -79,7 +79,6 @@ export const FAMILY_INFO: Record<DocFamily, { root: string; ns: string; label: s
 
 const inline = (key: string) => async () => (await import('../xsltContent')).getInlineXslt(key) ?? '';
 const antrepo = (id: string) => async () => (await import('../xslt-editor/antrepoTemplates')).getAntrepoTemplateById(id)?.xslt ?? '';
-const gallery = (id: string) => async () => (await import('../xslt-editor/templates')).TEMPLATES.find(t => t.id === id)?.xslt ?? '';
 
 /**
  * GİB general.xslt başlıkta yalnızca e-Arşiv / e-FATURA ayrımı yapar; makbuz
@@ -129,11 +128,7 @@ export const WIZARD_DOC_TYPES: WizardDocType[] = [
             gibSample('YTB_IadeIstisna_EFatura.xml', 'Yatırım teşvik istisna iade', 'YATIRIMTESVIK · IADE'),
         ],
         defaults: [
-            gibOption('fatura'),
-            { id: 'gib-fatura', label: 'Sade e-Fatura', description: 'GİB düzenine yakın, hafif şablon', moduleId: 'fatura', load: inline('gib/v2/e-Fatura-Sablon.xslt') },
-            { id: 'antrepo-fatura', label: 'Antrepo e-Fatura', description: 'Logolu, banka bilgili profesyonel şablon', moduleId: 'antrepo-fatura', load: antrepo('antrepo-fatura') },
-            { id: 'fatura-standart', label: 'Standart Fatura', description: 'Satır tablosu ve toplamlar', moduleId: 'fatura', load: gallery('fatura-standart') },
-            { id: 'fatura-minimal', label: 'Minimal Fatura', description: 'Az alanlı, sade başlangıç', moduleId: 'fatura', load: gallery('fatura-minimal') },
+            { id: 'gib-resmi-fatura', label: 'GİB Resmi Şablon', description: 'UBL-TR 1.2.1 e-Fatura görünümü, banka bilgili ve düzenlenebilir', moduleId: 'fatura', load: antrepo('antrepo-fatura') },
         ],
     },
     {
@@ -153,15 +148,7 @@ export const WIZARD_DOC_TYPES: WizardDocType[] = [
             gibSample('EArsiv_SARJANLIK.xml', 'Anlık şarj (türetilmiş)', 'EARSIVFATURA · SARJANLIK'),
         ],
         defaults: [
-            {
-                id: 'gib-resmi-arsiv-2026', label: 'GİB Resmi e-Arşiv Şablonu (2026)',
-                description: 'GİB e-Arşiv karekod standardıyla resmi görünüm', moduleId: 'arsiv', load: inline('gib/earsiv-2026.xslt'),
-            },
-            gibOption('arsiv'),
-            { id: 'gib-arsiv', label: 'Sade e-Arşiv', description: 'GİB düzenine yakın, hafif şablon', moduleId: 'arsiv', load: inline('gib/v2/e-Arsiv-Sablon.xslt') },
-            { id: 'antrepo-arsiv', label: 'Antrepo e-Arşiv', description: 'Logolu profesyonel şablon', moduleId: 'antrepo-arsiv', load: antrepo('antrepo-arsiv') },
-            { id: 'arsiv-standart', label: 'Standart e-Arşiv', description: 'Satır tablosu ve toplamlar', moduleId: 'arsiv', load: gallery('arsiv-standart') },
-            { id: 'arsiv-minimal', label: 'Minimal e-Arşiv', description: 'Az alanlı, sade başlangıç', moduleId: 'arsiv', load: gallery('arsiv-minimal') },
+            { id: 'gib-resmi-arsiv', label: 'GİB Resmi Şablon', description: 'UBL-TR 1.2.1 e-Arşiv görünümü, banka bilgili ve düzenlenebilir', moduleId: 'arsiv', load: antrepo('antrepo-arsiv') },
         ],
     },
     {

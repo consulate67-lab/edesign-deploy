@@ -35,18 +35,18 @@ const ANTREPO_ARSIV = stripBom(anrepoArsivRaw);
 export const ANTREPO_TEMPLATES: XsltTemplate[] = [
     {
         id: 'antrepo-fatura',
-        label: 'Antrepo e-Fatura',
-        description: 'Profesyonel e-Fatura tasarımı — UBL-TR standart görünüm (tedarikçi/müşteri kartları, ürün tablosu, KDV, toplam). 119 KB.',
+        label: 'GİB Resmi e-Fatura',
+        description: 'UBL-TR e-Fatura görünümü (tedarikçi/müşteri kartları, ürün tablosu, KDV, toplam, banka bilgileri).',
         moduleId: 'fatura',
-        docName: 'Antrepo e-Fatura',
+        docName: 'GİB Resmi e-Fatura',
         xslt: ANTREPO_FATURA,
     },
     {
         id: 'antrepo-arsiv',
-        label: 'Antrepo e-Arşiv',
-        description: 'Profesyonel e-Arşiv tasarımı — UBL-TR standart görünüm (tedarikçi/müşteri kartları, ürün tablosu, KDV, toplam). 127 KB.',
+        label: 'GİB Resmi e-Arşiv',
+        description: 'UBL-TR e-Arşiv görünümü (tedarikçi/müşteri kartları, ürün tablosu, KDV, toplam, banka bilgileri).',
         moduleId: 'arsiv',
-        docName: 'Antrepo e-Arşiv',
+        docName: 'GİB Resmi e-Arşiv',
         xslt: ANTREPO_ARSIV,
     },
 ];
