@@ -4,6 +4,7 @@
  * ve e-Dekont için paketlerdeki resmi XSLT'ler. Karekod belgenin sağ üst köşesinde yer almalıdır.
  */
 import QR_LIB from './vendor/qrcode.min.js?raw';
+import { QR_SCRIPT_LOOKUP, QR_SCRIPT_WIDTH } from './utils/legacyViewerCompat';
 
 const L = (name: string) => `*[local-name()='${name}']`;
 const p = (...names: string[]) => '/*/' + names.map(L).join('/');
@@ -124,9 +125,9 @@ const CREDIT_NOTE_JSON = '<xsl:choose>'
     + `<xsl:otherwise>${MUSTAHSIL_JSON}</xsl:otherwise>`
     + '</xsl:choose>';
 
-const RENDER_JS = "(function(){var s=document.currentScript,b=s&&s.parentNode;if(!b||typeof QRCode==='undefined')return;"
+const RENDER_JS = `(function(){${QR_SCRIPT_LOOKUP}if(!b||typeof QRCode==='undefined')return;`
     + "var t=b.querySelector('[data-karekod-box]'),d=b.querySelector('[data-karekod-value]');if(!t||!d||t.querySelector('canvas,img'))return;"
-    + "var w=b.clientWidth||120;new QRCode(t,{text:d.textContent.replace(/\\s+/g,' ').trim(),width:w,height:w,correctLevel:QRCode.CorrectLevel.M});})();";
+    + `${QR_SCRIPT_WIDTH}new QRCode(t,{text:d.textContent.replace(/\\s+/g,' ').trim(),width:w,height:w,correctLevel:QRCode.CorrectLevel.M});})();`;
 
 export const hasQrLibrary = (xslt: string) => xslt.includes('var QRCode;');
 

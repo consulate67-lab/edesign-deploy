@@ -2,44 +2,50 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { SECTOR_TEMPLATES, SECTORS, hazirPath } from '../sector-templates';
 import { transformXmlWithXslt } from '../xsltTransformer';
 import { theme } from '../theme';
+import { useLocaleT } from '../i18n';
 
 /** A4 genişliği (96 dpi); önizleme bu genişlikte çizilip kutuya sığdırılır. */
 const PAGE_W = 794;
 const FRAME_CSS = '<style>html,body{overflow:hidden!important;}</style>';
 
-interface PreviewSource {
+export interface PreviewSource {
     key: string;
     name: string;
     sectorLabel?: string;
     sectorColor?: string;
-    xslt: string;
-    xml: string;
+    /** Galeri satırı yerine gösterilen alt yazı (ör. örnek verinin ülkesi). */
+    subtitle?: string;
+    /** [XSLT, XML] metinleri. */
+    load: () => Promise<[string, string]>;
 }
 
+const SECTOR_BY_ID = new Map(SECTORS.map(s => [s.id, s]));
+
 /** Galeride hazır şablonu olmayan türler için resmi / varsayılan görünüm. */
-const FALLBACKS: Record<string, PreviewSource> = {
+const FALLBACKS: Record<string, { key: string; name: string; xslt: string; xml: string }> = {
     'bilet-rapor': {
         key: 'fb-bilet-rapor', name: 'e-Bilet Raporu Görünümü',
         xslt: 'ebelge/ebilet/ebilet-rapor.xslt', xml: 'ebelge/samples/gib/eBilet-Rapor-Karayolu.xml',
     },
     makbuz: {
-        key: 'fb-makbuz', name: 'e-Makbuz Şablonu',
-        xslt: 'ebelge/community/hzkucuk-eFatura-makbuz.xslt', xml: 'ebelge/samples/e-Makbuz-TEMEL.xml',
+        key: 'fb-makbuz-v2', name: 'Profesyonel e-Makbuz',
+        xslt: 'ebelge/gib/v2/e-Makbuz-Sablon.xslt', xml: 'ebelge/samples/e-Makbuz-TEMEL.xml',
     },
 };
 
-const SECTOR_BY_ID = new Map(SECTORS.map(s => [s.id, s]));
-
-const sourcesFor = (docTypeId: string): PreviewSource[] => {
-    const list = SECTOR_TEMPLATES.filter(t => t.docTypeId === docTypeId).map(t => {
+/** Türkiye belge türleri: sektör galerisindeki hazır şablonlar. */
+const gallerySources = (docTypeId: string): PreviewSource[] => {
+    const fromFiles = (xslt: string, xml: string) => () => Promise.all([loadText(xslt), loadText(xml)]);
+    const list: PreviewSource[] = SECTOR_TEMPLATES.filter(t => t.docTypeId === docTypeId).map(t => {
         const s = SECTOR_BY_ID.get(t.sector);
         return {
             key: t.id, name: t.name, sectorLabel: s?.label, sectorColor: s?.color ?? t.accent,
-            xslt: t.xslt || hazirPath(t.id, 'xslt'), xml: t.xml || hazirPath(t.id, 'xml'),
+            load: fromFiles(t.xslt || hazirPath(t.id, 'xslt'), t.xml || hazirPath(t.id, 'xml')),
         };
     });
     if (list.length) return list;
-    return FALLBACKS[docTypeId] ? [FALLBACKS[docTypeId]] : [];
+    const fb = FALLBACKS[docTypeId];
+    return fb ? [{ key: fb.key, name: fb.name, load: fromFiles(fb.xslt, fb.xml) }] : [];
 };
 
 const textCache = new Map<string, Promise<string>>();
@@ -62,7 +68,7 @@ let chain: Promise<unknown> = Promise.resolve();
 const renderSource = (src: PreviewSource): Promise<string> => {
     let p = htmlCache.get(src.key);
     if (!p) {
-        p = Promise.all([loadText(src.xslt), loadText(src.xml)]).then(([xslt, xml]) => {
+        p = src.load().then(([xslt, xml]) => {
             const job = chain.then(() => new Promise<string>(resolve => {
                 setTimeout(() => resolve(FRAME_CSS + transformXmlWithXslt(xml, xslt)), 30);
             }));
@@ -86,11 +92,15 @@ interface HeroPreviewProps {
     round: number;
     /** Sıradaki türün önizlemesi önceden hazırlanır. */
     nextDocTypeId?: string;
+    /** Türün önizleme kaynakları; verilmezse Türkiye galerisi kullanılır. */
+    sources?: (docTypeId: string) => PreviewSource[];
     onClick?: () => void;
     onHoverChange?: (hover: boolean) => void;
 }
 
-export const HeroPreview: React.FC<HeroPreviewProps> = ({ docTypeId, docLabel, accent, round, nextDocTypeId, onClick, onHoverChange }) => {
+export const HeroPreview: React.FC<HeroPreviewProps> = ({ docTypeId, docLabel, accent, round, nextDocTypeId, sources, onClick, onHoverChange }) => {
+    const sourcesFor = sources ?? gallerySources;
+    const { t } = useLocaleT();
     const boxRef = useRef<HTMLDivElement>(null);
     const [size, setSize] = useState({ w: 440, h: 560 });
     const [layers, setLayers] = useState<Layer[]>([]);
@@ -99,7 +109,7 @@ export const HeroPreview: React.FC<HeroPreviewProps> = ({ docTypeId, docLabel, a
     const src = useMemo(() => {
         const list = sourcesFor(docTypeId);
         return list.length ? list[round % list.length] : null;
-    }, [docTypeId, round]);
+    }, [docTypeId, round, sourcesFor]);
 
     useEffect(() => {
         const el = boxRef.current;
@@ -125,9 +135,9 @@ export const HeroPreview: React.FC<HeroPreviewProps> = ({ docTypeId, docLabel, a
         const next = sourcesFor(nextDocTypeId);
         const pick = next.length ? next[(nextDocTypeId === docTypeId ? round + 1 : round) % next.length] : null;
         if (!pick) return;
-        const t = window.setTimeout(() => { renderSource(pick).catch(() => undefined); }, 600);
-        return () => window.clearTimeout(t);
-    }, [nextDocTypeId, docTypeId, round]);
+        const timer = window.setTimeout(() => { renderSource(pick).catch(() => undefined); }, 600);
+        return () => window.clearTimeout(timer);
+    }, [nextDocTypeId, docTypeId, round, sourcesFor]);
 
     const reveal = (id: number) => {
         setLayers(ls => ls.map(l => (l.id === id ? { ...l, shown: true } : l)));
@@ -162,7 +172,7 @@ export const HeroPreview: React.FC<HeroPreviewProps> = ({ docTypeId, docLabel, a
             <button
                 type="button"
                 onClick={onClick}
-                aria-label={`${docLabel} hazır şablon önizlemesi`}
+                aria-label={t('hero.previewLabel', { doc: docLabel })}
                 style={{
                     position: 'relative', display: 'block', width: '100%', padding: 0, border: 0, cursor: 'pointer',
                     background: '#fff', borderRadius: 18, overflow: 'hidden', textAlign: 'left',
@@ -178,7 +188,7 @@ export const HeroPreview: React.FC<HeroPreviewProps> = ({ docTypeId, docLabel, a
                     {layers.map(l => (
                         <iframe
                             key={l.id}
-                            title={`${l.src.name} önizleme`}
+                            title={t('hero.frameTitle', { name: l.src.name })}
                             srcDoc={l.html}
                             sandbox="allow-scripts"
                             tabIndex={-1}
@@ -220,10 +230,10 @@ export const HeroPreview: React.FC<HeroPreviewProps> = ({ docTypeId, docLabel, a
                 </span>
                 <div style={{ minWidth: 0, flex: 1 }}>
                     <div style={{ fontSize: 13, fontWeight: 700, color: theme.text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {current?.name ?? 'Hazır şablon'}
+                        {current?.name ?? t('hero.readyTemplate')}
                     </div>
                     <div style={{ fontSize: 11, color: theme.textSubtle, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {current?.sectorLabel ? `Galeriden hazır şablon · ${current.sectorLabel}` : 'Galeriden hazır şablon'}
+                        {current?.subtitle ?? (current?.sectorLabel ? `${t('hero.fromGallery')} · ${current.sectorLabel}` : t('hero.fromGallery'))}
                     </div>
                 </div>
             </div>

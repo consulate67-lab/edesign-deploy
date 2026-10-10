@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { LogIn, UserPlus, ArrowLeft } from 'lucide-react';
 import { api } from './api';
 import { theme, techBackground } from './theme';
+import { useLocaleT } from './i18n';
+import { LanguageSwitcher } from './i18n/LanguageSwitcher';
 
 type AuthMode = 'login' | 'register';
 
@@ -20,6 +22,7 @@ export const Auth: React.FC<AuthProps> = ({
     onSwitchMode,
     onBackToLanding,
 }) => {
+    const { t } = useLocaleT();
     const [isLogin, setIsLogin] = useState(mode === 'login');
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -65,7 +68,7 @@ export const Auth: React.FC<AuthProps> = ({
                 else onLogin();
             }
         } catch (err: any) {
-            setError(err.message || 'Bir hata oluştu');
+            setError(err.message || t('common.genericError'));
         } finally {
             setIsLoading(false);
         }
@@ -161,9 +164,10 @@ export const Auth: React.FC<AuthProps> = ({
                         e.currentTarget.style.color = theme.textMuted;
                     }}
                 >
-                    <ArrowLeft size={14} /> Ana sayfa
+                    <ArrowLeft size={14} /> {t('auth.backHome')}
                 </button>
             )}
+            <LanguageSwitcher style={{ position: 'fixed', top: 24, right: 24, zIndex: 10 }} />
 
             {/* Card */}
             <div
@@ -205,7 +209,7 @@ export const Auth: React.FC<AuthProps> = ({
                             margin: 0,
                         }}
                     >
-                        {isLogin ? 'Tekrar hoş geldiniz' : 'Hesabınızı oluşturun'}
+                        {isLogin ? t('auth.welcomeBack') : t('auth.createTitle')}
                     </h1>
                     <p
                         style={{
@@ -215,9 +219,7 @@ export const Auth: React.FC<AuthProps> = ({
                             lineHeight: 1.5,
                         }}
                     >
-                        {isLogin
-                            ? 'UBL-TR Designer hesabınıza giriş yapın'
-                            : 'Tasarımcıyı kullanmaya başlamak için bilgilerinizi tamamlayın'}
+                        {isLogin ? t('auth.loginSub') : t('auth.registerSub')}
                     </p>
                 </div>
 
@@ -268,10 +270,10 @@ export const Auth: React.FC<AuthProps> = ({
                             }}
                         >
                             <div>
-                                <label style={labelStyle}>Ad Soyad</label>
+                                <label style={labelStyle}>{t('auth.fullName')}</label>
                                 <input
                                     type="text"
-                                    placeholder="örn. Ahmet Yılmaz"
+                                    placeholder={t('auth.fullNamePh')}
                                     required
                                     value={fullName}
                                     onChange={(e) => setFullName(e.target.value)}
@@ -281,10 +283,10 @@ export const Auth: React.FC<AuthProps> = ({
                                 />
                             </div>
                             <div>
-                                <label style={labelStyle}>Telefon</label>
+                                <label style={labelStyle}>{t('auth.phone')}</label>
                                 <input
                                     type="tel"
-                                    placeholder="05xx xxx xx xx"
+                                    placeholder={t('auth.phonePh')}
                                     value={phoneNumber}
                                     onChange={(e) => setPhoneNumber(e.target.value)}
                                     onFocus={() => setFocusedField('phoneNumber')}
@@ -297,10 +299,10 @@ export const Auth: React.FC<AuthProps> = ({
 
                     {!isLogin && (
                         <div>
-                            <label style={labelStyle}>Firma Adı</label>
+                            <label style={labelStyle}>{t('auth.company')}</label>
                             <input
                                 type="text"
-                                placeholder="örn. Teknoloji LTD. ŞTİ."
+                                placeholder={t('auth.companyPh')}
                                 required
                                 value={companyName}
                                 onChange={(e) => setCompanyName(e.target.value)}
@@ -312,7 +314,7 @@ export const Auth: React.FC<AuthProps> = ({
                     )}
 
                     <div>
-                        <label style={labelStyle}>E-posta Adresi</label>
+                        <label style={labelStyle}>{t('auth.email')}</label>
                         <input
                             type="email"
                             placeholder="mail@firma.com"
@@ -326,7 +328,7 @@ export const Auth: React.FC<AuthProps> = ({
                     </div>
 
                     <div>
-                        <label style={labelStyle}>Şifre</label>
+                        <label style={labelStyle}>{t('auth.password')}</label>
                         <input
                             type="password"
                             placeholder="••••••••"
@@ -373,14 +375,14 @@ export const Auth: React.FC<AuthProps> = ({
                         }}
                     >
                         {isLoading ? (
-                            'İşleniyor...'
+                            t('auth.processing')
                         ) : isLogin ? (
                             <>
-                                <LogIn size={18} /> Giriş Yap
+                                <LogIn size={18} /> {t('auth.login')}
                             </>
                         ) : (
                             <>
-                                <UserPlus size={18} /> Hesabı Oluştur
+                                <UserPlus size={18} /> {t('auth.create')}
                             </>
                         )}
                     </button>
@@ -411,9 +413,7 @@ export const Auth: React.FC<AuthProps> = ({
                             e.currentTarget.style.background = 'transparent';
                         }}
                     >
-                        {isLogin
-                            ? 'Henüz hesabınız yok mu? Yeni hesap oluşturun'
-                            : 'Zaten hesabınız var mı? Giriş ekranına dönün'}
+                        {isLogin ? t('auth.toRegister') : t('auth.toLogin')}
                     </button>
                 </div>
             </div>
@@ -429,7 +429,7 @@ export const Auth: React.FC<AuthProps> = ({
                     textAlign: 'center',
                 }}
             >
-                © 2026 · GİB UBL-TR Designer
+                {t('auth.footer')}
             </div>
         </div>
     );

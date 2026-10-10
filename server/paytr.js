@@ -31,6 +31,9 @@ const clientIp = (req) => String(req.ip || '').replace(/^::ffff:/, '') || '127.0
 
 const clip = (s, n) => String(s ?? '').trim().slice(0, n);
 
+/** Satış para birimi → PayTR currency kodu. EUR/GBP için mağazada döviz ile tahsilat açık olmalı. */
+const PAYTR_CURRENCY = { TRY: 'TL', EUR: 'EUR', GBP: 'GBP' };
+
 export function registerPaytrRoutes(app, { db, authenticateToken, packages, frontendUrl, isAllowedOrigin }) {
     /** Ödeme sonrası dönülecek sayfa: yalnızca izinli ön yüz adresleri, aksi halde varsayılan ön yüz. */
     const returnBase = (raw) => {
@@ -63,7 +66,9 @@ export function registerPaytrRoutes(app, { db, authenticateToken, packages, fron
         if (!user) return res.status(401).json({ error: 'Oturum geçersiz.' });
 
         const merchantOid = `ED${user.id}${planId.toUpperCase()}${Date.now()}`;
-        const amount = Number(plan.price);
+        const saleCurrency = Object.hasOwn(PAYTR_CURRENCY, req.body?.currency) ? req.body.currency : 'TRY';
+        const amount = Number(plan.prices?.[saleCurrency] ?? plan.price);
+        if (!(amount > 0)) return res.status(400).json({ error: 'Geçersiz paket fiyatı.' });
         const paymentAmount = String(Math.round(amount * 100));
         const email = clip(user.username, 100);
         const userIp = clientIp(req);
@@ -72,7 +77,7 @@ export function registerPaytrRoutes(app, { db, authenticateToken, packages, fron
         ])).toString('base64');
         const noInstallment = '0';
         const maxInstallment = '0';
-        const currency = 'TL';
+        const currency = PAYTR_CURRENCY[saleCurrency];
         const back = returnBase(req.body?.returnUrl);
 
         const fields = {
@@ -112,9 +117,9 @@ export function registerPaytrRoutes(app, { db, authenticateToken, packages, fron
                 return res.status(502).json({ error: `Ödeme başlatılamadı: ${data.reason || 'PayTR yanıt vermedi'}` });
             }
             await db.run(
-                `INSERT INTO payments (user_id, plan_id, conversation_id, token, amount, status, billing)
-                 VALUES (?, ?, ?, ?, ?, 'pending', ?::jsonb)`,
-                [user.id, planId, merchantOid, data.token, amount, JSON.stringify(billing)]
+                `INSERT INTO payments (user_id, plan_id, conversation_id, token, amount, currency, status, billing)
+                 VALUES (?, ?, ?, ?, ?, ?, 'pending', ?::jsonb)`,
+                [user.id, planId, merchantOid, data.token, amount, saleCurrency, JSON.stringify(billing)]
             );
             await db.run(
                 `UPDATE users
@@ -124,7 +129,7 @@ export function registerPaytrRoutes(app, { db, authenticateToken, packages, fron
                   WHERE id = ?`,
                 [JSON.stringify(billing), billing.title, user.id]
             );
-            console.log(`[paytr] checkout user=${user.id} plan=${planId} oid=${merchantOid} test=${TEST_MODE}`);
+            console.log(`[paytr] checkout user=${user.id} plan=${planId} oid=${merchantOid} ${amount} ${saleCurrency} test=${TEST_MODE}`);
             res.json({ success: true, merchantOid, iframeUrl: IFRAME_URL + data.token, testMode: TEST_MODE === '1' });
         } catch (e) {
             console.error('[paytr] checkout error:', e);
@@ -168,6 +173,7 @@ export function registerPaytrRoutes(app, { db, authenticateToken, packages, fron
                     );
                     invoiceDraft = buildInvoiceDraft({
                         plan: { ...plan, price: payment.amount },
+                        currency: payment.currency,
                         billing: payment.billing,
                         user: buyer.rows[0],
                         merchantOid: oid,

@@ -4,6 +4,7 @@
  * opaklık için resim hedefin ::before katmanına konur (içeriği soldurmaz).
  */
 import { findLiteralTagByOrdinal, setTagAttribute } from './xsltStyleEdit';
+import i18n from '../../i18n';
 
 export type BgTarget = 'page' | 'element';
 export type BgFit = 'width' | 'width-repeat' | 'stretch' | 'cover';
@@ -98,7 +99,7 @@ export async function imageFileToDataUrl(file: File, maxWidth = 1800): Promise<s
     const img = await new Promise<HTMLImageElement>((resolve, reject) => {
         const i = new Image();
         i.onload = () => resolve(i);
-        i.onerror = () => reject(new Error('Resim okunamadı'));
+        i.onerror = () => reject(new Error(i18n.t('editor.background.readFailed')));
         i.src = original;
     });
     if (img.naturalWidth <= maxWidth) return original;

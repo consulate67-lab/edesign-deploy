@@ -44,7 +44,10 @@ export interface DocTypeDefinition {
     defaultTemplate: string;
     /** XSLT'nin kaynağı — UI rozetleme için. */
     xsltSource: XsltSource;
-    /** List of countries (ISO 3166-1 alpha-2) where this doc type is supported. */
+    /**
+     * Bu şablonun geçerli olduğu ülkeler. UBL-TR şablonları yalnız TR içindir;
+     * diğer ülkelerin profilleri `documentProfiles.ts` içindedir.
+     */
     supportedCountries: string[];
     /** Whether this doc type requires a digital signature. */
     requiresSignature: boolean;
@@ -99,9 +102,9 @@ export const docTypes: DocTypeDefinition[] = [
         rootElement: 'Invoice',
         defaultTemplate: '/ebelge/gib/e-Fatura.xslt',
         xsltSource: 'gib-official',
-        supportedCountries: ['TR', 'DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'AT', 'PL', 'SE', 'FI', 'DK', 'NO', 'IE', 'PT', 'GB', 'SG', 'AU', 'NZ', 'JP'],
+        supportedCountries: ['TR'],
         requiresSignature: true,
-        category: 'peppol',
+        category: 'turkish',
         customizationId: 'TR1.2',
         profileId: 'e-Fatura',
         sampleXml: '/ebelge/samples/e-Fatura-TEMEL.xml',
@@ -113,9 +116,9 @@ export const docTypes: DocTypeDefinition[] = [
         rootElement: 'CreditNote',
         defaultTemplate: '/ebelge/gib/e-Fatura-OzelMatrah.xslt',
         xsltSource: 'gib-official',
-        supportedCountries: ['TR', 'DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'AT', 'GB', 'SG', 'AU', 'NZ'],
+        supportedCountries: ['TR'],
         requiresSignature: true,
-        category: 'peppol',
+        category: 'turkish',
         customizationId: 'TR1.2',
         profileId: 'e-Fatura-Iade',
         sampleXml: '/ebelge/samples/e-Fatura-IADE.xml',
@@ -127,7 +130,7 @@ export const docTypes: DocTypeDefinition[] = [
         rootElement: 'DespatchAdvice',
         defaultTemplate: '/ebelge/community/IRPTeam-eWaybill-Irsaliye.xslt',
         xsltSource: 'community',
-        supportedCountries: ['TR', 'DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'GB', 'SG', 'AU'],
+        supportedCountries: ['TR'],
         requiresSignature: false,
         category: 'turkish',
         customizationId: 'TR1.2',

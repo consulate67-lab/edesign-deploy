@@ -15,6 +15,9 @@
 import { documentEndOffset } from './xsltStyleEdit';
 import { xmlFieldName, xpathPaths } from './xpathNames';
 import { restoreScriptText, stripXsltDeprecationBanner } from '../../xsltTransformer';
+import type { DocLanguage } from '../../international/registry/docLanguages';
+import i18n from '../../i18n';
+import { docT } from '../docLanguage';
 
 const INDEXED_TAGS = new Set([
     'div', 'span', 'p', 'table', 'tr', 'td', 'th',
@@ -372,7 +375,7 @@ export function renderAndAnnotateXslt(
     if (xml.startsWith('\u00EF\u00BB\u00BF')) xml = xml.slice(3);
 
     if (!xslt.trim() || !xml.trim()) {
-        return { html: '', error: 'XSLT veya XML boş', durationMs: 0 };
+        return { html: '', error: i18n.t('editor.render.empty'), durationMs: 0 };
     }
 
     try {
@@ -384,7 +387,7 @@ export function renderAndAnnotateXslt(
         if (xsltError) {
             return {
                 html: '',
-                error: `XSLT parse hatası: ${xsltError.textContent?.trim().slice(0, 200) || 'bilinmiyor'}`,
+                error: i18n.t('editor.render.xsltParse', { detail: xsltError.textContent?.trim().slice(0, 200) || '?' }),
                 durationMs: performance.now() - start,
             };
         }
@@ -392,7 +395,7 @@ export function renderAndAnnotateXslt(
         if (xmlError) {
             return {
                 html: '',
-                error: `XML parse hatası: ${xmlError.textContent?.trim().slice(0, 200) || 'bilinmiyor'}`,
+                error: i18n.t('editor.render.xmlParse', { detail: xmlError.textContent?.trim().slice(0, 200) || '?' }),
                 durationMs: performance.now() - start,
             };
         }
@@ -404,7 +407,7 @@ export function renderAndAnnotateXslt(
         if (!resultDoc) {
             return {
                 html: '',
-                error: 'XSLT dönüşümü sonuç üretmedi — stylesheet geçersiz (ör. xsl:template dışında HTML etiketi).',
+                error: i18n.t('editor.render.noResult'),
                 durationMs: performance.now() - start,
             };
         }
@@ -758,23 +761,37 @@ export function removeXsltBinding(xslt: string, b: XsltBinding): string {
     return xslt;
 }
 
-const IMAGE_PLACEHOLDER_SRC = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='100'%3E%3Crect width='100%25' height='100%25' fill='%23e2e8f0' stroke='%2394a3b8'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='13' fill='%23475569'%3EResim se%C3%A7in%3C/text%3E%3C/svg%3E";
+/** Yer tutucu resmin dilden bağımsız imzası (kutu rengi). */
+export const IMAGE_PLACEHOLDER_MARK = "fill='%23e2e8f0' stroke='%2394a3b8'";
+const imagePlaceholderSrc = (text: string) => "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='100'%3E%3Crect width='100%25' height='100%25' "
+    + IMAGE_PLACEHOLDER_MARK
+    + "/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='13' fill='%23475569'%3E"
+    + encodeURIComponent(text).replace(/'/g, '%27')
+    + '%3C/text%3E%3C/svg%3E';
 
 // data-xslt-obj: özellik panelinin objeyi XSLT kaynağında ve önizlemede
-// bulduğu kalıcı kimlik.
+// bulduğu kalıcı kimlik. Metinler belge dilindedir (önizlemede görünen fatura).
 export const XSLT_ELEMENT_SNIPPETS = {
-    image: (id: string, src: string = IMAGE_PLACEHOLDER_SRC, width = 200) =>
-        `<img data-xslt-obj="${id}" src="${src}" alt="Resim" width="${width}" />`,
-    text: (id: string) => `<p data-xslt-obj="${id}">Yeni metin</p>`,
-    table: (id: string) => {
-        const line = '1px solid #000000';
-        return `<table data-xslt-obj="${id}" border="0" cellpadding="5" data-border-frame="1 solid #000000" data-border-inner="all 1 solid #000000" style="border-collapse:collapse;border:${line}">`
-            + `<tr><th>Başlık 1</th><th style="border-left:${line}">Başlık 2</th></tr>`
-            + `<tr><td style="border-top:${line}">Hücre 1</td><td style="border-top:${line};border-left:${line}">Hücre 2</td></tr></table>`;
+    image: (id: string, lang: DocLanguage = 'tr', src?: string, width = 200) => {
+        const t = docT(lang);
+        return `<img data-xslt-obj="${id}" src="${src ?? imagePlaceholderSrc(t('editor.doc.chooseImage'))}" alt="${escapeAttr(t('editor.doc.image'))}" width="${width}" />`;
     },
-    input: (id: string) => `<input data-xslt-obj="${id}" type="text" placeholder="Alan adı" />`,
+    text: (id: string, lang: DocLanguage = 'tr') => `<p data-xslt-obj="${id}">${escapeText(docT(lang)('editor.doc.newText'))}</p>`,
+    table: (id: string, lang: DocLanguage = 'tr') => {
+        const t = docT(lang);
+        const line = '1px solid #000000';
+        const h = (n: number) => escapeText(t('editor.doc.header', { n }));
+        const c = (n: number) => escapeText(t('editor.doc.cell', { n }));
+        return `<table data-xslt-obj="${id}" border="0" cellpadding="5" data-border-frame="1 solid #000000" data-border-inner="all 1 solid #000000" style="border-collapse:collapse;border:${line}">`
+            + `<tr><th>${h(1)}</th><th style="border-left:${line}">${h(2)}</th></tr>`
+            + `<tr><td style="border-top:${line}">${c(1)}</td><td style="border-top:${line};border-left:${line}">${c(2)}</td></tr></table>`;
+    },
+    input: (id: string, lang: DocLanguage = 'tr') => `<input data-xslt-obj="${id}" type="text" placeholder="${escapeAttr(docT(lang)('editor.doc.fieldName'))}" />`,
 } as const;
 export type XsltInsertType = keyof typeof XSLT_ELEMENT_SNIPPETS;
+
+const escapeText = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const escapeAttr = (s: string) => escapeText(s).replace(/"/g, '&quot;').replace(/\{/g, '{{').replace(/\}/g, '}}');
 
 export function nextXsltObjId(xslt: string): string {
     let max = 0;

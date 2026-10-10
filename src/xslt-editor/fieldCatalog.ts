@@ -6,6 +6,8 @@
  * XPath'ler namespace önekinden bağımsız üretilir (`*[local-name()='X']`),
  * böylece her şablonun kendi önek tanımlarıyla çalışır.
  */
+import i18n from '../i18n';
+import { numberStyleOf, type DocLanguage, type NumberStyle } from '../international/registry/docLanguages';
 
 export type CatalogFormat = 'text' | 'amount' | 'number' | 'date';
 
@@ -901,16 +903,17 @@ export function labelForXPath(xpath: string, catalog: CatalogField[], context = 
     return bases.size === 1 ? catalog.find(f => f.path === [...bases][0]) ?? null : null;
 }
 
-const ATTR_SUFFIX: Record<string, string> = { currencyID: 'para birimi', unitCode: 'birim', schemeID: 'türü' };
+const ATTR_SUFFIX = { currencyID: 'editor.attr.currency', unitCode: 'editor.attr.unit', schemeID: 'editor.attr.scheme' } as const;
 
-/** Tasarım listesindeki XPath'in Türkçe adı; katalogda olmayan öznitelikler üst alanın adıyla adlandırılır. */
+/** Tasarım listesindeki XPath'in (arayüz dilindeki) adı; katalogda olmayan öznitelikler üst alanın adıyla adlandırılır. */
 export function bindingLabel(xpath: string, catalog: CatalogField[], context = ''): string | null {
     const direct = labelForXPath(xpath, catalog, context);
     if (direct) return direct.label;
     const attr = xpath.match(/\/?@([\w.-]+)\s*\)?\s*$/);
     if (!attr) return null;
     const parent = labelForXPath(xpath.slice(0, attr.index), catalog, context);
-    return parent ? `${parent.label} (${ATTR_SUFFIX[attr[1]] ?? attr[1]})` : null;
+    const key = ATTR_SUFFIX[attr[1] as keyof typeof ATTR_SUFFIX];
+    return parent ? `${parent.label} (${key ? i18n.t(key) : attr[1]})` : null;
 }
 
 /** Alanın örnek XML'deki değeri (ilk eşleşme). */
@@ -927,20 +930,38 @@ export function evaluateField(xmlDoc: Document | null, f: CatalogField): string 
 // Sayı biçimi, veri alanı ve formül snippet'leri
 // ----------------------------------------------------------------------------
 
-export const DECIMAL_FORMAT_NAME = 'edesign-tr';
+/** Belge diline göre sayı ayraçları (decimal-format adı → ondalık / binlik). */
+const DECIMAL_FORMATS = {
+    'edesign-tr': { decimal: ',', grouping: '.' },
+    'edesign-en': { decimal: '.', grouping: ',' },
+    'edesign-fr': { decimal: ',', grouping: '\u00a0' },
+} as const;
+type DecimalFormatName = keyof typeof DECIMAL_FORMATS;
+const DECIMAL_FORMAT_BY_STYLE: Record<NumberStyle, DecimalFormatName> = { dot: 'edesign-en', space: 'edesign-fr', comma: 'edesign-tr' };
+const decimalFormatOf = (lang: DocLanguage): DecimalFormatName => DECIMAL_FORMAT_BY_STYLE[numberStyleOf(lang)];
 
-/** format-number için Türkçe ayraçlı decimal-format bildirimi yoksa ekler. */
+/** format-number ifadelerinin kullandığı (edesign-*) decimal-format bildirimlerinden eksik olanları ekler. */
 export function ensureDecimalFormat(xslt: string): string {
-    if (xslt.includes(`name="${DECIMAL_FORMAT_NAME}"`)) return xslt;
+    const used = new Set([...xslt.matchAll(/'(edesign-(?:tr|en|fr))'\s*\)/g)].map(m => m[1] as DecimalFormatName));
+    const missing = [...used].filter(name => !xslt.includes(`name="${name}"`));
+    if (!missing.length) return xslt;
     const m = xslt.match(/<xsl:(stylesheet|transform)\b[^>]*>/);
     if (!m || m.index === undefined) return xslt;
     const at = m.index + m[0].length;
-    return `${xslt.slice(0, at)}\n<xsl:decimal-format name="${DECIMAL_FORMAT_NAME}" decimal-separator="," grouping-separator="."/>${xslt.slice(at)}`;
+    const decls = missing.map(name => {
+        const { decimal, grouping } = DECIMAL_FORMATS[name];
+        return `\n<xsl:decimal-format name="${name}" decimal-separator="${decimal}" grouping-separator="${grouping === '\u00a0' ? '&#160;' : grouping}"/>`;
+    }).join('');
+    return `${xslt.slice(0, at)}${decls}${xslt.slice(at)}`;
 }
 
-export const numberPattern = (decimals: number) => (decimals > 0 ? `###.##0,${'0'.repeat(decimals)}` : '###.##0');
-const formatted = (expr: string, decimals: number) =>
-    `format-number(${expr}, '${numberPattern(decimals)}', '${DECIMAL_FORMAT_NAME}')`;
+export const numberPattern = (decimals: number, lang: DocLanguage = 'tr') => {
+    const { decimal, grouping } = DECIMAL_FORMATS[decimalFormatOf(lang)];
+    const int = `###${grouping}##0`;
+    return decimals > 0 ? `${int}${decimal}${'0'.repeat(decimals)}` : int;
+};
+const formatted = (expr: string, decimals: number, lang: DocLanguage) =>
+    `format-number(${expr}, '${numberPattern(decimals, lang)}', '${decimalFormatOf(lang)}')`;
 
 /** Seçilen konum bir satır döngüsünün (InvoiceLine / DespatchLine / ReceiptLine / CreditNoteLine) içinde mi? */
 export function isInLineContext(xslt: string, offset: number): boolean {
@@ -951,15 +972,15 @@ export function isInLineContext(xslt: string, offset: number): boolean {
 
 const escapeText = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-/** Veri alanı objesinin içeriği (sayısal alanlar Türkçe biçimlenir). */
-export function fieldContent(f: CatalogField, inLine: boolean): string {
+/** Veri alanı objesinin içeriği (sayısal alanlar belge dilinin ayraçlarıyla biçimlenir). */
+export function fieldContent(f: CatalogField, inLine: boolean, lang: DocLanguage = 'tr'): string {
     const xp = fieldXPath(f, inLine);
-    if (f.format === 'amount') return `<xsl:if test="${xp}"><xsl:value-of select="${formatted(`number(${xp})`, 2)}"/></xsl:if>`;
+    if (f.format === 'amount') return `<xsl:if test="${xp}"><xsl:value-of select="${formatted(`number(${xp})`, 2, lang)}"/></xsl:if>`;
     return `<xsl:value-of select="${xp}"/>`;
 }
 
-export const fieldSnippet = (id: string, f: CatalogField, inLine: boolean) =>
-    `<span data-xslt-obj="${id}" data-obj-kind="field" data-field="${f.key}">${fieldContent(f, inLine)}</span>`;
+export const fieldSnippet = (id: string, f: CatalogField, inLine: boolean, lang: DocLanguage = 'tr') =>
+    `<span data-xslt-obj="${id}" data-obj-kind="field" data-field="${f.key}">${fieldContent(f, inLine, lang)}</span>`;
 
 export type FormulaOp = 'none' | 'percent' | 'mul' | 'div' | 'add' | 'sub';
 export interface FormulaModel {
@@ -973,21 +994,23 @@ export interface FormulaModel {
     suffix: string;
 }
 
-export const FORMULA_OPS: { id: FormulaOp; label: string }[] = [
-    { id: 'none', label: '(yok) — sadece alan / toplamı' },
-    { id: 'percent', label: '% (yüzdesi)' },
-    { id: 'mul', label: '× (çarpı)' },
-    { id: 'div', label: '÷ (bölü)' },
-    { id: 'add', label: '+ (artı)' },
-    { id: 'sub', label: '− (eksi)' },
+/** İşlemler; görünen adları `editor.formula.ops.<id>` (arayüz dili). */
+export const FORMULA_OPS: { id: FormulaOp; symbol: string }[] = [
+    { id: 'none', symbol: '' },
+    { id: 'percent', symbol: '%' },
+    { id: 'mul', symbol: '×' },
+    { id: 'div', symbol: '÷' },
+    { id: 'add', symbol: '+' },
+    { id: 'sub', symbol: '−' },
 ];
 
+/** Yeni formül objesi; etiketi belge dilinde. */
 export const DEFAULT_FORMULA: FormulaModel = {
     a: 'Invoice/LegalMonetaryTotal/PayableAmount',
     op: 'percent',
     b: '20',
     decimals: 2,
-    label: 'Peşin (%20): ',
+    label: '',
     suffix: '',
 };
 
@@ -1083,13 +1106,13 @@ export function evaluateFormula(xmlDoc: Document | null, m: FormulaModel, catalo
 }
 
 /** Formül objesinin XSLT içeriği; alan bulunamazsa null. */
-export function formulaContent(m: FormulaModel, catalog: CatalogField[], inLine: boolean): string | null {
+export function formulaContent(m: FormulaModel, catalog: CatalogField[], inLine: boolean, lang: DocLanguage = 'tr'): string | null {
     const fx = formulaExpression(m, catalog, inLine);
     if (!fx) return null;
-    return `${escapeText(m.label)}<xsl:if test="string(${fx.a}) != 'NaN'"><xsl:value-of select="${formatted(fx.expr, m.decimals)}"/></xsl:if>${escapeText(m.suffix)}`;
+    return `${escapeText(m.label)}<xsl:if test="string(${fx.a}) != 'NaN'"><xsl:value-of select="${formatted(fx.expr, m.decimals, lang)}"/></xsl:if>${escapeText(m.suffix)}`;
 }
 
-export function formulaSnippet(id: string, m: FormulaModel, catalog: CatalogField[], inLine: boolean): string {
+export function formulaSnippet(id: string, m: FormulaModel, catalog: CatalogField[], inLine: boolean, lang: DocLanguage = 'tr'): string {
     const attrs = formulaAttrs(m).map(([k, v]) => ` ${k}="${v.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/\{/g, '{{').replace(/\}/g, '}}')}"`).join('');
-    return `<span data-xslt-obj="${id}" data-obj-kind="formula"${attrs}>${formulaContent(m, catalog, inLine) ?? ''}</span>`;
+    return `<span data-xslt-obj="${id}" data-obj-kind="formula"${attrs}>${formulaContent(m, catalog, inLine, lang) ?? ''}</span>`;
 }

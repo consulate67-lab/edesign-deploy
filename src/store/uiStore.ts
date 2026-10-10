@@ -8,7 +8,8 @@ import { persist, createJSONStorage } from 'zustand/middleware';
  */
 
 export type ThemeMode = 'light' | 'dark';
-export type Locale = 'tr' | 'en';
+export type Locale = 'tr' | 'en' | 'de' | 'fr' | 'es';
+export const LOCALES: Locale[] = ['tr', 'en', 'de', 'fr', 'es'];
 
 export interface ToastMessage {
     id: string;
@@ -22,6 +23,8 @@ export interface ToastMessage {
 interface UiState {
     theme: ThemeMode;
     locale: Locale;
+    /** Seçili ülke (ISO 3166-1 alpha-2); şablon, örnek XML ve kurallar buna göre gelir. İlk girişte bölgeden bulunur. */
+    country: string | null;
     sidebarCollapsed: boolean;
     toasts: ToastMessage[];
 
@@ -29,6 +32,7 @@ interface UiState {
     setTheme: (theme: ThemeMode) => void;
     toggleTheme: () => void;
     setLocale: (locale: Locale) => void;
+    setCountry: (country: string) => void;
     toggleSidebar: () => void;
     setSidebarCollapsed: (collapsed: boolean) => void;
 
@@ -42,12 +46,14 @@ export const useUiStore = create<UiState>()(
         (set) => ({
             theme: 'light',
             locale: 'tr',
+            country: null,
             sidebarCollapsed: false,
             toasts: [],
 
             setTheme: (theme) => set({ theme }),
             toggleTheme: () => set((s) => ({ theme: s.theme === 'light' ? 'dark' : 'light' })),
             setLocale: (locale) => set({ locale }),
+            setCountry: (country) => set({ country }),
             toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
             setSidebarCollapsed: (sidebarCollapsed) => set({ sidebarCollapsed }),
 
@@ -67,6 +73,7 @@ export const useUiStore = create<UiState>()(
             partialize: (state) => ({
                 theme: state.theme,
                 locale: state.locale,
+                country: state.country,
                 sidebarCollapsed: state.sidebarCollapsed,
             }),
         }
@@ -79,3 +86,4 @@ export const useUiStore = create<UiState>()(
  */
 export const useTheme = () => useUiStore((s) => s.theme);
 export const useLocale = () => useUiStore((s) => s.locale);
+export const useCountry = () => useUiStore((s) => s.country);

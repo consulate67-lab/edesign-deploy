@@ -6,6 +6,9 @@ import { DesignWizard } from './wizard/DesignWizard';
 import { MyDesigns, CompletedDesigns } from './MyDesigns';
 import { TemplateGallery } from './sector-templates/TemplateGallery';
 import { theme, techBackground, gradientTextStyle } from './theme';
+import { useLocaleT } from './i18n';
+import { LanguageSwitcher } from './i18n/LanguageSwitcher';
+import { useCountry } from './store/uiStore';
 
 interface SelectionProps {
     onSelect: (moduleId: string, template: string, moduleName: string, customContent?: string, themeColor?: string) => void;
@@ -15,6 +18,8 @@ interface SelectionProps {
 }
 
 export const Selection: React.FC<SelectionProps> = ({ onLogout, onSelectXsltEditor }) => {
+    const { t } = useLocaleT();
+    const isTurkey = (useCountry() ?? 'TR') === 'TR';
     const [showProfileModal, setShowProfileModal] = useState(false);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [userInfo, setUserInfo] = useState<any>(null);
@@ -36,21 +41,24 @@ export const Selection: React.FC<SelectionProps> = ({ onLogout, onSelectXsltEdit
             boxSizing: 'border-box',
             position: 'relative'
         }}>
-            <div style={{
-                position: 'absolute', top: '2rem', right: '2rem',
-                display: 'flex', gap: '1rem', zIndex: 50
+            <div data-selection-actions style={{
+                position: 'absolute', top: '2rem', right: '2rem', left: '2rem',
+                display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', gap: '1rem', zIndex: 50,
+                pointerEvents: 'none',
             }}>
+                <style>{'[data-selection-actions] > * { pointer-events: auto; }'}</style>
+                <LanguageSwitcher style={{ borderRadius: 12, alignSelf: 'stretch' }} />
                 {userInfo && (
                     <div
                         data-credit-badge
-                        title="Kalan tasarım hakkı"
+                        title={t('selection.creditsTitle')}
                         style={{
                             display: 'flex', alignItems: 'center', gap: '6px', padding: '0.6rem 1rem',
                             borderRadius: '12px', border: '1px solid #a7f3d0',
                             background: theme.greenSoft, color: theme.greenText, fontSize: '0.85rem', fontWeight: 700,
                         }}
                     >
-                        <CreditCard size={16} /> {userInfo.credits ?? 0} tasarım hakkı
+                        <CreditCard size={16} /> {t('pricing.credits', { count: userInfo.credits ?? 0 })}
                     </div>
                 )}
                 <button
@@ -65,7 +73,7 @@ export const Selection: React.FC<SelectionProps> = ({ onLogout, onSelectXsltEdit
                     onMouseOut={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
                 >
                     <Sparkles size={18} />
-                    <span style={{ fontSize: '0.9rem' }}>Paket Al</span>
+                    <span style={{ fontSize: '0.9rem' }}>{t('selection.buy')}</span>
                 </button>
 
                 <button
@@ -80,7 +88,7 @@ export const Selection: React.FC<SelectionProps> = ({ onLogout, onSelectXsltEdit
                     onMouseOut={(e) => (e.currentTarget.style.background = '#fff')}
                 >
                     <User size={18} color={theme.primary} />
-                    <span style={{ fontSize: '0.9rem', fontWeight: '500' }}>Profilim</span>
+                    <span style={{ fontSize: '0.9rem', fontWeight: '500' }}>{t('selection.profile')}</span>
                 </button>
 
                 <button
@@ -101,7 +109,7 @@ export const Selection: React.FC<SelectionProps> = ({ onLogout, onSelectXsltEdit
                     }}
                 >
                     <LogOut size={18} />
-                    <span style={{ fontSize: '0.9rem', fontWeight: '500' }}>Çıkış</span>
+                    <span style={{ fontSize: '0.9rem', fontWeight: '500' }}>{t('selection.logout')}</span>
                 </button>
             </div>
 
@@ -131,9 +139,9 @@ export const Selection: React.FC<SelectionProps> = ({ onLogout, onSelectXsltEdit
                             }}>
                                 <User size={40} color="white" />
                             </div>
-                            <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>{userInfo.full_name || 'Kullanıcı'}</h2>
+                            <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>{userInfo.full_name || t('selection.user')}</h2>
                             <span style={{ background: theme.primarySoft, padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600, color: theme.primary, border: '1px solid rgba(124, 58, 237, 0.2)' }}>
-                                {userInfo.role === 'admin' ? 'Yönetici Hesabı' : 'Standart Hesap'}
+                                {userInfo.role === 'admin' ? t('selection.adminAccount') : t('selection.standardAccount')}
                             </span>
                         </div>
 
@@ -141,7 +149,7 @@ export const Selection: React.FC<SelectionProps> = ({ onLogout, onSelectXsltEdit
                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: theme.surfaceAlt, padding: '1rem', borderRadius: '16px', border: `1px solid ${theme.border}` }}>
                                 <Building2 size={20} color={theme.textSubtle} />
                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                    <span style={{ fontSize: '0.65rem', color: theme.textSubtle, textTransform: 'uppercase', letterSpacing: '1px' }}>Firma</span>
+                                    <span style={{ fontSize: '0.65rem', color: theme.textSubtle, textTransform: 'uppercase', letterSpacing: '1px' }}>{t('selection.company')}</span>
                                     <span style={{ fontSize: '0.95rem' }}>{userInfo.company_name || '-'}</span>
                                 </div>
                             </div>
@@ -149,7 +157,7 @@ export const Selection: React.FC<SelectionProps> = ({ onLogout, onSelectXsltEdit
                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: theme.surfaceAlt, padding: '1rem', borderRadius: '16px', border: `1px solid ${theme.border}` }}>
                                 <Mail size={20} color={theme.textSubtle} />
                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                    <span style={{ fontSize: '0.65rem', color: theme.textSubtle, textTransform: 'uppercase', letterSpacing: '1px' }}>E-Posta</span>
+                                    <span style={{ fontSize: '0.65rem', color: theme.textSubtle, textTransform: 'uppercase', letterSpacing: '1px' }}>{t('selection.email')}</span>
                                     <span style={{ fontSize: '0.95rem' }}>{userInfo.username}</span>
                                 </div>
                             </div>
@@ -157,7 +165,7 @@ export const Selection: React.FC<SelectionProps> = ({ onLogout, onSelectXsltEdit
                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: theme.surfaceAlt, padding: '1rem', borderRadius: '16px', border: `1px solid ${theme.border}` }}>
                                 <Phone size={20} color={theme.textSubtle} />
                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                    <span style={{ fontSize: '0.65rem', color: theme.textSubtle, textTransform: 'uppercase', letterSpacing: '1px' }}>Telefon</span>
+                                    <span style={{ fontSize: '0.65rem', color: theme.textSubtle, textTransform: 'uppercase', letterSpacing: '1px' }}>{t('selection.phone')}</span>
                                     <span style={{ fontSize: '0.95rem' }}>{userInfo.phone_number || '-'}</span>
                                 </div>
                             </div>
@@ -165,8 +173,8 @@ export const Selection: React.FC<SelectionProps> = ({ onLogout, onSelectXsltEdit
                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: theme.greenSoft, padding: '1rem', borderRadius: '16px', border: '1px solid #a7f3d0' }}>
                                 <CreditCard size={20} color={theme.greenText} />
                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                    <span style={{ fontSize: '0.65rem', color: theme.greenText, textTransform: 'uppercase', letterSpacing: '1px' }}>Mevcut Kredi</span>
-                                    <span style={{ fontSize: '1.25rem', fontWeight: 'bold', color: theme.greenText }}>{userInfo.credits} <span style={{ fontSize: '0.8rem', fontWeight: 'normal' }}>Tasarım</span></span>
+                                    <span style={{ fontSize: '0.65rem', color: theme.greenText, textTransform: 'uppercase', letterSpacing: '1px' }}>{t('selection.currentCredits')}</span>
+                                    <span style={{ fontSize: '1.25rem', fontWeight: 'bold', color: theme.greenText }}>{userInfo.credits} <span style={{ fontSize: '0.8rem', fontWeight: 'normal' }}>{t('selection.designUnit')}</span></span>
                                 </div>
                             </div>
                         </div>
@@ -174,10 +182,11 @@ export const Selection: React.FC<SelectionProps> = ({ onLogout, onSelectXsltEdit
                 </div>
             )}
 
-            <div style={{
+            <div data-selection-main style={{
                 width: '100%',
                 maxWidth: '1000px',
                 margin: 'auto',
+                paddingTop: '4rem',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center'
@@ -198,10 +207,10 @@ export const Selection: React.FC<SelectionProps> = ({ onLogout, onSelectXsltEdit
                         ...gradientTextStyle,
                         letterSpacing: '-1px'
                     }}>
-                        E-Belge Tasarımcı
+                        {t('selection.title')}
                     </h1>
                     <p style={{ color: theme.textMuted, fontSize: '1.1rem', maxWidth: '600px', margin: '0 auto' }}>
-                        Yeni bir tasarım için adımları izleyin: belge türü, şablon ve veri.
+                        {t('selection.subtitle')}
                     </p>
                 </div>
 
@@ -217,7 +226,7 @@ export const Selection: React.FC<SelectionProps> = ({ onLogout, onSelectXsltEdit
 
                 <CompletedDesigns />
 
-                <TemplateGallery onUse={onSelectXsltEditor} />
+                {isTurkey && <TemplateGallery onUse={onSelectXsltEditor} />}
             </div>
 
             <PaymentModal

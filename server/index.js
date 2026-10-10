@@ -653,11 +653,12 @@ app.post('/api/designs/export', authenticateToken, async (req, res) => {
 // Paket satın alma — PayTR iFrame API (server/paytr.js)
 // ============================================================================
 
-// Tek seferlik paket; Landing.tsx ve PaymentModal.tsx → PACKAGES_PLANS ile aynı tutulmalı.
+// Tek seferlik paket; src/pricing.ts → PACKAGES_PLANS ile aynı tutulmalı.
+// price: TL fiyatı (asistan / yönetim ekranı); prices: para birimine göre KDV dahil satış fiyatı.
 const PACKAGE_PRICES = {
-    one: { name: 'One', price: '3000', credits: 1 },
-    basic: { name: 'Basic', price: '10000', credits: 10 },
-    pro: { name: 'Pro', price: '15000', credits: 25 },
+    one: { name: 'One', price: '3000', prices: { TRY: '3000', EUR: '59', GBP: '59' }, credits: 1 },
+    basic: { name: 'Basic', price: '10000', prices: { TRY: '10000', EUR: '199', GBP: '199' }, credits: 10 },
+    pro: { name: 'Pro', price: '15000', prices: { TRY: '15000', EUR: '399', GBP: '399' }, credits: 25 },
 };
 
 // Ödeme dönüş adresi izinli bir ön yüz değilse kullanılacak varsayılan (GitHub Pages).
@@ -669,6 +670,7 @@ app.get('/api/payment/packages', (_req, res) => {
         id,
         name: p.name,
         price: p.price,
+        prices: p.prices,
         credits: p.credits,
     })) });
 });

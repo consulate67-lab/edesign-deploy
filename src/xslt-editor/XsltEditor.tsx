@@ -38,7 +38,7 @@ import {
 } from 'lucide-react';
 import { karekodSnippet, hasQrLibrary } from './karekod';
 import {
-    getCatalog, docRootOf, detectInXslt, xsltLocalNameSet, bindingLabel, contextPathResolver, evaluateField,
+    detectInXslt, xsltLocalNameSet, bindingLabel, contextPathResolver, evaluateField,
     ensureDecimalFormat, isInLineContext, isLineField, fieldSnippet, fieldContent, formulaSnippet, formulaContent, formulaAttrs,
     readFormula, DEFAULT_FORMULA, FORMULA_OPS, evaluateFormula, formulaSumsLines,
     type CatalogField, type FormulaModel,
@@ -46,7 +46,7 @@ import {
 import { transformXmlWithXslt } from '../xsltTransformer';
 import { getInlineXslt } from '../xsltContent';
 import { getAntrepoTemplateById } from './antrepoTemplates';
-import { renderAndAnnotateXslt, parseXsltInstrumented, updateXSLTBinding, removeXsltBinding, nextXsltObjId, XSLT_ELEMENT_SNIPPETS } from './utils/xsltRender';
+import { renderAndAnnotateXslt, parseXsltInstrumented, updateXSLTBinding, removeXsltBinding, nextXsltObjId, XSLT_ELEMENT_SNIPPETS, IMAGE_PLACEHOLDER_MARK } from './utils/xsltRender';
 import { pickImageFile, readImageFile, dataUrlFormat, dataUrlBytes, formatBytes } from './utils/imageFile';
 import type { XsltBinding, XsltInsertType } from './utils/xsltRender';
 import {
@@ -60,7 +60,12 @@ import { xpathPaths, xmlFieldName, xsltVariables, resolveVariablePath } from './
 import { findLineTableCell, addColumnAfterCell, editColumn, countHiddenColumnCells, showHiddenColumns, type ColumnAction } from './utils/tableColumns';
 import { BG_FITS, readPageBackground, writePageBackground, imageFileToDataUrl, type PageBackground } from './utils/pageBackground';
 import { addTestWatermark, stripTestWatermark, stripLeadingBom } from './utils/testWatermark';
+import { applyLegacyViewerCompat } from './utils/legacyViewerCompat';
 import { ApproveDialog } from './ApproveDialog';
+import i18n, { useLocaleT } from '../i18n';
+import { numberStyleOf, type DocLanguage, type NumberStyle } from '../international/registry/docLanguages';
+import { docT, documentLanguage } from './docLanguage';
+import { buildCatalog } from './catalogI18n';
 
 /** Satır formülü kolonunun varsayılan alanı (ilk bulunan). */
 const LINE_FORMULA_KEYS = ['Invoice/InvoiceLine/LineExtensionAmount', 'DespatchAdvice/DespatchLine/DeliveredQuantity', 'ReceiptAdvice/ReceiptLine/ReceivedQuantity', 'CreditNote/CreditNoteLine/LineExtensionAmount', 'eBilet/bilet/tutar', 'eYolcuListesi/yolcuListesi/koltukListesi/koltuk/tutar'];
@@ -107,20 +112,20 @@ function placementOfBinding(xslt: string, bindings: XsltBinding[], index: number
     const offset = b ? findBindingSourceOffset(xslt, bindings, b) : null;
     const tag = offset === null ? null : findEnclosingLiteralTag(xslt, offset);
     if (offset === null || !tag) {
-        return { tag: null, movable: false, detach: null, reason: 'Bu alanın XSLT\'de taşınabilir bir kapsayıcısı bulunamadı.' };
+        return { tag: null, movable: false, detach: null, reason: i18n.t('editor.place.noContainer') };
     }
     if (isInLineContext(xslt, offset)) {
-        return { tag, movable: false, detach: null, reason: 'Kalem satırlarındaki alanlar her satırda tekrarlanır; tek başına taşınamaz. Kolon olarak düzenleyin.' };
+        return { tag, movable: false, detach: null, reason: i18n.t('editor.place.lineField') };
     }
     const parent = findParentTag(xslt, offset);
     const range = bindingElementRange(xslt, offset);
     const canWrap = !!range && !(parent && UNWRAPPABLE_PARENT.test(parent.name));
     const name = tag.name.toLowerCase();
     if (name === 'td' || name === 'th' || name === 'table' || TABLE_PARTS.has(name)) {
-        return { tag, movable: false, detach: canWrap ? 'cell' : null, reason: 'Veri bir tablo hücresinin içinde; hücre yerinden oynatılamaz.' };
+        return { tag, movable: false, detach: canWrap ? 'cell' : null, reason: i18n.t('editor.place.inCell') };
     }
     if (name === 'body' || name === 'html') {
-        return { tag, movable: false, detach: canWrap ? 'cell' : null, reason: 'Veri doğrudan sayfa gövdesinde; önce ayrı bir kutuya alınmalı.' };
+        return { tag, movable: false, detach: canWrap ? 'cell' : null, reason: i18n.t('editor.place.inBody') };
     }
     let detach: 'value' | null = null;
     const content = canWrap && range ? findElementContentRange(xslt, tag) : null;
@@ -174,16 +179,16 @@ const UNMOVABLE_TAGS = new Set(['html', 'head', 'body', 'style', 'script', 'meta
 /** Önizlemede seçilen herhangi bir literal öğenin (metin kutusu, çizgi, tablo...) taşınabilirliği. */
 function placementOfElement(xslt: string, ordinal: number): BindPlacement {
     const tag = findLiteralTagByOrdinal(xslt, ordinal);
-    if (!tag) return { tag: null, movable: false, detach: null, reason: 'Bu öğenin XSLT\'deki karşılığı bulunamadı.' };
+    if (!tag) return { tag: null, movable: false, detach: null, reason: i18n.t('editor.place.noSource') };
     const name = tag.name.toLowerCase();
     if (name === 'td' || name === 'th') {
-        return { tag, movable: false, detach: null, reason: 'Tablo hücresi yerinden oynatılamaz; ölçü ve boşluklarını aşağıdan değiştirebilir, içindeki öğeleri taşıyabilirsiniz.' };
+        return { tag, movable: false, detach: null, reason: i18n.t('editor.place.cell') };
     }
     if (UNMOVABLE_TAGS.has(name)) {
-        return { tag, movable: false, detach: null, reason: 'Bu öğe tek başına taşınamaz; ölçü ve boşluklarını aşağıdan değiştirebilirsiniz.' };
+        return { tag, movable: false, detach: null, reason: i18n.t('editor.place.fixed') };
     }
     if (isInLineContext(xslt, tag.start)) {
-        return { tag, movable: false, detach: null, reason: 'Kalem satırlarındaki öğeler her satırda tekrarlanır; tek başına taşınamaz. Ölçü değişiklikleri tüm satırlara uygulanır.' };
+        return { tag, movable: false, detach: null, reason: i18n.t('editor.place.lineElement') };
     }
     return { tag, movable: true, detach: null, reason: null };
 }
@@ -197,7 +202,7 @@ const decodeAttr = (v: string) => v
  * (satır içinde o satırın değeri, satır dışında satırların toplamı).
  * `ids` verilmezse tüm formül objeleri yenilenir.
  */
-function refreshObjectContents(xslt: string, catalog: CatalogField[], ids?: string[]): string {
+function refreshObjectContents(xslt: string, catalog: CatalogField[], lang: DocLanguage, ids?: string[]): string {
     const targets = ids ?? [...xslt.matchAll(/<span\b[^>]*\bdata-obj-kind="formula"[^>]*>/g)]
         .map(m => m[0].match(/\bdata-xslt-obj="([^"]+)"/)?.[1])
         .filter((x): x is string => !!x);
@@ -210,14 +215,14 @@ function refreshObjectContents(xslt: string, catalog: CatalogField[], ids?: stri
         const inLine = isInLineContext(next, tag.start);
         const kind = el.getAttribute('data-obj-kind');
         let content: string | null = null;
-        if (kind === 'formula') content = formulaContent(readFormula(el), catalog, inLine);
+        if (kind === 'formula') content = formulaContent(readFormula(el), catalog, inLine, lang);
         else if (kind === 'field') {
             const f = catalog.find(x => x.key === el.getAttribute('data-field'));
-            if (f) content = fieldContent(f, inLine);
+            if (f) content = fieldContent(f, inLine, lang);
         }
         if (content !== null) next = replaceElementContent(next, tag, content);
     }
-    return next;
+    return ensureDecimalFormat(next);
 }
 
 function resolveInsertTarget(start: Element | null, mode: 'auto' | InsertPosition): InsertTarget | null {
@@ -286,7 +291,9 @@ const MODULES: ModuleDef[] = [
     { id: 'bilet',         label: 'e-Bilet',           inlineKey: 'community/hzkucuk-eFatura-bilet.xslt' },
     { id: 'bilet-rapor',   label: 'e-Bilet Raporu',    inlineKey: 'ebilet/ebilet-rapor.xslt' },
     { id: 'bilet-yolcu',   label: 'e-Yolcu Listesi',   inlineKey: 'ebilet/ebilet-yolcu-listesi.xslt' },
-    { id: 'makbuz',        label: 'e-Makbuz',          inlineKey: 'community/hzkucuk-eFatura-makbuz.xslt' },
+    { id: 'makbuz',        label: 'e-Makbuz',          inlineKey: 'gib/v2/e-Makbuz-Sablon.xslt' },
+    { id: 'intl-invoice',  label: 'EN 16931 Fatura',   inlineKey: 'intl/en16931-invoice.xslt' },
+    { id: 'intl-despatch', label: 'Peppol Sevk Bildirimi', inlineKey: 'intl/peppol-despatch-advice.xslt' },
 
     // Sprint 9 — Antrepo profesyonel şablonlar (public/ altından, ?raw inline)
     { id: 'antrepo-fatura', label: 'GİB Resmi e-Fatura', antrepoId: 'antrepo-fatura', isAntrepo: true },
@@ -439,7 +446,7 @@ const sideBorder = (cs: CSSStyleDeclaration, side: 'top' | 'right' | 'bottom' | 
     const style = cs[`border${cap}Style`];
     return w > 0 && style !== 'none' && style !== 'hidden' ? `${roundPx(cs[`border${cap}Width`])} ${style} ${cs[`border${cap}Color`]}` : '';
 };
-const isImagePlaceholder = (src: string) => src.startsWith('data:image/svg+xml,%3Csvg') && src.includes('%3EResim');
+const isImagePlaceholder = (src: string) => src.startsWith('data:image/svg+xml,%3Csvg') && (src.includes(IMAGE_PLACEHOLDER_MARK) || src.includes('%3EResim'));
 
 /**
  * Resim kaynağı: dosya seçilir, `data:<tür>;base64,...` değeri otomatik
@@ -476,6 +483,7 @@ const base64ToDataUrl = (raw: string): string | null => {
 };
 
 const ImageSourceField: React.FC<{ currentValue: string; onChange: (v: string) => void; readOnly?: boolean }> = ({ currentValue, onChange, readOnly }) => {
+    const { t, locale } = useLocaleT();
     const [src, setSrc] = useState(currentValue);
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -506,7 +514,7 @@ const ImageSourceField: React.FC<{ currentValue: string; onChange: (v: string) =
         if (b64Draft === null) return;
         const dataUrl = base64ToDataUrl(b64Draft);
         if (!dataUrl) {
-            setError('Geçerli bir base64 resim değeri değil (PNG, JPEG, GIF, WEBP, SVG veya BMP olmalı).');
+            setError(t('editor.image.invalidBase64'));
             return;
         }
         setError(null);
@@ -522,7 +530,7 @@ const ImageSourceField: React.FC<{ currentValue: string; onChange: (v: string) =
             setCopied(true);
             setTimeout(() => setCopied(false), 1500);
         } catch {
-            setError('Panoya kopyalanamadı; değeri kutudan seçip kopyalayın.');
+            setError(t('editor.image.copyFailed'));
         }
     };
     const smallBtn: React.CSSProperties = {
@@ -532,29 +540,29 @@ const ImageSourceField: React.FC<{ currentValue: string; onChange: (v: string) =
     const base64Box = (
         <div data-image-base64-box>
             <label style={{ ...fieldLabelStyle, marginTop: '10px' }}>
-                Base64 değeri{b64 ? ` · ${b64.mime} · ${b64.data.length.toLocaleString('tr-TR')} karakter` : ''}
+                {t('editor.image.base64Value')}{b64 ? ` · ${b64.mime} · ${t('editor.image.chars', { count: b64.data.length, n: b64.data.length.toLocaleString(locale) })}` : ''}
             </label>
             <textarea
                 data-image-base64
                 value={b64Draft ?? b64?.data ?? ''}
                 readOnly={readOnly}
                 spellCheck={false}
-                placeholder={readOnly ? 'Bu resim base64 değil (harici adres).' : 'Base64 değerini (iVBORw0KGgo…) ya da data:image/...;base64,… yapıştırın'}
+                placeholder={readOnly ? t('editor.image.notBase64') : t('editor.image.pasteBase64')}
                 onChange={(e) => { setB64Draft(e.target.value); setError(null); }}
                 rows={4}
                 style={{ ...fieldInputStyle, fontFamily: 'monospace', fontSize: '10px', lineHeight: 1.35, resize: 'vertical', wordBreak: 'break-all', minHeight: '64px' }}
             />
             <div style={{ display: 'flex', gap: '6px', marginTop: '6px' }}>
                 <button type="button" data-image-base64-copy disabled={!b64} onClick={copyBase64} style={{ ...smallBtn, opacity: b64 ? 1 : 0.5 }}>
-                    {copied ? '✓ Kopyalandı' : 'Kopyala'}
+                    {copied ? `✓ ${t('editor.common.copied')}` : t('editor.common.copy')}
                 </button>
                 {!readOnly && b64Draft !== null && (
                     <>
                         <button type="button" data-image-base64-apply onClick={applyBase64} style={{ ...smallBtn, borderColor: 'rgba(16, 185, 129, 0.5)', color: '#6ee7b7' }}>
-                            Uygula
+                            {t('editor.common.apply')}
                         </button>
                         <button type="button" onClick={() => { setB64Draft(null); setError(null); }} style={smallBtn}>
-                            Vazgeç
+                            {t('editor.common.cancel')}
                         </button>
                     </>
                 )}
@@ -564,7 +572,7 @@ const ImageSourceField: React.FC<{ currentValue: string; onChange: (v: string) =
     if (readOnly) {
         return (
             <div data-image-source style={{ marginBottom: '10px' }}>
-                <label style={fieldLabelStyle}>Resim</label>
+                <label style={fieldLabelStyle}>{t('editor.image.label')}</label>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                     <div style={{
                         width: '64px', height: '48px', flexShrink: 0, borderRadius: '4px', border: '1px solid #334155',
@@ -574,7 +582,7 @@ const ImageSourceField: React.FC<{ currentValue: string; onChange: (v: string) =
                         {placeholder ? <ImageIcon size={18} color="#64748b" /> : <img src={src} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />}
                     </div>
                     <div style={{ fontSize: '11px', color: '#fcd34d', lineHeight: 1.4 }}>
-                        Bu resim belgenin XML'inden geliyor (ör. EmbeddedDocumentBinaryObject); her belgede değişir, burada değiştirilemez.
+                        {t('editor.image.fromXml')}
                     </div>
                 </div>
                 {base64Box}
@@ -584,7 +592,7 @@ const ImageSourceField: React.FC<{ currentValue: string; onChange: (v: string) =
     }
     return (
         <div data-image-source style={{ marginBottom: '10px' }}>
-            <label style={fieldLabelStyle}>Resim</label>
+            <label style={fieldLabelStyle}>{t('editor.image.label')}</label>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
                 <div style={{
                     width: '64px', height: '48px', flexShrink: 0, borderRadius: '4px', border: '1px solid #334155',
@@ -597,10 +605,10 @@ const ImageSourceField: React.FC<{ currentValue: string; onChange: (v: string) =
                 </div>
                 <div data-image-info style={{ fontSize: '11px', color: '#94a3b8', lineHeight: 1.4, minWidth: 0 }}>
                     {placeholder
-                        ? 'Henüz resim seçilmedi'
+                        ? t('editor.image.none')
                         : format
-                            ? <>Gömülü {format} · {formatBytes(dataUrlBytes(src))}</>
-                            : <span style={{ wordBreak: 'break-all' }}>Harici adres</span>}
+                            ? <>{t('editor.image.embedded', { format })} · {formatBytes(dataUrlBytes(src))}</>
+                            : <span style={{ wordBreak: 'break-all' }}>{t('editor.image.external')}</span>}
                 </div>
             </div>
             <button
@@ -615,11 +623,11 @@ const ImageSourceField: React.FC<{ currentValue: string; onChange: (v: string) =
                     cursor: busy ? 'wait' : 'pointer', fontFamily: 'inherit',
                 }}
             >
-                <ImageIcon size={14} /> {busy ? 'Yükleniyor…' : placeholder ? 'Resim Seç' : 'Resmi Değiştir'}
+                <ImageIcon size={14} /> {busy ? t('editor.common.loading') : placeholder ? t('editor.image.choose') : t('editor.image.change')}
             </button>
             {error && <div style={{ marginTop: '6px', fontSize: '11px', color: '#fca5a5' }}>{error}</div>}
             {base64Box}
-            <label style={{ ...fieldLabelStyle, marginTop: '10px' }}>veya resim adresi (URL)</label>
+            <label style={{ ...fieldLabelStyle, marginTop: '10px' }}>{t('editor.image.url')}</label>
             <input
                 type="text"
                 value={url}
@@ -768,36 +776,39 @@ const tableModelToMarkup = (m: TableModel): string => {
     }).join('');
 };
 
-const BorderControls: React.FC<{ spec: BorderSpec; onChange: (b: BorderSpec) => void; testId: string }> = ({ spec, onChange, testId }) => (
+const BorderControls: React.FC<{ spec: BorderSpec; onChange: (b: BorderSpec) => void; testId: string }> = ({ spec, onChange, testId }) => {
+    const { t } = useLocaleT();
+    return (
     <div style={{ display: 'flex', gap: '6px', marginBottom: '10px' }} data-border-controls={testId}>
         <input
             type="number" min={0} max={10} value={spec.width}
-            title="Kalınlık (px)"
+            title={t('editor.border.width')}
             data-border-width
             onChange={(e) => onChange({ ...spec, width: Math.min(10, Math.max(0, Number(e.target.value) || 0)) })}
             style={{ ...fieldInputStyle, width: '58px' }}
         />
         <select
             value={spec.style}
-            title="Çizgi stili"
+            title={t('editor.border.style')}
             data-border-style
             onChange={(e) => onChange({ ...spec, style: e.target.value })}
             style={{ ...fieldInputStyle, flex: 1 }}
         >
-            <option value="solid">Düz</option>
-            <option value="dashed">Kesik</option>
-            <option value="dotted">Noktalı</option>
-            <option value="double">Çift</option>
+            <option value="solid">{t('editor.border.solid')}</option>
+            <option value="dashed">{t('editor.border.dashed')}</option>
+            <option value="dotted">{t('editor.border.dotted')}</option>
+            <option value="double">{t('editor.border.double')}</option>
         </select>
         <input
             type="color" value={spec.color}
-            title="Renk"
+            title={t('editor.border.color')}
             data-border-color
             onChange={(e) => onChange({ ...spec, color: e.target.value })}
             style={{ width: '34px', height: '30px', padding: 0, border: '1px solid #334155', borderRadius: '4px', background: '#1e293b', cursor: 'pointer' }}
         />
     </div>
-);
+    );
+};
 
 const MAX_TABLE_COLS = 12;
 const MAX_TABLE_ROWS = 50;
@@ -806,7 +817,10 @@ const TableEditor: React.FC<{
     onChange: (markup: string) => void;
     onAttr: (attr: string, value: string) => void;
     onStyle: (prop: string, value: string) => void;
-}> = ({ table, onChange, onAttr, onStyle }) => {
+    docLang: DocLanguage;
+}> = ({ table, onChange, onAttr, onStyle, docLang }) => {
+    const { t } = useLocaleT();
+    const headerText = (n: number) => docT(docLang)('editor.doc.header', { n });
     const [model, setModel] = useState<TableModel>(() => readTableModel(table));
     const cols = model.rows[0]?.length ?? 1;
     const bodyRows = model.rows.length - (model.header ? 1 : 0);
@@ -824,7 +838,7 @@ const TableEditor: React.FC<{
     };
     const setCols = (n: number) => {
         const c = Math.min(MAX_TABLE_COLS, Math.max(1, n || 1));
-        update({ ...model, rows: model.rows.map((r, ri) => Array.from({ length: c }, (_, i) => r[i] ?? (model.header && ri === 0 ? `Başlık ${i + 1}` : ''))) });
+        update({ ...model, rows: model.rows.map((r, ri) => Array.from({ length: c }, (_, i) => r[i] ?? (model.header && ri === 0 ? headerText(i + 1) : ''))) });
     };
     const setBodyRows = (n: number) => {
         const target = Math.min(MAX_TABLE_ROWS, Math.max(1, n || 1)) + (model.header ? 1 : 0);
@@ -835,12 +849,12 @@ const TableEditor: React.FC<{
     const setHeader = (header: boolean) => {
         if (header === model.header) return;
         const rows = header
-            ? [Array.from({ length: cols }, (_, i) => `Başlık ${i + 1}`), ...model.rows]
+            ? [Array.from({ length: cols }, (_, i) => headerText(i + 1)), ...model.rows]
             : model.rows.slice(1);
         update({ ...model, header, rows: rows.length ? rows : [Array.from({ length: cols }, () => '')] });
     };
     const setCell = (ri: number, ci: number, v: string) => {
-        update({ ...model, rows: model.rows.map((r, i) => (i === ri ? r.map((t, j) => (j === ci ? v : t)) : r)) });
+        update({ ...model, rows: model.rows.map((r, i) => (i === ri ? r.map((cell, j) => (j === ci ? v : cell)) : r)) });
     };
     const numberInput = (label: string, value: number, max: number, onSet: (n: number) => void, attr: string) => (
         <div style={{ flex: 1 }}>
@@ -856,32 +870,32 @@ const TableEditor: React.FC<{
     return (
         <div data-table-editor>
             <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
-                {numberInput('Sütun sayısı', cols, MAX_TABLE_COLS, setCols, 'data-table-cols')}
-                {numberInput('Satır sayısı', bodyRows, MAX_TABLE_ROWS, setBodyRows, 'data-table-rows')}
+                {numberInput(t('editor.table.cols'), cols, MAX_TABLE_COLS, setCols, 'data-table-cols')}
+                {numberInput(t('editor.table.rows'), bodyRows, MAX_TABLE_ROWS, setBodyRows, 'data-table-rows')}
             </div>
             <label style={{ ...fieldLabelStyle, display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', marginBottom: '10px' }}>
                 <input type="checkbox" data-table-header checked={model.header} onChange={(e) => setHeader(e.target.checked)} />
-                Başlık satırı
+                {t('editor.table.headerRow')}
             </label>
-            <label style={fieldLabelStyle}>Dış çerçeve (kalınlık px · stil · renk)</label>
+            <label style={fieldLabelStyle}>{t('editor.table.frame')}</label>
             <BorderControls testId="frame" spec={model.frame} onChange={(frame) => updateLines({ ...model, frame })} />
-            <label style={fieldLabelStyle}>Hücreler arası çizgiler</label>
+            <label style={fieldLabelStyle}>{t('editor.table.innerLines')}</label>
             <select
                 data-inner-lines
                 value={model.inner.lines}
                 onChange={(e) => updateLines({ ...model, inner: { ...model.inner, lines: e.target.value as InnerLines } })}
                 style={{ ...fieldInputStyle, marginBottom: '6px' }}
             >
-                <option value="all">Tümü (yatay + dikey)</option>
-                <option value="horizontal">Sadece yatay</option>
-                <option value="vertical">Sadece dikey</option>
-                <option value="none">Yok</option>
+                <option value="all">{t('editor.table.linesAll')}</option>
+                <option value="horizontal">{t('editor.table.linesHorizontal')}</option>
+                <option value="vertical">{t('editor.table.linesVertical')}</option>
+                <option value="none">{t('editor.table.linesNone')}</option>
             </select>
             {model.inner.lines !== 'none' && (
                 <BorderControls testId="inner" spec={model.inner} onChange={(b) => updateLines({ ...model, inner: { ...b, lines: model.inner.lines } })} />
             )}
             <div style={{ marginBottom: '10px' }}>
-                <label style={fieldLabelStyle}>Hücre iç boşluğu (px)</label>
+                <label style={fieldLabelStyle}>{t('editor.table.padding')}</label>
                 <input
                     type="number" min={0} max={40} value={model.padding}
                     data-table-padding
@@ -889,14 +903,14 @@ const TableEditor: React.FC<{
                     style={fieldInputStyle}
                 />
             </div>
-            <label style={fieldLabelStyle}>Hücre içerikleri</label>
+            <label style={fieldLabelStyle}>{t('editor.table.cells')}</label>
             <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, gap: '3px', marginBottom: '10px' }}>
-                {model.rows.map((r, ri) => r.map((t, ci) => (
+                {model.rows.map((r, ri) => r.map((cell, ci) => (
                     <input
                         key={`${ri}-${ci}`}
                         data-table-cell={`${ri}-${ci}`}
-                        value={t}
-                        title={model.header && ri === 0 ? `Başlık ${ci + 1}` : `Satır ${ri + (model.header ? 0 : 1)}, Sütun ${ci + 1}`}
+                        value={cell}
+                        title={model.header && ri === 0 ? t('editor.table.headerCell', { n: ci + 1 }) : t('editor.table.cellAt', { row: ri + (model.header ? 0 : 1), col: ci + 1 })}
                         onChange={(e) => setCell(ri, ci, e.target.value)}
                         style={{ ...fieldInputStyle, padding: '4px 5px', fontSize: '11px', fontWeight: model.header && ri === 0 ? 700 : 400, minWidth: 0 }}
                     />
@@ -958,6 +972,7 @@ const PositionEditor: React.FC<{
     onStyle: (prop: string, value: string) => void;
     onCommit: (mode: PositionMode, left: string, top: string) => void;
 }> = ({ el, onStyle, onCommit }) => {
+    const { t } = useLocaleT();
     const [mode, setMode] = useState<PositionMode>(() => readPositionMode(el));
     const [unit, setUnit] = useState<PositionUnit>(() => parseLength(el.style.left || '').unit);
     const [pos, setPos] = useState(() => ({ x: parseLength(el.style.left || '0').px, y: parseLength(el.style.top || '0').px }));
@@ -985,31 +1000,27 @@ const PositionEditor: React.FC<{
         onStyle('top', formatLength(pos.y, next));
     };
     const changeAxis = (axis: 'x' | 'y', raw: string) => {
-        setText(t => ({ ...t, [axis]: raw }));
+        setText(prev => ({ ...prev, [axis]: raw }));
         const n = parseFloat(raw.replace(',', '.'));
         if (!Number.isFinite(n)) return;
         const px = unit === 'mm' ? n * PX_PER_MM : n;
         setPos(p => ({ ...p, [axis]: px }));
         onStyle(axis === 'x' ? 'left' : 'top', `${n}${unit}`);
     };
-    const hint = mode === 'absolute'
-        ? 'Sayfanın sol üst köşesine göre konum. Önizlemede objeyi sürükleyerek de taşıyabilirsiniz.'
-        : mode === 'relative'
-            ? 'Obje yerini korur, X/Y kadar kaydırılarak gösterilir. Sürükleyerek de kaydırabilirsiniz.'
-            : 'Obje sayfa akışında durur. Önizlemede sürüklerseniz "Sayfada sabit" konuma geçer.';
+    const hint = t(`editor.position.hint.${mode}`);
     return (
         <div data-position-editor>
-            <label style={fieldLabelStyle}>Konumlandırma</label>
+            <label style={fieldLabelStyle}>{t('editor.position.label')}</label>
             <select data-position-mode value={mode} onChange={(e) => changeMode(e.target.value as PositionMode)} style={{ ...fieldInputStyle, marginBottom: '10px' }}>
-                <option value="static">Normal (sayfa akışında)</option>
-                <option value="relative">Yerinden kaydır</option>
-                <option value="absolute">Sayfada sabit konum</option>
+                <option value="static">{t('editor.position.static')}</option>
+                <option value="relative">{t('editor.position.relative')}</option>
+                <option value="absolute">{t('editor.position.absolute')}</option>
             </select>
             {mode !== 'static' && (
                 <div style={{ display: 'flex', gap: '6px', marginBottom: '10px' }}>
                     {(['x', 'y'] as const).map(axis => (
                         <div key={axis} style={{ flex: 1 }}>
-                            <label style={fieldLabelStyle}>{axis === 'x' ? 'X (soldan)' : 'Y (üstten)'}</label>
+                            <label style={fieldLabelStyle}>{axis === 'x' ? t('editor.position.x') : t('editor.position.y')}</label>
                             <input
                                 type="number" step={unit === 'mm' ? 0.5 : 1}
                                 data-position-axis={axis}
@@ -1020,7 +1031,7 @@ const PositionEditor: React.FC<{
                         </div>
                     ))}
                     <div style={{ width: '64px' }}>
-                        <label style={fieldLabelStyle}>Birim</label>
+                        <label style={fieldLabelStyle}>{t('editor.position.unit')}</label>
                         <select data-position-unit value={unit} onChange={(e) => changeUnit(e.target.value as PositionUnit)} style={fieldInputStyle}>
                             <option value="px">px</option>
                             <option value="mm">mm</option>
@@ -1053,13 +1064,15 @@ const CatalogOptions: React.FC<{ fields: CatalogField[]; xmlDoc: Document | null
     );
 };
 
-const formatTr = (n: number, decimals: number) =>
-    n.toLocaleString('tr-TR', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+/** Belge dilindeki sayı yazımı (önizleme metinleri; XSLT'deki format-number ile aynı ayraçlar). */
+const NUMBER_LOCALE: Record<NumberStyle, string> = { dot: 'en-GB', space: 'fr-FR', comma: 'de-DE' };
+const formatDocNumber = (n: number, decimals: number, lang: DocLanguage) =>
+    n.toLocaleString(NUMBER_LOCALE[numberStyleOf(lang)], { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 
 /** Formülün örnek XML ile hesaplanan önizleme metni (satır içinde ilk satırın değerleriyle). */
-function formulaPreviewText(m: FormulaModel, catalog: CatalogField[], xmlDoc: Document | null, inLine: boolean): string {
+function formulaPreviewText(m: FormulaModel, catalog: CatalogField[], xmlDoc: Document | null, inLine: boolean, lang: DocLanguage): string {
     const r = evaluateFormula(xmlDoc, m, catalog, inLine);
-    return `${m.label}${Number.isFinite(r) ? formatTr(r, m.decimals) : ''}${m.suffix}`;
+    return `${m.label}${Number.isFinite(r) ? formatDocNumber(r, m.decimals, lang) : ''}${m.suffix}`;
 }
 
 const FormulaEditor: React.FC<{
@@ -1067,79 +1080,79 @@ const FormulaEditor: React.FC<{
     catalog: CatalogField[];
     xmlDoc: Document | null;
     inLine: boolean;
+    docLang: DocLanguage;
     onChange: (m: FormulaModel, previewText: string) => void;
-}> = ({ el, catalog, xmlDoc, inLine, onChange }) => {
+}> = ({ el, catalog, xmlDoc, inLine, docLang, onChange }) => {
+    const { t } = useLocaleT();
     const [model, setModel] = useState<FormulaModel>(() => readFormula(el));
     const numeric = useMemo(() => catalog.filter(isNumericField), [catalog]);
     const update = (patch: Partial<FormulaModel>) => {
         const next = { ...model, ...patch };
         setModel(next);
-        onChange(next, formulaPreviewText(next, catalog, xmlDoc, inLine));
+        onChange(next, formulaPreviewText(next, catalog, xmlDoc, inLine, docLang));
     };
     const hasB = model.op !== 'none';
     const bIsField = model.b.startsWith('field:');
     const sums = formulaSumsLines(model, catalog, inLine);
     const productOfSums = sums && bIsField && (model.op === 'mul' || model.op === 'div');
-    const result = formulaPreviewText({ ...model, label: '', suffix: '' }, catalog, xmlDoc, inLine);
+    const result = formulaPreviewText({ ...model, label: '', suffix: '' }, catalog, xmlDoc, inLine, docLang);
     return (
         <div data-formula-editor>
-            <FieldText label="Önündeki metin" currentValue={model.label} placeholder="ör. Peşin (%20): " onChange={(v) => update({ label: v })} />
-            <label style={fieldLabelStyle}>Alan</label>
+            <FieldText label={t('editor.formula.prefix')} currentValue={model.label} placeholder={docT(docLang)('editor.doc.formulaLabel')} onChange={(v) => update({ label: v })} />
+            <label style={fieldLabelStyle}>{t('editor.formula.field')}</label>
             <select data-formula-a value={model.a} onChange={(e) => update({ a: e.target.value })} style={{ ...fieldInputStyle, marginBottom: '10px' }}>
                 <CatalogOptions fields={numeric} xmlDoc={xmlDoc} />
             </select>
             <div style={{ display: 'flex', gap: '6px', marginBottom: '10px' }}>
                 <div style={{ flex: 1 }}>
-                    <label style={fieldLabelStyle}>İşlem</label>
+                    <label style={fieldLabelStyle}>{t('editor.formula.op')}</label>
                     <select data-formula-op value={model.op} onChange={(e) => update({ op: e.target.value as FormulaModel['op'] })} style={fieldInputStyle}>
-                        {FORMULA_OPS.map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
+                        {FORMULA_OPS.map(o => <option key={o.id} value={o.id}>{o.symbol ? `${o.symbol} (${t(`editor.formula.ops.${o.id}`)})` : t(`editor.formula.ops.${o.id}`)}</option>)}
                     </select>
                 </div>
                 {hasB && <div style={{ flex: 1 }}>
-                    <label style={fieldLabelStyle}>Değer türü</label>
+                    <label style={fieldLabelStyle}>{t('editor.formula.bKind')}</label>
                     <select
                         data-formula-b-kind
                         value={bIsField ? 'field' : 'number'}
                         onChange={(e) => update({ b: e.target.value === 'field' ? `field:${numeric[0]?.key ?? ''}` : '20' })}
                         style={fieldInputStyle}
                     >
-                        <option value="number">Sabit sayı</option>
-                        <option value="field">Başka alan</option>
+                        <option value="number">{t('editor.formula.constant')}</option>
+                        <option value="field">{t('editor.formula.otherField')}</option>
                     </select>
                 </div>}
             </div>
             {!hasB ? null : bIsField ? (
                 <>
-                    <label style={fieldLabelStyle}>İkinci alan</label>
+                    <label style={fieldLabelStyle}>{t('editor.formula.secondField')}</label>
                     <select data-formula-b value={model.b.slice(6)} onChange={(e) => update({ b: `field:${e.target.value}` })} style={{ ...fieldInputStyle, marginBottom: '10px' }}>
                         <CatalogOptions fields={numeric} xmlDoc={xmlDoc} />
                     </select>
                 </>
             ) : (
                 <div style={{ marginBottom: '10px' }}>
-                    <label style={fieldLabelStyle}>{model.op === 'percent' ? 'Yüzde (%)' : 'Sayı'}</label>
+                    <label style={fieldLabelStyle}>{model.op === 'percent' ? t('editor.formula.percent') : t('editor.formula.number')}</label>
                     <input data-formula-b type="text" inputMode="decimal" value={model.b} onChange={(e) => update({ b: e.target.value })} style={fieldInputStyle} />
                 </div>
             )}
             <div style={{ display: 'flex', gap: '6px', marginBottom: '10px' }}>
                 <div style={{ width: '90px' }}>
-                    <label style={fieldLabelStyle}>Ondalık</label>
+                    <label style={fieldLabelStyle}>{t('editor.formula.decimals')}</label>
                     <input data-formula-decimals type="number" min={0} max={4} value={model.decimals}
                         onChange={(e) => update({ decimals: Math.min(4, Math.max(0, Number(e.target.value) || 0)) })} style={fieldInputStyle} />
                 </div>
                 <div style={{ flex: 1 }}>
-                    <FieldText label="Arkasındaki metin" currentValue={model.suffix} placeholder="ör.  TL" onChange={(v) => update({ suffix: v })} />
+                    <FieldText label={t('editor.formula.suffix')} currentValue={model.suffix} placeholder={t('editor.formula.suffixPlaceholder')} onChange={(v) => update({ suffix: v })} />
                 </div>
             </div>
             {sums && (
                 <div data-formula-sum-note style={{ marginBottom: '8px', fontSize: '11px', lineHeight: 1.45, color: productOfSums ? '#fcd34d' : '#93c5fd' }}>
-                    {productOfSums
-                        ? 'Formül satır tablosunun dışında: satır alanlarının önce toplamları alınır, sonra işlem yapılır (Σ × Σ). Satır satır çarpım için formülü satır tablosuna kolon olarak ekleyin.'
-                        : 'Formül satır tablosunun dışında: satır alanlarında tüm satırların toplamı kullanılır.'}
+                    {productOfSums ? t('editor.formula.sumProduct') : t('editor.formula.sumNote')}
                 </div>
             )}
             <div data-formula-result style={{ padding: '8px 10px', background: '#0b1222', border: '1px dashed #334155', borderRadius: '4px', fontSize: '12px', color: '#e2e8f0' }}>
-                {inLine ? 'Örnek veriyle sonuç (ilk satır)' : 'Örnek veriyle sonuç'}: <b>{result || '—'}</b>
+                {inLine ? t('editor.formula.resultLine') : t('editor.formula.result')}: <b>{result || '—'}</b>
             </div>
         </div>
     );
@@ -1149,11 +1162,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     initialModuleId = 'fatura',
     initialXslt,
     initialXml,
-    docName = 'XSLT Tasarım',
+    docName,
     initialDesignId,
     onWorkChange,
     onBack,
 }) => {
+    // Menüler arayüz dilinde (üstteki dil seçici); tasarıma eklenen objeler belge dilinde.
+    const { t, locale } = useLocaleT();
+    const docTitle = docName || t('editor.save.defaultName');
     // ------------------------------------------------------------------------
     // State
     // ------------------------------------------------------------------------
@@ -1351,7 +1367,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         if (initialXslt && moduleId === initialModuleId) {
             // İlk yükleme, kullanıcı verisi varsa onu kullan
             const userXslt = stripLeadingBom(stripTestWatermark(initialXslt));
-            load(designKeyOf(userXslt) ? userXslt : refreshObjectContents(userXslt, catalogRef.current));
+            load(designKeyOf(userXslt) ? userXslt : refreshObjectContents(userXslt, catalogRef.current, documentLanguage(userXslt, initialXml || SAMPLE_XML)));
             return;
         }
         // Sprint 9 — Antrepo ise antrepoTemplates'tan al
@@ -1379,7 +1395,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             console.warn(`[XSLTEditor] Inline XSLT yok: ${currentModule.inlineKey}`);
             load('<!-- Bu modül için inline XSLT bulunamadı -->');
         }
-    }, [moduleId, currentModule.antrepoId, currentModule.inlineKey, initialXslt, initialModuleId, resetHistory]);
+    }, [moduleId, currentModule.antrepoId, currentModule.inlineKey, initialXslt, initialXml, initialModuleId, resetHistory]);
 
     // ------------------------------------------------------------------------
     // Canlı preview — 500ms debounce
@@ -1418,7 +1434,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             // Hata varsa boş Set (renklendirme yapılmaz, default görünüm).
             setRenderedBindingIndexes(result.renderedBindings ?? new Set());
         } catch (err) {
-            setPreviewError((err as Error).message || 'Bilinmeyen render hatası');
+            setPreviewError((err as Error).message || i18n.t('editor.preview.unknownError'));
             setPreviewHtml('');
             setRenderDurationMs(performance.now() - start);
             setRenderedBindingIndexes(new Set()); // hata → renklendirme YOK
@@ -1460,7 +1476,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             setDesign({ id: d.id, key: d.design_key ?? key, paid: d.paid, paidAt: d.paid_at, name: d.name, taxId: d.license_tax_id });
             if (d.paid) {
                 setSaveStatus('saved');
-                setSaveMessage('🔒 Onaylanmış tasarım — yalnızca indirilebilir');
+                setSaveMessage(`🔒 ${i18n.t('editor.save.lockedHint')}`);
             }
         }).catch(err => console.warn('[XSLTEditor] Tasarım anahtarı sorgulanamadı:', err));
         return () => { cancelled = true; };
@@ -1479,7 +1495,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             }
             setDesign({ id: d.id, key: d.design_key ?? undefined, paid: true, paidAt: d.paid_at, name: d.name, taxId: d.license_tax_id });
             setSaveStatus('saved');
-            setSaveMessage('🔒 Onaylanmış tasarım — yalnızca indirilebilir');
+            setSaveMessage(`🔒 ${i18n.t('editor.save.lockedHint')}`);
         }).catch(err => console.warn('[XSLTEditor] Tasarım durumu alınamadı:', err));
         return () => { cancelled = true; };
     }, [initialDesignId]);
@@ -1498,18 +1514,18 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         flushSourceEditsRef.current();
         const content = xsltContentRef.current;
         setSaveStatus('saving');
-        setSaveMessage('Kaydediliyor...');
+        setSaveMessage(i18n.t('editor.save.saving'));
         try {
             if (design.id) {
                 await api.updateDesign(design.id, { xslt_content: content, xml_content: xmlContent });
                 setSaveStatus('saved');
-                setSaveMessage('✅ Kaydedildi');
+                setSaveMessage(`✅ ${i18n.t('editor.save.saved')}`);
                 return;
             }
-            const designName = window.prompt?.('Tasarım adı:', docName) ?? docName;
+            const designName = window.prompt?.(i18n.t('editor.save.namePrompt'), docTitle) ?? docTitle;
             if (!designName || !designName.trim()) {
                 setSaveStatus('idle');
-                setSaveMessage('İptal edildi');
+                setSaveMessage(i18n.t('editor.save.cancelled'));
                 return;
             }
             const result = await api.saveDesign({
@@ -1524,12 +1540,12 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             });
             setDesign(prev => ({ ...prev, id: result.design.id, name: result.design.name }));
             setSaveStatus('saved');
-            setSaveMessage(`✅ Kaydedildi — "${result.design.name}"`);
+            setSaveMessage(`✅ ${i18n.t('editor.save.savedAs', { name: result.design.name })}`);
         } catch (err) {
             setSaveStatus('error');
-            setSaveMessage(`⚠ Kayıt hatası: ${(err as Error).message}`);
+            setSaveMessage(`⚠ ${i18n.t('editor.save.error', { message: (err as Error).message })}`);
         }
-    }, [design.id, design.paid, docName, moduleId, xmlContent]);
+    }, [design.id, design.paid, docTitle, moduleId, xmlContent]);
 
     /** Kaydedilmemiş tasarım indirilemez / onaylanamaz; kullanıcı Kaydet'e yönlendirilir. */
     const needsSave = !design.paid && !design.id;
@@ -1537,7 +1553,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const requireSaved = useCallback((): boolean => {
         if (!needsSave) return true;
         setSaveStatus('error');
-        setSaveMessage('⚠ Önce "Kaydet" ile tasarıma bir isim verip kaydedin; sonra indirebilir ve onaylayabilirsiniz.');
+        setSaveMessage(`⚠ ${i18n.t('editor.save.saveFirst')}`);
         setSaveHint(true);
         setTimeout(() => setSaveHint(false), 2400);
         return false;
@@ -1551,15 +1567,15 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             return true;
         } catch (err) {
             setSaveStatus('error');
-            setSaveMessage(`⚠ Kayıt hatası: ${(err as Error).message}`);
+            setSaveMessage(`⚠ ${i18n.t('editor.save.error', { message: (err as Error).message })}`);
             return false;
         }
     }, [design.id, design.paid, xmlContent]);
 
     const downloadXslt = useCallback((content: string, suffix = '') => {
-        const base = (design.name || docName).trim().replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, '_');
+        const base = (design.name || docTitle).trim().replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, '_');
         const fileName = `${base}_${moduleId}${suffix}.xslt`;
-        const url = URL.createObjectURL(new Blob([stripLeadingBom(content)], { type: 'application/xml;charset=utf-8' }));
+        const url = URL.createObjectURL(new Blob([applyLegacyViewerCompat(stripLeadingBom(content))], { type: 'application/xml;charset=utf-8' }));
         const a = document.createElement('a');
         a.href = url;
         a.download = fileName;
@@ -1567,7 +1583,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         a.click();
         document.body.removeChild(a);
         setTimeout(() => URL.revokeObjectURL(url), 10000);
-    }, [design.name, docName, moduleId]);
+    }, [design.name, docTitle, moduleId]);
 
     // ------------------------------------------------------------------------
     // Test indirme — ücretsiz, sayfa ortasında TEST filigranı ile
@@ -1578,13 +1594,13 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         const marked = addTestWatermark(xsltContentRef.current);
         if (!marked) {
             setSaveStatus('error');
-            setSaveMessage('⚠ Test dosyası oluşturulamadı: XSLT içinde <body> veya kök template bulunamadı.');
+            setSaveMessage(`⚠ ${i18n.t('editor.save.testFailed')}`);
             return;
         }
         if (!(await syncSavedDesign())) return;
         downloadXslt(marked, '_TEST');
         setSaveStatus('saved');
-        setSaveMessage('🧪 Test dosyası indirildi · ücretsiz. Sorun yoksa "Onayla" ile TEST yazısız dosyayı alın.');
+        setSaveMessage(`🧪 ${i18n.t('editor.save.testDone')}`);
     }, [downloadXslt, requireSaved, syncSavedDesign]);
 
     // ------------------------------------------------------------------------
@@ -1599,7 +1615,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         if (!requireSaved()) return;
         flushSourceEditsRef.current();
         setSaveStatus('saving');
-        setSaveMessage('Onaylanıyor...');
+        setSaveMessage(i18n.t('editor.save.approving'));
         try {
             const r = await api.exportDesign({
                 design_id: design.id,
@@ -1623,10 +1639,10 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             setJustDownloaded(true);
             setApproveOpen(false);
             setSaveStatus('saved');
-            const licensed = r.design.license_tax_id ? ` · ${r.design.license_tax_id} için lisanslı` : '';
+            const licensed = r.design.license_tax_id ? ` · ${i18n.t('editor.save.licensedFor', { taxId: r.design.license_tax_id })}` : '';
             setSaveMessage(r.charged
-                ? `✅ Onaylandı ve indirildi${licensed} · 1 tasarım hakkı kullanıldı (kalan ${r.credits}).`
-                : `✅ İndirildi · ücretsiz (onaylı tasarım${licensed})`);
+                ? `✅ ${i18n.t('editor.save.approved', { licensed, credits: r.credits })}`
+                : `✅ ${i18n.t('editor.save.downloadedFree', { licensed })}`);
             setSelectedObject(null);
         } catch (err) {
             const e = err as Error & { paymentRequired?: boolean };
@@ -1646,9 +1662,17 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     // xsltInstrumented.bindings'i kind'e göre grupla + arama filtresi uygula.
     // "Tüm Belge Alanları": XML türüne göre katalog, şablonda kullanılıp
     // kullanılmadığı ve örnek verideki değeri.
-    const catalog = useMemo(() => getCatalog(docRootOf(xmlContent)), [xmlContent]);
+    const catalog = useMemo(() => buildCatalog(xmlContent, locale), [xmlContent, locale]);
     const catalogRef = useRef(catalog);
     catalogRef.current = catalog;
+    // Belge dili sihirbazda seçilen ülkeden gelir (şablonun lang parametresi);
+    // eklenen kolon başlıkları vb. bu dilde, menüler arayüz dilinde kalır.
+    const docLang = useMemo(() => documentLanguage(xsltContent, xmlContent), [xsltContent, xmlContent]);
+    const docLangRef = useRef(docLang);
+    docLangRef.current = docLang;
+    const docCatalog = useMemo(() => (docLang === locale ? catalog : buildCatalog(xmlContent, docLang)), [catalog, docLang, locale, xmlContent]);
+    const docCatalogRef = useRef(docCatalog);
+    docCatalogRef.current = docCatalog;
     /**
      * Tasarımdaki veri alanlarının Türkçe adları (katalogla eşleşenler) ve
      * XML'deki adları. İfadedeki her yol ayrı adlandırılır; `$değişken/...`
@@ -1684,17 +1708,17 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     // Element yapısı (xsl:if / for-each) tasarım yapan kullanıcı için anlamlı
     // olmadığından listelenmez.
     const filteredBindingsByGroup = useMemo(() => {
-        const q = xsltSearch.trim().toLocaleLowerCase('tr');
+        const q = xsltSearch.trim().toLocaleLowerCase(locale);
         const groups: { dropdown: XsltBinding[]; static: XsltBinding[] } = { dropdown: [], static: [] };
         for (const b of xsltInstrumented.bindings) {
             const kind = b.kind || 'dropdown';
             if (kind === 'element') continue;
             const info = bindingInfo.get(b);
-            if (q && !`${b.xpath} ${info?.label ?? ''} ${info?.xml ?? ''}`.toLocaleLowerCase('tr').includes(q)) continue;
+            if (q && !`${b.xpath} ${info?.label ?? ''} ${info?.xml ?? ''}`.toLocaleLowerCase(locale).includes(q)) continue;
             groups[kind].push(b);
         }
         return groups;
-    }, [xsltInstrumented.bindings, xsltSearch, bindingInfo]);
+    }, [xsltInstrumented.bindings, xsltSearch, bindingInfo, locale]);
     const xmlDoc = useMemo(() => {
         const doc = new DOMParser().parseFromString(xmlContent.replace(/^\uFEFF/, ''), 'application/xml');
         return doc.getElementsByTagName('parsererror').length ? null : doc;
@@ -1706,14 +1730,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         return catalog.map(f => ({ f, inXslt: detectInXslt(names, xsltContent, f), value: evaluateField(xmlDoc, f) }));
     }, [catalog, xsltContent, xmlDoc]);
     const filteredCatalog = useMemo(() => {
-        const q = xsltSearch.trim().toLocaleLowerCase('tr');
+        const q = xsltSearch.trim().toLocaleLowerCase(locale);
         const groups = new Map<string, typeof catalogStatus>();
         for (const s of catalogStatus) {
-            if (q && !`${s.f.label} ${s.f.category} ${s.f.path}`.toLocaleLowerCase('tr').includes(q)) continue;
+            if (q && !`${s.f.label} ${s.f.category} ${s.f.path}`.toLocaleLowerCase(locale).includes(q)) continue;
             groups.set(s.f.category, [...(groups.get(s.f.category) ?? []), s]);
         }
         return [...groups];
-    }, [catalogStatus, xsltSearch]);
+    }, [catalogStatus, xsltSearch, locale]);
     const [catalogOpen, setCatalogOpen] = useState<Record<string, boolean>>({});
 
     /**
@@ -1907,12 +1931,12 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             void pickImageFile().then(async (file) => {
                 if (file === null) return;
                 if (file === undefined) {
-                    insertSnippet((id) => XSLT_ELEMENT_SNIPPETS.image(id), target, 'resim');
+                    insertSnippet((id) => XSLT_ELEMENT_SNIPPETS.image(id, docLangRef.current), target, 'resim');
                     return;
                 }
                 try {
                     const img = await readImageFile(file);
-                    insertSnippet((id) => XSLT_ELEMENT_SNIPPETS.image(id, img.dataUrl, Math.min(200, img.width || 200)), target, `resim (${file.name})`);
+                    insertSnippet((id) => XSLT_ELEMENT_SNIPPETS.image(id, docLangRef.current, img.dataUrl, Math.min(200, img.width || 200)), target, `resim (${file.name})`);
                 } catch (e) {
                     setSaveStatus('error');
                     setSaveMessage(`⚠ ${e instanceof Error ? e.message : String(e)}`);
@@ -1921,18 +1945,20 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             return;
         }
         if (type !== 'formula') {
-            insertSnippet((id) => XSLT_ELEMENT_SNIPPETS[type](id), target, type);
+            insertSnippet((id) => XSLT_ELEMENT_SNIPPETS[type](id, docLangRef.current), target, type);
             return;
         }
         const cat = catalogRef.current;
+        const lang = docLangRef.current;
         const a = cat.some(f => f.key === DEFAULT_FORMULA.a) ? DEFAULT_FORMULA.a : cat.find(isNumericField)?.key ?? '';
-        insertSnippet((id, inLine) => formulaSnippet(id, { ...DEFAULT_FORMULA, a }, cat, inLine), target, 'formül');
+        const label = docT(lang)('editor.doc.formulaLabel');
+        insertSnippet((id, inLine) => formulaSnippet(id, { ...DEFAULT_FORMULA, a, label }, cat, inLine, lang), target, 'formül');
     }, [insertSnippet]);
 
     /** Katalogdan veri alanı ekler. */
     const insertField = useCallback((key: string, target: InsertTarget | null) => {
         const f = catalogRef.current.find(x => x.key === key);
-        if (f) insertSnippet((id, inLine) => fieldSnippet(id, f, inLine), target, f.label);
+        if (f) insertSnippet((id, inLine) => fieldSnippet(id, f, inLine, docLangRef.current), target, f.label);
     }, [insertSnippet]);
 
     /**
@@ -1945,20 +1971,22 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         const ctx = findLineTableCell(selectedObjectRef.current?.element ?? null, xslt);
         if (!ctx) return false;
         const cat = catalogRef.current;
+        const lang = docLangRef.current;
+        const dt = docT(lang);
         const id = nextXsltObjId(xslt);
-        let header = 'Yeni Kolon';
+        let header = dt('editor.doc.newColumn');
         let line = '';
         if (what === 'field') {
             const f = cat.find(x => x.key === key);
             if (!f) return false;
-            header = f.label;
-            line = fieldSnippet(id, f, true);
+            header = docCatalogRef.current.find(x => x.key === key)?.label ?? f.label;
+            line = fieldSnippet(id, f, true, lang);
         } else if (what === 'formula') {
             const a = cat.find(f => LINE_FORMULA_KEYS.includes(f.key))?.key
                 ?? cat.find(f => isLineField(f) && isNumericField(f))?.key
                 ?? DEFAULT_FORMULA.a;
-            header = 'Hesaplanan';
-            line = formulaSnippet(id, { ...DEFAULT_FORMULA, a, label: '', suffix: '' }, cat, true);
+            header = dt('editor.doc.computed');
+            line = formulaSnippet(id, { ...DEFAULT_FORMULA, a, label: '', suffix: '' }, cat, true, lang);
         }
         let updated = addColumnAfterCell(xslt, ctx, kind => kind === 'line'
             ? line
@@ -1993,7 +2021,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         xsltContentRef.current = r.xslt;
         setXsltContent(r.xslt);
         setSaveStatus('idle');
-        setSaveMessage(`${action === 'remove' ? '🗑 Kolon silindi' : '👁 Kolon gizlendi'}${name ? ` · "${name}"` : ''} · Geri Al (Ctrl+Z) ile geri alınabilir`);
+        setSaveMessage(`${action === 'remove' ? `🗑 ${i18n.t('editor.column.removed')}` : `👁 ${i18n.t('editor.column.hidden')}`}${name ? ` · "${name}"` : ''} · ${i18n.t('editor.column.undoHint')}`);
         console.log(`[XSLTEditor] Kolon ${action === 'remove' ? 'silindi' : 'gizlendi'}: "${name}" (${r.cells} kaynak hücre)`);
     }, []);
 
@@ -2006,7 +2034,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         xsltContentRef.current = next;
         setXsltContent(next);
         setSaveStatus('idle');
-        setSaveMessage('👁 Gizli kolonlar yeniden gösteriliyor');
+        setSaveMessage(`👁 ${i18n.t('editor.column.revealed')}`);
     }, []);
 
     // Arka plan resmi (sayfa veya seçili çerçeve)
@@ -2025,13 +2053,13 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             if (!bg.image) return;
             const el = patch.target === 'element' ? selectedObjectRef.current?.element?.closest('[data-xsrc]') : null;
             if (patch.target === 'element' && !el) {
-                setBgError('Önce önizlemede çerçeve olacak öğeyi (ör. dış tablo) seçin.');
+                setBgError(i18n.t('editor.background.selectFrame'));
                 return;
             }
             next = writePageBackground(xslt, bg, el ? Number(el.getAttribute('data-xsrc')) : undefined);
         }
         if (next === null) {
-            setBgError('Arka plan eklenecek yer bulunamadı.');
+            setBgError(i18n.t('editor.background.noPlace'));
             return;
         }
         setBgError(null);
@@ -2052,7 +2080,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         if (target && !tag) return;
         const moved = moveElement(xslt, src, tag, target?.position ?? 'after');
         if (!moved || moved === xslt) return;
-        const updated = refreshObjectContents(moved, catalogRef.current, [id]);
+        const updated = refreshObjectContents(moved, catalogRef.current, docLangRef.current, [id]);
         console.log(`[XSLTEditor] Obje taşındı: ${id} → ${tag ? `<${tag.name}> ${target?.position === 'inside' ? 'içine' : 'altına'}` : 'sayfa sonu'}`);
         if (!tag) pendingPreviewScrollRef.current = Number.MAX_SAFE_INTEGER;
         pendingSelectRef.current = { kind: 'obj', id };
@@ -2081,19 +2109,19 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             }
         }
         if (!p.movable || !p.tag) {
-            setSaveMessage(`⚠ ${p.reason ?? 'Bu alan taşınamıyor.'}`);
+            setSaveMessage(`⚠ ${p.reason ?? i18n.t('editor.move.fieldFixed')}`);
             return;
         }
         const position = target?.position ?? 'after';
         const at = tag ? insertOffset(xslt, tag, position) : documentEndOffset(xslt);
         if (at < 0) return;
         if (isInLineContext(xslt, at)) {
-            setSaveMessage('⚠ Alan kalem satırlarının içine taşınamaz (her satırda tekrarlanırdı).');
+            setSaveMessage(`⚠ ${i18n.t('editor.move.fieldIntoLines')}`);
             return;
         }
         const contextOf = contextPathResolver(xslt);
         if (contextOf(p.tag.start) !== contextOf(at) && hasRelativeSelect(xslt.slice(p.tag.start, elementEnd(xslt, p.tag)))) {
-            setSaveMessage('⚠ Hedef farklı bir veri bölümünde; alan orada boş görünürdü. Aynı bölüm içinde bir yere taşıyın.');
+            setSaveMessage(`⚠ ${i18n.t('editor.move.fieldOtherSection')}`);
             return;
         }
         const moved = moveElementTracked(xslt, p.tag, tag, position);
@@ -2105,7 +2133,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         if (!tag) pendingPreviewScrollRef.current = Number.MAX_SAFE_INTEGER;
         xsltContentRef.current = moved.xslt;
         setXsltContent(moved.xslt);
-        setSaveMessage('↕ Veri alanı taşındı.');
+        setSaveMessage(`↕ ${i18n.t('editor.move.fieldMoved')}`);
         console.log(`[XSLTEditor] Veri alanı taşındı: B${index + 1} <${p.tag.name}> → ${tag ? `<${tag.name}> ${position === 'inside' ? 'içine' : 'altına'}` : 'sayfa sonu'}`);
     }, [bindPlacement]);
 
@@ -2115,7 +2143,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         const xslt = xsltContentRef.current;
         const p = placementOfElement(xslt, ordinal);
         if (!p.movable || !p.tag) {
-            setSaveMessage(`⚠ ${p.reason ?? 'Bu öğe taşınamıyor.'}`);
+            setSaveMessage(`⚠ ${p.reason ?? i18n.t('editor.move.elementFixed')}`);
             return;
         }
         const tag = target ? findLiteralTagByOrdinal(xslt, target.ordinal) : null;
@@ -2124,17 +2152,17 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         const at = tag ? insertOffset(xslt, tag, position) : documentEndOffset(xslt);
         if (at < 0) return;
         if (isInLineContext(xslt, at)) {
-            setSaveMessage('⚠ Öğe kalem satırlarının içine taşınamaz (her satırda tekrarlanırdı).');
+            setSaveMessage(`⚠ ${i18n.t('editor.move.elementIntoLines')}`);
             return;
         }
         const contextOf = contextPathResolver(xslt);
         if (contextOf(p.tag.start) !== contextOf(at) && hasRelativeSelect(xslt.slice(p.tag.start, elementEnd(xslt, p.tag)))) {
-            setSaveMessage('⚠ Hedef farklı bir veri bölümünde; içindeki alanlar orada boş görünürdü. Aynı bölüm içinde bir yere taşıyın.');
+            setSaveMessage(`⚠ ${i18n.t('editor.move.elementOtherSection')}`);
             return;
         }
         const moved = moveElementTracked(xslt, p.tag, tag, position);
         if (!moved) {
-            setSaveMessage('⚠ Öğe kendi içine taşınamaz.');
+            setSaveMessage(`⚠ ${i18n.t('editor.move.intoItself')}`);
             return;
         }
         if (moved.xslt === xslt) return;
@@ -2143,7 +2171,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         if (!tag) pendingPreviewScrollRef.current = Number.MAX_SAFE_INTEGER;
         xsltContentRef.current = moved.xslt;
         setXsltContent(moved.xslt);
-        setSaveMessage('↕ Öğe taşındı.');
+        setSaveMessage(`↕ ${i18n.t('editor.move.elementMoved')}`);
         console.log(`[XSLTEditor] Öğe taşındı: <${p.tag.name}> → ${tag ? `<${tag.name}> ${position === 'inside' ? 'içine' : 'altına'}` : 'sayfa sonu'}`);
     }, [flushSourceEdits]);
 
@@ -2155,7 +2183,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         pendingSelectRef.current = { kind: 'bind', index };
         xsltContentRef.current = next;
         setXsltContent(next);
-        setSaveMessage('✂ Alan ayrıldı; artık sürükleyerek, Konum alanlarıyla veya ↕ Taşı ile yerini değiştirebilirsiniz.');
+        setSaveMessage(`✂ ${i18n.t('editor.move.detached')}`);
     }, []);
 
     const moveTo = useCallback((loc: PreviewLocator, target: InsertTarget | null) => {
@@ -2221,7 +2249,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     }, []);
 
     const handleFormulaChange = useCallback((m: FormulaModel, previewText: string) => {
-        const content = formulaContent(m, catalogRef.current, selectedObjInLine());
+        const content = formulaContent(m, catalogRef.current, selectedObjInLine(), docLangRef.current);
         if (content === null) return;
         for (const [attr, value] of formulaAttrs(m)) handleAttrChange(attr, value);
         handleContentChange(content, previewText);
@@ -2231,7 +2259,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         const f = catalogRef.current.find(x => x.key === key);
         if (!f) return;
         handleAttrChange('data-field', key);
-        handleContentChange(fieldContent(f, selectedObjInLine()), evaluateField(xmlDocRef.current, f));
+        handleContentChange(fieldContent(f, selectedObjInLine(), docLangRef.current), evaluateField(xmlDocRef.current, f));
     }, [selectedObjInLine, handleAttrChange, handleContentChange]);
 
     const openSelection = useCallback((binding: XsltBinding | null, element: HTMLElement | null, locator: PreviewLocator | null) => {
@@ -2344,7 +2372,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         setXsltContent(target);
         syncHistoryState();
         setSaveStatus('idle');
-        setSaveMessage(direction === 'undo' ? '↶ Geri alındı' : '↷ İleri alındı');
+        setSaveMessage(direction === 'undo' ? `↶ ${i18n.t('editor.history.undone')}` : `↷ ${i18n.t('editor.history.redone')}`);
     }, [design.paid, flushAllPendingEdits, syncHistoryState]);
     const undo = useCallback(() => restoreHistory('undo'), [restoreHistory]);
     const redo = useCallback(() => restoreHistory('redo'), [restoreHistory]);
@@ -3018,7 +3046,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             pendingSelectRef.current = { kind: 'bind', index };
             xsltContentRef.current = next;
             setXsltContent(next);
-            setSaveMessage('↕ Veri alanı hücreden ayrılıp bırakılan yere taşındı; Konum alanlarından ince ayar yapabilirsiniz.');
+            setSaveMessage(`↕ ${i18n.t('editor.move.detachedMoved')}`);
         };
         const endDrag = () => {
             const d = drag;
@@ -3203,17 +3231,17 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         fontWeight: 600,
                         cursor: 'pointer',
                     }}
-                    title="Geri (Selection)"
+                    title={t('editor.toolbar.back')}
                 >
                     <ArrowLeft size={16} />
-                    Geri
+                    {t('editor.toolbar.back')}
                 </button>
 
                 {/* Sprint 9 Aşama 2c — Sol snippet paneli aç/kapat toggle.
                     Kapatıldığında preview + editör tüm genişliği kaplar. */}
                 <button
                     onClick={() => setSnippetPanelOpen(!snippetPanelOpen)}
-                    title={snippetPanelOpen ? 'Snippet panelini kapat (preview genişler)' : 'Snippet panelini aç'}
+                    title={snippetPanelOpen ? t('editor.toolbar.closePanel') : t('editor.toolbar.openPanel')}
                     data-toggle-snippet-panel
                     style={{
                         display: 'flex',
@@ -3232,7 +3260,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                     {snippetPanelOpen
                         ? <PanelLeftClose size={14} />
                         : <PanelLeftOpen size={14} />}
-                    {snippetPanelOpen ? 'Panel' : 'Panel Aç'}
+                    {snippetPanelOpen ? t('editor.toolbar.panel') : t('editor.toolbar.panelOpen')}
                 </button>
 
                 {/* Tasarım adı */}
@@ -3244,23 +3272,23 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         marginRight: '8px',
                     }}
                 >
-                    {docName}
+                    {docTitle}
                 </div>
 
                 {/* Geri al / ileri al */}
                 {!design.paid && (
                     <div style={{ display: 'flex', gap: '4px' }}>
                         {([
-                            { dir: 'undo', label: 'Geri Al', hint: 'Geri Al (Ctrl+Z) — son tasarım değişikliğini geri alır', Icon: Undo2, enabled: historyState.canUndo, run: undo },
-                            { dir: 'redo', label: 'İleri Al', hint: 'İleri Al (Ctrl+Y / Ctrl+Shift+Z) — geri alınan değişikliği yeniden uygular', Icon: Redo2, enabled: historyState.canRedo, run: redo },
-                        ] as const).map(({ dir, label, hint, Icon, enabled, run }) => (
+                            { dir: 'undo', label: t('editor.history.undo'), hint: t('editor.history.undoHint'), empty: t('editor.history.undoEmpty'), Icon: Undo2, enabled: historyState.canUndo, run: undo },
+                            { dir: 'redo', label: t('editor.history.redo'), hint: t('editor.history.redoHint'), empty: t('editor.history.redoEmpty'), Icon: Redo2, enabled: historyState.canRedo, run: redo },
+                        ] as const).map(({ dir, label, hint, empty, Icon, enabled, run }) => (
                             <button
                                 key={dir}
                                 type="button"
                                 data-history={dir}
                                 onClick={run}
                                 disabled={!enabled}
-                                title={enabled ? hint : `${label} — ${dir === 'undo' ? 'geri alınacak değişiklik yok' : 'ileri alınacak değişiklik yok'}`}
+                                title={enabled ? hint : `${label} — ${empty}`}
                                 aria-label={label}
                                 style={{
                                     display: 'flex',
@@ -3325,7 +3353,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                     onClick={handleSave}
                     data-save
                     disabled={saveStatus === 'saving'}
-                    title={design.id ? `"${design.name || docName}" olarak kaydedilir` : 'Tasarıma bir isim verip hesabınıza kaydeder. İndirme ve onay için önce kaydetmelisiniz.'}
+                    title={design.id ? t('editor.toolbar.saveAs', { name: design.name || docTitle }) : t('editor.toolbar.saveNew')}
                     style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -3350,7 +3378,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                     ) : (
                         <Save size={14} />
                     )}
-                    Kaydet
+                    {t('editor.toolbar.save')}
                 </button>}
 
                 {!design.paid && (
@@ -3359,9 +3387,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         data-test-download
                         data-needs-save={needsSave ? '1' : undefined}
                         disabled={saveStatus === 'saving'}
-                        title={needsSave
-                            ? 'Önce "Kaydet" ile tasarıma bir isim verip kaydedin.'
-                            : 'Ücretsiz. Dosyayı kendi sisteminizde denemeniz için sayfa ortasında büyük TEST yazısıyla indirir.'}
+                        title={needsSave ? t('editor.toolbar.needsSave') : t('editor.toolbar.testHint')}
                         style={{
                             opacity: needsSave ? 0.45 : 1,
                             display: 'flex',
@@ -3378,16 +3404,16 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         }}
                     >
                         <Download size={14} />
-                        Test İndir
+                        {t('editor.toolbar.testDownload')}
                         <span style={{ padding: '1px 6px', borderRadius: 999, fontSize: '10px', fontWeight: 700, background: 'rgba(245, 158, 11, 0.25)' }}>
-                            ücretsiz
+                            {t('editor.toolbar.free')}
                         </span>
                     </button>
                 )}
 
                 <button
                     onClick={() => {
-                        if (design.paid) { handleApprove(design.name || docName).catch(() => {}); return; }
+                        if (design.paid) { handleApprove(design.name || docTitle).catch(() => {}); return; }
                         if (requireSaved()) setApproveOpen(true);
                     }}
                     data-download
@@ -3395,10 +3421,10 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                     data-needs-save={needsSave ? '1' : undefined}
                     disabled={saveStatus === 'saving'}
                     title={design.paid
-                        ? 'Onaylı tasarım kilitlidir — onaylanan dosyayı tekrar indirmek ücretsiz.'
+                        ? t('editor.toolbar.lockedHint')
                         : needsSave
-                            ? 'Önce "Kaydet" ile tasarıma bir isim verip kaydedin.'
-                            : 'Tasarımı onaylayın: TEST yazısı kaldırılmış dosya indirilir (1 tasarım hakkı).'}
+                            ? t('editor.toolbar.needsSave')
+                            : t('editor.toolbar.approveHint')}
                     style={{
                         opacity: needsSave ? 0.45 : 1,
                         display: 'flex',
@@ -3416,19 +3442,19 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                     }}
                 >
                     {design.paid ? <Download size={14} /> : <CheckCircle2 size={14} />}
-                    {design.paid ? 'İndir .xslt' : 'Onayla'}
+                    {design.paid ? t('editor.toolbar.download') : t('editor.toolbar.approve')}
                     <span style={{
                         padding: '1px 6px', borderRadius: 999, fontSize: '10px', fontWeight: 700,
                         background: design.paid ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.2)',
                     }}>
-                        {design.paid ? 'ücretsiz' : '1 hak'}
+                        {design.paid ? t('editor.toolbar.free') : t('editor.toolbar.oneCredit')}
                     </span>
                 </button>
             </div>
             <PaymentModal isOpen={showPayment} onClose={() => setShowPayment(false)} onSuccess={() => setShowPayment(false)} />
             {approveOpen && (
                 <ApproveDialog
-                    defaultName={design.name || docName}
+                    defaultName={design.name || docTitle}
                     onTestDownload={handleTestDownload}
                     onApprove={handleApprove}
                     onBuy={() => { setApproveOpen(false); setShowPayment(true); }}
@@ -3469,20 +3495,18 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5)', color: '#e2e8f0',
                         }}>
                             <Lock size={30} color="#34d399" style={{ marginBottom: 10 }} />
-                            <div style={{ fontSize: 17, fontWeight: 800, marginBottom: 6 }}>Bu tasarım onaylandı</div>
+                            <div style={{ fontSize: 17, fontWeight: 800, marginBottom: 6 }}>{t('editor.locked.title')}</div>
                             <div style={{ fontSize: 13, lineHeight: 1.6, color: '#94a3b8', marginBottom: 18 }}>
-                                Onaylanmış (satın alınmış) tasarımlar tekrar düzenlenemez. Onaylanan dosyayı
-                                istediğiniz zaman buradan veya "Tamamlanan Tasarımlar" listesinden ücretsiz indirebilirsiniz.
+                                {t('editor.locked.body')}
                             </div>
                             {design.taxId && (
                                 <div data-locked-tax-id style={{ fontSize: 12, lineHeight: 1.5, color: '#fcd34d', marginTop: -8, marginBottom: 16 }}>
-                                    {design.taxId.length === 11 ? 'TCKN' : 'VKN'} {design.taxId} için lisanslı; başka bir
-                                    VKN/TCKN ile düzenlenen belgelerde TEST yazısı çıkar.
+                                    {t('editor.locked.taxId', { kind: design.taxId.length === 11 ? 'TCKN' : 'VKN', taxId: design.taxId })}
                                 </div>
                             )}
                             {justDownloaded && (
                                 <div data-locked-downloaded style={{ fontSize: 13, fontWeight: 700, color: '#6ee7b7', marginTop: -6, marginBottom: 16 }}>
-                                    ✓ Dosya indirildi; bilgisayarınızın İndirilenler klasörüne kaydedildi.
+                                    ✓ {t('editor.locked.downloaded')}
                                 </div>
                             )}
                             {justDownloaded ? (
@@ -3497,21 +3521,21 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                         background: 'linear-gradient(135deg, #10b981, #059669)', color: 'white',
                                     }}
                                 >
-                                    <CheckCircle2 size={14} /> Tamam
+                                    <CheckCircle2 size={14} /> {t('editor.common.ok')}
                                 </button>
                             ) : (
                             <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
                                 <button
                                     type="button"
                                     data-locked-download
-                                    onClick={() => handleApprove(design.name || docName).catch(() => {})}
+                                    onClick={() => handleApprove(design.name || docTitle).catch(() => {})}
                                     style={{
                                         display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 16px', borderRadius: 8,
                                         border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 13, fontFamily: 'inherit',
                                         background: 'linear-gradient(135deg, #10b981, #059669)', color: 'white',
                                     }}
                                 >
-                                    <Download size={14} /> İndir .xslt
+                                    <Download size={14} /> {t('editor.toolbar.download')}
                                 </button>
                                 {onBack && (
                                     <button
@@ -3523,7 +3547,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                             background: 'transparent', border: '1px solid rgba(148, 163, 184, 0.35)', color: '#cbd5e1',
                                         }}
                                     >
-                                        <ArrowLeft size={14} /> Geri
+                                        <ArrowLeft size={14} /> {t('editor.toolbar.back')}
                                     </button>
                                 )}
                             </div>
@@ -3561,7 +3585,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         }}
                     >
                         <Sparkles size={13} />
-                        <span>XSLT Alanları</span>
+                        <span>{t('editor.fields.title')}</span>
                         <span style={{
                             marginLeft: 'auto',
                             padding: '2px 6px',
@@ -3575,7 +3599,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         {/* Sprint 9 Aşama 2c — Panel kapat butonu (X) */}
                         <button
                             onClick={() => setSnippetPanelOpen(false)}
-                            title="Snippet panelini kapat (preview alanı genişler)"
+                            title={t('editor.toolbar.closePanel')}
                             data-close-snippet-panel
                             style={{
                                 marginLeft: '6px',
@@ -3625,7 +3649,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 data-field-search
                                 value={xsltSearch}
                                 onChange={(e) => setXsltSearch(e.target.value)}
-                                placeholder="Alan ara: kur, tutar, alıcı, IBAN..."
+                                placeholder={t('editor.fields.search')}
                                 style={{
                                     display: 'block',
                                     boxSizing: 'border-box',
@@ -3648,11 +3672,11 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             <div style={{ display: 'flex', gap: '10px', marginTop: '6px', fontSize: '9px', color: '#94a3b8' }}>
                                 <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <span style={{ width: '9px', height: '9px', borderRadius: '2px', background: 'rgba(16, 185, 129, 0.35)', borderLeft: '3px solid #10b981' }} />
-                                    Tasarımda görünen
+                                    {t('editor.fields.visible')}
                                 </span>
                                 <span style={{ display: 'flex', alignItems: 'center', gap: '4px', opacity: 0.7 }}>
                                     <span style={{ width: '9px', height: '9px', borderRadius: '2px', background: '#1e293b', borderLeft: '3px solid #475569' }} />
-                                    Görünmeyen
+                                    {t('editor.fields.hidden')}
                                 </span>
                             </div>
                         )}
@@ -3678,12 +3702,12 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     fontSize: '11px',
                                 }}
                             >
-                                Bu XSLT'te binding bulunamadı.
+                                {t('editor.fields.noBindings')}
                             </div>
                         ) : (
                             (['dropdown', 'static'] as const).map(group => {
                                 const list = filteredBindingsByGroup[group];
-                                const groupLabel = group === 'dropdown' ? 'Tasarımdaki Veri Alanları' : 'Sabit Metinler';
+                                const groupLabel = group === 'dropdown' ? t('editor.fields.dataFields') : t('editor.fields.staticTexts');
                                 const groupColor = group === 'dropdown' ? '#a5b4fc'
                                     : group === 'static' ? '#6ee7b7'
                                     : '#fcd34d';
@@ -3726,7 +3750,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                 fontWeight: 700,
                                                 color: groupColor,
                                             }}
-                                                title={groupHasRenderStatus ? `${renderedCount} alan tasarımda görünüyor / toplam ${list.length}` : undefined}
+                                                title={groupHasRenderStatus ? t('editor.fields.renderedCount', { count: renderedCount, total: list.length }) : undefined}
                                             >
                                                 {groupHasRenderStatus ? `${renderedCount}/${list.length}` : list.length}
                                             </span>
@@ -3776,7 +3800,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                                 e.dataTransfer.effectAllowed = 'move';
                                                             }}
                                                             data-rendered={showRenderStatus ? String(isRendered) : undefined}
-                                                            title={`${trLabel ? `${trLabel}\n` : ''}${xmlName ? `XML: ${xmlName}\n` : ''}XPath: ${b.xpath}\nSatır ${b.line}, col ${b.column}${showRenderStatus ? (isRendered ? '\n✓ Tasarımda görünüyor — önizlemeye sürükleyerek taşıyabilirsiniz' : '\n✗ Tasarımda görünmüyor') : ''}`}
+                                                            title={`${trLabel ? `${trLabel}\n` : ''}${xmlName ? `XML: ${xmlName}\n` : ''}XPath: ${b.xpath}\n${t('editor.fields.lineCol', { line: b.line, col: b.column })}${showRenderStatus ? (isRendered ? `\n✓ ${t('editor.fields.renderedDrag')}` : `\n✗ ${t('editor.fields.notRendered')}`) : ''}`}
                                                             style={{
                                                                 display: 'flex',
                                                                 alignItems: 'center',
@@ -3856,8 +3880,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                                 yapmadığını anlar. */}
                                                             <span
                                                                 title={showRenderStatus
-                                                                    ? (isRendered ? 'Tasarımda görünüyor' : 'Tasarımda görünmüyor (xsl:if koşulu sağlanmıyor vb.)')
-                                                                    : 'Render henüz yapılmadı / XML yükle'}
+                                                                    ? (isRendered ? t('editor.fields.rendered') : t('editor.fields.notRenderedWhy'))
+                                                                    : t('editor.fields.notRenderedYet')}
                                                                 style={{
                                                                     fontSize: '12px',
                                                                     fontWeight: 700,
@@ -3887,14 +3911,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 background: 'rgba(14, 165, 233, 0.16)', border: '1px solid rgba(56, 189, 248, 0.35)', borderRadius: '4px',
                                 color: '#7dd3fc', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.4px',
                             }}>
-                                <span>Tüm Belge Alanları</span>
+                                <span>{t('editor.catalog.title')}</span>
                                 <span style={{ marginLeft: 'auto', padding: '1px 5px', background: '#0f172a', borderRadius: '3px', fontSize: '9px' }}
-                                    title="Şablonda kullanılan / katalogdaki alan sayısı">
+                                    title={t('editor.catalog.countHint')}>
                                     {catalogStatus.filter(s => s.inXslt).length}/{catalogStatus.length}
                                 </span>
                             </div>
                             <div style={{ fontSize: '9px', color: '#64748b', margin: '4px 2px 6px', lineHeight: 1.4 }}>
-                                ✓ şablonda kullanılıyor · <b style={{ color: '#7dd3fc' }}>+</b> tıklayın veya önizlemeye sürükleyin. Gri değer örnek veriden gelir.
+                                ✓ {t('editor.catalog.used')} · <b style={{ color: '#7dd3fc' }}>+</b> {t('editor.catalog.help')}
                             </div>
                             {filteredCatalog.map(([category, items]) => {
                                 const open = catalogOpen[category] ?? !!xsltSearch.trim();
@@ -3936,7 +3960,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                         e.dataTransfer.effectAllowed = 'copy';
                                                     }}
                                                     onClick={() => (existing ? handleBindingClick(existing) : insertHere())}
-                                                    title={`${f.label}\n${f.path.replace(/\//g, ' › ')}${isLineField(f) ? '\nSatır alanı: tablo satırının içine konursa her satırın değeri basılır.' : ''}${existing ? '\nTıklayınca tasarımdaki yerine gider.' : '\nTıklayınca seçili konuma eklenir.'}`}
+                                                    title={`${f.label}\n${f.path.replace(/\//g, ' › ')}${isLineField(f) ? `\n${t('editor.catalog.lineField')}` : ''}\n${existing ? t('editor.catalog.goTo') : t('editor.catalog.insertAt')}`}
                                                     style={{
                                                         display: 'flex', alignItems: 'center', gap: '6px', margin: '2px 0 2px 8px', padding: '4px 6px 4px 8px',
                                                         background: '#1e293b', border: '1px solid #334155',
@@ -3950,13 +3974,13 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                             {f.label}
                                                         </span>
                                                         <span style={{ display: 'block', fontSize: '9px', color: value ? '#94a3b8' : '#475569', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                            {value || 'örnek veride yok'}
+                                                            {value || t('editor.catalog.noSample')}
                                                         </span>
                                                     </span>
-                                                    {inXslt && <span title="Şablonda kullanılıyor" style={{ color: '#10b981', fontSize: '12px', fontWeight: 700 }}>✓</span>}
+                                                    {inXslt && <span title={t('editor.catalog.usedTitle')} style={{ color: '#10b981', fontSize: '12px', fontWeight: 700 }}>✓</span>}
                                                     <button
                                                         data-catalog-insert={f.key}
-                                                        title="Tasarıma ekle"
+                                                        title={t('editor.catalog.add')}
                                                         onClick={(e) => { e.stopPropagation(); insertHere(); }}
                                                         style={{
                                                             display: 'flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px', padding: 0,
@@ -4012,15 +4036,15 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         }}
                     >
                         <Eye size={13} color="#34d399" />
-                        <span style={{ color: '#6ee7b7' }}>Canlı Önizleme</span>
+                        <span style={{ color: '#6ee7b7' }}>{t('editor.preview.title')}</span>
                         <div style={{ flex: 1 }} />
                         {isRendering ? (
                             <span style={{ color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                <RefreshCw size={11} className="spin" /> Render ediliyor...
+                                <RefreshCw size={11} className="spin" /> {t('editor.preview.rendering')}
                             </span>
                         ) : previewError ? (
                             <span style={{ color: '#fca5a5', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                <AlertCircle size={11} /> Hata
+                                <AlertCircle size={11} /> {t('editor.preview.error')}
                             </span>
                         ) : (
                             <span style={{ color: '#6ee7b7', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -4042,7 +4066,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     autoFitRef.current = false;
                                     setPreviewZoom(z => Math.max(0.25, Math.round((z - 0.1) * 100) / 100));
                                 }}
-                                title="Zoom out (-10%)"
+                                title={t('editor.preview.zoomOut')}
                                 style={{
                                     padding: '2px 4px',
                                     background: 'transparent',
@@ -4072,7 +4096,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     autoFitRef.current = false;
                                     setPreviewZoom(z => Math.min(2.0, Math.round((z + 0.1) * 100) / 100));
                                 }}
-                                title="Zoom in (+10%)"
+                                title={t('editor.preview.zoomIn')}
                                 style={{
                                     padding: '2px 4px',
                                     background: 'transparent',
@@ -4092,7 +4116,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     autoFitRef.current = true;
                                     setPreviewZoom(fitZoomToContainer());
                                 }}
-                                title="Genişliğe sığdır"
+                                title={t('editor.preview.fitHint')}
                                 style={{
                                     padding: '1px 5px',
                                     background: 'transparent',
@@ -4117,7 +4141,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     e.currentTarget.style.color = '#94a3b8';
                                 }}
                             >
-                                Fit
+                                {t('editor.preview.fit')}
                             </button>
                         </span>
                     </div>
@@ -4132,21 +4156,21 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         }}
                     >
                         <span style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8', letterSpacing: '0.4px', textTransform: 'uppercase', marginRight: '2px' }}>
-                            Ekle
+                            {t('editor.insert.title')}
                         </span>
                         {([
-                            { type: 'text', label: 'Metin', Icon: Type, color: '#6ee7b7' },
-                            { type: 'image', label: 'Resim', Icon: ImageIcon, color: '#a5b4fc' },
-                            { type: 'table', label: 'Tablo', Icon: Table2, color: '#fcd34d' },
-                            { type: 'formula', label: 'Formül', Icon: Calculator, color: '#f9a8d4' },
-                            { type: 'input', label: 'Kutu', Icon: TextCursorInput, color: '#fca5a5' },
-                            { type: 'karekod', label: 'Karekod', Icon: QrCode, color: '#93c5fd' },
+                            { type: 'text', label: t('editor.insert.text'), Icon: Type, color: '#6ee7b7' },
+                            { type: 'image', label: t('editor.insert.image'), Icon: ImageIcon, color: '#a5b4fc' },
+                            { type: 'table', label: t('editor.insert.table'), Icon: Table2, color: '#fcd34d' },
+                            { type: 'formula', label: t('editor.insert.formula'), Icon: Calculator, color: '#f9a8d4' },
+                            { type: 'input', label: t('editor.insert.input'), Icon: TextCursorInput, color: '#fca5a5' },
+                            { type: 'karekod', label: t('editor.insert.qr'), Icon: QrCode, color: '#93c5fd' },
                         ] as const).map(({ type, label, Icon, color }) => (
                             <div
                                 key={type}
                                 draggable
                                 data-insert-type={type}
-                                title={`${label} ekle — tıklayın ya da önizlemede istediğiniz yere sürükleyin`}
+                                title={t('editor.insert.hint', { label })}
                                 onDragStart={(e) => {
                                     e.dataTransfer.setData('text/x-xslt-element', type);
                                     e.dataTransfer.effectAllowed = 'copy';
@@ -4174,9 +4198,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             data-insert-column
                             disabled={!selectedLineCell}
                             onClick={() => insertColumn('empty')}
-                            title={selectedLineCell
-                                ? 'Seçili kolonun sağına boş kolon ekler; içine alan veya formül koyabilirsiniz.'
-                                : 'Önce önizlemede satır (kalem) tablosundan bir kolon seçin.'}
+                            title={selectedLineCell ? t('editor.insert.columnHint') : t('editor.insert.columnDisabled')}
                             style={{
                                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px',
                                 width: '68px', height: '56px', background: '#1e293b', border: '1px solid #67e8f955',
@@ -4185,14 +4207,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             }}
                         >
                             <Columns3 size={22} />
-                            Kolon
+                            {t('editor.insert.column')}
                         </button>
                         {hiddenColumnCells > 0 && (
                             <button
                                 type="button"
                                 data-show-hidden-columns
                                 onClick={revealHiddenColumns}
-                                title="'Kolonu Gizle' ile gizlenen kolonları yeniden gösterir"
+                                title={t('editor.insert.showHiddenHint')}
                                 style={{
                                     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px',
                                     width: '68px', height: '56px', background: '#1e293b', border: '1px solid #fcd34d55',
@@ -4201,14 +4223,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 }}
                             >
                                 <Eye size={20} />
-                                Gizlileri göster
+                                {t('editor.insert.showHidden')}
                             </button>
                         )}
                         <button
                             type="button"
                             data-bg-toggle
                             onClick={() => setBgOpen(v => !v)}
-                            title="Sayfaya veya seçili çerçeveye arka plan resmi"
+                            title={t('editor.background.hint')}
                             style={{
                                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px',
                                 width: '68px', height: '56px', background: bgOpen || pageBg ? '#c4b5fd22' : '#1e293b',
@@ -4217,25 +4239,25 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             }}
                         >
                             <Wallpaper size={22} />
-                            Arka Plan
+                            {t('editor.background.title')}
                         </button>
                         <div style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'column', gap: '3px', minWidth: '190px' }}>
                             <select
                                 data-insert-mode
                                 value={insertMode}
                                 onChange={(e) => setInsertMode(e.target.value as 'end' | InsertPosition)}
-                                title="Tıklayarak eklenen obje nereye konsun"
+                                title={t('editor.insert.modeHint')}
                                 style={{ ...fieldInputStyle, padding: '5px 8px', fontSize: '11px', fontFamily: 'inherit' }}
                             >
-                                <option value="after">Seçili öğenin altına</option>
-                                <option value="inside">Seçili öğenin içine</option>
-                                <option value="end">Sayfanın sonuna</option>
+                                <option value="after">{t('editor.insert.after')}</option>
+                                <option value="inside">{t('editor.insert.inside')}</option>
+                                <option value="end">{t('editor.insert.end')}</option>
                             </select>
                             <span style={{ fontSize: '10px', color: '#64748b' }}>
                                 {insertMode === 'end'
-                                    ? 'Tıklanan obje sayfanın sonuna eklenir.'
-                                    : selectedObject?.element ? `Seçili: <${selectedObject.element.tagName.toLowerCase()}>` : 'Seçim yoksa sayfa sonuna eklenir.'}
-                                {' · '}Sürükleyip bırakabilirsiniz.
+                                    ? t('editor.insert.endHint')
+                                    : selectedObject?.element ? t('editor.insert.selected', { tag: selectedObject.element.tagName.toLowerCase() }) : t('editor.insert.noSelection')}
+                                {' · '}{t('editor.insert.dragHint')}
                             </span>
                         </div>
                         {selectedLineCell && insertMode === 'after' && (
@@ -4243,8 +4265,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 flexBasis: '100%', fontSize: '10px', color: '#67e8f9', padding: '4px 8px',
                                 background: 'rgba(103, 232, 249, 0.08)', border: '1px solid rgba(103, 232, 249, 0.25)', borderRadius: '4px',
                             }}>
-                                Satır tablosunda kolon seçili: soldaki listeden eklenen <b>satır alanları</b> ve <b>Formül</b>, seçili kolonun sağına
-                                yeni kolon olarak eklenir; formül her satır için ayrı hesaplanır. Hücrenin içine koymak için "Seçili öğenin içine"yi seçin.
+                                {t('editor.insert.lineColumnHint')}
                             </div>
                         )}
                     </div>
@@ -4262,13 +4283,13 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 background: pageBg ? `#fff url("${pageBg.image}") center top / 100% auto no-repeat` : '#111827',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569', fontSize: '9px', textAlign: 'center',
                             }}>
-                                {!pageBg && 'Resim yok'}
+                                {!pageBg && t('editor.background.none')}
                             </div>
                             <label style={{
                                 padding: '6px 10px', borderRadius: '6px', cursor: 'pointer', fontWeight: 700,
                                 background: 'rgba(196, 181, 253, 0.15)', border: '1px solid rgba(196, 181, 253, 0.5)', color: '#ddd6fe',
                             }}>
-                                {pageBg ? 'Resmi değiştir' : 'Resim seç'}
+                                {pageBg ? t('editor.image.change') : t('editor.image.choose')}
                                 <input
                                     type="file"
                                     accept="image/png,image/jpeg,image/svg+xml,image/webp"
@@ -4278,7 +4299,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                         const file = e.target.files?.[0];
                                         e.target.value = '';
                                         if (!file) return;
-                                        if (file.size > 8 * 1024 * 1024) { setBgError('Resim en fazla 8 MB olabilir.'); return; }
+                                        if (file.size > 8 * 1024 * 1024) { setBgError(t('editor.background.tooLarge')); return; }
                                         try {
                                             applyBackground({ image: await imageFileToDataUrl(file) });
                                         } catch (err) {
@@ -4288,7 +4309,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 />
                             </label>
                             <label style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                                <span style={{ color: '#94a3b8' }}>Uygulanacak yer</span>
+                                <span style={{ color: '#94a3b8' }}>{t('editor.background.target')}</span>
                                 <select
                                     data-bg-target
                                     value={pageBg?.target ?? 'page'}
@@ -4296,12 +4317,12 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     onChange={(e) => applyBackground({ target: e.target.value as PageBackground['target'] })}
                                     style={{ ...fieldInputStyle, padding: '5px 8px', fontSize: '11px', fontFamily: 'inherit' }}
                                 >
-                                    <option value="page">Tüm sayfa</option>
-                                    <option value="element">Seçili öğe (çerçeve)</option>
+                                    <option value="page">{t('editor.background.page')}</option>
+                                    <option value="element">{t('editor.background.element')}</option>
                                 </select>
                             </label>
                             <label style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                                <span style={{ color: '#94a3b8' }}>Yerleşim</span>
+                                <span style={{ color: '#94a3b8' }}>{t('editor.background.fit')}</span>
                                 <select
                                     data-bg-fit
                                     value={pageBg?.fit ?? 'width'}
@@ -4309,11 +4330,11 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     onChange={(e) => applyBackground({ fit: e.target.value as PageBackground['fit'] })}
                                     style={{ ...fieldInputStyle, padding: '5px 8px', fontSize: '11px', fontFamily: 'inherit' }}
                                 >
-                                    {BG_FITS.map(f => <option key={f.id} value={f.id}>{f.label}</option>)}
+                                    {BG_FITS.map(f => <option key={f.id} value={f.id}>{t(`editor.background.fits.${f.id}`)}</option>)}
                                 </select>
                             </label>
                             <label style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                                <span style={{ color: '#94a3b8' }}>Opaklık</span>
+                                <span style={{ color: '#94a3b8' }}>{t('editor.background.opacity')}</span>
                                 <select
                                     data-bg-opacity
                                     value={String(pageBg?.opacity ?? 1)}
@@ -4321,7 +4342,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     onChange={(e) => applyBackground({ opacity: Number(e.target.value) })}
                                     style={{ ...fieldInputStyle, padding: '5px 8px', fontSize: '11px', fontFamily: 'inherit' }}
                                 >
-                                    {[1, 0.75, 0.5, 0.3, 0.15].map(o => <option key={o} value={String(o)}>%{Math.round(o * 100)}</option>)}
+                                    {[1, 0.75, 0.5, 0.3, 0.15].map(o => <option key={o} value={String(o)}>{o.toLocaleString(locale, { style: 'percent' })}</option>)}
                                 </select>
                             </label>
                             {pageBg && (
@@ -4331,13 +4352,11 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     onClick={() => applyBackground(null)}
                                     style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #7f1d1d', background: 'transparent', color: '#fca5a5', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
                                 >
-                                    Kaldır
+                                    {t('editor.background.remove')}
                                 </button>
                             )}
                             <span style={{ flex: 1, minWidth: '200px', color: bgError ? '#fca5a5' : '#64748b', fontSize: '10px', lineHeight: 1.4 }}>
-                                {bgError ?? (pageBg?.target === 'element'
-                                    ? 'Resim işaretli öğenin (çerçevenin) genişliğine göre yerleşir. Başka öğe için önce onu seçip yeniden "Seçili öğe"yi seçin.'
-                                    : 'Resim XSLT dosyasının içine gömülür (harici bağlantı gerekmez). Çerçeve için önce dış tabloyu seçip "Seçili öğe"yi kullanın.')}
+                                {bgError ?? (pageBg?.target === 'element' ? t('editor.background.elementHint') : t('editor.background.pageHint'))}
                                 {pageBg && ` · ${(pageBg.image.length / 1024).toFixed(0)} kB`}
                             </span>
                         </div>
@@ -4354,19 +4373,19 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             }}
                         >
                             <span style={{ flex: 1 }}>
-                                ↕ Taşıma: önizlemede hedef öğeye tıklayın — hücre / kutu ise içine, diğerlerinde altına konur. Esc ile iptal.
+                                ↕ {t('editor.move.banner')}
                             </span>
                             <button
                                 onClick={() => { const loc = moving; setMoving(null); moveTo(loc, null); }}
                                 style={{ padding: '4px 8px', background: 'transparent', border: '1px solid rgba(16, 185, 129, 0.5)', borderRadius: '4px', color: '#6ee7b7', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
                             >
-                                Sayfa sonuna
+                                {t('editor.move.toEnd')}
                             </button>
                             <button
                                 onClick={() => setMoving(null)}
                                 style={{ padding: '4px 8px', background: 'transparent', border: '1px solid #334155', borderRadius: '4px', color: '#94a3b8', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
                             >
-                                İptal
+                                {t('editor.common.cancelAction')}
                             </button>
                         </div>
                     )}
@@ -4387,7 +4406,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         >
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
                                 <AlertCircle size={14} />
-                                <strong>Render Hatası</strong>
+                                <strong>{t('editor.preview.errorTitle')}</strong>
                             </div>
                             <div style={{ whiteSpace: 'pre-wrap', fontSize: '11px' }}>
                                 {previewError}
@@ -4461,7 +4480,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     background: '#1e293b',
                                 }}
                             >
-                                {previewError ? 'Render hatası — XSLT/XML\'i kontrol edin' : 'Render bekleniyor...'}
+                                {previewError ? t('editor.preview.failed') : t('editor.preview.waiting')}
                             </div>
                         )}
                     </div>
@@ -4513,14 +4532,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         const bindingIndex = sel.locator?.kind === 'bind'
                             ? sel.locator.index
                             : (b ? xsltInstrumented.bindings.indexOf(b) : -1);
-                        const kindDisplay = kind === 'dropdown' ? 'Dinamik Veri'
-                            : kind === 'static' ? 'Statik Metin'
-                            : kind === 'element' ? 'Element Yapısı'
-                            : isObj ? `Eklenen Obje · ${isFormula ? 'Formül' : isField ? 'Veri Alanı' : isKarekod ? 'Karekod' : isImg ? 'Resim' : isTable ? 'Tablo' : isInput ? 'Input' : 'Metin'}`
-                            : isImg ? 'Resim'
-                            : isLine ? 'Çizgi / Ayraç'
-                            : isCell ? 'Tablo Hücresi'
-                            : isLiteral ? 'Tasarım Öğesi' : 'Önizleme Öğesi';
+                        const kindDisplay = kind === 'dropdown' ? t('editor.panel.kind.dynamic')
+                            : kind === 'static' ? t('editor.panel.kind.static')
+                            : kind === 'element' ? t('editor.panel.kind.element')
+                            : isObj ? `${t('editor.panel.kind.object')} · ${isFormula ? t('editor.insert.formula') : isField ? t('editor.panel.kind.field') : isKarekod ? t('editor.insert.qr') : isImg ? t('editor.insert.image') : isTable ? t('editor.insert.table') : isInput ? t('editor.insert.input') : t('editor.insert.text')}`
+                            : isImg ? t('editor.insert.image')
+                            : isLine ? t('editor.panel.kind.line')
+                            : isCell ? t('editor.panel.kind.cell')
+                            : isLiteral ? t('editor.panel.kind.literal') : t('editor.panel.kind.preview');
                         const kindColor = kind === 'dropdown' ? '#a5b4fc'
                             : kind === 'static' ? '#6ee7b7'
                             : '#fcd34d';
@@ -4581,7 +4600,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     </div>
                                     <div style={{ flex: 1, minWidth: 0 }}>
                                         <div style={{ fontSize: '12px', fontWeight: 700, color: '#e2e8f0', letterSpacing: '0.4px' }}>
-                                            Alan Özellikleri
+                                            {t('editor.panel.title')}
                                         </div>
                                         <div style={{ fontSize: '10px', color: kindColor, fontWeight: 600, letterSpacing: '0.3px' }}>
                                             {kindDisplay}{b?.elementType ? ` · xsl:${b.elementType}` : ''}{tag ? ` · <${tag}>` : ''}
@@ -4589,7 +4608,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     </div>
                                     <button
                                         onClick={closeSelection}
-                                        title="Kapat (Esc)"
+                                        title={t('editor.panel.close')}
                                         data-close-property-drawer
                                         style={{ padding: '4px 8px', background: 'transparent', border: '1px solid #334155', borderRadius: '4px', color: '#94a3b8', cursor: 'pointer', fontSize: '11px' }}
                                         onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)'; e.currentTarget.style.color = '#fca5a5'; }}
@@ -4602,40 +4621,40 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 <div style={{ flex: 1, padding: '0 14px 14px', overflowY: 'auto' }}>
                                     {selectedLineCell && el && (
                                         <div data-column-actions>
-                                            {sectionTitle('Kolon (satır tablosu)', '#67e8f9')}
+                                            {sectionTitle(t('editor.panel.column.title'), '#67e8f9')}
                                             <div style={{ display: 'flex', gap: '6px' }}>
                                                 <button
                                                     type="button"
                                                     data-column-remove
                                                     onClick={() => applyColumnEdit('remove')}
-                                                    title="Bu kolonu başlık, kalem satırları ve boş satırlarla birlikte XSLT'ten siler"
+                                                    title={t('editor.panel.column.removeHint')}
                                                     style={{ flex: 1, padding: '6px 8px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)', borderRadius: '4px', color: '#fca5a5', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
                                                 >
-                                                    🗑 Kolonu XSLT'ten Sil
+                                                    🗑 {t('editor.panel.column.remove')}
                                                 </button>
                                                 <button
                                                     type="button"
                                                     data-column-hide
                                                     onClick={() => applyColumnEdit('hide')}
-                                                    title="Bu kolonu tüm satırlarıyla gizler (display:none XSLT'ye yazılır)"
+                                                    title={t('editor.panel.column.hideHint')}
                                                     style={{ flex: 1, padding: '6px 8px', background: 'rgba(252, 211, 77, 0.15)', border: '1px solid rgba(252, 211, 77, 0.4)', borderRadius: '4px', color: '#fcd34d', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
                                                 >
-                                                    👁 Kolonu Gizle
+                                                    👁 {t('editor.panel.column.hide')}
                                                 </button>
                                             </div>
-                                            {noteBox('Başlık hücresi ile her satırdaki veri hücresi birlikte silinir / gizlenir; diğer kolonların verisi yerinde kalır. Geri Al (Ctrl+Z) ile geri alınabilir.', 'info')}
+                                            {noteBox(t('editor.panel.column.note'), 'info')}
                                         </div>
                                     )}
                                     {kind === 'dropdown' && b && (
                                         <>
-                                            {sectionTitle('Veri Alanı (XML)', '#a5b4fc')}
+                                            {sectionTitle(t('editor.panel.xmlField'), '#a5b4fc')}
                                             <div data-bind-info style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '6px 10px', fontSize: '11px', alignItems: 'baseline' }}>
-                                                <span style={{ color: '#94a3b8' }}>Alan adı</span>
+                                                <span style={{ color: '#94a3b8' }}>{t('editor.panel.fieldName')}</span>
                                                 <span data-bind-label style={{ color: '#e2e8f0', fontWeight: 700 }}>{bindingInfo.get(b)?.label ?? '—'}</span>
-                                                <span style={{ color: '#94a3b8' }}>XML alanı</span>
+                                                <span style={{ color: '#94a3b8' }}>{t('editor.panel.xmlName')}</span>
                                                 <span data-bind-xml style={{ color: '#7dd3fc', fontFamily: 'monospace', wordBreak: 'break-all' }}>{bindingInfo.get(b)?.xml || '—'}</span>
                                             </div>
-                                            <label style={{ ...fieldLabelStyle, marginTop: '10px' }}>XPath ifadesi</label>
+                                            <label style={{ ...fieldLabelStyle, marginTop: '10px' }}>{t('editor.panel.xpath')}</label>
                                             <div
                                                 data-readonly-xpath
                                                 style={{
@@ -4649,34 +4668,34 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                             </div>
                                             {el && (
                                                 <div style={{ marginTop: '8px', fontSize: '11px', color: '#94a3b8' }}>
-                                                    Önizlemedeki değer:{' '}
+                                                    {t('editor.panel.previewValue')}{' '}
                                                     <span style={{ color: '#e2e8f0', fontWeight: 600, wordBreak: 'break-all' }}>
-                                                        {(el.textContent || '').trim().slice(0, 120) || '(boş)'}
+                                                        {(el.textContent || '').trim().slice(0, 120) || t('editor.panel.empty')}
                                                     </span>
                                                 </div>
                                             )}
-                                            {noteBox('🔒 Veri XML\'den gelir; bu alanın kaynağı değiştirilemez. Yerini sürükleyerek, Konum alanlarıyla veya ↕ Taşı ile; görünümünü aşağıdan değiştirebilirsiniz.', 'info')}
+                                            {noteBox(`🔒 ${t('editor.panel.xmlLocked')}`, 'info')}
                                         </>
                                     )}
 
                                     {(sel.locator?.kind === 'bind' || isLiteral) && el && selectedBindPlacement && !design.paid && (selectedBindPlacement.detach || !selectedBindPlacement.movable) && (
                                         <div data-bind-move-status>
-                                            {sectionTitle('Taşıma', '#6ee7b7')}
+                                            {sectionTitle(t('editor.panel.move.title'), '#6ee7b7')}
                                             {!selectedBindPlacement.movable && (selectedBindPlacement.detach === 'cell'
-                                                ? noteBox('Veri bir tablo hücresinde. Değeri önizlemede sürükleyip bırakabilir ya da ↕ Taşı ile başka yere koyabilirsiniz; değer hücreden otomatik ayrılır, hücre yerinde kalır.', 'info')
+                                                ? noteBox(t('editor.panel.move.inCell'), 'info')
                                                 : noteBox(selectedBindPlacement.reason, 'warn'))}
                                             {selectedBindPlacement.detach && (
                                                 <button
                                                     type="button"
                                                     data-bind-detach
                                                     onClick={() => { if (sel.locator?.kind === 'bind') detachBinding(sel.locator.index); }}
-                                                    title="Değeri kendi kutusuna (<span>) alır; hücre ve yanındaki etiketler yerinde kalır"
+                                                    title={t('editor.panel.move.detachHint')}
                                                     style={{ width: '100%', marginTop: '8px', padding: '7px 10px', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.45)', borderRadius: '4px', color: '#6ee7b7', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
                                                 >
-                                                    ✂ {selectedBindPlacement.detach === 'cell' ? 'Hücreden ayır (taşınabilir yap)' : 'Sadece değeri ayır'}
+                                                    ✂ {selectedBindPlacement.detach === 'cell' ? t('editor.panel.move.detachCell') : t('editor.panel.move.detachValue')}
                                                 </button>
                                             )}
-                                            {selectedBindPlacement.detach === 'value' && noteBox('Şu an alan, bulunduğu kutudaki diğer yazılarla birlikte taşınır. Yalnızca değeri taşımak için önce ayırın.', 'info')}
+                                            {selectedBindPlacement.detach === 'value' && noteBox(t('editor.panel.move.valueNote'), 'info')}
                                         </div>
                                     )}
 
@@ -4689,11 +4708,11 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                         if (kind === 'dropdown' && !dynamic.length) return null;
                                         return (
                                             <div data-contained-fields>
-                                                {sectionTitle(kind === 'dropdown' ? `Bu kutudaki diğer veri alanları (${dynamic.length})`
-                                                    : dynamic.length ? `Veri Alanı (XML) · bu öğede ${dynamic.length} alan` : 'Veri Alanı (XML)', '#a5b4fc')}
+                                                {sectionTitle(kind === 'dropdown' ? t('editor.panel.otherFields', { count: dynamic.length })
+                                                    : dynamic.length ? `${t('editor.panel.xmlField')} · ${t('editor.panel.fieldsHere', { count: dynamic.length })}` : t('editor.panel.xmlField'), '#a5b4fc')}
                                                 {!dynamic.length && (
                                                     <div data-no-xml-field style={{ fontSize: '11px', color: '#94a3b8', marginBottom: '6px' }}>
-                                                        {kind === 'static' ? 'Sabit metin — XML\'den gelmez; metni aşağıdan değiştirebilirsiniz.' : 'Bu öğe XML\'den veri almıyor (sabit tasarım öğesi).'}
+                                                        {kind === 'static' ? t('editor.panel.staticNote') : t('editor.panel.noXmlNote')}
                                                     </div>
                                                 )}
                                                 {inner.map(i => {
@@ -4719,7 +4738,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
 
                                     {kind === 'static' && (
                                         <>
-                                            {sectionTitle('Metin İçeriği', '#6ee7b7')}
+                                            {sectionTitle(t('editor.panel.textContent'), '#6ee7b7')}
                                             <textarea
                                                 data-property-input
                                                 value={propertyDraft.value || ''}
@@ -4740,7 +4759,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
 
                                     {kind === 'element' && b && (
                                         <>
-                                            {sectionTitle(`Koşul / Seçim (${propertyDraft['__attr__'] || 'select'})`, '#fcd34d')}
+                                            {sectionTitle(`${t('editor.panel.condition')} (${propertyDraft['__attr__'] || 'select'})`, '#fcd34d')}
                                             <textarea
                                                 data-property-input
                                                 value={propertyDraft.value || ''}
@@ -4756,34 +4775,31 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                 onFocus={(e) => e.currentTarget.style.borderColor = '#6366f1'}
                                                 onBlur={(e) => e.currentTarget.style.borderColor = '#334155'}
                                             />
-                                            {noteBox('Yapı elemanı (xsl:if / for-each vb.) önizlemede tek bir öğeye karşılık gelmez; görünüm özellikleri yoktur.', 'info')}
+                                            {noteBox(t('editor.panel.elementNote'), 'info')}
                                         </>
                                     )}
 
-                                    {b && kind !== 'element' && !el && noteBox(
-                                        'Bu alan şu anki önizlemede görünmüyor (ör. xsl:if koşulu sağlanmıyor). Görünüm özellikleri yalnızca tasarımda görünen alanlar için düzenlenebilir.',
-                                        'warn'
-                                    )}
+                                    {b && kind !== 'element' && !el && noteBox(t('editor.panel.notVisible'), 'warn')}
 
                                     {isObj && el && isTable && (
                                         <>
-                                            {sectionTitle('Tablo', '#fcd34d')}
-                                            <TableEditor key={fieldKey('table')} table={el as HTMLTableElement} onChange={handleContentChange} onAttr={handleAttrChange} onStyle={handleStyleChange} />
+                                            {sectionTitle(t('editor.insert.table'), '#fcd34d')}
+                                            <TableEditor key={fieldKey('table')} table={el as HTMLTableElement} onChange={handleContentChange} onAttr={handleAttrChange} onStyle={handleStyleChange} docLang={docLang} />
                                         </>
                                     )}
 
                                     {isObj && el && isFormula && (
                                         <>
-                                            {sectionTitle('Formül', '#f9a8d4')}
-                                            <FormulaEditor key={fieldKey('formula')} el={el} catalog={catalog} xmlDoc={xmlDoc} inLine={selectedObjInLine()} onChange={handleFormulaChange} />
-                                            {noteBox('Sonuç her belgede o belgenin kendi değerleriyle hesaplanır. Satır tablosunun içine konan formül her satır için ayrı, dışına konan formül tüm satırların toplamıyla hesaplanır. Tek bir alanın toplamı için işlemi "(yok)" seçin.', 'info')}
+                                            {sectionTitle(t('editor.insert.formula'), '#f9a8d4')}
+                                            <FormulaEditor key={fieldKey('formula')} el={el} catalog={catalog} xmlDoc={xmlDoc} inLine={selectedObjInLine()} docLang={docLang} onChange={handleFormulaChange} />
+                                            {noteBox(t('editor.panel.formulaNote'), 'info')}
                                         </>
                                     )}
 
                                     {isObj && el && isField && (
                                         <>
-                                            {sectionTitle('Veri Alanı', '#7dd3fc')}
-                                            <label style={fieldLabelStyle}>Gösterilen alan</label>
+                                            {sectionTitle(t('editor.panel.kind.field'), '#7dd3fc')}
+                                            <label style={fieldLabelStyle}>{t('editor.panel.shownField')}</label>
                                             <select
                                                 key={fieldKey('field')}
                                                 data-field-select
@@ -4793,28 +4809,28 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                             >
                                                 <CatalogOptions fields={catalog} xmlDoc={xmlDoc} />
                                             </select>
-                                            {noteBox('Değer belgenin XML verisinden gelir; tutarlar Türkçe sayı biçimiyle (1.234,56) basılır.', 'info')}
+                                            {noteBox(t('editor.panel.fieldNote', { sample: formatDocNumber(1234.56, 2, docLang) }), 'info')}
                                         </>
                                     )}
 
                                     {isObj && el && isKarekod && (
                                         <>
-                                            {sectionTitle('Karekod', '#93c5fd')}
-                                            <FieldText key={fieldKey('qr-size')} label="Boyut (genişlik = yükseklik)" currentValue={el.style.width || '120px'} onChange={(v) => { handleStyleChange('width', v); handleStyleChange('height', v); }} />
-                                            {noteBox('GİB Karekod Standardı (v1.2) içeriği belgeden otomatik üretilir: fatura ve e-Arşivde VKN/TCKN, senaryo, tip, tarih, no, ETTN, tutarlar ve KDV oranları; irsaliyede sevk tarihi/saati, taşıyıcı VKN ve plaka. Karekod belgenin sağ üst köşesinde yer almalıdır. Boyut değişikliği önizleme yenilenince uygulanır.', 'info')}
+                                            {sectionTitle(t('editor.insert.qr'), '#93c5fd')}
+                                            <FieldText key={fieldKey('qr-size')} label={t('editor.panel.qrSize')} currentValue={el.style.width || '120px'} onChange={(v) => { handleStyleChange('width', v); handleStyleChange('height', v); }} />
+                                            {noteBox(t('editor.panel.qrNote'), 'info')}
                                         </>
                                     )}
 
                                     {isObj && el && !isImg && !isInput && !isTable && !isFormula && !isField && !isKarekod && (
                                         <>
-                                            {sectionTitle('Metin İçeriği', '#6ee7b7')}
-                                            <FieldTextArea key={fieldKey('text')} label="Metin" currentValue={el.innerText} onChange={(v) => handleContentChange(textToMarkup(v))} />
+                                            {sectionTitle(t('editor.panel.textContent'), '#6ee7b7')}
+                                            <FieldTextArea key={fieldKey('text')} label={t('editor.insert.text')} currentValue={el.innerText} onChange={(v) => handleContentChange(textToMarkup(v))} />
                                         </>
                                     )}
 
                                     {el && canPersist && sel.locator && (isObj || sel.locator.kind === 'img' || ((sel.locator.kind === 'bind' || isLiteral) && !!selectedBindPlacement?.movable)) && (
                                         <>
-                                            {sectionTitle('Konum', '#6ee7b7')}
+                                            {sectionTitle(t('editor.panel.position'), '#6ee7b7')}
                                             <PositionEditor
                                                 key={fieldKey(`position-${positionRev}`)}
                                                 el={el}
@@ -4830,14 +4846,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     {el && cs && (() => {
                                         const grid: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' };
                                         const spacing = isCell ? 'padding' : 'margin';
-                                        const sides = [['top', 'Üstten', 'Üst'], ['left', 'Soldan', 'Sol'], ['bottom', 'Alttan', 'Alt'], ['right', 'Sağdan', 'Sağ']] as const;
+                                        const sides = (['top', 'left', 'bottom', 'right'] as const).map(side => [side, t(`editor.panel.sides.${side}`)] as const);
                                         return (
                                             <div data-dimension-editor>
-                                                {sectionTitle(isLine ? 'Ölçü ve Boşluk (çizgi)' : 'Ölçü ve Boşluk', '#67e8f9')}
+                                                {sectionTitle(isLine ? t('editor.panel.sizeLine') : t('editor.panel.size'), '#67e8f9')}
                                                 {!isImg && (
                                                     <div style={grid}>
-                                                        <FieldLength key={fieldKey('dim-width')} attr="width" label="Genişlik" currentValue={el.style.width} placeholder={roundPx(cs.width)} onChange={(v) => handleStyleChange('width', v)} />
-                                                        <FieldLength key={fieldKey('dim-height')} attr="height" label={isLine ? 'Yükseklik (kalınlık)' : 'Yükseklik'} currentValue={el.style.height} placeholder={roundPx(cs.height)} onChange={(v) => handleStyleChange('height', v)} />
+                                                        <FieldLength key={fieldKey('dim-width')} attr="width" label={t('editor.panel.width')} currentValue={el.style.width} placeholder={roundPx(cs.width)} onChange={(v) => handleStyleChange('width', v)} />
+                                                        <FieldLength key={fieldKey('dim-height')} attr="height" label={isLine ? t('editor.panel.heightLine') : t('editor.panel.height')} currentValue={el.style.height} placeholder={roundPx(cs.height)} onChange={(v) => handleStyleChange('height', v)} />
                                                     </div>
                                                 )}
                                                 <div style={grid}>
@@ -4845,7 +4861,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                         <FieldLength
                                                             key={fieldKey(`${spacing}-${side}`)}
                                                             attr={`${spacing}-${side}`}
-                                                            label={`${text} ${isCell ? 'iç boşluk' : 'boşluk'}`}
+                                                            label={t(isCell ? 'editor.panel.paddingSide' : 'editor.panel.marginSide', { side: text })}
                                                             currentValue={el.style.getPropertyValue(`${spacing}-${side}`)}
                                                             placeholder={roundPx(cs.getPropertyValue(`${spacing}-${side}`))}
                                                             onChange={(v) => handleStyleChange(`${spacing}-${side}`, v)}
@@ -4853,25 +4869,25 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                     ))}
                                                 </div>
                                                 <div style={{ fontSize: '10px', color: '#64748b', lineHeight: 1.5, marginBottom: '6px' }}>
-                                                    Sayı yazarsanız px kabul edilir (ör. 12); 5mm, 50%, auto da yazılabilir. Boş bırakılan alan tasarımdaki değerine döner.
-                                                    {isCell ? ' Hücrelerde dış boşluk uygulanmadığı için iç boşluk (padding) kullanılır.' : ''}
+                                                    {t('editor.panel.lengthHint')}
+                                                    {isCell ? ` ${t('editor.panel.cellPaddingHint')}` : ''}
                                                 </div>
 
-                                                {sectionTitle('Çizgi / Kenarlık', '#67e8f9')}
-                                                <FieldText key={fieldKey('border')} label="Tüm kenarlar (border)" currentValue={el.style.border || ''} placeholder="ör. 1px solid #000" onChange={(v) => handleStyleChange('border', v)} />
+                                                {sectionTitle(t('editor.panel.border'), '#67e8f9')}
+                                                <FieldText key={fieldKey('border')} label={t('editor.panel.borderAll')} currentValue={el.style.border || ''} placeholder={t('editor.panel.borderPlaceholder')} onChange={(v) => handleStyleChange('border', v)} />
                                                 <div style={{ ...grid, marginBottom: 0 }}>
-                                                    {sides.map(([side, , short]) => (
+                                                    {sides.map(([side]) => (
                                                         <FieldText
                                                             key={fieldKey(`border-${side}`)}
-                                                            label={`${short} çizgi`}
+                                                            label={t(`editor.panel.borderSides.${side}`)}
                                                             currentValue={el.style.getPropertyValue(`border-${side}`) || sideBorder(cs, side)}
-                                                            placeholder="yok"
+                                                            placeholder={t('editor.panel.none')}
                                                             onChange={(v) => handleStyleChange(`border-${side}`, v)}
                                                         />
                                                     ))}
                                                 </div>
                                                 <div style={{ fontSize: '10px', color: '#64748b', lineHeight: 1.5 }}>
-                                                    Biçim: kalınlık stil renk (ör. 2px solid #1e3a8a; stil: solid, dashed, dotted, double). Çizgiyi kaldırmak için none yazın.
+                                                    {t('editor.panel.borderHint')}
                                                 </div>
                                             </div>
                                         );
@@ -4879,7 +4895,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
 
                                     {el && cs && isImg && (
                                         <>
-                                            {sectionTitle('Resim', '#fcd34d')}
+                                            {sectionTitle(t('editor.insert.image'), '#fcd34d')}
                                             <ImageSourceField
                                                 key={fieldKey('src')}
                                                 readOnly={!canPersist}
@@ -4889,29 +4905,29 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                     if (v.startsWith('data:')) flushSourceEditsRef.current();
                                                 }}
                                             />
-                                            <FieldText key={fieldKey('alt')} label="Alternatif metin (alt)" currentValue={el.getAttribute('alt') || ''} onChange={(v) => handleAttrChange('alt', v)} />
-                                            <FieldText key={fieldKey('width')} label="Genişlik (width)" currentValue={el.style.width || el.getAttribute('width') || cs.width} onChange={(v) => handleStyleChange('width', v)} />
-                                            <FieldText key={fieldKey('height')} label="Yükseklik (height)" currentValue={el.style.height || el.getAttribute('height') || ''} placeholder="auto" onChange={(v) => handleStyleChange('height', v)} />
-                                            <FieldSelect key={fieldKey('object-fit')} label="Sığdırma (object-fit)" currentValue={el.style.objectFit || ''} options={['', 'contain', 'cover', 'fill', 'scale-down', 'none']} onChange={(v) => handleStyleChange('object-fit', v)} />
+                                            <FieldText key={fieldKey('alt')} label={t('editor.panel.alt')} currentValue={el.getAttribute('alt') || ''} onChange={(v) => handleAttrChange('alt', v)} />
+                                            <FieldText key={fieldKey('width')} label={`${t('editor.panel.width')} (width)`} currentValue={el.style.width || el.getAttribute('width') || cs.width} onChange={(v) => handleStyleChange('width', v)} />
+                                            <FieldText key={fieldKey('height')} label={`${t('editor.panel.height')} (height)`} currentValue={el.style.height || el.getAttribute('height') || ''} placeholder="auto" onChange={(v) => handleStyleChange('height', v)} />
+                                            <FieldSelect key={fieldKey('object-fit')} label={t('editor.panel.objectFit')} currentValue={el.style.objectFit || ''} options={['', 'contain', 'cover', 'fill', 'scale-down', 'none']} onChange={(v) => handleStyleChange('object-fit', v)} />
                                         </>
                                     )}
 
                                     {el && cs && !isImg && (
                                         <>
                                             {!isLine && <>
-                                            {sectionTitle('Yazı', '#fcd34d')}
-                                            <FieldText key={fieldKey('font-family')} label="Yazı tipi (font-family)" currentValue={cs.fontFamily} onChange={(v) => handleStyleChange('font-family', v)} />
-                                            <FieldText key={fieldKey('font-size')} label="Boyut (font-size)" currentValue={cs.fontSize} onChange={(v) => handleStyleChange('font-size', v)} />
-                                            <FieldSelect key={fieldKey('font-weight')} label="Kalınlık (font-weight)" currentValue={cs.fontWeight} options={['normal', 'bold', '100', '200', '300', '400', '500', '600', '700', '800', '900']} onChange={(v) => handleStyleChange('font-weight', v)} />
-                                            <FieldSelect key={fieldKey('font-style')} label="Eğik (font-style)" currentValue={cs.fontStyle} options={['normal', 'italic', 'oblique']} onChange={(v) => handleStyleChange('font-style', v)} />
-                                            <FieldSelect key={fieldKey('text-decoration-line')} label="Çizgi (text-decoration)" currentValue={cs.textDecorationLine} options={['none', 'underline', 'line-through', 'overline']} onChange={(v) => handleStyleChange('text-decoration-line', v)} />
-                                            <FieldColor key={fieldKey('color')} label="Yazı rengi (color)" currentValue={cs.color} onChange={(v) => handleStyleChange('color', v)} />
-                                            <FieldSelect key={fieldKey('text-align')} label="Hizalama (text-align)" currentValue={cs.textAlign} options={['left', 'right', 'center', 'justify', 'start', 'end']} onChange={(v) => handleStyleChange('text-align', v)} />
+                                            {sectionTitle(t('editor.panel.font'), '#fcd34d')}
+                                            <FieldText key={fieldKey('font-family')} label={t('editor.panel.fontFamily')} currentValue={cs.fontFamily} onChange={(v) => handleStyleChange('font-family', v)} />
+                                            <FieldText key={fieldKey('font-size')} label={t('editor.panel.fontSize')} currentValue={cs.fontSize} onChange={(v) => handleStyleChange('font-size', v)} />
+                                            <FieldSelect key={fieldKey('font-weight')} label={t('editor.panel.fontWeight')} currentValue={cs.fontWeight} options={['normal', 'bold', '100', '200', '300', '400', '500', '600', '700', '800', '900']} onChange={(v) => handleStyleChange('font-weight', v)} />
+                                            <FieldSelect key={fieldKey('font-style')} label={t('editor.panel.fontStyle')} currentValue={cs.fontStyle} options={['normal', 'italic', 'oblique']} onChange={(v) => handleStyleChange('font-style', v)} />
+                                            <FieldSelect key={fieldKey('text-decoration-line')} label={t('editor.panel.textDecoration')} currentValue={cs.textDecorationLine} options={['none', 'underline', 'line-through', 'overline']} onChange={(v) => handleStyleChange('text-decoration-line', v)} />
+                                            <FieldColor key={fieldKey('color')} label={t('editor.panel.color')} currentValue={cs.color} onChange={(v) => handleStyleChange('color', v)} />
+                                            <FieldSelect key={fieldKey('text-align')} label={t('editor.panel.textAlign')} currentValue={cs.textAlign} options={['left', 'right', 'center', 'justify', 'start', 'end']} onChange={(v) => handleStyleChange('text-align', v)} />
                                             </>}
 
-                                            {sectionTitle('Kutu', '#fcd34d')}
-                                            <FieldColor key={fieldKey('background-color')} label="Arka plan (background-color)" currentValue={transparentToEmpty(cs.backgroundColor)} onChange={(v) => handleStyleChange('background-color', v)} />
-                                            <FieldText key={fieldKey('padding')} label="İç boşluk (padding)" currentValue={cs.padding} onChange={(v) => handleStyleChange('padding', v)} />
+                                            {sectionTitle(t('editor.panel.box'), '#fcd34d')}
+                                            <FieldColor key={fieldKey('background-color')} label={t('editor.panel.background')} currentValue={transparentToEmpty(cs.backgroundColor)} onChange={(v) => handleStyleChange('background-color', v)} />
+                                            <FieldText key={fieldKey('padding')} label={t('editor.panel.padding')} currentValue={cs.padding} onChange={(v) => handleStyleChange('padding', v)} />
 
                                             {isInput && (
                                                 <>
@@ -4924,8 +4940,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     )}
 
                                     {el && (canPersist
-                                        ? noteBox('✓ Değişiklikler XSLT\'ye yazılır; Kaydet ve İndir\'e dahil edilir.', 'ok')
-                                        : noteBox('⚠ Bu öğenin XSLT\'de doğrudan karşılığı bulunamadı (ör. değeri değişkenden geliyor). Değişiklikler sadece önizlemede kalır.', 'warn'))}
+                                        ? noteBox(`✓ ${t('editor.panel.persisted')}`, 'ok')
+                                        : noteBox(`⚠ ${t('editor.panel.notPersisted')}`, 'warn'))}
                                 </div>
 
                                 <div style={{
@@ -4940,31 +4956,31 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                 el.style.display = el.style.display === 'none' ? '' : 'none';
                                                 closeSelection();
                                             }}
-                                            title={isColumnCell ? 'Kolonu başlığı ve tüm satırlarıyla birlikte gizle (XSLT\'ye yazılır)' : 'Sadece önizlemeden gizle'}
+                                            title={isColumnCell ? t('editor.panel.hideColumnHint') : t('editor.panel.hideHint')}
                                             data-hide-preview-element
                                             style={{ flex: 1, padding: '6px 8px', background: 'rgba(252, 211, 77, 0.15)', border: '1px solid rgba(252, 211, 77, 0.4)', borderRadius: '4px', color: '#fcd34d', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
                                         >
-                                            {isColumnCell ? '👁 Kolonu Gizle' : '👁 Gizle'}
+                                            👁 {isColumnCell ? t('editor.panel.column.hide') : t('editor.panel.hide')}
                                         </button>
                                     )}
                                     {((isObj && canPersist && sel.locator?.kind === 'obj') || (sel.locator?.kind === 'bind' && !!el && (!!selectedBindPlacement?.movable || selectedBindPlacement?.detach === 'cell') && !design.paid) || (elMovable && canPersist)) && (
                                         <button
                                             onClick={() => { flushSourceEdits(); setMoving(sel.locator); }}
-                                            title={isObj ? 'Objeyi sayfada başka bir yere taşı' : isLiteral ? 'Öğeyi sayfada başka bir yere taşı' : 'Veri alanını sayfada başka bir yere taşı'}
+                                            title={isObj ? t('editor.panel.moveObject') : isLiteral ? t('editor.panel.moveElement') : t('editor.panel.moveField')}
                                             data-move-object
                                             style={{ flex: 1, padding: '6px 8px', background: moving ? 'rgba(16, 185, 129, 0.3)' : 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.4)', borderRadius: '4px', color: '#6ee7b7', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
                                         >
-                                            ↕ Taşı
+                                            ↕ {t('editor.panel.move.button')}
                                         </button>
                                     )}
                                     {removable && (
                                         <button
                                             onClick={handleRemove}
-                                            title={isColumnCell ? 'Kolonu başlığı ve tüm satırlarıyla birlikte XSLT\'ten sil' : 'XSLT kaynak kodundan tamamen kaldır'}
+                                            title={isColumnCell ? t('editor.panel.removeColumnHint') : t('editor.panel.removeHint')}
                                             data-remove-from-xslt
                                             style={{ flex: 1, padding: '6px 8px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)', borderRadius: '4px', color: '#fca5a5', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
                                         >
-                                            {isColumnCell ? '🗑 Kolonu Sil' : '🗑 XSLT\'ten Sil'}
+                                            🗑 {isColumnCell ? t('editor.panel.removeColumn') : t('editor.panel.remove')}
                                         </button>
                                     )}
                                 </div>

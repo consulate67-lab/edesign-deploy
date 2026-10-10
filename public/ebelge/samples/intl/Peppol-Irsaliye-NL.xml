@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DespatchAdvice xmlns="urn:oasis:names:specification:ubl:schema:xsd:DespatchAdvice-2"
+                xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+                xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+  <cbc:CustomizationID>urn:fdc:peppol.eu:poacc:trns:despatch_advice:3</cbc:CustomizationID>
+  <cbc:ProfileID>urn:fdc:peppol.eu:poacc:bis:despatch_advice:3</cbc:ProfileID>
+  <cbc:ID>DA-2026-20871</cbc:ID>
+  <cbc:IssueDate>2026-10-11</cbc:IssueDate>
+  <cbc:IssueTime>16:45:00</cbc:IssueTime>
+  <cbc:Note>Levering via achteringang, laadperron 2.</cbc:Note>
+  <cac:OrderReference>
+    <cbc:ID>BM-PO-3310</cbc:ID>
+  </cac:OrderReference>
+  <cac:DespatchSupplierParty>
+    <cac:Party>
+      <cbc:EndpointID schemeID="0106">34112233</cbc:EndpointID>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="0088">8712345000000</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyName>
+        <cbc:Name>Van Dijk Groothandel</cbc:Name>
+      </cac:PartyName>
+      <cac:PostalAddress>
+        <cbc:StreetName>Industrieweg 40</cbc:StreetName>
+        <cbc:CityName>Utrecht</cbc:CityName>
+        <cbc:PostalZone>3542 AD</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>NL</cbc:IdentificationCode>
+        </cac:Country>
+      </cac:PostalAddress>
+      <cac:PartyLegalEntity>
+        <cbc:RegistrationName>Van Dijk Groothandel B.V.</cbc:RegistrationName>
+      </cac:PartyLegalEntity>
+      <cac:Contact>
+        <cbc:Name>Logistiek</cbc:Name>
+        <cbc:Telephone>+31 30 123 45 67</cbc:Telephone>
+        <cbc:ElectronicMail>logistiek@vandijk-groothandel.nl</cbc:ElectronicMail>
+      </cac:Contact>
+    </cac:Party>
+  </cac:DespatchSupplierParty>
+  <cac:DeliveryCustomerParty>
+    <cac:Party>
+      <cbc:EndpointID schemeID="0106">56778899</cbc:EndpointID>
+      <cac:PartyName>
+        <cbc:Name>Bakkerij De Molen</cbc:Name>
+      </cac:PartyName>
+      <cac:PostalAddress>
+        <cbc:StreetName>Molenstraat 8</cbc:StreetName>
+        <cbc:CityName>Amersfoort</cbc:CityName>
+        <cbc:PostalZone>3811 HJ</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>NL</cbc:IdentificationCode>
+        </cac:Country>
+      </cac:PostalAddress>
+      <cac:PartyLegalEntity>
+        <cbc:RegistrationName>Bakkerij De Molen V.O.F.</cbc:RegistrationName>
+      </cac:PartyLegalEntity>
+      <cac:Contact>
+        <cbc:Name>Pieter de Vries</cbc:Name>
+        <cbc:Telephone>+31 33 765 43 21</cbc:Telephone>
+      </cac:Contact>
+    </cac:Party>
+  </cac:DeliveryCustomerParty>
+  <cac:Shipment>
+    <cbc:ID>SHP-2026-55120</cbc:ID>
+    <cbc:GrossWeightMeasure unitCode="KGM">1120</cbc:GrossWeightMeasure>
+    <cbc:GrossVolumeMeasure unitCode="MTQ">2.4</cbc:GrossVolumeMeasure>
+    <cac:Delivery>
+      <cbc:TrackingID>3SVDJ123456789</cbc:TrackingID>
+      <cac:DeliveryAddress>
+        <cbc:StreetName>Molenstraat 8</cbc:StreetName>
+        <cbc:CityName>Amersfoort</cbc:CityName>
+        <cbc:PostalZone>3811 HJ</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>NL</cbc:IdentificationCode>
+        </cac:Country>
+      </cac:DeliveryAddress>
+      <cac:EstimatedDeliveryPeriod>
+        <cbc:StartDate>2026-10-12</cbc:StartDate>
+        <cbc:StartTime>06:00:00</cbc:StartTime>
+        <cbc:EndDate>2026-10-12</cbc:EndDate>
+        <cbc:EndTime>08:00:00</cbc:EndTime>
+      </cac:EstimatedDeliveryPeriod>
+      <cac:CarrierParty>
+        <cac:PartyName>
+          <cbc:Name>Snel Transport B.V.</cbc:Name>
+        </cac:PartyName>
+      </cac:CarrierParty>
+      <cac:Despatch>
+        <cbc:ActualDespatchDate>2026-10-11</cbc:ActualDespatchDate>
+        <cbc:ActualDespatchTime>16:30:00</cbc:ActualDespatchTime>
+      </cac:Despatch>
+    </cac:Delivery>
+    <cac:TransportHandlingUnit>
+      <cbc:ID schemeID="SSCC">387123450000000017</cbc:ID>
+      <cbc:TransportHandlingUnitTypeCode>PX</cbc:TransportHandlingUnitTypeCode>
+    </cac:TransportHandlingUnit>
+    <cac:TransportHandlingUnit>
+      <cbc:ID schemeID="SSCC">387123450000000024</cbc:ID>
+      <cbc:TransportHandlingUnitTypeCode>PX</cbc:TransportHandlingUnitTypeCode>
+    </cac:TransportHandlingUnit>
+  </cac:Shipment>
+  <cac:DespatchLine>
+    <cbc:ID>1</cbc:ID>
+    <cbc:DeliveredQuantity unitCode="KGM">1000</cbc:DeliveredQuantity>
+    <cac:OrderLineReference>
+      <cbc:LineID>1</cbc:LineID>
+    </cac:OrderLineReference>
+    <cac:Item>
+      <cbc:Description>40 zakken à 25 kg</cbc:Description>
+      <cbc:Name>Tarwebloem type 405</cbc:Name>
+      <cac:SellersItemIdentification>
+        <cbc:ID>VD-BL405-25</cbc:ID>
+      </cac:SellersItemIdentification>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">08712345000017</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:ItemInstance>
+        <cac:LotIdentification>
+          <cbc:LotNumberID>L2026-0412</cbc:LotNumberID>
+          <cbc:ExpiryDate>2027-04-12</cbc:ExpiryDate>
+        </cac:LotIdentification>
+      </cac:ItemInstance>
+    </cac:Item>
+  </cac:DespatchLine>
+  <cac:DespatchLine>
+    <cbc:ID>2</cbc:ID>
+    <cbc:DeliveredQuantity unitCode="H87">24</cbc:DeliveredQuantity>
+    <cac:OrderLineReference>
+      <cbc:LineID>2</cbc:LineID>
+    </cac:OrderLineReference>
+    <cac:Item>
+      <cbc:Name>Roomboter blok 2,5 kg</cbc:Name>
+      <cac:SellersItemIdentification>
+        <cbc:ID>VD-RB-2500</cbc:ID>
+      </cac:SellersItemIdentification>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">08712345000024</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:ItemInstance>
+        <cac:LotIdentification>
+          <cbc:LotNumberID>RB-26-77</cbc:LotNumberID>
+          <cbc:ExpiryDate>2026-12-01</cbc:ExpiryDate>
+        </cac:LotIdentification>
+      </cac:ItemInstance>
+    </cac:Item>
+  </cac:DespatchLine>
+  <cac:DespatchLine>
+    <cbc:ID>3</cbc:ID>
+    <cbc:DeliveredQuantity unitCode="C62">30</cbc:DeliveredQuantity>
+    <cbc:BackorderQuantity unitCode="C62">20</cbc:BackorderQuantity>
+    <cbc:BackorderReason>Temporarily out of stock, follows on 2026-10-15</cbc:BackorderReason>
+    <cac:OrderLineReference>
+      <cbc:LineID>3</cbc:LineID>
+    </cac:OrderLineReference>
+    <cac:Item>
+      <cbc:Name>Bakpapier vellen 60x40 (500 st.)</cbc:Name>
+      <cac:SellersItemIdentification>
+        <cbc:ID>VD-BP-6040</cbc:ID>
+      </cac:SellersItemIdentification>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">08712345000031</cbc:ID>
+      </cac:StandardItemIdentification>
+    </cac:Item>
+  </cac:DespatchLine>
+</DespatchAdvice>

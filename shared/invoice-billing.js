@@ -88,7 +88,7 @@ export function parseBilling(input) {
  * Başarılı ödeme için EDM'ye verilecek fatura taslağı.
  * Alıcının e-Fatura mükellefi olup olmadığı kesim anında EDM CheckUser ile doğrulanır.
  */
-export function buildInvoiceDraft({ plan, billing, user, merchantOid, issueDate, website, documentMode = 'auto', note = '' }) {
+export function buildInvoiceDraft({ plan, billing, user, merchantOid, issueDate, website, currency = 'TRY', documentMode = 'auto', note = '' }) {
     const totals = splitInclusiveVat(plan.price);
     const sole = billing.partyType === 'sole';
     const mode = DOCUMENT_MODES.includes(documentMode) ? documentMode : 'auto';
@@ -103,7 +103,7 @@ export function buildInvoiceDraft({ plan, billing, user, merchantOid, issueDate,
         integrator: 'edm',
         preparedAt: new Date().toISOString(),
         issueDate,
-        currency: 'TRY',
+        currency,
         notes: noteText ? [noteText] : [],
         document: {
             mode,
@@ -155,7 +155,7 @@ export function buildInvoiceDraft({ plan, billing, user, merchantOid, issueDate,
             internetSales: true,
             receiverVkn: billing.taxId,
             invoiceDate: issueDate,
-            currency: 'TRY',
+            currency,
             payableAmount: totals.gross,
             checkUserBeforeSend: checkUser,
         },

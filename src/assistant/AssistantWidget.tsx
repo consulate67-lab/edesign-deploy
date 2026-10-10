@@ -3,6 +3,8 @@ import {
     FileText, HelpCircle, LogIn, MessageCircle, RotateCcw, Send, Sparkles, Tag, ThumbsDown, ThumbsUp, UserPlus, X,
 } from 'lucide-react';
 import { theme } from '../theme';
+import { useLocaleT } from '../i18n';
+import { usePriceCurrency } from '../pricing';
 import { RobotIcon } from './RobotIcon';
 import { assistantApi, type AssistantAction, type AssistantReply, type HistoryItem } from './assistantApi';
 
@@ -10,8 +12,7 @@ const CHAT_KEY = 'edi_chat';
 const SESSION_KEY = 'edi_session';
 const GREETED_KEY = 'edi_greeted';
 const WHATSAPP_URL = 'https://wa.me/905336660125';
-const DEFAULT_SUGGESTIONS = ['Bu site ne işe yarar?', 'Fiyatlar nedir?', 'İlk tasarımı nasıl yaparım?', 'Tasarım hakkı ne zaman harcanır?'];
-const WELCOME = 'Merhaba! Ben **Sarp**, eBelge Tasarımcı asistanıyım.\nSiteyi kullanma, paketler, tasarım hakkı ve tasarım ekranı hakkındaki sorularınızı yanıtlarım. Ne öğrenmek istersiniz?';
+const WELCOME_KEY = 'welcome';
 
 interface Message {
     key: string;
@@ -24,14 +25,14 @@ interface Message {
     feedback?: 1 | -1;
 }
 
-const ACTIONS: Record<AssistantAction, { label: string; icon: React.ReactNode }> = {
-    register: { label: 'Ücretsiz hesap aç', icon: <UserPlus size={14} /> },
-    login: { label: 'Giriş yap', icon: <LogIn size={14} /> },
-    pricing: { label: 'Fiyatları gör', icon: <Tag size={14} /> },
-    docs: { label: 'Belge türleri', icon: <FileText size={14} /> },
-    faq: { label: 'Sık sorulanlar', icon: <HelpCircle size={14} /> },
-    product: { label: 'Nasıl çalışır?', icon: <Sparkles size={14} /> },
-    contact: { label: 'WhatsApp ile yazın', icon: <MessageCircle size={14} /> },
+const ACTION_ICONS: Record<AssistantAction, React.ReactNode> = {
+    register: <UserPlus size={14} />,
+    login: <LogIn size={14} />,
+    pricing: <Tag size={14} />,
+    docs: <FileText size={14} />,
+    faq: <HelpCircle size={14} />,
+    product: <Sparkles size={14} />,
+    contact: <MessageCircle size={14} />,
 };
 
 const SECTION_OF: Partial<Record<AssistantAction, string>> = { pricing: 'fiyatlar', docs: 'belgeler', faq: 'sss', product: 'urun' };
@@ -51,7 +52,8 @@ const sessionId = () => {
     }
 };
 
-const welcome = (suggestions: string[]): Message => ({ key: 'welcome', role: 'assistant', text: WELCOME, mode: 'smalltalk', suggestions });
+/** Karşılama metni ve önerileri her çizimde arayüz dilinden okunur; dil değişince kendiliğinden çevrilir. */
+const welcome = (): Message => ({ key: WELCOME_KEY, role: 'assistant', text: '', mode: 'smalltalk' });
 
 const readChat = (): Message[] | null => {
     try {
@@ -118,23 +120,34 @@ export interface AssistantWidgetProps {
 
 /** Sağ altta "Sarp" yardım asistanı: siteyle ilgili soruları bilgi bankası + (varsa) yapay zekâ ile yanıtlar. */
 export const AssistantWidget: React.FC<AssistantWidgetProps> = ({ page, onRegister, onLogin, onSection }) => {
+    const { t, locale } = useLocaleT();
+    const currency = usePriceCurrency();
     const [open, setOpen] = useState(false);
     const [greeting, setGreeting] = useState(false);
     const [ai, setAi] = useState(false);
-    const [suggestions, setSuggestions] = useState(DEFAULT_SUGGESTIONS);
-    const [messages, setMessages] = useState<Message[]>(() => readChat() ?? [welcome(DEFAULT_SUGGESTIONS)]);
+    const [serverSuggestions, setServerSuggestions] = useState<{ locale: string; list: string[] } | null>(null);
+    const suggestions = serverSuggestions?.locale === locale && serverSuggestions.list.length
+        ? serverSuggestions.list
+        : t('assistant.suggestions', { returnObjects: true });
+    const [messages, setMessages] = useState<Message[]>(() => readChat() ?? [welcome()]);
     const [input, setInput] = useState('');
     const [busy, setBusy] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        assistantApi.info()
+        let alive = true;
+        assistantApi.info(locale)
             .then((info) => {
+                if (!alive) return;
                 setAi(info.ai);
-                if (info.suggestions?.length) setSuggestions(info.suggestions);
+                setServerSuggestions({ locale, list: info.suggestions ?? [] });
             })
             .catch(() => undefined);
+        return () => { alive = false; };
+    }, [locale]);
+
+    useEffect(() => {
         if (sessionStorage.getItem(GREETED_KEY)) return;
         const timer = window.setTimeout(() => setGreeting(true), 2500);
         return () => window.clearTimeout(timer);
@@ -167,21 +180,21 @@ export const AssistantWidget: React.FC<AssistantWidgetProps> = ({ page, onRegist
         const question = raw.trim().slice(0, 500);
         if (!question || busy) return;
         const history: HistoryItem[] = messages
-            .filter((m) => m.key !== 'welcome' && m.mode !== 'error')
+            .filter((m) => m.key !== WELCOME_KEY && m.mode !== 'error')
             .slice(-6)
             .map((m) => ({ role: m.role, text: m.text }));
         setMessages((list) => [...list, { key: newKey(), role: 'user', text: question }]);
         setInput('');
         setBusy(true);
         try {
-            const r = await assistantApi.ask(question, sessionId(), history, page);
+            const r = await assistantApi.ask({ question, session: sessionId(), history, page, lang: locale, currency });
             setMessages((list) => [...list, {
                 key: newKey(), role: 'assistant', text: r.answer, id: r.id, mode: r.mode, actions: r.actions, suggestions: r.suggestions,
             }]);
         } catch (e) {
             setMessages((list) => [...list, {
                 key: newKey(), role: 'assistant', mode: 'error', actions: ['contact'],
-                text: `${e instanceof Error ? e.message : 'Bir sorun oluştu.'} Biraz sonra tekrar deneyebilir ya da bize WhatsApp'tan yazabilirsiniz.`,
+                text: `${e instanceof Error ? e.message : t('assistant.error')} ${t('assistant.errorHint')}`,
             }]);
         } finally {
             setBusy(false);
@@ -206,7 +219,7 @@ export const AssistantWidget: React.FC<AssistantWidgetProps> = ({ page, onRegist
     };
 
     const reset = () => {
-        setMessages([welcome(suggestions)]);
+        setMessages([welcome()]);
         setInput('');
     };
 
@@ -226,10 +239,10 @@ export const AssistantWidget: React.FC<AssistantWidgetProps> = ({ page, onRegist
                     }}
                     onClick={toggle}
                 >
-                    <strong>Merhaba, ben Sarp!</strong> Site, paketler veya tasarım hakkında sorunuz varsa yardımcı olabilirim.
+                    <strong>{t('assistant.greetingTitle')}</strong> {t('assistant.greetingText')}
                     <button
                         type="button"
-                        aria-label="Kapat"
+                        aria-label={t('assistant.close')}
                         onClick={(e) => { e.stopPropagation(); dismissGreeting(); }}
                         style={{ position: 'absolute', top: 6, right: 6, background: 'transparent', border: 'none', color: theme.textSubtle, cursor: 'pointer', padding: 2, display: 'flex' }}
                     >
@@ -240,7 +253,7 @@ export const AssistantWidget: React.FC<AssistantWidgetProps> = ({ page, onRegist
 
             {open && (
                 <section
-                    aria-label="Sarp yardım asistanı"
+                    aria-label={t('assistant.region')}
                     style={{
                         position: 'fixed', right: 20, bottom: 96, zIndex: 9999, width: 'min(380px, calc(100vw - 24px))',
                         height: 'min(580px, calc(100vh - 120px))', display: 'flex', flexDirection: 'column', background: '#fff',
@@ -253,17 +266,17 @@ export const AssistantWidget: React.FC<AssistantWidgetProps> = ({ page, onRegist
                             <RobotIcon size={34} />
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontWeight: 800, fontSize: '1rem', letterSpacing: '-0.01em' }}>Sarp · eBelge Asistanı</div>
+                            <div style={{ fontWeight: 800, fontSize: '1rem', letterSpacing: '-0.01em' }}>{t('assistant.title')}</div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.74rem', opacity: 0.95, marginTop: 2 }}>
                                 <span style={{ width: 7, height: 7, borderRadius: 4, background: '#4ade80', boxShadow: '0 0 0 2px rgba(255,255,255,0.35)' }} />
-                                <span>Çevrimiçi</span>
+                                <span>{t('assistant.online')}</span>
                                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, padding: '1px 7px', borderRadius: 999, background: 'rgba(255,255,255,0.2)', fontWeight: 700 }}>
-                                    <Sparkles size={11} /> {ai ? 'Yapay zekâ destekli' : 'Akıllı asistan'}
+                                    <Sparkles size={11} /> {ai ? t('assistant.aiPowered') : t('assistant.smart')}
                                 </span>
                             </div>
                         </div>
-                        <button type="button" title="Sohbeti yenile" aria-label="Sohbeti yenile" onClick={reset} style={headerBtn}><RotateCcw size={17} /></button>
-                        <button type="button" title="Kapat" aria-label="Kapat" onClick={() => setOpen(false)} style={headerBtn}><X size={19} /></button>
+                        <button type="button" title={t('assistant.reset')} aria-label={t('assistant.reset')} onClick={reset} style={headerBtn}><RotateCcw size={17} /></button>
+                        <button type="button" title={t('assistant.close')} aria-label={t('assistant.close')} onClick={() => setOpen(false)} style={headerBtn}><X size={19} /></button>
                     </header>
 
                     <div ref={scrollRef} className="edi-scroll" style={{ flex: 1, overflowY: 'auto', padding: '16px 14px 8px', background: theme.bg, display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -278,7 +291,7 @@ export const AssistantWidget: React.FC<AssistantWidgetProps> = ({ page, onRegist
                                 </div>
                                 <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 7 }}>
                                     <div style={{ alignSelf: 'flex-start', maxWidth: '100%', padding: '9px 13px', borderRadius: '4px 16px 16px 16px', background: '#fff', border: `1px solid ${m.mode === 'error' ? '#fecaca' : theme.border}`, color: theme.textMuted, fontSize: '0.86rem', lineHeight: 1.5, wordBreak: 'break-word', boxShadow: theme.shadowSm }}>
-                                        <Formatted text={m.text} />
+                                        <Formatted text={m.key === WELCOME_KEY ? t('assistant.welcome') : m.text} />
                                     </div>
                                     {!!m.actions?.length && (
                                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
@@ -288,7 +301,7 @@ export const AssistantWidget: React.FC<AssistantWidgetProps> = ({ page, onRegist
                                                     fontSize: '0.77rem', fontWeight: 700, border: 'none',
                                                     ...(a === 'contact' ? { background: '#dcfce7', color: '#15803d' } : a === 'register' ? { background: theme.gradient, color: '#fff' } : { background: theme.primarySoft, color: theme.primary }),
                                                 }}>
-                                                    {ACTIONS[a].icon}{ACTIONS[a].label}
+                                                    {ACTION_ICONS[a]}{t(`assistant.actions.${a}`)}
                                                 </button>
                                             ))}
                                         </div>
@@ -296,19 +309,19 @@ export const AssistantWidget: React.FC<AssistantWidgetProps> = ({ page, onRegist
                                     {m.id && m.mode !== 'smalltalk' && (
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.72rem', color: theme.textSubtle }}>
                                             {m.feedback ? (
-                                                <span>{m.feedback === 1 ? 'Teşekkürler! Geri bildiriminizle öğreniyorum.' : 'Teşekkürler, bu yanıtı geliştireceğiz.'}</span>
+                                                <span>{m.feedback === 1 ? t('assistant.thanksUp') : t('assistant.thanksDown')}</span>
                                             ) : (
                                                 <>
-                                                    <span>Yardımcı oldu mu?</span>
-                                                    <button type="button" className="edi-thumb" aria-label="Evet" onClick={() => rate(m, 1)} style={thumbBtn}><ThumbsUp size={13} /></button>
-                                                    <button type="button" className="edi-thumb" aria-label="Hayır" onClick={() => rate(m, -1)} style={thumbBtn}><ThumbsDown size={13} /></button>
+                                                    <span>{t('assistant.helpful')}</span>
+                                                    <button type="button" className="edi-thumb" aria-label={t('assistant.yes')} onClick={() => rate(m, 1)} style={thumbBtn}><ThumbsUp size={13} /></button>
+                                                    <button type="button" className="edi-thumb" aria-label={t('assistant.no')} onClick={() => rate(m, -1)} style={thumbBtn}><ThumbsDown size={13} /></button>
                                                 </>
                                             )}
                                         </div>
                                     )}
-                                    {m === last && !busy && !!m.suggestions?.length && (
+                                    {m === last && !busy && !!(m.key === WELCOME_KEY ? suggestions : m.suggestions)?.length && (
                                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                                            {m.suggestions.map((s) => (
+                                            {(m.key === WELCOME_KEY ? suggestions : m.suggestions ?? []).map((s) => (
                                                 <button key={s} type="button" className="edi-chip" onClick={() => void ask(s)} style={{
                                                     padding: '6px 11px', borderRadius: 999, border: `1px solid ${theme.border}`, background: '#fff', color: theme.text,
                                                     fontSize: '0.77rem', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
@@ -326,7 +339,7 @@ export const AssistantWidget: React.FC<AssistantWidgetProps> = ({ page, onRegist
                                 <div style={{ width: 30, height: 30, borderRadius: 10, background: '#fff', border: `1px solid ${theme.border}`, display: 'grid', placeItems: 'center' }}>
                                     <RobotIcon size={24} />
                                 </div>
-                                <div aria-label="Yazıyor" style={{ display: 'flex', gap: 4, padding: '12px 14px', background: '#fff', borderRadius: '4px 16px 16px 16px', border: `1px solid ${theme.border}` }}>
+                                <div aria-label={t('assistant.typing')} style={{ display: 'flex', gap: 4, padding: '12px 14px', background: '#fff', borderRadius: '4px 16px 16px 16px', border: `1px solid ${theme.border}` }}>
                                     {[0, 1, 2].map((i) => (
                                         <span key={i} style={{ width: 7, height: 7, borderRadius: 4, background: theme.primary, animation: `edi-dot 1.1s ${i * 0.15}s infinite` }} />
                                     ))}
@@ -344,8 +357,8 @@ export const AssistantWidget: React.FC<AssistantWidgetProps> = ({ page, onRegist
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             maxLength={500}
-                            placeholder="Sorunuzu yazın…"
-                            aria-label="Sorunuz"
+                            placeholder={t('assistant.placeholder')}
+                            aria-label={t('assistant.inputLabel')}
                             style={{
                                 flex: 1, minWidth: 0, padding: '11px 14px', borderRadius: 999, border: `1px solid ${theme.borderStrong}`, outline: 'none',
                                 fontSize: '0.86rem', fontFamily: 'inherit', color: theme.text, background: theme.surfaceAlt,
@@ -353,7 +366,7 @@ export const AssistantWidget: React.FC<AssistantWidgetProps> = ({ page, onRegist
                         />
                         <button
                             type="submit"
-                            aria-label="Gönder"
+                            aria-label={t('assistant.send')}
                             disabled={busy || !input.trim()}
                             style={{
                                 width: 42, height: 42, borderRadius: 21, border: 'none', display: 'grid', placeItems: 'center', flexShrink: 0,
@@ -365,7 +378,7 @@ export const AssistantWidget: React.FC<AssistantWidgetProps> = ({ page, onRegist
                         </button>
                     </form>
                     <div style={{ padding: '0 12px 9px', background: '#fff', fontSize: '0.68rem', color: theme.textSubtle, textAlign: 'center' }}>
-                        Sarp yalnızca bu siteyle ilgili sorulara yanıt verir; yanıtlar bilgilendirme amaçlıdır.
+                        {t('assistant.disclaimer')}
                     </div>
                 </section>
             )}
@@ -374,8 +387,8 @@ export const AssistantWidget: React.FC<AssistantWidgetProps> = ({ page, onRegist
                 type="button"
                 className={open ? undefined : 'edi-fab'}
                 onClick={toggle}
-                aria-label={open ? 'Asistanı kapat' : 'Sarp asistanına soru sorun'}
-                title={open ? 'Kapat' : 'Sarp asistanına soru sorun'}
+                aria-label={open ? t('assistant.closeAssistant') : t('assistant.open')}
+                title={open ? t('assistant.close') : t('assistant.open')}
                 style={{
                     position: 'fixed', right: 20, bottom: 20, zIndex: 9999, width: 64, height: 64, borderRadius: 32, padding: 0, cursor: 'pointer',
                     display: 'grid', placeItems: 'center', border: '3px solid transparent',

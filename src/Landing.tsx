@@ -1,50 +1,28 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ArrowRight, Sparkles, Zap, FileText, Globe, Layers, ChevronDown, Check, ShieldCheck } from 'lucide-react';
 import { KVKKModal, KullaniciSozlesmesiModal, CerezPolitikasiModal, IletisimModal } from './legal/Legal';
 import { api } from './api';
-import { PACKAGES_PLANS, type PackagePlan, type PlanId } from './pricing';
+import {
+    PACKAGES_PLANS, formatPrice, perDesignPrice, planFeatureText, usePriceCurrency,
+    type PackagePlan, type PlanId, type PriceCurrency,
+} from './pricing';
 import { PaymentModal } from './PaymentModal';
 import { theme, techBackground, gradientTextStyle } from './theme';
 import { HeroPreview } from './landing/HeroPreview';
+import { INTL_SHOWCASE_DOCS, intlPreviewSources } from './landing/intlShowcase';
+import { useLocaleT } from './i18n';
+import { LanguageSwitcher } from './i18n/LanguageSwitcher';
+import { useCountry } from './store/uiStore';
 
 interface LandingProps {
     onRegister: () => void;
     onLogin: () => void;
 }
 
-interface SssItem {
-    q: string;
-    a: string;
-}
+interface LandingDoc { label: string; code: string; id: string; a: string }
 
-const SSS_ITEMS: SssItem[] = [
-    {
-        q: 'Nasıl satın alırım?',
-        a: 'Önce üye olup giriş yapın, ardından size uygun paketi satın alın: One (3.000 TL, 1 tasarım hakkı), Basic (10.000 TL, 10 tasarım hakkı) veya Pro (15.000 TL, 25 tasarım hakkı). Tüm paketler tek seferlik ödemedir; aylık abonelik yoktur. Haklarınız süresizdir.',
-    },
-    {
-        q: 'Hangi e-belge tiplerini tasarlayabilirim?',
-        a: 'Toplam 15 belge türü: e-Fatura, e-Arşiv, e-İrsaliye, e-İrsaliye Yanıtı, e-İhracat, e-SMM, e-Müstahsil, e-Gider Pusulası, e-Döviz / Kıymetli Maden, e-Dekont, e-Sigorta Komisyon Gider Belgesi, e-Bilet, e-Bilet Raporu, e-Yolcu Listesi ve e-Makbuz. Her tür için GİB resmi XSLT veya hazır şablon yüklenir.',
-    },
-    {
-        q: 'XSLT bilmem gerekiyor mu?',
-        a: 'Hayır. Hazır şablonlardan birini seçip görsel editörle sürükle-bırak mantığıyla özelleştirebilirsiniz. İsterseniz kendi XSLT dosyanızı da (.xslt / .xsl / .xml) yükleyip aynı editörde düzenleyebilirsiniz.',
-    },
-    {
-        q: 'Tasarımlarım GİB uyumlu mu?',
-        a: 'Evet. Tüm şablonlar GİB UBL-TR 1.2.1 şemasına ve e-Fatura Paketi v29’a uygun şekilde hazırlanmıştır. GİB tarafından yayımlanan örnek XML dosyalarıyla test edilmiştir.',
-    },
-    {
-        q: 'Ödeme nasıl çalışır?',
-        a: 'Giriş yaptıktan sonra Paket Al ile seçtiğiniz paketi PayTR güvenli ödeme (3D Secure) ile satın alırsınız. Kaydetmek ve test indirmek ücretsizdir; tasarımı onayladığınızda 1 hak harcanır. Ödeme sonrası haklar hesabınıza otomatik yansır; bittiğinde yeni paket alabilirsiniz.',
-    },
-    {
-        q: 'Verilerim Türkiye’de mi saklanıyor?',
-        a: 'Evet. Tüm kullanıcı ve şablon verileri Türkiye’deki (Railway) PostgreSQL veritabanında, KVKK kapsamında saklanır. XSLT dosyaları statik olarak GitHub Pages üzerinden sunulur.',
-    },
-];
-
-const DOC_TYPES = [
+/** Türkçe sayfada dönen GİB belge türleri; diğer dillerde Avrupa türleri (intlShowcase) gösterilir. */
+const DOC_TYPES: LandingDoc[] = [
     { label: 'e-Fatura', code: '01', id: 'fatura', a: '#2563eb' },
     { label: 'e-Arşiv', code: '02', id: 'arsiv', a: '#7c3aed' },
     { label: 'e-İrsaliye', code: '03', id: 'irsaliye', a: '#0284c7' },
@@ -61,6 +39,13 @@ const DOC_TYPES = [
     { label: 'e-Yolcu Listesi', code: '14', id: 'bilet-yolcu', a: '#e11d48' },
     { label: 'e-Makbuz', code: '15', id: 'makbuz', a: '#0f766e' },
 ];
+
+/** Tanıtım kartındaki örnek faturanın iki satırı ve toplamı. */
+const MOCK_AMOUNTS: Record<PriceCurrency, [number, number, number]> = {
+    TRY: [900, 1250, 5280],
+    EUR: [24.9, 39.5, 107.16],
+    GBP: [24.9, 39.5, 107.16],
+};
 
 const LOGO_URL = `${import.meta.env.BASE_URL}logo-300x100.png`;
 const LOGO_SRCSET = `${import.meta.env.BASE_URL}logo-600x200.png 2x`;
@@ -104,7 +89,7 @@ const LANDING_CSS = `
 const ROTATE_MS = 3200;
 
 /** Başlıkta belge türleri arasında dönen kelime. */
-const RotatingDocType: React.FC<{ dt: (typeof DOC_TYPES)[number] }> = ({ dt }) => {
+const RotatingDocType: React.FC<{ dt: LandingDoc }> = ({ dt }) => {
     // Uzun adlar küçültülür: satır hep tek kalsın, başlık yüksekliği değişmesin.
     const fit = dt.label.length > 16 ? `${Math.max(0.6, 16 / dt.label.length).toFixed(3)}em` : '1em';
     return (
@@ -165,10 +150,24 @@ const SectionTitle: React.FC<{ title: string; subtitle?: string; eyebrow?: strin
  * marka gradyanı (mor → mavi → camgöbeği) butonlar ve vurgularda.
  */
 export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
+    const { t, locale } = useLocaleT();
+    const currency = usePriceCurrency();
+    const priceOf = (id: PlanId) => formatPrice(PACKAGES_PLANS.find(p => p.id === id)?.prices[currency] ?? 0, currency, locale);
+    const priceVars = { one: priceOf('one'), basic: priceOf('basic'), pro: priceOf('pro'), from: priceOf('one') };
+    const faqItems = t('landing.faq.items', { returnObjects: true, ...priceVars });
+    const mockAmounts = MOCK_AMOUNTS[currency].map(n => formatPrice(n, currency, locale));
+    const country = useCountry();
+    const docTypes = useMemo<LandingDoc[]>(() => (locale === 'tr'
+        ? DOC_TYPES
+        : INTL_SHOWCASE_DOCS.map(d => ({ ...d, label: t(`intl.kinds.${d.id}`) }))), [locale, t]);
+    const previewSources = useCallback(
+        (kind: string) => (locale === 'tr' ? [] : intlPreviewSources(kind, locale, country, (name) => t('hero.countrySample', { country: name }))),
+        [locale, country, t],
+    );
     const [openSss, setOpenSss] = useState<string | null>(null);
     const [legalModal, setLegalModal] = useState<'kvkk' | 'sozlesme' | 'cerez' | 'iletisim' | null>(null);
     const [buyPlan, setBuyPlan] = useState<PlanId | null>(null);
-    // step: kaçıncı dönüş; belge türü step % 15, aynı türün kaçıncı gelişi (galeriden sıradaki şablon) step / 15.
+    // step: kaçıncı dönüş; belge türü step % tür sayısı, aynı türün kaçıncı gelişi (sıradaki şablon / ülke) step / tür sayısı.
     const [step, setStep] = useState(0);
     const [previewHover, setPreviewHover] = useState(false);
     useEffect(() => {
@@ -176,10 +175,10 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
         const t = window.setInterval(() => setStep(n => n + 1), ROTATE_MS);
         return () => window.clearInterval(t);
     }, [previewHover]);
-    const docIdx = step % DOC_TYPES.length;
-    const activeDoc = DOC_TYPES[docIdx];
-    const nextDoc = DOC_TYPES[(docIdx + 1) % DOC_TYPES.length];
-    const round = Math.floor(step / DOC_TYPES.length);
+    const docIdx = step % docTypes.length;
+    const activeDoc = docTypes[docIdx];
+    const nextDoc = docTypes[(docIdx + 1) % docTypes.length];
+    const round = Math.floor(step / docTypes.length);
 
     const handleBuyPlan = (plan: PackagePlan) => {
         // Satın alma yalnızca üyeler için — giriş yoksa giriş ekranına.
@@ -237,12 +236,13 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                     </a>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
                         <nav className="ld-nav" style={{ display: 'flex', gap: 28, fontSize: 14, fontWeight: 600 }}>
-                            <a href="#urun">Ürün</a>
-                            <a href="#belgeler">Belgeler</a>
-                            <a href="#fiyatlar">Fiyatlar</a>
-                            <a href="#sss">SSS</a>
+                            <a href="#urun">{t('landing.nav.product')}</a>
+                            <a href="#belgeler">{t('landing.nav.docs')}</a>
+                            <a href="#fiyatlar">{t('landing.nav.pricing')}</a>
+                            <a href="#sss">{t('landing.nav.faq')}</a>
                         </nav>
                         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                            <LanguageSwitcher />
                             <button
                                 type="button"
                                 onClick={onLogin}
@@ -257,7 +257,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                                     fontFamily: 'inherit',
                                 }}
                             >
-                                Giriş
+                                {t('landing.login')}
                             </button>
                             <button
                                 type="button"
@@ -279,7 +279,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                                     whiteSpace: 'nowrap',
                                 }}
                             >
-                                Üye ol <ArrowRight size={14} />
+                                {t('landing.register')} <ArrowRight size={14} />
                             </button>
                         </div>
                     </div>
@@ -329,9 +329,9 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                                 letterSpacing: 0.5,
                             }}
                         >
-                            <Sparkles size={12} /> YENİ
+                            <Sparkles size={12} /> {t('landing.badgeNew')}
                         </span>
-                        e-Gider Pusulası, e-Döviz / Kıymetli Maden, e-Dekont ve e-Sigorta Komisyon eklendi
+                        {t('landing.news')}
                     </div>
 
                     <h1
@@ -345,9 +345,9 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                         }}
                     >
                         <RotatingDocType dt={activeDoc} />
-                        tasarımı artık
+                        {t('landing.heroLine')}
                         <br />
-                        <span style={gradientTextStyle}>çok kolay</span>
+                        <span style={gradientTextStyle}>{t('landing.heroAccent')}</span>
                     </h1>
 
                     <p
@@ -360,9 +360,8 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                             maxWidth: 560,
                         }}
                     >
-                        GİB uyumlu <strong style={{ color: theme.text }}>e-Fatura, e-Arşiv, e-İrsaliye</strong>{' '}
-                        ve 12 tür daha. Şablonu seç, logo-kaşe-bankasını ekle, XML önizle.
-                        XSLT bilgisi olmadan dakikalar içinde profesyonel tasarım.
+                        {t('landing.heroSubLead')} <strong style={{ color: theme.text }}>{t('landing.heroSubStrong')}</strong>{' '}
+                        {t('landing.heroSubRest')} {t('landing.heroSubEurope')}
                     </p>
 
                     <div
@@ -393,7 +392,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                                 fontFamily: 'inherit',
                             }}
                         >
-                            Hesap aç <ArrowRight size={17} />
+                            {t('landing.ctaOpen')} <ArrowRight size={17} />
                         </button>
                         <button
                             type="button"
@@ -411,7 +410,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                                 fontFamily: 'inherit',
                             }}
                         >
-                            Fiyatları gör
+                            {t('landing.ctaPricing')}
                         </button>
                     </div>
 
@@ -421,7 +420,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                             onClick={(e) => { e.preventDefault(); onLogin(); }}
                             style={{ color: theme.primary, textDecoration: 'underline', textUnderlineOffset: 3, fontWeight: 600 }}
                         >
-                            Zaten üyeyim
+                            {t('landing.alreadyMember')}
                         </a>
                     </div>
                 </div>
@@ -431,6 +430,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                     accent={activeDoc.a}
                     round={round}
                     nextDocTypeId={nextDoc.id}
+                    sources={locale === 'tr' ? undefined : previewSources}
                     onClick={onRegister}
                     onHoverChange={setPreviewHover}
                 />
@@ -460,10 +460,10 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                 >
                     <div aria-hidden style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: theme.gradient }} />
                     {[
-                        { v: 'GİB', l: 'UBL-TR Resmi Uyumlu', a: '#059669' },
-                        { v: String(DOC_TYPES.length), l: 'Belge Türü Desteği', a: theme.blue },
-                        { v: '3', l: 'Paket Seçeneği', a: '#db2777' },
-                        { v: '%100', l: 'Web Tabanlı', a: theme.primary },
+                        { v: t('landing.stats.complianceValue'), l: t('landing.stats.gib'), a: '#059669' },
+                        { v: String(docTypes.length), l: t('landing.stats.docTypes'), a: theme.blue },
+                        { v: String(PACKAGES_PLANS.length), l: t('landing.stats.plans'), a: '#db2777' },
+                        { v: t('landing.stats.webValue'), l: t('landing.stats.web'), a: theme.primary },
                     ].map((s, i) => (
                         <div key={i} style={{ textAlign: 'center' }}>
                             <div style={{ fontSize: 30, fontWeight: 800, color: s.a, marginBottom: 2, letterSpacing: '-0.02em' }}>
@@ -481,7 +481,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                 className="ld-section"
                 style={{ position: 'relative', zIndex: 1, padding: '56px 32px', maxWidth: 1280, margin: '0 auto' }}
             >
-                <SectionTitle eyebrow="Ürün" title="Tek tasarımcı, on beş e-belge" subtitle="GİB UBL 2.1 uyumlu, hepsi tek editörde" />
+                <SectionTitle eyebrow={t('landing.product.eyebrow')} title={t('landing.product.title')} subtitle={t('landing.product.subtitle')} />
 
                 <div className="ld-bento">
                     <div
@@ -515,10 +515,10 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                                 SHOWCASE
                             </div>
                             <h3 style={{ fontSize: 26, fontWeight: 800, margin: '8px 0 12px', color: '#fff', letterSpacing: '-0.02em' }}>
-                                e-Arşiv Fatura Tasarımı
+                                {t('landing.showcase.title')}
                             </h3>
                             <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.9)', margin: '0 0 22px', lineHeight: 1.55, maxWidth: 340 }}>
-                                Gerçek bir GİB faturasının tasarım ekranı. Logo, kaşe, banka, ürün tablosu, toplam alanı — hepsi sürükle-bırak ile düzenlenir.
+                                {t('landing.showcase.text')}
                             </p>
                             <button
                                 type="button"
@@ -539,7 +539,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                                     fontFamily: 'inherit',
                                 }}
                             >
-                                Denemek için tıkla <ArrowRight size={14} />
+                                {t('landing.showcase.cta')} <ArrowRight size={14} />
                             </button>
                         </div>
                         {/* Dekoratif fatura önizleme */}
@@ -560,16 +560,16 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                             }}
                         >
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                                <div style={{ fontSize: 10, fontWeight: 800, color: theme.primary }}>e-Arşiv Fatura</div>
+                                <div style={{ fontSize: 10, fontWeight: 800, color: theme.primary }}>{t('landing.mock.title')}</div>
                                 <img src={MARK_URL} alt="" width={18} height={18} style={{ borderRadius: 5 }} />
                             </div>
                             <div style={{ height: 3, background: theme.gradient, borderRadius: 2, marginBottom: 8 }} />
                             <div style={{ fontSize: 8, color: '#475569', lineHeight: 1.5 }}>
-                                <div style={{ fontWeight: 700, color: '#0f172a' }}>Örnek Kırtasiye Ltd. Şti.</div>
-                                <div>VKN: 1234567890</div>
+                                <div style={{ fontWeight: 700, color: '#0f172a' }}>{t('landing.mock.company')}</div>
+                                <div>{t('landing.mock.taxId')}</div>
                                 <div style={{ marginTop: 6, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4 }}>
-                                    <div style={{ background: '#f1f5f9', padding: '3px 5px', borderRadius: 4 }}>A4 Fotokopi · 2 Koli · 900 ₺</div>
-                                    <div style={{ background: '#f1f5f9', padding: '3px 5px', borderRadius: 4 }}>Toner · 1 Adet · 1.250 ₺</div>
+                                    <div style={{ background: '#f1f5f9', padding: '3px 5px', borderRadius: 4 }}>{t('landing.mock.line1', { a: mockAmounts[0] })}</div>
+                                    <div style={{ background: '#f1f5f9', padding: '3px 5px', borderRadius: 4 }}>{t('landing.mock.line2', { b: mockAmounts[1] })}</div>
                                 </div>
                             </div>
                             <div
@@ -585,16 +585,16 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                                     borderRadius: 6,
                                 }}
                             >
-                                Toplam: 5.280 ₺
+                                {t('landing.mock.total', { c: mockAmounts[2] })}
                             </div>
                         </div>
                     </div>
 
                     {[
-                        { icon: <Layers size={22} />, t: 'Sürükle & Bırak', d: 'XSLT öğrenmeden görsel tasarım', g: 'linear-gradient(135deg, #3b82f6, #06b6d4)' },
-                        { icon: <Zap size={22} />, t: 'Anlık Önizleme', d: 'Kendi XML ile test et', g: 'linear-gradient(135deg, #10b981, #84cc16)' },
-                        { icon: <FileText size={22} />, t: 'GİB Uyumlu', d: 'e-Fatura Paketi v29', g: 'linear-gradient(135deg, #f97316, #f59e0b)' },
-                        { icon: <Globe size={22} />, t: `${DOC_TYPES.length} Belge Türü`, d: 'Fatura, irsaliye, makbuz, dekont, bilet...', g: 'linear-gradient(135deg, #ec4899, #8b5cf6)' },
+                        { icon: <Layers size={22} />, title: t('landing.features.dragTitle'), d: t('landing.features.dragText'), g: 'linear-gradient(135deg, #3b82f6, #06b6d4)' },
+                        { icon: <Zap size={22} />, title: t('landing.features.previewTitle'), d: t('landing.features.previewText'), g: 'linear-gradient(135deg, #10b981, #84cc16)' },
+                        { icon: <FileText size={22} />, title: t('landing.features.gibTitle'), d: t('landing.features.gibText'), g: 'linear-gradient(135deg, #f97316, #f59e0b)' },
+                        { icon: <Globe size={22} />, title: t('landing.features.docsTitle', { count: docTypes.length }), d: t('landing.features.docsText'), g: 'linear-gradient(135deg, #ec4899, #8b5cf6)' },
                     ].map((f, i) => (
                         <div
                             key={i}
@@ -620,7 +620,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                             >
                                 {f.icon}
                             </div>
-                            <h4 style={{ fontSize: 16, fontWeight: 700, margin: '0 0 4px', color: theme.text }}>{f.t}</h4>
+                            <h4 style={{ fontSize: 16, fontWeight: 700, margin: '0 0 4px', color: theme.text }}>{f.title}</h4>
                             <p style={{ fontSize: 14, color: theme.textMuted, margin: 0, lineHeight: 1.5 }}>{f.d}</p>
                         </div>
                     ))}
@@ -633,9 +633,9 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                 className="ld-section"
                 style={{ position: 'relative', zIndex: 1, padding: '40px 32px', maxWidth: 1280, margin: '0 auto' }}
             >
-                <SectionTitle eyebrow="Belgeler" title="Hangi belgeleri tasarlayabilirsiniz?" />
+                <SectionTitle eyebrow={t('landing.docs.eyebrow')} title={t('landing.docs.title')} />
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
-                    {DOC_TYPES.map((dt) => (
+                    {docTypes.map((dt) => (
                         <button
                             type="button"
                             key={dt.code}
@@ -687,9 +687,9 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                 style={{ position: 'relative', zIndex: 1, padding: '72px 32px', maxWidth: 1280, margin: '0 auto' }}
             >
                 <SectionTitle
-                    eyebrow="Fiyatlar"
-                    title="Fiyatlandırma"
-                    subtitle="Tek seferlik ödeme, abonelik yok. Üye olup giriş yaptıktan sonra satın alabilirsiniz."
+                    eyebrow={t('landing.pricing.eyebrow')}
+                    title={t('landing.pricing.title')}
+                    subtitle={t('landing.pricing.subtitle')}
                 />
 
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'stretch', flexWrap: 'wrap', gap: 24 }}>
@@ -720,24 +720,24 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                                     color: '#fff', fontSize: 11, fontWeight: 800, whiteSpace: 'nowrap', letterSpacing: 0.4,
                                     boxShadow: theme.shadowBrand,
                                 }}>
-                                    En avantajlı
+                                    {t('pricing.best')}
                                 </div>
                             )}
                             <h3 style={{ fontSize: 22, fontWeight: 800, margin: '0 0 4px', color: theme.text }}>{plan.name}</h3>
                             <p style={{ color: theme.textSubtle, fontSize: 13, margin: '0 0 20px' }}>
-                                Tasarım başına ₺{Math.round(plan.price / plan.credits).toLocaleString('tr-TR')}
+                                {t('landing.pricing.perDesign', { price: formatPrice(perDesignPrice(plan, currency), currency, locale) })}
                             </p>
 
                             <div style={{ marginBottom: 20 }}>
                                 <span style={{ fontSize: 42, fontWeight: 800, letterSpacing: '-0.02em', ...gradientTextStyle }}>
-                                    ₺{plan.price.toLocaleString('tr-TR')}
+                                    {formatPrice(plan.prices[currency], currency, locale)}
                                 </span>
-                                <span style={{ color: theme.textSubtle, fontSize: 14, marginLeft: 6 }}>tek seferlik</span>
+                                <span style={{ color: theme.textSubtle, fontSize: 14, marginLeft: 6 }}>{t('landing.pricing.oneTime')}</span>
                             </div>
 
                             <div style={{ paddingTop: 4, borderTop: `1px solid ${theme.border}`, marginBottom: 20, flex: 1 }}>
                                 <div style={{ color: theme.primary, fontSize: 13, fontWeight: 700, margin: '14px 0' }}>
-                                    {plan.credits} tasarım hakkı
+                                    {t('pricing.credits', { count: plan.credits })}
                                 </div>
                                 <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
                                     {plan.features.map((feat, i) => (
@@ -757,7 +757,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                                             >
                                                 <Check size={12} color={theme.greenText} strokeWidth={3} />
                                             </span>
-                                            <span>{feat}</span>
+                                            <span>{planFeatureText(t, plan, feat)}</span>
                                         </li>
                                     ))}
                                 </ul>
@@ -781,17 +781,17 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                                     fontFamily: 'inherit',
                                 }}
                             >
-                                Satın Al
+                                {t('landing.pricing.buy')}
                             </button>
                             <p style={{ textAlign: 'center', color: theme.textSubtle, fontSize: 12, margin: '10px 0 0' }}>
-                                Satın almak için üye girişi gerekir.
+                                {t('landing.pricing.loginRequired')}
                             </p>
                         </div>
                     ))}
                 </div>
 
                 <p style={{ textAlign: 'center', color: theme.textSubtle, fontSize: 13, marginTop: 32 }}>
-                    Fiyata KDV dahildir.
+                    {t('landing.pricing.vatIncluded')}
                 </p>
             </section>
 
@@ -801,10 +801,10 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                 className="ld-section"
                 style={{ position: 'relative', zIndex: 1, padding: '56px 32px', maxWidth: 880, margin: '0 auto' }}
             >
-                <SectionTitle eyebrow="SSS" title="Sıkça Sorulan Sorular" subtitle="Aklınıza takılanlar — ihtiyacınıza uygun cevaplar burada." />
+                <SectionTitle eyebrow={t('landing.faq.eyebrow')} title={t('landing.faq.title')} subtitle={t('landing.faq.subtitle')} />
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                    {SSS_ITEMS.map((item) => {
+                    {faqItems.map((item) => {
                         const open = openSss === item.q;
                         return (
                             <div
@@ -919,13 +919,13 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                                 marginBottom: 16,
                             }}
                         >
-                            <ShieldCheck size={13} style={{ animation: 'edesign-pulse 2.4s ease-in-out infinite' }} /> GİB UBL-TR uyumlu
+                            <ShieldCheck size={13} style={{ animation: 'edesign-pulse 2.4s ease-in-out infinite' }} /> {t('landing.finalCta.badge')}
                         </div>
                         <h2 style={{ fontSize: 'clamp(28px, 3.8vw, 44px)', fontWeight: 800, margin: '0 0 12px', letterSpacing: '-0.025em', lineHeight: 1.12 }}>
-                            İlk tasarımınızı bugün oluşturun
+                            {t('landing.finalCta.title')}
                         </h2>
                         <p style={{ fontSize: 17, color: 'rgba(255,255,255,0.92)', margin: '0 0 30px', lineHeight: 1.5 }}>
-                            Üye olun, 3.000 TL'den başlayan paketlerle tasarıma başlayın.
+                            {t('landing.finalCta.text', priceVars)}
                         </p>
                         <button
                             type="button"
@@ -946,7 +946,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                                 fontFamily: 'inherit',
                             }}
                         >
-                            Hesap aç <ArrowRight size={17} />
+                            {t('landing.ctaOpen')} <ArrowRight size={17} />
                         </button>
                     </div>
                 </div>
@@ -972,14 +972,14 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
             >
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
                     <img src={LOGO_URL} srcSet={LOGO_SRCSET} alt="edXdocu" width={300} height={100} style={{ display: 'block', height: 28, width: 'auto' }} />
-                    © 2026 · eBelge Tasarımcı · GİB UBL-TR
+                    © 2026 · {t('landing.footer.tagline')}
                 </div>
                 <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
-                    <a href="#sss">SSS</a>
-                    <a href="#kvkk" onClick={(e) => { e.preventDefault(); setLegalModal('kvkk'); }}>KVKK</a>
-                    <a href="#sozlesme" onClick={(e) => { e.preventDefault(); setLegalModal('sozlesme'); }}>Kullanıcı Sözleşmesi</a>
-                    <a href="#cerez" onClick={(e) => { e.preventDefault(); setLegalModal('cerez'); }}>Çerez Politikası</a>
-                    <a href="#iletisim" onClick={(e) => { e.preventDefault(); setLegalModal('iletisim'); }}>İletişim</a>
+                    <a href="#sss">{t('landing.nav.faq')}</a>
+                    <a href="#kvkk" onClick={(e) => { e.preventDefault(); setLegalModal('kvkk'); }}>{t('landing.footer.kvkk')}</a>
+                    <a href="#sozlesme" onClick={(e) => { e.preventDefault(); setLegalModal('sozlesme'); }}>{t('landing.footer.terms')}</a>
+                    <a href="#cerez" onClick={(e) => { e.preventDefault(); setLegalModal('cerez'); }}>{t('landing.footer.cookies')}</a>
+                    <a href="#iletisim" onClick={(e) => { e.preventDefault(); setLegalModal('iletisim'); }}>{t('landing.footer.contact')}</a>
                 </div>
             </footer>
 

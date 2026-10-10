@@ -2,22 +2,25 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { FileCode, PenLine, Trash2, Download, Lock, Eye, X, Search, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { api, type SavedDesign } from './api';
 import { WIZARD_DOC_TYPES, loadSampleXml } from './wizard/docTypes';
+import { intlModuleDocTypes } from './wizard/intlDocTypes';
 import { stripLeadingBom } from './xslt-editor/utils/testWatermark';
+import { applyLegacyViewerCompat } from './xslt-editor/utils/legacyViewerCompat';
 import { transformXmlWithXslt } from './xsltTransformer';
 import { theme } from './theme';
+import i18n, { currentLocale, useLocaleT } from './i18n';
 
 const MAX_DRAFTS = 5;
 const PAGE_SIZE = 10;
 
 const docTypeOf = (moduleId: string) =>
-    WIZARD_DOC_TYPES.find(t => t.id === moduleId || t.defaults.some(d => d.moduleId === moduleId));
+    [...WIZARD_DOC_TYPES, ...intlModuleDocTypes()].find(t => t.id === moduleId || t.defaults.some(d => d.moduleId === moduleId));
 const moduleLabel = (moduleId: string) => docTypeOf(moduleId)?.label ?? moduleId;
 
 const formatDate = (iso: string | null | undefined, withTime = false) => {
     if (!iso) return '';
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) return '';
-    return d.toLocaleString('tr-TR', {
+    return d.toLocaleString(currentLocale(), {
         day: '2-digit', month: 'short', year: 'numeric',
         ...(withTime ? { hour: '2-digit', minute: '2-digit' } : {}),
     });
@@ -27,7 +30,7 @@ const byRecent = (key: 'updated_at' | 'paid_at') => (a: SavedDesign, b: SavedDes
     new Date(b[key] ?? b.updated_at).getTime() - new Date(a[key] ?? a.updated_at).getTime();
 
 const downloadDesign = (d: SavedDesign) => {
-    const url = URL.createObjectURL(new Blob([stripLeadingBom(d.xslt_content ?? '')], { type: 'application/xml;charset=utf-8' }));
+    const url = URL.createObjectURL(new Blob([applyLegacyViewerCompat(stripLeadingBom(d.xslt_content ?? ''))], { type: 'application/xml;charset=utf-8' }));
     const a = document.createElement('a');
     a.href = url;
     a.download = `${d.name.replace(/[\\/:*?"<>|\s]+/g, '_')}_${d.module_id}.xslt`;
@@ -48,7 +51,8 @@ const useDesigns = () => {
     }, []);
 
     const remove = async (d: SavedDesign) => {
-        if (!window.confirm(`"${d.name}" silinsin mi?${d.paid ? '\n\nOnaylanmış bir tasarımı silerseniz tekrar indiremezsiniz.' : ''}`)) return;
+        const question = i18n.t('designs.confirmDelete', { name: d.name });
+        if (!window.confirm(`${question}${d.paid ? `\n\n${i18n.t('designs.confirmDeletePaid')}` : ''}`)) return;
         await api.deleteDesign(d.id);
         setDesigns(prev => prev?.filter(x => x.id !== d.id) ?? null);
     };
@@ -77,6 +81,7 @@ const ghostBtn: React.CSSProperties = {
 
 /** Devam eden (onaylanmamış) tasarımlar — en son düzenlenen 5 tanesi. */
 export const MyDesigns: React.FC<{ onOpen: (d: SavedDesign) => void }> = ({ onOpen }) => {
+    const { t } = useLocaleT();
     const { designs, remove } = useDesigns();
     const drafts = useMemo(() => (designs ?? []).filter(d => !d.paid).sort(byRecent('updated_at')).slice(0, MAX_DRAFTS), [designs]);
 
@@ -84,7 +89,7 @@ export const MyDesigns: React.FC<{ onOpen: (d: SavedDesign) => void }> = ({ onOp
 
     return (
         <div data-my-designs style={{ width: '100%', marginBottom: '2rem' }}>
-            {sectionTitle('Devam Eden Tasarımlar', `Son düzenlediğiniz ${MAX_DRAFTS} taslak. Onaylanana kadar düzenleyebilirsiniz; onay 1 hak harcar.`)}
+            {sectionTitle(t('designs.draftsTitle'), t('designs.draftsNote', { count: MAX_DRAFTS }))}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '12px' }}>
                 {drafts.map(d => (
                     <div
@@ -108,7 +113,7 @@ export const MyDesigns: React.FC<{ onOpen: (d: SavedDesign) => void }> = ({ onOp
                             </div>
                             <button
                                 type="button"
-                                title="Sil"
+                                title={t('common.delete')}
                                 onClick={() => remove(d)}
                                 style={{ background: 'transparent', border: 'none', color: theme.textSubtle, cursor: 'pointer', padding: 4 }}
                             >
@@ -120,10 +125,10 @@ export const MyDesigns: React.FC<{ onOpen: (d: SavedDesign) => void }> = ({ onOp
                                 fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: 999,
                                 background: theme.surfaceAlt, color: theme.textMuted, border: `1px solid ${theme.border}`,
                             }}>
-                                Taslak · onay 1 hak
+                                {t('designs.draftBadge')}
                             </span>
                             <button type="button" data-open-design={d.id} onClick={() => onOpen(d)} style={{ ...primaryBtn, marginLeft: 'auto' }}>
-                                <PenLine size={13} /> Devam et
+                                <PenLine size={13} /> {t('designs.continue')}
                             </button>
                         </div>
                     </div>
@@ -144,6 +149,7 @@ const td: React.CSSProperties = {
 
 /** Onaylanmış (satın alınmış) tasarımlar — kilitli; önizlenir ve tekrar indirilir. */
 export const CompletedDesigns: React.FC = () => {
+    const { t, locale } = useLocaleT();
     const { designs, remove } = useDesigns();
     const [query, setQuery] = useState('');
     const [page, setPage] = useState(0);
@@ -151,10 +157,10 @@ export const CompletedDesigns: React.FC = () => {
 
     const completed = useMemo(() => (designs ?? []).filter(d => d.paid).sort(byRecent('paid_at')), [designs]);
     const filtered = useMemo(() => {
-        const q = query.trim().toLocaleLowerCase('tr-TR');
+        const q = query.trim().toLocaleLowerCase(locale);
         if (!q) return completed;
-        return completed.filter(d => `${d.name} ${moduleLabel(d.module_id)}`.toLocaleLowerCase('tr-TR').includes(q));
-    }, [completed, query]);
+        return completed.filter(d => `${d.name} ${moduleLabel(d.module_id)}`.toLocaleLowerCase(locale).includes(q));
+    }, [completed, query, locale]);
 
     const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
     const current = Math.min(page, pageCount - 1);
@@ -164,7 +170,7 @@ export const CompletedDesigns: React.FC = () => {
 
     return (
         <div data-completed-designs style={{ width: '100%', marginBottom: '2rem' }}>
-            {sectionTitle('Tamamlanan Tasarımlar', 'Onaylanan tasarımlar değiştirilemez; istediğiniz zaman önizleyip ücretsiz tekrar indirebilirsiniz.')}
+            {sectionTitle(t('designs.completedTitle'), t('designs.completedNote'))}
             <div style={{ background: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', overflow: 'hidden', boxShadow: theme.shadowSm }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', borderBottom: `1px solid ${theme.border}` }}>
                     <div style={{ position: 'relative', flex: '0 1 280px' }}>
@@ -175,7 +181,7 @@ export const CompletedDesigns: React.FC = () => {
                             onChange={e => { setQuery(e.target.value); setPage(0); }}
                             onFocus={e => { e.currentTarget.style.borderColor = theme.primary; e.currentTarget.style.boxShadow = theme.focusRing; }}
                             onBlur={e => { e.currentTarget.style.borderColor = theme.borderStrong; e.currentTarget.style.boxShadow = 'none'; }}
-                            placeholder="Tasarım veya belge türü ara"
+                            placeholder={t('designs.search')}
                             style={{
                                 width: '100%', boxSizing: 'border-box', padding: '7px 10px 7px 30px', borderRadius: '8px',
                                 border: `1px solid ${theme.borderStrong}`, background: '#fff',
@@ -184,18 +190,18 @@ export const CompletedDesigns: React.FC = () => {
                         />
                     </div>
                     <span style={{ marginLeft: 'auto', fontSize: '0.78rem', color: theme.textMuted }}>
-                        {filtered.length} / {completed.length} tasarım
+                        {t('designs.count', { shown: filtered.length, total: completed.length })}
                     </span>
                 </div>
                 <div style={{ overflowX: 'auto' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
                             <tr>
-                                <th style={th}>Tasarım</th>
-                                <th style={th}>Belge türü</th>
-                                <th style={th}>Onay tarihi</th>
-                                <th style={{ ...th, textAlign: 'center' }}>İndirme</th>
-                                <th style={{ ...th, textAlign: 'right' }}>İşlemler</th>
+                                <th style={th}>{t('designs.colDesign')}</th>
+                                <th style={th}>{t('designs.colType')}</th>
+                                <th style={th}>{t('designs.colApproved')}</th>
+                                <th style={{ ...th, textAlign: 'center' }}>{t('designs.colDownloads')}</th>
+                                <th style={{ ...th, textAlign: 'right' }}>{t('designs.colActions')}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -209,7 +215,7 @@ export const CompletedDesigns: React.FC = () => {
                                         </div>
                                         {d.license_tax_id && (
                                             <div data-license-tax-id style={{ fontSize: '11px', color: theme.textMuted, marginTop: '2px', paddingLeft: '24px' }}>
-                                                {d.license_tax_id.length === 11 ? 'TCKN' : 'VKN'} {d.license_tax_id} için lisanslı
+                                                {t('designs.licensed', { kind: d.license_tax_id.length === 11 ? 'TCKN' : 'VKN', id: d.license_tax_id })}
                                             </div>
                                         )}
                                     </td>
@@ -219,14 +225,14 @@ export const CompletedDesigns: React.FC = () => {
                                     <td style={{ ...td, textAlign: 'right' }}>
                                         <div style={{ display: 'inline-flex', gap: '6px', alignItems: 'center' }}>
                                             <button type="button" data-preview-design={d.id} onClick={() => setPreview(d)} style={ghostBtn}>
-                                                <Eye size={13} /> Önizle
+                                                <Eye size={13} /> {t('designs.preview')}
                                             </button>
                                             <button type="button" data-download-design={d.id} onClick={() => downloadDesign(d)} style={btn(theme.green)}>
-                                                <Download size={13} /> İndir
+                                                <Download size={13} /> {t('designs.download')}
                                             </button>
                                             <button
                                                 type="button"
-                                                title="Sil"
+                                                title={t('common.delete')}
                                                 onClick={() => remove(d)}
                                                 style={{ background: 'transparent', border: 'none', color: theme.textSubtle, cursor: 'pointer', padding: 4 }}
                                             >
@@ -237,7 +243,7 @@ export const CompletedDesigns: React.FC = () => {
                                 </tr>
                             ))}
                             {!rows.length && (
-                                <tr><td colSpan={5} style={{ ...td, textAlign: 'center', color: theme.textSubtle, padding: '20px' }}>Aramaya uyan tasarım yok.</td></tr>
+                                <tr><td colSpan={5} style={{ ...td, textAlign: 'center', color: theme.textSubtle, padding: '20px' }}>{t('designs.noMatch')}</td></tr>
                             )}
                         </tbody>
                     </table>
@@ -261,6 +267,7 @@ export const CompletedDesigns: React.FC = () => {
 
 /** Tasarımı kayıtlı XML'iyle (yoksa belge türünün örnek XML'iyle) gösterir. */
 const DesignPreview: React.FC<{ design: SavedDesign; onClose: () => void }> = ({ design, onClose }) => {
+    const { t } = useLocaleT();
     const [html, setHtml] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [usesSample, setUsesSample] = useState(false);
@@ -272,7 +279,7 @@ const DesignPreview: React.FC<{ design: SavedDesign; onClose: () => void }> = ({
                 let xml = design.xml_content;
                 if (!xml) {
                     const docType = docTypeOf(design.module_id);
-                    if (!docType) throw new Error('Bu belge türü için örnek XML bulunamadı.');
+                    if (!docType) throw new Error(i18n.t('designs.noSample'));
                     xml = await loadSampleXml(docType);
                     if (alive) setUsesSample(true);
                 }
@@ -306,20 +313,20 @@ const DesignPreview: React.FC<{ design: SavedDesign; onClose: () => void }> = ({
                     <div style={{ minWidth: 0 }}>
                         <div style={{ fontWeight: 800, color: theme.text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{design.name}</div>
                         <div style={{ fontSize: '0.75rem', color: theme.textMuted }}>
-                            {moduleLabel(design.module_id)} · {usesSample ? 'örnek XML ile önizleme' : 'kayıtlı XML ile önizleme'}
+                            {moduleLabel(design.module_id)} · {usesSample ? t('designs.withSample') : t('designs.withSaved')}
                         </div>
                     </div>
                     <button type="button" onClick={() => downloadDesign(design)} style={{ ...btn(theme.green), marginLeft: 'auto' }}>
-                        <Download size={13} /> İndir
+                        <Download size={13} /> {t('designs.download')}
                     </button>
-                    <button type="button" title="Kapat" data-preview-close onClick={onClose} style={{ background: 'transparent', border: 'none', color: theme.textSubtle, cursor: 'pointer', padding: 4 }}>
+                    <button type="button" title={t('common.close')} data-preview-close onClick={onClose} style={{ background: 'transparent', border: 'none', color: theme.textSubtle, cursor: 'pointer', padding: 4 }}>
                         <X size={18} />
                     </button>
                 </div>
                 <div style={{ flex: 1, background: '#fff', position: 'relative', borderTop: `1px solid ${theme.border}` }}>
-                    {html && <iframe title="Tasarım önizleme" srcDoc={html} sandbox="allow-same-origin" style={{ width: '100%', height: '100%', border: 0 }} />}
-                    {!html && !error && <div style={{ padding: 24, color: theme.textMuted }}>Önizleme hazırlanıyor…</div>}
-                    {error && <div style={{ padding: 24, color: theme.redText }}>Önizleme oluşturulamadı: {error}</div>}
+                    {html && <iframe title={t('designs.frameTitle')} srcDoc={html} sandbox="allow-same-origin" style={{ width: '100%', height: '100%', border: 0 }} />}
+                    {!html && !error && <div style={{ padding: 24, color: theme.textMuted }}>{t('designs.preparing')}</div>}
+                    {error && <div style={{ padding: 24, color: theme.redText }}>{t('designs.previewFailed', { error })}</div>}
                 </div>
             </div>
         </div>

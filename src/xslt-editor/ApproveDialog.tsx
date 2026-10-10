@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { CheckCircle2, Download, Loader2, X, AlertTriangle, Lock } from 'lucide-react';
 import { api } from '../api';
 import { isValidTaxId, normalizeTaxId } from '../../shared/license-lock.js';
+import { useLocaleT } from '../i18n';
 
 interface ApproveDialogProps {
     defaultName: string;
@@ -33,6 +34,7 @@ const PagePreview: React.FC<{ test: boolean }> = ({ test }) => (
 
 /** Onay ekranı: tasarım onaylanınca TEST yazısız dosya indirilir, 1 tasarım hakkı düşer. */
 export const ApproveDialog: React.FC<ApproveDialogProps> = ({ defaultName, onTestDownload, onApprove, onBuy, onClose }) => {
+    const { t } = useLocaleT();
     const [name, setName] = useState(defaultName);
     const [taxInput, setTaxInput] = useState('');
     const [checked, setChecked] = useState(false);
@@ -54,8 +56,8 @@ export const ApproveDialog: React.FC<ApproveDialogProps> = ({ defaultName, onTes
     const taxId = normalizeTaxId(taxInput);
     const taxValid = isValidTaxId(taxId);
     const taxError = !taxId ? null
-        : taxId.length !== 10 && taxId.length !== 11 ? 'VKN 10, TCKN 11 haneli olmalı.'
-        : !taxValid ? `Bu ${taxId.length === 10 ? 'VKN' : 'TCKN'} geçerli değil; haneleri kontrol edin.`
+        : taxId.length !== 10 && taxId.length !== 11 ? t('editor.approve.taxLength')
+        : !taxValid ? t('editor.approve.taxInvalid', { kind: taxId.length === 10 ? 'VKN' : 'TCKN' })
         : null;
     const canApprove = !busy && checked && !!name.trim() && taxValid && !noCredits;
 
@@ -86,30 +88,30 @@ export const ApproveDialog: React.FC<ApproveDialogProps> = ({ defaultName, onTes
             }}>
                 <button
                     onClick={onClose}
-                    aria-label="Kapat"
+                    aria-label={t('editor.approve.close')}
                     style={{ position: 'absolute', top: 16, right: 16, background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}
                 >
                     <X size={18} />
                 </button>
 
-                <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: '#f8fafc' }}>Tasarımı Onayla</h2>
+                <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: '#f8fafc' }}>{t('editor.approve.title')}</h2>
                 <p style={{ margin: '6px 0 20px', fontSize: 13, color: '#94a3b8', lineHeight: 1.5 }}>
-                    Onayladığınızda TEST yazısı kaldırılmış, kullanıma hazır XSLT dosyanız indirilir.
+                    {t('editor.approve.intro')}
                 </p>
 
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 18, marginBottom: 22 }}>
                     <div style={{ textAlign: 'center' }}>
                         <PagePreview test />
-                        <div style={{ fontSize: 11, color: '#fcd34d', marginTop: 8, fontWeight: 600 }}>Test dosyası</div>
+                        <div style={{ fontSize: 11, color: '#fcd34d', marginTop: 8, fontWeight: 600 }}>{t('editor.approve.testFile')}</div>
                     </div>
                     <div style={{ fontSize: 22, color: '#64748b' }}>→</div>
                     <div style={{ textAlign: 'center' }}>
                         <PagePreview test={false} />
-                        <div style={{ fontSize: 11, color: '#6ee7b7', marginTop: 8, fontWeight: 600 }}>Onaylı dosya</div>
+                        <div style={{ fontSize: 11, color: '#6ee7b7', marginTop: 8, fontWeight: 600 }}>{t('editor.approve.approvedFile')}</div>
                     </div>
                 </div>
 
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#cbd5e1', marginBottom: 6 }}>Tasarım adı</label>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#cbd5e1', marginBottom: 6 }}>{t('editor.approve.name')}</label>
                 <input
                     data-approve-name
                     value={name}
@@ -123,7 +125,7 @@ export const ApproveDialog: React.FC<ApproveDialogProps> = ({ defaultName, onTes
                 />
 
                 <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#cbd5e1', marginBottom: 6 }}>
-                    Tasarımı kullanacak firmanın VKN / TCKN'si
+                    {t('editor.approve.taxLabel')}
                 </label>
                 <input
                     data-approve-tax-id
@@ -132,7 +134,7 @@ export const ApproveDialog: React.FC<ApproveDialogProps> = ({ defaultName, onTes
                     inputMode="numeric"
                     autoComplete="off"
                     maxLength={16}
-                    placeholder="10 haneli VKN ya da 11 haneli TCKN"
+                    placeholder={t('editor.approve.taxPlaceholder')}
                     style={{
                         width: '100%', boxSizing: 'border-box', padding: '9px 12px', borderRadius: 8, fontSize: 15,
                         letterSpacing: 1, fontFamily: 'monospace', background: 'rgba(15, 23, 42, 0.9)', color: '#f1f5f9',
@@ -140,24 +142,24 @@ export const ApproveDialog: React.FC<ApproveDialogProps> = ({ defaultName, onTes
                     }}
                 />
                 <div data-approve-tax-note style={{ fontSize: 12, lineHeight: 1.5, margin: '6px 0 16px', color: taxError ? '#fca5a5' : '#94a3b8' }}>
-                    {taxError ?? 'Tasarım yalnızca bu VKN/TCKN ile düzenlenen belgelerde TEST yazısız görünür; başka firmada, logo ya da IBAN değiştirilirse TEST yazısı çıkar. Onaydan sonra değiştirilemez.'}
+                    {taxError ?? t('editor.approve.taxNote')}
                 </div>
 
                 <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 16px', display: 'flex', flexDirection: 'column', gap: 8, fontSize: 13 }}>
                     <li style={{ display: 'flex', gap: 8 }}>
                         <CheckCircle2 size={16} color="#10b981" style={{ flexShrink: 0 }} />
                         <span>
-                            1 tasarım hakkı kullanılır
-                            {isAdmin ? ' (yönetici: düşülmez)' : credits !== null ? ` · kalan hakkınız: ${credits}` : ''}
+                            {t('editor.approve.usesCredit')}
+                            {isAdmin ? ` (${t('editor.approve.adminFree')})` : credits !== null ? ` · ${t('editor.approve.creditsLeft', { credits })}` : ''}
                         </span>
                     </li>
                     <li style={{ display: 'flex', gap: 8 }}>
                         <CheckCircle2 size={16} color="#10b981" style={{ flexShrink: 0 }} />
-                        <span>Tasarım hesabınıza kaydedilir; "Tamamlanan Tasarımlar" listesinden istediğiniz zaman önizleyip ücretsiz tekrar indirebilirsiniz.</span>
+                        <span>{t('editor.approve.savedNote')}</span>
                     </li>
                     <li data-approve-lock-note style={{ display: 'flex', gap: 8, color: '#fca5a5', fontWeight: 600 }}>
                         <Lock size={16} color="#f87171" style={{ flexShrink: 0 }} />
-                        <span>Onaydan sonra tasarım kilitlenir: tekrar düzenlenemez, yalnızca indirilebilir.</span>
+                        <span>{t('editor.approve.lockNote')}</span>
                     </li>
                 </ul>
 
@@ -166,7 +168,7 @@ export const ApproveDialog: React.FC<ApproveDialogProps> = ({ defaultName, onTes
                     background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.3)', fontSize: 12, color: '#fde68a',
                 }}>
                     <span style={{ flex: 1, lineHeight: 1.5 }}>
-                        Henüz denemediyseniz önce test dosyasını indirip kendi sisteminizde kontrol edin. Test indirme ücretsizdir.
+                        {t('editor.approve.testNote')}
                     </span>
                     <button
                         type="button"
@@ -178,13 +180,13 @@ export const ApproveDialog: React.FC<ApproveDialogProps> = ({ defaultName, onTes
                             fontWeight: 700, fontSize: 12, whiteSpace: 'nowrap', fontFamily: 'inherit',
                         }}
                     >
-                        <Download size={13} /> Test İndir
+                        <Download size={13} /> {t('editor.toolbar.testDownload')}
                     </button>
                 </div>
 
                 <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: '#cbd5e1', marginBottom: 18, cursor: 'pointer' }}>
                     <input data-approve-check type="checkbox" checked={checked} onChange={e => setChecked(e.target.checked)} style={{ marginTop: 2 }} />
-                    Tasarımı ve VKN/TCKN'yi kontrol ettim, onaylıyorum. Onaydan sonra değişiklik yapamayacağımı biliyorum.
+                    {t('editor.approve.confirmCheck')}
                 </label>
 
                 {noCredits && (
@@ -193,13 +195,13 @@ export const ApproveDialog: React.FC<ApproveDialogProps> = ({ defaultName, onTes
                         background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.35)', fontSize: 13, color: '#fca5a5',
                     }}>
                         <AlertTriangle size={16} style={{ flexShrink: 0 }} />
-                        <span style={{ flex: 1 }}>Tasarım hakkınız kalmadı. Onaylamak için paket alın.</span>
+                        <span style={{ flex: 1 }}>{t('editor.approve.noCredits')}</span>
                         <button
                             type="button"
                             onClick={onBuy}
                             style={{ padding: '6px 12px', borderRadius: 7, border: 'none', background: '#6366f1', color: 'white', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
                         >
-                            Paket Al
+                            {t('editor.approve.buy')}
                         </button>
                     </div>
                 )}
@@ -216,7 +218,7 @@ export const ApproveDialog: React.FC<ApproveDialogProps> = ({ defaultName, onTes
                         onClick={onClose}
                         style={{ padding: '10px 16px', borderRadius: 8, background: 'transparent', border: '1px solid rgba(148, 163, 184, 0.3)', color: '#cbd5e1', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
                     >
-                        Vazgeç
+                        {t('editor.common.cancel')}
                     </button>
                     <button
                         type="button"
@@ -230,7 +232,7 @@ export const ApproveDialog: React.FC<ApproveDialogProps> = ({ defaultName, onTes
                         }}
                     >
                         {busy ? <Loader2 size={15} className="spin" /> : <CheckCircle2 size={15} />}
-                        Onayla ve İndir
+                        {t('editor.approve.confirm')}
                     </button>
                 </div>
             </div>

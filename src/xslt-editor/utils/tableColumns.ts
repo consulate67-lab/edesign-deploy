@@ -9,6 +9,7 @@
  * aşan colspan'lı hücrelerin colspan'ı artırılır).
  */
 import { isInLineContext } from '../fieldCatalog';
+import i18n from '../../i18n';
 import {
     childElements, elementEnd, findLiteralTagByOrdinal, findParentTag, setTagAttribute, setTagStyleProperty,
     XML_TAG_RE_SOURCE, type SourceTag,
@@ -239,7 +240,7 @@ export function editColumn(xslt: string, { cell, table }: LineTableCell, action:
     const grids = rowGrids(rows);
     const selRow = rows.findIndex(r => r === cell.parentElement);
     const selCell = selRow >= 0 ? grids[selRow].find(g => g.cell === cell) : undefined;
-    if (!selCell) return { ok: false, error: 'Seçili hücre tabloda bulunamadı.' };
+    if (!selCell) return { ok: false, error: i18n.t('editor.columnError.noCell') };
     const c0 = selCell.col;
     const c1 = c0 + selCell.span;
 
@@ -268,12 +269,12 @@ export function editColumn(xslt: string, { cell, table }: LineTableCell, action:
                 if (overlap <= 0) continue;
                 const ord = ordinalOf(g.cell);
                 if (ord === null) {
-                    return { ok: false, error: 'Kolonun bazı hücreleri XSLT\'de doğrudan bulunamadı (ör. xsl:element ile üretiliyor); kolon değiştirilmedi.' };
+                    return { ok: false, error: i18n.t('editor.columnError.generated') };
                 }
                 const elsewhere = grid.some(o => o !== g && ordinalOf(o.cell) === ord
                     && (o.col + o.span <= c0 || o.col >= c1));
                 if (elsewhere) {
-                    return { ok: false, error: 'Bu kolonun hücresi XSLT\'de döngüyle birden fazla kolon üretiyor; kolon değiştirilmedi.' };
+                    return { ok: false, error: i18n.t('editor.columnError.loop') };
                 }
                 if (g.col >= c0 && g.col + g.span <= c1) removeOrds.add(ord);
                 else shrink.set(ord, { from: g.span, to: g.span - overlap });
@@ -298,7 +299,7 @@ export function editColumn(xslt: string, { cell, table }: LineTableCell, action:
         }
     }
 
-    if (!removeOrds.size) return { ok: false, error: 'Kolonda silinecek hücre bulunamadı.' };
+    if (!removeOrds.size) return { ok: false, error: i18n.t('editor.columnError.empty') };
     for (const ord of removeOrds) shrink.delete(ord);
 
     type Op = { start: number; end: number; apply: (s: string) => string };
@@ -312,7 +313,7 @@ export function editColumn(xslt: string, { cell, table }: LineTableCell, action:
         const units: { start: number; end: number }[] = [];
         for (const ord of removeOrds) {
             const tag = resolve(ord, /^t[dh]$/i);
-            if (!tag) return { ok: false, error: 'Kolon hücresi XSLT kaynağında eşleştirilemedi; kolon değiştirilmedi.' };
+            if (!tag) return { ok: false, error: i18n.t('editor.columnError.unmatched') };
             units.push(cellUnit(xslt, tag));
         }
         for (const ord of colRemove) {
@@ -339,7 +340,7 @@ export function editColumn(xslt: string, { cell, table }: LineTableCell, action:
         const seen = new Set<number>();
         for (const ord of removeOrds) {
             const tag = resolve(ord, /^t[dh]$/i);
-            if (!tag) return { ok: false, error: 'Kolon hücresi XSLT kaynağında eşleştirilemedi; kolon değiştirilmedi.' };
+            if (!tag) return { ok: false, error: i18n.t('editor.columnError.unmatched') };
             for (const c of cellUnit(xslt, tag).cells) {
                 if (seen.has(c.start)) continue;
                 seen.add(c.start);

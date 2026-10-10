@@ -30,6 +30,7 @@ export function buildInvoiceDraft(input: {
     merchantOid?: string | null;
     issueDate: string;
     website?: string | null;
+    currency?: 'TRY' | 'EUR' | 'GBP';
     documentMode?: DocumentMode;
     note?: string;
 }): {

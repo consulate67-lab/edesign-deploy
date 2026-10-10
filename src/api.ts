@@ -450,10 +450,11 @@ export const api = {
     paytrCheckout: (
         plan: 'one' | 'basic' | 'pro',
         billing: { partyType: 'company' | 'sole'; title: string; taxId: string; taxOffice: string; city: string; address: string },
+        currency: 'TRY' | 'EUR' | 'GBP' = 'TRY',
     ): Promise<{ merchantOid: string; iframeUrl: string; testMode: boolean }> =>
         api.request('/payment/paytr/checkout', {
             method: 'POST',
-            body: JSON.stringify({ plan, billing, returnUrl: window.location.origin + window.location.pathname }),
+            body: JSON.stringify({ plan, billing, currency, returnUrl: window.location.origin + window.location.pathname }),
         }),
     paytrStatus: (merchantOid: string): Promise<{ status: 'pending' | 'success' | 'failed'; credits: number | null }> =>
         api.request(`/payment/paytr/status/${encodeURIComponent(merchantOid)}`),

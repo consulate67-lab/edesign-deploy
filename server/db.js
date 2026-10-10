@@ -411,6 +411,10 @@ const createSupportSchema = async (client) => {
         )
     `);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_assistant_kb_status ON assistant_kb (status)`);
+    // Asistan arayüz dilinde yanıt verir; önbellek ve öğrenilen kayıtlar dile (ve fiyat para birimine) göre ayrılır.
+    await ensureTableColumn(client, 'assistant_log', 'lang', `TEXT NOT NULL DEFAULT 'tr'`);
+    await ensureTableColumn(client, 'assistant_log', 'currency', `TEXT NOT NULL DEFAULT 'TRY'`);
+    await ensureTableColumn(client, 'assistant_kb', 'lang', `TEXT NOT NULL DEFAULT 'tr'`);
 };
 
 /**

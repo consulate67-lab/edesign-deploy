@@ -201,6 +201,7 @@ export const registerAdminRoutes = (app, { db, requireAdmin, packages = {}, webs
         const known = packages[row.plan_id];
         const draft = buildInvoiceDraft({
             plan: { name: known?.name || row.plan_id, credits: known?.credits ?? 0, price: row.amount },
+            currency: row.currency || 'TRY',
             billing: parsed.billing,
             user: row,
             merchantOid: row.conversation_id,

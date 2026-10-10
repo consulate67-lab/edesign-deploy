@@ -27,13 +27,14 @@ import eFaturaSablonRaw from '../public/ebelge/gib/v2/e-Fatura-Sablon.xslt?raw';
 import eArsivSablonRaw from '../public/ebelge/gib/v2/e-Arsiv-Sablon.xslt?raw';
 // e-SMM: GİB resmi XSLT yayımlamadığı için 509 IV.4.3 ve Karekod Standardı 2.4'e göre hazırlandı
 import eSmmSablonRaw from '../public/ebelge/gib/v2/e-SMM-Sablon.xslt?raw';
+// UBL Receipt yapısı için profesyonel e-Makbuz görünümü
+import eMakbuzSablonRaw from '../public/ebelge/gib/v2/e-Makbuz-Sablon.xslt?raw';
 // Topluluk fallback'leri — 7 modul icin (Faz A.1.2)
 import irsaliyeAracliRaw from '../public/ebelge/community/IRPTeam-eWaybill-Irsaliye-Aracli.xslt?raw';
 import iracatRaw from '../public/ebelge/community/IRPTeam-eFatura.xslt?raw';
 import smmRaw from '../public/ebelge/community/hzkucuk-eFatura-smm.xslt?raw';
 import mustahsilRaw from '../public/ebelge/community/hzkucuk-eFatura-mustahsil.xslt?raw';
 import biletRaw from '../public/ebelge/community/hzkucuk-eFatura-bilet.xslt?raw';
-import makbuzRaw from '../public/ebelge/community/hzkucuk-eFatura-makbuz.xslt?raw';
 // e-Bilet paketi (ebilet.xsd) XSLT içermez; rapor, yolcu listesi ve görsel bilet şablonları e-Bilet kılavuzları ve 509 IV.7'ye göre hazırlandı
 import ebiletRaporRaw from '../public/ebelge/ebilet/ebilet-rapor.xslt?raw';
 import ebiletYolcuListesiRaw from '../public/ebelge/ebilet/ebilet-yolcu-listesi.xslt?raw';
@@ -46,6 +47,8 @@ import gibDovizAlimRaw from '../public/ebelge/gib/doviz-maden-alim.xslt?raw';
 import gibDovizSatimRaw from '../public/ebelge/gib/doviz-maden-satim.xslt?raw';
 import gibDekontRaw from '../public/ebelge/gib/dekont.xslt?raw';
 import gibSigortaKomisyonRaw from '../public/ebelge/gib/sigorta-komisyon-gider.xslt?raw';
+import intlInvoiceRaw from '../public/ebelge/intl/en16931-invoice.xslt?raw';
+import intlDespatchRaw from '../public/ebelge/intl/peppol-despatch-advice.xslt?raw';
 
 export const INLINE_XSLT_CONTENT: Record<string, string> = {
     'gib/general.xslt': gibGeneralRaw,
@@ -56,16 +59,16 @@ export const INLINE_XSLT_CONTENT: Record<string, string> = {
     'gib/v2/e-Fatura-Sablon.xslt': eFaturaSablonRaw,
     'gib/v2/e-Arsiv-Sablon.xslt': eArsivSablonRaw,
     'gib/v2/e-SMM-Sablon.xslt': eSmmSablonRaw,
+    'gib/v2/e-Makbuz-Sablon.xslt': eMakbuzSablonRaw,
     // Faz A.1.2 — topluluk XSLT'leri (community/)
     // e-İrsaliye: aracli versiyon (sürücü/mal kabul yeri eklemeli)
     'community/IRPTeam-eWaybill-Irsaliye-Aracli.xslt': irsaliyeAracliRaw,
     // e-İhracat ve e-Mikro İhracat: ayni XSLT (Invoice-2 bazli)
     'community/IRPTeam-eFatura.xslt': iracatRaw,
-    // e-SMM, e-Müstahsil, e-Bilet, e-Makbuz: hzkucuk topluluk XSLT'leri
+    // e-SMM, e-Müstahsil ve e-Bilet: hzkucuk topluluk XSLT'leri
     'community/hzkucuk-eFatura-smm.xslt': smmRaw,
     'community/hzkucuk-eFatura-mustahsil.xslt': mustahsilRaw,
     'community/hzkucuk-eFatura-bilet.xslt': biletRaw,
-    'community/hzkucuk-eFatura-makbuz.xslt': makbuzRaw,
     'ebilet/ebilet-rapor.xslt': ebiletRaporRaw,
     'ebilet/ebilet-yolcu-listesi.xslt': ebiletYolcuListesiRaw,
     'ebilet/ebilet-gorsel.xslt': ebiletGorselRaw,
@@ -75,6 +78,9 @@ export const INLINE_XSLT_CONTENT: Record<string, string> = {
     'gib/doviz-maden-satim.xslt': gibDovizSatimRaw,
     'gib/dekont.xslt': gibDekontRaw,
     'gib/sigorta-komisyon-gider.xslt': gibSigortaKomisyonRaw,
+    // Avrupa profilleri (EN 16931 / Peppol / XRechnung); etiket dili lang parametresiyle seçilir.
+    'intl/en16931-invoice.xslt': intlInvoiceRaw,
+    'intl/peppol-despatch-advice.xslt': intlDespatchRaw,
 };
 
 /**

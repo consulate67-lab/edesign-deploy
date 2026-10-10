@@ -7,6 +7,7 @@ import { TemplateQuestions, type QuestionStep, type TemplateAnswers } from './Te
 import { WIZARD_DOC_TYPES, loadXmlFile } from '../wizard/docTypes';
 import { stripLeadingBom } from '../xslt-editor/utils/testWatermark';
 import { transformXmlWithXslt } from '../xsltTransformer';
+import i18n, { useLocaleT } from '../i18n';
 import { theme } from '../theme';
 
 type UseHandler = (moduleId?: string, initialXslt?: string, docName?: string, xml?: string) => void;
@@ -32,7 +33,7 @@ const loadText = (path: string): Promise<string> => {
         p = loadXmlFile(path).then(raw => {
             const text = stripLeadingBom(raw);
             if (!text.trim().startsWith('<') || /^\s*<!doctype html/i.test(text)) {
-                throw new Error(`Şablon dosyası bulunamadı: ${path.split('/').pop()}`);
+                throw new Error(i18n.t('gallery.fileNotFound', { name: path.split('/').pop() }));
             }
             return text;
         });
@@ -141,6 +142,7 @@ const Tags: React.FC<{ tags: string[]; color: string }> = ({ tags, color }) => (
 
 /** Kart görünür olunca şablonu örnek XML'iyle çizer; iframe A4 genişliğinde render edilip karta sığacak şekilde küçültülür. */
 const Thumbnail: React.FC<{ t: SectorTemplate; prefs: TemplatePrefs }> = ({ t, prefs }) => {
+    const { t: tr } = useLocaleT();
     const boxRef = useRef<HTMLDivElement>(null);
     const [visible, setVisible] = useState(false);
     const [width, setWidth] = useState(300);
@@ -176,7 +178,7 @@ const Thumbnail: React.FC<{ t: SectorTemplate; prefs: TemplatePrefs }> = ({ t, p
         <div ref={boxRef} data-template-thumb={t.id} style={{ position: 'relative', height: THUMB_H, overflow: 'hidden', background: '#fff' }}>
             {html && (
                 <iframe
-                    title={`${t.name} önizleme`}
+                    title={tr('gallery.previewTitle', { name: t.name })}
                     srcDoc={html}
                     sandbox="allow-scripts"
                     tabIndex={-1}
@@ -197,7 +199,7 @@ const Thumbnail: React.FC<{ t: SectorTemplate; prefs: TemplatePrefs }> = ({ t, p
             )}
             {failed && (
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: theme.textSubtle, fontSize: 12 }}>
-                    Önizleme yüklenemedi
+                    {tr('gallery.previewFailed')}
                 </div>
             )}
             <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 56, background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(15,23,42,0.12) 100%)', pointerEvents: 'none' }} />
@@ -213,6 +215,7 @@ const TemplateCard: React.FC<{
     onPreview: () => void;
     onUse: () => void;
 }> = ({ t, prefs, busy, error, onPreview, onUse }) => {
+    const { t: tr } = useLocaleT();
     const [hover, setHover] = useState(false);
     const sectorColor = SECTOR_BY_ID.get(t.sector)?.color ?? t.accent;
     return (
@@ -220,7 +223,7 @@ const TemplateCard: React.FC<{
             data-template-card={t.id}
             role="button"
             tabIndex={0}
-            title="Bu şablonla tasarım ekranını aç"
+            title={tr('gallery.openTitle')}
             onClick={onUse}
             onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onUse(); } }}
             onMouseEnter={() => setHover(true)}
@@ -250,7 +253,7 @@ const TemplateCard: React.FC<{
                             display: 'inline-block', verticalAlign: 2, marginRight: 6, padding: '1px 7px', borderRadius: 999,
                             background: 'linear-gradient(135deg, #f97316, #ec4899)', color: 'white', fontSize: '0.62rem', fontWeight: 800, letterSpacing: 0.3,
                         }}>
-                            Yeni
+                            {tr('gallery.new')}
                         </span>
                     )}
                     {t.name}
@@ -270,7 +273,7 @@ const TemplateCard: React.FC<{
                         onClick={e => { e.stopPropagation(); onPreview(); }}
                         style={secondaryBtn}
                     >
-                        <Eye size={14} /> Önizle
+                        <Eye size={14} /> {tr('gallery.preview')}
                     </button>
                     <button
                         type="button"
@@ -279,7 +282,7 @@ const TemplateCard: React.FC<{
                         onClick={e => { e.stopPropagation(); onUse(); }}
                         style={{ ...btn(`linear-gradient(135deg, ${t.accent}, ${sectorColor})`), marginLeft: 'auto', opacity: busy ? 0.7 : 1 }}
                     >
-                        {busy ? <Loader2 size={14} className="tg-spin" /> : <ArrowRight size={14} />} Tasarla
+                        {busy ? <Loader2 size={14} className="tg-spin" /> : <ArrowRight size={14} />} {tr('gallery.design')}
                     </button>
                 </div>
             </div>
@@ -290,7 +293,7 @@ const TemplateCard: React.FC<{
                     color: theme.text, fontSize: '0.85rem', fontWeight: 700,
                 }}>
                     <Loader2 size={28} className="tg-spin" color={t.accent} />
-                    Tasarım ekranı açılıyor…
+                    {tr('gallery.opening')}
                 </div>
             )}
         </div>
@@ -305,6 +308,7 @@ const TemplateModal: React.FC<{
     onClose: () => void;
     onUse: () => void;
 }> = ({ t, prefs, busy, error, onClose, onUse }) => {
+    const { t: tr } = useLocaleT();
     const [tab, setTab] = useState<'preview' | 'xml'>('preview');
     const [html, setHtml] = useState<string | null>(null);
     const [xml, setXml] = useState<string | null>(null);
@@ -370,7 +374,7 @@ const TemplateModal: React.FC<{
                     </div>
                     <button
                         type="button"
-                        title="Kapat (Esc)"
+                        title={tr('gallery.close')}
                         data-template-modal-close
                         onClick={onClose}
                         style={{
@@ -382,8 +386,8 @@ const TemplateModal: React.FC<{
                     </button>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 20px', borderTop: `1px solid ${theme.border}`, borderBottom: `1px solid ${theme.border}`, flexWrap: 'wrap' }}>
-                    {tabBtn('preview', <><Eye size={14} /> Önizleme</>)}
-                    {tabBtn('xml', <><Code2 size={14} /> Örnek XML</>)}
+                    {tabBtn('preview', <><Eye size={14} /> {tr('gallery.tabPreview')}</>)}
+                    {tabBtn('xml', <><Code2 size={14} /> {tr('gallery.tabXml')}</>)}
                     <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
                         {error && <span style={{ color: theme.redText, fontSize: '0.78rem' }}>{error}</span>}
                         {tab === 'xml' && (
@@ -394,7 +398,7 @@ const TemplateModal: React.FC<{
                                 onClick={() => xml && downloadText(xml, `${t.id}.xml`)}
                                 style={{ ...secondaryBtn, opacity: xml ? 1 : 0.5 }}
                             >
-                                <Download size={14} /> XML&apos;i indir
+                                <Download size={14} /> {tr('gallery.downloadXml')}
                             </button>
                         )}
                         <button
@@ -404,30 +408,30 @@ const TemplateModal: React.FC<{
                             onClick={onUse}
                             style={{ ...btn(`linear-gradient(135deg, ${t.accent}, ${sectorColor})`), padding: '8px 16px', fontSize: '0.85rem', boxShadow: `0 6px 18px ${t.accent}44` }}
                         >
-                            {busy ? <Loader2 size={15} className="tg-spin" /> : <ArrowRight size={15} />} Bu şablonla tasarla
+                            {busy ? <Loader2 size={15} className="tg-spin" /> : <ArrowRight size={15} />} {tr('gallery.useTemplate')}
                         </button>
                     </div>
                 </div>
                 <div style={{ flex: 1, minHeight: 0, position: 'relative', background: tab === 'preview' ? '#e2e8f0' : theme.surfaceAlt }}>
                     {loadError && (
-                        <div style={{ padding: 24, color: theme.redText }}>Şablon yüklenemedi: {loadError}</div>
+                        <div style={{ padding: 24, color: theme.redText }}>{tr('gallery.loadFailed', { error: loadError })}</div>
                     )}
                     {!loadError && tab === 'preview' && (html
-                        ? <iframe data-template-modal-preview title={`${t.name} önizleme`} srcDoc={html} sandbox="allow-scripts" style={{ width: '100%', height: '100%', border: 0, background: '#fff' }} />
-                        : <div style={{ padding: 24, color: theme.textMuted, display: 'flex', alignItems: 'center', gap: 8 }}><Loader2 size={16} className="tg-spin" /> Önizleme hazırlanıyor…</div>
+                        ? <iframe data-template-modal-preview title={tr('gallery.previewTitle', { name: t.name })} srcDoc={html} sandbox="allow-scripts" style={{ width: '100%', height: '100%', border: 0, background: '#fff' }} />
+                        : <div style={{ padding: 24, color: theme.textMuted, display: 'flex', alignItems: 'center', gap: 8 }}><Loader2 size={16} className="tg-spin" /> {tr('gallery.preparing')}</div>
                     )}
                     {!loadError && tab === 'xml' && (
                         <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column' }}>
                             <div style={{ padding: '8px 16px', fontSize: '0.75rem', color: theme.textSubtle, borderBottom: `1px solid ${theme.border}`, background: theme.surface }}>
                                 {t.xml.split('/').pop()}
-                                {xml && ` · ${xml.split('\n').length} satır · ${(new Blob([xml]).size / 1024).toFixed(1)} KB`}
-                                {' · '}Önizlemede kullanılan örnek veri; tasarım ekranında kendi XML&apos;inizle değiştirebilirsiniz.
+                                {xml && ` · ${tr('gallery.lines', { count: xml.split('\n').length })} · ${(new Blob([xml]).size / 1024).toFixed(1)} KB`}
+                                {' · '}{tr('gallery.sampleNote')}
                             </div>
                             <pre data-template-xml style={{
                                 flex: 1, margin: 0, overflow: 'auto', padding: 16, fontSize: 12, lineHeight: 1.5,
                                 fontFamily: 'Consolas, "Cascadia Code", Menlo, monospace', color: theme.primary, whiteSpace: 'pre',
                             }}>
-                                {xml ?? 'Yükleniyor…'}
+                                {xml ?? tr('gallery.loading')}
                             </pre>
                         </div>
                     )}
@@ -477,13 +481,13 @@ const docOptions = (items: SectorTemplate[]): FilterOption[] => WIZARD_DOC_TYPES
     return count ? [{ id: d.id, label: d.label, color: d.color ?? '#64748b', count, depth: 0 as const }] : [];
 });
 
-const companyOptions = (items: SectorTemplate[]): FilterOption[] => CATEGORIES.flatMap(c => {
+const companyOptions = (items: SectorTemplate[], categoryLabel: (id: CategoryId) => string): FilterOption[] => CATEGORIES.flatMap(c => {
     const sectors = SECTORS.filter(s => s.category === c.id).flatMap(s => {
         const count = items.filter(t => t.sector === s.id).length;
         return count ? [{ id: `s:${s.id}`, label: s.label, color: s.color, count, depth: 1 as const }] : [];
     });
     const count = sectors.reduce((n, s) => n + s.count, 0);
-    return count ? [{ id: `c:${c.id}`, label: c.label, color: c.color, count, depth: 0 as const }, ...sectors] : [];
+    return count ? [{ id: `c:${c.id}`, label: categoryLabel(c.id), color: c.color, count, depth: 0 as const }, ...sectors] : [];
 });
 
 const FilterDropdown: React.FC<{
@@ -495,6 +499,7 @@ const FilterDropdown: React.FC<{
     total: number;
     onChange: (id: string) => void;
 }> = ({ name, title, icon, value, options, total, onChange }) => {
+    const { t } = useLocaleT();
     const [open, setOpen] = useState(false);
     const rootRef = useRef<HTMLDivElement>(null);
     const current = options.find(o => o.id === value);
@@ -529,7 +534,7 @@ const FilterDropdown: React.FC<{
                 {o
                     ? <span style={{ width: o.depth ? 7 : 10, height: o.depth ? 7 : 10, borderRadius: o.depth ? 999 : 3, background: color, flexShrink: 0 }} />
                     : <LayoutTemplate size={13} color={theme.primary} style={{ flexShrink: 0 }} />}
-                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{o?.label ?? 'Tümü'}</span>
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{o?.label ?? t('gallery.all')}</span>
                 <span style={{
                     marginLeft: 'auto', fontSize: '0.66rem', padding: '1px 7px', borderRadius: 999, flexShrink: 0,
                     background: active ? color : theme.surfaceAlt, color: active ? 'white' : theme.textSubtle,
@@ -559,7 +564,7 @@ const FilterDropdown: React.FC<{
             >
                 {icon}
                 <span style={{ color: theme.textSubtle, fontWeight: 600 }}>{title}:</span>
-                <span data-filter-value={name} style={{ fontWeight: 800, overflow: 'hidden', textOverflow: 'ellipsis' }}>{current?.label ?? 'Tümü'}</span>
+                <span data-filter-value={name} style={{ fontWeight: 800, overflow: 'hidden', textOverflow: 'ellipsis' }}>{current?.label ?? t('gallery.all')}</span>
                 <ChevronDown size={14} color={theme.textSubtle} style={{ flexShrink: 0, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
             </button>
             {open && (
@@ -571,7 +576,7 @@ const FilterDropdown: React.FC<{
                     {option(null)}
                     <div style={{ height: 1, background: theme.border, margin: '4px 6px' }} />
                     {options.length ? options.map(o => option(o)) : (
-                        <div style={{ padding: 10, color: theme.textSubtle, fontSize: '0.8rem' }}>Bu filtrelerle eşleşen seçenek yok.</div>
+                        <div style={{ padding: 10, color: theme.textSubtle, fontSize: '0.8rem' }}>{t('gallery.noOptions')}</div>
                     )}
                 </div>
             )}
@@ -596,36 +601,39 @@ const PrefsBar: React.FC<{
     onChangeLogo: () => void;
     onClearBank: () => void;
     onRestart: () => void;
-}> = ({ prefs, onChangeLogo, onClearBank, onRestart }) => (
+}> = ({ prefs, onChangeLogo, onClearBank, onRestart }) => {
+    const { t } = useLocaleT();
+    return (
     <div data-template-prefs style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
-        <span style={{ fontSize: '0.78rem', color: theme.textMuted, fontWeight: 700 }}>Tercihleriniz:</span>
+        <span style={{ fontSize: '0.78rem', color: theme.textMuted, fontWeight: 700 }}>{t('gallery.prefs')}</span>
         <span style={chipStyle} data-pref-logo={prefs.logo.mode}>
             {prefs.logo.mode === 'custom' ? (
-                <><img src={prefs.logo.dataUrl} alt="" style={{ height: 16, maxWidth: 40, objectFit: 'contain' }} /> Logonuz</>
+                <><img src={prefs.logo.dataUrl} alt="" style={{ height: 16, maxWidth: 40, objectFit: 'contain' }} /> {t('gallery.yourLogo')}</>
             ) : prefs.logo.mode === 'none' ? (
-                <><ImageOff size={13} color={theme.textMuted} /> Logosuz</>
+                <><ImageOff size={13} color={theme.textMuted} /> {t('gallery.noLogo')}</>
             ) : (
-                <><ImageIcon size={13} color={theme.textMuted} /> Örnek logo</>
+                <><ImageIcon size={13} color={theme.textMuted} /> {t('gallery.sampleLogo')}</>
             )}
         </span>
         {prefs.bank !== 'any' && (
             <span style={chipStyle} data-pref-bank={prefs.bank}>
                 {prefs.bank === 'yes'
-                    ? <><Landmark size={13} color="#0f766e" /> Banka / IBAN bilgili</>
-                    : <><Ban size={13} color="#b45309" /> Banka bilgisi yok</>}
-                <button type="button" aria-label="Banka tercihini kaldır" onClick={onClearBank} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', color: theme.textSubtle }}>
+                    ? <><Landmark size={13} color="#0f766e" /> {t('gallery.bankYes')}</>
+                    : <><Ban size={13} color="#b45309" /> {t('gallery.bankNo')}</>}
+                <button type="button" aria-label={t('gallery.clearBank')} onClick={onClearBank} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', color: theme.textSubtle }}>
                     <X size={12} />
                 </button>
             </span>
         )}
         <button type="button" data-pref-change-logo onClick={onChangeLogo} style={linkBtn}>
-            <ImageIcon size={13} /> Logoyu değiştir
+            <ImageIcon size={13} /> {t('gallery.changeLogo')}
         </button>
         <button type="button" data-pref-restart onClick={onRestart} style={{ ...linkBtn, marginLeft: 'auto' }}>
-            <SlidersHorizontal size={13} /> Dizaynımı hazırla
+            <SlidersHorizontal size={13} /> {t('gallery.restart')}
         </button>
     </div>
-);
+    );
+};
 
 /**
  * Sektöre göre hazır tasarım galerisi: arama kutusunun yanında Fatura tipi ve
@@ -634,6 +642,7 @@ const PrefsBar: React.FC<{
  * tasarım ekranında açılır.
  */
 export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => {
+    const { t: tr } = useLocaleT();
     const [docType, setDocType] = useState('');
     const [company, setCompany] = useState('');
     const [meslek, setMeslek] = useState('');
@@ -679,7 +688,7 @@ export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => 
     const forMeslek = useMemo(() => searched.filter(t => (!docType || t.docTypeId === docType) && matchesCompany(t, company)), [searched, docType, company]);
     const filtered = useMemo(() => forDoc.filter(t => !docType || t.docTypeId === docType), [forDoc, docType]);
     const docOpts = useMemo(() => docOptions(forDoc), [forDoc]);
-    const companyOpts = useMemo(() => companyOptions(forCompany), [forCompany]);
+    const companyOpts = useMemo(() => companyOptions(forCompany, id => tr(`gallery.categories.${id}`)), [forCompany, tr]);
     const meslekOpts = useMemo(() => meslekOptions(forMeslek), [forMeslek]);
     const anyFilter = !!(docType || company || meslek || q);
     const clearAll = () => { setDocType(''); setCompany(''); setMeslek(''); setQuery(''); };
@@ -728,9 +737,9 @@ export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => 
                     <LayoutTemplate size={24} color="white" />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                    <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>Sektörünüze Hazır Şablonlar</h2>
+                    <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>{tr('gallery.title')}</h2>
                     <p style={{ margin: '4px 0 0', color: theme.textMuted, fontSize: 14, lineHeight: 1.5 }}>
-                        Birkaç soruyu yanıtlayın; size uygun şablonları logonuzla birlikte gösterelim ve tek tıkla tasarım ekranında açın.
+                        {tr('gallery.intro')}
                     </p>
                 </div>
             </div>
@@ -762,7 +771,7 @@ export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => 
                         data-template-search
                         value={query}
                         onChange={e => setQuery(e.target.value)}
-                        placeholder="Şablon, belge türü veya etiket ara"
+                        placeholder={tr('gallery.search')}
                         style={{
                             width: '100%', boxSizing: 'border-box', padding: '8px 30px 8px 33px', borderRadius: 999,
                             border: `1px solid ${theme.borderStrong}`, background: '#fff',
@@ -771,7 +780,7 @@ export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => 
                         }}
                     />
                     {query && (
-                        <button type="button" aria-label="Aramayı temizle" onClick={() => setQuery('')} style={{
+                        <button type="button" aria-label={tr('gallery.clearSearch')} onClick={() => setQuery('')} style={{
                             position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none',
                             color: theme.textSubtle, cursor: 'pointer', display: 'flex', padding: 2,
                         }}>
@@ -781,7 +790,7 @@ export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => 
                 </div>
                 <FilterDropdown
                     name="doc"
-                    title="Fatura tipi"
+                    title={tr('gallery.filterDoc')}
                     icon={<FileText size={14} color={theme.primary} style={{ flexShrink: 0 }} />}
                     value={docType}
                     options={docOpts}
@@ -790,7 +799,7 @@ export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => 
                 />
                 <FilterDropdown
                     name="company"
-                    title="Firma kategorisi"
+                    title={tr('gallery.filterCompany')}
                     icon={<Building2 size={14} color={theme.primary} style={{ flexShrink: 0 }} />}
                     value={company}
                     options={companyOpts}
@@ -799,7 +808,7 @@ export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => 
                 />
                 <FilterDropdown
                     name="meslek"
-                    title="Meslek"
+                    title={tr('gallery.filterProfession')}
                     icon={<Briefcase size={14} color={theme.primary} style={{ flexShrink: 0 }} />}
                     value={meslek}
                     options={meslekOpts}
@@ -807,14 +816,14 @@ export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => 
                     onChange={setMeslek}
                 />
                 <span data-template-count style={{ marginLeft: 'auto', fontSize: '0.8rem', color: theme.textMuted, whiteSpace: 'nowrap' }}>
-                    <b style={{ color: theme.text }}>{filtered.length}</b> şablon
+                    <b style={{ color: theme.text }}>{filtered.length}</b> {tr('gallery.templates', { count: filtered.length })}
                 </span>
                 {anyFilter && (
                     <button type="button" data-template-clear onClick={clearAll} style={{
                         display: 'inline-flex', alignItems: 'center', gap: 5, background: 'none', border: 'none', color: theme.primary,
                         cursor: 'pointer', fontFamily: 'inherit', fontSize: '0.8rem', fontWeight: 700, padding: '4px 2px',
                     }}>
-                        <RotateCcw size={13} /> Temizle
+                        <RotateCcw size={13} /> {tr('gallery.clear')}
                     </button>
                 )}
             </div>
@@ -835,13 +844,13 @@ export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => 
                 </div>
             ) : (
                 <div style={{ padding: '28px 16px', textAlign: 'center', color: theme.textSubtle, fontSize: '0.9rem' }}>
-                    Bu filtrelere uyan şablon yok.{' '}
+                    {tr('gallery.noMatch')}{' '}
                     <button
                         type="button"
                         onClick={clearAll}
                         style={{ background: 'none', border: 'none', color: theme.primary, cursor: 'pointer', fontFamily: 'inherit', fontSize: 'inherit', textDecoration: 'underline' }}
                     >
-                        Filtreleri temizle
+                        {tr('gallery.clearFilters')}
                     </button>
                     {prefs.bank === 'yes' && (
                         <>
@@ -851,7 +860,7 @@ export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => 
                                 onClick={() => updatePrefs({ ...prefs, bank: 'any' })}
                                 style={{ background: 'none', border: 'none', color: theme.primary, cursor: 'pointer', fontFamily: 'inherit', fontSize: 'inherit', textDecoration: 'underline' }}
                             >
-                                Banka bilgisi şartını kaldır
+                                {tr('gallery.dropBank')}
                             </button>
                         </>
                     )}

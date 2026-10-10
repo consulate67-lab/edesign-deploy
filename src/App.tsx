@@ -5,6 +5,7 @@ import { ToastHost } from './store/ToastHost.tsx';
 import { useUiStore } from './store/uiStore';
 import { Landing } from './Landing.tsx';
 import { theme } from './theme';
+import i18n from './i18n';
 
 // Route-level code splitting: each screen ships in its own chunk so the
 // initial bundle stays small. The designer (~150KB after minify) is the
@@ -39,7 +40,7 @@ const ScreenFallback: React.FC<{ light?: boolean }> = ({ light }) => (
             fontSize: 14,
         }}
     >
-        Yükleniyor...
+        {i18n.t('common.loading')}
     </div>
 );
 
@@ -192,7 +193,7 @@ const App: React.FC = () => {
     const handleSelectXsltEditor = (moduleId?: string, initialXslt?: string, docName?: string, xml?: string, designId?: number) => {
         setSelectedDoc({
             moduleId: moduleId || 'fatura',
-            moduleName: docName || 'XSLT Tasarim',
+            moduleName: docName || '',
             template: 'XsltEditor',
             customContent: initialXslt,
             themeColor: '#1e3a8a',

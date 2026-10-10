@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { cleanText, optionalText, parseId } from './util.js';
 import { buildSeedKb, SUGGESTIONS } from './assistant-kb.js';
+import { buildIntlSeedKb, INTL_LANGS, INTL_SUGGESTIONS } from './assistant-kb-intl.js';
 
 const AI_KEY = process.env.ASSISTANT_AI_KEY || process.env.GEMINI_API_KEY || '';
 const AI_URL = process.env.ASSISTANT_AI_URL || 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
@@ -13,17 +14,72 @@ const ACTIONS = ['register', 'login', 'pricing', 'docs', 'faq', 'product', 'cont
 const KB_DIRECT = 0.45;
 const KB_HINT = 0.18;
 
+/* ------------------------------------------------------------------ dil */
+
+/** Asistan, sitenin üstündeki arayüz dilinde konuşur; Türkçe dışında fiyatlar EUR / GBP. */
+const LANGS = ['tr', ...INTL_LANGS];
+const LANG_NAMES = { tr: 'Türkçe', en: 'İngilizce (English)', de: 'Almanca (Deutsch)', fr: 'Fransızca (Français)', es: 'İspanyolca (Español)' };
+
+const parseLocale = (lang, currency) => {
+    const l = LANGS.includes(lang) ? lang : 'tr';
+    return { lang: l, currency: l === 'tr' ? 'TRY' : currency === 'GBP' ? 'GBP' : 'EUR' };
+};
+
+const suggestionsFor = (lang) => (lang === 'tr' ? SUGGESTIONS : INTL_SUGGESTIONS[lang]);
+
+const MESSAGES = {
+    tr: {
+        length: (max) => `Soru 1-${max} karakter olmalı.`,
+        rate: 'Çok sık soru gönderdiniz; lütfen biraz sonra tekrar deneyin.',
+        hint: 'Sorunuzu tam anlayamadım. Şunlardan birini mi soruyorsunuz?',
+        offTopic: 'Bu konuda yardımcı olamıyorum; ben yalnızca **eBelge Tasarımcı** sitesi, e-belge tasarımı, paketler ve hesabınızla ilgili sorulara yanıt veriyorum. Aşağıdaki konulardan birini seçebilir ya da sorunuzu farklı sözcüklerle yazabilirsiniz.',
+    },
+    en: {
+        length: (max) => `The question must be 1-${max} characters.`,
+        rate: 'You have sent questions too often; please try again in a moment.',
+        hint: 'I didn’t fully understand your question. Did you mean one of these?',
+        offTopic: 'I can’t help with that; I only answer questions about the **e-Document Designer** site, e-document design, packages and your account. Pick one of the topics below or rephrase your question.',
+    },
+    de: {
+        length: (max) => `Die Frage muss 1-${max} Zeichen lang sein.`,
+        rate: 'Sie haben zu oft Fragen gesendet; bitte versuchen Sie es gleich noch einmal.',
+        hint: 'Ich habe Ihre Frage nicht ganz verstanden. Meinten Sie eine dieser Fragen?',
+        offTopic: 'Dabei kann ich nicht helfen; ich beantworte nur Fragen zur Website **E-Beleg-Designer**, zur Gestaltung von E-Belegen, zu Paketen und zu Ihrem Konto. Wählen Sie eines der Themen unten oder formulieren Sie Ihre Frage anders.',
+    },
+    fr: {
+        length: (max) => `La question doit comporter 1 à ${max} caractères.`,
+        rate: 'Vous avez envoyé trop de questions ; réessayez dans un instant.',
+        hint: 'Je n’ai pas bien compris votre question. Vouliez-vous demander l’une de celles-ci ?',
+        offTopic: 'Je ne peux pas vous aider sur ce point ; je réponds uniquement aux questions sur le site **Concepteur d’e-documents**, la conception d’e-documents, les formules et votre compte. Choisissez un sujet ci-dessous ou reformulez votre question.',
+    },
+    es: {
+        length: (max) => `La pregunta debe tener entre 1 y ${max} caracteres.`,
+        rate: 'Has enviado preguntas con demasiada frecuencia; vuelve a intentarlo en un momento.',
+        hint: 'No he entendido bien tu pregunta. ¿Te refieres a alguna de estas?',
+        offTopic: 'No puedo ayudarte con eso; solo respondo preguntas sobre el sitio **Diseñador de e-documentos**, el diseño de e-documentos, los paquetes y tu cuenta. Elige uno de los temas de abajo o reformula tu pregunta.',
+    },
+};
+
 /* ------------------------------------------------------------------ arama */
 
 const TR = { ç: 'c', ğ: 'g', ı: 'i', ö: 'o', ş: 's', ü: 'u', â: 'a', î: 'i', û: 'u' };
 export const normalize = (s) => String(s || '')
     .toLocaleLowerCase('tr-TR')
     .replace(/[çğıöşüâîû]/g, (c) => TR[c])
+    .replace(/ß/g, 'ss')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, ' ')
     .trim();
 
-const STOP = new Set(('ve veya ile bir bu su o da de mi mu ne nasil neden niye icin gibi ben sen biz siz var yok midir ki ya en cok daha '
-    + 'olarak olan olur acaba lutfen bana beni bunu sunu hangi kac nedir nerede nereden zaman yapabilir miyim misiniz istiyorum').split(' '));
+const STOP = new Set([
+    've veya ile bir bu su o da de mi mu ne nasil neden niye icin gibi ben sen biz siz var yok midir ki ya en cok daha',
+    'olarak olan olur acaba lutfen bana beni bunu sunu hangi kac nedir nerede nereden zaman yapabilir miyim misiniz istiyorum',
+    'the a an is are am do does did how what why when where which who can could i me my you your we our it its to of for in on at with and or be this that there have has will would should please about',
+    'der die das den dem des ein eine einen einem ist sind wie was warum wann wo welche wer kann ich mich mein meine sie ihr wir es zu von fur mit und oder bitte auf im an',
+    'le la les un une des du est sont comment quoi quel quelle quels pourquoi quand ou qui je me mon ma mes vous votre nous il elle ce cette pour avec et dans sur au aux puis peux pouvez',
+    'el los las una unos unas es son como que cual cuales por porque cuando donde quien puedo puede mis tu su para con y en del al se',
+].join(' ').split(' '));
 
 /** Türkçe ekler için kaba kök: ilk 6 harf ("faturalarım" → "fatura"). */
 const stem = (t) => (t.length > 6 ? t.slice(0, 6) : t);
@@ -65,8 +121,16 @@ Kurallar:
 - Bilgi bankasında olmayan site sorularında "Bu konuda kesin bilgim yok" de ve destek ekibine yazmayı öner.
 - Site ve e-belge tasarımı dışındaki konularda (genel sohbet, kod yazma, vergi/muhasebe danışmanlığı, başka ürünler vb.) kibarca yalnızca bu site hakkında yardımcı olabileceğini söyle ve ilgili bir site konusuna yönlendir.
 - Selamlama yapma ve kendini tanıtma ("Merhaba", "Ben Sarp" gibi); doğrudan yanıta geç. Yanıtı "Başka bir konuda yardımcı olabilir miyim?" gibi kalıplarla bitirme.
-- Türkçe, samimi ve kısa yanıt ver (en fazla 120 kelime). Adım gerekiyorsa "- " ile madde kullan. Önemli düğme adlarını **kalın** yaz.
+- Samimi ve kısa yanıt ver (en fazla 120 kelime). Adım gerekiyorsa "- " ile madde kullan. Önemli düğme adlarını **kalın** yaz.
 - HTML, başlık, tablo, bağlantı veya URL yazma. Kendinden "yapay zekâ modeli" diye bahsetme.`;
+
+const systemPrompt = (lang, currency) => {
+    const rules = [`- Yanıtı yalnızca ${LANG_NAMES[lang]} dilinde yaz; ziyaretçi başka bir dilde yazsa da bu dili kullan. Düğme adlarını bilgi bankasında yazıldığı gibi kullan.`];
+    if (lang !== 'tr') {
+        rules.push(`- Ziyaretçi sitenin Avrupa sürümünü kullanıyor: Avrupa e-fatura biçimlerini (EN 16931, Peppol BIS 3, XRechnung) anlat; ziyaretçi sormadıkça GİB'den ve Türkiye'ye özgü belge türlerinden bahsetme. Fiyatları bilgi bankasındaki ${currency} tutarlarıyla ver.`);
+    }
+    return `${SYSTEM_PROMPT}\n${rules.join('\n')}`;
+};
 
 /** Bilgi bankası ve talimat her yayında değişebilir; önceki sürümün yapay zekâ yanıtları önbellekten verilmez. */
 const CACHE_SINCE = new Date();
@@ -79,11 +143,11 @@ const aiBudgetLeft = () => {
     return aiCallsCount < AI_DAILY_LIMIT;
 };
 
-const askAi = async (question, history, context) => {
+const askAi = async (question, history, context, locale) => {
     aiCallsCount += 1;
     const kb = context.map((e) => `S: ${e.q}\nC: ${e.a}`).join('\n\n');
     const messages = [
-        { role: 'system', content: `${SYSTEM_PROMPT}\n\nBİLGİ BANKASI:\n${kb}` },
+        { role: 'system', content: `${systemPrompt(locale.lang, locale.currency)}\n\nBİLGİ BANKASI:\n${kb}` },
         ...history.map((h) => ({ role: h.role, content: h.text })),
         { role: 'user', content: question },
     ];
@@ -131,13 +195,33 @@ setInterval(() => {
 
 /* ------------------------------------------------------------ yardımcılar */
 
-const SMALL_TALK = [
-    { re: /^(merhaba|selam|selamlar|hey|iyi gunler|gunaydin|iyi aksamlar|slm|mrb)\b/, a: 'Merhaba! Ben **Sarp**, eBelge Tasarımcı asistanıyım. Site, paketler, tasarım ekranı veya hesabınızla ilgili ne sormak istersiniz?' },
-    { re: /^(tesekkur|tesekkurler|sagol|sag ol|eyvallah|cok sagol|tsk)/, a: 'Rica ederim! Başka bir sorunuz olursa buradayım.' },
-    { re: /^(sen kimsin|kimsin|adin ne|bot musun|robot musun)/, a: 'Ben **Sarp**, bu sitenin yardım asistanıyım. Sitenin nasıl kullanıldığı, paketler, tasarım ve destek konularında yol gösteririm.' },
-];
-
-const OFF_TOPIC = 'Bu konuda yardımcı olamıyorum; ben yalnızca **eBelge Tasarımcı** sitesi, e-belge tasarımı, paketler ve hesabınızla ilgili sorulara yanıt veriyorum. Aşağıdaki konulardan birini seçebilir ya da sorunuzu farklı sözcüklerle yazabilirsiniz.';
+const SMALL_TALK = {
+    tr: [
+        { re: /^(merhaba|selam|selamlar|hey|iyi gunler|gunaydin|iyi aksamlar|slm|mrb)\b/, a: 'Merhaba! Ben **Sarp**, eBelge Tasarımcı asistanıyım. Site, paketler, tasarım ekranı veya hesabınızla ilgili ne sormak istersiniz?' },
+        { re: /^(tesekkur|tesekkurler|sagol|sag ol|eyvallah|cok sagol|tsk)/, a: 'Rica ederim! Başka bir sorunuz olursa buradayım.' },
+        { re: /^(sen kimsin|kimsin|adin ne|bot musun|robot musun)/, a: 'Ben **Sarp**, bu sitenin yardım asistanıyım. Sitenin nasıl kullanıldığı, paketler, tasarım ve destek konularında yol gösteririm.' },
+    ],
+    en: [
+        { re: /^(hi|hello|hey|hiya|good (morning|afternoon|evening))\b/, a: 'Hi! I’m **Sarp**, the e-Document Designer assistant. What would you like to know about the site, packages, the design screen or your account?' },
+        { re: /^(thanks|thank you|thx|cheers|many thanks)/, a: 'You’re welcome! I’m here if you have another question.' },
+        { re: /^(who are you|what is your name|whats your name|are you a bot|are you a robot)/, a: 'I’m **Sarp**, this site’s help assistant. I can guide you through using the site, packages, designing and support.' },
+    ],
+    de: [
+        { re: /^(hallo|hi|hey|guten (morgen|tag|abend)|servus|moin)\b/, a: 'Hallo! Ich bin **Sarp**, der Assistent des E-Beleg-Designers. Was möchten Sie zur Website, zu Paketen, zum Gestaltungsbildschirm oder zu Ihrem Konto wissen?' },
+        { re: /^(danke|vielen dank|dankeschon|merci)/, a: 'Gern geschehen! Bei weiteren Fragen bin ich da.' },
+        { re: /^(wer bist du|wie heisst du|bist du ein bot|bist du ein roboter|wer sind sie)/, a: 'Ich bin **Sarp**, der Hilfeassistent dieser Website. Ich helfe bei der Nutzung der Website, bei Paketen, beim Gestalten und beim Support.' },
+    ],
+    fr: [
+        { re: /^(bonjour|salut|bonsoir|coucou|hello)\b/, a: 'Bonjour ! Je suis **Sarp**, l’assistant du Concepteur d’e-documents. Que souhaitez-vous savoir sur le site, les formules, l’écran de conception ou votre compte ?' },
+        { re: /^(merci|merci beaucoup)/, a: 'Avec plaisir ! Je reste là si vous avez une autre question.' },
+        { re: /^(qui es tu|tu es qui|qui etes vous|comment tu t appelles|es tu un bot|es tu un robot)/, a: 'Je suis **Sarp**, l’assistant d’aide de ce site. Je vous guide sur l’utilisation du site, les formules, la conception et le support.' },
+    ],
+    es: [
+        { re: /^(hola|buenos dias|buenas tardes|buenas noches|buenas|hey)\b/, a: '¡Hola! Soy **Sarp**, el asistente del Diseñador de e-documentos. ¿Qué quieres saber sobre el sitio, los paquetes, la pantalla de diseño o tu cuenta?' },
+        { re: /^(gracias|muchas gracias)/, a: '¡De nada! Aquí estoy si tienes otra pregunta.' },
+        { re: /^(quien eres|como te llamas|eres un bot|eres un robot)/, a: 'Soy **Sarp**, el asistente de ayuda de este sitio. Te oriento sobre el uso del sitio, los paquetes, el diseño y el soporte.' },
+    ],
+};
 
 const ipKey = (req) => createHash('sha256').update(String(req.ip || '')).digest('hex').slice(0, 16);
 
@@ -153,6 +237,7 @@ const parseActions = (raw) => {
 
 const serializeKb = (row) => ({
     id: row.id,
+    lang: row.lang ?? 'tr',
     question: row.question,
     answer: row.answer,
     keywords: row.keywords,
@@ -166,6 +251,7 @@ const serializeKb = (row) => ({
 
 const serializeLog = (row) => ({
     id: row.id,
+    lang: row.lang ?? 'tr',
     question: row.question,
     answer: row.answer,
     mode: row.mode,
@@ -180,30 +266,42 @@ const serializeLog = (row) => ({
 
 export const registerAssistantRoutes = (app, { db, requireAdmin, packages }) => {
     const seeds = buildSeedKb(packages);
-    let index = null;
+    /** Yerleşik kayıtlar ve arama dizini dil + para birimine göre ayrı tutulur. */
+    const seedCache = new Map();
+    const seedsFor = ({ lang, currency }) => {
+        if (lang === 'tr') return seeds;
+        const key = `${lang}:${currency}`;
+        if (!seedCache.has(key)) seedCache.set(key, buildIntlSeedKb(packages, lang, currency));
+        return seedCache.get(key);
+    };
+    const indexes = new Map();
 
-    const loadIndex = async () => {
-        const rows = await db.all(`SELECT * FROM assistant_kb WHERE status = 'active'`);
+    const loadIndex = async (locale) => {
+        const rows = await db.all(`SELECT * FROM assistant_kb WHERE status = 'active' AND lang = ?`, [locale.lang]);
         const learned = rows.map((r) => ({ id: `kb-${r.id}`, dbId: r.id, q: r.question, a: r.answer, keywords: r.keywords || '', actions: r.actions ?? [] }));
-        index = buildIndex([...seeds, ...learned]);
+        const index = buildIndex([...seedsFor(locale), ...learned]);
+        indexes.set(`${locale.lang}:${locale.currency}`, index);
         return index;
     };
-    const getIndex = async () => index ?? loadIndex();
-    const invalidate = () => { index = null; };
+    const getIndex = async (locale) => indexes.get(`${locale.lang}:${locale.currency}`) ?? loadIndex(locale);
+    const invalidate = () => { indexes.clear(); };
 
     const bumpHits = (entry) => {
         if (entry?.dbId) db.run('UPDATE assistant_kb SET hits = hits + 1 WHERE id = ?', [entry.dbId]).catch(() => {});
     };
 
-    app.get('/api/assistant/info', (_req, res) => {
-        res.json({ name: 'Sarp', ai: !!AI_KEY, suggestions: SUGGESTIONS });
+    app.get('/api/assistant/info', (req, res) => {
+        res.json({ name: 'Sarp', ai: !!AI_KEY, suggestions: suggestionsFor(parseLocale(req.query.lang).lang) });
     });
 
     app.post('/api/assistant/ask', async (req, res) => {
+        const locale = parseLocale(req.body?.lang, req.body?.currency);
+        const text = MESSAGES[locale.lang];
+        const defaultSuggestions = suggestionsFor(locale.lang);
         const question = cleanText(req.body?.question, QUESTION_MAX);
-        if (!question) return res.status(400).json({ error: `Soru 1-${QUESTION_MAX} karakter olmalı.` });
+        if (!question) return res.status(400).json({ error: text.length(QUESTION_MAX) });
         if (!allow(ipKey(req))) {
-            return res.status(429).json({ error: 'Çok sık soru gönderdiniz; lütfen biraz sonra tekrar deneyin.' });
+            return res.status(429).json({ error: text.rate });
         }
         const history = parseHistory(req.body?.history);
         const session = optionalText(req.body?.session, 64) || null;
@@ -214,34 +312,36 @@ export const registerAssistantRoutes = (app, { db, requireAdmin, packages }) => 
         let mode = 'kb';
         let actions = [];
         let suggestions = [];
-        const idx = await getIndex();
+        const idx = await getIndex(locale);
         const results = search(idx, question);
         const top = results[0];
         const score = top?.score ?? 0;
 
-        const small = SMALL_TALK.find((s) => s.re.test(norm));
+        const small = SMALL_TALK[locale.lang].find((s) => s.re.test(norm));
         if (small && norm.split(' ').length <= 4) {
             answer = small.a;
             mode = 'smalltalk';
-            suggestions = SUGGESTIONS.slice(0, 4);
+            suggestions = defaultSuggestions.slice(0, 4);
         } else {
             if (!history.length) {
                 const cached = await db.get(
                     `SELECT answer FROM assistant_log
-                      WHERE norm = ? AND mode IN ('ai', 'cache') AND (helpful IS NULL OR helpful > 0)
+                      WHERE norm = ? AND lang = ? AND currency = ? AND mode IN ('ai', 'cache') AND (helpful IS NULL OR helpful > 0)
                         AND created_at > NOW() - INTERVAL '14 days' AND created_at > ?
                       ORDER BY helpful DESC NULLS LAST, created_at DESC LIMIT 1`,
-                    [norm, CACHE_SINCE]
+                    [norm, locale.lang, locale.currency, CACHE_SINCE]
                 );
                 if (cached) { answer = cached.answer; mode = 'cache'; }
             }
             if (!answer && AI_KEY && aiBudgetLeft()) {
                 const context = results.map((r) => r.entry);
+                const pinned = seedsFor(locale);
                 for (const id of ['s-nedir', 's-fiyat', 's-hak']) {
-                    if (!context.some((e) => e.id === id)) context.push(seeds.find((s) => s.id === id));
+                    const seed = pinned.find((s) => s.id === id);
+                    if (seed && !context.some((e) => e.id === id)) context.push(seed);
                 }
                 try {
-                    answer = await askAi(question, history, context);
+                    answer = await askAi(question, history, context, locale);
                     mode = 'ai';
                 } catch (e) {
                     console.warn('[assistant] yapay zekâ yanıtı alınamadı:', e.message);
@@ -252,13 +352,13 @@ export const registerAssistantRoutes = (app, { db, requireAdmin, packages }) => 
                     answer = top.entry.a;
                     mode = 'kb';
                 } else if (score >= KB_HINT) {
-                    answer = 'Sorunuzu tam anlayamadım. Şunlardan birini mi soruyorsunuz?';
+                    answer = text.hint;
                     mode = 'hint';
                     suggestions = results.slice(0, 3).map((r) => r.entry.q);
                 } else {
-                    answer = OFF_TOPIC;
+                    answer = text.offTopic;
                     mode = 'none';
-                    suggestions = SUGGESTIONS.slice(0, 4);
+                    suggestions = defaultSuggestions.slice(0, 4);
                 }
             }
             if (mode !== 'none' && mode !== 'hint' && score >= 0.3) {
@@ -271,9 +371,9 @@ export const registerAssistantRoutes = (app, { db, requireAdmin, packages }) => 
         }
 
         const row = await db.get(
-            `INSERT INTO assistant_log (session, question, norm, answer, mode, score, page, kb_ref)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`,
-            [session, question, norm, answer, mode, Number(score.toFixed(3)), page, top?.entry.id ?? null]
+            `INSERT INTO assistant_log (session, question, norm, answer, mode, score, page, kb_ref, lang, currency)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`,
+            [session, question, norm, answer, mode, Number(score.toFixed(3)), page, top?.entry.id ?? null, locale.lang, locale.currency]
         );
         res.json({ id: row.id, answer, mode, actions, suggestions });
     });
@@ -285,12 +385,12 @@ export const registerAssistantRoutes = (app, { db, requireAdmin, packages }) => 
         const log = await db.get('UPDATE assistant_log SET helpful = ? WHERE id = ? RETURNING *', [helpful, id]);
         if (!log) return res.status(404).json({ error: 'Kayıt bulunamadı.' });
         if (helpful === 1 && (log.mode === 'ai' || log.mode === 'cache')) {
-            const exists = await db.get(`SELECT id FROM assistant_kb WHERE norm = ?`, [log.norm]);
+            const exists = await db.get(`SELECT id FROM assistant_kb WHERE norm = ? AND lang = ?`, [log.norm, log.lang]);
             if (!exists) {
                 await db.run(
-                    `INSERT INTO assistant_kb (question, answer, keywords, actions, status, source, norm, log_id)
-                     VALUES (?, ?, '', '[]'::jsonb, 'pending', 'learned', ?, ?)`,
-                    [log.question, log.answer, log.norm, log.id]
+                    `INSERT INTO assistant_kb (question, answer, keywords, actions, status, source, norm, log_id, lang)
+                     VALUES (?, ?, '', '[]'::jsonb, 'pending', 'learned', ?, ?, ?)`,
+                    [log.question, log.answer, log.norm, log.id, log.lang]
                 );
             }
         }
@@ -333,6 +433,7 @@ export const registerAssistantRoutes = (app, { db, requireAdmin, packages }) => 
             keywords: optionalText(body?.keywords, 500),
             actions: parseActions(body?.actions),
             status: body?.status ?? 'active',
+            lang: LANGS.includes(body?.lang) ? body.lang : null,
         };
         if (!value.question) return { error: `Soru 1-${QUESTION_MAX} karakter olmalı.` };
         if (!value.answer) return { error: `Yanıt 1-${ANSWER_MAX} karakter olmalı.` };
@@ -345,10 +446,11 @@ export const registerAssistantRoutes = (app, { db, requireAdmin, packages }) => 
         const { value, error } = parseKb(req.body);
         if (error) return res.status(400).json({ error });
         const logId = parseId(req.body?.log_id);
+        const lang = value.lang ?? (logId ? (await db.get('SELECT lang FROM assistant_log WHERE id = ?', [logId]))?.lang : null) ?? 'tr';
         const row = await db.get(
-            `INSERT INTO assistant_kb (question, answer, keywords, actions, status, source, norm, log_id)
-             VALUES (?, ?, ?, ?::jsonb, ?, 'admin', ?, ?) RETURNING *`,
-            [value.question, value.answer, value.keywords, JSON.stringify(value.actions), value.status, normalize(value.question), logId]
+            `INSERT INTO assistant_kb (question, answer, keywords, actions, status, source, norm, log_id, lang)
+             VALUES (?, ?, ?, ?::jsonb, ?, 'admin', ?, ?, ?) RETURNING *`,
+            [value.question, value.answer, value.keywords, JSON.stringify(value.actions), value.status, normalize(value.question), logId, lang]
         );
         if (logId) await db.run('UPDATE assistant_log SET resolved = TRUE WHERE id = ?', [logId]);
         invalidate();
@@ -361,9 +463,9 @@ export const registerAssistantRoutes = (app, { db, requireAdmin, packages }) => 
         const { value, error } = parseKb(req.body);
         if (error) return res.status(400).json({ error });
         const row = await db.get(
-            `UPDATE assistant_kb SET question = ?, answer = ?, keywords = ?, actions = ?::jsonb, status = ?, norm = ?, updated_at = NOW()
+            `UPDATE assistant_kb SET question = ?, answer = ?, keywords = ?, actions = ?::jsonb, status = ?, norm = ?, lang = COALESCE(?, lang), updated_at = NOW()
               WHERE id = ? RETURNING *`,
-            [value.question, value.answer, value.keywords, JSON.stringify(value.actions), value.status, normalize(value.question), id]
+            [value.question, value.answer, value.keywords, JSON.stringify(value.actions), value.status, normalize(value.question), value.lang, id]
         );
         if (!row) return res.status(404).json({ error: 'Kayıt bulunamadı.' });
         invalidate();

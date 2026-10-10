@@ -1,4 +1,6 @@
 import { FAMILY_INFO, EFATURA_PROFILE_IDS, type DocFamily, type WizardDocType } from './docTypes';
+import { detectDocumentProfile, europeanInvoiceIssues, findDocumentProfile, peppolDespatchIssues } from '../international';
+import i18n, { currentLocale } from '../i18n';
 
 export type CheckLevel = 'ok' | 'warn' | 'error';
 export interface Check { level: CheckLevel; text: string }
@@ -17,8 +19,11 @@ export const stripBom = (text: string) => text.replace(/^\uFEFF/, '').replace(/^
 function parseXml(text: string): { doc: Document; error: string | null } {
     const doc = new DOMParser().parseFromString(stripBom(text), 'application/xml');
     const err = doc.getElementsByTagName('parsererror')[0];
-    return { doc, error: err ? (err.textContent || 'ayrıştırma hatası').split('\n')[0].slice(0, 160) : null };
+    return { doc, error: err ? (err.textContent || i18n.t('validate.parseError')).split('\n')[0].slice(0, 160) : null };
 }
+
+const familyLabel = (family: DocFamily) =>
+    (i18n.t('wizard.family', { returnObjects: true }) as Record<string, string>)[family] ?? FAMILY_INFO[family].label;
 
 const familiesOfNs = (uri: string | null): DocFamily[] =>
     (Object.keys(FAMILY_INFO) as DocFamily[]).filter(f => FAMILY_INFO[f].ns === uri);
@@ -33,7 +38,7 @@ function tryTransform(xsltDoc: Document, xmlDoc: Document): string | null {
         const proc = new XSLTProcessor();
         proc.importStylesheet(xsltDoc);
         const out = proc.transformToDocument(xmlDoc);
-        if (!out || !out.documentElement) return 'XSLT sonuç üretmedi';
+        if (!out || !out.documentElement) return i18n.t('validate.noOutput');
         return null;
     } catch (e) {
         return e instanceof Error ? e.message : String(e);
@@ -51,16 +56,16 @@ export function validateXslt(text: string, docType: WizardDocType, sampleXml: st
     const checks: Check[] = [];
     const info: [string, string][] = [];
     const { doc, error } = parseXml(text);
-    if (error) return result([{ level: 'error', text: `Dosya geçerli bir XML/XSLT değil: ${error}` }], info);
+    if (error) return result([{ level: 'error', text: i18n.t('validate.notXmlXslt', { error }) }], info);
 
     const root = doc.documentElement;
     if (root.namespaceURI !== XSL_NS || !['stylesheet', 'transform'].includes(root.localName)) {
-        return result([{ level: 'error', text: `Bu dosya bir XSLT değil (kök eleman <${root.nodeName}>; xsl:stylesheet olmalı).` }], info);
+        return result([{ level: 'error', text: i18n.t('validate.notXslt', { root: root.nodeName }) }], info);
     }
-    checks.push({ level: 'ok', text: 'Geçerli XSLT dosyası' });
+    checks.push({ level: 'ok', text: i18n.t('validate.validXslt') });
     const version = root.getAttribute('version') || '1.0';
-    info.push(['XSLT sürümü', version]);
-    info.push(['Şablon (template) sayısı', String(doc.getElementsByTagNameNS(XSL_NS, 'template').length)]);
+    info.push([i18n.t('validate.xsltVersion'), version]);
+    info.push([i18n.t('validate.templateCount'), String(doc.getElementsByTagNameNS(XSL_NS, 'template').length)]);
 
     // Namespace bildirimi belirleyicidir; kopyala-yapıştır kalıntısı eleman
     // adları (ör. irsaliye XSLT'sinde InvoiceLine) yalnızca namespace yoksa sayılır.
@@ -80,13 +85,12 @@ export function validateXslt(text: string, docType: WizardDocType, sampleXml: st
     };
     const candidates = families.size ? [...families] : (Object.keys(usage) as DocFamily[]).filter(f => usage[f] > 0);
     const primary = candidates.sort((a, b) => usage[b] - usage[a] || Number(b === docType.family) - Number(a === docType.family))[0] ?? null;
-    const expected = FAMILY_INFO[docType.family];
     if (primary && primary !== docType.family) {
-        checks.push({ level: 'error', text: `Bu XSLT ${FAMILY_INFO[primary].label} için hazırlanmış; ${docType.label} için ${expected.label} yapısında bir XSLT gerekli.` });
+        checks.push({ level: 'error', text: i18n.t('validate.xsltWrongFamily', { found: familyLabel(primary), doc: docType.label, expected: familyLabel(docType.family) }) });
     } else if (primary) {
-        checks.push({ level: 'ok', text: `Belge yapısı uygun: ${expected.label}` });
+        checks.push({ level: 'ok', text: i18n.t('validate.structureOk', { structure: familyLabel(docType.family) }) });
     } else {
-        checks.push({ level: 'warn', text: 'XSLT belge yapısını belirtmiyor; uygunluk örnek veriyle denenerek kontrol edildi.' });
+        checks.push({ level: 'warn', text: i18n.t('validate.xsltNoFamily') });
     }
 
     if (docType.family === 'invoice') {
@@ -101,15 +105,15 @@ export function validateXslt(text: string, docType: WizardDocType, sampleXml: st
         }
     }
     if (version.startsWith('2') || version.startsWith('3')) {
-        checks.push({ level: 'warn', text: `XSLT ${version} olarak işaretli; tasarımcı 1.0 motoruyla çalıştırır, 2.0'a özel fonksiyonlar çalışmayabilir.` });
+        checks.push({ level: 'warn', text: i18n.t('validate.xsltVersionWarn', { version }) });
     }
 
     if (sampleXml && !checks.some(c => c.level === 'error')) {
         const xml = parseXml(sampleXml);
         const err = xml.error ? null : tryTransform(doc, xml.doc);
         checks.push(err
-            ? { level: 'error', text: `${docType.label} örnek verisiyle çalıştırılamadı: ${err}` }
-            : { level: 'ok', text: `${docType.label} örnek verisiyle başarıyla çalıştı` });
+            ? { level: 'error', text: i18n.t('validate.sampleRunFailed', { doc: docType.label, error: err }) }
+            : { level: 'ok', text: i18n.t('validate.sampleRunOk', { doc: docType.label }) });
     }
     return result(checks, info);
 }
@@ -1041,10 +1045,10 @@ function biletInvoiceRuleChecks(root: Element): string[] {
 
 function xsltRunCheck(xslt: string, doc: Document): Check {
     const x = parseXml(xslt);
-    const err = x.error ? `XSLT okunamadı: ${x.error}` : tryTransform(x.doc, doc);
+    const err = x.error ? i18n.t('validate.xsltUnreadable', { error: x.error }) : tryTransform(x.doc, doc);
     return err
-        ? { level: 'error', text: `Seçilen XSLT bu veriyle çalıştırılamadı: ${err}` }
-        : { level: 'ok', text: 'Seçilen XSLT bu veriyle başarıyla çalıştı' };
+        ? { level: 'error', text: i18n.t('validate.xsltRunFailed', { error: err }) }
+        : { level: 'ok', text: i18n.t('validate.xsltRunOk') };
 }
 
 function receiptAdviceStatus(root: Element): string {
@@ -1055,21 +1059,69 @@ function receiptAdviceStatus(root: Element): string {
     return parts.length ? `Kısmi kabul (${parts.join(', ')})` : 'Kabul';
 }
 
+const EN16931_PREFIX = 'urn:cen.eu:en16931:2017';
+
+/** Avrupa profilleri: profil algılama, EN 16931 / Peppol / XRechnung ya da Peppol DA kuralları. */
+function intlXmlChecks(doc: Document, root: Element, docType: WizardDocType, checks: Check[], info: [string, string][]): void {
+    const selected = findDocumentProfile(docType.intlProfileId ?? '');
+    if (!selected) return;
+    const despatch = docType.family === 'despatch';
+    const detected = detectDocumentProfile(doc);
+    const customization = childText(root, 'CustomizationID');
+    if (!detected) {
+        checks.push({ level: 'warn', text: i18n.t('validate.unknownProfile', { id: customization || i18n.t('validate.empty'), profile: selected.name }) });
+    } else if (detected.profile.id === selected.id) {
+        checks.push({ level: 'ok', text: i18n.t('validate.profileOk', { profile: selected.name }) });
+    } else if (selected.id === 'en16931-ubl' && detected.profile.customizationIds?.some(c => c.startsWith(EN16931_PREFIX))) {
+        checks.push({ level: 'ok', text: i18n.t('validate.subProfileOk', { profile: detected.profile.name }) });
+    } else {
+        checks.push({ level: 'warn', text: i18n.t('validate.otherProfile', { detected: detected.profile.name, profile: selected.name }) });
+    }
+
+    const name = (path: string) => pathText(root, `${path}/Party/PartyName/Name`) || pathText(root, `${path}/Party/PartyLegalEntity/RegistrationName`);
+    const lineTag = despatch ? 'DespatchLine' : root.localName === 'CreditNote' ? 'CreditNoteLine' : 'InvoiceLine';
+    const labels = i18n.t('validate.info', { returnObjects: true });
+    const label = (key: keyof typeof labels) => labels[key];
+    const rows: [string, string][] = [
+        [label('docNo'), childText(root, 'ID')],
+        [label('date'), childText(root, 'IssueDate')],
+        [label('profile'), detected?.profile.name ?? customization],
+        [label('type'), childText(root, 'InvoiceTypeCode') || childText(root, 'CreditNoteTypeCode')],
+        [label('currency'), childText(root, 'DocumentCurrencyCode')],
+        [label(despatch ? 'despatchParty' : 'seller'), name(despatch ? 'DespatchSupplierParty' : 'AccountingSupplierParty')],
+        [label(despatch ? 'deliveryParty' : 'buyer'), name(despatch ? 'DeliveryCustomerParty' : 'AccountingCustomerParty')],
+        [label('lines'), String(pathAll(root, lineTag).length)],
+        despatch ? [label('shipment'), pathText(root, 'Shipment/ID')] : [label('payable'), pathText(root, 'LegalMonetaryTotal/PayableAmount')],
+    ];
+    info.push(...rows.filter(([, v]) => v));
+
+    const lang = currentLocale();
+    const issues = despatch ? peppolDespatchIssues(root, lang) : europeanInvoiceIssues(root, selected.id, lang);
+    checks.push(...(issues.length
+        ? issues.map(i => ({ level: 'warn' as const, text: `${i.rule}: ${i.text}` }))
+        : [{ level: 'ok' as const, text: i18n.t('validate.rulesPassed', { profile: selected.name }) }]));
+}
+
 /** Kullanıcının XML'i seçilen belge türüne uygun mu? Seçilen XSLT ile deneme dönüşümü yapılır. */
 export function validateXml(text: string, docType: WizardDocType, xslt: string | null): ValidationResult {
     const checks: Check[] = [];
     const info: [string, string][] = [];
     const { doc, error } = parseXml(text);
-    if (error) return result([{ level: 'error', text: `Dosya geçerli bir XML değil: ${error}` }], info);
+    if (error) return result([{ level: 'error', text: i18n.t('validate.notXml', { error }) }], info);
 
     const root = doc.documentElement;
     const family = familyOfRoot(root);
-    const expected = FAMILY_INFO[docType.family];
-    if (family !== docType.family) {
-        const found = family ? FAMILY_INFO[family].label : `<${root.localName}>`;
-        return result([{ level: 'error', text: `Bu XML bir ${found} belgesi; ${docType.label} için ${expected.label} belgesi gerekli.` }], info);
+    if (docType.intlProfileId && (family === docType.family || (docType.family === 'invoice' && family === 'creditNote'))) {
+        checks.push({ level: 'ok', text: i18n.t('validate.structureOk', { structure: `UBL 2.1 ${root.localName}` }) });
+        intlXmlChecks(doc, root, docType, checks, info);
+        if (xslt) checks.push(xsltRunCheck(xslt, doc));
+        return result(checks, info);
     }
-    checks.push({ level: 'ok', text: `Belge yapısı uygun: ${expected.label}` });
+    if (family !== docType.family) {
+        const found = family ? familyLabel(family) : `<${root.localName}>`;
+        return result([{ level: 'error', text: i18n.t('validate.wrongFamily', { found, doc: docType.label, expected: familyLabel(docType.family) }) }], info);
+    }
+    checks.push({ level: 'ok', text: i18n.t('validate.structureOk', { structure: familyLabel(docType.family) }) });
     if (family === 'ebiletReport' || family === 'ebiletPassengerList') {
         ebiletXmlChecks(root, family, checks, info);
         if (xslt) checks.push(xsltRunCheck(xslt, doc));
@@ -1135,12 +1187,6 @@ export function validateXml(text: string, docType: WizardDocType, xslt: string |
             : [{ level: 'ok' as const, text: 'GİB e-Bilet zorunlu bilgi kontrolleri geçti (509 IV.7.3)' }]));
     }
 
-    if (xslt) {
-        const x = parseXml(xslt);
-        const err = x.error ? `XSLT okunamadı: ${x.error}` : tryTransform(x.doc, doc);
-        checks.push(err
-            ? { level: 'error', text: `Seçilen XSLT bu veriyle çalıştırılamadı: ${err}` }
-            : { level: 'ok', text: 'Seçilen XSLT bu veriyle başarıyla çalıştı' });
-    }
+    if (xslt) checks.push(xsltRunCheck(xslt, doc));
     return result(checks, info);
 }

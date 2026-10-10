@@ -2,6 +2,7 @@
  * Kullanıcının seçtiği resmi XSLT'ye gömülebilir `data:<mime>;base64,...`
  * değerine çevirir; büyük raster resimler gömülmeden önce küçültülür.
  */
+import i18n from '../../i18n';
 
 export interface PickedImage {
     dataUrl: string;
@@ -55,23 +56,23 @@ export function formatBytes(n: number): string {
 const readAsDataUrl = (blob: Blob): Promise<string> => new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result ?? ''));
-    reader.onerror = () => reject(reader.error ?? new Error('Resim okunamadı'));
+    reader.onerror = () => reject(reader.error ?? new Error(i18n.t('editor.background.readFailed')));
     reader.readAsDataURL(blob);
 });
 
 const loadImage = (src: string): Promise<HTMLImageElement> => new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error('Dosya geçerli bir resim değil'));
+    img.onerror = () => reject(new Error(i18n.t('editor.image.notImage')));
     img.src = src;
 });
 
 /** Dosyayı doğrular, gerekirse küçültür ve data URL olarak döndürür. */
 export async function readImageFile(file: File): Promise<PickedImage> {
     const mime = mimeOf(file);
-    if (!mime) throw new Error(`Desteklenmeyen dosya türü: ${file.name}`);
+    if (!mime) throw new Error(i18n.t('editor.image.unsupported', { name: file.name }));
     if (file.size > MAX_IMAGE_FILE_BYTES) {
-        throw new Error(`Resim çok büyük (en fazla ${formatBytes(MAX_IMAGE_FILE_BYTES)}): ${formatBytes(file.size)}`);
+        throw new Error(i18n.t('editor.image.tooLarge', { max: formatBytes(MAX_IMAGE_FILE_BYTES), size: formatBytes(file.size) }));
     }
     const typed = file.type === mime ? file : new Blob([file], { type: mime });
     let dataUrl = await readAsDataUrl(typed);

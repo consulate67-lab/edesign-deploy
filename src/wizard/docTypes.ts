@@ -2,6 +2,8 @@
  * Tasarım sihirbazı belge türleri. Her tür bir UBL kök elemanına (family)
  * bağlıdır; kullanıcının yüklediği XSLT/XML bu aileye uymak zorundadır.
  */
+import type { DocLanguage, IntlDocKind } from '../international';
+
 export type DocFamily = 'invoice' | 'despatch' | 'receiptAdvice' | 'receipt' | 'creditNote' | 'ebiletReport' | 'ebiletPassengerList';
 
 export interface DefaultXsltOption {
@@ -11,6 +13,8 @@ export interface DefaultXsltOption {
     /** XSLT editöründeki modül (dropdown) karşılığı. */
     moduleId: string;
     load: () => Promise<string>;
+    /** Seçili belge türü için önerilen tasarım. */
+    recommended?: boolean;
 }
 
 export interface WizardDocType {
@@ -23,21 +27,33 @@ export interface WizardDocType {
     profileIds?: string[];
     /** Geçerli InvoiceTypeCode / DespatchAdviceTypeCode değerleri — uymazsa uyarı verilir. */
     typeCodes?: string[];
-    /** public/ altındaki varsayılan örnek XML. */
+    /** public/ altındaki varsayılan örnek XML (sampleText varsa yalnız gösterilen dosya adı). */
     sampleXml: string;
+    /** Bellekte üretilen örnek XML (ülke + belge dili örnekleri). */
+    sampleText?: () => string;
     /** GİB resmi paketlerindeki (UBL-TR 1.2.1, e-Fatura Paketi) örnek belgeler. */
     officialSamples?: OfficialSample[];
     /** Örnek belgelerin kaynağını anlatan kısa not (varsayılan: UBL-TR / e-Fatura paketi). */
     officialNote?: string;
     defaults: DefaultXsltOption[];
+    /** Avrupa profili (documentProfiles.ts kimliği); varsa GİB kuralları yerine profil kuralları uygulanır. */
+    intlProfileId?: string;
+    /** Avrupa profilinin seçildiği ülke (ISO 3166-1 alpha-2). */
+    country?: string;
+    /** Ülke belgesinin türü (fatura, iade, sevk …). */
+    intlKind?: IntlDocKind;
+    /** Belgenin (tasarımın) dili; arayüz dilinden bağımsız. */
+    docLanguage?: DocLanguage;
 }
 
 export interface OfficialSample {
-    /** public/ altındaki yol. */
+    /** public/ altındaki yol (text varsa yalnız gösterilen dosya adı). */
     file: string;
     label: string;
     /** Senaryo / fatura tipi özeti. */
     tag: string;
+    /** Bellekte üretilen örnek XML. */
+    text?: () => string;
 }
 
 const gibSample = (name: string, label: string, tag: string): OfficialSample =>
@@ -375,4 +391,6 @@ export async function loadXmlFile(path: string): Promise<string> {
     return res.text();
 }
 
-export const loadSampleXml = (docType: WizardDocType) => loadXmlFile(docType.sampleXml);
+export const loadSampleXml = async (docType: WizardDocType) => docType.sampleText?.() ?? loadXmlFile(docType.sampleXml);
+
+export const loadOfficialSample = async (sample: OfficialSample) => sample.text?.() ?? loadXmlFile(sample.file);

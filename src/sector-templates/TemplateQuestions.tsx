@@ -4,6 +4,7 @@ import { CATEGORIES, SECTORS, type SectorTemplate } from './index';
 import { readLogo, type BankChoice, type LogoChoice, type TemplatePrefs } from './personalize';
 import { WIZARD_DOC_TYPES } from '../wizard/docTypes';
 import { IMAGE_ACCEPT } from '../xslt-editor/utils/imageFile';
+import { useLocaleT } from '../i18n';
 import { theme } from '../theme';
 
 export interface TemplateAnswers {
@@ -76,6 +77,7 @@ export const TemplateQuestions: React.FC<{
     onDone: (answers: TemplateAnswers) => void;
     onSkip: () => void;
 }> = ({ templates, initial, startStep = 'doc', onDone, onSkip }) => {
+    const { t } = useLocaleT();
     const [docType, setDocType] = useState(initial.docType);
     const [category, setCategory] = useState(initial.category);
     const [logo, setLogo] = useState<LogoChoice>(initial.prefs.logo);
@@ -87,15 +89,15 @@ export const TemplateQuestions: React.FC<{
     const fileRef = useRef<HTMLInputElement>(null);
 
     const docOpts = useMemo(() => WIZARD_DOC_TYPES.flatMap(d => {
-        const count = templates.filter(t => t.docTypeId === d.id).length;
+        const count = templates.filter(x => x.docTypeId === d.id).length;
         return count ? [{ id: d.id, label: d.label, color: d.color ?? theme.primary, count }] : [];
     }), [templates]);
     const catOpts = useMemo(() => CATEGORIES.flatMap(c => {
-        const count = templates.filter(t => matches(t, docType, c.id)).length;
-        return count ? [{ ...c, count }] : [];
-    }), [templates, docType]);
-    const candidates = useMemo(() => templates.filter(t => matches(t, docType, category)), [templates, docType, category]);
-    const bankCount = candidates.filter(t => t.bank).length;
+        const count = templates.filter(x => matches(x, docType, c.id)).length;
+        return count ? [{ ...c, label: t(`gallery.categories.${c.id}`), count }] : [];
+    }), [templates, docType, t]);
+    const candidates = useMemo(() => templates.filter(x => matches(x, docType, category)), [templates, docType, category]);
+    const bankCount = candidates.filter(x => x.bank).length;
     const steps: QuestionStep[] = bankCount ? ['doc', 'category', 'logo', 'bank'] : ['doc', 'category', 'logo'];
     const index = Math.max(0, steps.indexOf(step));
     const resultCount = bank === 'yes' && bankCount ? bankCount : candidates.length;
@@ -106,7 +108,7 @@ export const TemplateQuestions: React.FC<{
 
     const pickDoc = (id: string) => {
         setDocType(id);
-        if (category && !templates.some(t => matches(t, id, category))) setCategory('');
+        if (category && !templates.some(x => matches(x, id, category))) setCategory('');
         setStep('category');
     };
     const pickCategory = (id: string) => { setCategory(id); setStep('logo'); };
@@ -129,10 +131,10 @@ export const TemplateQuestions: React.FC<{
     };
 
     const title: Record<QuestionStep, { q: string; hint: string }> = {
-        doc: { q: 'Hangi belgeyi tasarlamak istiyorsunuz?', hint: 'Şablonları seçtiğiniz belge türüne göre listeleyeceğiz.' },
-        category: { q: 'Firmanız hangi alanda faaliyet gösteriyor?', hint: 'Sektörünüze uygun alanları (plaka, oda no, tevkifat, vade…) içeren tasarımları öne çıkaralım.' },
-        logo: { q: 'Belgenizde logonuz yer alsın mı?', hint: 'Logonuzu yükleyin; tüm şablonları logonuzla birlikte gösterelim. Logo yalnızca tarayıcınızda tutulur ve seçtiğiniz tasarıma gömülür.' },
-        bank: { q: 'Banka / IBAN bilgileriniz belgede yer alsın mı?', hint: "Banka adı ve IBAN, e-belge XML'inizdeki ödeme bilgilerinden otomatik gelir. Daha sonra tasarım ekranında da değiştirebilirsiniz." },
+        doc: { q: t('gallery.q.docQ'), hint: t('gallery.q.docHint') },
+        category: { q: t('gallery.q.categoryQ'), hint: t('gallery.q.categoryHint') },
+        logo: { q: t('gallery.q.logoQ'), hint: t('gallery.q.logoHint') },
+        bank: { q: t('gallery.q.bankQ'), hint: t('gallery.q.bankHint') },
     };
 
     return (
@@ -144,11 +146,11 @@ export const TemplateQuestions: React.FC<{
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
                 <span style={{ fontSize: '0.74rem', fontWeight: 800, color: theme.primary, letterSpacing: 0.4, textTransform: 'uppercase' }}>
-                    Adım {index + 1} / {steps.length}
+                    {t('gallery.q.step', { n: index + 1, total: steps.length })}
                 </span>
                 <div style={{ flex: 1, display: 'flex', gap: 6 }}>
                     {steps.map((s, i) => (
-                        <button key={s} type="button" aria-label={`${i + 1}. adım`} onClick={() => i < index && setStep(s)} style={{
+                        <button key={s} type="button" aria-label={t('gallery.q.stepAria', { n: i + 1 })} onClick={() => i < index && setStep(s)} style={{
                             flex: 1, height: 6, borderRadius: 3, border: 'none', padding: 0, cursor: i < index ? 'pointer' : 'default',
                             background: i <= index ? theme.gradient : theme.border,
                         }} />
@@ -165,7 +167,7 @@ export const TemplateQuestions: React.FC<{
                         {docOpts.map(d => (
                             <Tile key={d.id} name={d.id} active={docType === d.id} color={d.color} icon={<FileText size={20} />} title={d.label} count={d.count} onClick={() => pickDoc(d.id)} />
                         ))}
-                        <Tile name="any" active={!docType} icon={<FileText size={20} />} title="Fark etmez" hint="Tüm belge türlerini göster" count={templates.length} onClick={() => pickDoc('')} />
+                        <Tile name="any" active={!docType} icon={<FileText size={20} />} title={t('gallery.q.any')} hint={t('gallery.q.allDocs')} count={templates.length} onClick={() => pickDoc('')} />
                     </>
                 )}
                 {step === 'category' && (
@@ -173,7 +175,7 @@ export const TemplateQuestions: React.FC<{
                         {catOpts.map(c => (
                             <Tile key={c.id} name={c.id} active={category === c.id} color={c.color} icon={<Building2 size={20} />} title={c.label} count={c.count} onClick={() => pickCategory(c.id)} />
                         ))}
-                        <Tile name="any" active={!category} icon={<Building2 size={20} />} title="Fark etmez" hint="Tüm sektörleri göster" count={templates.filter(t => matches(t, docType, '')).length} onClick={() => pickCategory('')} />
+                        <Tile name="any" active={!category} icon={<Building2 size={20} />} title={t('gallery.q.any')} hint={t('gallery.q.allSectors')} count={templates.filter(x => matches(x, docType, '')).length} onClick={() => pickCategory('')} />
                     </>
                 )}
                 {step === 'logo' && (
@@ -184,19 +186,19 @@ export const TemplateQuestions: React.FC<{
                             icon={logoBusy ? <Loader2 size={20} className="tg-spin" /> : lastCustom?.mode === 'custom'
                                 ? <img src={lastCustom.dataUrl} alt="" style={{ maxWidth: 34, maxHeight: 34, objectFit: 'contain' }} />
                                 : <ImagePlus size={20} />}
-                            title={lastCustom?.mode === 'custom' ? 'Logomu kullan' : 'Logomu yükleyeyim'}
-                            hint={lastCustom?.mode === 'custom' ? <>{lastCustom.name} · <u onClick={e => { e.stopPropagation(); fileRef.current?.click(); }}>başka logo seç</u></> : 'PNG, JPG veya SVG · en fazla 5 MB'}
+                            title={lastCustom?.mode === 'custom' ? t('gallery.q.useMyLogo') : t('gallery.q.uploadLogo')}
+                            hint={lastCustom?.mode === 'custom' ? <>{lastCustom.name} · <u onClick={e => { e.stopPropagation(); fileRef.current?.click(); }}>{t('gallery.q.otherLogo')}</u></> : t('gallery.q.logoFormats')}
                             onClick={() => (lastCustom ? setLogo(lastCustom) : fileRef.current?.click())}
                         />
-                        <Tile name="sample" active={logo.mode === 'sample'} icon={<ImageIcon size={20} />} title="Örnek logo kalsın" hint="Logonuzu sonra tasarım ekranında eklersiniz" onClick={() => setLogo({ mode: 'sample' })} />
-                        <Tile name="none" active={logo.mode === 'none'} icon={<ImageOff size={20} />} title="Logo kullanmayacağım" hint="Logo alanı kaldırılır" onClick={() => setLogo({ mode: 'none' })} />
+                        <Tile name="sample" active={logo.mode === 'sample'} icon={<ImageIcon size={20} />} title={t('gallery.q.keepSample')} hint={t('gallery.q.keepSampleHint')} onClick={() => setLogo({ mode: 'sample' })} />
+                        <Tile name="none" active={logo.mode === 'none'} icon={<ImageOff size={20} />} title={t('gallery.q.noLogo')} hint={t('gallery.q.noLogoHint')} onClick={() => setLogo({ mode: 'none' })} />
                         <input ref={fileRef} type="file" accept={IMAGE_ACCEPT} data-question-logo-file style={{ display: 'none' }} onChange={e => void onFile(e.target.files?.[0])} />
                     </>
                 )}
                 {step === 'bank' && (
                     <>
-                        <Tile name="yes" active={bank === 'yes'} color="#0f766e" icon={<Landmark size={20} />} title="Evet, yer alsın" hint="Banka hesapları / IBAN bölümü olan şablonlar" count={bankCount} onClick={() => pickBank('yes')} />
-                        <Tile name="no" active={bank === 'no'} color="#b45309" icon={<Ban size={20} />} title="Hayır, yer almasın" hint="Banka bölümü şablonlardan kaldırılır" count={candidates.length} onClick={() => pickBank('no')} />
+                        <Tile name="yes" active={bank === 'yes'} color="#0f766e" icon={<Landmark size={20} />} title={t('gallery.q.bankYes')} hint={t('gallery.q.bankYesHint')} count={bankCount} onClick={() => pickBank('yes')} />
+                        <Tile name="no" active={bank === 'no'} color="#b45309" icon={<Ban size={20} />} title={t('gallery.q.bankNo')} hint={t('gallery.q.bankNoHint')} count={candidates.length} onClick={() => pickBank('no')} />
                     </>
                 )}
             </div>
@@ -209,23 +211,23 @@ export const TemplateQuestions: React.FC<{
                         display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, cursor: 'pointer',
                         border: `1px solid ${theme.borderStrong}`, background: theme.surface, color: theme.text, fontFamily: 'inherit', fontWeight: 700, fontSize: '0.82rem',
                     }}>
-                        <ArrowLeft size={14} /> Geri
+                        <ArrowLeft size={14} /> {t('gallery.q.back')}
                     </button>
                 )}
                 <button type="button" data-question-skip onClick={onSkip} style={{
                     background: 'none', border: 'none', color: theme.textMuted, cursor: 'pointer', fontFamily: 'inherit', fontSize: '0.8rem', textDecoration: 'underline',
                 }}>
-                    Soruları atla, tüm şablonları göster
+                    {t('gallery.q.skip')}
                 </button>
                 <span style={{ marginLeft: 'auto', fontSize: '0.8rem', color: theme.textMuted }}>
-                    <b style={{ color: theme.text }}>{resultCount}</b> şablon uygun
+                    <b style={{ color: theme.text }}>{resultCount}</b> {t('gallery.q.matching', { count: resultCount })}
                 </span>
                 {step === 'logo' && (
                     <button type="button" data-question-next disabled={logoBusy} onClick={next} style={{
                         display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 16px', borderRadius: 10, cursor: 'pointer', border: 'none',
                         background: theme.gradient, color: 'white', fontFamily: 'inherit', fontWeight: 800, fontSize: '0.84rem', boxShadow: theme.shadowBrand,
                     }}>
-                        {index < steps.length - 1 ? 'Devam' : 'Şablonları göster'} <ArrowRight size={15} />
+                        {index < steps.length - 1 ? t('gallery.q.next') : t('gallery.q.show')} <ArrowRight size={15} />
                     </button>
                 )}
             </div>
