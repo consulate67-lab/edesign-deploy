@@ -41,7 +41,8 @@ import {
     detectInXslt, xsltLocalNameSet, bindingLabel, contextPathResolver, evaluateField,
     ensureDecimalFormat, isInLineContext, isLineField, fieldSnippet, fieldContent, formulaSnippet, formulaContent, formulaAttrs,
     readFormula, DEFAULT_FORMULA, FORMULA_OPS, evaluateFormula, formulaSumsLines,
-    type CatalogField, type FormulaModel,
+    readFieldTransform, fieldTransformAttrs, evaluateFieldTransform, FIELD_FILTERS, FIELD_EXTRACTS, FIELD_CASES,
+    type CatalogField, type FormulaModel, type FieldTransform,
 } from './fieldCatalog';
 import { transformXmlWithXslt } from '../xsltTransformer';
 import { getInlineXslt } from '../xsltContent';
@@ -53,13 +54,16 @@ import {
     findBindingSourceOffset, findEnclosingLiteralTag, findImgTagBySrc, findObjTag,
     setTagAttribute, setTagStyleProperty, replaceElementContent, removeElement, escapeXmlText,
     annotateLiteralTags, findLiteralTagByOrdinal, insertAtTag, moveElement, documentEndOffset,
-    bindingSourceOffsets, bindingElementRange, moveElementTracked, insertOffset, elementEnd, findParentTag, findElementContentRange,
+    bindingSourceOffsets, bindingElementRange, moveElementTracked, insertOffset, elementEnd, findElementContentRange,
     literalOrdinalAt, type SourceTag, type InsertPosition,
 } from './utils/xsltStyleEdit';
 import { xpathPaths, xmlFieldName, xsltVariables, resolveVariablePath } from './utils/xpathNames';
+import { placementOfBinding, placementOfElement, wrapCellContent, TABLE_PARTS } from './utils/placement';
 import { findLineTableCell, addColumnAfterCell, editColumn, countHiddenColumnCells, showHiddenColumns, type ColumnAction } from './utils/tableColumns';
 import { BG_FITS, readPageBackground, writePageBackground, imageFileToDataUrl, type PageBackground } from './utils/pageBackground';
 import { addTestWatermark, stripTestWatermark, stripLeadingBom } from './utils/testWatermark';
+import { withFieldGuide } from './utils/fieldGuide';
+import { stripFieldGuide } from './utils/fieldGuideMarker';
 import { applyLegacyViewerCompat } from './utils/legacyViewerCompat';
 import { ApproveDialog } from './ApproveDialog';
 import i18n, { useLocaleT } from '../i18n';
@@ -83,7 +87,6 @@ function isTextEditingTarget(target: EventTarget | null): boolean {
 }
 
 const CONTAINER_TAGS = new Set(['td', 'th', 'div', 'li', 'section', 'article', 'header', 'footer', 'main', 'aside', 'form', 'fieldset']);
-const TABLE_PARTS = new Set(['tr', 'tbody', 'thead', 'tfoot', 'colgroup', 'col', 'caption']);
 const VOID_TAGS = new Set(['img', 'input', 'br', 'hr', 'meta', 'link', 'area', 'base', 'wbr']);
 
 /**
@@ -103,41 +106,6 @@ function hasRelativeSelect(snippet: string): boolean {
     return false;
 }
 
-/** Önizlemedeki veri alanının XSLT'de taşınabilirliği. */
-type BindPlacement = { tag: SourceTag | null; movable: boolean; detach: 'cell' | 'value' | null; reason: string | null };
-const UNWRAPPABLE_PARENT = /^xsl:(attribute|variable|param|with-param|sort|message|comment|text|element)$/;
-
-function placementOfBinding(xslt: string, bindings: XsltBinding[], index: number): BindPlacement {
-    const b = bindings[index];
-    const offset = b ? findBindingSourceOffset(xslt, bindings, b) : null;
-    const tag = offset === null ? null : findEnclosingLiteralTag(xslt, offset);
-    if (offset === null || !tag) {
-        return { tag: null, movable: false, detach: null, reason: i18n.t('editor.place.noContainer') };
-    }
-    if (isInLineContext(xslt, offset)) {
-        return { tag, movable: false, detach: null, reason: i18n.t('editor.place.lineField') };
-    }
-    const parent = findParentTag(xslt, offset);
-    const range = bindingElementRange(xslt, offset);
-    const canWrap = !!range && !(parent && UNWRAPPABLE_PARENT.test(parent.name));
-    const name = tag.name.toLowerCase();
-    if (name === 'td' || name === 'th' || name === 'table' || TABLE_PARTS.has(name)) {
-        return { tag, movable: false, detach: canWrap ? 'cell' : null, reason: i18n.t('editor.place.inCell') };
-    }
-    if (name === 'body' || name === 'html') {
-        return { tag, movable: false, detach: canWrap ? 'cell' : null, reason: i18n.t('editor.place.inBody') };
-    }
-    let detach: 'value' | null = null;
-    const content = canWrap && range ? findElementContentRange(xslt, tag) : null;
-    if (content && range) {
-        const rest = (xslt.slice(content.start, range.start) + xslt.slice(range.end, content.end))
-            .replace(/<xsl:(?:value-of|copy-of)\b[^>]*?\/>/g, '')
-            .replace(/<!--[\s\S]*?-->|<\/?xsl:[^>]*>/g, '')
-            .trim();
-        if (rest) detach = 'value';
-    }
-    return { tag, movable: true, detach, reason: null };
-}
 /**
  * Veri alanının değerini (xsl:value-of) kendi <span>'ına alır; bulunamazsa null.
  * Hücre yalnızca değer / sabit metin parçalarından oluşuyorsa ("385,00" + " TL")
@@ -173,26 +141,6 @@ function wrapBindingValue(xslt: string, bindings: XsltBinding[], index: number, 
     };
 }
 
-/** Taşınınca geçersiz HTML üreten ya da sayfanın kendisi olan etiketler. */
-const UNMOVABLE_TAGS = new Set(['html', 'head', 'body', 'style', 'script', 'meta', 'link', 'title', 'td', 'th', 'li', 'dt', 'dd', 'option', ...TABLE_PARTS]);
-
-/** Önizlemede seçilen herhangi bir literal öğenin (metin kutusu, çizgi, tablo...) taşınabilirliği. */
-function placementOfElement(xslt: string, ordinal: number): BindPlacement {
-    const tag = findLiteralTagByOrdinal(xslt, ordinal);
-    if (!tag) return { tag: null, movable: false, detach: null, reason: i18n.t('editor.place.noSource') };
-    const name = tag.name.toLowerCase();
-    if (name === 'td' || name === 'th') {
-        return { tag, movable: false, detach: null, reason: i18n.t('editor.place.cell') };
-    }
-    if (UNMOVABLE_TAGS.has(name)) {
-        return { tag, movable: false, detach: null, reason: i18n.t('editor.place.fixed') };
-    }
-    if (isInLineContext(xslt, tag.start)) {
-        return { tag, movable: false, detach: null, reason: i18n.t('editor.place.lineElement') };
-    }
-    return { tag, movable: true, detach: null, reason: null };
-}
-
 const decodeAttr = (v: string) => v
     .replace(/\{\{/g, '{').replace(/\}\}/g, '}')
     .replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
@@ -218,7 +166,7 @@ function refreshObjectContents(xslt: string, catalog: CatalogField[], lang: DocL
         if (kind === 'formula') content = formulaContent(readFormula(el), catalog, inLine, lang);
         else if (kind === 'field') {
             const f = catalog.find(x => x.key === el.getAttribute('data-field'));
-            if (f) content = fieldContent(f, inLine, lang);
+            if (f) content = fieldContent(f, inLine, lang, readFieldTransform(el));
         }
         if (content !== null) next = replaceElementContent(next, tag, content);
     }
@@ -1158,6 +1106,76 @@ const FormulaEditor: React.FC<{
     );
 };
 
+/** Veri alanının değerini işleme: birden çok satırdan seçme ve değerin bir kısmını alma. */
+const FieldTransformEditor: React.FC<{
+    el: HTMLElement;
+    catalog: CatalogField[];
+    xmlDoc: Document | null;
+    docLang: DocLanguage;
+    onChange: (tx: FieldTransform) => void;
+}> = ({ el, catalog, xmlDoc, docLang, onChange }) => {
+    const { t } = useLocaleT();
+    const [tx, setTx] = useState<FieldTransform>(() => readFieldTransform(el));
+    const update = (patch: Partial<FieldTransform>) => {
+        const next = { ...tx, ...patch };
+        setTx(next);
+        onChange(next);
+    };
+    const field = catalog.find(f => f.key === el.getAttribute('data-field'));
+    const result = field ? evaluateFieldTransform(xmlDoc, field, tx, docLang) : '';
+    const input = (key: 'a' | 'b' | 'filterText', label: string, numeric = false, placeholder?: string) => (
+        <div style={{ flex: 1, minWidth: 0 }}>
+            <label style={fieldLabelStyle}>{label}</label>
+            <input
+                data-tx-input={key}
+                type={numeric ? 'number' : 'text'}
+                min={numeric ? 1 : undefined}
+                value={tx[key]}
+                placeholder={placeholder}
+                onChange={(e) => update({ [key]: e.target.value })}
+                style={fieldInputStyle}
+            />
+        </div>
+    );
+    return (
+        <div data-field-transform>
+            <label style={fieldLabelStyle}>{t('editor.fieldTx.filter')}</label>
+            <select data-tx-filter value={tx.filter} onChange={(e) => update({ filter: e.target.value as FieldTransform['filter'] })} style={{ ...fieldInputStyle, marginBottom: '6px' }}>
+                {FIELD_FILTERS.map(id => <option key={id} value={id}>{t(`editor.fieldTx.filters.${id}`)}</option>)}
+            </select>
+            {tx.filter !== 'none' && <div style={{ display: 'flex', marginBottom: '10px' }}>{input('filterText', '', false, t('editor.fieldTx.filterPlaceholder'))}</div>}
+            {tx.filter === 'none' && <div style={{ height: '4px' }} />}
+            <label style={fieldLabelStyle}>{t('editor.fieldTx.extract')}</label>
+            <select data-tx-extract value={tx.extract} onChange={(e) => update({ extract: e.target.value as FieldTransform['extract'], a: '', b: '' })} style={{ ...fieldInputStyle, marginBottom: '10px' }}>
+                {FIELD_EXTRACTS.map(id => <option key={id} value={id}>{t(`editor.fieldTx.extracts.${id}`)}</option>)}
+            </select>
+            {tx.extract !== 'all' && (
+                <div style={{ display: 'flex', gap: '6px', marginBottom: '10px' }}>
+                    {(tx.extract === 'first' || tx.extract === 'last') && input('a', t('editor.fieldTx.count'), true)}
+                    {tx.extract === 'sub' && <>{input('a', t('editor.fieldTx.start'), true)}{input('b', t('editor.fieldTx.length'), true)}</>}
+                    {(tx.extract === 'before' || tx.extract === 'after') && input('a', t('editor.fieldTx.separator'), false, ':')}
+                    {tx.extract === 'between' && <>{input('a', t('editor.fieldTx.startMarker'))}{input('b', t('editor.fieldTx.endMarker'))}</>}
+                </div>
+            )}
+            <div style={{ display: 'flex', gap: '6px', marginBottom: '10px', alignItems: 'flex-end' }}>
+                <label style={{ ...fieldLabelStyle, flex: 1, display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', marginBottom: 0, paddingBottom: '8px' }}>
+                    <input data-tx-trim type="checkbox" checked={tx.trim} onChange={(e) => update({ trim: e.target.checked })} />
+                    {t('editor.fieldTx.trim')}
+                </label>
+                <div style={{ flex: 1 }}>
+                    <label style={fieldLabelStyle}>{t('editor.fieldTx.case')}</label>
+                    <select data-tx-case value={tx.case} onChange={(e) => update({ case: e.target.value as FieldTransform['case'] })} style={fieldInputStyle}>
+                        {FIELD_CASES.map(id => <option key={id} value={id}>{t(`editor.fieldTx.cases.${id}`)}</option>)}
+                    </select>
+                </div>
+            </div>
+            <div data-tx-result style={{ padding: '8px 10px', background: '#0b1222', border: '1px dashed #334155', borderRadius: '4px', fontSize: '12px', color: '#e2e8f0', marginBottom: '8px', wordBreak: 'break-word' }}>
+                {t('editor.fieldTx.result')}: <b>{result || '—'}</b>
+            </div>
+        </div>
+    );
+};
+
 export const XSLTEditor: React.FC<XsltEditorProps> = ({
     initialModuleId = 'fatura',
     initialXslt,
@@ -1366,7 +1384,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         };
         if (initialXslt && moduleId === initialModuleId) {
             // İlk yükleme, kullanıcı verisi varsa onu kullan
-            const userXslt = stripLeadingBom(stripTestWatermark(initialXslt));
+            const userXslt = stripFieldGuide(stripLeadingBom(stripTestWatermark(initialXslt)));
             load(designKeyOf(userXslt) ? userXslt : refreshObjectContents(userXslt, catalogRef.current, documentLanguage(userXslt, initialXml || SAMPLE_XML)));
             return;
         }
@@ -1575,7 +1593,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const downloadXslt = useCallback((content: string, suffix = '') => {
         const base = (design.name || docTitle).trim().replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, '_');
         const fileName = `${base}_${moduleId}${suffix}.xslt`;
-        const url = URL.createObjectURL(new Blob([applyLegacyViewerCompat(stripLeadingBom(content))], { type: 'application/xml;charset=utf-8' }));
+        const out = withFieldGuide(applyLegacyViewerCompat(stripLeadingBom(content)), xmlContent, catalogRef.current, design.name || docTitle);
+        const url = URL.createObjectURL(new Blob([out], { type: 'application/xml;charset=utf-8' }));
         const a = document.createElement('a');
         a.href = url;
         a.download = fileName;
@@ -1583,7 +1602,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         a.click();
         document.body.removeChild(a);
         setTimeout(() => URL.revokeObjectURL(url), 10000);
-    }, [design.name, docTitle, moduleId]);
+    }, [design.name, docTitle, moduleId, xmlContent]);
 
     // ------------------------------------------------------------------------
     // Test indirme — ücretsiz, sayfa ortasında TEST filigranı ile
@@ -1622,7 +1641,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 design_key: design.key,
                 name,
                 module_id: moduleId,
-                xslt_content: stripLeadingBom(stripTestWatermark(xsltContentRef.current)),
+                xslt_content: stripFieldGuide(stripLeadingBom(stripTestWatermark(xsltContentRef.current))),
                 xml_content: xmlContent,
                 license_tax_id: taxId,
             });
@@ -2140,14 +2159,23 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     /** Önizlemede seçilen literal öğeyi (metin kutusu, çizgi, tablo...) içindekilerle birlikte taşır. */
     const moveLiteral = useCallback((ordinal: number, target: InsertTarget | null) => {
         flushSourceEdits();
-        const xslt = xsltContentRef.current;
-        const p = placementOfElement(xslt, ordinal);
+        let xslt = xsltContentRef.current;
+        let p = placementOfElement(xslt, ordinal);
+        let tag = target ? findLiteralTagByOrdinal(xslt, target.ordinal) : null;
+        if (target && !tag) return;
+        if (!p.movable && p.detach === 'cell' && p.tag) {
+            // Hücrenin içeriği önce kendi kutusuna alınır, hücre yerinde kalır.
+            const wrapped = wrapCellContent(xslt, p.tag);
+            if (wrapped) {
+                xslt = wrapped.xslt;
+                if (tag) tag = { ...tag, start: wrapped.shift(tag.start), end: wrapped.shift(tag.end) };
+                p = { tag: wrapped.span, movable: true, detach: null, reason: null };
+            }
+        }
         if (!p.movable || !p.tag) {
             setSaveMessage(`⚠ ${p.reason ?? i18n.t('editor.move.elementFixed')}`);
             return;
         }
-        const tag = target ? findLiteralTagByOrdinal(xslt, target.ordinal) : null;
-        if (target && !tag) return;
         const position = target?.position ?? 'after';
         const at = tag ? insertOffset(xslt, tag, position) : documentEndOffset(xslt);
         if (at < 0) return;
@@ -2183,6 +2211,19 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         pendingSelectRef.current = { kind: 'bind', index };
         xsltContentRef.current = next;
         setXsltContent(next);
+        setSaveMessage(`✂ ${i18n.t('editor.move.detached')}`);
+    }, []);
+
+    /** Hücrenin içeriğini kendi <span>'ına alır ve onu seçer. */
+    const detachCell = useCallback((ordinal: number) => {
+        flushSourceEditsRef.current();
+        const cell = findLiteralTagByOrdinal(xsltContentRef.current, ordinal);
+        const wrapped = cell ? wrapCellContent(xsltContentRef.current, cell) : null;
+        if (!wrapped) return;
+        const spanOrdinal = literalOrdinalAt(wrapped.xslt, wrapped.span.start);
+        if (spanOrdinal !== null) pendingSelectRef.current = { kind: 'el', ordinal: spanOrdinal, nth: 0 };
+        xsltContentRef.current = wrapped.xslt;
+        setXsltContent(wrapped.xslt);
         setSaveMessage(`✂ ${i18n.t('editor.move.detached')}`);
     }, []);
 
@@ -2258,8 +2299,21 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const handleFieldChange = useCallback((key: string) => {
         const f = catalogRef.current.find(x => x.key === key);
         if (!f) return;
+        const el = selectedObjectRef.current?.element;
+        const tx = el ? readFieldTransform(el) : null;
         handleAttrChange('data-field', key);
-        handleContentChange(fieldContent(f, selectedObjInLine(), docLangRef.current), evaluateField(xmlDocRef.current, f));
+        handleContentChange(
+            fieldContent(f, selectedObjInLine(), docLangRef.current, tx ?? undefined),
+            tx ? evaluateFieldTransform(xmlDocRef.current, f, tx, docLangRef.current) : evaluateField(xmlDocRef.current, f),
+        );
+    }, [selectedObjInLine, handleAttrChange, handleContentChange]);
+
+    const handleFieldTransformChange = useCallback((tx: FieldTransform) => {
+        const el = selectedObjectRef.current?.element;
+        const f = catalogRef.current.find(x => x.key === el?.getAttribute('data-field'));
+        if (!f) return;
+        for (const [attr, value] of fieldTransformAttrs(tx)) handleAttrChange(attr, value);
+        handleContentChange(fieldContent(f, selectedObjInLine(), docLangRef.current, tx), evaluateFieldTransform(xmlDocRef.current, f, tx, docLangRef.current));
     }, [selectedObjInLine, handleAttrChange, handleContentChange]);
 
     const openSelection = useCallback((binding: XsltBinding | null, element: HTMLElement | null, locator: PreviewLocator | null) => {
@@ -2759,7 +2813,11 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             openSelection(null, objEl, { kind: 'obj', id: objEl.getAttribute('data-xslt-obj') || '' });
             return;
         }
-        if (ownIndex !== null) {
+        // İsimli şablondaki değer (tarih, birim, kod...) her çağrıda ayrı yerde basılır;
+        // taşınacak olan, önizlemede değeri saran çağrı yerindeki öğedir.
+        const viaCaller = ownIndex !== null && !bindPlacement(xsltContentRef.current, Number(ownIndex)).tag
+            && !!indexedEl.closest('[data-xsrc]');
+        if (ownIndex !== null && !viaCaller) {
             const index = Number(ownIndex);
             locator = { kind: 'bind', index };
             binding = bindingsRef.current[index] ?? null;
@@ -2780,7 +2838,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         }
         openSelection(binding, indexedEl, locator);
         console.log(`[XSLTEditor] Preview click → ${indexedEl.tagName} render-index=${renderIndex ?? '(yok — sadece stil paneli)'}`);
-    }, [openSelection, moveTo]);
+    }, [openSelection, moveTo, bindPlacement]);
 
     /**
      * iframe yüklendiğinde:
@@ -3090,6 +3148,11 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 && placementOfElement(xsltContentRef.current, sel.locator.ordinal).movable) {
                 el = sel.element;
                 locator = sel.locator;
+            } else if (sel?.element && sel.locator?.kind === 'el' && sel.element.contains(target) && !design.paid
+                && placementOfElement(xsltContentRef.current, sel.locator.ordinal).detach === 'cell') {
+                e.preventDefault();
+                drag = { el: sel.element, source: sel.element, locator: sel.locator, sx: e.clientX, sy: e.clientY, started: false, mode: 'absolute', unit: 'px', left: 0, top: 0, scale: 1 };
+                return;
             }
             if (!el || !locator) return;
             e.preventDefault();
@@ -4688,7 +4751,10 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                 <button
                                                     type="button"
                                                     data-bind-detach
-                                                    onClick={() => { if (sel.locator?.kind === 'bind') detachBinding(sel.locator.index); }}
+                                                    onClick={() => {
+                                                        if (sel.locator?.kind === 'bind') detachBinding(sel.locator.index);
+                                                        else if (sel.locator?.kind === 'el') detachCell(sel.locator.ordinal);
+                                                    }}
                                                     title={t('editor.panel.move.detachHint')}
                                                     style={{ width: '100%', marginTop: '8px', padding: '7px 10px', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.45)', borderRadius: '4px', color: '#6ee7b7', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
                                                 >
@@ -4810,6 +4876,9 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                 <CatalogOptions fields={catalog} xmlDoc={xmlDoc} />
                                             </select>
                                             {noteBox(t('editor.panel.fieldNote', { sample: formatDocNumber(1234.56, 2, docLang) }), 'info')}
+                                            {sectionTitle(t('editor.fieldTx.title'), '#a5b4fc')}
+                                            <FieldTransformEditor key={fieldKey('field-tx')} el={el} catalog={catalog} xmlDoc={xmlDoc} docLang={docLang} onChange={handleFieldTransformChange} />
+                                            {noteBox(t('editor.fieldTx.hint'), 'info')}
                                         </>
                                     )}
 

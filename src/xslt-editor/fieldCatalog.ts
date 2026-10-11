@@ -972,11 +972,123 @@ export function isInLineContext(xslt: string, offset: number): boolean {
 
 const escapeText = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-/** Veri alanı objesinin içeriği (sayısal alanlar belge dilinin ayraçlarıyla biçimlenir). */
-export function fieldContent(f: CatalogField, inLine: boolean, lang: DocLanguage = 'tr'): string {
+/**
+ * Veri alanı objesinde değerin işlenmesi: aynı öğe birden çok kez geçiyorsa
+ * (ör. fatura notları) hangisinin alınacağı ve değerin hangi kısmının
+ * gösterileceği. `data-tx-*` attribute'larında saklanır.
+ */
+export type FieldFilter = 'none' | 'starts' | 'contains' | 'notStarts';
+export type FieldExtract = 'all' | 'first' | 'last' | 'sub' | 'before' | 'after' | 'between';
+export type FieldCase = 'none' | 'upper' | 'lower';
+export interface FieldTransform {
+    filter: FieldFilter;
+    filterText: string;
+    extract: FieldExtract;
+    a: string;
+    b: string;
+    trim: boolean;
+    case: FieldCase;
+}
+
+export const FIELD_FILTERS: FieldFilter[] = ['none', 'starts', 'contains', 'notStarts'];
+export const FIELD_EXTRACTS: FieldExtract[] = ['all', 'first', 'last', 'sub', 'before', 'after', 'between'];
+export const FIELD_CASES: FieldCase[] = ['none', 'upper', 'lower'];
+export const NO_TRANSFORM: FieldTransform = { filter: 'none', filterText: '', extract: 'all', a: '', b: '', trim: false, case: 'none' };
+
+const unAvt = (s: string) => s.replace(/\{\{/g, '{').replace(/\}\}/g, '}');
+
+export function readFieldTransform(el: Element): FieldTransform {
+    const get = (n: string) => unAvt(el.getAttribute(n) ?? '');
+    const pick = <T extends string>(v: string, all: T[], dflt: T): T => (all.includes(v as T) ? v as T : dflt);
+    return {
+        filter: pick(get('data-tx-filter'), FIELD_FILTERS, 'none'),
+        filterText: get('data-tx-filter-text'),
+        extract: pick(get('data-tx'), FIELD_EXTRACTS, 'all'),
+        a: get('data-tx-a'),
+        b: get('data-tx-b'),
+        trim: get('data-tx-trim') === '1',
+        case: pick(get('data-tx-case'), FIELD_CASES, 'none'),
+    };
+}
+
+export const fieldTransformAttrs = (tx: FieldTransform): [string, string][] => [
+    ['data-tx-filter', tx.filter === 'none' ? '' : tx.filter],
+    ['data-tx-filter-text', tx.filterText],
+    ['data-tx', tx.extract === 'all' ? '' : tx.extract],
+    ['data-tx-a', tx.a],
+    ['data-tx-b', tx.b],
+    ['data-tx-trim', tx.trim ? '1' : ''],
+    ['data-tx-case', tx.case === 'none' ? '' : tx.case],
+];
+
+/** XPath metin sabiti (tek / çift tırnak içerenler concat ile). */
+const xpLiteral = (s: string) => (!s.includes("'") ? `'${s}'` : !s.includes('"') ? `"${s}"` : `concat('${s.split("'").join(`', "'", '`)}')`);
+const positiveInt = (s: string) => {
+    const n = parseInt(s, 10);
+    return Number.isFinite(n) && n > 0 ? n : null;
+};
+const CASE_LETTERS: Record<'tr' | 'other', [string, string]> = {
+    tr: ['abcçdefgğhıijklmnoöpqrsştuüvwxyz', 'ABCÇDEFGĞHIİJKLMNOÖPQRSŞTUÜVWXYZ'],
+    other: ['abcdefghijklmnopqrstuvwxyzàáâäçèéêëìíîïñòóôöùúûü', 'ABCDEFGHIJKLMNOPQRSTUVWXYZÀÁÂÄÇÈÉÊËÌÍÎÏÑÒÓÔÖÙÚÛÜ'],
+};
+
+/** Filtrelenmiş öğe yolu (filtre yoksa alanın kendi yolu). */
+function fieldNodeXPath(f: CatalogField, inLine: boolean, tx: FieldTransform): string {
     const xp = fieldXPath(f, inLine);
-    if (f.format === 'amount') return `<xsl:if test="${xp}"><xsl:value-of select="${formatted(`number(${xp})`, 2, lang)}"/></xsl:if>`;
-    return `<xsl:value-of select="${xp}"/>`;
+    if (tx.filter === 'none' || !tx.filterText) return xp;
+    const lit = xpLiteral(tx.filterText);
+    const cond = tx.filter === 'contains' ? `contains(., ${lit})` : `starts-with(normalize-space(.), ${lit})`;
+    return `${xp}[${tx.filter === 'notStarts' ? `not(${cond})` : cond}][1]`;
+}
+
+/** Dönüşümlü alanın metin ifadesi (XPath). */
+export function fieldTransformExpr(f: CatalogField, inLine: boolean, tx: FieldTransform, lang: DocLanguage = 'tr'): string {
+    let v = fieldNodeXPath(f, inLine, tx);
+    const a = positiveInt(tx.a);
+    const b = positiveInt(tx.b);
+    switch (tx.extract) {
+        case 'first': if (a) v = `substring(${v}, 1, ${a})`; break;
+        case 'last': if (a) v = `substring(${v}, string-length(${v}) - ${a} + 1)`; break;
+        case 'sub': if (a) v = b ? `substring(${v}, ${a}, ${b})` : `substring(${v}, ${a})`; break;
+        case 'before': if (tx.a) v = `substring-before(${v}, ${xpLiteral(tx.a)})`; break;
+        case 'after': if (tx.a) v = `substring-after(${v}, ${xpLiteral(tx.a)})`; break;
+        case 'between':
+            if (tx.a) v = `substring-after(${v}, ${xpLiteral(tx.a)})`;
+            if (tx.b) v = `substring-before(${v}, ${xpLiteral(tx.b)})`;
+            break;
+        default: break;
+    }
+    if (tx.trim) v = `normalize-space(${v})`;
+    if (tx.case !== 'none') {
+        const [lower, upper] = CASE_LETTERS[lang === 'tr' ? 'tr' : 'other'];
+        v = tx.case === 'upper' ? `translate(${v}, '${lower}', '${upper}')` : `translate(${v}, '${upper}', '${lower}')`;
+    }
+    return v;
+}
+
+const isPlainTransform = (tx: FieldTransform) => (tx.filter === 'none' || !tx.filterText) && tx.extract === 'all' && !tx.trim && tx.case === 'none';
+const escapeSelect = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+
+/** Veri alanı objesinin içeriği (sayısal alanlar belge dilinin ayraçlarıyla biçimlenir). */
+export function fieldContent(f: CatalogField, inLine: boolean, lang: DocLanguage = 'tr', tx: FieldTransform = NO_TRANSFORM): string {
+    const textual = tx.extract !== 'all' || tx.case !== 'none';
+    if (f.format === 'amount' && !textual) {
+        const xp = escapeSelect(fieldNodeXPath(f, inLine, tx));
+        return `<xsl:if test="${xp}"><xsl:value-of select="${formatted(`number(${xp})`, 2, lang)}"/></xsl:if>`;
+    }
+    if (isPlainTransform(tx)) return `<xsl:value-of select="${fieldXPath(f, inLine)}"/>`;
+    return `<xsl:value-of select="${escapeSelect(fieldTransformExpr(f, inLine, tx, lang))}"/>`;
+}
+
+/** Dönüşümlü alanın örnek XML'deki değeri (ilk eşleşme). */
+export function evaluateFieldTransform(xmlDoc: Document | null, f: CatalogField, tx: FieldTransform, lang: DocLanguage = 'tr'): string {
+    if (!xmlDoc) return '';
+    if (isPlainTransform(tx)) return evaluateField(xmlDoc, f);
+    try {
+        return xmlDoc.evaluate(`string(${fieldTransformExpr(f, false, tx, lang)})`, xmlDoc, null, XPathResult.STRING_TYPE, null).stringValue.trim();
+    } catch {
+        return '';
+    }
 }
 
 export const fieldSnippet = (id: string, f: CatalogField, inLine: boolean, lang: DocLanguage = 'tr') =>

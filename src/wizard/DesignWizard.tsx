@@ -10,6 +10,7 @@ import {
 import { validateXslt, validateXml, stripBom, type ValidationResult } from './validate';
 import { designKeyOf } from '../api';
 import { hasTestWatermark, stripTestWatermark } from '../xslt-editor/utils/testWatermark';
+import { stripFieldGuide } from '../xslt-editor/utils/fieldGuideMarker';
 import { hasLicenseLock } from '../../shared/license-lock.js';
 import { theme } from '../theme';
 import i18n, { useLocaleT } from '../i18n';
@@ -358,7 +359,7 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
         try {
             const raw = await readFile(file);
             const wasTest = kind === 'xslt' && hasTestWatermark(raw);
-            const text = wasTest ? stripTestWatermark(raw) : raw;
+            const text = kind === 'xslt' ? stripFieldGuide(wasTest ? stripTestWatermark(raw) : raw) : raw;
             if (kind === 'xslt') setOwnXsltWasTest(wasTest);
             const loaded = { name: file.name, size: file.size, text, result: checkFile(text, kind, docType, sampleXml, xsltText) };
             if (kind === 'xslt') setOwnXslt(loaded); else setOwnXml(loaded);

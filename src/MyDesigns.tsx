@@ -29,8 +29,24 @@ const formatDate = (iso: string | null | undefined, withTime = false) => {
 const byRecent = (key: 'updated_at' | 'paid_at') => (a: SavedDesign, b: SavedDesign) =>
     new Date(b[key] ?? b.updated_at).getTime() - new Date(a[key] ?? a.updated_at).getTime();
 
-const downloadDesign = (d: SavedDesign) => {
-    const url = URL.createObjectURL(new Blob([applyLegacyViewerCompat(stripLeadingBom(d.xslt_content ?? ''))], { type: 'application/xml;charset=utf-8' }));
+/** Rehber için tasarımın XML'i; kayıtlı değilse belge türünün örnek XML'i. */
+const designXml = async (d: SavedDesign) => {
+    if (d.xml_content) return d.xml_content;
+    const docType = docTypeOf(d.module_id);
+    return docType ? loadSampleXml(docType).catch(() => '') : '';
+};
+
+const downloadDesign = async (d: SavedDesign) => {
+    let content = applyLegacyViewerCompat(stripLeadingBom(d.xslt_content ?? ''));
+    try {
+        const [xml, { buildCatalog }, { withFieldGuide }] = await Promise.all([
+            designXml(d), import('./xslt-editor/catalogI18n'), import('./xslt-editor/utils/fieldGuide'),
+        ]);
+        content = withFieldGuide(content, xml, buildCatalog(xml, currentLocale()), d.name);
+    } catch (err) {
+        console.warn('[MyDesigns] alan rehberi eklenemedi', err);
+    }
+    const url = URL.createObjectURL(new Blob([content], { type: 'application/xml;charset=utf-8' }));
     const a = document.createElement('a');
     a.href = url;
     a.download = `${d.name.replace(/[\\/:*?"<>|\s]+/g, '_')}_${d.module_id}.xslt`;
