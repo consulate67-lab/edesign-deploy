@@ -2198,6 +2198,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         if (content !== null) {
             const tag = resolveSourceTag(next, locator);
             if (tag) next = replaceElementContent(next, tag, content);
+            if (content.includes('format-number(')) next = ensureDecimalFormat(next);
         }
         if (locator !== sel.locator) {
             const updated = { ...sel, locator };
