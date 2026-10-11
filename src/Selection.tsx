@@ -193,8 +193,8 @@ export const Selection: React.FC<SelectionProps> = ({ onLogout, onSelectXsltEdit
             }}>
                 <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
                     <img
-                        src={`${import.meta.env.BASE_URL}logo-300x100.png`}
-                        srcSet={`${import.meta.env.BASE_URL}logo-600x200.png 2x`}
+                        src={`${import.meta.env.BASE_URL}logo-300x100.png?v=2`}
+                        srcSet={`${import.meta.env.BASE_URL}logo-600x200.png?v=2 2x`}
                         alt="edXdocu"
                         width={300}
                         height={100}

@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#6d28d9" />
     <meta name="description" content="GİB uyumlu e-Fatura, e-Arşiv, e-İrsaliye ve 12 e-belge türü için XSLT bilgisi gerektirmeyen tasarım aracı." />
     <title>edXdocu — eBelge Tasarımcı</title>
-    <link rel="preload" as="image" href="logo-intro-x.png" />
+    <link rel="preload" as="image" href="logo-intro-x.png?v=2" />
     <script>
       // The intro plays once per browser session and never on the admin panel.
       try {
@@ -35,15 +35,15 @@
       #edx-intro.edx-done { opacity: 0; visibility: hidden; }
       .edx-stage { position: relative; width: min(78vw, 480px); aspect-ratio: 3 / 1; }
       .edx-stage img { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; user-select: none; -webkit-user-drag: none; }
-      .edx-x { transform-origin: 43.7% 50%; animation: edx-x .85s cubic-bezier(.2, 1.3, .35, 1) .1s forwards; }
+      .edx-x { transform-origin: 38.3% 50%; animation: edx-x .85s cubic-bezier(.2, 1.3, .35, 1) .1s forwards; }
       .edx-ed { animation: edx-left .65s cubic-bezier(.2, .85, .25, 1) .6s forwards; }
       .edx-doc { animation: edx-right .65s cubic-bezier(.2, .85, .25, 1) .6s forwards; }
       .edx-shine {
         position: absolute; inset: 0; pointer-events: none; opacity: 0;
         background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, .6) 50%, transparent 65%) no-repeat;
         background-size: 250% 100%; background-position: 130% 0;
-        -webkit-mask: url(logo-600x200.png) center / 100% 100% no-repeat;
-        mask: url(logo-600x200.png) center / 100% 100% no-repeat;
+        -webkit-mask: url(logo-600x200.png?v=2) center / 100% 100% no-repeat;
+        mask: url(logo-600x200.png?v=2) center / 100% 100% no-repeat;
         animation: edx-shine .8s ease-in-out 1.25s forwards;
       }
       .edx-tag {
@@ -69,9 +69,9 @@
   <body>
     <div id="edx-intro" aria-hidden="true">
       <div class="edx-stage">
-        <img class="edx-ed" src="logo-intro-ed.png" alt="" />
-        <img class="edx-doc" src="logo-intro-doc.png" alt="" />
-        <img class="edx-x" src="logo-intro-x.png" alt="" />
+        <img class="edx-ed" src="logo-intro-ed.png?v=2" alt="" />
+        <img class="edx-doc" src="logo-intro-doc.png?v=2" alt="" />
+        <img class="edx-x" src="logo-intro-x.png?v=2" alt="" />
         <span class="edx-shine"></span>
       </div>
       <div class="edx-tag">eBelge Tasarımcı</div>

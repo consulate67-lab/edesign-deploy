@@ -47,8 +47,8 @@ const MOCK_AMOUNTS: Record<PriceCurrency, [number, number, number]> = {
     GBP: [24.9, 39.5, 107.16],
 };
 
-const LOGO_URL = `${import.meta.env.BASE_URL}logo-300x100.png`;
-const LOGO_SRCSET = `${import.meta.env.BASE_URL}logo-600x200.png 2x`;
+const LOGO_URL = `${import.meta.env.BASE_URL}logo-300x100.png?v=2`;
+const LOGO_SRCSET = `${import.meta.env.BASE_URL}logo-600x200.png?v=2 2x`;
 const MARK_URL = `${import.meta.env.BASE_URL}favicon-192.png`;
 
 const LANDING_CSS = `
