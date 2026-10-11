@@ -603,31 +603,87 @@ const cssColorToHex = (color: string): string => {
     if (m) return '#' + [m[1], m[2], m[3]].map(n => Number(n).toString(16).padStart(2, '0')).join('');
     return /^#[0-9a-f]{6}$/i.test(color) ? color : '#000000';
 };
-const FieldColor: React.FC<{ label: string; currentValue: string; onChange: (v: string) => void }> = ({ label, currentValue, onChange }) => {
+const CHECKER = 'repeating-conic-gradient(#e2e8f0 0% 25%, #ffffff 0% 50%) 50% / 10px 10px';
+const FieldColor: React.FC<{ label: string; currentValue: string; onChange: (v: string) => void; placeholder?: string; hint?: React.ReactNode }> = ({ label, currentValue, onChange, placeholder, hint }) => {
     const [value, setValue] = useState(currentValue);
     const update = (v: string) => { setValue(v); onChange(v); };
+    const empty = !value.trim();
     return (
         <div style={{ marginBottom: '10px' }}>
             <label style={fieldLabelStyle}>{label}</label>
             <div style={{ display: 'flex', gap: '6px' }}>
-                <input
-                    type="color"
-                    value={cssColorToHex(value)}
-                    onChange={(e) => update(e.target.value)}
-                    style={{ width: '34px', height: '30px', padding: 0, border: '1px solid #D9DEF0', borderRadius: '4px', background: '#f3f5ff', cursor: 'pointer' }}
-                />
+                <span style={{ position: 'relative', width: '34px', height: '30px', flexShrink: 0 }}>
+                    <input
+                        type="color"
+                        value={empty ? '#ffffff' : cssColorToHex(value)}
+                        onChange={(e) => update(e.target.value)}
+                        style={{ width: '34px', height: '30px', padding: 0, border: '1px solid #D9DEF0', borderRadius: '4px', background: '#f3f5ff', cursor: 'pointer' }}
+                    />
+                    {empty && <span style={{ position: 'absolute', inset: '1px', borderRadius: '3px', background: CHECKER, pointerEvents: 'none' }} />}
+                </span>
                 <input
                     type="text"
                     value={value}
+                    placeholder={placeholder}
                     onChange={(e) => update(e.target.value)}
                     style={{ ...fieldInputStyle, flex: 1 }}
                     onFocus={(e) => e.currentTarget.style.borderColor = '#6366f1'}
                     onBlur={(e) => e.currentTarget.style.borderColor = '#D9DEF0'}
                 />
+                {!empty && (
+                    <button type="button" title={placeholder} onClick={() => { setValue(''); onChange('transparent'); }}
+                        style={{ ...fieldInputStyle, width: '28px', flex: 'none', padding: 0, cursor: 'pointer', color: '#dc2626' }}>×</button>
+                )}
             </div>
+            {hint && <div style={{ fontSize: '10px', color: '#6b7690', lineHeight: 1.45, marginTop: '4px' }}>{hint}</div>}
         </div>
     );
 };
+
+/** Renk geçişli arka plan (background-image: linear-gradient). */
+const GRADIENT_DIRS = ['', '90deg', '180deg', '135deg'] as const;
+const FieldGradient: React.FC<{ label: string; currentValue: string; dirLabels: Record<typeof GRADIENT_DIRS[number], string>; onChange: (v: string) => void }> = ({ label, currentValue, dirLabels, onChange }) => {
+    const parsed = useMemo(() => {
+        if (!currentValue.startsWith('linear-gradient')) return { dir: '' as typeof GRADIENT_DIRS[number], a: '#ede9fe', b: '#e0f2fe' };
+        const colors = currentValue.match(/rgba?\([^)]*\)|#[0-9a-f]{3,8}\b/gi) ?? [];
+        const deg = currentValue.match(/(\d+)deg/)?.[1];
+        const dir = (GRADIENT_DIRS as readonly string[]).includes(`${deg}deg`) ? `${deg}deg` as typeof GRADIENT_DIRS[number] : '180deg';
+        return { dir, a: cssColorToHex(colors[0] ?? '#ede9fe'), b: cssColorToHex(colors[colors.length - 1] ?? '#e0f2fe') };
+    }, [currentValue]);
+    const [state, setState] = useState(parsed);
+    const update = (patch: Partial<typeof state>) => {
+        const next = { ...state, ...patch };
+        setState(next);
+        onChange(next.dir ? `linear-gradient(${next.dir}, ${next.a}, ${next.b})` : '');
+    };
+    const swatch: React.CSSProperties = { width: '34px', height: '30px', padding: 0, border: '1px solid #D9DEF0', borderRadius: '4px', cursor: 'pointer', flexShrink: 0 };
+    return (
+        <div data-gradient-field style={{ marginBottom: '10px' }}>
+            <label style={fieldLabelStyle}>{label}</label>
+            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                <select value={state.dir} onChange={(e) => update({ dir: e.target.value as typeof GRADIENT_DIRS[number] })} style={{ ...fieldInputStyle, flex: 1, fontFamily: 'inherit' }}>
+                    {GRADIENT_DIRS.map(d => <option key={d} value={d}>{dirLabels[d]}</option>)}
+                </select>
+                {state.dir && <>
+                    <input type="color" value={state.a} onChange={(e) => update({ a: e.target.value })} style={swatch} />
+                    <input type="color" value={state.b} onChange={(e) => update({ b: e.target.value })} style={swatch} />
+                </>}
+            </div>
+            {state.dir && <div style={{ height: '8px', marginTop: '5px', borderRadius: '4px', background: `linear-gradient(${state.dir === '180deg' ? '90deg' : state.dir}, ${state.a}, ${state.b})` }} />}
+        </div>
+    );
+};
+
+/** Öğede görünen arka plan, şeffafsa üst öğelerden gelen renk. */
+function inheritedBackground(el: HTMLElement): string {
+    for (let p = el.parentElement; p && p.tagName !== 'HTML'; p = p.parentElement) {
+        const c = p.ownerDocument.defaultView?.getComputedStyle(p);
+        if (!c) break;
+        if (c.backgroundImage && c.backgroundImage !== 'none') return 'gradient';
+        if (c.backgroundColor !== 'rgba(0, 0, 0, 0)' && c.backgroundColor !== 'transparent') return cssColorToHex(c.backgroundColor);
+    }
+    return '';
+}
 const FieldSelect: React.FC<{ label: string; currentValue: string; options: string[]; onChange: (v: string) => void }> = ({ label, currentValue, options, onChange }) => {
     const [value, setValue] = useState(currentValue);
     const allOptions = value && !options.includes(value) ? [value, ...options] : options;
@@ -653,6 +709,20 @@ const FieldSelect: React.FC<{ label: string; currentValue: string; options: stri
     </div>
     );
 };
+/** Etiketli seçenekli açılır liste; listede olmayan mevcut değer olduğu gibi gösterilir. */
+const FieldChoice: React.FC<{ label: string; currentValue: string; options: { value: string; label: string }[]; onChange: (v: string) => void }> = ({ label, currentValue, options, onChange }) => {
+    const [value, setValue] = useState(currentValue);
+    const all = options.some(o => o.value === value) ? options : [{ value, label: value }, ...options];
+    return (
+        <div style={{ marginBottom: '10px' }}>
+            <label style={fieldLabelStyle}>{label}</label>
+            <select value={value} onChange={(e) => { setValue(e.target.value); onChange(e.target.value); }} style={{ ...fieldInputStyle, fontFamily: 'inherit' }}>
+                {all.map(o => <option key={o.value || '(none)'} value={o.value}>{o.label}</option>)}
+            </select>
+        </div>
+    );
+};
+
 const FieldTextArea: React.FC<{ label: string; currentValue: string; onChange: (v: string) => void }> = ({ label, currentValue, onChange }) => {
     const [value, setValue] = useState(currentValue);
     return (
@@ -1481,6 +1551,10 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const [moving, setMoving] = useState<PreviewLocator | null>(null);
     const movingRef = useRef<PreviewLocator | null>(null);
     movingRef.current = moving;
+    /** Soldan seçilen alan: sayfada tıklanan yere eklenir. */
+    const [placing, setPlacing] = useState<{ key: string; label: string } | null>(null);
+    const placingRef = useRef<{ key: string; label: string } | null>(null);
+    placingRef.current = placing;
     // Taşınan veri alanı yeni önizlemede kaynak aralığındaki sırasıyla yeniden seçilir.
     const pendingBindRangeRef = useRef<{ start: number; end: number; nth: number } | null>(null);
     /** Önizlemede sürükleme bitince Konum alanlarını yeniden okutmak için. */
@@ -2594,6 +2668,25 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     }, [flushSourceEdits]);
 
     useEffect(() => {
+        const doc = iframeRef.current?.contentDocument;
+        if (doc?.documentElement) {
+            if (placing) doc.documentElement.setAttribute('data-xslt-placing', '');
+            else {
+                doc.documentElement.removeAttribute('data-xslt-placing');
+                doc.querySelectorAll('[data-xslt-drop]').forEach(n => n.removeAttribute('data-xslt-drop'));
+            }
+        }
+        if (!placing) return;
+        const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setPlacing(null); };
+        document.addEventListener('keydown', onKey);
+        doc?.addEventListener('keydown', onKey);
+        return () => {
+            document.removeEventListener('keydown', onKey);
+            doc?.removeEventListener('keydown', onKey);
+        };
+    }, [placing]);
+
+    useEffect(() => {
         if (!selectedObject) return;
         const onKey = (e: KeyboardEvent) => {
             if (e.key === 'Escape') {
@@ -2999,6 +3092,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             moveTo(movingLoc, resolveInsertTarget(target, 'auto'));
             return;
         }
+        const placingField = placingRef.current;
+        if (placingField) {
+            e.preventDefault();
+            e.stopPropagation();
+            setPlacing(null);
+            insertField(placingField.key, resolveInsertTarget(target, 'auto'));
+            return;
+        }
         // Sprint 16 Aşama 3 — Tüm elementlere tıklama desteği. Önceki kod
         // sadece data-render-index olan elementlerde çalışıyordu
         // (closest('[data-render-index]') null ise return). e-Fatura-Sablon
@@ -3088,7 +3189,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         }
         openSelection(binding, indexedEl, locator);
         console.log(`[XSLTEditor] Preview click → ${indexedEl.tagName} render-index=${renderIndex ?? '(yok — sadece stil paneli)'}`);
-    }, [openSelection, moveTo, bindPlacement]);
+    }, [openSelection, moveTo, bindPlacement, insertField]);
 
     /**
      * iframe yüklendiğinde:
@@ -3127,7 +3228,10 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 + '[data-xslt-obj],img[data-xslt-selected],[data-xslt-movable]{cursor:move !important;}[data-xslt-obj]:hover{outline:2px dashed #6366f1;outline-offset:2px;}'
                 + '[data-xslt-dragging]{opacity:0.85;outline:2px solid #10b981 !important;}'
                 + '[data-xslt-drop=inside]{outline:2px dashed #10b981 !important;outline-offset:-2px;background-color:rgba(16,185,129,0.08) !important;}'
-                + '[data-xslt-drop=after]{box-shadow:0 3px 0 0 #10b981 !important;}';
+                + '[data-xslt-drop=after]{box-shadow:0 3px 0 0 #10b981 !important;}'
+                + '[data-empty-label]{display:inline-block;min-width:40px;min-height:12px;padding:0 4px;outline:1px dashed #a78bfa;outline-offset:1px;background-color:rgba(167,139,250,0.10);vertical-align:middle;}'
+                + '[data-empty-label]::before{content:attr(data-empty-label);font:italic 9px/12px system-ui,sans-serif;color:#7c3aed;letter-spacing:0;text-transform:none;}'
+                + 'html[data-xslt-placing] *{cursor:crosshair !important;}';
             doc.head.appendChild(style);
         }
         doc.documentElement.style.setProperty('zoom', String(zoom));
@@ -3215,6 +3319,13 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             // hemen uygula (titreme olmasın), auto-fit açıksa 350ms sonra
             // (measureHeight 300ms + 50ms pay) genişliğe göre yeniden sığdır.
             applyPreviewZoom(previewZoomRef.current);
+            // Örnek XML'de değeri olmayan alan objesi önizlemede kesikli kutuyla gösterilir (yalnız editörde).
+            doc.querySelectorAll<HTMLElement>('[data-obj-kind="field"]').forEach(n => {
+                if ((n.textContent ?? '').trim() || n.querySelector('img')) return;
+                const key = n.getAttribute('data-field') ?? '';
+                n.setAttribute('data-empty-label', catalogRef.current.find(f => f.key === key)?.label ?? key.split('/').pop() ?? '');
+            });
+            if (placingRef.current) doc.documentElement.setAttribute('data-xslt-placing', '');
             // Yeniden render sonrası seçili öğeyi yeni dokümanda tekrar bul
             // ve önceki kaydırma konumuna dön.
             const sel = selectedObjectRef.current;
@@ -3315,7 +3426,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             else moveBinding(Number(bindIndex), target);
         };
         const moveOverHandler = (e: MouseEvent) => {
-            if (movingRef.current) markDropTarget(resolveInsertTarget(e.target as Element, 'auto'));
+            if (movingRef.current || placingRef.current) markDropTarget(resolveInsertTarget(e.target as Element, 'auto'));
         };
         // Eklenen objeler (ve seçili resim) önizlemede sürüklenerek konumlandırılır.
         type DragState = {
@@ -3373,7 +3484,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             setPositionRev(r => r + 1);
         };
         const mouseDownHandler = (e: MouseEvent) => {
-            if (e.button !== 0 || movingRef.current) return;
+            if (e.button !== 0 || movingRef.current || placingRef.current) return;
             const target = e.target as HTMLElement;
             const obj = target.closest?.('[data-xslt-obj]') as HTMLElement | null;
             const sel = selectedObjectRef.current;
@@ -4257,9 +4368,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                 : undefined;
                                             const insertHere = () => {
                                                 if (isLineField(f) && insertMode === 'after' && insertColumn('field', f.key)) return;
-                                                insertField(f.key, insertMode === 'end'
-                                                    ? null
-                                                    : resolveInsertTarget(selectedObjectRef.current?.element ?? null, insertMode));
+                                                setMoving(null);
+                                                setPlacing({ key: f.key, label: f.label });
                                             };
                                             return (
                                                 <div
@@ -4675,6 +4785,44 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         </div>
                     )}
 
+                    {placing && (
+                        <div
+                            data-place-banner
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap',
+                                padding: '8px 12px', background: 'linear-gradient(90deg, #ede9fe, #e0f2fe)',
+                                borderBottom: '1px solid #c4b5fd', color: '#5b21b6', fontSize: '11px',
+                            }}
+                        >
+                            <span style={{ flex: 1, minWidth: '220px' }}>
+                                📍 {t('editor.placing.banner', { label: placing.label })}
+                            </span>
+                            {selectedObject?.element && (
+                                <button
+                                    data-place-selected
+                                    onClick={() => { const p = placing; setPlacing(null); insertField(p.key, resolveInsertTarget(selectedObjectRef.current?.element ?? null, 'after')); }}
+                                    style={{ padding: '4px 8px', background: '#ffffff', border: '1px solid #c4b5fd', borderRadius: '4px', color: '#6d28d9', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
+                                >
+                                    {t('editor.placing.afterSelected')}
+                                </button>
+                            )}
+                            <button
+                                data-place-end
+                                onClick={() => { const p = placing; setPlacing(null); insertField(p.key, null); }}
+                                style={{ padding: '4px 8px', background: '#ffffff', border: '1px solid #c4b5fd', borderRadius: '4px', color: '#6d28d9', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
+                            >
+                                {t('editor.move.toEnd')}
+                            </button>
+                            <button
+                                data-place-cancel
+                                onClick={() => setPlacing(null)}
+                                style={{ padding: '4px 8px', background: 'transparent', border: '1px solid #D9DEF0', borderRadius: '4px', color: '#5b6680', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
+                            >
+                                {t('editor.common.cancelAction')}
+                            </button>
+                        </div>
+                    )}
+
                     {moving && (
                         <div
                             data-move-banner
@@ -4854,6 +5002,21 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             : isLine ? t('editor.panel.kind.line')
                             : isCell ? t('editor.panel.kind.cell')
                             : isLiteral ? t('editor.panel.kind.literal') : t('editor.panel.kind.preview');
+                        // Öğeyi içeren şablon grupları (en yakın 4): tıklanınca grup seçilir.
+                        const ancestors: HTMLElement[] = [];
+                        for (let p = el?.parentElement ?? null; p && ancestors.length < 4; p = p.parentElement) {
+                            const ptag = p.tagName.toLowerCase();
+                            if (ptag === 'body' || ptag === 'html') break;
+                            if (p.hasAttribute('data-xsrc') || p.hasAttribute('data-xslt-obj')) ancestors.push(p);
+                        }
+                        const selectAncestor = (p: HTMLElement) => {
+                            const objId = p.getAttribute('data-xslt-obj');
+                            if (objId) { openSelection(null, p, { kind: 'obj', id: objId }); return; }
+                            const ordinal = Number(p.getAttribute('data-xsrc'));
+                            const same = Array.from(p.ownerDocument.querySelectorAll(`[data-xsrc="${ordinal}"]`));
+                            openSelection(null, p, { kind: 'el', ordinal, nth: Math.max(0, same.indexOf(p)) });
+                        };
+                        const nodeName = (n: HTMLElement) => `${n.tagName.toLowerCase()}${n.classList[0] ? `.${n.classList[0]}` : ''}`;
                         const kindColor = kind === 'dropdown' ? '#4f46e5'
                             : kind === 'static' ? '#059669'
                             : '#c2410c';
@@ -4944,6 +5107,26 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                         ✕
                                     </button>
                                 </div>
+
+                                {ancestors.length > 0 && (
+                                    <div data-parent-path style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap', padding: '6px 14px', background: '#faf5ff', borderBottom: '1px solid #e4e8f6', fontSize: '10px', color: '#6b7690' }}>
+                                        <span style={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.4px' }}>{t('editor.panel.parents')}:</span>
+                                        {[...ancestors].reverse().map((p, i) => (
+                                            <React.Fragment key={i}>
+                                                {i > 0 && <span>›</span>}
+                                                <button
+                                                    type="button"
+                                                    data-select-parent={ancestors.length - 1 - i}
+                                                    title={t('editor.panel.selectParent')}
+                                                    onClick={() => selectAncestor(p)}
+                                                    style={{ padding: '2px 6px', background: '#ffffff', border: '1px solid #c4b5fd', borderRadius: '10px', color: '#6d28d9', fontSize: '10px', fontWeight: 600, fontFamily: 'monospace', cursor: 'pointer' }}
+                                                >
+                                                    {nodeName(p)}
+                                                </button>
+                                            </React.Fragment>
+                                        ))}
+                                    </div>
+                                )}
 
                                 <div style={{ flex: 1, padding: '0 14px 14px', overflowY: 'auto' }}>
                                     {selectedLineCell && el && (
@@ -5191,6 +5374,68 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                         </>
                                     )}
 
+                                    {el && cs && !isLine && (() => {
+                                        const grid: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' };
+                                        const rawBg = transparentToEmpty(cs.backgroundColor);
+                                        const ownBg = rawBg && !/rgba\([^)]*,\s*0?\.\d+\s*\)/.test(rawBg) ? cssColorToHex(rawBg) : rawBg;
+                                        const fromParent = !ownBg && cs.backgroundImage === 'none' ? inheritedBackground(el) : '';
+                                        const shadowValue = cs.boxShadow === 'none' ? '' : cs.boxShadow;
+                                        const shadowOptions = [
+                                            { value: '', label: t('editor.panel.shadows.none') },
+                                            { value: '0 1px 3px rgba(15, 23, 42, 0.12)', label: t('editor.panel.shadows.soft') },
+                                            { value: '0 4px 14px rgba(15, 23, 42, 0.16)', label: t('editor.panel.shadows.medium') },
+                                            { value: '0 12px 30px rgba(15, 23, 42, 0.24)', label: t('editor.panel.shadows.strong') },
+                                        ];
+                                        const sides = (['top', 'left', 'bottom', 'right'] as const).map(side => [side, t(`editor.panel.sides.${side}`)] as const);
+                                        return (
+                                            <div data-appearance-editor>
+                                                {sectionTitle(t('editor.panel.appearance'), '#db2777')}
+                                                <FieldColor
+                                                    key={fieldKey('background-color')}
+                                                    label={t('editor.panel.background')}
+                                                    currentValue={ownBg}
+                                                    placeholder={t('editor.panel.transparent')}
+                                                    hint={fromParent && fromParent !== 'gradient'
+                                                        ? t('editor.panel.bgFromParent', { color: fromParent })
+                                                        : fromParent === 'gradient' ? t('editor.panel.bgFromParentGradient') : undefined}
+                                                    onChange={(v) => handleStyleChange('background-color', v)}
+                                                />
+                                                <FieldGradient
+                                                    key={fieldKey('background-image')}
+                                                    label={t('editor.panel.gradient')}
+                                                    currentValue={cs.backgroundImage === 'none' ? '' : cs.backgroundImage}
+                                                    dirLabels={{ '': t('editor.panel.gradientDirs.none'), '90deg': t('editor.panel.gradientDirs.horizontal'), '180deg': t('editor.panel.gradientDirs.vertical'), '135deg': t('editor.panel.gradientDirs.diagonal') }}
+                                                    onChange={(v) => handleStyleChange('background-image', v || 'none')}
+                                                />
+                                                <div style={grid}>
+                                                    <FieldText key={fieldKey('border-radius')} label={t('editor.panel.radius')} currentValue={cs.borderRadius === '0px' ? '' : cs.borderRadius} placeholder="0px" onChange={(v) => handleStyleChange('border-radius', v)} />
+                                                    <FieldText key={fieldKey('opacity')} label={t('editor.panel.opacity')} currentValue={cs.opacity === '1' ? '' : cs.opacity} placeholder="1" onChange={(v) => handleStyleChange('opacity', v)} />
+                                                </div>
+                                                <FieldChoice
+                                                    key={fieldKey('box-shadow')}
+                                                    label={t('editor.panel.shadow')}
+                                                    currentValue={shadowValue}
+                                                    options={shadowOptions.some(o => o.value === shadowValue) ? shadowOptions : [...shadowOptions, { value: shadowValue, label: t('editor.panel.shadows.custom') }]}
+                                                    onChange={(v) => handleStyleChange('box-shadow', v || 'none')}
+                                                />
+                                                {!isCell && (
+                                                    <div style={grid}>
+                                                        {sides.map(([side, text]) => (
+                                                            <FieldLength
+                                                                key={fieldKey(`padding-${side}`)}
+                                                                attr={`padding-${side}`}
+                                                                label={t('editor.panel.paddingSide', { side: text })}
+                                                                currentValue={el.style.getPropertyValue(`padding-${side}`)}
+                                                                placeholder={roundPx(cs.getPropertyValue(`padding-${side}`))}
+                                                                onChange={(v) => handleStyleChange(`padding-${side}`, v)}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })()}
+
                                     {el && cs && (() => {
                                         const grid: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' };
                                         const spacing = isCell ? 'padding' : 'margin';
@@ -5271,11 +5516,43 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                             <FieldSelect key={fieldKey('text-decoration-line')} label={t('editor.panel.textDecoration')} currentValue={cs.textDecorationLine} options={['none', 'underline', 'line-through', 'overline']} onChange={(v) => handleStyleChange('text-decoration-line', v)} />
                                             <FieldColor key={fieldKey('color')} label={t('editor.panel.color')} currentValue={cs.color} onChange={(v) => handleStyleChange('color', v)} />
                                             <FieldSelect key={fieldKey('text-align')} label={t('editor.panel.textAlign')} currentValue={cs.textAlign} options={['left', 'right', 'center', 'justify', 'start', 'end']} onChange={(v) => handleStyleChange('text-align', v)} />
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                                                <FieldText key={fieldKey('letter-spacing')} label={t('editor.panel.letterSpacing')} currentValue={cs.letterSpacing === 'normal' ? '' : cs.letterSpacing} placeholder="normal" onChange={(v) => handleStyleChange('letter-spacing', v)} />
+                                                <FieldText key={fieldKey('line-height')} label={t('editor.panel.lineHeight')} currentValue={cs.lineHeight === 'normal' ? '' : cs.lineHeight} placeholder="normal" onChange={(v) => handleStyleChange('line-height', v)} />
+                                            </div>
+                                            <FieldChoice
+                                                key={fieldKey('text-transform')}
+                                                label={t('editor.panel.textTransform')}
+                                                currentValue={cs.textTransform}
+                                                options={(['none', 'uppercase', 'lowercase', 'capitalize'] as const).map(v => ({ value: v, label: t(`editor.panel.transforms.${v}`) }))}
+                                                onChange={(v) => handleStyleChange('text-transform', v)}
+                                            />
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                                                <FieldChoice
+                                                    key={fieldKey('font-variant')}
+                                                    label={t('editor.panel.smallCaps')}
+                                                    currentValue={cs.fontVariantCaps === 'small-caps' ? 'small-caps' : 'normal'}
+                                                    options={[{ value: 'normal', label: t('editor.panel.no') }, { value: 'small-caps', label: t('editor.panel.yes') }]}
+                                                    onChange={(v) => handleStyleChange('font-variant', v)}
+                                                />
+                                                <FieldChoice
+                                                    key={fieldKey('white-space')}
+                                                    label={t('editor.panel.wrap')}
+                                                    currentValue={cs.whiteSpace === 'nowrap' ? 'nowrap' : 'normal'}
+                                                    options={[{ value: 'normal', label: t('editor.panel.wraps.normal') }, { value: 'nowrap', label: t('editor.panel.wraps.nowrap') }]}
+                                                    onChange={(v) => handleStyleChange('white-space', v)}
+                                                />
+                                            </div>
+                                            {(isCell || cs.display.startsWith('inline')) && (
+                                                <FieldChoice
+                                                    key={fieldKey('vertical-align')}
+                                                    label={t('editor.panel.verticalAlign')}
+                                                    currentValue={cs.verticalAlign}
+                                                    options={(['top', 'middle', 'bottom', 'baseline'] as const).map(v => ({ value: v, label: t(`editor.panel.valigns.${v}`) }))}
+                                                    onChange={(v) => handleStyleChange('vertical-align', v)}
+                                                />
+                                            )}
                                             </>}
-
-                                            {sectionTitle(t('editor.panel.box'), '#c2410c')}
-                                            <FieldColor key={fieldKey('background-color')} label={t('editor.panel.background')} currentValue={transparentToEmpty(cs.backgroundColor)} onChange={(v) => handleStyleChange('background-color', v)} />
-                                            <FieldText key={fieldKey('padding')} label={t('editor.panel.padding')} currentValue={cs.padding} onChange={(v) => handleStyleChange('padding', v)} />
 
                                             {isInput && (
                                                 <>
