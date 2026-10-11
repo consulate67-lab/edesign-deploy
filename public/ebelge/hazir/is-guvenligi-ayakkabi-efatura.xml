@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: İş Güvenliği Ayakkabısı → İnşaat Firması e-Fatura — TICARIFATURA · SATIS.
+  İş güvenliği ayakkabısı satıcıları için ikaz şeritli kurumsal e-Fatura; EN ISO 20345 sınıf bilgisi (S1P / S3), numara dağılımı, sipariş / irsaliye ızgarası ve IBAN’lı banka bloğu.
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>TICARIFATURA</cbc:ProfileID>
+    <cbc:ID>GVN2026000014430</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>788EAB22-5A90-4CC3-A3A8-704FBA0BD9B9</cbc:UUID>
+    <cbc:IssueDate>2026-10-06</cbc:IssueDate>
+    <cbc:IssueTime>09:40:00</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>SATIS</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız: Yüz Altmış Bir Bin Beş Yüz İki Türk Lirası</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>3</cbc:LineCountNumeric>
+    <cac:OrderReference>
+        <cbc:ID>SA-2026-1184</cbc:ID>
+        <cbc:IssueDate>2026-09-25</cbc:IssueDate>
+    </cac:OrderReference>
+    <cac:DespatchDocumentReference>
+        <cbc:ID>GVI2026000003318</cbc:ID>
+        <cbc:IssueDate>2026-10-05</cbc:IssueDate>
+    </cac:DespatchDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>EN ISO 20345:2022</cbc:ID>
+        <cbc:IssueDate>2026-10-01</cbc:IssueDate>
+        <cbc:DocumentType>STANDART</cbc:DocumentType>
+        <cbc:DocumentDescription>S3: çelik burun 200 J, çelik ara taban, su geçirmez saya · S1P: kompozit burun, delinmez ara taban. Uygunluk beyanları ektedir.</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">4120983657</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">4120983657</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>İkitelli OSB Mah. Atatürk Bulvarı Deposite AVM</cbc:StreetName>
+                <cbc:BuildingNumber>A5/112</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Başakşehir</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34490</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_GVN2026000014430</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.guvenliayak.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">4120983657</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">0412098365700012</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Güvenli Ayak KKD Ürünleri San. Tic. A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>İkitelli OSB Mah. Atatürk Bulvarı Deposite AVM</cbc:StreetName>
+                <cbc:BuildingNumber>A5/112</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Başakşehir</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34490</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>İkitelli</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0212 671 12 12</cbc:Telephone>
+                <cbc:ElectronicMail>kurumsal@guvenliayak.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">5208416739</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Yapıtaş İnşaat Taahhüt A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Mutlukent Mah. 2072. Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>3</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Çankaya</cbc:CitySubdivisionName>
+                <cbc:CityName>Ankara</cbc:CityName>
+                <cbc:PostalZone>06800</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Çankaya</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0312 236 20 72</cbc:Telephone>
+                <cbc:ElectronicMail>satinalma@yapitasinsaat.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-12-05</cbc:PaymentDueDate>
+        <cbc:InstructionNote>Havale / EFT</cbc:InstructionNote>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR650006400000917260354418</cbc:ID>
+            <cbc:CurrencyCode>TRY</cbc:CurrencyCode>
+            <cbc:PaymentNote>Başkent Ticaret Bankası · İkitelli Şubesi</cbc:PaymentNote>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:PaymentTerms>
+        <cbc:Note>60 gün vadeli · havale / EFT.</cbc:Note>
+    </cac:PaymentTerms>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">14682.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">146820.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">14682.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>10</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">148800.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">146820.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">161502.00</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="TRY">1980.00</cbc:AllowanceTotalAmount>
+        <cbc:PayableAmount currencyID="TRY">161502.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="PR">60</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">77400.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">7740.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">77400.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">7740.00</cbc:TaxAmount>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>S3 Çelik Burunlu İş Botu</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="NUMARA">39-46 karışık</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="SINIF">S3 SRC</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BURUN">Çelik 200 J</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Siyah</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENKKOD">#111111</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">1290</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="PR">40</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">37620.00</cbc:LineExtensionAmount>
+        <cac:AllowanceCharge>
+            <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+            <cbc:AllowanceChargeReason>Toplu alım %5</cbc:AllowanceChargeReason>
+            <cbc:MultiplierFactorNumeric>0.05</cbc:MultiplierFactorNumeric>
+            <cbc:Amount currencyID="TRY">1980.00</cbc:Amount>
+            <cbc:BaseAmount currencyID="TRY">39600.00</cbc:BaseAmount>
+        </cac:AllowanceCharge>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">3762.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">37620.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">3762.00</cbc:TaxAmount>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>S1P Kompozit Burunlu İş Ayakkabısı</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="NUMARA">38-45 karışık</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="SINIF">S1P SRC</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BURUN">Kompozit</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Gri</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENKKOD">#6b7280</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">990</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="PR">20</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">31800.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">3180.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">31800.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">3180.00</cbc:TaxAmount>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Kışlık Kürklü S3 Bot</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="NUMARA">40-45 karışık</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="SINIF">S3 CI</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Kahve</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENKKOD">#5b3a1e</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">1590</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>

@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: Koşu Ayakkabısı Mağazası e-Arşiv (Basış Analizli) — EARSIVFATURA · SATIS.
+  Koşu mağazaları için çapraz şeritli sportif tasarım; iri numaralı ürün kartları, basış (pronasyon) analizi notu, taksit planı ve 30 gün koşup deneme garantisi.
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>EARSIVFATURA</cbc:ProfileID>
+    <cbc:ID>KSU2026000048315</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>DE791FAD-97C0-4ED8-A43B-3801A3562C74</cbc:UUID>
+    <cbc:IssueDate>2026-10-09</cbc:IssueDate>
+    <cbc:IssueTime>18:05:00</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>SATIS</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız: On Üç Bin Beş Yüz Elli Bir Türk Lirası On Beş Kuruş</cbc:Note>
+    <cbc:Note>Koşu kemerinde KDV %20, ayakkabı ve giyim ürünlerinde %10 uygulanmıştır.</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>4</cbc:LineCountNumeric>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>Hafif pronasyon</cbc:ID>
+        <cbc:IssueDate>2026-10-09</cbc:IssueDate>
+        <cbc:DocumentType>ANALIZ</cbc:DocumentType>
+        <cbc:DocumentDescription>Koşu bandında video analizi: sağ ayakta içe basma; destekli (stability) model önerildi.</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>4</cbc:ID>
+        <cbc:IssueDate>2026-10-09</cbc:IssueDate>
+        <cbc:DocumentType>TAKSIT</cbc:DocumentType>
+        <cbc:DocumentDescription>Maximum kart · 4 taksit · vade farksız</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>KSU-DN-48315</cbc:ID>
+        <cbc:IssueDate>2026-11-08</cbc:IssueDate>
+        <cbc:DocumentType>DENEME</cbc:DocumentType>
+        <cbc:DocumentDescription>En fazla 50 km kullanılmış ürünlerde tek seferlik model değişimi</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">5390127648</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">5390127648</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Caddebostan Mah. Bağdat Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>318/A</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Kadıköy</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34728</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_KSU2026000048315</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.kulvarkosu.com</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">5390127648</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Kulvar Koşu Ekipmanları Tic. Ltd. Şti.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Caddebostan Mah. Bağdat Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>318/A</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Kadıköy</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34728</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Erenköy</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0216 356 31 31</cbc:Telephone>
+                <cbc:ElectronicMail>magaza@kulvarkosu.com</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">36508129470</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Suadiye Mah. Kazım Özalp Sok.</cbc:StreetName>
+                <cbc:BuildingNumber>12/8</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Kadıköy</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34740</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:Contact>
+                <cbc:Telephone>0533 640 17 29</cbc:Telephone>
+                <cbc:ElectronicMail>ozan.erdem@example.com</cbc:ElectronicMail>
+            </cac:Contact>
+            <cac:Person>
+                <cbc:FirstName>Ozan</cbc:FirstName>
+                <cbc:FamilyName>Erdem</cbc:FamilyName>
+            </cac:Person>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>48</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-10-09</cbc:PaymentDueDate>
+        <cbc:InstructionNote>Kredi kartı · 4 taksit · **** 8814</cbc:InstructionNote>
+    </cac:PaymentMeans>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">1294.65</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">11566.50</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">1156.65</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>10</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">690.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">138.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>2</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>20</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">13050.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">12256.50</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">13551.15</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="TRY">793.50</cbc:AllowanceTotalAmount>
+        <cbc:PayableAmount currencyID="TRY">13551.15</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="PR">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">6490.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">649.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">6490.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">649.00</cbc:TaxAmount>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Destekli Yol Koşu Ayakkabısı</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="NUMARA">43</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Neon yeşil</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENKKOD">#84cc16</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="DROP">8 mm</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="TABAN">Karbon plakasız</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">6490</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="PR">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">4496.50</cbc:LineExtensionAmount>
+        <cac:AllowanceCharge>
+            <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+            <cbc:AllowanceChargeReason>İkinci model %15</cbc:AllowanceChargeReason>
+            <cbc:MultiplierFactorNumeric>0.15</cbc:MultiplierFactorNumeric>
+            <cbc:Amount currencyID="TRY">793.50</cbc:Amount>
+            <cbc:BaseAmount currencyID="TRY">5290.00</cbc:BaseAmount>
+        </cac:AllowanceCharge>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">449.65</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">4496.50</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">449.65</cbc:TaxAmount>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Trail Koşu Ayakkabısı</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="NUMARA">43</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Antrasit</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENKKOD">#374151</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="DROP">6 mm</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="TABAN">5 mm kram</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">5290</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="PR">2</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">580.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">58.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">580.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">58.00</cbc:TaxAmount>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Dikişsiz Koşu Çorabı</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="NUMARA">42-44</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Siyah</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENKKOD">#111111</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">290</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>4</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">690.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">138.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">690.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">138.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Telefon Koşu Kemeri</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Siyah</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENKKOD">#1f2937</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">690</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>

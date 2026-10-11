@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: Kırtasiye → Ofis Sarf Malzemesi e-Fatura — TICARIFATURA · SATIS.
+  Kırtasiye ve ofis malzemesi satıcılarının şirketlere aylık sarf satışı için minimal ızgaralı e-Fatura; fotokopi kâğıdı, toner ve ofis malzemesi, aylık sipariş dönemi, irsaliye ve IBAN.
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>TICARIFATURA</cbc:ProfileID>
+    <cbc:ID>OFS2026000017390</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>0C478DCA-0AE8-41E2-A772-558EC02C881D</cbc:UUID>
+    <cbc:IssueDate>2026-10-01</cbc:IssueDate>
+    <cbc:IssueTime>10:00:00</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>SATIS</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız: On Dokuz Bin Dört Yüz On Dokuz Türk Lirası Altmış Kuruş</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>5</cbc:LineCountNumeric>
+    <cac:OrderReference>
+        <cbc:ID>Eylül 2026 sarf siparişi</cbc:ID>
+        <cbc:IssueDate>2026-09-02</cbc:IssueDate>
+    </cac:OrderReference>
+    <cac:DespatchDocumentReference>
+        <cbc:ID>OFI2026000004401</cbc:ID>
+        <cbc:IssueDate>2026-09-03</cbc:IssueDate>
+    </cac:DespatchDocumentReference>
+    <cac:DespatchDocumentReference>
+        <cbc:ID>OFI2026000004587</cbc:ID>
+        <cbc:IssueDate>2026-09-17</cbc:IssueDate>
+    </cac:DespatchDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">6590274183</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">6590274183</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Ostim Mah. 1148. Sok.</cbc:StreetName>
+                <cbc:BuildingNumber>22</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Yenimahalle</cbc:CitySubdivisionName>
+                <cbc:CityName>Ankara</cbc:CityName>
+                <cbc:PostalZone>06374</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_OFS2026000017390</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.ofispark.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">6590274183</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Ofispark Kırtasiye Ltd. Şti.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Ostim Mah. 1148. Sok.</cbc:StreetName>
+                <cbc:BuildingNumber>22</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Yenimahalle</cbc:CitySubdivisionName>
+                <cbc:CityName>Ankara</cbc:CityName>
+                <cbc:PostalZone>06374</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Ostim</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0312 354 11 48</cbc:Telephone>
+                <cbc:ElectronicMail>siparis@ofispark.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">3209175486</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Başkent Sigorta Aracılık Hizmetleri Ltd. Şti.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Kızılay Mah. Gazi Mustafa Kemal Bulvarı</cbc:StreetName>
+                <cbc:BuildingNumber>34/9</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Çankaya</cbc:CitySubdivisionName>
+                <cbc:CityName>Ankara</cbc:CityName>
+                <cbc:PostalZone>06420</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Maltepe</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0312 232 34 34</cbc:Telephone>
+                <cbc:ElectronicMail>idari@baskentsigorta.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-10-16</cbc:PaymentDueDate>
+        <cbc:InstructionNote>Havale / EFT</cbc:InstructionNote>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR280001000000618273940512</cbc:ID>
+            <cbc:CurrencyCode>TRY</cbc:CurrencyCode>
+            <cbc:PaymentNote>Ankara Ticaret Bankası · Ostim Şubesi</cbc:PaymentNote>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:PaymentTerms>
+        <cbc:Note>Ay sonu kapanış · 15 gün vadeli.</cbc:Note>
+    </cac:PaymentTerms>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">3236.60</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">16183.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">3236.60</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>20</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">16375.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">16183.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">19419.60</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="TRY">192.00</cbc:AllowanceTotalAmount>
+        <cbc:PayableAmount currencyID="TRY">19419.60</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="BX">12</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">8580.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">1716.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">8580.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">1716.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>A4 Fotokopi Kâğıdı 80 g (5 top)</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="ICERIK">2.500 yaprak</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">715</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">4</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">4600.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">920.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">4600.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">920.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Lazer Toner (muadil)</cbc:Name>
+            <cbc:ModelName>TN-2456</cbc:ModelName>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="OZELLIK">3.000 sayfa</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">1150</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">40</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">1728.00</cbc:LineExtensionAmount>
+        <cac:AllowanceCharge>
+            <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+            <cbc:AllowanceChargeReason>Adet indirimi</cbc:AllowanceChargeReason>
+            <cbc:MultiplierFactorNumeric>0.1</cbc:MultiplierFactorNumeric>
+            <cbc:Amount currencyID="TRY">192.00</cbc:Amount>
+            <cbc:BaseAmount currencyID="TRY">1920.00</cbc:BaseAmount>
+        </cac:AllowanceCharge>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">345.60</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">1728.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">345.60</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Plastik Klasör Geniş</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Lacivert</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENKKOD">#1e3a8a</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">48</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>4</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">2</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">780.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">156.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">780.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">156.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Masaüstü Zımba Makinesi</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="OZELLIK">40 sayfa</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">390</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>5</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">3</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">495.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">99.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">495.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">99.00</cbc:TaxAmount>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Yapışkanlı Not Kâğıdı (12’li)</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">165</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>

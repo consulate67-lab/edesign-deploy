@@ -172,6 +172,7 @@ export function invoice(d) {
         e('cbc:DocumentCurrencyCode', cur),
         e('cbc:LineCountNumeric', String(lines.length)),
         d.order && docRef('cac:OrderReference', d.order),
+        (d.billing ?? []).map((x) => e('cac:BillingReference', docRef('cac:InvoiceDocumentReference', x))),
         (d.despatch ?? []).map((x) => docRef('cac:DespatchDocumentReference', x)),
         (d.docs ?? []).map((x) => docRef('cac:AdditionalDocumentReference', x)),
         signature(d.supplier, d.id),

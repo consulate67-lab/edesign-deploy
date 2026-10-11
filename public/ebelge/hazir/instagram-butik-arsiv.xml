@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: Instagram Butik e-Arşiv (Kapıda Ödeme) — EARSIVFATURA · SATIS.
+  Sosyal medyadan satış yapan butikler için profil sayfası görünümlü e-Arşiv; gönderi karosu ürünler, mesaj balonunda müşteri ve künye, GİB internet satışı bilgileri ve iade kodu.
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>EARSIVFATURA</cbc:ProfileID>
+    <cbc:ID>LLA2026000002291</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>D87F7B60-63F7-4B47-A8CD-00F4123A75FE</cbc:UUID>
+    <cbc:IssueDate>2026-10-08</cbc:IssueDate>
+    <cbc:IssueTime>22:16:00</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>SATIS</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız: Üç Bin Üç Yüz Yetmiş Sekiz Türk Lirası On Kuruş</cbc:Note>
+    <cbc:Note>Bu satış internet üzerinden yapılmıştır.</cbc:Note>
+    <cbc:Note>Cayma hakkı: teslimden itibaren 14 gün.</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>3</cbc:LineCountNumeric>
+    <cac:OrderReference>
+        <cbc:ID>DM-1077</cbc:ID>
+        <cbc:IssueDate>2026-10-08</cbc:IssueDate>
+    </cac:OrderReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>LLA-RT-58K2</cbc:ID>
+        <cbc:IssueDate>2026-10-24</cbc:IssueDate>
+        <cbc:DocumentType>IADEKODU</cbc:DocumentType>
+        <cbc:DocumentDescription>Kargo şubesinde bu kodla ücretsiz iade</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">3170465582</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">3170465582</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Kızıltoprak Mah. Aspendos Bulvarı</cbc:StreetName>
+                <cbc:BuildingNumber>102/4</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Muratpaşa</cbc:CitySubdivisionName>
+                <cbc:CityName>Antalya</cbc:CityName>
+                <cbc:PostalZone>07300</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_LLA2026000002291</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.lilabutik.com</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">3170465582</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Lila Butik Giyim — Ceren Akın</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Kızıltoprak Mah. Aspendos Bulvarı</cbc:StreetName>
+                <cbc:BuildingNumber>102/4</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Muratpaşa</cbc:CitySubdivisionName>
+                <cbc:CityName>Antalya</cbc:CityName>
+                <cbc:PostalZone>07300</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Muratpaşa</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0532 607 10 77</cbc:Telephone>
+                <cbc:ElectronicMail>siparis@lilabutik.com</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">19463058207</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Yenidoğan Mah. 1260. Sok.</cbc:StreetName>
+                <cbc:BuildingNumber>8/5</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Kepez</cbc:CitySubdivisionName>
+                <cbc:CityName>Antalya</cbc:CityName>
+                <cbc:PostalZone>07090</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:Contact>
+                <cbc:Telephone>0546 811 30 92</cbc:Telephone>
+                <cbc:ElectronicMail>irem.g@example.com</cbc:ElectronicMail>
+            </cac:Contact>
+            <cac:Person>
+                <cbc:FirstName>İrem</cbc:FirstName>
+                <cbc:FamilyName>Gündoğdu</cbc:FamilyName>
+            </cac:Person>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:Delivery>
+        <cbc:TrackingID>HZ 4471 0920 88</cbc:TrackingID>
+        <cac:DeliveryAddress>
+            <cbc:StreetName>Yenidoğan Mah. 1260. Sok.</cbc:StreetName>
+            <cbc:BuildingNumber>8/5</cbc:BuildingNumber>
+            <cbc:CitySubdivisionName>Kepez</cbc:CitySubdivisionName>
+            <cbc:CityName>Antalya</cbc:CityName>
+            <cbc:PostalZone>07090</cbc:PostalZone>
+            <cac:Country>
+                <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                <cbc:Name>Türkiye</cbc:Name>
+            </cac:Country>
+        </cac:DeliveryAddress>
+        <cac:CarrierParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">4630182759</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Hızlı Kargo Taşımacılık A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:CitySubdivisionName>Kepez</cbc:CitySubdivisionName>
+                <cbc:CityName>Antalya</cbc:CityName>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:CarrierParty>
+        <cac:Despatch>
+            <cbc:ActualDespatchDate>2026-10-09</cbc:ActualDespatchDate>
+            <cbc:ActualDespatchTime>10:20:00</cbc:ActualDespatchTime>
+        </cac:Despatch>
+    </cac:Delivery>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>10</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-10-10</cbc:PaymentDueDate>
+        <cbc:InstructionNote>Kapıda ödeme (nakit) · kargo görevlisine</cbc:InstructionNote>
+    </cac:PaymentMeans>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">307.10</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">3071.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">307.10</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>10</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">3170.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">3071.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">3378.10</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="TRY">99.00</cbc:AllowanceTotalAmount>
+        <cbc:PayableAmount currencyID="TRY">3378.10</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">1290.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">129.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">1290.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">129.00</cbc:TaxAmount>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Keten Gömlek Elbise</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN">S</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Taş</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENKKOD">#d6cfc4</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="KUMAS">%55 keten · %45 viskon</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">1290</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">890.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">89.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">890.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">89.00</cbc:TaxAmount>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Örme Crop Hırka</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN">S/M</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Lila</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENKKOD">#c4b5fd</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">890</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">891.00</cbc:LineExtensionAmount>
+        <cac:AllowanceCharge>
+            <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+            <cbc:AllowanceChargeReason>DM kodu LILA10</cbc:AllowanceChargeReason>
+            <cbc:MultiplierFactorNumeric>0.1</cbc:MultiplierFactorNumeric>
+            <cbc:Amount currencyID="TRY">99.00</cbc:Amount>
+            <cbc:BaseAmount currencyID="TRY">990.00</cbc:BaseAmount>
+        </cac:AllowanceCharge>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">89.10</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">891.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">89.10</cbc:TaxAmount>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Bağcıklı Geniş Paça Pantolon</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="BEDEN">36</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENK">Krem</cbc:ID>
+            </cac:AdditionalItemIdentification>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="RENKKOD">#f5f0e1</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">990</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>

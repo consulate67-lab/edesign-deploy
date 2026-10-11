@@ -8,6 +8,7 @@ import { HIZMET2_TEMPLATES } from './groups/hizmet2';
 import { SANAYI2_TEMPLATES } from './groups/sanayi2';
 import { YANIT_TEMPLATES } from './groups/yanit';
 import { MODA_TEMPLATES } from './groups/moda';
+import { PERAKENDE_TEMPLATES } from './groups/perakende.generated';
 import { MESLEK_TEMPLATES } from './groups/meslek.generated';
 import { API_URL } from '../api';
 import type { GalleryDesign } from '../admin/contracts';
@@ -27,6 +28,7 @@ export const SECTOR_TEMPLATES: SectorTemplate[] = [
     ...SANAYI_TEMPLATES,
     ...SANAYI2_TEMPLATES,
     ...MODA_TEMPLATES,
+    ...PERAKENDE_TEMPLATES,
     ...YANIT_TEMPLATES,
     ...MESLEK_TEMPLATES,
 ].map(t => ({ ...t, bank: BANK_TEMPLATE_IDS.has(t.id) }));
