@@ -343,6 +343,8 @@ const editor: typeof tr = {
         input: 'Box',
         qr: 'QR Code',
         chart: 'Chart',
+        shareBar: 'Share Bar',
+        shareBarHint: 'Adds a colored bar to the line rows showing each row\'s share of the total — click and pick a row cell on the page, or drag it',
         hint: 'Insert {{label}} — click, or drag it to the desired place in the preview',
         column: 'Column',
         columnHint: 'Adds an empty column to the right of the selected column; you can put a field or formula in it.',
@@ -431,6 +433,9 @@ const editor: typeof tr = {
     placing: {
         banner: 'Click where you want to add "{{label}}" on the page: it goes inside a box or below an element. It stays visible as a dashed box even if the sample data has no value. (Esc: cancel)',
         afterSelected: 'Below the selected element',
+        shareBar: 'Click the line row where the share bar should go (e.g. the cell with the item name). Each row shows its share of the total. (Esc: cancel)',
+        shareBarNeedLine: 'The share bar can only go inside the line (item) table; click a cell in an item row.',
+        shareBarNoLines: 'No numeric line field found in this document; the share bar cannot be added.',
     },
     move: {
         fieldFixed: 'This field cannot be moved.',
@@ -491,6 +496,11 @@ const editor: typeof tr = {
         formula: 'Value formula',
         formulaNote: 'Each line is calculated with its own values; the total is the sum of these line results.',
         inlineNote: 'The chart is inside the line table: each row shows a slim bar with that row\'s share of the total of all rows.',
+        color1: 'Bar color (start)',
+        color2: 'Bar color (end)',
+        colorAuto: 'from palette',
+        track: 'Track color',
+        barHeight: 'Thickness (px)',
         note: 'The chart is drawn from the document values when it is displayed. Drag it into a cell of the line table to get a bar showing each row\'s share; with "My own rows" you can place any fields, such as totals, side by side.',
     },
     fieldTx: {

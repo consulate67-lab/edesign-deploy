@@ -341,6 +341,8 @@ const editor = {
         input: 'Kutu',
         qr: 'Karekod',
         chart: 'Grafik',
+        shareBar: 'Pay Çubuğu',
+        shareBarHint: 'Kalem satırına, her satırın toplam içindeki payını gösteren renkli çubuk ekler — tıklayıp sayfada satır hücresini seçin ya da sürükleyin',
         hint: '{{label}} ekle — tıklayın ya da önizlemede istediğiniz yere sürükleyin',
         column: 'Kolon',
         columnHint: 'Seçili kolonun sağına boş kolon ekler; içine alan veya formül koyabilirsiniz.',
@@ -429,6 +431,9 @@ const editor = {
     placing: {
         banner: '"{{label}}" alanını eklemek istediğiniz yere sayfada tıklayın: bir kutunun içine ya da bir öğenin altına eklenir. Örnek veride değeri olmasa da kesikli kutuyla görünür. (Esc: vazgeç)',
         afterSelected: 'Seçili öğenin altına',
+        shareBar: 'Pay çubuğunu koymak istediğiniz kalem satırına tıklayın (ör. hizmet adının bulunduğu hücre). Çubuk her satırda o satırın toplamdaki payını gösterir. (Esc: vazgeç)',
+        shareBarNeedLine: 'Pay çubuğu yalnız kalem (satır) tablosunun içine konabilir; bir kalem satırındaki hücreye tıklayın.',
+        shareBarNoLines: 'Bu belgede sayısal kalem alanı bulunamadı; pay çubuğu eklenemiyor.',
     },
     move: {
         fieldFixed: 'Bu alan taşınamıyor.',
@@ -490,6 +495,11 @@ const editor = {
         formula: 'Değere formül',
         formulaNote: 'Her satır kendi değerleriyle ayrı hesaplanır; toplam bu satır sonuçlarından bulunur.',
         inlineNote: 'Grafik satır tablosunun içinde: her satırda o satırın değerinin tüm satırların toplamındaki payı ince bir çubukla gösterilir.',
+        color1: 'Çubuk rengi (baş)',
+        color2: 'Çubuk rengi (son)',
+        colorAuto: 'paletten',
+        track: 'Zemin rengi',
+        barHeight: 'Kalınlık (px)',
         note: 'Grafik, belgedeki değerlerle görüntüleme anında çizilir. Satır tablosunun bir hücresine sürüklerseniz her satıra o satırın payını gösteren çubuk olur; "Kendi satırlarım" ile toplamlar gibi istediğiniz alanları yan yana koyabilirsiniz.',
     },
     fieldTx: {

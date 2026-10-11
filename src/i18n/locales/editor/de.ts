@@ -343,6 +343,8 @@ const editor: typeof tr = {
         input: 'Box',
         qr: 'QR-Code',
         chart: 'Diagramm',
+        shareBar: 'Anteilsbalken',
+        shareBarHint: 'Fügt den Positionszeilen einen farbigen Balken mit dem Anteil jeder Zeile an der Summe hinzu — klicken und eine Zeilenzelle auf der Seite wählen oder ziehen',
         hint: '{{label}} einfügen — klicken oder an die gewünschte Stelle in der Vorschau ziehen',
         column: 'Spalte',
         columnHint: 'Fügt rechts neben der ausgewählten Spalte eine leere Spalte ein; Sie können ein Feld oder eine Formel hineinsetzen.',
@@ -431,6 +433,9 @@ const editor: typeof tr = {
     placing: {
         banner: 'Klicken Sie auf der Seite dorthin, wo „{{label}}“ eingefügt werden soll: in eine Box oder unter ein Element. Auch ohne Wert in den Beispieldaten bleibt es als gestrichelte Box sichtbar. (Esc: abbrechen)',
         afterSelected: 'Unter dem ausgewählten Element',
+        shareBar: 'Klicken Sie auf die Positionszeile, in die der Anteilsbalken soll (z. B. die Zelle mit dem Artikelnamen). Jede Zeile zeigt ihren Anteil an der Summe. (Esc: abbrechen)',
+        shareBarNeedLine: 'Der Anteilsbalken kann nur in die Positionstabelle; klicken Sie auf eine Zelle einer Positionszeile.',
+        shareBarNoLines: 'In diesem Dokument gibt es kein numerisches Positionsfeld; der Anteilsbalken kann nicht eingefügt werden.',
     },
     move: {
         fieldFixed: 'Dieses Feld kann nicht verschoben werden.',
@@ -491,6 +496,11 @@ const editor: typeof tr = {
         formula: 'Formel für den Wert',
         formulaNote: 'Jede Zeile wird mit ihren eigenen Werten berechnet; die Summe ergibt sich aus diesen Zeilenergebnissen.',
         inlineNote: 'Das Diagramm steht in der Positionstabelle: Jede Zeile zeigt mit einem schmalen Balken ihren Anteil an der Summe aller Zeilen.',
+        color1: 'Balkenfarbe (Anfang)',
+        color2: 'Balkenfarbe (Ende)',
+        colorAuto: 'aus Palette',
+        track: 'Hintergrundfarbe',
+        barHeight: 'Stärke (px)',
         note: 'Das Diagramm wird beim Anzeigen aus den Belegwerten gezeichnet. In eine Zelle der Positionstabelle gezogen, zeigt es pro Zeile deren Anteil; mit „Eigene Zeilen" stellen Sie beliebige Felder wie Summen nebeneinander.',
     },
     fieldTx: {

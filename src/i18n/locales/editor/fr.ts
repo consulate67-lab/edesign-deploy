@@ -343,6 +343,8 @@ const editor: typeof tr = {
         input: 'Bloc',
         qr: 'QR code',
         chart: 'Graphique',
+        shareBar: 'Barre de part',
+        shareBarHint: 'Ajoute aux lignes une barre colorée montrant la part de chaque ligne dans le total — cliquez puis choisissez une cellule de ligne sur la page, ou faites-la glisser',
         hint: 'Insérer : {{label}} — cliquez ou faites glisser à l’endroit voulu dans l’aperçu',
         column: 'Colonne',
         columnHint: 'Ajoute une colonne vide à droite de la colonne sélectionnée ; vous pouvez y placer un champ ou une formule.',
@@ -431,6 +433,9 @@ const editor: typeof tr = {
     placing: {
         banner: 'Cliquez sur la page à l\'endroit où ajouter « {{label}} » : dans un bloc ou sous un élément. Il reste visible en pointillés même sans valeur dans les données d\'exemple. (Échap : annuler)',
         afterSelected: 'Sous l\'élément sélectionné',
+        shareBar: 'Cliquez sur la ligne où placer la barre de part (ex. la cellule du nom de l\'article). Chaque ligne affiche sa part du total. (Échap : annuler)',
+        shareBarNeedLine: 'La barre de part ne peut aller que dans le tableau des lignes ; cliquez sur une cellule d\'une ligne d\'article.',
+        shareBarNoLines: 'Aucun champ de ligne numérique dans ce document ; impossible d\'ajouter la barre de part.',
     },
     move: {
         fieldFixed: 'Ce champ ne peut pas être déplacé.',
@@ -491,6 +496,11 @@ const editor: typeof tr = {
         formula: 'Formule sur la valeur',
         formulaNote: 'Chaque ligne est calculée avec ses propres valeurs ; le total est la somme de ces résultats.',
         inlineNote: 'Le graphique est dans le tableau des lignes : chaque ligne affiche une fine barre avec sa part du total de toutes les lignes.',
+        color1: 'Couleur de barre (début)',
+        color2: 'Couleur de barre (fin)',
+        colorAuto: 'de la palette',
+        track: 'Couleur du fond',
+        barHeight: 'Épaisseur (px)',
         note: 'Le graphique est tracé à partir des valeurs du document lors de l\'affichage. Glissé dans une cellule du tableau des lignes, il montre la part de chaque ligne ; avec « Mes propres lignes », placez côte à côte les champs de votre choix, comme les totaux.',
     },
     fieldTx: {

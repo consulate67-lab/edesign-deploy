@@ -34,12 +34,12 @@ import {
     ArrowLeft, Save, Download, FileCode2,
     AlertCircle, Eye, RefreshCw, CheckCircle2, Sparkles, Search, ZoomIn, ZoomOut,
     PanelLeftClose, PanelLeftOpen, X, Lock, Undo2, Redo2,
-    Image as ImageIcon, Type, Table2, TextCursorInput, Calculator, Plus, Columns3, Wallpaper, QrCode, BarChart3,
+    Image as ImageIcon, Type, Table2, TextCursorInput, Calculator, Plus, Columns3, Wallpaper, QrCode, BarChart3, ChartNoAxesGantt,
 } from 'lucide-react';
 import { karekodSnippet, hasQrLibrary } from './karekod';
 import {
-    chartSnippet, chartContent, chartAttrs, readChart, defaultChart, renderChartHtml,
-    CHART_TYPES, CHART_SOURCES, CHART_SHOWS, CHART_PALETTES, type ChartModel, type ChartPalette,
+    chartSnippet, chartContent, chartAttrs, readChart, defaultChart, shareBarChart, renderChartHtml,
+    BAR_HEIGHT_MIN, BAR_HEIGHT_MAX, CHART_TYPES, CHART_SOURCES, CHART_SHOWS, CHART_PALETTES, type ChartModel, type ChartPalette,
 } from './chart';
 import {
     detectInXslt, xsltLocalNameSet, bindingLabel, contextPathResolver, evaluateField,
@@ -177,6 +177,9 @@ function refreshObjectContents(xslt: string, catalog: CatalogField[], lang: DocL
     }
     return ensureDecimalFormat(next);
 }
+
+/** Yer seçme modunda eklenecek şey: katalog alanı ya da pay çubuğu. */
+interface PlacingItem { key: string; label: string; kind?: 'sharebar' }
 
 function resolveInsertTarget(start: Element | null, mode: 'auto' | InsertPosition): InsertTarget | null {
     let el = start?.closest<HTMLElement>('[data-xsrc]') ?? null;
@@ -1246,6 +1249,7 @@ const ChartEditor: React.FC<{
 }> = ({ el, id, catalog, xmlDoc, inLine, docLang, onChange }) => {
     const { t } = useLocaleT();
     const [model, setModel] = useState<ChartModel>(() => readChart(el));
+    const [colorsKey, setColorsKey] = useState(0);
     const numeric = useMemo(() => catalog.filter(isNumericField), [catalog]);
     const lineNums = useMemo(() => numeric.filter(isLineField), [numeric]);
     const valueField = catalog.find(f => f.key === model.value);
@@ -1256,13 +1260,15 @@ const ChartEditor: React.FC<{
     const perLineList = model.op !== 'none' && model.op !== 'add' && model.op !== 'sub' && !!bField && isLineField(bField);
     const render = (m: ChartModel) => renderChartHtml(id, m, catalog, inLine, xmlDoc, docLang);
     const html = useMemo(() => renderChartHtml(id, model, catalog, inLine, xmlDoc, docLang), [id, model, catalog, inLine, xmlDoc, docLang]);
+    const modelRef = useRef(model);
     const update = (patch: Partial<ChartModel>) => {
-        const next = { ...model, ...patch };
+        const next = { ...modelRef.current, ...patch };
+        modelRef.current = next;
         setModel(next);
         onChange(next, render(next));
     };
     const setRow = (i: number, patch: Partial<ChartModel['rows'][number]>) =>
-        update({ rows: model.rows.map((r, j) => (j === i ? { ...r, ...patch } : r)) });
+        update({ rows: modelRef.current.rows.map((r, j) => (j === i ? { ...r, ...patch } : r)) });
     const byLines = inLine || model.source === 'lines';
     const half: React.CSSProperties = { flex: 1, minWidth: 0 };
     const pick = (active: boolean): React.CSSProperties => ({
@@ -1355,10 +1361,36 @@ const ChartEditor: React.FC<{
                 </div>
             )}
             {!inLine && <FieldText label={t('editor.chart.title')} currentValue={model.title} placeholder={t('editor.chart.titlePlaceholder')} onChange={(v) => update({ title: v })} />}
+            {inLine && (
+                <div data-chart-bar-style>
+                    <div key={colorsKey} style={{ display: 'flex', gap: '6px' }}>
+                        <div style={half}>
+                            <FieldColor label={t('editor.chart.color1')} currentValue={model.c1} placeholder={t('editor.chart.colorAuto')} onChange={(v) => update({ c1: v === 'transparent' ? '' : v })} />
+                        </div>
+                        <div style={half}>
+                            <FieldColor label={t('editor.chart.color2')} currentValue={model.c2} placeholder={t('editor.chart.colorAuto')} onChange={(v) => update({ c2: v === 'transparent' ? '' : v })} />
+                        </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-start' }}>
+                        <div style={half}>
+                            <FieldColor label={t('editor.chart.track')} currentValue={model.track} placeholder={t('editor.panel.transparent')} onChange={(v) => update({ track: v })} />
+                        </div>
+                        <div style={{ width: '80px', marginBottom: '10px' }}>
+                            <label style={fieldLabelStyle}>{t('editor.chart.barHeight')}</label>
+                            <input data-chart-height type="number" min={BAR_HEIGHT_MIN} max={BAR_HEIGHT_MAX} value={model.height}
+                                onChange={(e) => update({ height: Math.min(BAR_HEIGHT_MAX, Math.max(BAR_HEIGHT_MIN, Number(e.target.value) || BAR_HEIGHT_MIN)) })} style={fieldInputStyle} />
+                        </div>
+                    </div>
+                </div>
+            )}
             <label style={fieldLabelStyle}>{t('editor.chart.palette')}</label>
             <div style={{ display: 'flex', gap: '4px', marginBottom: '10px', flexWrap: 'wrap' }}>
                 {(Object.keys(CHART_PALETTES) as ChartPalette[]).map(p => (
-                    <button key={p} type="button" data-chart-palette={p} title={t(`editor.chart.palettes.${p}`)} onClick={() => update({ palette: p })}
+                    <button key={p} type="button" data-chart-palette={p} title={t(`editor.chart.palettes.${p}`)} onClick={() => {
+                        if (!inLine) { update({ palette: p }); return; }
+                        update({ palette: p, c1: CHART_PALETTES[p][0], c2: CHART_PALETTES[p][1] });
+                        setColorsKey(k => k + 1);
+                    }}
                         style={{ display: 'flex', gap: '2px', padding: '4px', borderRadius: '5px', cursor: 'pointer', background: '#f3f5ff', border: `1px solid ${model.palette === p ? '#0d9488' : '#D9DEF0'}` }}>
                         {CHART_PALETTES[p].slice(0, 4).map(c => <span key={c} style={{ width: '10px', height: '14px', borderRadius: '2px', background: c }} />)}
                     </button>
@@ -1551,9 +1583,9 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const [moving, setMoving] = useState<PreviewLocator | null>(null);
     const movingRef = useRef<PreviewLocator | null>(null);
     movingRef.current = moving;
-    /** Soldan seçilen alan: sayfada tıklanan yere eklenir. */
-    const [placing, setPlacing] = useState<{ key: string; label: string } | null>(null);
-    const placingRef = useRef<{ key: string; label: string } | null>(null);
+    /** Soldan seçilen alan ya da pay çubuğu: sayfada tıklanan yere eklenir. */
+    const [placing, setPlacing] = useState<PlacingItem | null>(null);
+    const placingRef = useRef<PlacingItem | null>(null);
     placingRef.current = placing;
     // Taşınan veri alanı yeni önizlemede kaynak aralığındaki sırasıyla yeniden seçilir.
     const pendingBindRangeRef = useRef<{ start: number; end: number; nth: number } | null>(null);
@@ -2215,7 +2247,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
      * konumun satır döngüsü içinde olup olmadığına göre üretilir (satır
      * alanları orada göreli yolla her satırın değerini basar).
      */
-    const insertSnippet = useCallback((build: (id: string, inLine: boolean) => string, target: InsertTarget | null, what: string) => {
+    const insertSnippet = useCallback((build: (id: string, inLine: boolean) => string | null, target: InsertTarget | null, what: string): boolean => {
         const xslt = xsltContentRef.current;
         const id = nextXsltObjId(xslt);
         const mark = '<!--edesign-insert-->';
@@ -2225,12 +2257,13 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             updated = insertAtTag(xslt, tag, mark, target.position);
         } else {
             const end = documentEndOffset(xslt);
-            if (end < 0) return;
+            if (end < 0) return false;
             updated = `${xslt.slice(0, end)}    ${mark}\n${xslt.slice(end)}`;
         }
         const at = updated.indexOf(mark);
-        if (at < 0) return;
+        if (at < 0) return false;
         const snippet = build(id, isInLineContext(updated, at));
+        if (snippet === null) return false;
         updated = updated.slice(0, at) + snippet + updated.slice(at + mark.length);
         if (snippet.includes('format-number(')) updated = ensureDecimalFormat(updated);
         if (!tag) pendingPreviewScrollRef.current = Number.MAX_SAFE_INTEGER;
@@ -2238,7 +2271,25 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         xsltContentRef.current = updated;
         setXsltContent(updated);
         console.log(`[XSLTEditor] Obje eklendi: ${what} → ${target ? `<${target.el.tagName.toLowerCase()}> ${target.position === 'inside' ? 'içine' : 'altına'}` : 'sayfa sonu'}`);
+        return true;
     }, []);
+
+    /** Pay çubuğu yalnız satır (kalem) döngüsünün içine konur; konamazsa uyarır ve false döner. */
+    const insertShareBar = useCallback((target: InsertTarget | null): boolean => {
+        const cat = catalogRef.current;
+        const m = shareBarChart(cat);
+        const warn = (key: 'editor.placing.shareBarNoLines' | 'editor.placing.shareBarNeedLine') => {
+            setSaveStatus('error');
+            setSaveMessage(`⚠ ${i18n.t(key)}`);
+            return false;
+        };
+        if (!cat.some(f => f.key === m.value && isLineField(f))) return warn('editor.placing.shareBarNoLines');
+        const ok = insertSnippet((id, inLine) => (inLine ? chartSnippet(id, m, cat, true, docLangRef.current) : null), target, 'pay çubuğu');
+        if (!ok) return warn('editor.placing.shareBarNeedLine');
+        setSaveStatus('idle');
+        setSaveMessage('');
+        return true;
+    }, [insertSnippet]);
 
     const insertObject = useCallback((type: XsltInsertType | 'formula' | 'karekod' | 'chart', target: InsertTarget | null) => {
         if (type === 'karekod') {
@@ -2283,6 +2334,13 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         const f = catalogRef.current.find(x => x.key === key);
         if (f) insertSnippet((id, inLine) => fieldSnippet(id, f, inLine, docLangRef.current), target, f.label);
     }, [insertSnippet]);
+
+    /** Yer seçme modunda seçilen yere ekler; eklenemezse (false) mod sürer. */
+    const placeChosen = useCallback((p: PlacingItem, target: InsertTarget | null): boolean => {
+        if (p.kind === 'sharebar') return insertShareBar(target);
+        insertField(p.key, target);
+        return true;
+    }, [insertShareBar, insertField]);
 
     /**
      * Seçili hücre satır (kalem) tablosundaysa, sağına yeni kolon ekler:
@@ -3092,12 +3150,11 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             moveTo(movingLoc, resolveInsertTarget(target, 'auto'));
             return;
         }
-        const placingField = placingRef.current;
-        if (placingField) {
+        const placingItem = placingRef.current;
+        if (placingItem) {
             e.preventDefault();
             e.stopPropagation();
-            setPlacing(null);
-            insertField(placingField.key, resolveInsertTarget(target, 'auto'));
+            if (placeChosen(placingItem, resolveInsertTarget(target, 'auto'))) setPlacing(null);
             return;
         }
         // Sprint 16 Aşama 3 — Tüm elementlere tıklama desteği. Önceki kod
@@ -3189,7 +3246,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         }
         openSelection(binding, indexedEl, locator);
         console.log(`[XSLTEditor] Preview click → ${indexedEl.tagName} render-index=${renderIndex ?? '(yok — sadece stil paneli)'}`);
-    }, [openSelection, moveTo, bindPlacement, insertField]);
+    }, [openSelection, moveTo, bindPlacement, placeChosen]);
 
     /**
      * iframe yüklendiğinde:
@@ -3413,7 +3470,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             if (!e.relatedTarget) markDropTarget(null);
         };
         const dropHandler = (e: DragEvent) => {
-            const type = e.dataTransfer?.getData('text/x-xslt-element') as XsltInsertType | 'formula' | 'karekod' | 'chart' | '';
+            const type = e.dataTransfer?.getData('text/x-xslt-element') as XsltInsertType | 'formula' | 'karekod' | 'chart' | 'sharebar' | '';
             const fieldKey = e.dataTransfer?.getData('text/x-xslt-field') ?? '';
             const bindIndex = e.dataTransfer?.getData('text/x-xslt-bind') ?? '';
             markDropTarget(null);
@@ -3421,7 +3478,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             e.preventDefault();
             e.stopPropagation();
             const target = resolveInsertTarget(e.target as Element, 'auto');
-            if (type) insertObject(type, target);
+            if (type === 'sharebar') insertShareBar(target);
+            else if (type) insertObject(type, target);
             else if (fieldKey) insertField(fieldKey, target);
             else moveBinding(Number(bindIndex), target);
         };
@@ -3596,7 +3654,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             doc.removeEventListener('mouseup', endDrag);
             doc.removeEventListener('keydown', handleUndoRedoKey);
         };
-    }, [previewHtml, iframeLoadCount, handleIframeBodyClick, insertObject, insertField, moveBinding, bindPlacement, commitPosition, openSelection, handleUndoRedoKey, design.paid]);
+    }, [previewHtml, iframeLoadCount, handleIframeBodyClick, insertObject, insertShareBar, insertField, moveBinding, bindPlacement, commitPosition, openSelection, handleUndoRedoKey, design.paid]);
 
     // Taşıma modu bitince önizlemedeki hedef işareti kaldırılır.
     useEffect(() => {
@@ -4588,17 +4646,22 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             { type: 'input', label: t('editor.insert.input'), Icon: TextCursorInput, color: '#dc2626' },
                             { type: 'karekod', label: t('editor.insert.qr'), Icon: QrCode, color: '#2563eb' },
                             { type: 'chart', label: t('editor.insert.chart'), Icon: BarChart3, color: '#0d9488' },
+                            { type: 'sharebar', label: t('editor.insert.shareBar'), Icon: ChartNoAxesGantt, color: '#0891b2' },
                         ] as const).map(({ type, label, Icon, color }) => (
                             <div
                                 key={type}
                                 draggable
                                 data-insert-type={type}
-                                title={t('editor.insert.hint', { label })}
+                                title={type === 'sharebar' ? t('editor.insert.shareBarHint') : t('editor.insert.hint', { label })}
                                 onDragStart={(e) => {
                                     e.dataTransfer.setData('text/x-xslt-element', type);
                                     e.dataTransfer.effectAllowed = 'copy';
                                 }}
                                 onClick={() => {
+                                    if (type === 'sharebar') {
+                                        setPlacing({ key: '', label, kind: 'sharebar' });
+                                        return;
+                                    }
                                     if ((type === 'formula' || type === 'chart') && insertMode === 'after' && insertColumn(type)) return;
                                     insertObject(type, insertMode === 'end'
                                         ? null
@@ -4795,24 +4858,26 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             }}
                         >
                             <span style={{ flex: 1, minWidth: '220px' }}>
-                                📍 {t('editor.placing.banner', { label: placing.label })}
+                                📍 {placing.kind === 'sharebar' ? t('editor.placing.shareBar') : t('editor.placing.banner', { label: placing.label })}
                             </span>
                             {selectedObject?.element && (
                                 <button
                                     data-place-selected
-                                    onClick={() => { const p = placing; setPlacing(null); insertField(p.key, resolveInsertTarget(selectedObjectRef.current?.element ?? null, 'after')); }}
+                                    onClick={() => { if (placeChosen(placing, resolveInsertTarget(selectedObjectRef.current?.element ?? null, 'after'))) setPlacing(null); }}
                                     style={{ padding: '4px 8px', background: '#ffffff', border: '1px solid #c4b5fd', borderRadius: '4px', color: '#6d28d9', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
                                 >
                                     {t('editor.placing.afterSelected')}
                                 </button>
                             )}
-                            <button
-                                data-place-end
-                                onClick={() => { const p = placing; setPlacing(null); insertField(p.key, null); }}
-                                style={{ padding: '4px 8px', background: '#ffffff', border: '1px solid #c4b5fd', borderRadius: '4px', color: '#6d28d9', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
-                            >
-                                {t('editor.move.toEnd')}
-                            </button>
+                            {placing.kind !== 'sharebar' && (
+                                <button
+                                    data-place-end
+                                    onClick={() => { const p = placing; setPlacing(null); insertField(p.key, null); }}
+                                    style={{ padding: '4px 8px', background: '#ffffff', border: '1px solid #c4b5fd', borderRadius: '4px', color: '#6d28d9', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
+                                >
+                                    {t('editor.move.toEnd')}
+                                </button>
+                            )}
                             <button
                                 data-place-cancel
                                 onClick={() => setPlacing(null)}

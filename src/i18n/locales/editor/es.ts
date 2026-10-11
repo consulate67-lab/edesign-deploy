@@ -343,6 +343,8 @@ const editor: typeof tr = {
         input: 'Bloque',
         qr: 'Código QR',
         chart: 'Gráfico',
+        shareBar: 'Barra de cuota',
+        shareBarHint: 'Añade a las líneas una barra de color con la parte de cada línea en el total — haga clic y elija una celda de línea en la página, o arrástrela',
         hint: 'Insertar {{label}} — haga clic o arrástrelo al lugar deseado de la vista previa',
         column: 'Columna',
         columnHint: 'Añade una columna vacía a la derecha de la columna seleccionada; puede poner en ella un campo o una fórmula.',
@@ -431,6 +433,9 @@ const editor: typeof tr = {
     placing: {
         banner: 'Haga clic en la página donde quiera añadir «{{label}}»: se coloca dentro de un bloque o debajo de un elemento. Se ve como un recuadro discontinuo aunque los datos de ejemplo no tengan valor. (Esc: cancelar)',
         afterSelected: 'Debajo del elemento seleccionado',
+        shareBar: 'Haga clic en la línea donde debe ir la barra de cuota (p. ej. la celda con el nombre del artículo). Cada línea muestra su parte del total. (Esc: cancelar)',
+        shareBarNeedLine: 'La barra de cuota solo puede ir dentro de la tabla de líneas; haga clic en una celda de una línea de artículo.',
+        shareBarNoLines: 'No hay ningún campo de línea numérico en este documento; no se puede añadir la barra de cuota.',
     },
     move: {
         fieldFixed: 'Este campo no se puede mover.',
@@ -491,6 +496,11 @@ const editor: typeof tr = {
         formula: 'Fórmula del valor',
         formulaNote: 'Cada línea se calcula con sus propios valores; el total es la suma de esos resultados.',
         inlineNote: 'El gráfico está dentro de la tabla de líneas: cada fila muestra una barra fina con su parte del total de todas las filas.',
+        color1: 'Color de barra (inicio)',
+        color2: 'Color de barra (fin)',
+        colorAuto: 'de la paleta',
+        track: 'Color de fondo',
+        barHeight: 'Grosor (px)',
         note: 'El gráfico se dibuja con los valores del documento al mostrarlo. Arrástrelo a una celda de la tabla de líneas para obtener una barra con la parte de cada fila; con «Mis propias filas» puede poner lado a lado los campos que quiera, como los totales.',
     },
     fieldTx: {

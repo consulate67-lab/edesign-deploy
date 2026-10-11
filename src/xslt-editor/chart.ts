@@ -42,6 +42,11 @@ export interface ChartModel {
     /** Satır kaynağında büyükten küçüğe sırala (halka belge sırasıyla çizilir). */
     sort: boolean;
     limit: number;
+    /** Satır içi pay çubuğu: kalınlık (px), zemin rengi, renk geçişinin iki ucu (boş = paletten). */
+    height: number;
+    track: string;
+    c1: string;
+    c2: string;
 }
 
 export const CHART_TYPES: ChartType[] = ['bar', 'column', 'donut'];
@@ -59,9 +64,18 @@ export const CHART_PALETTES: Record<ChartPalette, string[]> = {
 export const DEFAULT_CHART: ChartModel = {
     type: 'bar', source: 'lines', label: '', value: '', op: 'none', b: '20', rows: [], title: '',
     palette: 'ocean', show: 'both', decimals: 2, sort: true, limit: 8,
+    height: 6, track: '#eef2f7', c1: '', c2: '',
 };
 
 const MAX_LIMIT = 20;
+export const BAR_HEIGHT_MIN = 2;
+export const BAR_HEIGHT_MAX = 24;
+
+/** Stil içine yazılacak renk: XSLT / HTML'i bozabilecek karakter içermemeli. */
+const safeColor = (v: string | null) => {
+    const s = (v ?? '').trim();
+    return /^[#\w(),.% -]{0,48}$/.test(s) ? s : '';
+};
 
 /** Rengi beyaza doğru açar (degradenin açık ucu). */
 function lighten(hex: string, amount = 0.38): string {
@@ -99,6 +113,10 @@ export function readChart(el: Element): ChartModel {
         decimals: Math.min(4, Math.max(0, Number(get('decimals') ?? DEFAULT_CHART.decimals) || 0)),
         sort: get('sort') !== '0',
         limit: Math.min(MAX_LIMIT, Math.max(1, Number(get('limit') ?? DEFAULT_CHART.limit) || DEFAULT_CHART.limit)),
+        height: Math.min(BAR_HEIGHT_MAX, Math.max(BAR_HEIGHT_MIN, Number(get('height') ?? DEFAULT_CHART.height) || DEFAULT_CHART.height)),
+        track: get('track') === null ? DEFAULT_CHART.track : safeColor(get('track')),
+        c1: safeColor(get('c1')),
+        c2: safeColor(get('c2')),
     };
 }
 
@@ -116,6 +134,10 @@ export const chartAttrs = (m: ChartModel): [string, string][] => [
     ['data-chart-decimals', String(m.decimals)],
     ['data-chart-sort', m.sort ? '1' : '0'],
     ['data-chart-limit', String(m.limit)],
+    ['data-chart-height', String(m.height)],
+    ['data-chart-track', safeColor(m.track)],
+    ['data-chart-c1', safeColor(m.c1)],
+    ['data-chart-c2', safeColor(m.c2)],
 ];
 
 const isNumeric = (f: CatalogField) => f.format === 'amount' || f.format === 'number';
@@ -133,6 +155,10 @@ export function defaultChart(catalog: CatalogField[]): ChartModel {
     const nums = catalog.filter(isNumeric).slice(0, 3);
     return { ...DEFAULT_CHART, source: 'rows', rows: nums.map(f => ({ label: f.label, value: `field:${f.key}` })) };
 }
+
+/** Pay çubuğu objesi: yalnız çubuk (yazısız), biraz kalın ve canlı renk geçişli. */
+export const shareBarChart = (catalog: CatalogField[]): ChartModel =>
+    ({ ...defaultChart(catalog), source: 'lines', show: 'none', height: 7, c1: '#22d3ee', c2: '#a3e635' });
 
 const escapeText = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const escapeAttr = (s: string) => escapeText(s).replace(/"/g, '&quot;').replace(/\{/g, '{{').replace(/\}/g, '}}');
@@ -379,11 +405,15 @@ function inlineChart(c: Ctx, catalog: CatalogField[]): string | null {
     const T = `$${vp}t`, V = `$${vp}v`;
     const text = valueText(c, V, T);
     const total = lineTotal(vp, src);
+    const h = c.m.height;
+    const track = safeColor(c.m.track) || 'transparent';
+    const from = safeColor(c.m.c1) || c.colors[0];
+    const to = safeColor(c.m.c2) || (safeColor(c.m.c1) ? from : c.lights[0]);
     const out = total.vars
         + `<xsl:variable name="${vp}v" select="${src.expr}"/>`
         + scaled(`${vp}w`, V, T, `round(${V} * 1000 div ${T}) div 10`)
-        + '<div style="height:6px;background-color:#eef2f7;border-radius:99px;overflow:hidden;font-size:0;line-height:0;margin:3px 0 2px 0">'
-        + `<div style="height:6px;border-radius:99px;width:{$${vp}w}%;background-color:${c.colors[0]};background-image:linear-gradient(90deg,${c.colors[0]},${c.lights[0]})">${blank}</div>`
+        + `<div style="height:${h}px;background-color:${track};border-radius:99px;overflow:hidden;font-size:0;line-height:0;margin:3px 0 2px 0">`
+        + `<div style="height:${h}px;border-radius:99px;width:{$${vp}w}%;background-color:${from};background-image:linear-gradient(90deg,${from},${to})">${blank}</div>`
         + '</div>'
         + (text ? `<div style="font-size:9px;color:#64748b;white-space:nowrap">${text}</div>` : '');
     return total.list ? withNodeSet(out) : out;
