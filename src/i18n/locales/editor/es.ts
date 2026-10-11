@@ -66,6 +66,7 @@ const editor: typeof tr = {
     },
     position: {
         label: 'Posicionamiento',
+        reanchored: '{{count}} objeto(s) con posición libre anclado(s) a la página de la factura; ahora aparecen en el mismo lugar de la página en cualquier visor y al imprimir.',
         static: 'Normal (en el flujo de la página)',
         relative: 'Desplazado',
         absolute: 'Fijo en la página',

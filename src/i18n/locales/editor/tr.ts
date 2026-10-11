@@ -64,6 +64,7 @@ const editor = {
     },
     position: {
         label: 'Konumlandırma',
+        reanchored: '{{count}} serbest konumlu obje fatura sayfasına sabitlendi; artık her görüntüleyicide ve baskıda sayfadaki aynı yerde görünür.',
         static: 'Normal (sayfa akışında)',
         relative: 'Yerinden kaydır',
         absolute: 'Sayfada sabit konum',

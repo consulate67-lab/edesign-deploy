@@ -66,6 +66,7 @@ const editor: typeof tr = {
     },
     position: {
         label: 'Positioning',
+        reanchored: '{{count}} freely positioned object(s) pinned to the invoice page; they now appear at the same place on the page in every viewer and in print.',
         static: 'Normal (in page flow)',
         relative: 'Offset from place',
         absolute: 'Fixed on page',

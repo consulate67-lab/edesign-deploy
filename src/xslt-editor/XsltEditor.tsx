@@ -972,15 +972,68 @@ function clientScale(el: HTMLElement): number {
     return (b - a) / 100 || 1;
 }
 
+const PAGE_TAGS = new Set(['div', 'section', 'article', 'main', 'form', 'center']);
+const isPageCandidate = (n: Element): n is HTMLElement =>
+    PAGE_TAGS.has(n.tagName.toLowerCase()) && n.hasAttribute('data-xsrc') && !n.hasAttribute('data-xslt-obj');
+
+/**
+ * Belgenin sayfa kutusu (ör. ortalanmış 210 mm'lik div). Mutlak konum buna
+ * göre yazılır: body'ye göre yazılırsa ortalanmış sayfada pencere / kâğıt
+ * genişliği değişince obje sayfadan kayar. Tam genişlikli sarmalayıcının
+ * içindeki daha dar ve neredeyse aynı yükseklikteki kutuya inilir.
+ */
+function pageRootOf(doc: Document): HTMLElement | null {
+    const body = doc.body;
+    if (!body) return null;
+    const area = (n: HTMLElement) => { const r = n.getBoundingClientRect(); return r.width * r.height; };
+    let best: HTMLElement | null = null;
+    for (const c of Array.from(body.children)) {
+        if (isPageCandidate(c) && (!best || area(c) > area(best))) best = c;
+    }
+    for (let depth = 0; best && depth < 4; depth++) {
+        const outer = best.getBoundingClientRect();
+        const inner = Array.from(best.children).find((c): c is HTMLElement => {
+            if (!isPageCandidate(c)) return false;
+            const r = c.getBoundingClientRect();
+            return r.width < outer.width - 2 && r.height >= outer.height * 0.8;
+        });
+        if (!inner) break;
+        best = inner;
+    }
+    return best && area(best) > 0 ? best : null;
+}
+
+/** Sayfanın dışında (body'nin doğrudan çocuğu) duran eklenmiş obje. */
+const outsidePage = (el: HTMLElement, page: HTMLElement | null) =>
+    !!page && el.parentElement === el.ownerDocument.body && el.hasAttribute('data-xslt-obj') && !page.contains(el);
+
+/** Mutlak konumlu öğe sayfaya göre değil (body'ye göre) mi konumlanıyor? */
+function needsPageAnchor(el: HTMLElement): boolean {
+    const page = pageRootOf(el.ownerDocument);
+    if (!page || page === el || el.contains(page)) return false;
+    if (outsidePage(el, page)) return true;
+    return page.contains(el) && el.ownerDocument.defaultView?.getComputedStyle(page).position === 'static';
+}
+
 /**
  * Öğeyi bulunduğu yerde mutlak konuma sabitler (zıplamadan). Koordinatlar
- * body'ye göre olsun diye önizlemede body'ye position:relative verilir.
+ * sayfa kutusuna göredir: sayfa önizlemede position:relative olur; sayfanın
+ * dışındaki obje sayfanın içine alınır (`data-xslt-pin-into`, XSLT'de de
+ * taşınır). Sayfa kutusu yoksa body'ye göre.
  */
 function pinAbsolute(el: HTMLElement): { left: number; top: number } {
     const doc = el.ownerDocument;
     const body = doc.body;
     if (body && doc.defaultView?.getComputedStyle(body).position === 'static') body.style.position = 'relative';
     const before = el.getBoundingClientRect();
+    const page = pageRootOf(doc);
+    if (page && page !== el && !el.contains(page)) {
+        if (outsidePage(el, page)) {
+            page.appendChild(el);
+            el.setAttribute('data-xslt-pin-into', page.getAttribute('data-xsrc') ?? '');
+        }
+        if (page.contains(el) && doc.defaultView?.getComputedStyle(page).position === 'static') page.style.position = 'relative';
+    }
     el.style.position = 'absolute';
     el.style.left = '0px';
     el.style.top = '0px';
@@ -1812,6 +1865,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const [design, setDesign] = useState<{ id?: number; key?: string; paid: boolean; paidAt?: string | null; name?: string; taxId?: string | null }>(
         { id: initialDesignId, paid: false }
     );
+    const designPaidRef = useRef(design.paid);
+    designPaidRef.current = design.paid;
     const [showPayment, setShowPayment] = useState(false);
     useEffect(() => {
         const key = designKeyOf(initialXslt);
@@ -2619,10 +2674,24 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         }
         let next = xsltContentRef.current;
         const body = el.ownerDocument.body;
-        if (mode === 'absolute' && body?.hasAttribute('data-xsrc')) {
-            const bodyTag = findLiteralTagByOrdinal(next, Number(body.getAttribute('data-xsrc')));
-            if (bodyTag && bodyTag.name.toLowerCase() === 'body' && !/position\s*:/.test(next.slice(bodyTag.start, bodyTag.end))) {
-                next = setTagStyleProperty(next, bodyTag, 'position', 'relative');
+        const makeRelative = (anchor: HTMLElement, tagName?: string) => {
+            if (!anchor.hasAttribute('data-xsrc')) return;
+            const tag = findLiteralTagByOrdinal(next, Number(anchor.getAttribute('data-xsrc')));
+            if (tag && (!tagName || tag.name.toLowerCase() === tagName) && !/position\s*:/.test(next.slice(tag.start, tag.end))) {
+                next = setTagStyleProperty(next, tag, 'position', 'relative');
+            }
+        };
+        const pinInto = el.getAttribute('data-xslt-pin-into');
+        el.removeAttribute('data-xslt-pin-into');
+        if (mode === 'absolute') {
+            if (body) makeRelative(body, 'body');
+            const anchor = el.offsetParent as HTMLElement | null;
+            if (anchor && anchor !== body && anchor.tagName.toLowerCase() !== 'html') makeRelative(anchor);
+            if (pinInto && locator.kind === 'obj') {
+                const src = findObjTag(next, locator.id);
+                const pageTag = findLiteralTagByOrdinal(next, Number(pinInto));
+                const moved = src && pageTag ? moveElement(next, src, pageTag, 'inside') : null;
+                if (moved) next = refreshObjectContents(moved, catalogRef.current, docLangRef.current, [locator.id]);
             }
         }
         for (const [prop, v] of values) {
@@ -3383,6 +3452,17 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 const key = n.getAttribute('data-field') ?? '';
                 n.setAttribute('data-empty-label', catalogRef.current.find(f => f.key === key)?.label ?? key.split('/').pop() ?? '');
             });
+            // Sayfaya göre değil body'ye göre konumlanmış objeler (eski sürüm) sayfaya sabitlenir.
+            if (!designPaidRef.current) {
+                const stray = Array.from(doc.querySelectorAll<HTMLElement>('[data-xslt-obj]'))
+                    .filter(n => n.style.position === 'absolute' && needsPageAnchor(n));
+                for (const n of stray) {
+                    const unit = parseLength(n.style.left || '').unit;
+                    const p = pinAbsolute(n);
+                    commitPosition(n, { kind: 'obj', id: n.getAttribute('data-xslt-obj') ?? '' }, 'absolute', formatLength(p.left, unit), formatLength(p.top, unit));
+                }
+                if (stray.length) setSaveMessage(`📌 ${i18n.t('editor.position.reanchored', { count: stray.length })}`);
+            }
             if (placingRef.current) doc.documentElement.setAttribute('data-xslt-placing', '');
             // Yeniden render sonrası seçili öğeyi yeni dokümanda tekrar bul
             // ve önceki kaydırma konumuna dön.
@@ -3428,7 +3508,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         };
 
         bindListener();
-    }, [handleIframeBodyClick, fitZoomToContainer, applyPreviewZoom, findPreviewElement, openSelection]);
+    }, [handleIframeBodyClick, fitZoomToContainer, applyPreviewZoom, findPreviewElement, openSelection, commitPosition]);
 
     /**
      * iframe onLoad → handleIframeLoad. previewHtml değiştiğinde iframe
@@ -3617,7 +3697,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 drag.started = true;
                 drag.unit = parseLength(el.style.left || '').unit;
                 drag.mode = readPositionMode(el);
-                if (drag.mode === 'static') {
+                if (drag.mode === 'static' || (drag.mode === 'absolute' && needsPageAnchor(el))) {
                     pinAbsolute(el);
                     drag.mode = 'absolute';
                 }

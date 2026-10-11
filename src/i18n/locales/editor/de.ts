@@ -66,6 +66,7 @@ const editor: typeof tr = {
     },
     position: {
         label: 'Positionierung',
+        reanchored: '{{count}} frei positionierte(s) Objekt(e) an der Rechnungsseite verankert; sie erscheinen jetzt in jedem Viewer und im Druck an derselben Stelle der Seite.',
         static: 'Normal (im Seitenfluss)',
         relative: 'Versetzt',
         absolute: 'Fest auf der Seite',
