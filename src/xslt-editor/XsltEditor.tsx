@@ -4877,6 +4877,19 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         };
                         // Satır tablosunda hücrenin kendisi seçiliyse tek hücreyi silmek /
                         // gizlemek başlık ile veriyi kaydırır; işlem tüm kolona uygulanır.
+                        // Şablonda doğrudan yazılmış, yalnız metin (ve <br/>) içeren öğe: metni düzenlenebilir.
+                        const literalText = (() => {
+                            if (!isLiteral || !el || !canPersist || isLine || isImg || isTable) return null;
+                            const srcTag = resolveSourceTag(xsltContent, sel.locator);
+                            const range = srcTag ? findElementContentRange(xsltContent, srcTag) : null;
+                            if (!range) return null;
+                            const inner = xsltContent.slice(range.start, range.end);
+                            if (/<(?!br\s*\/?>)/i.test(inner)) return null;
+                            const doc = new DOMParser().parseFromString(
+                                `<x>${inner.replace(/\s+/g, ' ').replace(/\s*<br\s*\/?>\s*/gi, '\n')}</x>`, 'application/xml');
+                            if (doc.getElementsByTagName('parsererror').length) return null;
+                            return (doc.documentElement.textContent ?? '').split('\n').map(s => s.trim()).join('\n');
+                        })();
                         const isColumnCell = !!selectedLineCell && (tag === 'td' || tag === 'th') && selectedLineCell.cell === el;
                         const elMovable = isLiteral && !!el && !!selectedBindPlacement?.movable && !design.paid;
                         const removable = isColumnCell || !!b || ((sel.locator?.kind === 'img' || isObj) && canPersist) || (elMovable && canPersist);
@@ -5052,6 +5065,13 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                             </div>
                                         );
                                     })()}
+
+                                    {literalText !== null && (
+                                        <>
+                                            {sectionTitle(t('editor.panel.textContent'), '#059669')}
+                                            <FieldTextArea key={fieldKey('literal-text')} label={t('editor.insert.text')} currentValue={literalText} onChange={(v) => handleContentChange(textToMarkup(v))} />
+                                        </>
+                                    )}
 
                                     {kind === 'static' && (
                                         <>
