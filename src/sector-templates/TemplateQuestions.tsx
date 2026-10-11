@@ -1,7 +1,10 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { ArrowLeft, ArrowRight, Ban, Building2, Check, FileText, Image as ImageIcon, ImageOff, ImagePlus, Landmark, Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Ban, Building2, Check, FileText, Image as ImageIcon, ImageOff, ImagePlus, Landmark, Loader2, Plus, Trash2 } from 'lucide-react';
 import { CATEGORIES, SECTORS, type SectorTemplate } from './index';
-import { readLogo, type BankChoice, type LogoChoice, type TemplatePrefs } from './personalize';
+import {
+    EMPTY_ACCOUNT, formatIban, isValidIban, normalizeIban, readLogo,
+    type BankAccount, type BankChoice, type LogoChoice, type TemplatePrefs,
+} from './personalize';
 import { WIZARD_DOC_TYPES } from '../wizard/docTypes';
 import { IMAGE_ACCEPT } from '../xslt-editor/utils/imageFile';
 import { useLocaleT } from '../i18n';
@@ -66,6 +69,94 @@ const Tile: React.FC<{
     </button>
 );
 
+const MAX_ACCOUNTS = 4;
+const CURRENCIES = ['TRY', 'USD', 'EUR', 'GBP', 'CHF'];
+
+const inputStyle: React.CSSProperties = {
+    width: '100%', boxSizing: 'border-box', padding: '8px 10px', borderRadius: 9, border: `1px solid ${theme.borderStrong}`,
+    background: theme.surface, color: theme.text, fontFamily: 'inherit', fontSize: '0.84rem',
+};
+
+const Field: React.FC<{ label: string; grow: number; children: React.ReactNode; error?: string | null }> = ({ label, grow, children, error }) => (
+    <label style={{ flex: grow ? `${grow} 1 ${grow * 120}px` : '0 0 96px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <span style={{ fontSize: '0.72rem', fontWeight: 700, color: theme.textMuted }}>{label}</span>
+        {children}
+        {error && <span style={{ fontSize: '0.72rem', color: theme.redText }}>{error}</span>}
+    </label>
+);
+
+const hasContent = (a: BankAccount) => Boolean(normalizeIban(a.iban) || a.bank.trim() || a.branch.trim() || a.holder.trim());
+
+/** Banka sorusunda "Evet" denince açılan hesap formu; hesaplar seçilen tasarıma yazılır. */
+const BankAccountsForm: React.FC<{ accounts: BankAccount[]; onChange: (accounts: BankAccount[]) => void }> = ({ accounts, onChange }) => {
+    const { t } = useLocaleT();
+    const [touched, setTouched] = useState<Set<number>>(() => new Set());
+    const set = (i: number, patch: Partial<BankAccount>) => onChange(accounts.map((a, j) => (j === i ? { ...a, ...patch } : a)));
+    const remove = (i: number) => {
+        onChange(accounts.length > 1 ? accounts.filter((_, j) => j !== i) : [{ ...EMPTY_ACCOUNT }]);
+        setTouched(new Set());
+    };
+    return (
+        <div data-bank-accounts style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ fontSize: '0.8rem', color: theme.textMuted, lineHeight: 1.5 }}>{t('gallery.q.accountsHint')}</div>
+            {accounts.map((a, i) => {
+                const iban = normalizeIban(a.iban);
+                const bad = Boolean(iban) && !isValidIban(iban) && (touched.has(i) || iban.length >= 26);
+                return (
+                    <div key={i} data-bank-account={i} style={{
+                        display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'flex-start', padding: 12, borderRadius: 12,
+                        border: `1px solid ${theme.border}`, background: theme.surface,
+                    }}>
+                        <Field label={t('gallery.q.bankName')} grow={2}>
+                            <input value={a.bank} data-bank-field="bank" placeholder={t('gallery.q.bankPlaceholder')} maxLength={80} onChange={e => set(i, { bank: e.target.value })} style={inputStyle} />
+                        </Field>
+                        <Field label={t('gallery.q.branch')} grow={2}>
+                            <input value={a.branch} data-bank-field="branch" placeholder={t('gallery.q.branchPlaceholder')} maxLength={80} onChange={e => set(i, { branch: e.target.value })} style={inputStyle} />
+                        </Field>
+                        <Field label="IBAN" grow={3} error={bad ? t('gallery.q.invalidIban') : null}>
+                            <input
+                                value={a.iban}
+                                data-bank-field="iban"
+                                placeholder="TR00 0000 0000 0000 0000 0000 00"
+                                maxLength={42}
+                                spellCheck={false}
+                                aria-invalid={bad}
+                                onChange={e => set(i, { iban: e.target.value.toUpperCase() })}
+                                onBlur={() => { set(i, { iban: formatIban(a.iban) }); setTouched(s => new Set(s).add(i)); }}
+                                style={{ ...inputStyle, fontFamily: 'ui-monospace, Consolas, monospace', borderColor: bad ? theme.redText : theme.borderStrong }}
+                            />
+                        </Field>
+                        <Field label={t('gallery.q.currency')} grow={0}>
+                            <select value={a.currency} data-bank-field="currency" onChange={e => set(i, { currency: e.target.value })} style={inputStyle}>
+                                {CURRENCIES.map(c => <option key={c} value={c}>{c}</option>)}
+                            </select>
+                        </Field>
+                        <Field label={t('gallery.q.holder')} grow={2}>
+                            <input value={a.holder} data-bank-field="holder" placeholder={t('gallery.q.holderPlaceholder')} maxLength={120} onChange={e => set(i, { holder: e.target.value })} style={inputStyle} />
+                        </Field>
+                        {(accounts.length > 1 || hasContent(a)) && (
+                            <button type="button" data-bank-remove={i} aria-label={t('gallery.q.removeAccount')} title={t('gallery.q.removeAccount')} onClick={() => remove(i)} style={{
+                                alignSelf: 'flex-end', height: 36, width: 36, flexShrink: 0, display: 'grid', placeItems: 'center', borderRadius: 9, cursor: 'pointer',
+                                border: `1px solid ${theme.border}`, background: theme.surface, color: theme.textMuted,
+                            }}>
+                                <Trash2 size={15} />
+                            </button>
+                        )}
+                    </div>
+                );
+            })}
+            {accounts.length < MAX_ACCOUNTS && (
+                <button type="button" data-bank-add onClick={() => onChange([...accounts, { ...EMPTY_ACCOUNT, currency: accounts[accounts.length - 1]?.currency || EMPTY_ACCOUNT.currency }])} style={{
+                    alignSelf: 'flex-start', display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 12px', borderRadius: 9, cursor: 'pointer',
+                    border: `1px dashed ${theme.borderStrong}`, background: 'none', color: theme.primary, fontFamily: 'inherit', fontWeight: 700, fontSize: '0.8rem',
+                }}>
+                    <Plus size={14} /> {t('gallery.q.addAccount')}
+                </button>
+            )}
+        </div>
+    );
+};
+
 /**
  * Hazır şablonları göstermeden önce sorulan kısa sorular: belge türü, firma alanı, logo ve banka bilgisi.
  * Yanıtlara göre şablonlar süzülür; logo ve banka tercihi şablonların kendisine uygulanır.
@@ -82,6 +173,8 @@ export const TemplateQuestions: React.FC<{
     const [category, setCategory] = useState(initial.category);
     const [logo, setLogo] = useState<LogoChoice>(initial.prefs.logo);
     const [bank, setBank] = useState<BankChoice>(initial.prefs.bank);
+    const [accounts, setAccounts] = useState<BankAccount[]>(() =>
+        initial.prefs.accounts?.length ? initial.prefs.accounts : [{ ...EMPTY_ACCOUNT }]);
     const [lastCustom, setLastCustom] = useState<LogoChoice | null>(initial.prefs.logo.mode === 'custom' ? initial.prefs.logo : null);
     const [step, setStep] = useState<QuestionStep>(startStep);
     const [logoBusy, setLogoBusy] = useState(false);
@@ -102,7 +195,12 @@ export const TemplateQuestions: React.FC<{
     const index = Math.max(0, steps.indexOf(step));
     const resultCount = bank === 'yes' && bankCount ? bankCount : candidates.length;
 
-    const finish = (b: BankChoice = bank) => onDone({ docType, category, prefs: { logo, bank: bankCount ? b : 'any' } });
+    const ibanInvalid = accounts.some(a => normalizeIban(a.iban) && !isValidIban(a.iban));
+
+    const finish = (b: BankChoice = bank) => {
+        const filled = accounts.filter(hasContent).map(a => ({ ...a, iban: formatIban(a.iban) }));
+        onDone({ docType, category, prefs: { logo, bank: bankCount ? b : 'any', ...(filled.length ? { accounts: filled } : {}) } });
+    };
     const next = () => (index < steps.length - 1 ? setStep(steps[index + 1]) : finish());
     const back = () => setStep(steps[Math.max(0, index - 1)]);
 
@@ -112,7 +210,10 @@ export const TemplateQuestions: React.FC<{
         setStep('category');
     };
     const pickCategory = (id: string) => { setCategory(id); setStep('logo'); };
-    const pickBank = (b: BankChoice) => { setBank(b); finish(b); };
+    const pickBank = (b: BankChoice) => {
+        setBank(b);
+        if (b === 'no') finish(b);
+    };
 
     const onFile = async (file: File | undefined) => {
         if (!file) return;
@@ -203,6 +304,8 @@ export const TemplateQuestions: React.FC<{
                 )}
             </div>
 
+            {step === 'bank' && bank === 'yes' && <BankAccountsForm accounts={accounts} onChange={setAccounts} />}
+
             {logoError && step === 'logo' && <div style={{ marginTop: 10, color: theme.redText, fontSize: '0.8rem' }}>{logoError}</div>}
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 18, flexWrap: 'wrap' }}>
@@ -222,10 +325,11 @@ export const TemplateQuestions: React.FC<{
                 <span style={{ marginLeft: 'auto', fontSize: '0.8rem', color: theme.textMuted }}>
                     <b style={{ color: theme.text }}>{resultCount}</b> {t('gallery.q.matching', { count: resultCount })}
                 </span>
-                {step === 'logo' && (
-                    <button type="button" data-question-next disabled={logoBusy} onClick={next} style={{
+                {(step === 'logo' || (step === 'bank' && bank === 'yes')) && (
+                    <button type="button" data-question-next disabled={logoBusy || (step === 'bank' && ibanInvalid)} onClick={next} style={{
                         display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 16px', borderRadius: 10, cursor: 'pointer', border: 'none',
                         background: theme.gradient, color: 'white', fontFamily: 'inherit', fontWeight: 800, fontSize: '0.84rem', boxShadow: theme.shadowBrand,
+                        opacity: step === 'bank' && ibanInvalid ? 0.5 : 1,
                     }}>
                         {index < steps.length - 1 ? t('gallery.q.next') : t('gallery.q.show')} <ArrowRight size={15} />
                     </button>

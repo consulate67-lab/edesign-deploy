@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { LayoutTemplate, Search, Eye, X, Download, ArrowRight, Loader2, Code2, FileText, ChevronDown, Check, Building2, RotateCcw, Image as ImageIcon, ImageOff, Landmark, Ban, SlidersHorizontal, Briefcase } from 'lucide-react';
 import { SECTOR_TEMPLATES, SECTORS, CATEGORIES, cachedDbTemplates, loadDbTemplates, type CategoryId, type SectorId, type SectorTemplate } from './index';
 import { MESLEK_GROUPS, MESLEK_NAME } from './meslekler.generated';
-import { loadPrefs, personalizeXslt, prefsKey, savePrefs, type TemplatePrefs } from './personalize';
+import { loadPrefs, personalizeXslt, prefsKey, savePrefs, usableAccounts, type TemplatePrefs } from './personalize';
 import { TemplateQuestions, type QuestionStep, type TemplateAnswers } from './TemplateQuestions';
 import { WIZARD_DOC_TYPES, loadXmlFile } from '../wizard/docTypes';
 import { stripLeadingBom } from '../xslt-editor/utils/testWatermark';
@@ -599,10 +599,12 @@ const linkBtn: React.CSSProperties = {
 const PrefsBar: React.FC<{
     prefs: TemplatePrefs;
     onChangeLogo: () => void;
+    onEditBank: () => void;
     onClearBank: () => void;
     onRestart: () => void;
-}> = ({ prefs, onChangeLogo, onClearBank, onRestart }) => {
+}> = ({ prefs, onChangeLogo, onEditBank, onClearBank, onRestart }) => {
     const { t } = useLocaleT();
+    const accountCount = usableAccounts(prefs).length;
     return (
     <div data-template-prefs style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
         <span style={{ fontSize: '0.78rem', color: theme.textMuted, fontWeight: 700 }}>{t('gallery.prefs')}</span>
@@ -617,9 +619,14 @@ const PrefsBar: React.FC<{
         </span>
         {prefs.bank !== 'any' && (
             <span style={chipStyle} data-pref-bank={prefs.bank}>
-                {prefs.bank === 'yes'
-                    ? <><Landmark size={13} color="#0f766e" /> {t('gallery.bankYes')}</>
-                    : <><Ban size={13} color="#b45309" /> {t('gallery.bankNo')}</>}
+                {prefs.bank === 'yes' ? (
+                    <button type="button" data-pref-edit-bank onClick={onEditBank} title={t('gallery.editBank')} style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+                        color: 'inherit', font: 'inherit',
+                    }}>
+                        <Landmark size={13} color="#0f766e" /> {accountCount ? t('gallery.bankAccounts', { count: accountCount }) : t('gallery.bankYes')}
+                    </button>
+                ) : <><Ban size={13} color="#b45309" /> {t('gallery.bankNo')}</>}
                 <button type="button" aria-label={t('gallery.clearBank')} onClick={onClearBank} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', color: theme.textSubtle }}>
                     <X size={12} />
                 </button>
@@ -757,6 +764,7 @@ export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => 
             <PrefsBar
                 prefs={prefs}
                 onChangeLogo={() => setAsking('logo')}
+                onEditBank={() => setAsking('bank')}
                 onClearBank={() => updatePrefs({ ...prefs, bank: 'any' })}
                 onRestart={() => setAsking('doc')}
             />

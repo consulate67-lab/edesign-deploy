@@ -27,9 +27,9 @@ export interface PackagePlan {
 const COMMON_FEATURES: PlanFeature[] = ['credits', 'allDocs', 'ownFiles', 'allTemplates', 'download'];
 
 export const PACKAGES_PLANS: PackagePlan[] = [
-    { id: 'one', name: 'One', prices: { TRY: 3000, EUR: 59, GBP: 59 }, credits: 1, features: COMMON_FEATURES },
-    { id: 'basic', name: 'Basic', prices: { TRY: 10000, EUR: 199, GBP: 199 }, credits: 10, features: COMMON_FEATURES },
-    { id: 'pro', name: 'Pro', prices: { TRY: 15000, EUR: 399, GBP: 399 }, credits: 25, highlight: true, features: [...COMMON_FEATURES, 'priority'] },
+    { id: 'one', name: 'One', prices: { TRY: 3000, EUR: 59, GBP: 51 }, credits: 1, features: COMMON_FEATURES },
+    { id: 'basic', name: 'Basic', prices: { TRY: 10000, EUR: 199, GBP: 169 }, credits: 10, features: COMMON_FEATURES },
+    { id: 'pro', name: 'Pro', prices: { TRY: 15000, EUR: 399, GBP: 339 }, credits: 25, highlight: true, features: [...COMMON_FEATURES, 'priority'] },
 ];
 
 export const priceCurrencyFor = (locale: string, country: string | null | undefined): PriceCurrency =>
