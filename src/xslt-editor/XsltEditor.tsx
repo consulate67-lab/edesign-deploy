@@ -68,6 +68,7 @@ import { BG_FITS, readPageBackground, writePageBackground, imageFileToDataUrl, t
 import { addTestWatermark, stripTestWatermark, stripLeadingBom } from './utils/testWatermark';
 import { downloadFieldGuide, withFieldGuide } from './utils/fieldGuide';
 import { stripFieldGuide } from './utils/fieldGuideMarker';
+import { applyGibLayout, finalizeDelivery, GIB_SIZE_LIMIT, type DeliveryReport, type LayoutResult } from './utils/gibCompliance';
 import { applyLegacyViewerCompat } from './utils/legacyViewerCompat';
 import { ApproveDialog } from './ApproveDialog';
 import i18n, { useLocaleT } from '../i18n';
@@ -1973,11 +1974,11 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         }
     }, [design.id, design.paid, xmlContent]);
 
-    const downloadXslt = useCallback((content: string, suffix = '') => {
+    const downloadXslt = useCallback((content: string, suffix = ''): DeliveryReport => {
         const base = (design.name || docTitle).trim().replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, '_');
         const fileName = `${base}_${moduleId}${suffix}.xslt`;
         const clean = applyLegacyViewerCompat(stripLeadingBom(content));
-        const out = withFieldGuide(clean, xmlContent, catalogRef.current, design.name || docTitle);
+        const { content: out, report } = finalizeDelivery(clean, x => withFieldGuide(x, xmlContent, catalogRef.current, design.name || docTitle));
         const url = URL.createObjectURL(new Blob([out], { type: 'application/xml;charset=utf-8' }));
         const a = document.createElement('a');
         a.href = url;
@@ -1988,7 +1989,20 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         setTimeout(() => URL.revokeObjectURL(url), 10000);
         const catalog = catalogRef.current;
         setTimeout(() => downloadFieldGuide(`${base}_${moduleId}${suffix}`, clean, xmlContent, catalog, design.name || docTitle), 400);
+        return report;
     }, [design.name, docTitle, moduleId, xmlContent]);
+
+    const [gibReport, setGibReport] = useState<{ report: DeliveryReport; layout: LayoutResult } | null>(null);
+
+    /** İndirme anında önizlemeye göre kolon oranları ve sayfa genişliği düzeltilir. */
+    const gibLayout = useCallback((xslt: string): LayoutResult => {
+        try {
+            return applyGibLayout(xslt, iframeRef.current?.contentDocument);
+        } catch (err) {
+            console.warn('[gib] düzen denetimi yapılamadı', err);
+            return { xslt, rows: 0, responsive: 0 };
+        }
+    }, []);
 
     // ------------------------------------------------------------------------
     // Test indirme — ücretsiz, sayfa ortasında TEST filigranı ile
@@ -1996,17 +2010,19 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const handleTestDownload = useCallback(async () => {
         if (!requireSaved()) return;
         flushSourceEditsRef.current();
-        const marked = addTestWatermark(xsltContentRef.current);
+        const layout = gibLayout(xsltContentRef.current);
+        const marked = addTestWatermark(layout.xslt);
         if (!marked) {
             setSaveStatus('error');
             setSaveMessage(`⚠ ${i18n.t('editor.save.testFailed')}`);
             return;
         }
         if (!(await syncSavedDesign())) return;
-        downloadXslt(marked, '_TEST');
+        const report = downloadXslt(marked, '_TEST');
         setSaveStatus('saved');
         setSaveMessage(`🧪 ${i18n.t('editor.save.testDone')}`);
-    }, [downloadXslt, requireSaved, syncSavedDesign]);
+        setGibReport({ report, layout });
+    }, [downloadXslt, gibLayout, requireSaved, syncSavedDesign]);
 
     // ------------------------------------------------------------------------
     // Onay — ilk onayda 1 tasarım hakkı; TEST yazısız dosya indirilir.
@@ -2021,13 +2037,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         flushSourceEditsRef.current();
         setSaveStatus('saving');
         setSaveMessage(i18n.t('editor.save.approving'));
+        const layout = design.paid ? { xslt: xsltContentRef.current, rows: 0, responsive: 0 } : gibLayout(xsltContentRef.current);
         try {
             const r = await api.exportDesign({
                 design_id: design.id,
                 design_key: design.key,
                 name,
                 module_id: moduleId,
-                xslt_content: stripFieldGuide(stripLeadingBom(stripTestWatermark(xsltContentRef.current))),
+                xslt_content: stripFieldGuide(stripLeadingBom(stripTestWatermark(layout.xslt))),
                 xml_content: xmlContent,
                 license_tax_id: taxId,
             });
@@ -2040,7 +2057,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             }
             if (r.design.xml_content && r.design.xml_content !== xmlContent) setXmlContent(r.design.xml_content);
             setDesign({ id: r.design.id, key: r.design.design_key ?? undefined, paid: true, paidAt: r.design.paid_at, name: r.design.name, taxId: r.design.license_tax_id });
-            downloadXslt(out);
+            const report = downloadXslt(out);
             setJustDownloaded(true);
             setApproveOpen(false);
             setSaveStatus('saved');
@@ -2048,6 +2065,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             setSaveMessage(r.charged
                 ? `✅ ${i18n.t('editor.save.approved', { licensed, credits: r.credits })}`
                 : `✅ ${i18n.t('editor.save.downloadedFree', { licensed })}`);
+            setGibReport({ report, layout });
             setSelectedObject(null);
         } catch (err) {
             const e = err as Error & { paymentRequired?: boolean };
@@ -2059,7 +2077,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             }
             throw e;
         }
-    }, [design, moduleId, xmlContent, downloadXslt, resetHistory, requireSaved]);
+    }, [design, moduleId, xmlContent, downloadXslt, gibLayout, resetHistory, requireSaved]);
 
     // ------------------------------------------------------------------------
     // Sprint 14 Aşama 1 — XSLT alanları 3-gruplu liste (snippet gallery kaldırıldı)
@@ -4968,6 +4986,47 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             </button>
                         </div>
                     )}
+
+                    {gibReport && (() => {
+                        const { report, layout } = gibReport;
+                        const warn = report.overLimit || report.external.length > 0;
+                        const row = (ok: boolean, text: string) => (
+                            <li style={{ color: ok ? '#047857' : '#b45309' }}>{ok ? '✓' : '⚠'} {text}</li>
+                        );
+                        return (
+                            <div
+                                data-gib-report
+                                style={{
+                                    display: 'flex', alignItems: 'flex-start', gap: '8px', padding: '8px 12px',
+                                    background: warn ? 'linear-gradient(90deg, #fef3c7, #fff7ed)' : 'linear-gradient(90deg, #d1fae5, #e0f2fe)',
+                                    borderBottom: `1px solid ${warn ? '#fcd34d' : '#6ee7b7'}`, fontSize: '11px', lineHeight: 1.5,
+                                }}
+                            >
+                                <div style={{ flex: 1, minWidth: '220px' }}>
+                                    <div style={{ fontWeight: 700, color: '#1f2937' }}>{t('editor.gib.title')}</div>
+                                    <ul style={{ margin: '2px 0 0', paddingLeft: '16px', listStyle: 'none' }}>
+                                        {row(!report.overLimit, t(report.overLimit ? 'editor.gib.sizeOver' : 'editor.gib.sizeOk', {
+                                            kb: (report.bytes / 1024).toFixed(1), limit: GIB_SIZE_LIMIT / 1024,
+                                        }))}
+                                        {row(!report.external.length, report.external.length
+                                            ? t('editor.gib.external', { count: report.external.length, list: report.external.slice(0, 3).join(' · ') })
+                                            : t('editor.gib.noExternal'))}
+                                        {row(true, layout.rows ? t('editor.gib.columnsFixed', { count: layout.rows }) : t('editor.gib.columnsOk'))}
+                                        {row(true, layout.responsive ? t('editor.gib.responsiveFixed', { count: layout.responsive }) : t('editor.gib.responsiveOk'))}
+                                        {report.guideDropped && row(true, t('editor.gib.guideTxt'))}
+                                    </ul>
+                                </div>
+                                <button
+                                    data-gib-report-close
+                                    onClick={() => setGibReport(null)}
+                                    title={t('editor.gib.close')}
+                                    style={{ padding: '2px 8px', background: 'transparent', border: '1px solid #D9DEF0', borderRadius: '4px', color: '#5b6680', fontSize: '12px', cursor: 'pointer' }}
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                        );
+                    })()}
 
                     {moving && (
                         <div

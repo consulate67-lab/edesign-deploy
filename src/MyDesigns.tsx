@@ -5,6 +5,7 @@ import { WIZARD_DOC_TYPES, loadSampleXml } from './wizard/docTypes';
 import { intlModuleDocTypes } from './wizard/intlDocTypes';
 import { stripLeadingBom } from './xslt-editor/utils/testWatermark';
 import { applyLegacyViewerCompat } from './xslt-editor/utils/legacyViewerCompat';
+import { finalizeDelivery } from './xslt-editor/utils/gibCompliance';
 import { transformXmlWithXslt } from './xsltTransformer';
 import { theme } from './theme';
 import i18n, { currentLocale, useLocaleT } from './i18n';
@@ -39,14 +40,14 @@ const designXml = async (d: SavedDesign) => {
 const downloadDesign = async (d: SavedDesign) => {
     const clean = applyLegacyViewerCompat(stripLeadingBom(d.xslt_content ?? ''));
     const base = `${d.name.replace(/[\\/:*?"<>|\s]+/g, '_')}_${d.module_id}`;
-    let content = clean;
+    let content = finalizeDelivery(clean).content;
     let saveGuide: (() => void) | null = null;
     try {
         const [xml, { buildCatalog }, { withFieldGuide, downloadFieldGuide }] = await Promise.all([
             designXml(d), import('./xslt-editor/catalogI18n'), import('./xslt-editor/utils/fieldGuide'),
         ]);
         const catalog = buildCatalog(xml, currentLocale());
-        content = withFieldGuide(clean, xml, catalog, d.name);
+        content = finalizeDelivery(clean, x => withFieldGuide(x, xml, catalog, d.name)).content;
         saveGuide = () => downloadFieldGuide(base, clean, xml, catalog, d.name);
     } catch (err) {
         console.warn('[MyDesigns] alan rehberi eklenemedi', err);

@@ -1,4 +1,5 @@
 import { TEST_WATERMARK_PNG } from './testWatermarkImage';
+import { LEGACY_TEST_WATERMARK_PNG } from './testWatermarkLegacyImage';
 
 /**
  * Onaylanmamış (ücretsiz) indirmelere eklenen TEST filigranı. Tasarımın kendisine
@@ -65,7 +66,7 @@ const WM_CSS = `body{position:relative!important}`
     + `@media print{.${WM_CLASS}{position:fixed!important;left:0!important;top:0!important;right:0!important;bottom:0!important;width:100%!important;height:100%!important}}`;
 const IE7_CSS = `.${WM_CLASS} img{display:none!important}.${WM_CLASS} span{display:inline-block!important}`;
 
-const buildImageWatermark = () =>
+const buildImageWatermark = (png: string) =>
     `<xsl:element name="style"><xsl:attribute name="type">text/css</xsl:attribute><xsl:text>${WM_CSS}</xsl:text></xsl:element>`
     + `<xsl:comment>[if lte IE 7]&gt;&lt;style type="text/css"&gt;${IE7_CSS}&lt;/style&gt;&lt;![endif]</xsl:comment>`
     + `<xsl:element name="div"><xsl:attribute name="class">${WM_CLASS}</xsl:attribute><xsl:attribute name="style">${css([
@@ -80,7 +81,7 @@ const buildImageWatermark = () =>
                 IMP('display:table-cell'), IMP('width:100%'), IMP('height:100%'), IMP('font-size:0'), IMP('line-height:0'),
                 IMP('text-align:center'), IMP('vertical-align:middle'), ...BOX_RESET,
             ],
-                `<xsl:element name="img"><xsl:attribute name="src">${TEST_WATERMARK_PNG}</xsl:attribute>`
+                `<xsl:element name="img"><xsl:attribute name="src">${png}</xsl:attribute>`
                 + `<xsl:attribute name="alt">TEST</xsl:attribute><xsl:attribute name="style">${css([
                     IMP('display:inline-block'), IMP('vertical-align:middle'), IMP('width:72%'), IMP('max-width:640px'),
                     IMP('height:auto'), IMP('margin:0'), IMP('padding:0'), IMP('border:0'), IMP('background:transparent'),
@@ -95,12 +96,13 @@ const buildImageWatermark = () =>
             ))))
     + `</xsl:element>`;
 
-const WATERMARK = buildImageWatermark();
+const WATERMARK = buildImageWatermark(TEST_WATERMARK_PNG);
 
 const PREV_ROTATE = 'translate(-50%,-50%) rotate(-30deg)';
 
 /** Önceki sürümlerin filigranları: eski TEST dosyaları da tanınıp temizlenir. */
 const LEGACY_WATERMARKS = [
+    buildImageWatermark(LEGACY_TEST_WATERMARK_PNG),
     buildTableWatermark(),
     buildWatermark(
         [
