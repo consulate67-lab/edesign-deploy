@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: Uluslararası Otobüs e-Yolcu Listesi (İstanbul → Sofya). T.C. vatandaşları TCKN, yabancı yolcular pasaport no ile.
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<ebilet:eYolcuListesi xmlns:ebilet="http://ebilet.efatura.gov.tr" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xades="http://uri.etsi.org/01903/v1.3.2#">
+    <ebilet:baslik>
+        <ebilet:gonderen>
+            <ebilet:vkn>1830462975</ebilet:vkn>
+        </ebilet:gonderen>
+        <ebilet:baslangicTarihi>2026-10-09</ebilet:baslangicTarihi>
+        <ebilet:bitisTarihi>2026-10-09</ebilet:bitisTarihi>
+        <ebilet:versiyon>1.0</ebilet:versiyon>
+        <ebilet:uuid>777B1685-B1D4-48DF-A7A4-EB4496113730</ebilet:uuid>
+        <ds:Signature Id="Signature_1">
+            <ds:SignedInfo>
+                <ds:CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
+                <ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+                <ds:Reference URI="">
+                    <ds:Transforms>
+                        <ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+                    </ds:Transforms>
+                    <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                    <ds:DigestValue>777B1685B1D448DFAFDE6C484C681356=</ds:DigestValue>
+                </ds:Reference>
+            </ds:SignedInfo>
+            <ds:SignatureValue>777B1685B1D448DFAD04314A9F1E33A1777B1685B1D448DFA75B01661A209D3C==</ds:SignatureValue>
+            <ds:KeyInfo>
+                <ds:X509Data>
+                    <ds:X509Certificate>MIIFlDCCBHygAwIBAgIGAIiEmAELMA0GCSqGSIb3DQEBCwUAMFwxCzAJBgNVBAYTAlRS</ds:X509Certificate>
+                </ds:X509Data>
+            </ds:KeyInfo>
+            <ds:Object>
+                <xades:QualifyingProperties Target="#Signature_1">
+                    <xades:SignedProperties Id="SignedProperties_1">
+                        <xades:SignedSignatureProperties>
+                            <xades:SigningTime>2026-10-09T06:40:00+03:00</xades:SigningTime>
+                        </xades:SignedSignatureProperties>
+                    </xades:SignedProperties>
+                </xades:QualifyingProperties>
+            </ds:Object>
+        </ds:Signature>
+    </ebilet:baslik>
+    <ebilet:yolcuListesi>
+        <ebilet:yolcuListesiNo>BLK2026000003318</ebilet:yolcuListesiNo>
+        <ebilet:ozetDeger>777b1685b1d448dfaa21a74750cb2219777b1685b1d448dfa4032cee1a5df78d</ebilet:ozetDeger>
+        <ebilet:haraketZamani>2026-10-09T07:00:00</ebilet:haraketZamani>
+        <ebilet:hareketNoktasi>İstanbul Esenler Otogarı · Uluslararası Peron 4</ebilet:hareketNoktasi>
+        <ebilet:seferNumarasi>IST-SOF-0700</ebilet:seferNumarasi>
+        <ebilet:seferTarihi>2026-10-09</ebilet:seferTarihi>
+        <ebilet:aracPlakasi>34BLK318</ebilet:aracPlakasi>
+        <ebilet:toplamHasilat>17100.00</ebilet:toplamHasilat>
+        <ebilet:koltukListesi>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>3</ebilet:koltukNo>
+                <ebilet:biletNo>BLK2026000331801</ebilet:biletNo>
+                <ebilet:tutar>1450.00</ebilet:tutar>
+                <ebilet:adSoyad>Elif Arslan</ebilet:adSoyad>
+                <ebilet:tcknYkn>10096655937</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>4</ebilet:koltukNo>
+                <ebilet:biletNo>BLK2026000331802</ebilet:biletNo>
+                <ebilet:tutar>1450.00</ebilet:tutar>
+                <ebilet:adSoyad>Georgi Ivanov</ebilet:adSoyad>
+                <ebilet:pasaportNo>BG3841257</ebilet:pasaportNo>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>5</ebilet:koltukNo>
+                <ebilet:biletNo>BLK2026000331803</ebilet:biletNo>
+                <ebilet:tutar>1450.00</ebilet:tutar>
+                <ebilet:adSoyad>Maria Petrova</ebilet:adSoyad>
+                <ebilet:pasaportNo>BG7719023</ebilet:pasaportNo>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>8</ebilet:koltukNo>
+                <ebilet:biletNo>BLK2026000331804</ebilet:biletNo>
+                <ebilet:tutar>1450.00</ebilet:tutar>
+                <ebilet:adSoyad>Hasan Çelik</ebilet:adSoyad>
+                <ebilet:tcknYkn>40301419022</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>9</ebilet:koltukNo>
+                <ebilet:biletNo>BLK2026000331805</ebilet:biletNo>
+                <ebilet:tutar>1300.00</ebilet:tutar>
+                <ebilet:adSoyad>Ayten Çelik</ebilet:adSoyad>
+                <ebilet:tcknYkn>70506182107</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>12</ebilet:koltukNo>
+                <ebilet:biletNo>BLK2026000331806</ebilet:biletNo>
+                <ebilet:tutar>1450.00</ebilet:tutar>
+                <ebilet:adSoyad>Stefan Dimitrov</ebilet:adSoyad>
+                <ebilet:pasaportNo>BG5502841</ebilet:pasaportNo>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>15</ebilet:koltukNo>
+                <ebilet:biletNo>BLK2026000331807</ebilet:biletNo>
+                <ebilet:tutar>1450.00</ebilet:tutar>
+                <ebilet:adSoyad>Lukas Weber</ebilet:adSoyad>
+                <ebilet:pasaportNo>C4XK7Z912</ebilet:pasaportNo>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>16</ebilet:koltukNo>
+                <ebilet:biletNo>BLK2026000331808</ebilet:biletNo>
+                <ebilet:tutar>1450.00</ebilet:tutar>
+                <ebilet:adSoyad>Anna Weber</ebilet:adSoyad>
+                <ebilet:pasaportNo>C4XK7Z955</ebilet:pasaportNo>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>19</ebilet:koltukNo>
+                <ebilet:biletNo>BLK2026000331809</ebilet:biletNo>
+                <ebilet:tutar>1450.00</ebilet:tutar>
+                <ebilet:adSoyad>Selim Yazıcı</ebilet:adSoyad>
+                <ebilet:tcknYkn>10710945193</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>22</ebilet:koltukNo>
+                <ebilet:biletNo>BLK2026000331810</ebilet:biletNo>
+                <ebilet:tutar>1450.00</ebilet:tutar>
+                <ebilet:adSoyad>Ivana Koleva</ebilet:adSoyad>
+                <ebilet:pasaportNo>BG6610238</ebilet:pasaportNo>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>23</ebilet:koltukNo>
+                <ebilet:biletNo>BLK2026000331811</ebilet:biletNo>
+                <ebilet:tutar>1450.00</ebilet:tutar>
+                <ebilet:adSoyad>Mihai Popescu</ebilet:adSoyad>
+                <ebilet:pasaportNo>053881274</ebilet:pasaportNo>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>27</ebilet:koltukNo>
+                <ebilet:biletNo>BLK2026000331812</ebilet:biletNo>
+                <ebilet:tutar>1300.00</ebilet:tutar>
+                <ebilet:adSoyad>Gülşen Tunç</ebilet:adSoyad>
+                <ebilet:tcknYkn>40915708278</ebilet:tcknYkn>
+            </ebilet:koltuk>
+        </ebilet:koltukListesi>
+    </ebilet:yolcuListesi>
+</ebilet:eYolcuListesi>

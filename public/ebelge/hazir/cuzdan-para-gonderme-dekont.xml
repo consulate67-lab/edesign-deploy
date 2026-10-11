@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: Cüzdan Para Gönderme e-Dekontu — DEKONT · PAGO (elektronik para kuruluşu, cüzdandan cüzdana gönderim).
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<CreditNote xmlns="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2.1</cbc:CustomizationID>
+    <cbc:ProfileID>DEKONT</cbc:ProfileID>
+    <cbc:ID>MRT2026000527814</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>AAD7FBAE-16C0-472F-A3EE-3F205CFC953A</cbc:UUID>
+    <cbc:IssueDate>2026-10-11</cbc:IssueDate>
+    <cbc:IssueTime>13:22:48</cbc:IssueTime>
+    <cbc:CreditNoteTypeCode>PAGO</cbc:CreditNoteTypeCode>
+    <cbc:Note>Yalnız: İki Bin Yedi Yüz Elli Üç Türk Lirası Altmış Sekiz Kuruş</cbc:Note>
+    <cbc:Note>Gönderim alıcının Martı Cüzdan hesabına anlık olarak aktarılmıştır.</cbc:Note>
+    <cbc:Note>Martı Elektronik Para ve Ödeme Hizmetleri A.Ş., 6493 sayılı Kanun kapsamında TCMB tarafından yetkilendirilmiş elektronik para kuruluşudur.</cbc:Note>
+    <cbc:Note>Bu dekont 509 Sıra No'lu VUK Genel Tebliği kapsamında elektronik ortamda düzenlenmiş olup ıslak imza gerektirmez.</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>6</cbc:LineCountNumeric>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID schemeID="ISLEMREFNO">MRT20261011PAGO0527814</cbc:ID>
+        <cbc:IssueDate>2026-10-11</cbc:IssueDate>
+        <cbc:DocumentType>ISLEMREFERANSNO</cbc:DocumentType>
+        <cbc:DocumentDescription>ISLEMREFERANSNO</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID schemeID="ISLEMKANALI">MOBİL UYGULAMA (iOS)</cbc:ID>
+        <cbc:IssueDate>2026-10-11</cbc:IssueDate>
+        <cbc:DocumentType>ISLEMKANALI</cbc:DocumentType>
+        <cbc:DocumentDescription>ISLEMKANALI</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">6120938457</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">6120938457</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Maslak Mahallesi Eski Büyükdere Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>27</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Sarıyer</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34485</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_MRT2026000527814</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.marticuzdan.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">6120938457</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">0612093845700019</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Martı Elektronik Para ve Ödeme Hizmetleri A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Maslak Mahallesi Eski Büyükdere Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>27</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Sarıyer</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34485</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Maslak</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0850 811 62 78</cbc:Telephone>
+                <cbc:ElectronicMail>destek@marticuzdan.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">28417063952</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MUSTERINO">90 532 418 27 66</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Göztepe Mahallesi Tanzimat Sokak</cbc:StreetName>
+                <cbc:BuildingNumber>14/6</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Kadıköy</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34730</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:Contact>
+                <cbc:Telephone>(532) 418 27 66</cbc:Telephone>
+            </cac:Contact>
+            <cac:Person>
+                <cbc:FirstName>Deniz</cbc:FirstName>
+                <cbc:FamilyName>ACAR</cbc:FamilyName>
+            </cac:Person>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:BuyerCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">17530492864</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MUSTERINO">90 544 207 31 58</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Alsancak Mahallesi Kıbrıs Şehitleri Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>122/3</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Konak</cbc:CitySubdivisionName>
+                <cbc:CityName>İzmir</cbc:CityName>
+                <cbc:PostalZone>35220</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:Person>
+                <cbc:FirstName>Ece</cbc:FirstName>
+                <cbc:FamilyName>YAVUZ</cbc:FamilyName>
+            </cac:Person>
+        </cac:Party>
+    </cac:BuyerCustomerParty>
+    <cac:PaymentTerms>
+        <cac:SettlementPeriod>
+            <cbc:StartDate>2026-10-11</cbc:StartDate>
+            <cbc:StartTime>13:22:46</cbc:StartTime>
+            <cbc:EndDate>2026-10-11</cbc:EndDate>
+            <cbc:EndTime>13:22:48</cbc:EndTime>
+        </cac:SettlementPeriod>
+    </cac:PaymentTerms>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">0.18</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">3.50</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">0.18</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>5</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>BSMV</cbc:Name>
+                    <cbc:TaxTypeCode>0021</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">2750.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">2753.50</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">2753.68</cbc:TaxInclusiveAmount>
+        <cbc:PayableAmount currencyID="TRY">2753.68</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:CreditNoteLine>
+        <cbc:ID>1</cbc:ID>
+        <cac:Item>
+            <cbc:Name>İŞLEM TUTARI</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">2750.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>2</cbc:ID>
+        <cac:Item>
+            <cbc:Name>KOMİSYON TUTARI</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">3.50</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>3</cbc:ID>
+        <cac:Item>
+            <cbc:Name>TOPLAM TUTAR</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">2753.68</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>4</cbc:ID>
+        <cac:Item>
+            <cbc:Name>ÖDENECEK TUTAR</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">2753.68</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>5</cbc:ID>
+        <cac:Item>
+            <cbc:Description>CÜZDANDAN CÜZDANA PARA GÖNDERME</cbc:Description>
+            <cbc:Name>İŞLEM TİPİ</cbc:Name>
+        </cac:Item>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>6</cbc:ID>
+        <cac:Item>
+            <cbc:Description>EKİM AYI EV KİRASI PAYI - DENİZ</cbc:Description>
+            <cbc:Name>AÇIKLAMA</cbc:Name>
+        </cac:Item>
+    </cac:CreditNoteLine>
+</CreditNote>

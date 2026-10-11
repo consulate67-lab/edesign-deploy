@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: Bankasürans Komisyon Gider Belgesi — EARSIVBELGE · SIGORTAKOMISYONGIDERBELGESI (hayat şirketinden acente bankaya).
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<CreditNote xmlns="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2.1</cbc:CustomizationID>
+    <cbc:ProfileID>EARSIVBELGE</cbc:ProfileID>
+    <cbc:ID>ATH2026000009184</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>D54F00B8-70D7-4A46-A5D1-A155A86279DE</cbc:UUID>
+    <cbc:IssueDate>2026-10-05</cbc:IssueDate>
+    <cbc:IssueTime>10:00:00</cbc:IssueTime>
+    <cbc:CreditNoteTypeCode>SIGORTAKOMISYONGIDERBELGESI</cbc:CreditNoteTypeCode>
+    <cbc:Note>Yalnız: Dört Yüz Doksan Bin İki Yüz Yetmiş Sekiz Türk Lirası Yetmiş Beş Kuruş</cbc:Note>
+    <cbc:Note>Komisyonlar Lodos Bankası şube kanalında satılan poliçeler için hesaplanmıştır.</cbc:Note>
+    <cbc:Note>İptal komisyonları, ilgili dönemde iptal edilen poliçelerin iade primleri üzerinden mahsup edilmiştir.</cbc:Note>
+    <cbc:Note>Bu belge 509 Sıra No'lu VUK Genel Tebliği kapsamında sigorta şirketi tarafından elektronik ortamda düzenlenmiştir.</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>4</cbc:LineCountNumeric>
+    <cac:InvoicePeriod>
+        <cbc:StartDate>2026-09-01</cbc:StartDate>
+        <cbc:EndDate>2026-09-30</cbc:EndDate>
+        <cbc:Description>EYLÜL - 2026</cbc:Description>
+    </cac:InvoicePeriod>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">1084729356</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">1084729356</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Saray Mahallesi Dr. Adnan Büyükdeniz Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>4</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Ümraniye</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34768</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_ATH2026000009184</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.atlashayat.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">1084729356</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TICARETSICILNO">512844-0</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">0108472935600016</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Atlas Hayat ve Emeklilik A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Saray Mahallesi Dr. Adnan Büyükdeniz Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>4</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Ümraniye</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34768</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Büyük Mükellefler</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(216) 444 28 56</cbc:Telephone>
+                <cbc:ElectronicMail>bankasurans@atlashayat.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">6080412395</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="LEVHANO">T34-2011-08127</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Lodos Bankası A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Ankara Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>81</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Bornova</cbc:CitySubdivisionName>
+                <cbc:CityName>İzmir</cbc:CityName>
+                <cbc:PostalZone>35030</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Bornova</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0850 222 56 37</cbc:Telephone>
+                <cbc:ElectronicMail>sigorta.operasyon@lodosbank.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode listID="UN/4461">42</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-10-15</cbc:PaymentDueDate>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR710009900000000410000101</cbc:ID>
+            <cbc:CurrencyCode>TRY</cbc:CurrencyCode>
+            <cac:FinancialInstitutionBranch>
+                <cbc:Name>Genel Müdürlük</cbc:Name>
+                <cac:FinancialInstitution>
+                    <cbc:Name>Lodos Bankası A.Ş.</cbc:Name>
+                </cac:FinancialInstitution>
+            </cac:FinancialInstitutionBranch>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">490278.75</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">490278.75</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">490278.75</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="TRY">523446.25</cbc:AllowanceTotalAmount>
+        <cbc:ChargeTotalAmount currencyID="TRY">33167.50</cbc:ChargeTotalAmount>
+        <cbc:PayableAmount currencyID="TRY">490278.75</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:CreditNoteLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:CreditedQuantity unitCode="C62">412</cbc:CreditedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">297075.00</cbc:LineExtensionAmount>
+        <cac:AllowanceCharge>
+            <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+            <cbc:AllowanceChargeReason>IPTAL</cbc:AllowanceChargeReason>
+            <cbc:MultiplierFactorNumeric>0.25</cbc:MultiplierFactorNumeric>
+            <cbc:Amount currencyID="TRY">24075.00</cbc:Amount>
+            <cbc:BaseAmount currencyID="TRY">96300.00</cbc:BaseAmount>
+        </cac:AllowanceCharge>
+        <cac:AllowanceCharge>
+            <cbc:ChargeIndicator>true</cbc:ChargeIndicator>
+            <cbc:AllowanceChargeReason>Istihsal</cbc:AllowanceChargeReason>
+            <cbc:MultiplierFactorNumeric>0.25</cbc:MultiplierFactorNumeric>
+            <cbc:Amount currencyID="TRY">321150.00</cbc:Amount>
+            <cbc:BaseAmount currencyID="TRY">1284600.00</cbc:BaseAmount>
+        </cac:AllowanceCharge>
+        <cac:Item>
+            <cbc:Description>Kredi bağlantılı hayat · 412 poliçe</cbc:Description>
+            <cbc:Name>Hayat</cbc:Name>
+        </cac:Item>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:CreditedQuantity unitCode="C62">188</cbc:CreditedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">60720.00</cbc:LineExtensionAmount>
+        <cac:AllowanceCharge>
+            <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+            <cbc:AllowanceChargeReason>IPTAL</cbc:AllowanceChargeReason>
+            <cbc:MultiplierFactorNumeric>0.3</cbc:MultiplierFactorNumeric>
+            <cbc:Amount currencyID="TRY">3720.00</cbc:Amount>
+            <cbc:BaseAmount currencyID="TRY">12400.00</cbc:BaseAmount>
+        </cac:AllowanceCharge>
+        <cac:AllowanceCharge>
+            <cbc:ChargeIndicator>true</cbc:ChargeIndicator>
+            <cbc:AllowanceChargeReason>Istihsal</cbc:AllowanceChargeReason>
+            <cbc:MultiplierFactorNumeric>0.3</cbc:MultiplierFactorNumeric>
+            <cbc:Amount currencyID="TRY">64440.00</cbc:Amount>
+            <cbc:BaseAmount currencyID="TRY">214800.00</cbc:BaseAmount>
+        </cac:AllowanceCharge>
+        <cac:Item>
+            <cbc:Description>Ferdi kaza · 188 poliçe</cbc:Description>
+            <cbc:Name>Kaza</cbc:Name>
+        </cac:Item>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:CreditedQuantity unitCode="C62">236</cbc:CreditedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">83860.00</cbc:LineExtensionAmount>
+        <cac:AllowanceCharge>
+            <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+            <cbc:AllowanceChargeReason>IPTAL</cbc:AllowanceChargeReason>
+            <cbc:MultiplierFactorNumeric>0.2</cbc:MultiplierFactorNumeric>
+            <cbc:Amount currencyID="TRY">3780.00</cbc:Amount>
+            <cbc:BaseAmount currencyID="TRY">18900.00</cbc:BaseAmount>
+        </cac:AllowanceCharge>
+        <cac:AllowanceCharge>
+            <cbc:ChargeIndicator>true</cbc:ChargeIndicator>
+            <cbc:AllowanceChargeReason>Istihsal</cbc:AllowanceChargeReason>
+            <cbc:MultiplierFactorNumeric>0.2</cbc:MultiplierFactorNumeric>
+            <cbc:Amount currencyID="TRY">87640.00</cbc:Amount>
+            <cbc:BaseAmount currencyID="TRY">438200.00</cbc:BaseAmount>
+        </cac:AllowanceCharge>
+        <cac:Item>
+            <cbc:Description>Konut paket · 236 poliçe</cbc:Description>
+            <cbc:Name>Yangın Ve Doğal Afetler</cbc:Name>
+        </cac:Item>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>4</cbc:ID>
+        <cbc:CreditedQuantity unitCode="C62">301</cbc:CreditedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">48623.75</cbc:LineExtensionAmount>
+        <cac:AllowanceCharge>
+            <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+            <cbc:AllowanceChargeReason>IPTAL</cbc:AllowanceChargeReason>
+            <cbc:MultiplierFactorNumeric>0.175</cbc:MultiplierFactorNumeric>
+            <cbc:Amount currencyID="TRY">1592.50</cbc:Amount>
+            <cbc:BaseAmount currencyID="TRY">9100.00</cbc:BaseAmount>
+        </cac:AllowanceCharge>
+        <cac:AllowanceCharge>
+            <cbc:ChargeIndicator>true</cbc:ChargeIndicator>
+            <cbc:AllowanceChargeReason>Istihsal</cbc:AllowanceChargeReason>
+            <cbc:MultiplierFactorNumeric>0.175</cbc:MultiplierFactorNumeric>
+            <cbc:Amount currencyID="TRY">50216.25</cbc:Amount>
+            <cbc:BaseAmount currencyID="TRY">286950.00</cbc:BaseAmount>
+        </cac:AllowanceCharge>
+        <cac:Item>
+            <cbc:Description>301 poliçe</cbc:Description>
+            <cbc:Name>Zorunlu Deprem (DASK)</cbc:Name>
+        </cac:Item>
+    </cac:CreditNoteLine>
+</CreditNote>

@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: Döviz Bürosu Alım Belgesi — EDOVIZBELGE · ALIM (müşteriden efektif avro alımı, TL karşılığı havale).
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<CreditNote xmlns="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2.1</cbc:CustomizationID>
+    <cbc:ProfileID>EDOVIZBELGE</cbc:ProfileID>
+    <cbc:ID>GLT2026000006215</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>75968170-2715-4445-AF74-F5F58451C7D5</cbc:UUID>
+    <cbc:IssueDate>2026-10-09</cbc:IssueDate>
+    <cbc:IssueTime>15:22:08</cbc:IssueTime>
+    <cbc:CreditNoteTypeCode>ALIM</cbc:CreditNoteTypeCode>
+    <cbc:Note>Kur Tablosu | USD | 42,1460 | 42,5280</cbc:Note>
+    <cbc:Note>Kur Tablosu | EUR | 48,9120 | 49,3650</cbc:Note>
+    <cbc:Note>Kur Tablosu | GBP | 56,3840 | 56,9970</cbc:Note>
+    <cbc:Note>Kur Tablosu | CHF | 52,6150 | 53,2240</cbc:Note>
+    <cbc:Note>Banknotlar müşteri huzurunda sayılmış; UV ve manyetik mürekkep kontrolünden geçirilmiştir.</cbc:Note>
+    <cbc:Note>Döviz alım işleminde kambiyo muameleleri vergisi (BSMV) uygulanmamıştır.</cbc:Note>
+    <cbc:Note>Bu belge 509 Sıra No'lu VUK Genel Tebliği kapsamında elektronik ortamda düzenlenmiştir.</cbc:Note>
+    <cbc:Note>Yalnız: Yetmiş Sekiz Bin İki Yüz Elli Dokuz Türk Lirası Yirmi Kuruş</cbc:Note>
+    <cbc:LineCountNumeric>3</cbc:LineCountNumeric>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>B7712</cbc:ID>
+        <cbc:IssueDate>2026-10-09</cbc:IssueDate>
+        <cbc:DocumentTypeCode>ISTATISTIKNO</cbc:DocumentTypeCode>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">3710592846</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">3710592846</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Bankalar Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>24</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Beyoğlu</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34420</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_GLT2026000006215</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.galatadoviz.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">3710592846</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="SUBENO">IST-0412</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Galata Döviz Ticaret A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Bankalar Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>24</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Beyoğlu</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34420</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Beyoğlu</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(212) 292 44 12</cbc:Telephone>
+                <cbc:ElectronicMail>islem@galatadoviz.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">28196403571</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MUSTERITURU">GERCEKKISI</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Cihangir Mahallesi Sıraselviler Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>62/4</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Beyoğlu</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34433</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:Contact>
+                <cbc:Telephone>(533) 408 21 67</cbc:Telephone>
+            </cac:Contact>
+            <cac:Person>
+                <cbc:FirstName>Deniz</cbc:FirstName>
+                <cbc:FamilyName>AKSU</cbc:FamilyName>
+            </cac:Person>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode listID="UN/4461">10</cbc:PaymentMeansCode>
+        <cbc:InstructionNote>Müşteri — efektif avro elden teslim edildi</cbc:InstructionNote>
+        <cac:PayerFinancialAccount>
+            <cbc:ID>0</cbc:ID>
+        </cac:PayerFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode listID="UN/4461">42</cbc:PaymentMeansCode>
+        <cbc:InstructionNote>Müessese — TL karşılığı müşteri hesabına havale edildi</cbc:InstructionNote>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR360001000144000418236501</cbc:ID>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:PaymentExchangeRate>
+        <cbc:SourceCurrencyCode>TRY</cbc:SourceCurrencyCode>
+        <cbc:TargetCurrencyCode>EUR</cbc:TargetCurrencyCode>
+        <cbc:CalculationRate>0.020445</cbc:CalculationRate>
+    </cac:PaymentExchangeRate>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">0.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">78259.20</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">0.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>0</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>BSMV</cbc:Name>
+                    <cbc:TaxTypeCode>0021</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="EUR">1600.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">78259.20</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">78259.20</cbc:TaxInclusiveAmount>
+        <cbc:PayableAmount currencyID="TRY">78259.20</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:CreditNoteLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:CreditedQuantity unitCode="C62">12</cbc:CreditedQuantity>
+        <cbc:LineExtensionAmount currencyID="EUR">1200.00</cbc:LineExtensionAmount>
+        <cac:Item>
+            <cbc:Description>Europa serisi</cbc:Description>
+            <cbc:Name>100 EUR Banknot</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="EUR">100.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:CreditedQuantity unitCode="C62">6</cbc:CreditedQuantity>
+        <cbc:LineExtensionAmount currencyID="EUR">300.00</cbc:LineExtensionAmount>
+        <cac:Item>
+            <cbc:Description>Europa serisi</cbc:Description>
+            <cbc:Name>50 EUR Banknot</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="EUR">50.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:CreditedQuantity unitCode="C62">5</cbc:CreditedQuantity>
+        <cbc:LineExtensionAmount currencyID="EUR">100.00</cbc:LineExtensionAmount>
+        <cac:Item>
+            <cbc:Description>Europa serisi</cbc:Description>
+            <cbc:Name>20 EUR Banknot</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="EUR">20.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+</CreditNote>

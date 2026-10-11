@@ -124,6 +124,7 @@ const withholdingNode = (w, base, amount, cur) => e('cac:WithholdingTaxTotal',
 const NS = {
     Invoice: 'urn:oasis:names:specification:ubl:schema:xsd:Invoice-2',
     DespatchAdvice: 'urn:oasis:names:specification:ubl:schema:xsd:DespatchAdvice-2',
+    CreditNote: 'urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2',
 };
 const rootAttrs = (root) => ({
     xmlns: NS[root],
@@ -133,6 +134,9 @@ const rootAttrs = (root) => ({
 });
 const ext = () => e('ext:UBLExtensions', e('ext:UBLExtension', e('ext:ExtensionContent')));
 const wrap = (comment, node) => `<?xml version="1.0" encoding="UTF-8"?>\n<!--\n${comment.trim().split('\n').map((s) => `  ${s.trim()}`).join('\n')}\n  Tüm kişi ve firma bilgileri kurgusaldır.\n-->\n${ser(node, 0)}\n`;
+
+/** Diğer belge üreticileri (scripts/belge) için XML yapı taşları. */
+export { address, ext, f2, r2, rootAttrs, ser, signature, uuidFrom, wrap };
 
 /** Fatura (e-Fatura / e-Arşiv / e-İhracat / mikro ihracat) örneği; tüm tutarlar satırlardan hesaplanır. */
 export function invoice(d) {

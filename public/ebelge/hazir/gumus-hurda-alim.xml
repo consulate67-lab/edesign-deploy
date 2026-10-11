@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: Hurda Gümüş Ayar Analizi ve Alım Belgesi — EKIYMETLIMADENBELGE · ALIM (tüzel kişiden gram bazında gümüş alımı).
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<CreditNote xmlns="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2.1</cbc:CustomizationID>
+    <cbc:ProfileID>EKIYMETLIMADENBELGE</cbc:ProfileID>
+    <cbc:ID>KZG2026000002417</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>D6AA2FEF-06A1-4F59-A0E9-C30F16B66F25</cbc:UUID>
+    <cbc:IssueDate>2026-10-08</cbc:IssueDate>
+    <cbc:IssueTime>10:05:51</cbc:IssueTime>
+    <cbc:CreditNoteTypeCode>ALIM</cbc:CreditNoteTypeCode>
+    <cbc:Note>Kur Tablosu | GÜMÜŞ 999 (gr) | 55,90 | 57,40</cbc:Note>
+    <cbc:Note>Kur Tablosu | GÜMÜŞ 925 (gr) | 51,80 | 53,10</cbc:Note>
+    <cbc:Note>Kur Tablosu | GÜMÜŞ 800 (gr) | 44,60 | 45,90</cbc:Note>
+    <cbc:Note>Tartım kalibre terazide müşteri yetkilisi huzurunda yapılmış, ayar XRF cihazıyla ölçülmüştür.</cbc:Note>
+    <cbc:Note>Bedel analiz sonucu ve günün alış kuru üzerinden hesaplanmıştır.</cbc:Note>
+    <cbc:Note>Bu belge 509 Sıra No'lu VUK Genel Tebliği kapsamında elektronik ortamda düzenlenmiştir.</cbc:Note>
+    <cbc:Note>Yalnız: Yüz On Dokuz Bin Altı Yüz Üç Türk Lirası On Kuruş</cbc:Note>
+    <cbc:LineCountNumeric>3</cbc:LineCountNumeric>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>A0391</cbc:ID>
+        <cbc:IssueDate>2026-10-08</cbc:IssueDate>
+        <cbc:DocumentTypeCode>ISTATISTIKNO</cbc:DocumentTypeCode>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">5240716938</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">5240716938</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Kazazlar Sokak</cbc:StreetName>
+                <cbc:BuildingNumber>18</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Ortahisar</cbc:CitySubdivisionName>
+                <cbc:CityName>Trabzon</cbc:CityName>
+                <cbc:PostalZone>61030</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_KZG2026000002417</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.kazazlargumus.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">5240716938</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="SUBENO">TZN-0001</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Kazazlar Gümüş Rafineri ve Telkari San. Ltd. Şti.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Kazazlar Sokak</cbc:StreetName>
+                <cbc:BuildingNumber>18</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Ortahisar</cbc:CitySubdivisionName>
+                <cbc:CityName>Trabzon</cbc:CityName>
+                <cbc:PostalZone>61030</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Karadeniz</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(462) 321 58 18</cbc:Telephone>
+                <cbc:ElectronicMail>alim@kazazlargumus.com.tr</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">7381025946</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MUSTERITURU">TUZELKISI</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Safranbolu Bakır ve Gümüş El Sanatları Ltd. Şti.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Çarşı Mahallesi Arasta Sokak</cbc:StreetName>
+                <cbc:BuildingNumber>9</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Safranbolu</cbc:CitySubdivisionName>
+                <cbc:CityName>Karabük</cbc:CityName>
+                <cbc:PostalZone>78600</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Safranbolu</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(370) 712 40 19</cbc:Telephone>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode listID="UN/4461">10</cbc:PaymentMeansCode>
+        <cbc:InstructionNote>Müşteri — hurda gümüş teslim edildi, tartım ve ayar analizi yapıldı</cbc:InstructionNote>
+        <cac:PayerFinancialAccount>
+            <cbc:ID>0</cbc:ID>
+        </cac:PayerFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode listID="UN/4461">42</cbc:PaymentMeansCode>
+        <cbc:InstructionNote>Müessese — bedel müşteri banka hesabına havale edildi</cbc:InstructionNote>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>TR780011100000000082741936</cbc:ID>
+        </cac:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">0.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">119603.10</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">0.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>0</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">119603.10</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">119603.10</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">119603.10</cbc:TaxInclusiveAmount>
+        <cbc:PayableAmount currencyID="TRY">119603.10</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:CreditNoteLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:CreditedQuantity unitCode="GRM">1240.5</cbc:CreditedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">64257.90</cbc:LineExtensionAmount>
+        <cac:Item>
+            <cbc:Description>Milyem 925 · Has 1.147,46 gr</cbc:Description>
+            <cbc:Name>925 Ayar Hurda Gümüş Çatal-Bıçak Takımı</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">51.80</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:CreditedQuantity unitCode="GRM">612</cbc:CreditedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">27295.20</cbc:LineExtensionAmount>
+        <cac:Item>
+            <cbc:Description>Milyem 800 · Has 489,60 gr</cbc:Description>
+            <cbc:Name>800 Ayar Eski Gümüş Tepsi ve Şekerlik</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">44.60</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:CreditedQuantity unitCode="GRM">500</cbc:CreditedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">28050.00</cbc:LineExtensionAmount>
+        <cac:Item>
+            <cbc:Description>Milyem 999 · Has 499,50 gr</cbc:Description>
+            <cbc:Name>999 Gümüş Granül (atölye artığı)</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">56.10</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+</CreditNote>

@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: Kredi Taksit Tahsilat e-Dekontu — DEKONT · NKT (gişede nakit taksit ödemesi, banka serbest satır biçimi).
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<CreditNote xmlns="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2.1</cbc:CustomizationID>
+    <cbc:ProfileID>DEKONT</cbc:ProfileID>
+    <cbc:ID>KRD2026000072915</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>DF15A89B-BACD-4978-A227-177618FA0175</cbc:UUID>
+    <cbc:IssueDate>2026-10-08</cbc:IssueDate>
+    <cbc:IssueTime>11:15:02</cbc:IssueTime>
+    <cbc:CreditNoteTypeCode>NKT</cbc:CreditNoteTypeCode>
+    <cbc:Note>Yalnız: On Bin Dokuz Yüz Seksen Yedi Türk Lirası İki Kuruş</cbc:Note>
+    <cbc:Note>Taksit tutarı gişede nakit olarak tahsil edilmiştir.</cbc:Note>
+    <cbc:Note>Bu dekont 509 Sıra No'lu VUK Genel Tebliği kapsamında elektronik ortamda düzenlenmiş olup ıslak imza gerektirmez.</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>8</cbc:LineCountNumeric>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID schemeID="ISLEMREFNO">KRD20261008NKT0072915</cbc:ID>
+        <cbc:IssueDate>2026-10-08</cbc:IssueDate>
+        <cbc:DocumentType>ISLEMREFERANSNO</cbc:DocumentType>
+        <cbc:DocumentDescription>ISLEMREFERANSNO</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID schemeID="ISLEMKANALI">GİŞE</cbc:ID>
+        <cbc:IssueDate>2026-10-08</cbc:IssueDate>
+        <cbc:DocumentType>ISLEMKANALI</cbc:DocumentType>
+        <cbc:DocumentDescription>ISLEMKANALI</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">5170283946</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">5170283946</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Talas Bulvarı</cbc:StreetName>
+                <cbc:BuildingNumber>146</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Talas</cbc:CitySubdivisionName>
+                <cbc:CityName>Kayseri</cbc:CityName>
+                <cbc:PostalZone>38280</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_KRD2026000072915</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.kardelenbank.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">5170283946</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MERSISNO">0517028394600011</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="SUBEKODU">0382</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="SUBEADI">Kayseri Talas Şubesi</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Kardelen Bank A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Talas Bulvarı</cbc:StreetName>
+                <cbc:BuildingNumber>146</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Talas</cbc:CitySubdivisionName>
+                <cbc:CityName>Kayseri</cbc:CityName>
+                <cbc:PostalZone>38280</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Erciyes</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0850 455 38 38</cbc:Telephone>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">41207635918</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="MUSTERINO">18820457</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Mevlana Mahallesi Kirazlı Sokak</cbc:StreetName>
+                <cbc:BuildingNumber>23/5</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Talas</cbc:CitySubdivisionName>
+                <cbc:CityName>Kayseri</cbc:CityName>
+                <cbc:PostalZone>38280</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:Contact>
+                <cbc:Telephone>(535) 612 44 09</cbc:Telephone>
+            </cac:Contact>
+            <cac:Person>
+                <cbc:FirstName>Hüseyin</cbc:FirstName>
+                <cbc:FamilyName>KARACA</cbc:FamilyName>
+            </cac:Person>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:PaymentTerms>
+        <cac:SettlementPeriod>
+            <cbc:StartDate>2026-10-08</cbc:StartDate>
+            <cbc:StartTime>11:15:02</cbc:StartTime>
+            <cbc:EndDate>2026-10-08</cbc:EndDate>
+            <cbc:EndTime>11:15:02</cbc:EndTime>
+        </cac:SettlementPeriod>
+    </cac:PaymentTerms>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">107.28</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">2145.60</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">107.28</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>5</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>BSMV</cbc:Name>
+                    <cbc:TaxTypeCode>0021</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">10879.74</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">10879.74</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">10987.02</cbc:TaxInclusiveAmount>
+        <cbc:PayableAmount currencyID="TRY">10987.02</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:CreditNoteLine>
+        <cbc:ID>1</cbc:ID>
+        <cac:Item>
+            <cbc:Description>TK-2026-0047812 · 24 ay vadeli ihtiyaç kredisi</cbc:Description>
+            <cbc:Name>Kredi No</cbc:Name>
+        </cac:Item>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>2</cbc:ID>
+        <cac:Item>
+            <cbc:Description>7 / 24</cbc:Description>
+            <cbc:Name>Taksit No</cbc:Name>
+        </cac:Item>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>3</cbc:ID>
+        <cac:Item>
+            <cbc:Name>Anapara</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">8412.30</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>4</cbc:ID>
+        <cac:Item>
+            <cbc:Description>Aylık %3,19</cbc:Description>
+            <cbc:Name>Faiz Tutarı</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">2145.60</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>5</cbc:ID>
+        <cac:Item>
+            <cbc:Description>Faizin %15'i</cbc:Description>
+            <cbc:Name>KKDF</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">321.84</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>6</cbc:ID>
+        <cac:Item>
+            <cbc:Description>139.284,55 TL</cbc:Description>
+            <cbc:Name>Kalan Anapara</cbc:Name>
+        </cac:Item>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>7</cbc:ID>
+        <cac:Item>
+            <cbc:Description>08.11.2026 · 10.987,02 TL</cbc:Description>
+            <cbc:Name>Sonraki Taksit</cbc:Name>
+        </cac:Item>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>8</cbc:ID>
+        <cac:Item>
+            <cbc:Description>EKİM 2026 KREDİ TAKSİT TAHSİLATI - NAKİT</cbc:Description>
+            <cbc:Name>AÇIKLAMA</cbc:Name>
+        </cac:Item>
+    </cac:CreditNoteLine>
+</CreditNote>

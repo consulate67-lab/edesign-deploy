@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: Motorlu Taşıtlar Vergisi Tahsil Alındısı — VTA · KKI (kartla MTV taksit ödemesi; banka serbest satır biçimi).
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<CreditNote xmlns="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2.1</cbc:CustomizationID>
+    <cbc:ProfileID>VTA</cbc:ProfileID>
+    <cbc:ID>TRS2026000318406</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>6493189A-5192-4352-A92C-EFA4957A6CF2</cbc:UUID>
+    <cbc:IssueDate>2026-07-24</cbc:IssueDate>
+    <cbc:IssueTime>16:08:44</cbc:IssueTime>
+    <cbc:CreditNoteTypeCode>KKI</cbc:CreditNoteTypeCode>
+    <cbc:Note>Yalnız: Altı Bin Altı Yüz Dört Türk Lirası On İki Kuruş</cbc:Note>
+    <cbc:Note>Tahsilat banka kartı ile alınmış, ilgili vergi dairesi hesabına aktarılmıştır.</cbc:Note>
+    <cbc:Note>Bu alındı 509 Sıra No'lu VUK Genel Tebliği kapsamında elektronik ortamda düzenlenmiştir.</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>5</cbc:LineCountNumeric>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID schemeID="BELGE_NO">MTV2026A0418277</cbc:ID>
+        <cbc:IssueDate>2026-07-24</cbc:IssueDate>
+        <cbc:DocumentType>BELGE_NO</cbc:DocumentType>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">8530164927</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">8530164927</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Atatürk Bulvarı</cbc:StreetName>
+                <cbc:BuildingNumber>109</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Çankaya</cbc:CitySubdivisionName>
+                <cbc:CityName>Ankara</cbc:CityName>
+                <cbc:PostalZone>06420</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_TRS2026000318406</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.toroslarbankasi.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">8530164927</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="SUBEKODU">0611</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="SUBEADI">Ankara Kızılay Şubesi</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Toroslar Bankası A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Atatürk Bulvarı</cbc:StreetName>
+                <cbc:BuildingNumber>109</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Çankaya</cbc:CitySubdivisionName>
+                <cbc:CityName>Ankara</cbc:CityName>
+                <cbc:PostalZone>06420</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Kavaklıdere</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0850 724 06 06</cbc:Telephone>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">52814093762</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="PLAKA">06 ABR 418</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Ayrancı Mahallesi Hoşdere Caddesi</cbc:StreetName>
+                <cbc:BuildingNumber>57/12</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Çankaya</cbc:CitySubdivisionName>
+                <cbc:CityName>Ankara</cbc:CityName>
+                <cbc:PostalZone>06540</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:Person>
+                <cbc:FirstName>Zeynep</cbc:FirstName>
+                <cbc:FamilyName>ARSLAN</cbc:FamilyName>
+            </cac:Person>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">0.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">0.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">0.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>0</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>BSMV</cbc:Name>
+                    <cbc:TaxTypeCode>0021</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">6604.12</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">6604.12</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">6604.12</cbc:TaxInclusiveAmount>
+        <cbc:PayableAmount currencyID="TRY">6604.12</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:CreditNoteLine>
+        <cbc:ID>1</cbc:ID>
+        <cac:Item>
+            <cbc:Description>9047</cbc:Description>
+            <cbc:Name>Vergi T. Kodu</cbc:Name>
+        </cac:Item>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>2</cbc:ID>
+        <cac:Item>
+            <cbc:Description>Çankaya Vergi Dairesi Müdürlüğü</cbc:Description>
+            <cbc:Name>Vergi Dairesi</cbc:Name>
+        </cac:Item>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>3</cbc:ID>
+        <cac:Item>
+            <cbc:Description>2026 / 2. Taksit</cbc:Description>
+            <cbc:Name>Dönem</cbc:Name>
+        </cac:Item>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>4</cbc:ID>
+        <cac:Item>
+            <cbc:Description>MOTORLU TAŞITLAR VERGİSİ</cbc:Description>
+            <cbc:Name>Nevi</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">6418.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>5</cbc:ID>
+        <cac:Item>
+            <cbc:Description>2026/1 TAKSİT GECİKME ZAMMI</cbc:Description>
+            <cbc:Name>Nevi</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">186.12</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+</CreditNote>

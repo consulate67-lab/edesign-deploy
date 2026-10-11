@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: Havalimanı Servisi e-Yolcu Listesi (Taksim → İstanbul Havalimanı, 27 koltuklu midibüs).
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<ebilet:eYolcuListesi xmlns:ebilet="http://ebilet.efatura.gov.tr" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xades="http://uri.etsi.org/01903/v1.3.2#">
+    <ebilet:baslik>
+        <ebilet:gonderen>
+            <ebilet:vkn>2864031759</ebilet:vkn>
+        </ebilet:gonderen>
+        <ebilet:baslangicTarihi>2026-10-11</ebilet:baslangicTarihi>
+        <ebilet:bitisTarihi>2026-10-11</ebilet:bitisTarihi>
+        <ebilet:versiyon>1.0</ebilet:versiyon>
+        <ebilet:uuid>9F0AD2EB-3060-4D38-ABDF-65950DDBE8A4</ebilet:uuid>
+        <ds:Signature Id="Signature_1">
+            <ds:SignedInfo>
+                <ds:CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
+                <ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+                <ds:Reference URI="">
+                    <ds:Transforms>
+                        <ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+                    </ds:Transforms>
+                    <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                    <ds:DigestValue>9F0AD2EB30604D38AA6A00439909DCBD=</ds:DigestValue>
+                </ds:Reference>
+            </ds:SignedInfo>
+            <ds:SignatureValue>9F0AD2EB30604D38A800F2F55924EB7B9F0AD2EB30604D38AB55D490976B140A==</ds:SignatureValue>
+            <ds:KeyInfo>
+                <ds:X509Data>
+                    <ds:X509Certificate>MIIFlDCCBHygAwIBAgIGAIiEmAELMA0GCSqGSIb3DQEBCwUAMFwxCzAJBgNVBAYTAlRS</ds:X509Certificate>
+                </ds:X509Data>
+            </ds:KeyInfo>
+            <ds:Object>
+                <xades:QualifyingProperties Target="#Signature_1">
+                    <xades:SignedProperties Id="SignedProperties_1">
+                        <xades:SignedSignatureProperties>
+                            <xades:SigningTime>2026-10-11T04:50:00+03:00</xades:SigningTime>
+                        </xades:SignedSignatureProperties>
+                    </xades:SignedProperties>
+                </xades:QualifyingProperties>
+            </ds:Object>
+        </ds:Signature>
+    </ebilet:baslik>
+    <ebilet:yolcuListesi>
+        <ebilet:yolcuListesiNo>HVR2026000041127</ebilet:yolcuListesiNo>
+        <ebilet:ozetDeger>9f0ad2eb30604d38a5eb975bd64276969f0ad2eb30604d38a8b4559f430ef5f9</ebilet:ozetDeger>
+        <ebilet:haraketZamani>2026-10-11T05:00:00</ebilet:haraketZamani>
+        <ebilet:hareketNoktasi>Taksim Meydanı · Servis Durağı 2</ebilet:hareketNoktasi>
+        <ebilet:seferNumarasi>HVR-IST-0500</ebilet:seferNumarasi>
+        <ebilet:seferTarihi>2026-10-11</ebilet:seferTarihi>
+        <ebilet:aracPlakasi>34HVR127</ebilet:aracPlakasi>
+        <ebilet:toplamHasilat>5925.00</ebilet:toplamHasilat>
+        <ebilet:koltukListesi>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>1</ebilet:koltukNo>
+                <ebilet:biletNo>HVR2026004112701</ebilet:biletNo>
+                <ebilet:tutar>395.00</ebilet:tutar>
+                <ebilet:adSoyad>İrem Aksoy</ebilet:adSoyad>
+                <ebilet:tcknYkn>78727298724</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>2</ebilet:koltukNo>
+                <ebilet:biletNo>HVR2026004112702</ebilet:biletNo>
+                <ebilet:tutar>395.00</ebilet:tutar>
+                <ebilet:adSoyad>Caner Bulut</ebilet:adSoyad>
+                <ebilet:tcknYkn>18932061810</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>4</ebilet:koltukNo>
+                <ebilet:biletNo>HVR2026004112703</ebilet:biletNo>
+                <ebilet:tutar>395.00</ebilet:tutar>
+                <ebilet:adSoyad>Nazlı Keskin</ebilet:adSoyad>
+                <ebilet:tcknYkn>49136824895</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>5</ebilet:koltukNo>
+                <ebilet:biletNo>HVR2026004112704</ebilet:biletNo>
+                <ebilet:tutar>395.00</ebilet:tutar>
+                <ebilet:adSoyad>Barış Yavuz</ebilet:adSoyad>
+                <ebilet:tcknYkn>79341587980</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>6</ebilet:koltukNo>
+                <ebilet:biletNo>HVR2026004112705</ebilet:biletNo>
+                <ebilet:tutar>395.00</ebilet:tutar>
+                <ebilet:adSoyad>Ceren Tekin</ebilet:adSoyad>
+                <ebilet:tcknYkn>19546351066</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>8</ebilet:koltukNo>
+                <ebilet:biletNo>HVR2026004112706</ebilet:biletNo>
+                <ebilet:tutar>395.00</ebilet:tutar>
+                <ebilet:adSoyad>Onur Uçar</ebilet:adSoyad>
+                <ebilet:tcknYkn>49751114151</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>11</ebilet:koltukNo>
+                <ebilet:biletNo>HVR2026004112707</ebilet:biletNo>
+                <ebilet:tutar>395.00</ebilet:tutar>
+                <ebilet:adSoyad>Hande Özkan</ebilet:adSoyad>
+                <ebilet:tcknYkn>79955877236</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>12</ebilet:koltukNo>
+                <ebilet:biletNo>HVR2026004112708</ebilet:biletNo>
+                <ebilet:tutar>395.00</ebilet:tutar>
+                <ebilet:adSoyad>Yusuf Taş</ebilet:adSoyad>
+                <ebilet:tcknYkn>20160640322</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>14</ebilet:koltukNo>
+                <ebilet:biletNo>HVR2026004112709</ebilet:biletNo>
+                <ebilet:tutar>395.00</ebilet:tutar>
+                <ebilet:adSoyad>Sibel Avcı</ebilet:adSoyad>
+                <ebilet:tcknYkn>50365403407</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>17</ebilet:koltukNo>
+                <ebilet:biletNo>HVR2026004112710</ebilet:biletNo>
+                <ebilet:tutar>395.00</ebilet:tutar>
+                <ebilet:adSoyad>Kaan Yalçın</ebilet:adSoyad>
+                <ebilet:tcknYkn>80570166492</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>18</ebilet:koltukNo>
+                <ebilet:biletNo>HVR2026004112711</ebilet:biletNo>
+                <ebilet:tutar>395.00</ebilet:tutar>
+                <ebilet:adSoyad>Pınar Karaca</ebilet:adSoyad>
+                <ebilet:tcknYkn>20774929578</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>20</ebilet:koltukNo>
+                <ebilet:biletNo>HVR2026004112712</ebilet:biletNo>
+                <ebilet:tutar>395.00</ebilet:tutar>
+                <ebilet:adSoyad>Volkan Acar</ebilet:adSoyad>
+                <ebilet:tcknYkn>50979692663</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>23</ebilet:koltukNo>
+                <ebilet:biletNo>HVR2026004112713</ebilet:biletNo>
+                <ebilet:tutar>395.00</ebilet:tutar>
+                <ebilet:adSoyad>Dilan Turan</ebilet:adSoyad>
+                <ebilet:tcknYkn>81184455748</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>25</ebilet:koltukNo>
+                <ebilet:biletNo>HVR2026004112714</ebilet:biletNo>
+                <ebilet:tutar>395.00</ebilet:tutar>
+                <ebilet:adSoyad>Erkan Sarı</ebilet:adSoyad>
+                <ebilet:tcknYkn>21389218834</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>26</ebilet:koltukNo>
+                <ebilet:biletNo>HVR2026004112715</ebilet:biletNo>
+                <ebilet:tutar>395.00</ebilet:tutar>
+                <ebilet:adSoyad>Gizem Bozkurt</ebilet:adSoyad>
+                <ebilet:tcknYkn>51593981919</ebilet:tcknYkn>
+            </ebilet:koltuk>
+        </ebilet:koltukListesi>
+    </ebilet:yolcuListesi>
+</ebilet:eYolcuListesi>

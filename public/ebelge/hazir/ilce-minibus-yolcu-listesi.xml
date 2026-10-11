@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: İlçe Minibüsü Günlük e-Yolcu Listesi (Karaman → Ermenek, aynı gün iki sefer; 16 koltuklu minibüs).
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<ebilet:eYolcuListesi xmlns:ebilet="http://ebilet.efatura.gov.tr" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xades="http://uri.etsi.org/01903/v1.3.2#">
+    <ebilet:baslik>
+        <ebilet:gonderen>
+            <ebilet:vkn>9031726485</ebilet:vkn>
+        </ebilet:gonderen>
+        <ebilet:baslangicTarihi>2026-10-08</ebilet:baslangicTarihi>
+        <ebilet:bitisTarihi>2026-10-08</ebilet:bitisTarihi>
+        <ebilet:versiyon>1.0</ebilet:versiyon>
+        <ebilet:uuid>7282B7AB-28EC-43E3-ACEE-B132FC9246F0</ebilet:uuid>
+        <ds:Signature Id="Signature_1">
+            <ds:SignedInfo>
+                <ds:CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
+                <ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+                <ds:Reference URI="">
+                    <ds:Transforms>
+                        <ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+                    </ds:Transforms>
+                    <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                    <ds:DigestValue>7282B7AB28EC43E3AE8493E4D4279D31=</ds:DigestValue>
+                </ds:Reference>
+            </ds:SignedInfo>
+            <ds:SignatureValue>7282B7AB28EC43E3A9A0883806EF554B7282B7AB28EC43E3AD2BB28BF3D4E86C==</ds:SignatureValue>
+            <ds:KeyInfo>
+                <ds:X509Data>
+                    <ds:X509Certificate>MIIFlDCCBHygAwIBAgIGAIiEmAELMA0GCSqGSIb3DQEBCwUAMFwxCzAJBgNVBAYTAlRS</ds:X509Certificate>
+                </ds:X509Data>
+            </ds:KeyInfo>
+            <ds:Object>
+                <xades:QualifyingProperties Target="#Signature_1">
+                    <xades:SignedProperties Id="SignedProperties_1">
+                        <xades:SignedSignatureProperties>
+                            <xades:SigningTime>2026-10-08T18:00:00+03:00</xades:SigningTime>
+                        </xades:SignedSignatureProperties>
+                    </xades:SignedProperties>
+                </xades:QualifyingProperties>
+            </ds:Object>
+        </ds:Signature>
+    </ebilet:baslik>
+    <ebilet:yolcuListesi>
+        <ebilet:yolcuListesiNo>GKS2026000020711</ebilet:yolcuListesiNo>
+        <ebilet:ozetDeger>7282b7ab28ec43e3add47dd5650974e87282b7ab28ec43e3ad9a701e37268a6c</ebilet:ozetDeger>
+        <ebilet:haraketZamani>2026-10-08T07:15:00</ebilet:haraketZamani>
+        <ebilet:hareketNoktasi>Karaman Otogarı · İlçe Peronu 12</ebilet:hareketNoktasi>
+        <ebilet:seferNumarasi>KRM-ERM-0715</ebilet:seferNumarasi>
+        <ebilet:seferTarihi>2026-10-08</ebilet:seferTarihi>
+        <ebilet:aracPlakasi>70GK418</ebilet:aracPlakasi>
+        <ebilet:toplamHasilat>1920.00</ebilet:toplamHasilat>
+        <ebilet:koltukListesi>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>1</ebilet:koltukNo>
+                <ebilet:biletNo>GKS2026002071101</ebilet:biletNo>
+                <ebilet:tutar>240.00</ebilet:tutar>
+                <ebilet:adSoyad>Merve Doğan</ebilet:adSoyad>
+                <ebilet:tcknYkn>99448013046</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>2</ebilet:koltukNo>
+                <ebilet:biletNo>GKS2026002071102</ebilet:biletNo>
+                <ebilet:tutar>240.00</ebilet:tutar>
+                <ebilet:adSoyad>Hasan Kılıç</ebilet:adSoyad>
+                <ebilet:tcknYkn>39652776132</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>4</ebilet:koltukNo>
+                <ebilet:biletNo>GKS2026002071103</ebilet:biletNo>
+                <ebilet:tutar>240.00</ebilet:tutar>
+                <ebilet:adSoyad>Esra Aslan</ebilet:adSoyad>
+                <ebilet:tcknYkn>69857539217</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>5</ebilet:koltukNo>
+                <ebilet:biletNo>GKS2026002071104</ebilet:biletNo>
+                <ebilet:tutar>240.00</ebilet:tutar>
+                <ebilet:adSoyad>Murat Çetin</ebilet:adSoyad>
+                <ebilet:tcknYkn>10062302303</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>7</ebilet:koltukNo>
+                <ebilet:biletNo>GKS2026002071105</ebilet:biletNo>
+                <ebilet:tutar>240.00</ebilet:tutar>
+                <ebilet:adSoyad>Gamze Kara</ebilet:adSoyad>
+                <ebilet:tcknYkn>40267065388</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>9</ebilet:koltukNo>
+                <ebilet:biletNo>GKS2026002071106</ebilet:biletNo>
+                <ebilet:tutar>240.00</ebilet:tutar>
+                <ebilet:adSoyad>Serkan Koç</ebilet:adSoyad>
+                <ebilet:tcknYkn>70471828473</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>12</ebilet:koltukNo>
+                <ebilet:biletNo>GKS2026002071107</ebilet:biletNo>
+                <ebilet:tutar>240.00</ebilet:tutar>
+                <ebilet:adSoyad>Büşra Kurt</ebilet:adSoyad>
+                <ebilet:tcknYkn>10676591559</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>15</ebilet:koltukNo>
+                <ebilet:biletNo>GKS2026002071108</ebilet:biletNo>
+                <ebilet:tutar>240.00</ebilet:tutar>
+                <ebilet:adSoyad>Okan Özdemir</ebilet:adSoyad>
+                <ebilet:tcknYkn>40881354644</ebilet:tcknYkn>
+            </ebilet:koltuk>
+        </ebilet:koltukListesi>
+    </ebilet:yolcuListesi>
+    <ebilet:yolcuListesi>
+        <ebilet:yolcuListesiNo>GKS2026000020712</ebilet:yolcuListesiNo>
+        <ebilet:ozetDeger>7282b7ab28ec43e0abfcbe292f8aa89f7282b7ab28ec43e0a5092c10cfb3e313</ebilet:ozetDeger>
+        <ebilet:haraketZamani>2026-10-08T12:30:00</ebilet:haraketZamani>
+        <ebilet:hareketNoktasi>Karaman Otogarı · İlçe Peronu 12</ebilet:hareketNoktasi>
+        <ebilet:seferNumarasi>KRM-ERM-1230</ebilet:seferNumarasi>
+        <ebilet:seferTarihi>2026-10-08</ebilet:seferTarihi>
+        <ebilet:aracPlakasi>70GK418</ebilet:aracPlakasi>
+        <ebilet:toplamHasilat>1440.00</ebilet:toplamHasilat>
+        <ebilet:koltukListesi>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>1</ebilet:koltukNo>
+                <ebilet:biletNo>GKS2026002071201</ebilet:biletNo>
+                <ebilet:tutar>240.00</ebilet:tutar>
+                <ebilet:adSoyad>Derya Şimşek</ebilet:adSoyad>
+                <ebilet:tcknYkn>89411977330</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>3</ebilet:koltukNo>
+                <ebilet:biletNo>GKS2026002071202</ebilet:biletNo>
+                <ebilet:tutar>240.00</ebilet:tutar>
+                <ebilet:adSoyad>Kerem Polat</ebilet:adSoyad>
+                <ebilet:tcknYkn>29616740416</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>6</ebilet:koltukNo>
+                <ebilet:biletNo>GKS2026002071203</ebilet:biletNo>
+                <ebilet:tutar>240.00</ebilet:tutar>
+                <ebilet:adSoyad>Selin Erdoğan</ebilet:adSoyad>
+                <ebilet:tcknYkn>59821503501</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>8</ebilet:koltukNo>
+                <ebilet:biletNo>GKS2026002071204</ebilet:biletNo>
+                <ebilet:tutar>240.00</ebilet:tutar>
+                <ebilet:adSoyad>Tolga Güneş</ebilet:adSoyad>
+                <ebilet:tcknYkn>90026266586</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>10</ebilet:koltukNo>
+                <ebilet:biletNo>GKS2026002071205</ebilet:biletNo>
+                <ebilet:tutar>240.00</ebilet:tutar>
+                <ebilet:adSoyad>İrem Aksoy</ebilet:adSoyad>
+                <ebilet:tcknYkn>30231029672</ebilet:tcknYkn>
+            </ebilet:koltuk>
+            <ebilet:koltuk>
+                <ebilet:koltukNo>14</ebilet:koltukNo>
+                <ebilet:biletNo>GKS2026002071206</ebilet:biletNo>
+                <ebilet:tutar>240.00</ebilet:tutar>
+                <ebilet:adSoyad>Caner Bulut</ebilet:adSoyad>
+                <ebilet:tcknYkn>60435792757</ebilet:tcknYkn>
+            </ebilet:koltuk>
+        </ebilet:koltukListesi>
+    </ebilet:yolcuListesi>
+</ebilet:eYolcuListesi>

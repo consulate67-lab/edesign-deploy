@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: Gümrük Vergisi Tahsil Alındısı — GVTA · HVL (ithalat beyannamesi vergilerinin havaleyle ödenmesi).
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<CreditNote xmlns="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2.1</cbc:CustomizationID>
+    <cbc:ProfileID>GVTA</cbc:ProfileID>
+    <cbc:ID>MLT2026000092647</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>A995DF92-3D84-49CC-A9AF-314D921321C1</cbc:UUID>
+    <cbc:IssueDate>2026-10-06</cbc:IssueDate>
+    <cbc:IssueTime>14:31:09</cbc:IssueTime>
+    <cbc:CreditNoteTypeCode>HVL</cbc:CreditNoteTypeCode>
+    <cbc:Note>Yalnız: Yüz On İki Bin Altı Yüz Yirmi İki Türk Lirası On Sekiz Kuruş</cbc:Note>
+    <cbc:Note>Vergiler müşterinin 0733-00418275 numaralı hesabından havale ile tahsil edilmiştir.</cbc:Note>
+    <cbc:Note>Bu dekont 509 Sıra No'lu VUK Genel Tebliği kapsamında elektronik ortamda düzenlenmiş olup ıslak imza gerektirmez.</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>5</cbc:LineCountNumeric>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID schemeID="BELGE_NO">26330100IM00247118</cbc:ID>
+        <cbc:IssueDate>2026-10-06</cbc:IssueDate>
+        <cbc:DocumentType>BELGE_NO</cbc:DocumentType>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">6210948375</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">6210948375</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Serbest Bölge 3. Cadde</cbc:StreetName>
+                <cbc:BuildingNumber>2</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Akdeniz</cbc:CitySubdivisionName>
+                <cbc:CityName>Mersin</cbc:CityName>
+                <cbc:PostalZone>33020</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_MLT2026000092647</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:WebsiteURI>https://www.meltembank.com.tr</cbc:WebsiteURI>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">6210948375</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="SUBEKODU">0733</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="SUBEADI">Mersin Serbest Bölge Şubesi</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Meltem Bankası A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Serbest Bölge 3. Cadde</cbc:StreetName>
+                <cbc:BuildingNumber>2</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Akdeniz</cbc:CitySubdivisionName>
+                <cbc:CityName>Mersin</cbc:CityName>
+                <cbc:PostalZone>33020</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Uray</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0850 333 07 33</cbc:Telephone>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">8460215937</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Çukurova Makine İthalat ve Dış Ticaret A.Ş.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Huzurkent Mahallesi 2. Organize Sanayi</cbc:StreetName>
+                <cbc:BuildingNumber>41</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Yüreğir</cbc:CitySubdivisionName>
+                <cbc:CityName>Adana</cbc:CityName>
+                <cbc:PostalZone>01350</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Ziyapaşa</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>(322) 394 18 00</cbc:Telephone>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">0.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">0.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">0.00</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>0</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>BSMV</cbc:Name>
+                    <cbc:TaxTypeCode>0021</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">112622.18</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">112622.18</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">112622.18</cbc:TaxInclusiveAmount>
+        <cbc:PayableAmount currencyID="TRY">112622.18</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:CreditNoteLine>
+        <cbc:ID>1</cbc:ID>
+        <cac:Item>
+            <cbc:Description>Mersin Gümrük Müdürlüğü (330100)</cbc:Description>
+            <cbc:Name>Gümrük İdaresi</cbc:Name>
+        </cac:Item>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>2</cbc:ID>
+        <cac:Item>
+            <cbc:Description>10</cbc:Description>
+            <cbc:Name>Gümrük Vergi Kodu</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">18420.00</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>3</cbc:ID>
+        <cac:Item>
+            <cbc:Description>40</cbc:Description>
+            <cbc:Name>Gümrük Vergi Kodu</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">93707.08</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>4</cbc:ID>
+        <cac:Item>
+            <cbc:Description>89</cbc:Description>
+            <cbc:Name>Gümrük Vergi Kodu</cbc:Name>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">495.10</cbc:PriceAmount>
+        </cac:Price>
+    </cac:CreditNoteLine>
+    <cac:CreditNoteLine>
+        <cbc:ID>5</cbc:ID>
+        <cac:Item>
+            <cbc:Description>CNC TORNA TEZGAHI İTHALATI - 2 KAP / 6.840 KG</cbc:Description>
+            <cbc:Name>AÇIKLAMA</cbc:Name>
+        </cac:Item>
+    </cac:CreditNoteLine>
+</CreditNote>
