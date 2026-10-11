@@ -450,6 +450,7 @@ const editor: typeof tr = {
         hint: 'Beispiel: für die Notizzeile „Kennzeichen: 34 ABC 12" „Den nehmen, der beginnt mit" = Kennzeichen:, „Teil nach einem Trennzeichen" = : und Leerzeichen entfernen → 34 ABC 12. Wird das Trennzeichen nicht gefunden, bleibt das Ergebnis leer. Der Feld-Leitfaden in der heruntergeladenen Datei erklärt diese Schritte ebenfalls.',
     },
     guide: {
+        fileSuffix: 'FELDLEITFADEN',
         title: 'DATENFELD-LEITFADEN — woher die Werte des Designs im XML stammen und wie',
         generated: '{{count}} Werte · erstellt am {{date}}',
         intro: 'Jeder Eintrag: Name im Design — Name im Feldkatalog.\n„XML-Pfad" ist das Element, aus dem der Wert gelesen wird; eckige Klammern zeigen, welcher Datensatz gewählt wird.\n„Ermittlung" beschreibt der Reihe nach, was das XSLT mit dem Wert macht (Notizzeile wählen, Text nach Trennzeichen, Datums-/Zahlenformat…).\n„Im XML ausfüllen" zeigt das Element mit dem Beispielwert; erzeugen Sie Ihr XML in dieser Form.\nBei Feldern aus einer Notizzeile (cbc:Note) beginnen Sie die Zeile mit dem angegebenen Wort und schreiben den Wert nach dem Trennzeichen.',

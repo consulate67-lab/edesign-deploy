@@ -450,6 +450,7 @@ const editor: typeof tr = {
         hint: 'Ejemplo: para la línea de nota "Matrícula: 34 ABC 12" use "Tomar el que empieza por" = Matrícula:, "Parte después de un separador" = : y quitar espacios → 34 ABC 12. Si no se encuentra el separador, el resultado queda vacío. La guía de campos del archivo descargado también explica estos pasos.',
     },
     guide: {
+        fileSuffix: 'GUIA_DE_CAMPOS',
         title: 'GUÍA DE CAMPOS — de dónde salen en el XML los valores del diseño y cómo',
         generated: '{{count}} valores · generado el {{date}}',
         intro: 'Cada entrada: nombre en el diseño — nombre en el catálogo de campos.\n"Ruta XML" es el elemento del que se lee el valor; los corchetes indican qué registro se elige.\n"Cómo se obtiene" describe en orden lo que el XSLT hace con el valor (elegir una línea de nota, texto tras un separador, formato de fecha/número…).\n"Rellenar en XML" muestra el elemento con el valor de ejemplo; genere su XML de esta forma.\nEn los campos leídos de una línea de nota (cbc:Note), empiece la línea con la palabra indicada y escriba el valor tras el separador.',

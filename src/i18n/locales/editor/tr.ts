@@ -450,6 +450,7 @@ const editor = {
     },
     /** İndirilen XSLT'nin başındaki veri alanı rehberi. */
     guide: {
+        fileSuffix: 'ALAN_REHBERI',
         title: 'VERİ ALANI REHBERİ — tasarımdaki değerler XML\'de nereden ve nasıl alınıyor',
         generated: '{{count}} değer · oluşturulma {{date}}',
         intro: 'Her madde: tasarımdaki adı — alan kataloğundaki adı.\n"XML yolu" değerin okunduğu öğedir; köşeli parantez içi hangi kaydın seçildiğini gösterir.\n"Nasıl alınır" XSLT\'nin değere uyguladığı işlemleri sırasıyla anlatır (not satırı seçme, ayraçtan sonrasını alma, tarih/sayı biçimi…).\n"XML\'de doldurma" örnek verideki değerle doldurulmuş öğedir; kendi XML\'inizi bu biçimde üretin.\nNot (cbc:Note) satırından okunan alanlarda satırı gösterilen sözcükle başlatın, değeri ayraçtan sonra yazın.',

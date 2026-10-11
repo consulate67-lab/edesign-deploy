@@ -62,7 +62,7 @@ import { placementOfBinding, placementOfElement, wrapCellContent, TABLE_PARTS } 
 import { findLineTableCell, addColumnAfterCell, editColumn, countHiddenColumnCells, showHiddenColumns, type ColumnAction } from './utils/tableColumns';
 import { BG_FITS, readPageBackground, writePageBackground, imageFileToDataUrl, type PageBackground } from './utils/pageBackground';
 import { addTestWatermark, stripTestWatermark, stripLeadingBom } from './utils/testWatermark';
-import { withFieldGuide } from './utils/fieldGuide';
+import { downloadFieldGuide, withFieldGuide } from './utils/fieldGuide';
 import { stripFieldGuide } from './utils/fieldGuideMarker';
 import { applyLegacyViewerCompat } from './utils/legacyViewerCompat';
 import { ApproveDialog } from './ApproveDialog';
@@ -1593,7 +1593,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const downloadXslt = useCallback((content: string, suffix = '') => {
         const base = (design.name || docTitle).trim().replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, '_');
         const fileName = `${base}_${moduleId}${suffix}.xslt`;
-        const out = withFieldGuide(applyLegacyViewerCompat(stripLeadingBom(content)), xmlContent, catalogRef.current, design.name || docTitle);
+        const clean = applyLegacyViewerCompat(stripLeadingBom(content));
+        const out = withFieldGuide(clean, xmlContent, catalogRef.current, design.name || docTitle);
         const url = URL.createObjectURL(new Blob([out], { type: 'application/xml;charset=utf-8' }));
         const a = document.createElement('a');
         a.href = url;
@@ -1602,6 +1603,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         a.click();
         document.body.removeChild(a);
         setTimeout(() => URL.revokeObjectURL(url), 10000);
+        const catalog = catalogRef.current;
+        setTimeout(() => downloadFieldGuide(`${base}_${moduleId}${suffix}`, clean, xmlContent, catalog, design.name || docTitle), 400);
     }, [design.name, docTitle, moduleId, xmlContent]);
 
     // ------------------------------------------------------------------------

@@ -450,6 +450,7 @@ const editor: typeof tr = {
         hint: 'Exemple : pour la ligne de note « Immatriculation: 34 ABC 12 », « Prendre celui qui commence par » = Immatriculation:, « Partie après un séparateur » = : et suppression des espaces → 34 ABC 12. Si le séparateur est absent, le résultat est vide. Le guide des champs du fichier téléchargé explique aussi ces étapes.',
     },
     guide: {
+        fileSuffix: 'GUIDE_DES_CHAMPS',
         title: 'GUIDE DES CHAMPS — d\'où viennent les valeurs du modèle dans le XML et comment',
         generated: '{{count}} valeurs · généré le {{date}}',
         intro: 'Chaque entrée : nom dans le modèle — nom dans le catalogue de champs.\n« Chemin XML » est l\'élément d\'où la valeur est lue ; les crochets indiquent quel enregistrement est choisi.\n« Lecture » décrit dans l\'ordre ce que le XSLT fait de la valeur (choix d\'une ligne de note, texte après un séparateur, format de date/nombre…).\n« Saisie XML » montre l\'élément rempli avec la valeur d\'exemple ; produisez votre XML sous cette forme.\nPour les champs lus dans une ligne de note (cbc:Note), commencez la ligne par le mot indiqué et écrivez la valeur après le séparateur.',

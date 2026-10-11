@@ -534,7 +534,7 @@ function collectEntries(xslt: string, xml: string, catalog: CatalogField[]): Ent
 /** Yorum içinde geçersiz olan `--` dizilerini böler. */
 const commentSafe = (s: string) => s.replace(/-{2,}/g, d => d.split('').join(' ')).replace(/-$/, '- ');
 
-export function buildFieldGuide(xslt: string, xml: string, catalog: CatalogField[], designName = ''): string | null {
+function guideLines(xslt: string, xml: string, catalog: CatalogField[], designName: string): string[] | null {
     const entries = collectEntries(stripFieldGuide(xslt), xml, catalog);
     if (!entries.length) return null;
     const t = (k: GuideKey, o?: Record<string, unknown>): string => i18n.t(`editor.guide.${k}`, o ?? {});
@@ -546,7 +546,6 @@ export function buildFieldGuide(xslt: string, xml: string, catalog: CatalogField
     const line = (label: string, value: string) => `     ${label.padEnd(pad)} : ${value}`;
     const rule = '='.repeat(78);
     const out: string[] = [
-        GUIDE_BEGIN,
         rule,
         ` ${t('title')}`,
         ...(designName ? [` ${designName}`] : []),
@@ -570,8 +569,33 @@ export function buildFieldGuide(xslt: string, xml: string, catalog: CatalogField
         for (const c of e.conditions) out.push(line(labels.cond, c));
         if (e.expr) out.push(line(labels.expr, e.expr));
     });
-    out.push('', rule, ` ${t('footer')}`, rule, GUIDE_END);
-    return `<!-- ${commentSafe(out.join('\n'))} -->`;
+    out.push('', rule, ` ${t('footer')}`, rule);
+    return out;
+}
+
+export function buildFieldGuide(xslt: string, xml: string, catalog: CatalogField[], designName = ''): string | null {
+    const lines = guideLines(xslt, xml, catalog, designName);
+    return lines ? `<!-- ${commentSafe([GUIDE_BEGIN, ...lines, GUIDE_END].join('\n'))} -->` : null;
+}
+
+/** Rehberi XSLT'nin yanında ayrı bir .txt dosyası olarak indirir (Not Defteri için BOM + CRLF). */
+export function downloadFieldGuide(baseName: string, xslt: string, xml: string, catalog: CatalogField[], designName = ''): void {
+    let lines: string[] | null = null;
+    try {
+        lines = guideLines(xslt, xml, catalog, designName);
+    } catch (err) {
+        console.warn('[fieldGuide] rehber dosyası oluşturulamadı', err);
+    }
+    if (!lines) return;
+    const text = `\uFEFF${lines.join('\r\n')}\r\n`;
+    const url = URL.createObjectURL(new Blob([text], { type: 'text/plain;charset=utf-8' }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${baseName}_${i18n.t('editor.guide.fileSuffix')}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
 }
 
 /** Rehberi XML bildiriminin hemen altına ekler (varsa eskisini değiştirir). */

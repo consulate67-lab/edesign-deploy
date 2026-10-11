@@ -450,6 +450,7 @@ const editor: typeof tr = {
         hint: 'Example: for the invoice note line "Plate: 34 ABC 12" use "Take the one starting with" = Plate:, "Part after a separator" = : and remove spaces → 34 ABC 12. If the separator/marker is not found the result is empty. The field guide in the downloaded file also explains these steps.',
     },
     guide: {
+        fileSuffix: 'FIELD_GUIDE',
         title: 'DATA FIELD GUIDE — where each value in the design comes from in the XML and how',
         generated: '{{count}} values · generated {{date}}',
         intro: 'Each item: name in the design — name in the field catalog.\n"XML path" is the element the value is read from; brackets show which record is selected.\n"How it is read" lists, in order, what the XSLT does to the value (picking a note line, taking text after a separator, date/number format…).\n"Fill in XML" shows the element filled with the sample value; produce your XML in this form.\nFor fields read from a note (cbc:Note) line, start the line with the shown word and write the value after the separator.',

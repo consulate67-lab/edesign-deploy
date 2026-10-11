@@ -37,23 +37,29 @@ const designXml = async (d: SavedDesign) => {
 };
 
 const downloadDesign = async (d: SavedDesign) => {
-    let content = applyLegacyViewerCompat(stripLeadingBom(d.xslt_content ?? ''));
+    const clean = applyLegacyViewerCompat(stripLeadingBom(d.xslt_content ?? ''));
+    const base = `${d.name.replace(/[\\/:*?"<>|\s]+/g, '_')}_${d.module_id}`;
+    let content = clean;
+    let saveGuide: (() => void) | null = null;
     try {
-        const [xml, { buildCatalog }, { withFieldGuide }] = await Promise.all([
+        const [xml, { buildCatalog }, { withFieldGuide, downloadFieldGuide }] = await Promise.all([
             designXml(d), import('./xslt-editor/catalogI18n'), import('./xslt-editor/utils/fieldGuide'),
         ]);
-        content = withFieldGuide(content, xml, buildCatalog(xml, currentLocale()), d.name);
+        const catalog = buildCatalog(xml, currentLocale());
+        content = withFieldGuide(clean, xml, catalog, d.name);
+        saveGuide = () => downloadFieldGuide(base, clean, xml, catalog, d.name);
     } catch (err) {
         console.warn('[MyDesigns] alan rehberi eklenemedi', err);
     }
     const url = URL.createObjectURL(new Blob([content], { type: 'application/xml;charset=utf-8' }));
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${d.name.replace(/[\\/:*?"<>|\s]+/g, '_')}_${d.module_id}.xslt`;
+    a.download = `${base}.xslt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 10000);
+    if (saveGuide) setTimeout(saveGuide, 400);
 };
 
 /** Hesaptaki XSLT tasarımları; taslak ve onaylı bölümler aynı listeyi paylaşır. */
