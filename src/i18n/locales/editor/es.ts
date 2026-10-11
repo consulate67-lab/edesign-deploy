@@ -437,6 +437,8 @@ const editor: typeof tr = {
         limit: 'Como máximo',
         preview: 'Vista previa con datos de ejemplo',
         empty: 'No se puede dibujar el gráfico con el campo elegido; elija un campo numérico de línea.',
+        formula: 'Fórmula del valor',
+        formulaNote: 'Cada línea se calcula con sus propios valores; el total es la suma de esos resultados.',
         inlineNote: 'El gráfico está dentro de la tabla de líneas: cada fila muestra una barra fina con su parte del total de todas las filas.',
         note: 'El gráfico se dibuja con los valores del documento al mostrarlo. Arrástrelo a una celda de la tabla de líneas para obtener una barra con la parte de cada fila; con «Mis propias filas» puede poner lado a lado los campos que quiera, como los totales.',
     },

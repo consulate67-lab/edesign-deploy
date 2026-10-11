@@ -436,6 +436,8 @@ const editor = {
         limit: 'En çok',
         preview: 'Örnek veriyle önizleme',
         empty: 'Seçilen alanla grafik çizilemedi; sayısal bir satır alanı seçin.',
+        formula: 'Değere formül',
+        formulaNote: 'Her satır kendi değerleriyle ayrı hesaplanır; toplam bu satır sonuçlarından bulunur.',
         inlineNote: 'Grafik satır tablosunun içinde: her satırda o satırın değerinin tüm satırların toplamındaki payı ince bir çubukla gösterilir.',
         note: 'Grafik, belgedeki değerlerle görüntüleme anında çizilir. Satır tablosunun bir hücresine sürüklerseniz her satıra o satırın payını gösteren çubuk olur; "Kendi satırlarım" ile toplamlar gibi istediğiniz alanları yan yana koyabilirsiniz.',
     },

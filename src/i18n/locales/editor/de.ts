@@ -437,6 +437,8 @@ const editor: typeof tr = {
         limit: 'Höchstens',
         preview: 'Vorschau mit Beispieldaten',
         empty: 'Mit dem gewählten Feld lässt sich kein Diagramm zeichnen; wählen Sie ein numerisches Positionsfeld.',
+        formula: 'Formel für den Wert',
+        formulaNote: 'Jede Zeile wird mit ihren eigenen Werten berechnet; die Summe ergibt sich aus diesen Zeilenergebnissen.',
         inlineNote: 'Das Diagramm steht in der Positionstabelle: Jede Zeile zeigt mit einem schmalen Balken ihren Anteil an der Summe aller Zeilen.',
         note: 'Das Diagramm wird beim Anzeigen aus den Belegwerten gezeichnet. In eine Zelle der Positionstabelle gezogen, zeigt es pro Zeile deren Anteil; mit „Eigene Zeilen" stellen Sie beliebige Felder wie Summen nebeneinander.',
     },

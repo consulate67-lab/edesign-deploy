@@ -76,42 +76,42 @@ export const ApproveDialog: React.FC<ApproveDialogProps> = ({ defaultName, onTes
         <div
             data-approve-dialog
             style={{
-                position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(2, 6, 23, 0.8)', backdropFilter: 'blur(6px)',
+                position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(49, 46, 129, 0.35)', backdropFilter: 'blur(6px)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24,
             }}
         >
             <div style={{
                 position: 'relative', width: '100%', maxWidth: 560, maxHeight: '90vh', overflowY: 'auto',
-                background: 'linear-gradient(180deg, #0b1224 0%, #0a0f1f 100%)', color: '#e2e8f0',
-                border: '1px solid rgba(148, 163, 184, 0.18)', borderRadius: 16, padding: '28px 28px 24px',
-                boxShadow: '0 24px 60px rgba(0,0,0,0.55)',
+                background: 'linear-gradient(180deg, #f7f8ff 0%, #ffffff 100%)', color: '#1e293b',
+                border: '1px solid #c7d2fe', borderRadius: 16, padding: '28px 28px 24px',
+                boxShadow: '0 24px 60px rgba(79, 70, 229, 0.25)',
             }}>
                 <button
                     onClick={onClose}
                     aria-label={t('editor.approve.close')}
-                    style={{ position: 'absolute', top: 16, right: 16, background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}
+                    style={{ position: 'absolute', top: 16, right: 16, background: 'transparent', border: 'none', color: '#5b6680', cursor: 'pointer' }}
                 >
                     <X size={18} />
                 </button>
 
-                <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: '#f8fafc' }}>{t('editor.approve.title')}</h2>
-                <p style={{ margin: '6px 0 20px', fontSize: 13, color: '#94a3b8', lineHeight: 1.5 }}>
+                <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: '#0f172a' }}>{t('editor.approve.title')}</h2>
+                <p style={{ margin: '6px 0 20px', fontSize: 13, color: '#5b6680', lineHeight: 1.5 }}>
                     {t('editor.approve.intro')}
                 </p>
 
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 18, marginBottom: 22 }}>
                     <div style={{ textAlign: 'center' }}>
                         <PagePreview test />
-                        <div style={{ fontSize: 11, color: '#fcd34d', marginTop: 8, fontWeight: 600 }}>{t('editor.approve.testFile')}</div>
+                        <div style={{ fontSize: 11, color: '#c2410c', marginTop: 8, fontWeight: 600 }}>{t('editor.approve.testFile')}</div>
                     </div>
-                    <div style={{ fontSize: 22, color: '#64748b' }}>→</div>
+                    <div style={{ fontSize: 22, color: '#6b7690' }}>→</div>
                     <div style={{ textAlign: 'center' }}>
                         <PagePreview test={false} />
-                        <div style={{ fontSize: 11, color: '#6ee7b7', marginTop: 8, fontWeight: 600 }}>{t('editor.approve.approvedFile')}</div>
+                        <div style={{ fontSize: 11, color: '#059669', marginTop: 8, fontWeight: 600 }}>{t('editor.approve.approvedFile')}</div>
                     </div>
                 </div>
 
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#cbd5e1', marginBottom: 6 }}>{t('editor.approve.name')}</label>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#334155', marginBottom: 6 }}>{t('editor.approve.name')}</label>
                 <input
                     data-approve-name
                     value={name}
@@ -119,12 +119,12 @@ export const ApproveDialog: React.FC<ApproveDialogProps> = ({ defaultName, onTes
                     maxLength={200}
                     style={{
                         width: '100%', boxSizing: 'border-box', padding: '9px 12px', borderRadius: 8, fontSize: 14,
-                        background: 'rgba(15, 23, 42, 0.9)', border: '1px solid rgba(148, 163, 184, 0.25)', color: '#f1f5f9',
+                        background: '#ffffff', border: '1px solid rgba(148, 163, 184, 0.25)', color: '#0f172a',
                         marginBottom: 16, fontFamily: 'inherit',
                     }}
                 />
 
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#cbd5e1', marginBottom: 6 }}>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#334155', marginBottom: 6 }}>
                     {t('editor.approve.taxLabel')}
                 </label>
                 <input
@@ -137,11 +137,11 @@ export const ApproveDialog: React.FC<ApproveDialogProps> = ({ defaultName, onTes
                     placeholder={t('editor.approve.taxPlaceholder')}
                     style={{
                         width: '100%', boxSizing: 'border-box', padding: '9px 12px', borderRadius: 8, fontSize: 15,
-                        letterSpacing: 1, fontFamily: 'monospace', background: 'rgba(15, 23, 42, 0.9)', color: '#f1f5f9',
-                        border: `1px solid ${taxError ? 'rgba(239, 68, 68, 0.6)' : taxValid ? 'rgba(16, 185, 129, 0.6)' : 'rgba(148, 163, 184, 0.25)'}`,
+                        letterSpacing: 1, fontFamily: 'monospace', background: '#ffffff', color: '#0f172a',
+                        border: `1px solid ${taxError ? 'rgba(239, 68, 68, 0.6)' : taxValid ? 'rgba(16, 185, 129, 0.6)' : '#c7cfe6'}`,
                     }}
                 />
-                <div data-approve-tax-note style={{ fontSize: 12, lineHeight: 1.5, margin: '6px 0 16px', color: taxError ? '#fca5a5' : '#94a3b8' }}>
+                <div data-approve-tax-note style={{ fontSize: 12, lineHeight: 1.5, margin: '6px 0 16px', color: taxError ? '#dc2626' : '#5b6680' }}>
                     {taxError ?? t('editor.approve.taxNote')}
                 </div>
 
@@ -157,15 +157,15 @@ export const ApproveDialog: React.FC<ApproveDialogProps> = ({ defaultName, onTes
                         <CheckCircle2 size={16} color="#10b981" style={{ flexShrink: 0 }} />
                         <span>{t('editor.approve.savedNote')}</span>
                     </li>
-                    <li data-approve-lock-note style={{ display: 'flex', gap: 8, color: '#fca5a5', fontWeight: 600 }}>
-                        <Lock size={16} color="#f87171" style={{ flexShrink: 0 }} />
+                    <li data-approve-lock-note style={{ display: 'flex', gap: 8, color: '#dc2626', fontWeight: 600 }}>
+                        <Lock size={16} color="#dc2626" style={{ flexShrink: 0 }} />
                         <span>{t('editor.approve.lockNote')}</span>
                     </li>
                 </ul>
 
                 <div style={{
                     display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, marginBottom: 16,
-                    background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.3)', fontSize: 12, color: '#fde68a',
+                    background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.3)', fontSize: 12, color: '#b45309',
                 }}>
                     <span style={{ flex: 1, lineHeight: 1.5 }}>
                         {t('editor.approve.testNote')}
@@ -176,7 +176,7 @@ export const ApproveDialog: React.FC<ApproveDialogProps> = ({ defaultName, onTes
                         onClick={onTestDownload}
                         style={{
                             display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 10px', borderRadius: 7, cursor: 'pointer',
-                            background: 'rgba(245, 158, 11, 0.18)', border: '1px solid rgba(245, 158, 11, 0.5)', color: '#fcd34d',
+                            background: 'rgba(245, 158, 11, 0.18)', border: '1px solid rgba(245, 158, 11, 0.5)', color: '#c2410c',
                             fontWeight: 700, fontSize: 12, whiteSpace: 'nowrap', fontFamily: 'inherit',
                         }}
                     >
@@ -184,7 +184,7 @@ export const ApproveDialog: React.FC<ApproveDialogProps> = ({ defaultName, onTes
                     </button>
                 </div>
 
-                <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: '#cbd5e1', marginBottom: 18, cursor: 'pointer' }}>
+                <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: '#334155', marginBottom: 18, cursor: 'pointer' }}>
                     <input data-approve-check type="checkbox" checked={checked} onChange={e => setChecked(e.target.checked)} style={{ marginTop: 2 }} />
                     {t('editor.approve.confirmCheck')}
                 </label>
@@ -192,7 +192,7 @@ export const ApproveDialog: React.FC<ApproveDialogProps> = ({ defaultName, onTes
                 {noCredits && (
                     <div style={{
                         display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px', borderRadius: 10, marginBottom: 14,
-                        background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.35)', fontSize: 13, color: '#fca5a5',
+                        background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.35)', fontSize: 13, color: '#dc2626',
                     }}>
                         <AlertTriangle size={16} style={{ flexShrink: 0 }} />
                         <span style={{ flex: 1 }}>{t('editor.approve.noCredits')}</span>
@@ -207,7 +207,7 @@ export const ApproveDialog: React.FC<ApproveDialogProps> = ({ defaultName, onTes
                 )}
 
                 {error && (
-                    <div data-approve-error style={{ padding: '10px 12px', borderRadius: 10, marginBottom: 14, background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.35)', fontSize: 13, color: '#fca5a5' }}>
+                    <div data-approve-error style={{ padding: '10px 12px', borderRadius: 10, marginBottom: 14, background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.35)', fontSize: 13, color: '#dc2626' }}>
                         {error}
                     </div>
                 )}
@@ -216,7 +216,7 @@ export const ApproveDialog: React.FC<ApproveDialogProps> = ({ defaultName, onTes
                     <button
                         type="button"
                         onClick={onClose}
-                        style={{ padding: '10px 16px', borderRadius: 8, background: 'transparent', border: '1px solid rgba(148, 163, 184, 0.3)', color: '#cbd5e1', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+                        style={{ padding: '10px 16px', borderRadius: 8, background: 'transparent', border: '1px solid rgba(148, 163, 184, 0.3)', color: '#334155', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
                     >
                         {t('editor.common.cancel')}
                     </button>

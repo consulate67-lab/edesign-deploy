@@ -1,0 +1,23 @@
+---
+description: Hatasız kod değişikliğinden sonra canlıya otomatik yayın (kullanıcı talebi)
+alwaysApply: true
+---
+
+# Otomatik canlıya alma
+
+Kullanıcı, her hatasız kod değişikliğinden sonra canlıya otomatik alınmasını istedi; ayrıca onay sorma.
+
+Bir iş bittiğinde sırayla:
+
+1. `npx tsc -p tsconfig.app.json --noEmit` hatasız bitmeli.
+2. `npx eslint <değişen dosyalar>` yeni hata vermemeli. `XsltEditor.tsx` içindeki 5 eski hata (`Editor`, `FileCode2`, `transformXmlWithXslt`, `iframeContentHeight`, `handleEditorMount`) ve 1 uyarı önceden var; bunlar engel değil.
+3. Arayüz değişikliğiyse tarayıcıda doğrula.
+4. `npm run deploy:web` çalıştır; "Yayın tamam." görülmeli.
+5. Yalnız değişen dosyaları `git add`, `git commit`, `git push`.
+6. Canlıyı https://www.edxdocu.com üzerinden kontrol et.
+
+Kurallar:
+- Kontrollerden biri hata verirse yayınlama; önce düzelt ya da durumu kullanıcıya bildir.
+- Backend (`server/`) değiştiyse ayrıca `railway up --service edesign-deploy --detach`.
+- FTP bilgilerini asla yazdırma; yalnız mevcut `npm run deploy:web` / `.env.ftp` kullanılır.
+- Kullanıcıya dönüşler Türkçe.

@@ -437,6 +437,8 @@ const editor: typeof tr = {
         limit: 'Au plus',
         preview: 'Aperçu avec les données d\'exemple',
         empty: 'Impossible de tracer le graphique avec ce champ ; choisissez un champ de ligne numérique.',
+        formula: 'Formule sur la valeur',
+        formulaNote: 'Chaque ligne est calculée avec ses propres valeurs ; le total est la somme de ces résultats.',
         inlineNote: 'Le graphique est dans le tableau des lignes : chaque ligne affiche une fine barre avec sa part du total de toutes les lignes.',
         note: 'Le graphique est tracé à partir des valeurs du document lors de l\'affichage. Glissé dans une cellule du tableau des lignes, il montre la part de chaque ligne ; avec « Mes propres lignes », placez côte à côte les champs de votre choix, comme les totaux.',
     },

@@ -8,7 +8,10 @@
  * yapılır (eski görüntüleyiciler de çizer); halka SVG `stroke-dasharray` ile
  * çizilir (trigonometri gerekmez). Ayarlar `data-chart-*` attribute'larında.
  */
-import { ensureDecimalFormat, fieldXPath, formatted, isLineField, lineRootXPath, type CatalogField } from './fieldCatalog';
+import {
+    ensureDecimalFormat, fieldXPath, formatted, formulaExpression, isLineField, lineRootXPath, FORMULA_OPS,
+    type CatalogField, type FormulaModel, type FormulaOp,
+} from './fieldCatalog';
 import type { DocLanguage } from '../international/registry/docLanguages';
 
 export type ChartType = 'bar' | 'column' | 'donut';
@@ -16,8 +19,11 @@ export type ChartSource = 'lines' | 'rows';
 export type ChartShow = 'value' | 'percent' | 'both' | 'none';
 export type ChartPalette = 'ocean' | 'sunset' | 'forest' | 'brand' | 'mono';
 
-/** Elle tanımlanan satır: `value` katalog alanı (`field:<anahtar>`) ya da sabit sayı. */
-export interface ChartRow { label: string; value: string }
+/**
+ * Elle tanımlanan satır: `value` katalog alanı (`field:<anahtar>`) ya da sabit sayı.
+ * Alan değerine formül uygulanabilir: `op` ile `b` (sabit sayı ya da `field:<anahtar>`).
+ */
+export interface ChartRow { label: string; value: string; op?: FormulaOp; b?: string }
 
 export interface ChartModel {
     type: ChartType;
@@ -25,6 +31,9 @@ export interface ChartModel {
     /** Satır kaynağında etiket ve değer alanlarının katalog anahtarları. */
     label: string;
     value: string;
+    /** Değer alanına uygulanan formül (her satır için ayrı hesaplanır). */
+    op: FormulaOp;
+    b: string;
     rows: ChartRow[];
     title: string;
     palette: ChartPalette;
@@ -48,7 +57,7 @@ export const CHART_PALETTES: Record<ChartPalette, string[]> = {
 };
 
 export const DEFAULT_CHART: ChartModel = {
-    type: 'bar', source: 'lines', label: '', value: '', rows: [], title: '',
+    type: 'bar', source: 'lines', label: '', value: '', op: 'none', b: '20', rows: [], title: '',
     palette: 'ocean', show: 'both', decimals: 2, sort: true, limit: 8,
 };
 
@@ -63,19 +72,26 @@ function lighten(hex: string, amount = 0.38): string {
 
 const oneOf = <T extends string>(v: string | null, list: readonly T[], fallback: T): T =>
     (v && (list as readonly string[]).includes(v) ? v : fallback) as T;
+const OPS = FORMULA_OPS.map(o => o.id);
 
 export function readChart(el: Element): ChartModel {
     const get = (n: string) => el.getAttribute(`data-chart-${n}`);
     let rows: ChartRow[] = [];
     try {
         const parsed = JSON.parse(get('rows') || '[]');
-        if (Array.isArray(parsed)) rows = parsed.filter(r => r && typeof r.label === 'string' && typeof r.value === 'string');
+        if (Array.isArray(parsed)) {
+            rows = parsed
+                .filter(r => r && typeof r.label === 'string' && typeof r.value === 'string')
+                .map(r => ({ label: r.label, value: r.value, op: oneOf(r.op ?? null, OPS, 'none'), b: typeof r.b === 'string' ? r.b : '20' }));
+        }
     } catch { /* bozuk değer: boş liste */ }
     return {
         type: oneOf(get('type'), CHART_TYPES, DEFAULT_CHART.type),
         source: oneOf(get('source'), CHART_SOURCES, DEFAULT_CHART.source),
         label: get('label') ?? '',
         value: get('value') ?? '',
+        op: oneOf(get('op'), OPS, DEFAULT_CHART.op),
+        b: get('b') ?? DEFAULT_CHART.b,
         rows,
         title: get('title') ?? '',
         palette: oneOf(get('palette'), Object.keys(CHART_PALETTES) as ChartPalette[], DEFAULT_CHART.palette),
@@ -91,6 +107,8 @@ export const chartAttrs = (m: ChartModel): [string, string][] => [
     ['data-chart-source', m.source],
     ['data-chart-label', m.label],
     ['data-chart-value', m.value],
+    ['data-chart-op', m.op],
+    ['data-chart-b', m.b],
     ['data-chart-rows', JSON.stringify(m.rows)],
     ['data-chart-title', m.title],
     ['data-chart-palette', m.palette],
@@ -213,13 +231,71 @@ function legendItem(c: Ctx, label: string, v: string, total: string, color: stri
 const more = (count: string, limit: number) =>
     `<xsl:if test="${count} &gt; ${limit}"><div style="font-size:10px;color:#94a3b8;margin:2px 0 0 0">+<xsl:value-of select="${count} - ${limit}"/></div></xsl:if>`;
 
-/** Belge satırlarından: her satır (kalem) bir çubuk / sütun / dilim. */
-function linesChart(c: Ctx, catalog: CatalogField[]): string | null {
-    const fv = catalog.find(f => f.key === c.m.value);
+const asFormula = (a: string, op: FormulaOp, b: string): FormulaModel => ({ a, op, b, decimals: 0, label: '', suffix: '' });
+
+/** node-set uzantısıyla (exsl, yoksa msxsl) hesaplanan değişken; ikisi de yoksa 0. */
+const nodeSetVar = (name: string, expr: (fn: string) => string) =>
+    `<xsl:variable name="${name}"><xsl:choose>`
+    + `<xsl:when test="function-available('exsl:node-set')"><xsl:value-of select="${expr('exsl:node-set')}"/></xsl:when>`
+    + `<xsl:when test="function-available('msxsl:node-set')"><xsl:value-of select="${expr('msxsl:node-set')}"/></xsl:when>`
+    + '<xsl:otherwise>0</xsl:otherwise></xsl:choose></xsl:variable>';
+
+/** node-set kullanan içerik uzantı ad alanlarını kendi kabında tanımlar; şablonun kökü değişmez. */
+const withNodeSet = (content: string) =>
+    '<div xmlns:exsl="http://exslt.org/common" xmlns:msxsl="urn:schemas-microsoft-com:xslt" xsl:exclude-result-prefixes="exsl msxsl">'
+    + `${content}</div>`;
+
+interface LineSource {
+    root: string;
+    /** Satır bağlamında, formül uygulanmış satır değeri. */
+    expr: string;
+    /** Satır kümesinin toplamı; iki satır alanının çarpımı / bölümü gibi doğrusal olmayan formülde null. */
+    sumOf: (nodes: string) => string | null;
+}
+
+function lineSource(m: ChartModel, catalog: CatalogField[]): LineSource | null {
+    const fv = catalog.find(f => f.key === m.value);
     const root = fv ? lineRootXPath(fv) : null;
     if (!fv || !root) return null;
+    const fb = m.op !== 'none' && m.b.startsWith('field:') ? catalog.find(f => f.key === m.b.slice(6)) : undefined;
+    if (fb && isLineField(fb) && lineRootXPath(fb) !== root) return null;
+    const fx = formulaExpression(asFormula(m.value, m.op, m.b), catalog, true);
+    if (!fx) return null;
+    const bRel = fb && isLineField(fb) ? fieldXPath(fb, true) : null;
+    const B = fb ? `number(${fieldXPath(fb)})` : String(Number(m.b.replace(',', '.')));
+    const aRel = fieldXPath(fv, true);
+    const sumOf = (nodes: string): string | null => {
+        const sa = numeric(`${nodes}/${aRel}`);
+        const sb = bRel ? numeric(`${nodes}/${bRel}`) : '';
+        switch (m.op) {
+            case 'none': return sa;
+            case 'add': return bRel ? `${sa} + ${sb}` : `${sa} + ${B} * count(${nodes})`;
+            case 'sub': return bRel ? `${sa} - ${sb}` : `${sa} - ${B} * count(${nodes})`;
+            case 'percent': return bRel ? null : `${sa} * ${B} div 100`;
+            case 'mul': return bRel ? null : `${sa} * ${B}`;
+            case 'div': return bRel ? null : `${sa} div ${B}`;
+        }
+    };
+    return { root, expr: fx.expr, sumOf };
+}
+
+/** Toplam değişkeni (`<vp>t`); doğrusal olmayan formülde satır değerleri listesi (`<vp>l`) üzerinden. */
+function lineTotal(vp: string, src: LineSource): { vars: string; list: boolean } {
+    const linear = src.sumOf(src.root);
+    if (linear !== null) return { vars: `<xsl:variable name="${vp}t" select="${linear}"/>`, list: false };
+    return {
+        vars: `<xsl:variable name="${vp}l"><xsl:for-each select="${src.root}"><v><xsl:value-of select="${src.expr}"/></v></xsl:for-each></xsl:variable>`
+            + nodeSetVar(`${vp}t`, fn => `sum(${fn}($${vp}l)/*[number(.) = number(.)])`),
+        list: true,
+    };
+}
+
+/** Belge satırlarından: her satır (kalem) bir çubuk / sütun / dilim. */
+function linesChart(c: Ctx, catalog: CatalogField[]): string | null {
+    const src = lineSource(c.m, catalog);
+    if (!src) return null;
+    const { root, expr } = src;
     const fl = catalog.find(f => f.key === c.m.label);
-    const vRel = fieldXPath(fv, true);
     const label = fl && lineRootXPath(fl) === root
         ? `<xsl:value-of select="${fieldXPath(fl, true)}"/>`
         : '<xsl:value-of select="position()"/>.';
@@ -227,41 +303,51 @@ function linesChart(c: Ctx, catalog: CatalogField[]): string | null {
     const T = `$${vp}t`, M = `$${vp}m`, V = `$${vp}v`;
     const color = `{substring('${c.colors.join('')}', ((position() - 1) mod ${c.colors.length}) * 7 + 1, 7)}`;
     const light = `{substring('${c.lights.join('')}', ((position() - 1) mod ${c.lights.length}) * 7 + 1, 7)}`;
-    const sort = m.sort && m.type !== 'donut' ? `<xsl:sort select="${numeric(vRel)}" data-type="number" order="descending"/>` : '';
+    const sort = m.sort && m.type !== 'donut' ? `<xsl:sort select="${expr}" data-type="number" order="descending"/>` : '';
     const each = (body: string) => `<xsl:for-each select="${root}">${sort}<xsl:if test="position() &lt;= ${m.limit}">`
-        + `<xsl:variable name="${vp}v" select="${numeric(vRel)}"/>${body}</xsl:if></xsl:for-each>`;
-    const vars = `<xsl:variable name="${vp}t" select="${numeric(`${root}/${vRel}`)}"/>`
-        + `<xsl:variable name="${vp}m"><xsl:for-each select="${root}/${vRel}[number(.) = number(.)]"><xsl:sort select="." data-type="number" order="descending"/>`
-        + '<xsl:if test="position() = 1"><xsl:value-of select="."/></xsl:if></xsl:for-each></xsl:variable>';
+        + `<xsl:variable name="${vp}v" select="${expr}"/>${body}</xsl:if></xsl:for-each>`;
+    const total = lineTotal(vp, src);
+    const vars = total.vars
+        + `<xsl:variable name="${vp}m"><xsl:for-each select="${root}"><xsl:sort select="${expr}" data-type="number" order="descending"/>`
+        + `<xsl:if test="position() = 1"><xsl:value-of select="${expr}"/></xsl:if></xsl:for-each></xsl:variable>`;
     const rest = more(`count(${root})`, m.limit);
 
-    if (m.type === 'bar') return vars + header(c, T) + each(barItem(c, label, V, M, T, color, light, `$${vp}w`)) + rest;
-    if (m.type === 'column') {
-        return vars + header(c, T)
+    let out: string;
+    if (m.type === 'bar') out = vars + header(c, T) + each(barItem(c, label, V, M, T, color, light, `$${vp}w`)) + rest;
+    else if (m.type === 'column') {
+        out = vars + header(c, T)
             + '<table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;table-layout:fixed">'
             + `<tr>${each(columnCell(c, V, M, T, color, light, `$${vp}h`))}</tr>`
             + `<tr>${each(columnLabel(label))}</tr></table>` + rest;
+    } else {
+        const step = root.split('/').pop() ?? '*';
+        const before = total.list
+            ? `<xsl:variable name="${vp}i" select="position()"/>`
+                + nodeSetVar(`${vp}b`, fn => `sum(${fn}($${vp}l)/*[position() &lt; $${vp}i][number(.) = number(.)])`)
+            : `<xsl:variable name="${vp}b" select="${src.sumOf(`preceding-sibling::${step}`)}"/>`;
+        const slices = each(before + donutSlice(V, T, `$${vp}b`, color));
+        out = vars + header(c, T) + donutFrame(c, T, slices, each(legendItem(c, label, V, T, color)) + rest);
     }
-    const step = root.split('/').pop() ?? '*';
-    const before = `$${vp}b`;
-    const slices = each(`<xsl:variable name="${vp}b" select="${numeric(`preceding-sibling::${step}/${vRel}`)}"/>${donutSlice(V, T, before, color)}`);
-    return vars + header(c, T) + donutFrame(c, T, slices, each(legendItem(c, label, V, T, color)) + rest);
+    return total.list ? withNodeSet(out) : out;
 }
 
 /** Elle tanımlanan satırlardan (her satır bir alan ya da sabit sayı). */
 function rowsChart(c: Ctx, catalog: CatalogField[]): string | null {
     const rows = c.m.rows.map(r => {
         if (r.value.startsWith('field:')) {
-            const f = catalog.find(x => x.key === r.value.slice(6));
-            return f ? { label: r.label, expr: numeric(fieldXPath(f)) } : null;
+            const fx = formulaExpression(asFormula(r.value.slice(6), r.op ?? 'none', r.b ?? ''), catalog, false);
+            return fx ? { label: r.label, expr: fx.expr, field: true } : null;
         }
         const n = Number(r.value.replace(',', '.'));
-        return Number.isFinite(n) ? { label: r.label, expr: String(n) } : null;
-    }).filter((r): r is { label: string; expr: string } => !!r);
+        return Number.isFinite(n) ? { label: r.label, expr: String(n), field: false } : null;
+    }).filter((r): r is { label: string; expr: string; field: boolean } => !!r);
     if (!rows.length) return null;
     const { vp, m } = c;
     const v = (i: number) => `$${vp}r${i}`;
-    let vars = rows.map((r, i) => `<xsl:variable name="${vp}r${i}" select="${r.expr}"/>`).join('');
+    // Belgede olmayan alan 0 sayılır (toplam NaN olmasın).
+    let vars = rows.map((r, i) => (r.field
+        ? `<xsl:variable name="${vp}r${i}"><xsl:choose><xsl:when test="number(${r.expr}) = number(${r.expr})"><xsl:value-of select="${r.expr}"/></xsl:when><xsl:otherwise>0</xsl:otherwise></xsl:choose></xsl:variable>`
+        : `<xsl:variable name="${vp}r${i}" select="${r.expr}"/>`)).join('');
     vars += `<xsl:variable name="${vp}t" select="${rows.map((_, i) => v(i)).join(' + ')}"/>`;
     vars += `<xsl:variable name="${vp}m0" select="${v(0)}"/>`;
     for (let i = 1; i < rows.length; i++) {
@@ -287,20 +373,20 @@ function rowsChart(c: Ctx, catalog: CatalogField[]): string | null {
 
 /** Satır tablosunun içinde: bu satırın değerinin tüm satırların toplamındaki payı. */
 function inlineChart(c: Ctx, catalog: CatalogField[]): string | null {
-    const fv = catalog.find(f => f.key === c.m.value);
-    const root = fv ? lineRootXPath(fv) : null;
-    if (!fv || !root) return null;
+    const src = lineSource(c.m, catalog);
+    if (!src) return null;
     const { vp } = c;
-    const vRel = fieldXPath(fv, true);
     const T = `$${vp}t`, V = `$${vp}v`;
     const text = valueText(c, V, T);
-    return `<xsl:variable name="${vp}t" select="${numeric(`${root}/${vRel}`)}"/>`
-        + `<xsl:variable name="${vp}v" select="${numeric(vRel)}"/>`
+    const total = lineTotal(vp, src);
+    const out = total.vars
+        + `<xsl:variable name="${vp}v" select="${src.expr}"/>`
         + scaled(`${vp}w`, V, T, `round(${V} * 1000 div ${T}) div 10`)
         + '<div style="height:6px;background-color:#eef2f7;border-radius:99px;overflow:hidden;font-size:0;line-height:0;margin:3px 0 2px 0">'
         + `<div style="height:6px;border-radius:99px;width:{$${vp}w}%;background-color:${c.colors[0]};background-image:linear-gradient(90deg,${c.colors[0]},${c.lights[0]})">${blank}</div>`
         + '</div>'
         + (text ? `<div style="font-size:9px;color:#64748b;white-space:nowrap">${text}</div>` : '');
+    return total.list ? withNodeSet(out) : out;
 }
 
 /** Grafik objesinin XSLT içeriği; veri alanı bulunamazsa null. */

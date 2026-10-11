@@ -437,6 +437,8 @@ const editor: typeof tr = {
         limit: 'At most',
         preview: 'Preview with sample data',
         empty: 'The chart cannot be drawn with the selected field; choose a numeric line field.',
+        formula: 'Value formula',
+        formulaNote: 'Each line is calculated with its own values; the total is the sum of these line results.',
         inlineNote: 'The chart is inside the line table: each row shows a slim bar with that row\'s share of the total of all rows.',
         note: 'The chart is drawn from the document values when it is displayed. Drag it into a cell of the line table to get a bar showing each row\'s share; with "My own rows" you can place any fields, such as totals, side by side.',
     },

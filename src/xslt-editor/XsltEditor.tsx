@@ -46,7 +46,7 @@ import {
     ensureDecimalFormat, isInLineContext, isLineField, lineRootXPath, fieldSnippet, fieldContent, formulaSnippet, formulaContent, formulaAttrs,
     readFormula, DEFAULT_FORMULA, FORMULA_OPS, evaluateFormula, formulaSumsLines,
     readFieldTransform, fieldTransformAttrs, evaluateFieldTransform, FIELD_FILTERS, FIELD_EXTRACTS, FIELD_CASES,
-    type CatalogField, type FormulaModel, type FieldTransform,
+    type CatalogField, type FormulaModel, type FormulaOp, type FieldTransform,
 } from './fieldCatalog';
 import { transformXmlWithXslt } from '../xsltTransformer';
 import { getInlineXslt } from '../xsltContent';
@@ -337,14 +337,14 @@ interface XsltEditorProps {
 // style) input yazarken değeri geri sıçratıyordu.
 const fieldLabelStyle: React.CSSProperties = {
     display: 'block',
-    fontSize: '10px', fontWeight: 700, color: '#94a3b8',
+    fontSize: '10px', fontWeight: 700, color: '#5b6680',
     letterSpacing: '0.4px', textTransform: 'uppercase',
     marginBottom: '4px',
 };
 const fieldInputStyle: React.CSSProperties = {
     boxSizing: 'border-box', width: '100%', minWidth: 0, padding: '6px 8px',
-    background: '#1e293b', border: '1px solid #334155',
-    borderRadius: '4px', color: '#e2e8f0',
+    background: '#f3f5ff', border: '1px solid #D9DEF0',
+    borderRadius: '4px', color: '#1e293b',
     fontSize: '12px', fontFamily: 'monospace', outline: 'none',
 };
 const FieldText: React.FC<{ label: string; currentValue: string; onChange: (v: string) => void; placeholder?: string }> = ({ label, currentValue, onChange, placeholder }) => {
@@ -359,7 +359,7 @@ const FieldText: React.FC<{ label: string; currentValue: string; onChange: (v: s
                 onChange={(e) => { setValue(e.target.value); onChange(e.target.value); }}
                 style={fieldInputStyle}
                 onFocus={(e) => e.currentTarget.style.borderColor = '#6366f1'}
-                onBlur={(e) => e.currentTarget.style.borderColor = '#334155'}
+                onBlur={(e) => e.currentTarget.style.borderColor = '#D9DEF0'}
             />
         </div>
     );
@@ -383,7 +383,7 @@ const FieldLength: React.FC<{ label: string; currentValue: string; placeholder?:
                 }}
                 style={fieldInputStyle}
                 onFocus={(e) => e.currentTarget.style.borderColor = '#6366f1'}
-                onBlur={(e) => e.currentTarget.style.borderColor = '#334155'}
+                onBlur={(e) => e.currentTarget.style.borderColor = '#D9DEF0'}
             />
         </div>
     );
@@ -487,8 +487,8 @@ const ImageSourceField: React.FC<{ currentValue: string; onChange: (v: string) =
         }
     };
     const smallBtn: React.CSSProperties = {
-        padding: '4px 8px', borderRadius: '4px', border: '1px solid #334155', background: '#1e293b',
-        color: '#cbd5e1', fontSize: '10px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+        padding: '4px 8px', borderRadius: '4px', border: '1px solid #D9DEF0', background: '#f3f5ff',
+        color: '#334155', fontSize: '10px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
     };
     const base64Box = (
         <div data-image-base64-box>
@@ -511,7 +511,7 @@ const ImageSourceField: React.FC<{ currentValue: string; onChange: (v: string) =
                 </button>
                 {!readOnly && b64Draft !== null && (
                     <>
-                        <button type="button" data-image-base64-apply onClick={applyBase64} style={{ ...smallBtn, borderColor: 'rgba(16, 185, 129, 0.5)', color: '#6ee7b7' }}>
+                        <button type="button" data-image-base64-apply onClick={applyBase64} style={{ ...smallBtn, borderColor: 'rgba(16, 185, 129, 0.5)', color: '#059669' }}>
                             {t('editor.common.apply')}
                         </button>
                         <button type="button" onClick={() => { setB64Draft(null); setError(null); }} style={smallBtn}>
@@ -528,18 +528,18 @@ const ImageSourceField: React.FC<{ currentValue: string; onChange: (v: string) =
                 <label style={fieldLabelStyle}>{t('editor.image.label')}</label>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                     <div style={{
-                        width: '64px', height: '48px', flexShrink: 0, borderRadius: '4px', border: '1px solid #334155',
-                        background: 'repeating-conic-gradient(#1e293b 0% 25%, #273449 0% 50%) 50% / 12px 12px',
+                        width: '64px', height: '48px', flexShrink: 0, borderRadius: '4px', border: '1px solid #D9DEF0',
+                        background: 'repeating-conic-gradient(#f3f5ff 0% 25%, #E3E8F7 0% 50%) 50% / 12px 12px',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
                     }}>
-                        {placeholder ? <ImageIcon size={18} color="#64748b" /> : <img src={src} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />}
+                        {placeholder ? <ImageIcon size={18} color="#6b7690" /> : <img src={src} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />}
                     </div>
-                    <div style={{ fontSize: '11px', color: '#fcd34d', lineHeight: 1.4 }}>
+                    <div style={{ fontSize: '11px', color: '#c2410c', lineHeight: 1.4 }}>
                         {t('editor.image.fromXml')}
                     </div>
                 </div>
                 {base64Box}
-                {error && <div style={{ marginTop: '6px', fontSize: '11px', color: '#fca5a5' }}>{error}</div>}
+                {error && <div style={{ marginTop: '6px', fontSize: '11px', color: '#dc2626' }}>{error}</div>}
             </div>
         );
     }
@@ -548,15 +548,15 @@ const ImageSourceField: React.FC<{ currentValue: string; onChange: (v: string) =
             <label style={fieldLabelStyle}>{t('editor.image.label')}</label>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
                 <div style={{
-                    width: '64px', height: '48px', flexShrink: 0, borderRadius: '4px', border: '1px solid #334155',
-                    background: 'repeating-conic-gradient(#1e293b 0% 25%, #273449 0% 50%) 50% / 12px 12px',
+                    width: '64px', height: '48px', flexShrink: 0, borderRadius: '4px', border: '1px solid #D9DEF0',
+                    background: 'repeating-conic-gradient(#f3f5ff 0% 25%, #E3E8F7 0% 50%) 50% / 12px 12px',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
                 }}>
                     {placeholder
-                        ? <ImageIcon size={18} color="#64748b" />
+                        ? <ImageIcon size={18} color="#6b7690" />
                         : <img src={src} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />}
                 </div>
-                <div data-image-info style={{ fontSize: '11px', color: '#94a3b8', lineHeight: 1.4, minWidth: 0 }}>
+                <div data-image-info style={{ fontSize: '11px', color: '#5b6680', lineHeight: 1.4, minWidth: 0 }}>
                     {placeholder
                         ? t('editor.image.none')
                         : format
@@ -572,13 +572,13 @@ const ImageSourceField: React.FC<{ currentValue: string; onChange: (v: string) =
                 style={{
                     width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
                     padding: '7px 10px', borderRadius: '4px', border: '1px solid rgba(165,180,252,0.5)',
-                    background: 'rgba(99,102,241,0.15)', color: '#c7d2fe', fontSize: '12px', fontWeight: 700,
+                    background: 'rgba(99,102,241,0.15)', color: '#4338ca', fontSize: '12px', fontWeight: 700,
                     cursor: busy ? 'wait' : 'pointer', fontFamily: 'inherit',
                 }}
             >
                 <ImageIcon size={14} /> {busy ? t('editor.common.loading') : placeholder ? t('editor.image.choose') : t('editor.image.change')}
             </button>
-            {error && <div style={{ marginTop: '6px', fontSize: '11px', color: '#fca5a5' }}>{error}</div>}
+            {error && <div style={{ marginTop: '6px', fontSize: '11px', color: '#dc2626' }}>{error}</div>}
             {base64Box}
             <label style={{ ...fieldLabelStyle, marginTop: '10px' }}>{t('editor.image.url')}</label>
             <input
@@ -592,7 +592,7 @@ const ImageSourceField: React.FC<{ currentValue: string; onChange: (v: string) =
                 }}
                 style={fieldInputStyle}
                 onFocus={(e) => e.currentTarget.style.borderColor = '#6366f1'}
-                onBlur={(e) => e.currentTarget.style.borderColor = '#334155'}
+                onBlur={(e) => e.currentTarget.style.borderColor = '#D9DEF0'}
             />
         </div>
     );
@@ -614,7 +614,7 @@ const FieldColor: React.FC<{ label: string; currentValue: string; onChange: (v: 
                     type="color"
                     value={cssColorToHex(value)}
                     onChange={(e) => update(e.target.value)}
-                    style={{ width: '34px', height: '30px', padding: 0, border: '1px solid #334155', borderRadius: '4px', background: '#1e293b', cursor: 'pointer' }}
+                    style={{ width: '34px', height: '30px', padding: 0, border: '1px solid #D9DEF0', borderRadius: '4px', background: '#f3f5ff', cursor: 'pointer' }}
                 />
                 <input
                     type="text"
@@ -622,7 +622,7 @@ const FieldColor: React.FC<{ label: string; currentValue: string; onChange: (v: 
                     onChange={(e) => update(e.target.value)}
                     style={{ ...fieldInputStyle, flex: 1 }}
                     onFocus={(e) => e.currentTarget.style.borderColor = '#6366f1'}
-                    onBlur={(e) => e.currentTarget.style.borderColor = '#334155'}
+                    onBlur={(e) => e.currentTarget.style.borderColor = '#D9DEF0'}
                 />
             </div>
         </div>
@@ -639,12 +639,12 @@ const FieldSelect: React.FC<{ label: string; currentValue: string; options: stri
             onChange={(e) => { setValue(e.target.value); onChange(e.target.value); }}
             style={{
                 width: '100%', padding: '6px 8px',
-                background: '#1e293b', border: '1px solid #334155',
-                borderRadius: '4px', color: '#e2e8f0',
+                background: '#f3f5ff', border: '1px solid #D9DEF0',
+                borderRadius: '4px', color: '#1e293b',
                 fontSize: '12px', fontFamily: 'monospace', outline: 'none',
             }}
             onFocus={(e) => e.currentTarget.style.borderColor = '#6366f1'}
-            onBlur={(e) => e.currentTarget.style.borderColor = '#334155'}
+            onBlur={(e) => e.currentTarget.style.borderColor = '#D9DEF0'}
         >
             {allOptions.map(opt => (
                 <option key={opt || '(none)'} value={opt}>{opt || '(default)'}</option>
@@ -665,7 +665,7 @@ const FieldTextArea: React.FC<{ label: string; currentValue: string; onChange: (
                 onChange={(e) => { setValue(e.target.value); onChange(e.target.value); }}
                 style={{ ...fieldInputStyle, minHeight: '70px', maxHeight: '240px', resize: 'vertical', fontFamily: 'inherit' }}
                 onFocus={(e) => e.currentTarget.style.borderColor = '#6366f1'}
-                onBlur={(e) => e.currentTarget.style.borderColor = '#334155'}
+                onBlur={(e) => e.currentTarget.style.borderColor = '#D9DEF0'}
             />
         </div>
     );
@@ -757,7 +757,7 @@ const BorderControls: React.FC<{ spec: BorderSpec; onChange: (b: BorderSpec) => 
             title={t('editor.border.color')}
             data-border-color
             onChange={(e) => onChange({ ...spec, color: e.target.value })}
-            style={{ width: '34px', height: '30px', padding: 0, border: '1px solid #334155', borderRadius: '4px', background: '#1e293b', cursor: 'pointer' }}
+            style={{ width: '34px', height: '30px', padding: 0, border: '1px solid #D9DEF0', borderRadius: '4px', background: '#f3f5ff', cursor: 'pointer' }}
         />
     </div>
     );
@@ -992,7 +992,7 @@ const PositionEditor: React.FC<{
                     </div>
                 </div>
             )}
-            <div style={{ fontSize: '10px', color: '#64748b', lineHeight: 1.5, marginBottom: '6px' }}>{hint}</div>
+            <div style={{ fontSize: '10px', color: '#6b7690', lineHeight: 1.5, marginBottom: '6px' }}>{hint}</div>
         </div>
     );
 };
@@ -1100,13 +1100,66 @@ const FormulaEditor: React.FC<{
                 </div>
             </div>
             {sums && (
-                <div data-formula-sum-note style={{ marginBottom: '8px', fontSize: '11px', lineHeight: 1.45, color: productOfSums ? '#fcd34d' : '#93c5fd' }}>
+                <div data-formula-sum-note style={{ marginBottom: '8px', fontSize: '11px', lineHeight: 1.45, color: productOfSums ? '#c2410c' : '#2563eb' }}>
                     {productOfSums ? t('editor.formula.sumProduct') : t('editor.formula.sumNote')}
                 </div>
             )}
-            <div data-formula-result style={{ padding: '8px 10px', background: '#0b1222', border: '1px dashed #334155', borderRadius: '4px', fontSize: '12px', color: '#e2e8f0' }}>
+            <div data-formula-result style={{ padding: '8px 10px', background: '#f7f8ff', border: '1px dashed #D9DEF0', borderRadius: '4px', fontSize: '12px', color: '#1e293b' }}>
                 {inLine ? t('editor.formula.resultLine') : t('editor.formula.result')}: <b>{result || '—'}</b>
             </div>
+        </div>
+    );
+};
+
+/** Grafik değerine uygulanan işlem (formül nesnesindeki işlemlerle aynı). */
+const ChartFormula: React.FC<{
+    op: FormulaOp;
+    b: string;
+    fields: CatalogField[];
+    xmlDoc: Document | null;
+    compact?: boolean;
+    onChange: (patch: { op?: FormulaOp; b?: string }) => void;
+}> = ({ op, b, fields, xmlDoc, compact, onChange }) => {
+    const { t } = useLocaleT();
+    const bIsField = b.startsWith('field:');
+    const label = (text: string) => (compact ? null : <label style={fieldLabelStyle}>{text}</label>);
+    return (
+        <div data-chart-formula style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: compact ? 0 : '10px' }}>
+            <div style={{ flex: '1 1 45%', minWidth: 0 }}>
+                {label(t('editor.chart.formula'))}
+                <select data-chart-op value={op} title={t('editor.chart.formula')} onChange={(e) => onChange({ op: e.target.value as FormulaOp })} style={fieldInputStyle}>
+                    {FORMULA_OPS.map(o => <option key={o.id} value={o.id}>{o.symbol ? `${o.symbol} (${t(`editor.formula.ops.${o.id}`)})` : t(`editor.formula.ops.${o.id}`)}</option>)}
+                </select>
+            </div>
+            {op !== 'none' && (
+                <div style={{ flex: '1 1 45%', minWidth: 0 }}>
+                    {label(t('editor.formula.bKind'))}
+                    <select
+                        data-chart-b-kind
+                        value={bIsField ? 'field' : 'number'}
+                        title={t('editor.formula.bKind')}
+                        onChange={(e) => onChange({ b: e.target.value === 'field' ? `field:${fields[0]?.key ?? ''}` : '20' })}
+                        style={fieldInputStyle}
+                    >
+                        <option value="number">{t('editor.formula.constant')}</option>
+                        <option value="field">{t('editor.formula.otherField')}</option>
+                    </select>
+                </div>
+            )}
+            {op !== 'none' && (
+                <div style={{ flex: '1 1 100%', minWidth: 0 }}>
+                    {label(bIsField ? t('editor.formula.secondField') : op === 'percent' ? t('editor.formula.percent') : t('editor.formula.number'))}
+                    {bIsField ? (
+                        <select data-chart-b value={b.slice(6)} onChange={(e) => onChange({ b: `field:${e.target.value}` })} style={fieldInputStyle}>
+                            <CatalogOptions fields={fields} xmlDoc={xmlDoc} />
+                        </select>
+                    ) : (
+                        <input data-chart-b type="text" inputMode="decimal" value={b}
+                            placeholder={op === 'percent' ? t('editor.formula.percent') : t('editor.formula.number')}
+                            onChange={(e) => onChange({ b: e.target.value })} style={fieldInputStyle} />
+                    )}
+                </div>
+            )}
         </div>
     );
 };
@@ -1128,6 +1181,9 @@ const ChartEditor: React.FC<{
     const valueField = catalog.find(f => f.key === model.value);
     const root = valueField ? lineRootXPath(valueField) : null;
     const lineLabels = useMemo(() => catalog.filter(f => isLineField(f) && lineRootXPath(f) === root), [catalog, root]);
+    const formulaFields = useMemo(() => numeric.filter(f => !isLineField(f) || lineRootXPath(f) === root), [numeric, root]);
+    const bField = model.b.startsWith('field:') ? catalog.find(f => f.key === model.b.slice(6)) : undefined;
+    const perLineList = model.op !== 'none' && model.op !== 'add' && model.op !== 'sub' && !!bField && isLineField(bField);
     const render = (m: ChartModel) => renderChartHtml(id, m, catalog, inLine, xmlDoc, docLang);
     const html = useMemo(() => renderChartHtml(id, model, catalog, inLine, xmlDoc, docLang), [id, model, catalog, inLine, xmlDoc, docLang]);
     const update = (patch: Partial<ChartModel>) => {
@@ -1141,13 +1197,13 @@ const ChartEditor: React.FC<{
     const half: React.CSSProperties = { flex: 1, minWidth: 0 };
     const pick = (active: boolean): React.CSSProperties => ({
         flex: 1, padding: '6px 4px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', fontWeight: 700, fontFamily: 'inherit',
-        background: active ? 'rgba(94, 234, 212, 0.16)' : '#1e293b', color: active ? '#5eead4' : '#94a3b8',
-        border: `1px solid ${active ? '#5eead4' : '#334155'}`,
+        background: active ? 'rgba(94, 234, 212, 0.16)' : '#f3f5ff', color: active ? '#0d9488' : '#5b6680',
+        border: `1px solid ${active ? '#0d9488' : '#D9DEF0'}`,
     });
     return (
         <div data-chart-editor>
             {inLine ? (
-                <div data-chart-inline-note style={{ marginBottom: '10px', fontSize: '11px', lineHeight: 1.45, color: '#93c5fd' }}>{t('editor.chart.inlineNote')}</div>
+                <div data-chart-inline-note style={{ marginBottom: '10px', fontSize: '11px', lineHeight: 1.45, color: '#2563eb' }}>{t('editor.chart.inlineNote')}</div>
             ) : (
                 <>
                     <label style={fieldLabelStyle}>{t('editor.chart.type')}</label>
@@ -1170,6 +1226,10 @@ const ChartEditor: React.FC<{
                     <select data-chart-value value={model.value} onChange={(e) => update({ value: e.target.value })} style={{ ...fieldInputStyle, marginBottom: '10px' }}>
                         <CatalogOptions fields={lineNums} xmlDoc={xmlDoc} />
                     </select>
+                    <ChartFormula op={model.op} b={model.b} fields={formulaFields} xmlDoc={xmlDoc} onChange={update} />
+                    {perLineList && (
+                        <div data-chart-formula-note style={{ marginTop: '-4px', marginBottom: '10px', fontSize: '11px', lineHeight: 1.45, color: '#2563eb' }}>{t('editor.chart.formulaNote')}</div>
+                    )}
                     {!inLine && (
                         <>
                             <label style={fieldLabelStyle}>{t('editor.chart.label')}</label>
@@ -1186,11 +1246,11 @@ const ChartEditor: React.FC<{
                     {model.rows.map((r, i) => {
                         const isField = r.value.startsWith('field:');
                         return (
-                            <div key={i} data-chart-row={i} style={{ padding: '6px', marginBottom: '6px', border: '1px solid #334155', borderRadius: '4px' }}>
+                            <div key={i} data-chart-row={i} style={{ padding: '6px', marginBottom: '6px', border: '1px solid #D9DEF0', borderRadius: '4px' }}>
                                 <div style={{ display: 'flex', gap: '4px', marginBottom: '4px' }}>
                                     <input data-chart-row-label type="text" value={r.label} placeholder={t('editor.chart.rowLabel')} onChange={(e) => setRow(i, { label: e.target.value })} style={{ ...fieldInputStyle, flex: 1 }} />
                                     <button type="button" data-chart-row-remove title={t('editor.chart.remove')} onClick={() => update({ rows: model.rows.filter((_, j) => j !== i) })}
-                                        style={{ ...fieldInputStyle, width: '30px', flex: 'none', cursor: 'pointer', color: '#fca5a5', padding: 0 }}>×</button>
+                                        style={{ ...fieldInputStyle, width: '30px', flex: 'none', cursor: 'pointer', color: '#dc2626', padding: 0 }}>×</button>
                                 </div>
                                 <div style={{ display: 'flex', gap: '4px' }}>
                                     <select
@@ -1210,11 +1270,16 @@ const ChartEditor: React.FC<{
                                         <input data-chart-row-number type="text" inputMode="decimal" value={r.value} onChange={(e) => setRow(i, { value: e.target.value })} style={{ ...fieldInputStyle, width: '80px', flex: 'none' }} />
                                     )}
                                 </div>
+                                {isField && (
+                                    <div style={{ marginTop: '4px' }}>
+                                        <ChartFormula compact op={r.op ?? 'none'} b={r.b ?? '20'} fields={numeric} xmlDoc={xmlDoc} onChange={(p) => setRow(i, p)} />
+                                    </div>
+                                )}
                             </div>
                         );
                     })}
                     <button type="button" data-chart-row-add onClick={() => update({ rows: [...model.rows, { label: '', value: `field:${numeric[0]?.key ?? ''}` }] })}
-                        style={{ ...fieldInputStyle, cursor: 'pointer', color: '#5eead4', fontFamily: 'inherit', fontWeight: 700 }}>
+                        style={{ ...fieldInputStyle, cursor: 'pointer', color: '#0d9488', fontFamily: 'inherit', fontWeight: 700 }}>
                         + {t('editor.chart.addRow')}
                     </button>
                 </div>
@@ -1224,7 +1289,7 @@ const ChartEditor: React.FC<{
             <div style={{ display: 'flex', gap: '4px', marginBottom: '10px', flexWrap: 'wrap' }}>
                 {(Object.keys(CHART_PALETTES) as ChartPalette[]).map(p => (
                     <button key={p} type="button" data-chart-palette={p} title={t(`editor.chart.palettes.${p}`)} onClick={() => update({ palette: p })}
-                        style={{ display: 'flex', gap: '2px', padding: '4px', borderRadius: '5px', cursor: 'pointer', background: '#1e293b', border: `1px solid ${model.palette === p ? '#5eead4' : '#334155'}` }}>
+                        style={{ display: 'flex', gap: '2px', padding: '4px', borderRadius: '5px', cursor: 'pointer', background: '#f3f5ff', border: `1px solid ${model.palette === p ? '#0d9488' : '#D9DEF0'}` }}>
                         {CHART_PALETTES[p].slice(0, 4).map(c => <span key={c} style={{ width: '10px', height: '14px', borderRadius: '2px', background: c }} />)}
                     </button>
                 ))}
@@ -1244,7 +1309,7 @@ const ChartEditor: React.FC<{
             </div>
             {!inLine && model.source === 'lines' && (
                 <div style={{ display: 'flex', gap: '6px', marginBottom: '10px', alignItems: 'flex-end' }}>
-                    <label style={{ ...half, display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: model.type === 'donut' ? '#64748b' : '#cbd5e1', cursor: 'pointer' }}>
+                    <label style={{ ...half, display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: model.type === 'donut' ? '#6b7690' : '#334155', cursor: 'pointer' }}>
                         <input data-chart-sort type="checkbox" checked={model.sort && model.type !== 'donut'} disabled={model.type === 'donut'} onChange={(e) => update({ sort: e.target.checked })} />
                         {t('editor.chart.sort')}
                     </label>
@@ -1257,7 +1322,7 @@ const ChartEditor: React.FC<{
             )}
             <label style={fieldLabelStyle}>{t('editor.chart.preview')}</label>
             <div data-chart-preview style={{ padding: '12px', background: '#ffffff', borderRadius: '8px', color: '#0f172a', fontFamily: 'Inter, system-ui, sans-serif', overflow: 'hidden' }}>
-                {html ? <div dangerouslySetInnerHTML={{ __html: html }} /> : <span style={{ fontSize: '11px', color: '#64748b' }}>{t('editor.chart.empty')}</span>}
+                {html ? <div dangerouslySetInnerHTML={{ __html: html }} /> : <span style={{ fontSize: '11px', color: '#6b7690' }}>{t('editor.chart.empty')}</span>}
             </div>
         </div>
     );
@@ -1326,7 +1391,7 @@ const FieldTransformEditor: React.FC<{
                     </select>
                 </div>
             </div>
-            <div data-tx-result style={{ padding: '8px 10px', background: '#0b1222', border: '1px dashed #334155', borderRadius: '4px', fontSize: '12px', color: '#e2e8f0', marginBottom: '8px', wordBreak: 'break-word' }}>
+            <div data-tx-result style={{ padding: '8px 10px', background: '#f7f8ff', border: '1px dashed #D9DEF0', borderRadius: '4px', fontSize: '12px', color: '#1e293b', marginBottom: '8px', wordBreak: 'break-word' }}>
                 {t('editor.fieldTx.result')}: <b>{result || '—'}</b>
             </div>
         </div>
@@ -3444,8 +3509,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 width: '100%',
                 minWidth: 0,
                 height: '100vh',
-                background: '#0f172a',
-                color: '#e2e8f0',
+                background: 'linear-gradient(180deg, #f5f3ff 0%, #eef4ff 100%)',
+                color: '#1e293b',
                 fontFamily: 'system-ui, -apple-system, sans-serif',
                 overflow: 'hidden',
             }}
@@ -3458,8 +3523,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                     gap: '12px',
                     height: '56px',
                     padding: '0 16px',
-                    background: '#1e293b',
-                    borderBottom: '1px solid #334155',
+                    background: 'linear-gradient(90deg, #7c3aed, #2563eb 55%, #06b6d4) left bottom / 100% 3px no-repeat, linear-gradient(90deg, #f3e8ff 0%, #e0f2fe 55%, #ccfbf1 100%)',
                     flexShrink: 0,
                 }}
             >
@@ -3474,7 +3538,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         background: 'rgba(99, 102, 241, 0.15)',
                         border: '1px solid rgba(99, 102, 241, 0.4)',
                         borderRadius: '6px',
-                        color: '#a5b4fc',
+                        color: '#4f46e5',
                         fontSize: '13px',
                         fontWeight: 600,
                         cursor: 'pointer',
@@ -3499,7 +3563,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         background: snippetPanelOpen ? 'rgba(16, 185, 129, 0.15)' : 'rgba(99, 102, 241, 0.15)',
                         border: '1px solid ' + (snippetPanelOpen ? 'rgba(16, 185, 129, 0.4)' : 'rgba(99, 102, 241, 0.4)'),
                         borderRadius: '6px',
-                        color: snippetPanelOpen ? '#6ee7b7' : '#a5b4fc',
+                        color: snippetPanelOpen ? '#059669' : '#4f46e5',
                         fontSize: '12px',
                         fontWeight: 600,
                         cursor: 'pointer',
@@ -3516,7 +3580,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                     style={{
                         fontSize: '14px',
                         fontWeight: 700,
-                        color: '#cbd5e1',
+                        color: '#334155',
                         marginRight: '8px',
                     }}
                 >
@@ -3546,7 +3610,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     background: enabled ? 'rgba(148, 163, 184, 0.12)' : 'transparent',
                                     border: `1px solid ${enabled ? 'rgba(148, 163, 184, 0.45)' : 'rgba(148, 163, 184, 0.18)'}`,
                                     borderRadius: '6px',
-                                    color: enabled ? '#e2e8f0' : '#475569',
+                                    color: enabled ? '#1e293b' : '#5B6680',
                                     fontSize: '12px',
                                     fontWeight: 600,
                                     fontFamily: 'inherit',
@@ -3580,10 +3644,10 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     : '1px solid transparent',
                             borderRadius: '4px',
                             color: saveStatus === 'error'
-                                ? '#fca5a5'
+                                ? '#dc2626'
                                 : saveStatus === 'saved'
-                                    ? '#6ee7b7'
-                                    : '#94a3b8',
+                                    ? '#059669'
+                                    : '#5b6680',
                             fontSize: '11px',
                             fontWeight: 600,
                             maxWidth: '320px',
@@ -3608,11 +3672,11 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         gap: '6px',
                         padding: '6px 12px',
                         background: saveStatus === 'saved' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(99, 102, 241, 0.15)',
-                        border: saveHint ? '1px solid #fbbf24' : '1px solid rgba(99, 102, 241, 0.4)',
+                        border: saveHint ? '1px solid #d97706' : '1px solid rgba(99, 102, 241, 0.4)',
                         boxShadow: saveHint ? '0 0 0 3px rgba(251, 191, 36, 0.45)' : 'none',
                         transition: 'box-shadow 0.2s, border-color 0.2s',
                         borderRadius: '6px',
-                        color: '#a5b4fc',
+                        color: '#4f46e5',
                         fontSize: '13px',
                         fontWeight: 600,
                         cursor: saveStatus === 'saving' ? 'wait' : 'pointer',
@@ -3645,7 +3709,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             background: 'rgba(245, 158, 11, 0.12)',
                             border: '1px solid rgba(245, 158, 11, 0.45)',
                             borderRadius: '6px',
-                            color: '#fcd34d',
+                            color: '#c2410c',
                             fontSize: '13px',
                             fontWeight: 600,
                             cursor: needsSave ? 'not-allowed' : 'pointer',
@@ -3734,26 +3798,26 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         style={{
                             position: 'absolute', inset: 0, zIndex: 50,
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            background: 'rgba(2, 6, 23, 0.55)', backdropFilter: 'blur(1px)',
+                            background: 'rgba(49, 46, 129, 0.25)', backdropFilter: 'blur(1px)',
                         }}
                     >
                         <div style={{
                             maxWidth: 440, padding: '24px 26px', borderRadius: 14, textAlign: 'center',
-                            background: '#0f172a', border: '1px solid rgba(16, 185, 129, 0.4)',
-                            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5)', color: '#e2e8f0',
+                            background: '#ffffff', border: '1px solid rgba(16, 185, 129, 0.4)',
+                            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5)', color: '#1e293b',
                         }}>
-                            <Lock size={30} color="#34d399" style={{ marginBottom: 10 }} />
+                            <Lock size={30} color="#059669" style={{ marginBottom: 10 }} />
                             <div style={{ fontSize: 17, fontWeight: 800, marginBottom: 6 }}>{t('editor.locked.title')}</div>
-                            <div style={{ fontSize: 13, lineHeight: 1.6, color: '#94a3b8', marginBottom: 18 }}>
+                            <div style={{ fontSize: 13, lineHeight: 1.6, color: '#5b6680', marginBottom: 18 }}>
                                 {t('editor.locked.body')}
                             </div>
                             {design.taxId && (
-                                <div data-locked-tax-id style={{ fontSize: 12, lineHeight: 1.5, color: '#fcd34d', marginTop: -8, marginBottom: 16 }}>
+                                <div data-locked-tax-id style={{ fontSize: 12, lineHeight: 1.5, color: '#c2410c', marginTop: -8, marginBottom: 16 }}>
                                     {t('editor.locked.taxId', { kind: design.taxId.length === 11 ? 'TCKN' : 'VKN', taxId: design.taxId })}
                                 </div>
                             )}
                             {justDownloaded && (
-                                <div data-locked-downloaded style={{ fontSize: 13, fontWeight: 700, color: '#6ee7b7', marginTop: -6, marginBottom: 16 }}>
+                                <div data-locked-downloaded style={{ fontSize: 13, fontWeight: 700, color: '#059669', marginTop: -6, marginBottom: 16 }}>
                                     ✓ {t('editor.locked.downloaded')}
                                 </div>
                             )}
@@ -3792,7 +3856,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                         style={{
                                             display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 16px', borderRadius: 8,
                                             cursor: 'pointer', fontWeight: 600, fontSize: 13, fontFamily: 'inherit',
-                                            background: 'transparent', border: '1px solid rgba(148, 163, 184, 0.35)', color: '#cbd5e1',
+                                            background: 'transparent', border: '1px solid rgba(148, 163, 184, 0.35)', color: '#334155',
                                         }}
                                     >
                                         <ArrowLeft size={14} /> {t('editor.toolbar.back')}
@@ -3809,8 +3873,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                     style={{
                         display: 'flex',
                         flexDirection: 'column',
-                        background: '#0f172a',
-                        borderRight: '1px solid #334155',
+                        background: '#ffffff',
+                        borderRight: '1px solid #D9DEF0',
                         minWidth: 0,
                         overflow: 'hidden',
                     }}
@@ -3823,13 +3887,13 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             gap: '8px',
                             padding: '0 12px',
                             height: '36px',
-                            background: '#1e293b',
-                            borderBottom: '1px solid #334155',
+                            background: 'linear-gradient(90deg, #d1fae5, #ecfdf5)',
+                            borderBottom: '1px solid #a7f3d0',
                             fontSize: '11px',
                             fontWeight: 700,
                             letterSpacing: '0.5px',
                             textTransform: 'uppercase',
-                            color: '#34d399',
+                            color: '#059669',
                         }}
                     >
                         <Sparkles size={13} />
@@ -3840,7 +3904,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             background: 'rgba(16, 185, 129, 0.18)',
                             borderRadius: '3px',
                             fontSize: '9px',
-                            color: '#6ee7b7',
+                            color: '#059669',
                         }}>
                             {filteredBindingsByGroup.dropdown.length + filteredBindingsByGroup.static.length}
                         </span>
@@ -3854,7 +3918,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 padding: '2px 4px',
                                 background: 'transparent',
                                 border: 'none',
-                                color: '#64748b',
+                                color: '#6b7690',
                                 cursor: 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
@@ -3862,11 +3926,11 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             }}
                             onMouseEnter={(e) => {
                                 e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)';
-                                e.currentTarget.style.color = '#fca5a5';
+                                e.currentTarget.style.color = '#dc2626';
                             }}
                             onMouseLeave={(e) => {
                                 e.currentTarget.style.background = 'transparent';
-                                e.currentTarget.style.color = '#64748b';
+                                e.currentTarget.style.color = '#6b7690';
                             }}
                         >
                             <X size={12} />
@@ -3877,7 +3941,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                     <div
                         style={{
                             padding: '8px 10px',
-                            borderBottom: '1px solid #1e293b',
+                            borderBottom: '1px solid #e4e8f6',
                         }}
                     >
                         <div style={{ position: 'relative', minWidth: 0 }}>
@@ -3888,7 +3952,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     left: 8,
                                     top: '50%',
                                     transform: 'translateY(-50%)',
-                                    color: '#64748b',
+                                    color: '#6b7690',
                                     pointerEvents: 'none',
                                 }}
                             />
@@ -3905,25 +3969,25 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     minWidth: 0,
                                     textOverflow: 'ellipsis',
                                     padding: '6px 8px 6px 26px',
-                                    background: '#1e293b',
-                                    border: '1px solid #334155',
+                                    background: '#f3f5ff',
+                                    border: '1px solid #D9DEF0',
                                     borderRadius: '4px',
-                                    color: '#e2e8f0',
+                                    color: '#1e293b',
                                     fontSize: '11px',
                                     outline: 'none',
                                 }}
                                 onFocus={(e) => e.currentTarget.style.borderColor = '#6366f1'}
-                                onBlur={(e) => e.currentTarget.style.borderColor = '#334155'}
+                                onBlur={(e) => e.currentTarget.style.borderColor = '#D9DEF0'}
                             />
                         </div>
                         {renderedBindingIndexes.size > 0 && (
-                            <div style={{ display: 'flex', gap: '10px', marginTop: '6px', fontSize: '9px', color: '#94a3b8' }}>
+                            <div style={{ display: 'flex', gap: '10px', marginTop: '6px', fontSize: '9px', color: '#5b6680' }}>
                                 <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <span style={{ width: '9px', height: '9px', borderRadius: '2px', background: 'rgba(16, 185, 129, 0.35)', borderLeft: '3px solid #10b981' }} />
                                     {t('editor.fields.visible')}
                                 </span>
                                 <span style={{ display: 'flex', alignItems: 'center', gap: '4px', opacity: 0.7 }}>
-                                    <span style={{ width: '9px', height: '9px', borderRadius: '2px', background: '#1e293b', borderLeft: '3px solid #475569' }} />
+                                    <span style={{ width: '9px', height: '9px', borderRadius: '2px', background: '#f3f5ff', borderLeft: '3px solid #B9C3DE' }} />
                                     {t('editor.fields.hidden')}
                                 </span>
                             </div>
@@ -3946,7 +4010,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 style={{
                                     padding: '20px 12px',
                                     textAlign: 'center',
-                                    color: '#64748b',
+                                    color: '#6b7690',
                                     fontSize: '11px',
                                 }}
                             >
@@ -3956,9 +4020,9 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             (['dropdown', 'static'] as const).map(group => {
                                 const list = filteredBindingsByGroup[group];
                                 const groupLabel = group === 'dropdown' ? t('editor.fields.dataFields') : t('editor.fields.staticTexts');
-                                const groupColor = group === 'dropdown' ? '#a5b4fc'
-                                    : group === 'static' ? '#6ee7b7'
-                                    : '#fcd34d';
+                                const groupColor = group === 'dropdown' ? '#4f46e5'
+                                    : group === 'static' ? '#059669'
+                                    : '#c2410c';
                                 const groupBg = group === 'dropdown' ? 'rgba(99, 102, 241, 0.18)'
                                     : group === 'static' ? 'rgba(16, 185, 129, 0.18)'
                                     : 'rgba(252, 211, 77, 0.18)';
@@ -3992,7 +4056,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                             <span style={{
                                                 marginLeft: 'auto',
                                                 padding: '1px 5px',
-                                                background: '#0f172a',
+                                                background: '#ffffff',
                                                 borderRadius: '3px',
                                                 fontSize: '9px',
                                                 fontWeight: 700,
@@ -4019,12 +4083,12 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                     // görünmeyenler soluklaşır; seçili alan mor çerçeveli.
                                                     const itemBg = isSelected ? 'rgba(99, 102, 241, 0.28)'
                                                         : showRenderStatus && isRendered ? 'rgba(16, 185, 129, 0.16)'
-                                                        : '#1e293b';
+                                                        : '#f3f5ff';
                                                     const itemBorder = isSelected ? 'rgba(129, 140, 248, 0.9)'
                                                         : showRenderStatus && isRendered ? 'rgba(16, 185, 129, 0.45)'
-                                                        : '#334155';
+                                                        : '#D9DEF0';
                                                     const itemBorderLeft = showRenderStatus
-                                                        ? `3px solid ${isRendered ? '#10b981' : '#475569'}`
+                                                        ? `3px solid ${isRendered ? '#10b981' : '#B9C3DE'}`
                                                         : `1px solid ${itemBorder}`;
                                                     const itemTextColor = showRenderStatus && isRendered ? '#d1fae5' : '#e2e8f0';
                                                     const itemOpacity = showRenderStatus && !isRendered && !isSelected ? 0.55 : 1;
@@ -4100,7 +4164,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                                 {!isStatic && (
                                                                     <span data-bind-xml-name style={{
                                                                         fontSize: '9px',
-                                                                        color: '#7dd3fc',
+                                                                        color: '#0284c7',
                                                                         fontFamily: 'monospace',
                                                                         whiteSpace: 'nowrap',
                                                                         overflow: 'hidden',
@@ -4113,7 +4177,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                             </span>
                                                             <span style={{
                                                                 fontSize: '9px',
-                                                                color: '#64748b',
+                                                                color: '#6b7690',
                                                                 fontFamily: 'monospace',
                                                             }}>
                                                                 {b.line}:{b.column}
@@ -4135,7 +4199,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                                     fontWeight: 700,
                                                                     color: showRenderStatus
                                                                         ? (isRendered ? '#10b981' : '#ef4444')
-                                                                        : '#64748b',
+                                                                        : '#6b7690',
                                                                     minWidth: '12px',
                                                                     textAlign: 'center',
                                                                     lineHeight: '1',
@@ -4157,16 +4221,16 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             <div style={{
                                 display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 8px',
                                 background: 'rgba(14, 165, 233, 0.16)', border: '1px solid rgba(56, 189, 248, 0.35)', borderRadius: '4px',
-                                color: '#7dd3fc', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.4px',
+                                color: '#0284c7', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.4px',
                             }}>
                                 <span>{t('editor.catalog.title')}</span>
-                                <span style={{ marginLeft: 'auto', padding: '1px 5px', background: '#0f172a', borderRadius: '3px', fontSize: '9px' }}
+                                <span style={{ marginLeft: 'auto', padding: '1px 5px', background: '#ffffff', borderRadius: '3px', fontSize: '9px' }}
                                     title={t('editor.catalog.countHint')}>
                                     {catalogStatus.filter(s => s.inXslt).length}/{catalogStatus.length}
                                 </span>
                             </div>
-                            <div style={{ fontSize: '9px', color: '#64748b', margin: '4px 2px 6px', lineHeight: 1.4 }}>
-                                ✓ {t('editor.catalog.used')} · <b style={{ color: '#7dd3fc' }}>+</b> {t('editor.catalog.help')}
+                            <div style={{ fontSize: '9px', color: '#6b7690', margin: '4px 2px 6px', lineHeight: 1.4 }}>
+                                ✓ {t('editor.catalog.used')} · <b style={{ color: '#0284c7' }}>+</b> {t('editor.catalog.help')}
                             </div>
                             {filteredCatalog.map(([category, items]) => {
                                 const open = catalogOpen[category] ?? !!xsltSearch.trim();
@@ -4177,13 +4241,13 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                             onClick={() => setCatalogOpen(prev => ({ ...prev, [category]: !open }))}
                                             style={{
                                                 width: '100%', display: 'flex', alignItems: 'center', gap: '6px', padding: '5px 8px',
-                                                background: '#111a30', border: '1px solid #1e293b', borderRadius: '4px',
-                                                color: '#cbd5e1', fontSize: '11px', fontWeight: 600, cursor: 'pointer', textAlign: 'left',
+                                                background: '#eef2ff', border: '1px solid #dbe1f7', borderRadius: '4px',
+                                                color: '#334155', fontSize: '11px', fontWeight: 600, cursor: 'pointer', textAlign: 'left',
                                             }}
                                         >
-                                            <span style={{ fontSize: '9px', color: '#64748b' }}>{open ? '▼' : '▶'}</span>
+                                            <span style={{ fontSize: '9px', color: '#6b7690' }}>{open ? '▼' : '▶'}</span>
                                             <span>{category}</span>
-                                            <span style={{ marginLeft: 'auto', fontSize: '9px', color: '#64748b' }}>
+                                            <span style={{ marginLeft: 'auto', fontSize: '9px', color: '#6b7690' }}>
                                                 {items.filter(s => s.inXslt).length}/{items.length}
                                             </span>
                                         </button>
@@ -4211,17 +4275,17 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                     title={`${f.label}\n${f.path.replace(/\//g, ' › ')}${isLineField(f) ? `\n${t('editor.catalog.lineField')}` : ''}\n${existing ? t('editor.catalog.goTo') : t('editor.catalog.insertAt')}`}
                                                     style={{
                                                         display: 'flex', alignItems: 'center', gap: '6px', margin: '2px 0 2px 8px', padding: '4px 6px 4px 8px',
-                                                        background: '#1e293b', border: '1px solid #334155',
-                                                        borderLeft: `3px solid ${inXslt ? '#10b981' : '#334155'}`, borderRadius: '3px', cursor: 'grab',
+                                                        background: '#f3f5ff', border: '1px solid #D9DEF0',
+                                                        borderLeft: `3px solid ${inXslt ? '#10b981' : '#D9DEF0'}`, borderRadius: '3px', cursor: 'grab',
                                                     }}
                                                     onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(14, 165, 233, 0.15)'; }}
-                                                    onMouseLeave={(e) => { e.currentTarget.style.background = '#1e293b'; }}
+                                                    onMouseLeave={(e) => { e.currentTarget.style.background = '#f3f5ff'; }}
                                                 >
                                                     <span style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
-                                                        <span style={{ display: 'block', fontSize: '11px', color: '#e2e8f0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                        <span style={{ display: 'block', fontSize: '11px', color: '#1e293b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                                             {f.label}
                                                         </span>
-                                                        <span style={{ display: 'block', fontSize: '9px', color: value ? '#94a3b8' : '#475569', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                        <span style={{ display: 'block', fontSize: '9px', color: value ? '#5b6680' : '#5B6680', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                                             {value || t('editor.catalog.noSample')}
                                                         </span>
                                                     </span>
@@ -4233,7 +4297,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                         style={{
                                                             display: 'flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px', padding: 0,
                                                             background: 'rgba(14, 165, 233, 0.18)', border: '1px solid rgba(56, 189, 248, 0.4)', borderRadius: '4px',
-                                                            color: '#7dd3fc', cursor: 'pointer', flexShrink: 0,
+                                                            color: '#0284c7', cursor: 'pointer', flexShrink: 0,
                                                         }}
                                                     >
                                                         <Plus size={12} />
@@ -4263,7 +4327,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                     style={{
                         display: 'flex',
                         flexDirection: 'column',
-                        background: '#0f172a',
+                        background: '#ffffff',
                         minWidth: 0,
                     }}
                 >
@@ -4275,27 +4339,27 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             gap: '8px',
                             padding: '0 12px',
                             height: '36px',
-                            background: '#1e293b',
-                            borderBottom: '1px solid #334155',
+                            background: 'linear-gradient(90deg, #d1fae5, #e0f2fe 60%, #ede9fe)',
+                            borderBottom: '1px solid #c7d2fe',
                             fontSize: '11px',
                             fontWeight: 700,
                             letterSpacing: '0.5px',
                             textTransform: 'uppercase',
                         }}
                     >
-                        <Eye size={13} color="#34d399" />
-                        <span style={{ color: '#6ee7b7' }}>{t('editor.preview.title')}</span>
+                        <Eye size={13} color="#059669" />
+                        <span style={{ color: '#059669' }}>{t('editor.preview.title')}</span>
                         <div style={{ flex: 1 }} />
                         {isRendering ? (
-                            <span style={{ color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <span style={{ color: '#d97706', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                 <RefreshCw size={11} className="spin" /> {t('editor.preview.rendering')}
                             </span>
                         ) : previewError ? (
-                            <span style={{ color: '#fca5a5', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <span style={{ color: '#dc2626', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                 <AlertCircle size={11} /> {t('editor.preview.error')}
                             </span>
                         ) : (
-                            <span style={{ color: '#6ee7b7', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <span style={{ color: '#059669', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                 <CheckCircle2 size={11} /> {renderDurationMs.toFixed(1)}ms
                             </span>
                         )}
@@ -4307,7 +4371,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             gap: '2px',
                             padding: '0 4px',
                             marginLeft: '8px',
-                            borderLeft: '1px solid #334155',
+                            borderLeft: '1px solid #D9DEF0',
                         }}>
                             <button
                                 onClick={() => {
@@ -4319,20 +4383,20 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     padding: '2px 4px',
                                     background: 'transparent',
                                     border: 'none',
-                                    color: '#94a3b8',
+                                    color: '#5b6680',
                                     cursor: 'pointer',
                                     display: 'flex',
                                     alignItems: 'center',
                                 }}
-                                onMouseEnter={(e) => e.currentTarget.style.color = '#a5b4fc'}
-                                onMouseLeave={(e) => e.currentTarget.style.color = '#94a3b8'}
+                                onMouseEnter={(e) => e.currentTarget.style.color = '#4f46e5'}
+                                onMouseLeave={(e) => e.currentTarget.style.color = '#5b6680'}
                             >
                                 <ZoomOut size={11} />
                             </button>
                             <span style={{
                                 fontSize: '10px',
                                 fontFamily: 'monospace',
-                                color: '#cbd5e1',
+                                color: '#334155',
                                 minWidth: '34px',
                                 textAlign: 'center',
                                 padding: '0 2px',
@@ -4349,13 +4413,13 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     padding: '2px 4px',
                                     background: 'transparent',
                                     border: 'none',
-                                    color: '#94a3b8',
+                                    color: '#5b6680',
                                     cursor: 'pointer',
                                     display: 'flex',
                                     alignItems: 'center',
                                 }}
-                                onMouseEnter={(e) => e.currentTarget.style.color = '#a5b4fc'}
-                                onMouseLeave={(e) => e.currentTarget.style.color = '#94a3b8'}
+                                onMouseEnter={(e) => e.currentTarget.style.color = '#4f46e5'}
+                                onMouseLeave={(e) => e.currentTarget.style.color = '#5b6680'}
                             >
                                 <ZoomIn size={11} />
                             </button>
@@ -4368,9 +4432,9 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 style={{
                                     padding: '1px 5px',
                                     background: 'transparent',
-                                    border: '1px solid #334155',
+                                    border: '1px solid #D9DEF0',
                                     borderRadius: '2px',
-                                    color: '#94a3b8',
+                                    color: '#5b6680',
                                     fontSize: '9px',
                                     fontWeight: 700,
                                     cursor: 'pointer',
@@ -4381,12 +4445,12 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 onMouseEnter={(e) => {
                                     e.currentTarget.style.background = 'rgba(99, 102, 241, 0.15)';
                                     e.currentTarget.style.borderColor = 'rgba(99, 102, 241, 0.5)';
-                                    e.currentTarget.style.color = '#a5b4fc';
+                                    e.currentTarget.style.color = '#4f46e5';
                                 }}
                                 onMouseLeave={(e) => {
                                     e.currentTarget.style.background = 'transparent';
-                                    e.currentTarget.style.borderColor = '#334155';
-                                    e.currentTarget.style.color = '#94a3b8';
+                                    e.currentTarget.style.borderColor = '#D9DEF0';
+                                    e.currentTarget.style.color = '#5b6680';
                                 }}
                             >
                                 {t('editor.preview.fit')}
@@ -4400,20 +4464,20 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         data-insert-panel
                         style={{
                             display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px',
-                            background: '#0a1024', borderBottom: '1px solid #1e293b', flexWrap: 'wrap',
+                            background: 'linear-gradient(90deg, #faf5ff, #f0f9ff)', borderBottom: '1px solid #e4e8f6', flexWrap: 'wrap',
                         }}
                     >
-                        <span style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8', letterSpacing: '0.4px', textTransform: 'uppercase', marginRight: '2px' }}>
+                        <span style={{ fontSize: '10px', fontWeight: 700, color: '#5b6680', letterSpacing: '0.4px', textTransform: 'uppercase', marginRight: '2px' }}>
                             {t('editor.insert.title')}
                         </span>
                         {([
-                            { type: 'text', label: t('editor.insert.text'), Icon: Type, color: '#6ee7b7' },
-                            { type: 'image', label: t('editor.insert.image'), Icon: ImageIcon, color: '#a5b4fc' },
-                            { type: 'table', label: t('editor.insert.table'), Icon: Table2, color: '#fcd34d' },
-                            { type: 'formula', label: t('editor.insert.formula'), Icon: Calculator, color: '#f9a8d4' },
-                            { type: 'input', label: t('editor.insert.input'), Icon: TextCursorInput, color: '#fca5a5' },
-                            { type: 'karekod', label: t('editor.insert.qr'), Icon: QrCode, color: '#93c5fd' },
-                            { type: 'chart', label: t('editor.insert.chart'), Icon: BarChart3, color: '#5eead4' },
+                            { type: 'text', label: t('editor.insert.text'), Icon: Type, color: '#059669' },
+                            { type: 'image', label: t('editor.insert.image'), Icon: ImageIcon, color: '#4f46e5' },
+                            { type: 'table', label: t('editor.insert.table'), Icon: Table2, color: '#c2410c' },
+                            { type: 'formula', label: t('editor.insert.formula'), Icon: Calculator, color: '#db2777' },
+                            { type: 'input', label: t('editor.insert.input'), Icon: TextCursorInput, color: '#dc2626' },
+                            { type: 'karekod', label: t('editor.insert.qr'), Icon: QrCode, color: '#2563eb' },
+                            { type: 'chart', label: t('editor.insert.chart'), Icon: BarChart3, color: '#0d9488' },
                         ] as const).map(({ type, label, Icon, color }) => (
                             <div
                                 key={type}
@@ -4432,11 +4496,11 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 }}
                                 style={{
                                     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px',
-                                    width: '68px', height: '56px', background: '#1e293b', border: `1px solid ${color}55`,
+                                    width: '68px', height: '56px', background: '#f3f5ff', border: `1px solid ${color}55`,
                                     borderRadius: '8px', color, fontSize: '11px', fontWeight: 700, cursor: 'grab', userSelect: 'none',
                                 }}
                                 onMouseEnter={(e) => { e.currentTarget.style.background = `${color}22`; e.currentTarget.style.borderColor = color; }}
-                                onMouseLeave={(e) => { e.currentTarget.style.background = '#1e293b'; e.currentTarget.style.borderColor = `${color}55`; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.background = '#f3f5ff'; e.currentTarget.style.borderColor = `${color}55`; }}
                             >
                                 <Icon size={22} />
                                 {label}
@@ -4450,8 +4514,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             title={selectedLineCell ? t('editor.insert.columnHint') : t('editor.insert.columnDisabled')}
                             style={{
                                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px',
-                                width: '68px', height: '56px', background: '#1e293b', border: '1px solid #67e8f955',
-                                borderRadius: '8px', color: '#67e8f9', fontSize: '11px', fontWeight: 700, fontFamily: 'inherit',
+                                width: '68px', height: '56px', background: '#f3f5ff', border: '1px solid #67e8f955',
+                                borderRadius: '8px', color: '#0891b2', fontSize: '11px', fontWeight: 700, fontFamily: 'inherit',
                                 cursor: selectedLineCell ? 'pointer' : 'not-allowed', opacity: selectedLineCell ? 1 : 0.45,
                             }}
                         >
@@ -4466,8 +4530,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 title={t('editor.insert.showHiddenHint')}
                                 style={{
                                     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px',
-                                    width: '68px', height: '56px', background: '#1e293b', border: '1px solid #fcd34d55',
-                                    borderRadius: '8px', color: '#fcd34d', fontSize: '10px', fontWeight: 700, fontFamily: 'inherit',
+                                    width: '68px', height: '56px', background: '#f3f5ff', border: '1px solid #fcd34d55',
+                                    borderRadius: '8px', color: '#c2410c', fontSize: '10px', fontWeight: 700, fontFamily: 'inherit',
                                     cursor: 'pointer', lineHeight: 1.1, textAlign: 'center',
                                 }}
                             >
@@ -4482,9 +4546,9 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             title={t('editor.background.hint')}
                             style={{
                                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px',
-                                width: '68px', height: '56px', background: bgOpen || pageBg ? '#c4b5fd22' : '#1e293b',
-                                border: `1px solid ${bgOpen ? '#c4b5fd' : '#c4b5fd55'}`,
-                                borderRadius: '8px', color: '#c4b5fd', fontSize: '11px', fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer',
+                                width: '68px', height: '56px', background: bgOpen || pageBg ? '#c4b5fd22' : '#f3f5ff',
+                                border: `1px solid ${bgOpen ? '#7c3aed' : '#c4b5fd55'}`,
+                                borderRadius: '8px', color: '#7c3aed', fontSize: '11px', fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer',
                             }}
                         >
                             <Wallpaper size={22} />
@@ -4502,7 +4566,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 <option value="inside">{t('editor.insert.inside')}</option>
                                 <option value="end">{t('editor.insert.end')}</option>
                             </select>
-                            <span style={{ fontSize: '10px', color: '#64748b' }}>
+                            <span style={{ fontSize: '10px', color: '#6b7690' }}>
                                 {insertMode === 'end'
                                     ? t('editor.insert.endHint')
                                     : selectedObject?.element ? t('editor.insert.selected', { tag: selectedObject.element.tagName.toLowerCase() }) : t('editor.insert.noSelection')}
@@ -4511,7 +4575,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         </div>
                         {selectedLineCell && insertMode === 'after' && (
                             <div data-line-column-hint style={{
-                                flexBasis: '100%', fontSize: '10px', color: '#67e8f9', padding: '4px 8px',
+                                flexBasis: '100%', fontSize: '10px', color: '#0891b2', padding: '4px 8px',
                                 background: 'rgba(103, 232, 249, 0.08)', border: '1px solid rgba(103, 232, 249, 0.25)', borderRadius: '4px',
                             }}>
                                 {t('editor.insert.lineColumnHint')}
@@ -4524,19 +4588,19 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             data-bg-panel
                             style={{
                                 display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px', flexWrap: 'wrap',
-                                background: '#0d1430', borderBottom: '1px solid #1e293b', fontSize: '11px', color: '#cbd5e1',
+                                background: '#eef4ff', borderBottom: '1px solid #e4e8f6', fontSize: '11px', color: '#334155',
                             }}
                         >
                             <div style={{
-                                width: '56px', height: '72px', borderRadius: '4px', border: '1px solid #334155', flexShrink: 0,
-                                background: pageBg ? `#fff url("${pageBg.image}") center top / 100% auto no-repeat` : '#111827',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569', fontSize: '9px', textAlign: 'center',
+                                width: '56px', height: '72px', borderRadius: '4px', border: '1px solid #D9DEF0', flexShrink: 0,
+                                background: pageBg ? `#fff url("${pageBg.image}") center top / 100% auto no-repeat` : '#E9EDFB',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#5B6680', fontSize: '9px', textAlign: 'center',
                             }}>
                                 {!pageBg && t('editor.background.none')}
                             </div>
                             <label style={{
                                 padding: '6px 10px', borderRadius: '6px', cursor: 'pointer', fontWeight: 700,
-                                background: 'rgba(196, 181, 253, 0.15)', border: '1px solid rgba(196, 181, 253, 0.5)', color: '#ddd6fe',
+                                background: 'rgba(196, 181, 253, 0.15)', border: '1px solid rgba(196, 181, 253, 0.5)', color: '#6d28d9',
                             }}>
                                 {pageBg ? t('editor.image.change') : t('editor.image.choose')}
                                 <input
@@ -4558,7 +4622,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 />
                             </label>
                             <label style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                                <span style={{ color: '#94a3b8' }}>{t('editor.background.target')}</span>
+                                <span style={{ color: '#5b6680' }}>{t('editor.background.target')}</span>
                                 <select
                                     data-bg-target
                                     value={pageBg?.target ?? 'page'}
@@ -4571,7 +4635,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 </select>
                             </label>
                             <label style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                                <span style={{ color: '#94a3b8' }}>{t('editor.background.fit')}</span>
+                                <span style={{ color: '#5b6680' }}>{t('editor.background.fit')}</span>
                                 <select
                                     data-bg-fit
                                     value={pageBg?.fit ?? 'width'}
@@ -4583,7 +4647,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 </select>
                             </label>
                             <label style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                                <span style={{ color: '#94a3b8' }}>{t('editor.background.opacity')}</span>
+                                <span style={{ color: '#5b6680' }}>{t('editor.background.opacity')}</span>
                                 <select
                                     data-bg-opacity
                                     value={String(pageBg?.opacity ?? 1)}
@@ -4599,12 +4663,12 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     type="button"
                                     data-bg-remove
                                     onClick={() => applyBackground(null)}
-                                    style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #7f1d1d', background: 'transparent', color: '#fca5a5', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+                                    style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #7f1d1d', background: 'transparent', color: '#dc2626', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
                                 >
                                     {t('editor.background.remove')}
                                 </button>
                             )}
-                            <span style={{ flex: 1, minWidth: '200px', color: bgError ? '#fca5a5' : '#64748b', fontSize: '10px', lineHeight: 1.4 }}>
+                            <span style={{ flex: 1, minWidth: '200px', color: bgError ? '#dc2626' : '#6b7690', fontSize: '10px', lineHeight: 1.4 }}>
                                 {bgError ?? (pageBg?.target === 'element' ? t('editor.background.elementHint') : t('editor.background.pageHint'))}
                                 {pageBg && ` · ${(pageBg.image.length / 1024).toFixed(0)} kB`}
                             </span>
@@ -4618,7 +4682,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 display: 'flex', alignItems: 'center', gap: '8px',
                                 padding: '8px 12px', background: 'rgba(16, 185, 129, 0.12)',
                                 borderBottom: '1px solid rgba(16, 185, 129, 0.4)',
-                                color: '#6ee7b7', fontSize: '11px',
+                                color: '#059669', fontSize: '11px',
                             }}
                         >
                             <span style={{ flex: 1 }}>
@@ -4626,13 +4690,13 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             </span>
                             <button
                                 onClick={() => { const loc = moving; setMoving(null); moveTo(loc, null); }}
-                                style={{ padding: '4px 8px', background: 'transparent', border: '1px solid rgba(16, 185, 129, 0.5)', borderRadius: '4px', color: '#6ee7b7', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
+                                style={{ padding: '4px 8px', background: 'transparent', border: '1px solid rgba(16, 185, 129, 0.5)', borderRadius: '4px', color: '#059669', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
                             >
                                 {t('editor.move.toEnd')}
                             </button>
                             <button
                                 onClick={() => setMoving(null)}
-                                style={{ padding: '4px 8px', background: 'transparent', border: '1px solid #334155', borderRadius: '4px', color: '#94a3b8', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
+                                style={{ padding: '4px 8px', background: 'transparent', border: '1px solid #D9DEF0', borderRadius: '4px', color: '#5b6680', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
                             >
                                 {t('editor.common.cancelAction')}
                             </button>
@@ -4646,7 +4710,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 padding: '10px 16px',
                                 background: 'rgba(239, 68, 68, 0.12)',
                                 borderBottom: '1px solid rgba(239, 68, 68, 0.4)',
-                                color: '#fca5a5',
+                                color: '#dc2626',
                                 fontSize: '12px',
                                 fontFamily: 'monospace',
                                 maxHeight: '120px',
@@ -4724,9 +4788,9 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     height: '100%',
-                                    color: '#94a3b8',
+                                    color: '#5b6680',
                                     fontSize: '14px',
-                                    background: '#1e293b',
+                                    background: '#f3f5ff',
                                 }}
                             >
                                 {previewError ? t('editor.preview.failed') : t('editor.preview.waiting')}
@@ -4746,14 +4810,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         top: 0,
                         bottom: 0,
                         width: '360px',
-                        background: '#0f172a',
-                        borderLeft: '1px solid #334155',
+                        background: '#ffffff',
+                        borderLeft: '1px solid #D9DEF0',
                         transform: selectedObject ? 'translateX(0)' : 'translateX(100%)',
                         transition: 'transform 0.25s ease',
                         display: 'flex',
                         flexDirection: 'column',
                         zIndex: 10,
-                        boxShadow: selectedObject ? '-4px 0 16px rgba(0,0,0,0.5)' : 'none',
+                        boxShadow: selectedObject ? '-8px 0 24px rgba(79, 70, 229, 0.18)' : 'none',
                     }}
                 >
                     {selectedObject && (() => {
@@ -4790,20 +4854,20 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             : isLine ? t('editor.panel.kind.line')
                             : isCell ? t('editor.panel.kind.cell')
                             : isLiteral ? t('editor.panel.kind.literal') : t('editor.panel.kind.preview');
-                        const kindColor = kind === 'dropdown' ? '#a5b4fc'
-                            : kind === 'static' ? '#6ee7b7'
-                            : '#fcd34d';
+                        const kindColor = kind === 'dropdown' ? '#4f46e5'
+                            : kind === 'static' ? '#059669'
+                            : '#c2410c';
                         const canPersist = !!el && selectedSourceTagFound;
                         const fieldKey = (name: string) => `${sel.id}-${name}`;
                         const transparentToEmpty = (c: string) => (c === 'rgba(0, 0, 0, 0)' || c === 'transparent' ? '' : c);
-                        const sectionTitle = (text: string, color = '#94a3b8') => (
-                            <div style={{ fontSize: '10px', fontWeight: 700, color, letterSpacing: '0.4px', textTransform: 'uppercase', margin: '14px 0 8px', paddingTop: '12px', borderTop: '1px solid #1e293b' }}>
+                        const sectionTitle = (text: string, color = '#5b6680') => (
+                            <div style={{ fontSize: '10px', fontWeight: 700, color, letterSpacing: '0.4px', textTransform: 'uppercase', margin: '14px 0 8px', paddingTop: '12px', borderTop: '1px solid #e4e8f6' }}>
                                 {text}
                             </div>
                         );
                         const noteBox = (text: React.ReactNode, tone: 'info' | 'ok' | 'warn') => {
-                            const c = tone === 'ok' ? ['rgba(16, 185, 129, 0.08)', 'rgba(16, 185, 129, 0.3)', '#6ee7b7']
-                                : tone === 'warn' ? ['rgba(252, 211, 77, 0.06)', 'rgba(252, 211, 77, 0.3)', '#fcd34d']
+                            const c = tone === 'ok' ? ['rgba(16, 185, 129, 0.08)', 'rgba(16, 185, 129, 0.3)', '#059669']
+                                : tone === 'warn' ? ['rgba(252, 211, 77, 0.06)', 'rgba(252, 211, 77, 0.3)', '#c2410c']
                                 : ['rgba(99, 102, 241, 0.08)', 'rgba(99, 102, 241, 0.25)', '#94a3b8'];
                             return (
                                 <div style={{ marginTop: '10px', padding: '10px 12px', background: c[0], border: `1px solid ${c[1]}`, borderRadius: '4px', fontSize: '10px', color: c[2], lineHeight: 1.5 }}>
@@ -4835,8 +4899,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         return (
                             <>
                                 <div style={{
-                                    padding: '12px 14px', background: '#0a1024',
-                                    borderBottom: '1px solid #1e293b',
+                                    padding: '12px 14px', background: 'linear-gradient(90deg, #ede9fe, #e0f2fe)',
+                                    borderBottom: '1px solid #c7d2fe',
                                     display: 'flex', alignItems: 'center', gap: '8px',
                                 }}>
                                     <div style={{
@@ -4844,12 +4908,12 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                         background: 'rgba(99, 102, 241, 0.2)',
                                         border: '1px solid rgba(99, 102, 241, 0.5)',
                                         borderRadius: '4px', fontSize: '11px', fontWeight: 700,
-                                        color: '#a5b4fc', textAlign: 'center', fontFamily: 'monospace',
+                                        color: '#4f46e5', textAlign: 'center', fontFamily: 'monospace',
                                     }}>
                                         {bindingIndex >= 0 ? `B${bindingIndex + 1}` : `<${tag || '?'}>`}
                                     </div>
                                     <div style={{ flex: 1, minWidth: 0 }}>
-                                        <div style={{ fontSize: '12px', fontWeight: 700, color: '#e2e8f0', letterSpacing: '0.4px' }}>
+                                        <div style={{ fontSize: '12px', fontWeight: 700, color: '#1e293b', letterSpacing: '0.4px' }}>
                                             {t('editor.panel.title')}
                                         </div>
                                         <div style={{ fontSize: '10px', color: kindColor, fontWeight: 600, letterSpacing: '0.3px' }}>
@@ -4860,9 +4924,9 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                         onClick={closeSelection}
                                         title={t('editor.panel.close')}
                                         data-close-property-drawer
-                                        style={{ padding: '4px 8px', background: 'transparent', border: '1px solid #334155', borderRadius: '4px', color: '#94a3b8', cursor: 'pointer', fontSize: '11px' }}
-                                        onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)'; e.currentTarget.style.color = '#fca5a5'; }}
-                                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#94a3b8'; }}
+                                        style={{ padding: '4px 8px', background: 'transparent', border: '1px solid #D9DEF0', borderRadius: '4px', color: '#5b6680', cursor: 'pointer', fontSize: '11px' }}
+                                        onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)'; e.currentTarget.style.color = '#dc2626'; }}
+                                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#5b6680'; }}
                                     >
                                         ✕
                                     </button>
@@ -4871,14 +4935,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 <div style={{ flex: 1, padding: '0 14px 14px', overflowY: 'auto' }}>
                                     {selectedLineCell && el && (
                                         <div data-column-actions>
-                                            {sectionTitle(t('editor.panel.column.title'), '#67e8f9')}
+                                            {sectionTitle(t('editor.panel.column.title'), '#0891b2')}
                                             <div style={{ display: 'flex', gap: '6px' }}>
                                                 <button
                                                     type="button"
                                                     data-column-remove
                                                     onClick={() => applyColumnEdit('remove')}
                                                     title={t('editor.panel.column.removeHint')}
-                                                    style={{ flex: 1, padding: '6px 8px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)', borderRadius: '4px', color: '#fca5a5', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+                                                    style={{ flex: 1, padding: '6px 8px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)', borderRadius: '4px', color: '#dc2626', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
                                                 >
                                                     🗑 {t('editor.panel.column.remove')}
                                                 </button>
@@ -4887,7 +4951,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                     data-column-hide
                                                     onClick={() => applyColumnEdit('hide')}
                                                     title={t('editor.panel.column.hideHint')}
-                                                    style={{ flex: 1, padding: '6px 8px', background: 'rgba(252, 211, 77, 0.15)', border: '1px solid rgba(252, 211, 77, 0.4)', borderRadius: '4px', color: '#fcd34d', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+                                                    style={{ flex: 1, padding: '6px 8px', background: 'rgba(252, 211, 77, 0.15)', border: '1px solid rgba(252, 211, 77, 0.4)', borderRadius: '4px', color: '#c2410c', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
                                                 >
                                                     👁 {t('editor.panel.column.hide')}
                                                 </button>
@@ -4897,29 +4961,29 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     )}
                                     {kind === 'dropdown' && b && (
                                         <>
-                                            {sectionTitle(t('editor.panel.xmlField'), '#a5b4fc')}
+                                            {sectionTitle(t('editor.panel.xmlField'), '#4f46e5')}
                                             <div data-bind-info style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '6px 10px', fontSize: '11px', alignItems: 'baseline' }}>
-                                                <span style={{ color: '#94a3b8' }}>{t('editor.panel.fieldName')}</span>
-                                                <span data-bind-label style={{ color: '#e2e8f0', fontWeight: 700 }}>{bindingInfo.get(b)?.label ?? '—'}</span>
-                                                <span style={{ color: '#94a3b8' }}>{t('editor.panel.xmlName')}</span>
-                                                <span data-bind-xml style={{ color: '#7dd3fc', fontFamily: 'monospace', wordBreak: 'break-all' }}>{bindingInfo.get(b)?.xml || '—'}</span>
+                                                <span style={{ color: '#5b6680' }}>{t('editor.panel.fieldName')}</span>
+                                                <span data-bind-label style={{ color: '#1e293b', fontWeight: 700 }}>{bindingInfo.get(b)?.label ?? '—'}</span>
+                                                <span style={{ color: '#5b6680' }}>{t('editor.panel.xmlName')}</span>
+                                                <span data-bind-xml style={{ color: '#0284c7', fontFamily: 'monospace', wordBreak: 'break-all' }}>{bindingInfo.get(b)?.xml || '—'}</span>
                                             </div>
                                             <label style={{ ...fieldLabelStyle, marginTop: '10px' }}>{t('editor.panel.xpath')}</label>
                                             <div
                                                 data-readonly-xpath
                                                 style={{
-                                                    padding: '8px 10px', background: '#0b1222',
-                                                    border: '1px dashed #334155', borderRadius: '4px',
-                                                    color: '#cbd5e1', fontSize: '12px', fontFamily: 'monospace',
+                                                    padding: '8px 10px', background: '#f7f8ff',
+                                                    border: '1px dashed #D9DEF0', borderRadius: '4px',
+                                                    color: '#334155', fontSize: '12px', fontFamily: 'monospace',
                                                     wordBreak: 'break-all',
                                                 }}
                                             >
                                                 {b.xpath}
                                             </div>
                                             {el && (
-                                                <div style={{ marginTop: '8px', fontSize: '11px', color: '#94a3b8' }}>
+                                                <div style={{ marginTop: '8px', fontSize: '11px', color: '#5b6680' }}>
                                                     {t('editor.panel.previewValue')}{' '}
-                                                    <span style={{ color: '#e2e8f0', fontWeight: 600, wordBreak: 'break-all' }}>
+                                                    <span style={{ color: '#1e293b', fontWeight: 600, wordBreak: 'break-all' }}>
                                                         {(el.textContent || '').trim().slice(0, 120) || t('editor.panel.empty')}
                                                     </span>
                                                 </div>
@@ -4930,7 +4994,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
 
                                     {(sel.locator?.kind === 'bind' || isLiteral) && el && selectedBindPlacement && !design.paid && (selectedBindPlacement.detach || !selectedBindPlacement.movable) && (
                                         <div data-bind-move-status>
-                                            {sectionTitle(t('editor.panel.move.title'), '#6ee7b7')}
+                                            {sectionTitle(t('editor.panel.move.title'), '#059669')}
                                             {!selectedBindPlacement.movable && (selectedBindPlacement.detach === 'cell'
                                                 ? noteBox(t('editor.panel.move.inCell'), 'info')
                                                 : noteBox(selectedBindPlacement.reason, 'warn'))}
@@ -4943,7 +5007,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                         else if (sel.locator?.kind === 'el') detachCell(sel.locator.ordinal);
                                                     }}
                                                     title={t('editor.panel.move.detachHint')}
-                                                    style={{ width: '100%', marginTop: '8px', padding: '7px 10px', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.45)', borderRadius: '4px', color: '#6ee7b7', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+                                                    style={{ width: '100%', marginTop: '8px', padding: '7px 10px', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.45)', borderRadius: '4px', color: '#059669', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
                                                 >
                                                     ✂ {selectedBindPlacement.detach === 'cell' ? t('editor.panel.move.detachCell') : t('editor.panel.move.detachValue')}
                                                 </button>
@@ -4962,9 +5026,9 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                         return (
                                             <div data-contained-fields>
                                                 {sectionTitle(kind === 'dropdown' ? t('editor.panel.otherFields', { count: dynamic.length })
-                                                    : dynamic.length ? `${t('editor.panel.xmlField')} · ${t('editor.panel.fieldsHere', { count: dynamic.length })}` : t('editor.panel.xmlField'), '#a5b4fc')}
+                                                    : dynamic.length ? `${t('editor.panel.xmlField')} · ${t('editor.panel.fieldsHere', { count: dynamic.length })}` : t('editor.panel.xmlField'), '#4f46e5')}
                                                 {!dynamic.length && (
-                                                    <div data-no-xml-field style={{ fontSize: '11px', color: '#94a3b8', marginBottom: '6px' }}>
+                                                    <div data-no-xml-field style={{ fontSize: '11px', color: '#5b6680', marginBottom: '6px' }}>
                                                         {kind === 'static' ? t('editor.panel.staticNote') : t('editor.panel.noXmlNote')}
                                                     </div>
                                                 )}
@@ -4978,10 +5042,10 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                             type="button"
                                                             onClick={() => handleBindingClick(ib)}
                                                             title={ib.xpath}
-                                                            style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width: '100%', marginBottom: '3px', padding: '5px 8px', background: '#1e293b', border: '1px solid #334155', borderRadius: '4px', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}
+                                                            style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width: '100%', marginBottom: '3px', padding: '5px 8px', background: '#f3f5ff', border: '1px solid #D9DEF0', borderRadius: '4px', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}
                                                         >
-                                                            <span style={{ fontSize: '11px', color: '#e2e8f0', fontWeight: 600 }}>B{i + 1} · {ii?.label ?? (ib.kind === 'static' ? ib.xpath.replace(/^static:\s*/, '').slice(0, 40) : ii?.xml || ib.xpath)}</span>
-                                                            {ib.kind !== 'static' && <span style={{ fontSize: '9px', color: '#7dd3fc', fontFamily: 'monospace', wordBreak: 'break-all' }}>XML: {ii?.xml || ib.xpath}</span>}
+                                                            <span style={{ fontSize: '11px', color: '#1e293b', fontWeight: 600 }}>B{i + 1} · {ii?.label ?? (ib.kind === 'static' ? ib.xpath.replace(/^static:\s*/, '').slice(0, 40) : ii?.xml || ib.xpath)}</span>
+                                                            {ib.kind !== 'static' && <span style={{ fontSize: '9px', color: '#0284c7', fontFamily: 'monospace', wordBreak: 'break-all' }}>XML: {ii?.xml || ib.xpath}</span>}
                                                         </button>
                                                     );
                                                 })}
@@ -4991,7 +5055,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
 
                                     {kind === 'static' && (
                                         <>
-                                            {sectionTitle(t('editor.panel.textContent'), '#6ee7b7')}
+                                            {sectionTitle(t('editor.panel.textContent'), '#059669')}
                                             <textarea
                                                 data-property-input
                                                 value={propertyDraft.value || ''}
@@ -4999,20 +5063,20 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                 spellCheck={false}
                                                 style={{
                                                     boxSizing: 'border-box', width: '100%', minHeight: '60px', maxHeight: '220px',
-                                                    padding: '8px 10px', background: '#1e293b',
-                                                    border: '1px solid #334155', borderRadius: '4px',
-                                                    color: '#e2e8f0', fontSize: '12px', fontFamily: 'monospace',
+                                                    padding: '8px 10px', background: '#f3f5ff',
+                                                    border: '1px solid #D9DEF0', borderRadius: '4px',
+                                                    color: '#1e293b', fontSize: '12px', fontFamily: 'monospace',
                                                     resize: 'vertical', outline: 'none',
                                                 }}
                                                 onFocus={(e) => e.currentTarget.style.borderColor = '#6366f1'}
-                                                onBlur={(e) => e.currentTarget.style.borderColor = '#334155'}
+                                                onBlur={(e) => e.currentTarget.style.borderColor = '#D9DEF0'}
                                             />
                                         </>
                                     )}
 
                                     {kind === 'element' && b && (
                                         <>
-                                            {sectionTitle(`${t('editor.panel.condition')} (${propertyDraft['__attr__'] || 'select'})`, '#fcd34d')}
+                                            {sectionTitle(`${t('editor.panel.condition')} (${propertyDraft['__attr__'] || 'select'})`, '#c2410c')}
                                             <textarea
                                                 data-property-input
                                                 value={propertyDraft.value || ''}
@@ -5020,13 +5084,13 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                 spellCheck={false}
                                                 style={{
                                                     boxSizing: 'border-box', width: '100%', minHeight: '60px', maxHeight: '220px',
-                                                    padding: '8px 10px', background: '#1e293b',
-                                                    border: '1px solid #334155', borderRadius: '4px',
-                                                    color: '#e2e8f0', fontSize: '12px', fontFamily: 'monospace',
+                                                    padding: '8px 10px', background: '#f3f5ff',
+                                                    border: '1px solid #D9DEF0', borderRadius: '4px',
+                                                    color: '#1e293b', fontSize: '12px', fontFamily: 'monospace',
                                                     resize: 'vertical', outline: 'none',
                                                 }}
                                                 onFocus={(e) => e.currentTarget.style.borderColor = '#6366f1'}
-                                                onBlur={(e) => e.currentTarget.style.borderColor = '#334155'}
+                                                onBlur={(e) => e.currentTarget.style.borderColor = '#D9DEF0'}
                                             />
                                             {noteBox(t('editor.panel.elementNote'), 'info')}
                                         </>
@@ -5036,14 +5100,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
 
                                     {isObj && el && isTable && (
                                         <>
-                                            {sectionTitle(t('editor.insert.table'), '#fcd34d')}
+                                            {sectionTitle(t('editor.insert.table'), '#c2410c')}
                                             <TableEditor key={fieldKey('table')} table={el as HTMLTableElement} onChange={handleContentChange} onAttr={handleAttrChange} onStyle={handleStyleChange} docLang={docLang} />
                                         </>
                                     )}
 
                                     {isObj && el && isFormula && (
                                         <>
-                                            {sectionTitle(t('editor.insert.formula'), '#f9a8d4')}
+                                            {sectionTitle(t('editor.insert.formula'), '#db2777')}
                                             <FormulaEditor key={fieldKey('formula')} el={el} catalog={catalog} xmlDoc={xmlDoc} inLine={selectedObjInLine()} docLang={docLang} onChange={handleFormulaChange} />
                                             {noteBox(t('editor.panel.formulaNote'), 'info')}
                                         </>
@@ -5051,7 +5115,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
 
                                     {isObj && el && isField && (
                                         <>
-                                            {sectionTitle(t('editor.panel.kind.field'), '#7dd3fc')}
+                                            {sectionTitle(t('editor.panel.kind.field'), '#0284c7')}
                                             <label style={fieldLabelStyle}>{t('editor.panel.shownField')}</label>
                                             <select
                                                 key={fieldKey('field')}
@@ -5063,7 +5127,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                 <CatalogOptions fields={catalog} xmlDoc={xmlDoc} />
                                             </select>
                                             {noteBox(t('editor.panel.fieldNote', { sample: formatDocNumber(1234.56, 2, docLang) }), 'info')}
-                                            {sectionTitle(t('editor.fieldTx.title'), '#a5b4fc')}
+                                            {sectionTitle(t('editor.fieldTx.title'), '#4f46e5')}
                                             <FieldTransformEditor key={fieldKey('field-tx')} el={el} catalog={catalog} xmlDoc={xmlDoc} docLang={docLang} onChange={handleFieldTransformChange} />
                                             {noteBox(t('editor.fieldTx.hint'), 'info')}
                                         </>
@@ -5071,7 +5135,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
 
                                     {isObj && el && isKarekod && (
                                         <>
-                                            {sectionTitle(t('editor.insert.qr'), '#93c5fd')}
+                                            {sectionTitle(t('editor.insert.qr'), '#2563eb')}
                                             <FieldText key={fieldKey('qr-size')} label={t('editor.panel.qrSize')} currentValue={el.style.width || '120px'} onChange={(v) => { handleStyleChange('width', v); handleStyleChange('height', v); }} />
                                             {noteBox(t('editor.panel.qrNote'), 'info')}
                                         </>
@@ -5079,7 +5143,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
 
                                     {isObj && el && isChart && sel.locator?.kind === 'obj' && (
                                         <>
-                                            {sectionTitle(t('editor.insert.chart'), '#5eead4')}
+                                            {sectionTitle(t('editor.insert.chart'), '#0d9488')}
                                             <ChartEditor key={fieldKey('chart')} el={el} id={sel.locator.id} catalog={catalog} xmlDoc={xmlDoc} inLine={objInLine(sel.locator.id)} docLang={docLang} onChange={handleChartChange} />
                                             {noteBox(t('editor.chart.note'), 'info')}
                                         </>
@@ -5087,14 +5151,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
 
                                     {isObj && el && !isImg && !isInput && !isTable && !isFormula && !isField && !isKarekod && !isChart && (
                                         <>
-                                            {sectionTitle(t('editor.panel.textContent'), '#6ee7b7')}
+                                            {sectionTitle(t('editor.panel.textContent'), '#059669')}
                                             <FieldTextArea key={fieldKey('text')} label={t('editor.insert.text')} currentValue={el.innerText} onChange={(v) => handleContentChange(textToMarkup(v))} />
                                         </>
                                     )}
 
                                     {el && canPersist && sel.locator && (isObj || sel.locator.kind === 'img' || ((sel.locator.kind === 'bind' || isLiteral) && !!selectedBindPlacement?.movable)) && (
                                         <>
-                                            {sectionTitle(t('editor.panel.position'), '#6ee7b7')}
+                                            {sectionTitle(t('editor.panel.position'), '#059669')}
                                             <PositionEditor
                                                 key={fieldKey(`position-${positionRev}`)}
                                                 el={el}
@@ -5113,7 +5177,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                         const sides = (['top', 'left', 'bottom', 'right'] as const).map(side => [side, t(`editor.panel.sides.${side}`)] as const);
                                         return (
                                             <div data-dimension-editor>
-                                                {sectionTitle(isLine ? t('editor.panel.sizeLine') : t('editor.panel.size'), '#67e8f9')}
+                                                {sectionTitle(isLine ? t('editor.panel.sizeLine') : t('editor.panel.size'), '#0891b2')}
                                                 {!isImg && (
                                                     <div style={grid}>
                                                         <FieldLength key={fieldKey('dim-width')} attr="width" label={t('editor.panel.width')} currentValue={el.style.width} placeholder={roundPx(cs.width)} onChange={(v) => handleStyleChange('width', v)} />
@@ -5132,12 +5196,12 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                         />
                                                     ))}
                                                 </div>
-                                                <div style={{ fontSize: '10px', color: '#64748b', lineHeight: 1.5, marginBottom: '6px' }}>
+                                                <div style={{ fontSize: '10px', color: '#6b7690', lineHeight: 1.5, marginBottom: '6px' }}>
                                                     {t('editor.panel.lengthHint')}
                                                     {isCell ? ` ${t('editor.panel.cellPaddingHint')}` : ''}
                                                 </div>
 
-                                                {sectionTitle(t('editor.panel.border'), '#67e8f9')}
+                                                {sectionTitle(t('editor.panel.border'), '#0891b2')}
                                                 <FieldText key={fieldKey('border')} label={t('editor.panel.borderAll')} currentValue={el.style.border || ''} placeholder={t('editor.panel.borderPlaceholder')} onChange={(v) => handleStyleChange('border', v)} />
                                                 <div style={{ ...grid, marginBottom: 0 }}>
                                                     {sides.map(([side]) => (
@@ -5150,7 +5214,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                         />
                                                     ))}
                                                 </div>
-                                                <div style={{ fontSize: '10px', color: '#64748b', lineHeight: 1.5 }}>
+                                                <div style={{ fontSize: '10px', color: '#6b7690', lineHeight: 1.5 }}>
                                                     {t('editor.panel.borderHint')}
                                                 </div>
                                             </div>
@@ -5159,7 +5223,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
 
                                     {el && cs && isImg && (
                                         <>
-                                            {sectionTitle(t('editor.insert.image'), '#fcd34d')}
+                                            {sectionTitle(t('editor.insert.image'), '#c2410c')}
                                             <ImageSourceField
                                                 key={fieldKey('src')}
                                                 readOnly={!canPersist}
@@ -5179,7 +5243,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     {el && cs && !isImg && (
                                         <>
                                             {!isLine && <>
-                                            {sectionTitle(t('editor.panel.font'), '#fcd34d')}
+                                            {sectionTitle(t('editor.panel.font'), '#c2410c')}
                                             <FieldText key={fieldKey('font-family')} label={t('editor.panel.fontFamily')} currentValue={cs.fontFamily} onChange={(v) => handleStyleChange('font-family', v)} />
                                             <FieldText key={fieldKey('font-size')} label={t('editor.panel.fontSize')} currentValue={cs.fontSize} onChange={(v) => handleStyleChange('font-size', v)} />
                                             <FieldSelect key={fieldKey('font-weight')} label={t('editor.panel.fontWeight')} currentValue={cs.fontWeight} options={['normal', 'bold', '100', '200', '300', '400', '500', '600', '700', '800', '900']} onChange={(v) => handleStyleChange('font-weight', v)} />
@@ -5189,13 +5253,13 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                             <FieldSelect key={fieldKey('text-align')} label={t('editor.panel.textAlign')} currentValue={cs.textAlign} options={['left', 'right', 'center', 'justify', 'start', 'end']} onChange={(v) => handleStyleChange('text-align', v)} />
                                             </>}
 
-                                            {sectionTitle(t('editor.panel.box'), '#fcd34d')}
+                                            {sectionTitle(t('editor.panel.box'), '#c2410c')}
                                             <FieldColor key={fieldKey('background-color')} label={t('editor.panel.background')} currentValue={transparentToEmpty(cs.backgroundColor)} onChange={(v) => handleStyleChange('background-color', v)} />
                                             <FieldText key={fieldKey('padding')} label={t('editor.panel.padding')} currentValue={cs.padding} onChange={(v) => handleStyleChange('padding', v)} />
 
                                             {isInput && (
                                                 <>
-                                                    {sectionTitle('Input', '#fcd34d')}
+                                                    {sectionTitle('Input', '#c2410c')}
                                                     <FieldText key={fieldKey('placeholder')} label="placeholder" currentValue={el.getAttribute('placeholder') || ''} onChange={(v) => handleAttrChange('placeholder', v)} />
                                                     <FieldText key={fieldKey('value')} label="value" currentValue={el.getAttribute('value') || ''} onChange={(v) => handleAttrChange('value', v)} />
                                                 </>
@@ -5209,8 +5273,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 </div>
 
                                 <div style={{
-                                    padding: '10px 14px', background: '#0a1024',
-                                    borderTop: '1px solid #1e293b',
+                                    padding: '10px 14px', background: '#f5f3ff',
+                                    borderTop: '1px solid #e4e8f6',
                                     display: 'flex', justifyContent: 'space-between', gap: '6px',
                                 }}>
                                     {el && (
@@ -5222,7 +5286,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                             }}
                                             title={isColumnCell ? t('editor.panel.hideColumnHint') : t('editor.panel.hideHint')}
                                             data-hide-preview-element
-                                            style={{ flex: 1, padding: '6px 8px', background: 'rgba(252, 211, 77, 0.15)', border: '1px solid rgba(252, 211, 77, 0.4)', borderRadius: '4px', color: '#fcd34d', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
+                                            style={{ flex: 1, padding: '6px 8px', background: 'rgba(252, 211, 77, 0.15)', border: '1px solid rgba(252, 211, 77, 0.4)', borderRadius: '4px', color: '#c2410c', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
                                         >
                                             👁 {isColumnCell ? t('editor.panel.column.hide') : t('editor.panel.hide')}
                                         </button>
@@ -5232,7 +5296,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                             onClick={() => { flushSourceEdits(); setMoving(sel.locator); }}
                                             title={isObj ? t('editor.panel.moveObject') : isLiteral ? t('editor.panel.moveElement') : t('editor.panel.moveField')}
                                             data-move-object
-                                            style={{ flex: 1, padding: '6px 8px', background: moving ? 'rgba(16, 185, 129, 0.3)' : 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.4)', borderRadius: '4px', color: '#6ee7b7', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
+                                            style={{ flex: 1, padding: '6px 8px', background: moving ? 'rgba(16, 185, 129, 0.3)' : 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.4)', borderRadius: '4px', color: '#059669', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
                                         >
                                             ↕ {t('editor.panel.move.button')}
                                         </button>
@@ -5242,7 +5306,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                             onClick={handleRemove}
                                             title={isColumnCell ? t('editor.panel.removeColumnHint') : t('editor.panel.removeHint')}
                                             data-remove-from-xslt
-                                            style={{ flex: 1, padding: '6px 8px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)', borderRadius: '4px', color: '#fca5a5', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
+                                            style={{ flex: 1, padding: '6px 8px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)', borderRadius: '4px', color: '#dc2626', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
                                         >
                                             🗑 {isColumnCell ? t('editor.panel.removeColumn') : t('editor.panel.remove')}
                                         </button>
