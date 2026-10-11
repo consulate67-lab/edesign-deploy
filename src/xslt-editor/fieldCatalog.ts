@@ -731,6 +731,12 @@ const LINE_PREFIX_RE = /^(Invoice\/InvoiceLine|DespatchAdvice\/DespatchLine|Rece
 /** Satır (kalem) alanı mı — yol satır elemanıyla (InvoiceLine, bilet, koltuk…) başlıyor. */
 export const isLineField = (f: CatalogField) => LINE_PREFIX_RE.test(f.path);
 
+/** Satır alanının satır öğelerinin mutlak XPath'i (ör. tüm InvoiceLine'lar); satır alanı değilse null. */
+export function lineRootXPath(f: CatalogField): string | null {
+    const prefix = f.path.match(LINE_PREFIX_RE)?.[1];
+    return prefix ? fieldXPath({ ...f, path: prefix }) : null;
+}
+
 const STEP_RE = /^(@?[\w.-]+)(?:\[((?:[\w.-]+\/)*@?[\w.-]+)='([^']*)'\])?$/;
 const PRED_RE = /\[(?:[\w.-]+\/)*@?[\w.-]+='([^']*)'\]/;
 
@@ -960,7 +966,7 @@ export const numberPattern = (decimals: number, lang: DocLanguage = 'tr') => {
     const int = `###${grouping}##0`;
     return decimals > 0 ? `${int}${decimal}${'0'.repeat(decimals)}` : int;
 };
-const formatted = (expr: string, decimals: number, lang: DocLanguage) =>
+export const formatted = (expr: string, decimals: number, lang: DocLanguage) =>
     `format-number(${expr}, '${numberPattern(decimals, lang)}', '${decimalFormatOf(lang)}')`;
 
 /** Seçilen konum bir satır döngüsünün (InvoiceLine / DespatchLine / ReceiptLine / CreditNoteLine) içinde mi? */

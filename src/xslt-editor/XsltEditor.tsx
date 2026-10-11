@@ -34,12 +34,16 @@ import {
     ArrowLeft, Save, Download, FileCode2,
     AlertCircle, Eye, RefreshCw, CheckCircle2, Sparkles, Search, ZoomIn, ZoomOut,
     PanelLeftClose, PanelLeftOpen, X, Lock, Undo2, Redo2,
-    Image as ImageIcon, Type, Table2, TextCursorInput, Calculator, Plus, Columns3, Wallpaper, QrCode,
+    Image as ImageIcon, Type, Table2, TextCursorInput, Calculator, Plus, Columns3, Wallpaper, QrCode, BarChart3,
 } from 'lucide-react';
 import { karekodSnippet, hasQrLibrary } from './karekod';
 import {
+    chartSnippet, chartContent, chartAttrs, readChart, defaultChart, renderChartHtml,
+    CHART_TYPES, CHART_SOURCES, CHART_SHOWS, CHART_PALETTES, type ChartModel, type ChartPalette,
+} from './chart';
+import {
     detectInXslt, xsltLocalNameSet, bindingLabel, contextPathResolver, evaluateField,
-    ensureDecimalFormat, isInLineContext, isLineField, fieldSnippet, fieldContent, formulaSnippet, formulaContent, formulaAttrs,
+    ensureDecimalFormat, isInLineContext, isLineField, lineRootXPath, fieldSnippet, fieldContent, formulaSnippet, formulaContent, formulaAttrs,
     readFormula, DEFAULT_FORMULA, FORMULA_OPS, evaluateFormula, formulaSumsLines,
     readFieldTransform, fieldTransformAttrs, evaluateFieldTransform, FIELD_FILTERS, FIELD_EXTRACTS, FIELD_CASES,
     type CatalogField, type FormulaModel, type FieldTransform,
@@ -151,7 +155,7 @@ const decodeAttr = (v: string) => v
  * `ids` verilmezse tüm formül objeleri yenilenir.
  */
 function refreshObjectContents(xslt: string, catalog: CatalogField[], lang: DocLanguage, ids?: string[]): string {
-    const targets = ids ?? [...xslt.matchAll(/<span\b[^>]*\bdata-obj-kind="formula"[^>]*>/g)]
+    const targets = ids ?? [...xslt.matchAll(/<(?:span|div)\b[^>]*\bdata-obj-kind="(?:formula|chart)"[^>]*>/g)]
         .map(m => m[0].match(/\bdata-xslt-obj="([^"]+)"/)?.[1])
         .filter((x): x is string => !!x);
     let next = xslt;
@@ -164,6 +168,7 @@ function refreshObjectContents(xslt: string, catalog: CatalogField[], lang: DocL
         const kind = el.getAttribute('data-obj-kind');
         let content: string | null = null;
         if (kind === 'formula') content = formulaContent(readFormula(el), catalog, inLine, lang);
+        else if (kind === 'chart') content = chartContent(id, readChart(el), catalog, inLine, lang);
         else if (kind === 'field') {
             const f = catalog.find(x => x.key === el.getAttribute('data-field'));
             if (f) content = fieldContent(f, inLine, lang, readFieldTransform(el));
@@ -1106,6 +1111,158 @@ const FormulaEditor: React.FC<{
     );
 };
 
+/** Grafik objesi: tür, veri kaynağı (belge satırları / elle satırlar), renkler ve gösterim. */
+const ChartEditor: React.FC<{
+    el: HTMLElement;
+    id: string;
+    catalog: CatalogField[];
+    xmlDoc: Document | null;
+    inLine: boolean;
+    docLang: DocLanguage;
+    onChange: (m: ChartModel, previewHtml: string) => void;
+}> = ({ el, id, catalog, xmlDoc, inLine, docLang, onChange }) => {
+    const { t } = useLocaleT();
+    const [model, setModel] = useState<ChartModel>(() => readChart(el));
+    const numeric = useMemo(() => catalog.filter(isNumericField), [catalog]);
+    const lineNums = useMemo(() => numeric.filter(isLineField), [numeric]);
+    const valueField = catalog.find(f => f.key === model.value);
+    const root = valueField ? lineRootXPath(valueField) : null;
+    const lineLabels = useMemo(() => catalog.filter(f => isLineField(f) && lineRootXPath(f) === root), [catalog, root]);
+    const render = (m: ChartModel) => renderChartHtml(id, m, catalog, inLine, xmlDoc, docLang);
+    const html = useMemo(() => renderChartHtml(id, model, catalog, inLine, xmlDoc, docLang), [id, model, catalog, inLine, xmlDoc, docLang]);
+    const update = (patch: Partial<ChartModel>) => {
+        const next = { ...model, ...patch };
+        setModel(next);
+        onChange(next, render(next));
+    };
+    const setRow = (i: number, patch: Partial<ChartModel['rows'][number]>) =>
+        update({ rows: model.rows.map((r, j) => (j === i ? { ...r, ...patch } : r)) });
+    const byLines = inLine || model.source === 'lines';
+    const half: React.CSSProperties = { flex: 1, minWidth: 0 };
+    const pick = (active: boolean): React.CSSProperties => ({
+        flex: 1, padding: '6px 4px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', fontWeight: 700, fontFamily: 'inherit',
+        background: active ? 'rgba(94, 234, 212, 0.16)' : '#1e293b', color: active ? '#5eead4' : '#94a3b8',
+        border: `1px solid ${active ? '#5eead4' : '#334155'}`,
+    });
+    return (
+        <div data-chart-editor>
+            {inLine ? (
+                <div data-chart-inline-note style={{ marginBottom: '10px', fontSize: '11px', lineHeight: 1.45, color: '#93c5fd' }}>{t('editor.chart.inlineNote')}</div>
+            ) : (
+                <>
+                    <label style={fieldLabelStyle}>{t('editor.chart.type')}</label>
+                    <div style={{ display: 'flex', gap: '4px', marginBottom: '10px' }}>
+                        {CHART_TYPES.map(type => (
+                            <button key={type} type="button" data-chart-type={type} onClick={() => update({ type })} style={pick(model.type === type)}>
+                                {t(`editor.chart.types.${type}`)}
+                            </button>
+                        ))}
+                    </div>
+                    <label style={fieldLabelStyle}>{t('editor.chart.source')}</label>
+                    <select data-chart-source value={model.source} onChange={(e) => update({ source: e.target.value as ChartModel['source'] })} style={{ ...fieldInputStyle, marginBottom: '10px' }}>
+                        {CHART_SOURCES.map(s => <option key={s} value={s}>{t(`editor.chart.sources.${s}`)}</option>)}
+                    </select>
+                </>
+            )}
+            {byLines ? (
+                <>
+                    <label style={fieldLabelStyle}>{t('editor.chart.value')}</label>
+                    <select data-chart-value value={model.value} onChange={(e) => update({ value: e.target.value })} style={{ ...fieldInputStyle, marginBottom: '10px' }}>
+                        <CatalogOptions fields={lineNums} xmlDoc={xmlDoc} />
+                    </select>
+                    {!inLine && (
+                        <>
+                            <label style={fieldLabelStyle}>{t('editor.chart.label')}</label>
+                            <select data-chart-label value={model.label} onChange={(e) => update({ label: e.target.value })} style={{ ...fieldInputStyle, marginBottom: '10px' }}>
+                                <option value="">{t('editor.chart.labelNone')}</option>
+                                <CatalogOptions fields={lineLabels} xmlDoc={xmlDoc} />
+                            </select>
+                        </>
+                    )}
+                </>
+            ) : (
+                <div data-chart-rows style={{ marginBottom: '10px' }}>
+                    <label style={fieldLabelStyle}>{t('editor.chart.rows')}</label>
+                    {model.rows.map((r, i) => {
+                        const isField = r.value.startsWith('field:');
+                        return (
+                            <div key={i} data-chart-row={i} style={{ padding: '6px', marginBottom: '6px', border: '1px solid #334155', borderRadius: '4px' }}>
+                                <div style={{ display: 'flex', gap: '4px', marginBottom: '4px' }}>
+                                    <input data-chart-row-label type="text" value={r.label} placeholder={t('editor.chart.rowLabel')} onChange={(e) => setRow(i, { label: e.target.value })} style={{ ...fieldInputStyle, flex: 1 }} />
+                                    <button type="button" data-chart-row-remove title={t('editor.chart.remove')} onClick={() => update({ rows: model.rows.filter((_, j) => j !== i) })}
+                                        style={{ ...fieldInputStyle, width: '30px', flex: 'none', cursor: 'pointer', color: '#fca5a5', padding: 0 }}>×</button>
+                                </div>
+                                <div style={{ display: 'flex', gap: '4px' }}>
+                                    <select
+                                        data-chart-row-value
+                                        value={isField ? r.value.slice(6) : '#'}
+                                        onChange={(e) => {
+                                            const key = e.target.value;
+                                            const f = catalog.find(x => x.key === key);
+                                            setRow(i, key === '#' ? { value: '0' } : { value: `field:${key}`, label: r.label || f?.label || '' });
+                                        }}
+                                        style={{ ...fieldInputStyle, flex: 1 }}
+                                    >
+                                        <option value="#">{t('editor.chart.constant')}</option>
+                                        <CatalogOptions fields={numeric} xmlDoc={xmlDoc} />
+                                    </select>
+                                    {!isField && (
+                                        <input data-chart-row-number type="text" inputMode="decimal" value={r.value} onChange={(e) => setRow(i, { value: e.target.value })} style={{ ...fieldInputStyle, width: '80px', flex: 'none' }} />
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })}
+                    <button type="button" data-chart-row-add onClick={() => update({ rows: [...model.rows, { label: '', value: `field:${numeric[0]?.key ?? ''}` }] })}
+                        style={{ ...fieldInputStyle, cursor: 'pointer', color: '#5eead4', fontFamily: 'inherit', fontWeight: 700 }}>
+                        + {t('editor.chart.addRow')}
+                    </button>
+                </div>
+            )}
+            {!inLine && <FieldText label={t('editor.chart.title')} currentValue={model.title} placeholder={t('editor.chart.titlePlaceholder')} onChange={(v) => update({ title: v })} />}
+            <label style={fieldLabelStyle}>{t('editor.chart.palette')}</label>
+            <div style={{ display: 'flex', gap: '4px', marginBottom: '10px', flexWrap: 'wrap' }}>
+                {(Object.keys(CHART_PALETTES) as ChartPalette[]).map(p => (
+                    <button key={p} type="button" data-chart-palette={p} title={t(`editor.chart.palettes.${p}`)} onClick={() => update({ palette: p })}
+                        style={{ display: 'flex', gap: '2px', padding: '4px', borderRadius: '5px', cursor: 'pointer', background: '#1e293b', border: `1px solid ${model.palette === p ? '#5eead4' : '#334155'}` }}>
+                        {CHART_PALETTES[p].slice(0, 4).map(c => <span key={c} style={{ width: '10px', height: '14px', borderRadius: '2px', background: c }} />)}
+                    </button>
+                ))}
+            </div>
+            <div style={{ display: 'flex', gap: '6px', marginBottom: '10px' }}>
+                <div style={half}>
+                    <label style={fieldLabelStyle}>{t('editor.chart.show')}</label>
+                    <select data-chart-show value={model.show} onChange={(e) => update({ show: e.target.value as ChartModel['show'] })} style={fieldInputStyle}>
+                        {CHART_SHOWS.map(s => <option key={s} value={s}>{t(`editor.chart.shows.${s}`)}</option>)}
+                    </select>
+                </div>
+                <div style={{ width: '80px' }}>
+                    <label style={fieldLabelStyle}>{t('editor.formula.decimals')}</label>
+                    <input data-chart-decimals type="number" min={0} max={4} value={model.decimals}
+                        onChange={(e) => update({ decimals: Math.min(4, Math.max(0, Number(e.target.value) || 0)) })} style={fieldInputStyle} />
+                </div>
+            </div>
+            {!inLine && model.source === 'lines' && (
+                <div style={{ display: 'flex', gap: '6px', marginBottom: '10px', alignItems: 'flex-end' }}>
+                    <label style={{ ...half, display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: model.type === 'donut' ? '#64748b' : '#cbd5e1', cursor: 'pointer' }}>
+                        <input data-chart-sort type="checkbox" checked={model.sort && model.type !== 'donut'} disabled={model.type === 'donut'} onChange={(e) => update({ sort: e.target.checked })} />
+                        {t('editor.chart.sort')}
+                    </label>
+                    <div style={{ width: '80px' }}>
+                        <label style={fieldLabelStyle}>{t('editor.chart.limit')}</label>
+                        <input data-chart-limit type="number" min={1} max={20} value={model.limit}
+                            onChange={(e) => update({ limit: Math.min(20, Math.max(1, Number(e.target.value) || 1)) })} style={fieldInputStyle} />
+                    </div>
+                </div>
+            )}
+            <label style={fieldLabelStyle}>{t('editor.chart.preview')}</label>
+            <div data-chart-preview style={{ padding: '12px', background: '#ffffff', borderRadius: '8px', color: '#0f172a', fontFamily: 'Inter, system-ui, sans-serif', overflow: 'hidden' }}>
+                {html ? <div dangerouslySetInnerHTML={{ __html: html }} /> : <span style={{ fontSize: '11px', color: '#64748b' }}>{t('editor.chart.empty')}</span>}
+            </div>
+        </div>
+    );
+};
+
 /** Veri alanının değerini işleme: birden çok satırdan seçme ve değerin bir kısmını alma. */
 const FieldTransformEditor: React.FC<{
     el: HTMLElement;
@@ -1944,9 +2101,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         console.log(`[XSLTEditor] Obje eklendi: ${what} → ${target ? `<${target.el.tagName.toLowerCase()}> ${target.position === 'inside' ? 'içine' : 'altına'}` : 'sayfa sonu'}`);
     }, []);
 
-    const insertObject = useCallback((type: XsltInsertType | 'formula' | 'karekod', target: InsertTarget | null) => {
+    const insertObject = useCallback((type: XsltInsertType | 'formula' | 'karekod' | 'chart', target: InsertTarget | null) => {
         if (type === 'karekod') {
             insertSnippet((id) => karekodSnippet(id, !hasQrLibrary(xsltContentRef.current)), target, 'karekod');
+            return;
+        }
+        if (type === 'chart') {
+            const cat = catalogRef.current;
+            insertSnippet((id, inLine) => chartSnippet(id, defaultChart(cat), cat, inLine, docLangRef.current), target, 'grafik');
             return;
         }
         if (type === 'image') {
@@ -1988,7 +2150,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
      * kalem satırına alan / satır formülü / boş hücre, başlığa kolon adı.
      * Seçim satır tablosunda değilse false.
      */
-    const insertColumn = useCallback((what: 'field' | 'formula' | 'empty', key?: string): boolean => {
+    const insertColumn = useCallback((what: 'field' | 'formula' | 'chart' | 'empty', key?: string): boolean => {
         const xslt = xsltContentRef.current;
         const ctx = findLineTableCell(selectedObjectRef.current?.element ?? null, xslt);
         if (!ctx) return false;
@@ -2009,6 +2171,11 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 ?? DEFAULT_FORMULA.a;
             header = dt('editor.doc.computed');
             line = formulaSnippet(id, { ...DEFAULT_FORMULA, a, label: '', suffix: '' }, cat, true, lang);
+        } else if (what === 'chart') {
+            const m = defaultChart(cat);
+            if (!cat.some(f => f.key === m.value && isLineField(f))) return false;
+            header = `${docCatalogRef.current.find(x => x.key === m.value)?.label ?? m.title} %`;
+            line = chartSnippet(id, m, cat, true, lang);
         }
         let updated = addColumnAfterCell(xslt, ctx, kind => kind === 'line'
             ? line
@@ -2272,17 +2439,23 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     }, [flushSourceEdits, resolveSourceTag]);
 
     /** Objenin iç içeriği (metin / tablo satırları): önizleme + XSLT. */
-    const handleContentChange = useCallback((markup: string, previewText?: string) => {
+    const handleContentChange = useCallback((markup: string, previewText?: string, previewHtml?: string) => {
         const sel = selectedObjectRef.current;
         if (!sel) return;
         if (sel.element) {
-            if (previewText !== undefined) sel.element.textContent = previewText;
+            if (previewHtml !== undefined) sel.element.innerHTML = previewHtml;
+            else if (previewText !== undefined) sel.element.textContent = previewText;
             else sel.element.innerHTML = markup;
         }
         if (!sel.locator) return;
         pendingContentRef.current = markup;
         scheduleSourceFlush();
     }, [scheduleSourceFlush]);
+
+    const objInLine = useCallback((id: string) => {
+        const tag = findObjTag(xsltContentRef.current, id);
+        return tag ? isInLineContext(xsltContentRef.current, tag.start) : false;
+    }, []);
 
     /** Seçili objenin XSLT'deki konumu satır döngüsü içinde mi? */
     const selectedObjInLine = useCallback(() => {
@@ -2298,6 +2471,15 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         for (const [attr, value] of formulaAttrs(m)) handleAttrChange(attr, value);
         handleContentChange(content, previewText);
     }, [selectedObjInLine, handleAttrChange, handleContentChange]);
+
+    const handleChartChange = useCallback((m: ChartModel, previewHtml: string) => {
+        const loc = selectedObjectRef.current?.locator;
+        if (loc?.kind !== 'obj') return;
+        const content = chartContent(loc.id, m, catalogRef.current, objInLine(loc.id), docLangRef.current);
+        if (content === null) return;
+        for (const [attr, value] of chartAttrs(m)) handleAttrChange(attr, value);
+        handleContentChange(content, undefined, previewHtml);
+    }, [objInLine, handleAttrChange, handleContentChange]);
 
     const handleFieldChange = useCallback((key: string) => {
         const f = catalogRef.current.find(x => x.key === key);
@@ -3055,7 +3237,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             if (!e.relatedTarget) markDropTarget(null);
         };
         const dropHandler = (e: DragEvent) => {
-            const type = e.dataTransfer?.getData('text/x-xslt-element') as XsltInsertType | 'formula' | 'karekod' | '';
+            const type = e.dataTransfer?.getData('text/x-xslt-element') as XsltInsertType | 'formula' | 'karekod' | 'chart' | '';
             const fieldKey = e.dataTransfer?.getData('text/x-xslt-field') ?? '';
             const bindIndex = e.dataTransfer?.getData('text/x-xslt-bind') ?? '';
             markDropTarget(null);
@@ -4231,6 +4413,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             { type: 'formula', label: t('editor.insert.formula'), Icon: Calculator, color: '#f9a8d4' },
                             { type: 'input', label: t('editor.insert.input'), Icon: TextCursorInput, color: '#fca5a5' },
                             { type: 'karekod', label: t('editor.insert.qr'), Icon: QrCode, color: '#93c5fd' },
+                            { type: 'chart', label: t('editor.insert.chart'), Icon: BarChart3, color: '#5eead4' },
                         ] as const).map(({ type, label, Icon, color }) => (
                             <div
                                 key={type}
@@ -4242,7 +4425,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     e.dataTransfer.effectAllowed = 'copy';
                                 }}
                                 onClick={() => {
-                                    if (type === 'formula' && insertMode === 'after' && insertColumn('formula')) return;
+                                    if ((type === 'formula' || type === 'chart') && insertMode === 'after' && insertColumn(type)) return;
                                     insertObject(type, insertMode === 'end'
                                         ? null
                                         : resolveInsertTarget(selectedObjectRef.current?.element ?? null, insertMode));
@@ -4590,6 +4773,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         const isFormula = objKind === 'formula';
                         const isField = objKind === 'field';
                         const isKarekod = objKind === 'karekod';
+                        const isChart = objKind === 'chart';
                         const isCell = tag === 'td' || tag === 'th';
                         const isLiteral = sel.locator?.kind === 'el';
                         const elRect = el?.getBoundingClientRect();
@@ -4601,7 +4785,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         const kindDisplay = kind === 'dropdown' ? t('editor.panel.kind.dynamic')
                             : kind === 'static' ? t('editor.panel.kind.static')
                             : kind === 'element' ? t('editor.panel.kind.element')
-                            : isObj ? `${t('editor.panel.kind.object')} · ${isFormula ? t('editor.insert.formula') : isField ? t('editor.panel.kind.field') : isKarekod ? t('editor.insert.qr') : isImg ? t('editor.insert.image') : isTable ? t('editor.insert.table') : isInput ? t('editor.insert.input') : t('editor.insert.text')}`
+                            : isObj ? `${t('editor.panel.kind.object')} · ${isFormula ? t('editor.insert.formula') : isField ? t('editor.panel.kind.field') : isKarekod ? t('editor.insert.qr') : isChart ? t('editor.insert.chart') : isImg ? t('editor.insert.image') : isTable ? t('editor.insert.table') : isInput ? t('editor.insert.input') : t('editor.insert.text')}`
                             : isImg ? t('editor.insert.image')
                             : isLine ? t('editor.panel.kind.line')
                             : isCell ? t('editor.panel.kind.cell')
@@ -4893,7 +5077,15 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                         </>
                                     )}
 
-                                    {isObj && el && !isImg && !isInput && !isTable && !isFormula && !isField && !isKarekod && (
+                                    {isObj && el && isChart && sel.locator?.kind === 'obj' && (
+                                        <>
+                                            {sectionTitle(t('editor.insert.chart'), '#5eead4')}
+                                            <ChartEditor key={fieldKey('chart')} el={el} id={sel.locator.id} catalog={catalog} xmlDoc={xmlDoc} inLine={objInLine(sel.locator.id)} docLang={docLang} onChange={handleChartChange} />
+                                            {noteBox(t('editor.chart.note'), 'info')}
+                                        </>
+                                    )}
+
+                                    {isObj && el && !isImg && !isInput && !isTable && !isFormula && !isField && !isKarekod && !isChart && (
                                         <>
                                             {sectionTitle(t('editor.panel.textContent'), '#6ee7b7')}
                                             <FieldTextArea key={fieldKey('text')} label={t('editor.insert.text')} currentValue={el.innerText} onChange={(v) => handleContentChange(textToMarkup(v))} />
