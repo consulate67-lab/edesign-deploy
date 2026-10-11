@@ -1,4 +1,4 @@
-// Perakende (tekstil, ayakkabı ve diğer mağaza sektörleri) e-Arşiv / e-Fatura hazır şablonlarını üretir:
+// Perakende (tekstil, ayakkabı, diğer mağaza sektörleri ve adisyon tarzı satışlar) e-Arşiv / e-Fatura hazır şablonlarını üretir:
 // public/ebelge/hazir/<id>.xslt + .xml ve src/sector-templates/groups/perakende.generated.ts. Tanımları
 // scripts/perakende/ altında değiştirince çalıştırın:
 //   node scripts/gen-perakende-templates.mjs
@@ -6,14 +6,17 @@ import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { DOMParser } from '@xmldom/xmldom';
 import { HAZIR, invoice, xslt } from './moda/lib.mjs';
-import { LAYOUTS } from './perakende/layouts.mjs';
+import { LAYOUTS as BASE_LAYOUTS } from './perakende/layouts.mjs';
+import { ADISYON_LAYOUTS } from './perakende/adisyon-layouts.mjs';
 import { BASE_CSS, LABELS, LINE_STYLES, TEMPLATES, blocks, mkLogo, themeCss } from './perakende/kit.mjs';
 import TEKSTIL from './perakende/tekstil.mjs';
 import AYAKKABI from './perakende/ayakkabi.mjs';
 import DIGER from './perakende/diger.mjs';
+import ADISYON from './perakende/adisyon.mjs';
 
 const OUT_TS = join(process.cwd(), 'src', 'sector-templates', 'groups', 'perakende.generated.ts');
-const SPECS = [...TEKSTIL, ...AYAKKABI, ...DIGER];
+const LAYOUTS = { ...BASE_LAYOUTS, ...ADISYON_LAYOUTS };
+const SPECS = [...TEKSTIL, ...AYAKKABI, ...DIGER, ...ADISYON];
 
 const wellFormed = (name, text) => {
     const errors = [];

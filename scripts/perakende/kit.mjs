@@ -55,6 +55,16 @@ const ICONS = {
     sise: '<path d="M10 2.5h4v3l1.5 2.5v13H8.5V8L10 5.5ZM8.5 12h7" fill="none"/>',
     kuruyemis: '<ellipse cx="12" cy="12" rx="5.5" ry="8" fill="none"/><path d="M12 4v16M8 7.5c2.5 1.2 5.5 1.2 8 0M8 16.5c2.5-1.2 5.5-1.2 8 0" fill="none"/>',
     kask: '<path d="M3 15.5a9 9 0 0 1 18 0ZM2 15.5h20v2.5H2ZM12 6.5v4M9 7.5l.8 3.5M15 7.5l-.8 3.5" fill="none"/>',
+    fincan: '<path d="M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5Z" fill="none"/><path d="M16 10h1.5a2.5 2.5 0 0 1 0 5H16M8 3.5c-.8 1 .8 2 0 3M12 3.5c-.8 1 .8 2 0 3M3 21.5h16" fill="none"/>',
+    pasta: '<path d="M4 20.5h16v-6H4ZM6 14.5v-4h12v4M12 10.5V7.5" fill="none"/><path d="M12 7.5c-1 0-1.6-1-1-2l1-1.8 1 1.8c.6 1 0 2-1 2ZM4 17.5c1.3 1 2.7 1 4 0s2.7-1 4 0 2.7 1 4 0 2.7-1 4 0" fill="none"/>',
+    ates: '<path d="M12 21.5c-3.9 0-6.5-2.7-6.5-6.2 0-3.5 2.7-5.2 3.5-8.8 1.7 1.2 2.6 2.9 2.7 4.8 1-1 1.6-2.4 1.6-4 2.7 1.8 4.7 5 4.7 8 0 3.5-2.5 6.2-6 6.2Z" fill="none"/><path d="M12 21.5c-1.7 0-2.8-1.2-2.8-2.8 0-1.8 1.6-2.6 2.1-4.4 1.6 1 3.5 2.4 3.5 4.4 0 1.6-1.1 2.8-2.8 2.8Z" fill="none"/>',
+    balik: '<path d="M2.5 12c3-4.5 9-6 14-2.5L21.5 6v12l-5-3.5c-5 3.5-11 2-14-2.5Z" fill="none"/><circle cx="7.5" cy="11" r=".9"/><path d="M11 9.5c.8 1.6.8 3.4 0 5" fill="none"/>',
+    pizza: '<path d="M12 21.5 3 5.5c5.8-3 12.2-3 18 0Z" fill="none"/><path d="M4.5 8.2c4.8-2.2 10.2-2.2 15 0" fill="none"/><circle cx="10" cy="11" r="1.2"/><circle cx="14" cy="13.5" r="1.2"/><circle cx="12" cy="17" r="1"/>',
+    burger: '<path d="M4 10.5C4 6.5 7.5 4 12 4s8 2.5 8 6.5ZM3 13.5h18M4.5 16.5h15c0 1.9-1.5 3.5-3.5 3.5H8c-2 0-3.5-1.6-3.5-3.5Z" fill="none"/><path d="M9 7h.01M12 6h.01M15 7h.01" fill="none"/>',
+    cay: '<path d="M8 3.5h8c0 3-2 4.5-2 8s2 4 2 8H8c0-4 2-4.5 2-8s-2-5-2-8Z" fill="none"/><path d="M5.5 21h13M9 13.5h6" fill="none"/>',
+    dondurma: '<path d="M7 11h10l-5 10.5Z" fill="none"/><path d="M7 11a5 5 0 0 1 10 0M9.3 14h5.4M10.4 16.8h3.2" fill="none"/>',
+    tabak: '<circle cx="12" cy="12" r="6" fill="none"/><circle cx="12" cy="12" r="3.5" fill="none"/><path d="M3 3.5v6M1.8 3.5v3.8c0 1 .5 2 1.2 2s1.2-1 1.2-2V3.5M3 9.5v11M21 3.5c-1.5 0-2.2 2.2-2.2 5.5H21v11.5" fill="none"/>',
+    kasik: '<path d="M12 21.5v-9M12 12.5c-2.8 0-4.5-2.3-4.5-5S9.2 2.5 12 2.5s4.5 2.3 4.5 5-1.7 5-4.5 5Z" fill="none"/>',
 };
 
 /**

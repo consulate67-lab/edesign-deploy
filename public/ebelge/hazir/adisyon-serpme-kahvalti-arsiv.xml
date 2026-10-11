@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hazır şablon örneği: Serpme Kahvaltı Adisyonu e-Arşiv (Kareli Örtü) — EARSIVFATURA · SATIS.
+  Kahvaltı salonları ve köy kahvaltıcıları için kareli masa örtüsü üzerinde tabak başlıklı adisyon e-Arşiv: masa (bahçe) ve kişi sayısı rozetleri, kişi başı tutar, Serpme / Sıcaklar / İçecekler grupları iki sütunda, mutfak notları ve ikram.
+  Tüm kişi ve firma bilgileri kurgusaldır.
+-->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionContent/>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+    <cbc:ProfileID>EARSIVFATURA</cbc:ProfileID>
+    <cbc:ID>KHT2026000066120</cbc:ID>
+    <cbc:CopyIndicator>false</cbc:CopyIndicator>
+    <cbc:UUID>D9EC8883-9521-48BA-A4BD-AD26DF59E2AA</cbc:UUID>
+    <cbc:IssueDate>2026-10-11</cbc:IssueDate>
+    <cbc:IssueTime>11:48:00</cbc:IssueTime>
+    <cbc:InvoiceTypeCode>SATIS</cbc:InvoiceTypeCode>
+    <cbc:Note>Yalnız: Dört Bin Otuz Türk Lirası</cbc:Note>
+    <cbc:Note>Fiyatlarımıza KDV dahildir. Servis ücreti alınmaz.</cbc:Note>
+    <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+    <cbc:LineCountNumeric>8</cbc:LineCountNumeric>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>KH-0905</cbc:ID>
+        <cbc:IssueDate>2026-10-11</cbc:IssueDate>
+        <cbc:DocumentType>ADISYON</cbc:DocumentType>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>B-6</cbc:ID>
+        <cbc:IssueDate>2026-10-11</cbc:IssueDate>
+        <cbc:DocumentType>MASA</cbc:DocumentType>
+        <cbc:DocumentDescription>Bahçe</cbc:DocumentDescription>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>Zeynep</cbc:ID>
+        <cbc:IssueDate>2026-10-11</cbc:IssueDate>
+        <cbc:DocumentType>GARSON</cbc:DocumentType>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>4</cbc:ID>
+        <cbc:IssueDate>2026-10-11</cbc:IssueDate>
+        <cbc:DocumentType>KISI</cbc:DocumentType>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID schemeID="VKN_TCKN">3709815426</cbc:ID>
+        <cac:SignatoryParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">3709815426</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Beylerbeyi Mah. Abdullah Ağa Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>33</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Üsküdar</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34676</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        </cac:SignatoryParty>
+        <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+                <cbc:URI>#Signature_KHT2026000066120</cbc:URI>
+            </cac:ExternalReference>
+        </cac:DigitalSignatureAttachment>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="VKN">3709815426</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>Bağ Evi Kahvaltı ve Gıda Ltd. Şti.</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>Beylerbeyi Mah. Abdullah Ağa Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>33</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Üsküdar</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34676</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <cbc:Name>Üsküdar</cbc:Name>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:Contact>
+                <cbc:Telephone>0216 318 62 40</cbc:Telephone>
+                <cbc:ElectronicMail>merhaba@bagevi.example.com</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="TCKN">72540163988</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PostalAddress>
+                <cbc:StreetName>Kuzguncuk Mah. İcadiye Cad.</cbc:StreetName>
+                <cbc:BuildingNumber>15/1</cbc:BuildingNumber>
+                <cbc:CitySubdivisionName>Üsküdar</cbc:CitySubdivisionName>
+                <cbc:CityName>İstanbul</cbc:CityName>
+                <cbc:PostalZone>34674</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+                    <cbc:Name>Türkiye</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:Contact>
+                <cbc:Telephone>0536 211 74 30</cbc:Telephone>
+                <cbc:ElectronicMail>asli.sahin@example.com</cbc:ElectronicMail>
+            </cac:Contact>
+            <cac:Person>
+                <cbc:FirstName>Aslı</cbc:FirstName>
+                <cbc:FamilyName>Şahin</cbc:FamilyName>
+            </cac:Person>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>48</cbc:PaymentMeansCode>
+        <cbc:PaymentDueDate>2026-10-11</cbc:PaymentDueDate>
+        <cbc:InstructionNote>Kredi kartı · masada POS</cbc:InstructionNote>
+    </cac:PaymentMeans>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="TRY">366.36</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="TRY">3663.64</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="TRY">366.36</cbc:TaxAmount>
+            <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+            <cbc:Percent>10</cbc:Percent>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:Name>KDV</cbc:Name>
+                    <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="TRY">3827.28</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="TRY">3663.64</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="TRY">4030.00</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="TRY">163.64</cbc:AllowanceTotalAmount>
+        <cbc:PayableAmount currencyID="TRY">4030.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="PTN">4</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">2363.64</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">236.36</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">2363.64</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">236.36</cbc:TaxAmount>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>5 çeşit peynir, zeytin, bal-kaymak, reçeller, söğüş, simit, pişi</cbc:Description>
+            <cbc:Name>Serpme Kahvaltı (kişi başı)</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="GRUP">Serpme</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">590.91</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>2</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="PTN">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">163.64</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">16.36</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">163.64</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">16.36</cbc:TaxAmount>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Bal-Kaymak (ilave)</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="GRUP">Serpme</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">163.64</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>3</cbc:ID>
+        <cbc:Note>Biri az pişmiş</cbc:Note>
+        <cbc:InvoicedQuantity unitCode="PTN">2</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">400.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">40.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">400.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">40.00</cbc:TaxAmount>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Sucuklu Yumurta (sahan)</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="GRUP">Sıcaklar</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">200</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>4</cbc:ID>
+        <cbc:Note>Soğanlı</cbc:Note>
+        <cbc:InvoicedQuantity unitCode="PTN">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">181.82</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">18.18</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">181.82</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">18.18</cbc:TaxAmount>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Menemen</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="GRUP">Sıcaklar</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">181.82</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>5</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="PTN">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">136.36</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">13.64</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">136.36</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">13.64</cbc:TaxAmount>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Patates Kızartması</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="GRUP">Sıcaklar</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">136.36</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>6</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">4</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">218.18</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">21.82</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">218.18</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">21.82</cbc:TaxAmount>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Demlik Çay (sınırsız)</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="GRUP">İçecekler</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">54.545</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>7</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">2</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">200.00</cbc:LineExtensionAmount>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">20.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">200.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">20.00</cbc:TaxAmount>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Taze Portakal Suyu</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="GRUP">İçecekler</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">100</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    <cac:InvoiceLine>
+        <cbc:ID>8</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="C62">2</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="TRY">0.00</cbc:LineExtensionAmount>
+        <cac:AllowanceCharge>
+            <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+            <cbc:AllowanceChargeReason>Kahve ikramı</cbc:AllowanceChargeReason>
+            <cbc:MultiplierFactorNumeric>1</cbc:MultiplierFactorNumeric>
+            <cbc:Amount currencyID="TRY">163.64</cbc:Amount>
+            <cbc:BaseAmount currencyID="TRY">163.64</cbc:BaseAmount>
+        </cac:AllowanceCharge>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="TRY">0.00</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="TRY">0.00</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="TRY">0.00</cbc:TaxAmount>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxCategory>
+                    <cac:TaxScheme>
+                        <cbc:Name>KDV</cbc:Name>
+                        <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>Türk Kahvesi</cbc:Name>
+            <cac:AdditionalItemIdentification>
+                <cbc:ID schemeID="GRUP">İçecekler</cbc:ID>
+            </cac:AdditionalItemIdentification>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="TRY">81.82</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+</Invoice>
