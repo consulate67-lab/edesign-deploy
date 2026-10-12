@@ -205,6 +205,8 @@ const fr: Messages = {
         login: 'Se connecter',
         create: 'Créer le compte',
         toRegister: 'Pas encore de compte ? Créez-en un',
+        orEmail: 'ou avec un e-mail',
+        googleFailed: 'La connexion avec Google n\'a pas pu aboutir, veuillez réessayer.',
         toLogin: 'Déjà un compte ? Connectez-vous',
         footer: '© 2026 · Concepteur d’e-documents',
     },

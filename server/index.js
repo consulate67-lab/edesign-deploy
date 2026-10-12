@@ -213,6 +213,61 @@ app.post('/api/auth/login', async (req, res) => {
     }
 });
 
+// Google ile giriş / üyelik. İstemci kimliği tanımlı değilse özellik kapalıdır
+// (arayüz düğmeyi göstermez). Google'ın imzaladığı kimlik belirteci tokeninfo
+// ile doğrulanır; doğrulanmış e-posta mevcut hesaba bağlanır, yoksa hesap açılır.
+const GOOGLE_CLIENT_ID = (process.env.GOOGLE_CLIENT_ID || '').trim();
+const GOOGLE_ISSUERS = new Set(['accounts.google.com', 'https://accounts.google.com']);
+
+app.get('/api/auth/google/config', (_req, res) => {
+    res.json({ clientId: GOOGLE_CLIENT_ID || null });
+});
+
+app.post('/api/auth/google', async (req, res) => {
+    if (!GOOGLE_CLIENT_ID) return res.status(404).json({ error: 'Google ile giriş etkin değil.' });
+    const credential = typeof req.body?.credential === 'string' ? req.body.credential : '';
+    if (!credential || credential.length > 4096) return res.status(400).json({ error: 'Google kimlik bilgisi eksik.' });
+
+    let claims;
+    try {
+        const r = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`);
+        claims = r.ok ? await r.json() : null;
+    } catch (e) {
+        console.warn('[google] tokeninfo error:', e.message);
+        return res.status(502).json({ error: 'Google doğrulaması şu an yapılamadı, lütfen tekrar deneyin.' });
+    }
+    const email = String(claims?.email || '').trim().toLowerCase();
+    const valid = claims
+        && claims.aud === GOOGLE_CLIENT_ID
+        && GOOGLE_ISSUERS.has(claims.iss)
+        && (claims.email_verified === true || claims.email_verified === 'true')
+        && Number(claims.exp) * 1000 > Date.now()
+        && email;
+    if (!valid) return res.status(401).json({ error: 'Google hesabı doğrulanamadı.' });
+
+    try {
+        let user = await db.get('SELECT * FROM users WHERE lower(username) = ?', [email]);
+        let created = false;
+        if (!user) {
+            // Şifreyle giriş yapılamayan rastgele şifre; kullanıcı Google ile girer.
+            const unusable = await bcrypt.hash(randomBytes(32).toString('hex'), 10);
+            const fullName = String(claims.name || '').trim().slice(0, 200) || null;
+            await db.run(
+                'INSERT INTO users (username, password, full_name) VALUES (?, ?, ?)',
+                [email, unusable, fullName]
+            );
+            user = await db.get('SELECT * FROM users WHERE username = ?', [email]);
+            created = true;
+            console.log(`[google] new user #${user.id}`);
+        }
+        const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, EFFECTIVE_SECRET);
+        res.json({ token, created, user: { id: user.id, username: user.username, role: user.role, credits: user.credits } });
+    } catch (e) {
+        console.error('[google] login error:', e);
+        res.status(500).json({ error: 'Sunucu hatası.' });
+    }
+});
+
 // Get User Info (Credits)
 app.get('/api/me', authenticateToken, async (req, res) => {
     try {

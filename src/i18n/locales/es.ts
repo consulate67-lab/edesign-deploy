@@ -205,6 +205,8 @@ const es: Messages = {
         login: 'Iniciar sesión',
         create: 'Crear cuenta',
         toRegister: '¿Aún no tienes cuenta? Crea una',
+        orEmail: 'o con correo electrónico',
+        googleFailed: 'No se pudo completar el inicio de sesión con Google, inténtelo de nuevo.',
         toLogin: '¿Ya tienes cuenta? Inicia sesión',
         footer: '© 2026 · Diseñador de e-documentos',
     },

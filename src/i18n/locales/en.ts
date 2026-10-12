@@ -205,6 +205,8 @@ const en: Messages = {
         login: 'Sign in',
         create: 'Create account',
         toRegister: 'No account yet? Create one',
+        orEmail: 'or with email',
+        googleFailed: 'Google sign-in could not be completed, please try again.',
         toLogin: 'Already have an account? Sign in',
         footer: '© 2026 · e-Document Designer',
     },

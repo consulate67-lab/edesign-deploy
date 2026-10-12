@@ -4,6 +4,7 @@ import { api } from './api';
 import { theme, techBackground } from './theme';
 import { useLocaleT } from './i18n';
 import { LanguageSwitcher } from './i18n/LanguageSwitcher';
+import { GoogleSignIn } from './GoogleSignIn';
 
 type AuthMode = 'login' | 'register';
 
@@ -256,6 +257,15 @@ export const Auth: React.FC<AuthProps> = ({
                         {successMessage}
                     </div>
                 )}
+
+                <GoogleSignIn
+                    mode={isLogin ? 'login' : 'register'}
+                    onSuccess={(created) => {
+                        if (created && onRegister) onRegister();
+                        else onLogin();
+                    }}
+                    onError={(message) => { setSuccessMessage(''); setError(message); }}
+                />
 
                 <form
                     onSubmit={handleSubmit}

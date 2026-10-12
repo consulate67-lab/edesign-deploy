@@ -208,6 +208,8 @@ const tr = {
         login: 'Giriş Yap',
         create: 'Hesabı Oluştur',
         toRegister: 'Henüz hesabınız yok mu? Yeni hesap oluşturun',
+        orEmail: 'veya e-posta ile',
+        googleFailed: 'Google ile giriş tamamlanamadı, lütfen tekrar deneyin.',
         toLogin: 'Zaten hesabınız var mı? Giriş ekranına dönün',
         footer: '© 2026 · GİB UBL-TR Designer',
     },

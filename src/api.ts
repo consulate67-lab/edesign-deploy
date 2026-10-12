@@ -270,6 +270,21 @@ export const api = {
         body: JSON.stringify(details)
     }),
 
+    /** Sunucuda Google istemci kimliği tanımlıysa döner; değilse Google ile giriş kapalıdır. */
+    googleClientId: async (): Promise<string | null> => {
+        try {
+            const r = await api.request('/auth/google/config');
+            return typeof r?.clientId === 'string' && r.clientId ? r.clientId : null;
+        } catch {
+            return null;
+        }
+    },
+
+    googleLogin: (credential: string): Promise<{ token: string; created: boolean }> => api.request('/auth/google', {
+        method: 'POST',
+        body: JSON.stringify({ credential }),
+    }),
+
     getMe: async () => {
         return api.request('/me');
     },

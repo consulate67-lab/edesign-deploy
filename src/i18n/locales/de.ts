@@ -205,6 +205,8 @@ const de: Messages = {
         login: 'Anmelden',
         create: 'Konto erstellen',
         toRegister: 'Noch kein Konto? Jetzt registrieren',
+        orEmail: 'oder mit E-Mail',
+        googleFailed: 'Die Anmeldung mit Google konnte nicht abgeschlossen werden, bitte versuchen Sie es erneut.',
         toLogin: 'Bereits ein Konto? Zur Anmeldung',
         footer: '© 2026 · E-Beleg-Designer',
     },
