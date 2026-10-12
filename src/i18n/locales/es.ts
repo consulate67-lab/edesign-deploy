@@ -1,10 +1,12 @@
 import type { Messages } from './tr';
 import editor from './editor/es';
 import gallery from './gallery/es';
+import tutorials from './tutorials/es';
 
 const es: Messages = {
     editor,
     gallery,
+    tutorials,
     lang: {
         label: 'Idioma',
         hint: 'Idioma de la página. El idioma del documento sigue el país elegido en el asistente de diseño.',

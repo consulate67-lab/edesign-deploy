@@ -1,10 +1,12 @@
 import type { Messages } from './tr';
 import editor from './editor/de';
 import gallery from './gallery/de';
+import tutorials from './tutorials/de';
 
 const de: Messages = {
     editor,
     gallery,
+    tutorials,
     lang: {
         label: 'Sprache',
         hint: 'Sprache der Seite. Die Belegsprache richtet sich nach dem im Design-Assistenten gewählten Land.',

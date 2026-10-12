@@ -4,10 +4,12 @@
  */
 import editor from './editor/tr';
 import gallery from './gallery/tr';
+import tutorials from './tutorials/tr';
 
 const tr = {
     editor,
     gallery,
+    tutorials,
     lang: {
         label: 'Dil',
         hint: 'Sayfa dili. Belgenin dili, tasarım sihirbazında seçtiğiniz ülkeye göre belirlenir.',

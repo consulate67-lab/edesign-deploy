@@ -13,6 +13,7 @@ import { INTL_SHOWCASE_DOCS, intlPreviewSources } from './landing/intlShowcase';
 import { useLocaleT } from './i18n';
 import { LanguageSwitcher } from './i18n/LanguageSwitcher';
 import { useCountry } from './store/uiStore';
+import { TutorialGrid } from './help/Tutorials';
 
 interface LandingProps {
     onRegister: () => void;
@@ -237,6 +238,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
                         <nav className="ld-nav" style={{ display: 'flex', gap: 28, fontSize: 14, fontWeight: 600 }}>
                             <a href="#urun">{t('landing.nav.product')}</a>
+                            <a href="#nasil-kullanilir">{t('tutorials.nav')}</a>
                             <a href="#belgeler">{t('landing.nav.docs')}</a>
                             <a href="#fiyatlar">{t('landing.nav.pricing')}</a>
                             <a href="#sss">{t('landing.nav.faq')}</a>
@@ -627,6 +629,16 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                 </div>
             </section>
 
+            {/* ====================== EĞİTİM VİDEOLARI ====================== */}
+            <section
+                id="nasil-kullanilir"
+                className="ld-section"
+                style={{ position: 'relative', zIndex: 1, padding: '40px 32px', maxWidth: 1280, margin: '0 auto' }}
+            >
+                <SectionTitle eyebrow={t('tutorials.eyebrow')} title={t('tutorials.title')} subtitle={t('tutorials.subtitle')} />
+                <TutorialGrid />
+            </section>
+
             {/* ====================== DOC TYPES ====================== */}
             <section
                 id="belgeler"
@@ -975,6 +987,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                     © 2026 · {t('landing.footer.tagline')}
                 </div>
                 <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+                    <a href="#nasil-kullanilir">{t('tutorials.nav')}</a>
                     <a href="#sss">{t('landing.nav.faq')}</a>
                     <a href="#kvkk" onClick={(e) => { e.preventDefault(); setLegalModal('kvkk'); }}>{t('landing.footer.kvkk')}</a>
                     <a href="#sozlesme" onClick={(e) => { e.preventDefault(); setLegalModal('sozlesme'); }}>{t('landing.footer.terms')}</a>

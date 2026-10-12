@@ -67,6 +67,7 @@ import { findLineTableCell, addColumnAfterCell, editColumn, countHiddenColumnCel
 import { BG_FITS, readPageBackground, writePageBackground, imageFileToDataUrl, type PageBackground } from './utils/pageBackground';
 import { addTestWatermark, stripTestWatermark, stripLeadingBom } from './utils/testWatermark';
 import { downloadFieldGuide, withFieldGuide } from './utils/fieldGuide';
+import { TutorialHelpButton } from '../help/Tutorials';
 import { stripFieldGuide } from './utils/fieldGuideMarker';
 import { applyGibLayout, finalizeDelivery, GIB_SIZE_LIMIT, type DeliveryReport, type LayoutResult } from './utils/gibCompliance';
 import { applyLegacyViewerCompat } from './utils/legacyViewerCompat';
@@ -3894,6 +3895,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
 
                 {/* Spacer */}
                 <div style={{ flex: 1 }} />
+
+                <TutorialHelpButton />
 
                 {/* Save status message */}
                 {saveMessage && (
