@@ -10,16 +10,16 @@ type TutorialId = keyof typeof tutorialsTr.items;
 interface Tutorial { id: TutorialId; slug: string; duration: string; group: 'start' | 'editor' }
 
 const TUTORIALS: Tutorial[] = [
-    { id: 'signup', slug: '01-uyelik', duration: '1:34', group: 'start' },
-    { id: 'template', slug: '02-hazir-sablon', duration: '2:01', group: 'start' },
+    { id: 'signup', slug: '01-uyelik', duration: '1:26', group: 'start' },
+    { id: 'template', slug: '02-hazir-sablon', duration: '2:10', group: 'start' },
     { id: 'scratch', slug: '03-sifirdan-tasarim', duration: '1:40', group: 'start' },
-    { id: 'textImage', slug: '04-metin-resim-kutu', duration: '1:21', group: 'editor' },
-    { id: 'tableFormula', slug: '05-tablo-formul', duration: '1:13', group: 'editor' },
-    { id: 'qrChart', slug: '06-karekod-grafik-pay', duration: '0:55', group: 'editor' },
-    { id: 'columnBackground', slug: '07-kolon-arka-plan', duration: '0:48', group: 'editor' },
+    { id: 'textImage', slug: '04-metin-resim-kutu', duration: '1:25', group: 'editor' },
+    { id: 'tableFormula', slug: '05-tablo-formul', duration: '1:18', group: 'editor' },
+    { id: 'qrChart', slug: '06-karekod-grafik-pay', duration: '0:57', group: 'editor' },
+    { id: 'columnBackground', slug: '07-kolon-arka-plan', duration: '0:53', group: 'editor' },
     { id: 'documentFields', slug: '08-belge-alanlari', duration: '0:42', group: 'editor' },
-    { id: 'editFields', slug: '09-alan-duzenleme', duration: '1:08', group: 'editor' },
-    { id: 'saveApprove', slug: '10-kaydet-onayla', duration: '0:52', group: 'editor' },
+    { id: 'editFields', slug: '09-alan-duzenleme', duration: '1:28', group: 'editor' },
+    { id: 'saveApprove', slug: '10-kaydet-onayla', duration: '0:58', group: 'editor' },
 ];
 
 const VIDEO_BASE = `${import.meta.env.BASE_URL}videos/egitim/`;
