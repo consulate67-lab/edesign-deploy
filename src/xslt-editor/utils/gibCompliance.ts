@@ -64,6 +64,19 @@ export function findExternalLinks(xslt: string): string[] {
     return [...found];
 }
 
+// Eski onaylı dosyalardaki çevrimiçi lisans mührü (shared/license-lock.js → buildSeal):
+// belge her açıldığında dış adrese istek attığı için indirmede çıkarılır. Çevrimdışı
+// VKN kilidi mühürden bağımsızdır.
+const ONLINE_SEAL_RE = new RegExp(
+    '<([\\w.-]+):element name="style"><\\1:attribute name="type">text/css</\\1:attribute>'
+    + '<\\1:text>@media print\\{\\.(x[a-z]{7})\\{position:fixed!important\\}\\}</\\1:text></\\1:element>'
+    + '<\\1:element name="div"><\\1:attribute name="class">\\2</\\1:attribute>'
+    + '<\\1:attribute name="style"><\\1:value-of select="concat\\([^"]*?url\\([^"]*"/></\\1:attribute></\\1:element>',
+    'g',
+);
+
+export const stripOnlineSeal = (xslt: string) => xslt.replace(ONLINE_SEAL_RE, '');
+
 const VIEWPORT_META = '<meta name="viewport" content="width=device-width, initial-scale=1"/>';
 
 /** Mobil tarayıcıların sayfayı masaüstü genişliğinde küçültmemesi için viewport bildirimi. */
@@ -230,11 +243,11 @@ export interface DeliveryReport {
 }
 
 /**
- * İndirilecek son dosya: girinti sıkıştırılır, viewport eklenir; alan rehberi
+ * İndirilecek son dosya: çevrimiçi mühür çıkarılır, girinti sıkıştırılır, viewport eklenir; alan rehberi
  * yalnız 150 KB sınırını aşmıyorsa dosyaya gömülür.
  */
 export function finalizeDelivery(xslt: string, addGuide?: (x: string) => string): { content: string; report: DeliveryReport } {
-    const base = ensureViewportMeta(compactXslt(xslt));
+    const base = ensureViewportMeta(compactXslt(stripOnlineSeal(xslt)));
     let content = base;
     let guideDropped = false;
     if (addGuide) {

@@ -41,15 +41,13 @@ const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS
 // Railway önünde tek proxy katmanı var; req.ip gerçek istemci adresi olur (giriş sınırlaması için).
 app.set('trust proxy', 1);
 
-// Çevrimiçi lisans mührü (shared/license-lock.js → buildSeal). XSLT'nin açıldığı her
-// yerden (ERP, entegratör, tarayıcı) arka plan resmi olarak çağrılır; bu yüzden CORS
+// Çevrimiçi lisans mührü (shared/license-lock.js → buildSeal). Yeni onaylara eklenmez
+// (e-belge dosyası dış bağlantı içermemeli); daha önce indirilmiş dosyalar için açık
+// kalır. XSLT'nin açıldığı her yerden arka plan resmi olarak çağrılır; bu yüzden CORS
 // denetiminden önce tanımlıdır. Geçerli lisansta saydam, değilse TEST resmi döner.
 // Sunucu hatasında saydam döner: karar XSLT'deki çevrimdışı kilide kalır.
 const TRANSPARENT_PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 'base64');
 const SEAL_TEST_PNG = Buffer.from(TEST_WATERMARK_PNG.slice(TEST_WATERMARK_PNG.indexOf(',') + 1), 'base64');
-const sealUrlsFor = (token) => (process.env.LICENSE_SEAL_URLS
-    || `https://${process.env.RAILWAY_PUBLIC_DOMAIN || 'edesign-deploy-production.up.railway.app'}/api/designs/seal/{token}/t{taxId}.png,https://www.edxdocu.com/seal.php?t={token}&v={taxId}`)
-    .split(',').map(u => u.trim()).filter(Boolean).map(u => u.replace('{token}', token));
 
 app.get('/api/designs/seal/:token/:file', async (req, res) => {
     res.set({
@@ -604,7 +602,7 @@ app.post('/api/designs/export', authenticateToken, async (req, res) => {
         const licenseToken = existing?.license_token || randomBytes(16).toString('hex');
         let lockedXslt;
         try {
-            lockedXslt = applyLicenseLock(xslt_content, taxId, { sealUrls: sealUrlsFor(licenseToken) });
+            lockedXslt = applyLicenseLock(xslt_content, taxId);
         } catch (e) {
             await client.query('ROLLBACK');
             return res.status(400).json({ error: `Lisans kilidi eklenemedi: ${e.message}` });
