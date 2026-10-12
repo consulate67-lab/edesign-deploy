@@ -6,7 +6,7 @@ const tutorials = {
     help: 'Nasıl kullanılır',
     helpHint: 'Tasarım ekranındaki her özelliği anlatan kısa eğitim videoları',
     playerTitle: 'Eğitim videoları',
-    turkishOnly: 'Videolar Türkçe seslendirmeli ve altyazılıdır.',
+    videoLangNote: '',
     watch: 'İzle',
     close: 'Kapat (Esc)',
     groupStart: 'Başlarken',

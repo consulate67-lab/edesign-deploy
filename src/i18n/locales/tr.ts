@@ -202,6 +202,7 @@ const tr = {
         fullNamePh: 'örn. Ahmet Yılmaz',
         phone: 'Telefon',
         phonePh: '05xx xxx xx xx',
+        emailPh: 'mail@firma.com',
         company: 'Firma Adı',
         companyPh: 'örn. Teknoloji LTD. ŞTİ.',
         email: 'E-posta Adresi',

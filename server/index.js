@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { initDb } from './db.js';
-import { applyLicenseLock, hasLicenseLock, isValidTaxId, normalizeTaxId, withIssuerTaxId } from '../shared/license-lock.js';
+import { applyLicenseLock, hasLicenseLock, isValidLicenseId, isValidTaxId, normalizeLicenseId, withIssuerTaxId } from '../shared/license-lock.js';
 import { TEST_WATERMARK_PNG } from '../shared/test-watermark-png.js';
 import { createRequireAdmin, registerAdminAuthRoutes } from './admin-auth.js';
 import { registerAdminRoutes } from './admin.js';
@@ -682,10 +682,10 @@ app.post('/api/designs/export', authenticateToken, async (req, res) => {
             return res.json({ success: true, charged: false, credits, design: serializeDesign(row) });
         }
 
-        const taxId = normalizeTaxId(license_tax_id);
-        if (!isValidTaxId(taxId)) {
+        const taxId = normalizeLicenseId(license_tax_id);
+        if (!isValidLicenseId(taxId)) {
             await client.query('ROLLBACK');
-            return res.status(400).json({ error: 'Tasarimin kullanilacagi gecerli bir VKN (10 hane) ya da TCKN (11 hane) girin.' });
+            return res.status(400).json({ error: 'Tasarimin kullanilacagi gecerli bir VKN (10 hane), TCKN (11 hane) ya da ulke onekli KDV numarasi (or. IE1234567T) girin.' });
         }
         if (hasLicenseLock(xslt_content)) {
             await client.query('ROLLBACK');

@@ -7,24 +7,27 @@ import type tutorialsTr from '../i18n/locales/tutorials/tr';
 
 type TutorialId = keyof typeof tutorialsTr.items;
 
-interface Tutorial { id: TutorialId; slug: string; duration: string; group: 'start' | 'editor' }
+interface Tutorial { id: TutorialId; slug: string; duration: { tr: string; en: string }; group: 'start' | 'editor' }
 
 const TUTORIALS: Tutorial[] = [
-    { id: 'signup', slug: '01-uyelik', duration: '1:26', group: 'start' },
-    { id: 'template', slug: '02-hazir-sablon', duration: '2:10', group: 'start' },
-    { id: 'scratch', slug: '03-sifirdan-tasarim', duration: '1:40', group: 'start' },
-    { id: 'textImage', slug: '04-metin-resim-kutu', duration: '1:25', group: 'editor' },
-    { id: 'tableFormula', slug: '05-tablo-formul', duration: '1:18', group: 'editor' },
-    { id: 'qrChart', slug: '06-karekod-grafik-pay', duration: '0:57', group: 'editor' },
-    { id: 'columnBackground', slug: '07-kolon-arka-plan', duration: '0:53', group: 'editor' },
-    { id: 'documentFields', slug: '08-belge-alanlari', duration: '0:42', group: 'editor' },
-    { id: 'editFields', slug: '09-alan-duzenleme', duration: '1:28', group: 'editor' },
-    { id: 'saveApprove', slug: '10-kaydet-onayla', duration: '0:58', group: 'editor' },
+    { id: 'signup', slug: '01-uyelik', duration: { tr: '1:26', en: '1:25' }, group: 'start' },
+    { id: 'template', slug: '02-hazir-sablon', duration: { tr: '2:10', en: '1:29' }, group: 'start' },
+    { id: 'scratch', slug: '03-sifirdan-tasarim', duration: { tr: '1:40', en: '1:27' }, group: 'start' },
+    { id: 'textImage', slug: '04-metin-resim-kutu', duration: { tr: '1:25', en: '1:09' }, group: 'editor' },
+    { id: 'tableFormula', slug: '05-tablo-formul', duration: { tr: '1:18', en: '1:04' }, group: 'editor' },
+    { id: 'qrChart', slug: '06-karekod-grafik-pay', duration: { tr: '0:57', en: '0:52' }, group: 'editor' },
+    { id: 'columnBackground', slug: '07-kolon-arka-plan', duration: { tr: '0:53', en: '0:53' }, group: 'editor' },
+    { id: 'documentFields', slug: '08-belge-alanlari', duration: { tr: '0:42', en: '0:40' }, group: 'editor' },
+    { id: 'editFields', slug: '09-alan-duzenleme', duration: { tr: '1:28', en: '1:12' }, group: 'editor' },
+    { id: 'saveApprove', slug: '10-kaydet-onayla', duration: { tr: '0:58', en: '0:53' }, group: 'editor' },
 ];
 
-const VIDEO_BASE = `${import.meta.env.BASE_URL}videos/egitim/`;
-const videoUrl = (v: Tutorial) => `${VIDEO_BASE}${v.slug}.mp4`;
-const posterUrl = (v: Tutorial) => `${VIDEO_BASE}${v.slug}.jpg`;
+type VideoLang = keyof Tutorial['duration'];
+/** Türkçe dışındaki tüm arayüz dillerinde İngilizce videolar gösterilir. */
+const videoLang = (locale: string): VideoLang => (locale === 'tr' ? 'tr' : 'en');
+const videoBase = (lang: VideoLang) => `${import.meta.env.BASE_URL}videos/egitim/${lang === 'tr' ? '' : `${lang}/`}`;
+const videoUrl = (v: Tutorial, lang: VideoLang) => `${videoBase(lang)}${v.slug}.mp4`;
+const posterUrl = (v: Tutorial, lang: VideoLang) => `${videoBase(lang)}${v.slug}.jpg`;
 
 const TUTORIALS_CSS = `
 .tut-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
@@ -37,7 +40,8 @@ const TUTORIALS_CSS = `
 `;
 
 const TutorialCard: React.FC<{ v: Tutorial; n: number; onOpen: (v: Tutorial) => void }> = ({ v, n, onOpen }) => {
-    const { t } = useLocaleT();
+    const { t, locale } = useLocaleT();
+    const lang = videoLang(locale);
     return (
         <button
             type="button"
@@ -60,7 +64,7 @@ const TutorialCard: React.FC<{ v: Tutorial; n: number; onOpen: (v: Tutorial) => 
             }}
         >
             <div style={{ position: 'relative', aspectRatio: '16 / 9', background: '#0f172a' }}>
-                <img src={posterUrl(v)} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                <img src={posterUrl(v, lang)} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                 <span
                     className="tut-play"
                     style={{
@@ -86,7 +90,7 @@ const TutorialCard: React.FC<{ v: Tutorial; n: number; onOpen: (v: Tutorial) => 
                     {n}
                 </span>
                 <span style={{ position: 'absolute', right: 8, bottom: 8, padding: '2px 7px', borderRadius: 6, background: 'rgba(15,23,42,0.78)', color: '#fff', fontSize: 11, fontWeight: 700 }}>
-                    {v.duration}
+                    {v.duration[lang]}
                 </span>
             </div>
             <div style={{ padding: '12px 14px 14px' }}>
@@ -99,14 +103,15 @@ const TutorialCard: React.FC<{ v: Tutorial; n: number; onOpen: (v: Tutorial) => 
 
 /** Eğitim videoları kartları; karta tıklayınca oynatıcı açılır. */
 export const TutorialGrid: React.FC = () => {
-    const { t, locale } = useLocaleT();
+    const { t } = useLocaleT();
     const [open, setOpen] = useState<Tutorial | null>(null);
     const close = useCallback(() => setOpen(null), []);
+    const note = t('tutorials.videoLangNote');
     return (
         <>
             <style>{TUTORIALS_CSS}</style>
-            {locale !== 'tr' && (
-                <p style={{ textAlign: 'center', fontSize: 13, color: theme.textSubtle, margin: '-8px 0 18px' }}>{t('tutorials.turkishOnly')}</p>
+            {note && (
+                <p style={{ textAlign: 'center', fontSize: 13, color: theme.textSubtle, margin: '-8px 0 18px' }}>{note}</p>
             )}
             <div className="tut-grid">
                 {TUTORIALS.map((v, i) => <TutorialCard key={v.slug} v={v} n={i + 1} onOpen={setOpen} />)}
@@ -119,6 +124,8 @@ export const TutorialGrid: React.FC = () => {
 /** Video oynatıcı + yandaki liste. */
 export const TutorialPlayer: React.FC<{ initial: Tutorial; autoPlay?: boolean; onClose: () => void }> = ({ initial, autoPlay = false, onClose }) => {
     const { t, locale } = useLocaleT();
+    const lang = videoLang(locale);
+    const note = t('tutorials.videoLangNote');
     const [current, setCurrent] = useState(initial);
     const [play, setPlay] = useState(autoPlay);
 
@@ -177,7 +184,7 @@ export const TutorialPlayer: React.FC<{ initial: Tutorial; autoPlay?: boolean; o
                     <div style={{ fontSize: 15, fontWeight: 700, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {t(`tutorials.items.${current.id}.title`)}
                     </div>
-                    {locale !== 'tr' && <span style={{ fontSize: 12, color: theme.textSubtle }}>{t('tutorials.turkishOnly')}</span>}
+                    {note && <span style={{ fontSize: 12, color: theme.textSubtle }}>{note}</span>}
                     <button
                         type="button"
                         onClick={onClose}
@@ -191,9 +198,9 @@ export const TutorialPlayer: React.FC<{ initial: Tutorial; autoPlay?: boolean; o
                 <div className="tut-player">
                     <div style={{ background: '#0f172a', display: 'flex', alignItems: 'center' }}>
                         <video
-                            key={current.slug}
-                            src={videoUrl(current)}
-                            poster={posterUrl(current)}
+                            key={`${lang}-${current.slug}`}
+                            src={videoUrl(current, lang)}
+                            poster={posterUrl(current, lang)}
                             controls
                             autoPlay={play}
                             playsInline
@@ -229,10 +236,10 @@ export const TutorialPlayer: React.FC<{ initial: Tutorial; autoPlay?: boolean; o
                                                 alignItems: 'center',
                                             }}
                                         >
-                                            <img src={posterUrl(v)} alt="" loading="lazy" style={{ width: 84, aspectRatio: '16 / 9', objectFit: 'cover', borderRadius: 6, flexShrink: 0, background: '#0f172a' }} />
+                                            <img src={posterUrl(v, lang)} alt="" loading="lazy" style={{ width: 84, aspectRatio: '16 / 9', objectFit: 'cover', borderRadius: 6, flexShrink: 0, background: '#0f172a' }} />
                                             <span style={{ minWidth: 0 }}>
                                                 <span style={{ display: 'block', fontSize: 13, fontWeight: active ? 700 : 600, lineHeight: 1.3 }}>{t(`tutorials.items.${v.id}.title`)}</span>
-                                                <span style={{ display: 'block', fontSize: 11, color: theme.textSubtle, marginTop: 2 }}>{v.duration}</span>
+                                                <span style={{ display: 'block', fontSize: 11, color: theme.textSubtle, marginTop: 2 }}>{v.duration[lang]}</span>
                                             </span>
                                         </button>
                                     );

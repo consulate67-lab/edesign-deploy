@@ -199,6 +199,7 @@ const fr: Messages = {
         fullNamePh: 'ex. Marie Dupont',
         phone: 'Téléphone',
         phonePh: '+33 6 12 34 56 78',
+        emailPh: 'nom@entreprise.fr',
         company: 'Nom de l’entreprise',
         companyPh: 'ex. Dupont SAS',
         email: 'Adresse e-mail',

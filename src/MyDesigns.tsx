@@ -9,6 +9,7 @@ import { finalizeDelivery } from './xslt-editor/utils/gibCompliance';
 import { transformXmlWithXslt } from './xsltTransformer';
 import { theme } from './theme';
 import i18n, { currentLocale, useLocaleT } from './i18n';
+import { licenseIdKind } from '../shared/license-lock.js';
 
 const MAX_DRAFTS = 5;
 const PAGE_SIZE = 10;
@@ -238,7 +239,7 @@ export const CompletedDesigns: React.FC = () => {
                                         </div>
                                         {d.license_tax_id && (
                                             <div data-license-tax-id style={{ fontSize: '11px', color: theme.textMuted, marginTop: '2px', paddingLeft: '24px' }}>
-                                                {t('designs.licensed', { kind: d.license_tax_id.length === 11 ? 'TCKN' : 'VKN', id: d.license_tax_id })}
+                                                {t('designs.licensed', { kind: licenseIdKind(d.license_tax_id), id: d.license_tax_id })}
                                             </div>
                                         )}
                                     </td>

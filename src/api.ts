@@ -389,9 +389,9 @@ export const api = {
             localStorage.setItem('mock_designs', JSON.stringify([again, ...designs.filter(d => d.id !== again.id)]));
             return { success: true, charged: false, credits: user.credits, design: again };
         }
-        const { applyLicenseLock, hasLicenseLock, isValidTaxId, normalizeTaxId, withIssuerTaxId } = await import('../shared/license-lock.js');
-        const taxId = normalizeTaxId(payload.license_tax_id);
-        if (!isValidTaxId(taxId)) throw new Error('Tasarımın kullanılacağı geçerli bir VKN (10 hane) ya da TCKN (11 hane) girin.');
+        const { applyLicenseLock, hasLicenseLock, isValidLicenseId, normalizeLicenseId, withIssuerTaxId } = await import('../shared/license-lock.js');
+        const taxId = normalizeLicenseId(payload.license_tax_id);
+        if (!isValidLicenseId(taxId)) throw new Error('Tasarımın kullanılacağı geçerli bir VKN (10 hane), TCKN (11 hane) ya da ülke önekli KDV numarası (ör. IE1234567T) girin.');
         if (hasLicenseLock(payload.xslt_content)) throw new Error('Bu dosya başka bir lisansa kilitli; tekrar onaylanamaz.');
         const locked = applyLicenseLock(payload.xslt_content, taxId);
         const baseXml = payload.xml_content ?? existing?.xml_content ?? null;

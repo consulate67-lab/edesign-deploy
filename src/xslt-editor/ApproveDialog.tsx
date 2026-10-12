@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { CheckCircle2, Download, Loader2, X, AlertTriangle, Lock } from 'lucide-react';
 import { api } from '../api';
-import { isValidTaxId, normalizeTaxId } from '../../shared/license-lock.js';
+import { isValidLicenseId, normalizeLicenseId } from '../../shared/license-lock.js';
 import { useLocaleT } from '../i18n';
 
 interface ApproveDialogProps {
@@ -53,9 +53,10 @@ export const ApproveDialog: React.FC<ApproveDialogProps> = ({ defaultName, onTes
     }, []);
 
     const noCredits = !isAdmin && credits !== null && credits <= 0;
-    const taxId = normalizeTaxId(taxInput);
-    const taxValid = isValidTaxId(taxId);
-    const taxError = !taxId ? null
+    const taxId = normalizeLicenseId(taxInput);
+    const taxValid = isValidLicenseId(taxId);
+    const taxError = !taxId || taxValid ? null
+        : /^\s*[a-z]{2}/i.test(taxInput) ? t('editor.approve.vatInvalid')
         : taxId.length !== 10 && taxId.length !== 11 ? t('editor.approve.taxLength')
         : !taxValid ? t('editor.approve.taxInvalid', { kind: taxId.length === 10 ? 'VKN' : 'TCKN' })
         : null;
@@ -131,9 +132,8 @@ export const ApproveDialog: React.FC<ApproveDialogProps> = ({ defaultName, onTes
                     data-approve-tax-id
                     value={taxInput}
                     onChange={e => setTaxInput(e.target.value)}
-                    inputMode="numeric"
                     autoComplete="off"
-                    maxLength={16}
+                    maxLength={24}
                     placeholder={t('editor.approve.taxPlaceholder')}
                     style={{
                         width: '100%', boxSizing: 'border-box', padding: '9px 12px', borderRadius: 8, fontSize: 15,

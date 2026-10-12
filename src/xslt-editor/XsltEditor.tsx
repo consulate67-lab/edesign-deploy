@@ -213,6 +213,7 @@ function resolveInsertTarget(start: Element | null, mode: 'auto' | InsertPositio
     return Number.isNaN(ordinal) ? null : { el, ordinal, position };
 }
 import { api, designKeyOf } from '../api';
+import { licenseIdKind } from '../../shared/license-lock.js';
 import { PaymentModal } from '../PaymentModal';
 import { XSLT_ELEMENTS, UBL_XPATHS, lintXslt } from './xsltSchema';
 
@@ -4084,7 +4085,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             </div>
                             {design.taxId && (
                                 <div data-locked-tax-id style={{ fontSize: 12, lineHeight: 1.5, color: '#c2410c', marginTop: -8, marginBottom: 16 }}>
-                                    {t('editor.locked.taxId', { kind: design.taxId.length === 11 ? 'TCKN' : 'VKN', taxId: design.taxId })}
+                                    {t('editor.locked.taxId', { kind: licenseIdKind(design.taxId), taxId: design.taxId })}
                                 </div>
                             )}
                             {justDownloaded && (

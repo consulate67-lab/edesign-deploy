@@ -476,7 +476,7 @@ export const Auth: React.FC<AuthProps> = ({
                         <label style={labelStyle}>{t('auth.email')}</label>
                         <input
                             type="email"
-                            placeholder="mail@firma.com"
+                            placeholder={t('auth.emailPh')}
                             required
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}

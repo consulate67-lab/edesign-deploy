@@ -199,6 +199,7 @@ const de: Messages = {
         fullNamePh: 'z. B. Max Mustermann',
         phone: 'Telefon',
         phonePh: '+49 151 2345678',
+        emailPh: 'name@firma.de',
         company: 'Firmenname',
         companyPh: 'z. B. Muster GmbH',
         email: 'E-Mail-Adresse',

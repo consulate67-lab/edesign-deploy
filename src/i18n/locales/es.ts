@@ -199,6 +199,7 @@ const es: Messages = {
         fullNamePh: 'p. ej. Lucía García',
         phone: 'Teléfono',
         phonePh: '+34 612 345 678',
+        emailPh: 'nombre@empresa.es',
         company: 'Nombre de la empresa',
         companyPh: 'p. ej. Ejemplo S.L.',
         email: 'Correo electrónico',
