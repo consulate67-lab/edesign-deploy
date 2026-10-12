@@ -81,10 +81,38 @@ const App: React.FC = () => {
     }, []);
 
     const userArea = !adminRoute && (view === 'selection' || view === 'designer' || view === 'xslt-editor');
+    const [supportAllowed, setSupportAllowed] = useState(false);
+    const showSupport = userArea && supportAllowed;
 
-    // Giriş yapmış kullanıcı: canlı bağlantı + ortak ekran istemcisi; çıkışta / girişe dönünce kapatılır.
+    // Destek (talep + online destek) yalnız kontörü olan / satın almış kullanıcılara; kontör yüklenince kendiliğinden açılır.
+    useEffect(() => {
+        if (!userArea || !api.getToken()) return;
+        let alive = true;
+        const check = () => {
+            api.getMe()
+                .then((me: { support_allowed?: boolean }) => { if (alive) setSupportAllowed(!!me?.support_allowed); })
+                .catch(() => undefined);
+        };
+        check();
+        window.addEventListener('focus', check);
+        const timer = window.setInterval(check, 30_000);
+        return () => {
+            alive = false;
+            window.removeEventListener('focus', check);
+            window.clearInterval(timer);
+        };
+    }, [userArea, view]);
+
     useEffect(() => {
         if (!userArea) return;
+        return () => {
+            import('./support/realtime').then((m) => m.disconnectUserRealtime()).catch(() => undefined);
+        };
+    }, [userArea]);
+
+    // Ortak ekran istemcisi yalnız desteğe erişimi olan kullanıcıda; çıkışta / girişe dönünce kapatılır.
+    useEffect(() => {
+        if (!showSupport) return;
         let alive = true;
         import('./support/cobrowse/CobrowseClient')
             .then((m) => { if (alive) m.mountCobrowseClient(); })
@@ -92,9 +120,8 @@ const App: React.FC = () => {
         return () => {
             alive = false;
             import('./support/cobrowse/CobrowseClient').then((m) => m.unmountCobrowseClient()).catch(() => undefined);
-            import('./support/realtime').then((m) => m.disconnectUserRealtime()).catch(() => undefined);
         };
-    }, [userArea]);
+    }, [showSupport]);
 
     useEffect(() => {
         if (!userArea) return;
@@ -119,6 +146,7 @@ const App: React.FC = () => {
             if (err?.status === 401 || err?.status === 403) {
                 api.logout();
                 setSelectedDoc(null);
+                setSupportAllowed(false);
                 setView('auth');
             }
         });
@@ -170,6 +198,7 @@ const App: React.FC = () => {
     const handleLogout = () => {
         api.logout();
         setSelectedDoc(null);
+        setSupportAllowed(false);
         setView('landing'); // logout → back to Landing (cleaner than Auth)
     };
 
@@ -217,7 +246,7 @@ const App: React.FC = () => {
     return (
         <>
             <ToastHost />
-            {userArea && api.getToken() && (
+            {showSupport && api.getToken() && (
                 <Suspense fallback={null}>
                     <SupportWidget />
                 </Suspense>

@@ -22,7 +22,26 @@ const cleanContext = (value) => {
     return Object.keys(context).length ? context : null;
 };
 
+const NOT_ALLOWED = 'Destek talebi ve online destek, tasarım hakkı (kontör) satın almış kullanıcılara açıktır.';
+
+/** Destek yalnız kontörü olan, daha önce tasarım onaylamış (satın almış) kullanıcılara ve yöneticilere açıktır. */
+export const isSupportAllowed = async (db, userId) => {
+    const row = await db.get(
+        `SELECT u.role, u.credits,
+                EXISTS (SELECT 1 FROM designs d WHERE d.user_id = u.id AND d.paid_at IS NOT NULL) AS has_paid
+           FROM users u WHERE u.id = ?`,
+        [userId]
+    );
+    return !!row && (row.role === 'admin' || Number(row.credits) > 0 || !!row.has_paid);
+};
+
 export const registerSupportRoutes = (app, { db, authenticateToken }) => {
+    const requireAllowed = async (req, res) => {
+        if (await isSupportAllowed(db, req.user.id)) return true;
+        res.status(403).json({ error: NOT_ALLOWED, supportLocked: true });
+        return false;
+    };
+
     const ownTicket = async (req, res) => {
         const id = parseId(req.params.id);
         const ticket = id && await getTicket(db, id);
@@ -38,6 +57,7 @@ export const registerSupportRoutes = (app, { db, authenticateToken }) => {
         const body = cleanText(req.body?.message, BODY_MAX);
         if (!subject) return res.status(400).json({ error: `Konu 1-${SUBJECT_MAX} karakter olmalı.` });
         if (!body) return res.status(400).json({ error: `Mesaj 1-${BODY_MAX} karakter olmalı.` });
+        if (!(await requireAllowed(req, res))) return;
         if (!messageLimiter(req.user.id)) return res.status(429).json({ error: TOO_MANY });
 
         const row = await createTicket(db, req.user.id, { subject, body, context: cleanContext(req.body?.context) });
@@ -54,6 +74,7 @@ export const registerSupportRoutes = (app, { db, authenticateToken }) => {
         if (!ticket) return;
         const body = cleanText(req.body?.body, BODY_MAX);
         if (!body) return res.status(400).json({ error: `Mesaj 1-${BODY_MAX} karakter olmalı.` });
+        if (!(await requireAllowed(req, res))) return;
         if (!messageLimiter(req.user.id)) return res.status(429).json({ error: TOO_MANY });
         res.json(await addMessage(db, ticket, { sender: 'user', body }));
     });
@@ -68,6 +89,7 @@ export const registerSupportRoutes = (app, { db, authenticateToken }) => {
     app.post('/api/support/remote', authenticateToken, async (req, res) => {
         const note = optionalText(req.body?.note, NOTE_MAX);
         if (note === null) return res.status(400).json({ error: `Not en fazla ${NOTE_MAX} karakter olabilir.` });
+        if (!(await requireAllowed(req, res))) return;
         let ticketId = null;
         if (req.body?.ticketId !== undefined && req.body.ticketId !== null) {
             ticketId = parseId(req.body.ticketId);

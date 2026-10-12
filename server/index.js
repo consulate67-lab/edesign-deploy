@@ -12,7 +12,7 @@ import { registerAssistantRoutes } from './assistant.js';
 import { registerGalleryRoutes } from './gallery.js';
 import { registerPaytrRoutes } from './paytr.js';
 import { attachRealtime, touchLastSeen } from './realtime.js';
-import { registerSupportRoutes } from './support.js';
+import { isSupportAllowed, registerSupportRoutes } from './support.js';
 import { createBotHandler } from './telegram-bot.js';
 import { startPolling } from './telegram.js';
 
@@ -273,7 +273,7 @@ app.get('/api/me', authenticateToken, async (req, res) => {
     try {
         const user = await db.get('SELECT id, username, role, credits, free_design_used, full_name, company_name, phone_number FROM users WHERE id = ?', [req.user.id]);
         touchLastSeen(db, req.user.id);
-        res.json(user);
+        res.json(user && { ...user, support_allowed: await isSupportAllowed(db, req.user.id) });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }

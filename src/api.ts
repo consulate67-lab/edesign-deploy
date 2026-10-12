@@ -205,7 +205,8 @@ export const api = {
                         company_name: user.company_name,
                         username: user.username,
                         email: user.username,
-                        phone_number: user.phone
+                        phone_number: user.phone,
+                        support_allowed: user.role === 'admin' || user.credits > 0
                     };
                 }
                 throw new Error('Oturum süresi doldu, lütfen tekrar giriş yapın.');
