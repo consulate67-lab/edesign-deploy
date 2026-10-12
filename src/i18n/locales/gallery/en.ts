@@ -46,6 +46,8 @@ const gallery: typeof tr = {
     clear: 'Clear',
     noMatch: 'No templates match these filters.',
     clearFilters: 'Clear filters',
+    showMore: 'Show more',
+    shownOf: 'Showing {{shown}} of {{total}} templates',
     dropBank: 'Drop the bank details requirement',
     categories: {
         ticaret: 'Trade & Retail',

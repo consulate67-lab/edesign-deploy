@@ -46,6 +46,8 @@ const gallery: typeof tr = {
     clear: 'Limpiar',
     noMatch: 'Ninguna plantilla coincide con estos filtros.',
     clearFilters: 'Limpiar filtros',
+    showMore: 'Mostrar más',
+    shownOf: 'Mostrando {{shown}} de {{total}} plantillas',
     dropBank: 'Quitar el requisito de datos bancarios',
     categories: {
         ticaret: 'Comercio y venta minorista',

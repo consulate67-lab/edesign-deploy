@@ -46,6 +46,8 @@ const gallery: typeof tr = {
     clear: 'Réinitialiser',
     noMatch: 'Aucun modèle ne correspond à ces filtres.',
     clearFilters: 'Réinitialiser les filtres',
+    showMore: 'Afficher plus',
+    shownOf: '{{shown}} modèles affichés sur {{total}}',
     dropBank: 'Ne plus exiger les coordonnées bancaires',
     categories: {
         ticaret: 'Commerce & Distribution',

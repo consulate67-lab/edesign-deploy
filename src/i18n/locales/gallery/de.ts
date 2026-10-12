@@ -46,6 +46,8 @@ const gallery: typeof tr = {
     clear: 'Zurücksetzen',
     noMatch: 'Keine Vorlage passt zu diesen Filtern.',
     clearFilters: 'Filter zurücksetzen',
+    showMore: 'Mehr anzeigen',
+    shownOf: '{{shown}} von {{total}} Vorlagen angezeigt',
     dropBank: 'Bankangaben nicht mehr verlangen',
     categories: {
         ticaret: 'Handel & Einzelhandel',

@@ -585,6 +585,8 @@ const FilterDropdown: React.FC<{
 };
 
 const ANSWERED_KEY = 'tpl_questions_done';
+/** Galeride ilk açılışta ve her "Daha fazla göster"de çizilen kart sayısı. */
+const PAGE_SIZE = 30;
 
 const chipStyle: React.CSSProperties = {
     display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 10px', borderRadius: 999, fontSize: '0.78rem', fontWeight: 700,
@@ -699,6 +701,13 @@ export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => 
     const meslekOpts = useMemo(() => meslekOptions(forMeslek), [forMeslek]);
     const anyFilter = !!(docType || company || meslek || q);
     const clearAll = () => { setDocType(''); setCompany(''); setMeslek(''); setQuery(''); };
+
+    // Filtre değişince liste yine ilk sayfadan başlar.
+    const filterKey = `${docType}|${company}|${meslek}|${q}|${prefs.bank}`;
+    const [page, setPage] = useState({ key: filterKey, count: PAGE_SIZE });
+    const shownCount = page.key === filterKey ? page.count : PAGE_SIZE;
+    const shown = filtered.slice(0, shownCount);
+    const showMore = () => setPage({ key: filterKey, count: shownCount + PAGE_SIZE });
 
     const previewTemplate = previewId ? allTemplates.find(t => t.id === previewId) ?? null : null;
 
@@ -837,8 +846,9 @@ export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => 
             </div>
 
             {filtered.length > 0 ? (
+                <>
                 <div data-template-grid style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
-                    {filtered.map(t => (
+                    {shown.map(t => (
                         <TemplateCard
                             key={t.id}
                             t={t}
@@ -850,6 +860,21 @@ export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => 
                         />
                     ))}
                 </div>
+                {filtered.length > shown.length && (
+                    <div data-template-more style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, marginTop: 20 }}>
+                        <span style={{ fontSize: '0.8rem', color: theme.textMuted }}>
+                            {tr('gallery.shownOf', { shown: shown.length, total: filtered.length })}
+                        </span>
+                        <button type="button" data-template-show-more onClick={showMore} style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 20px', borderRadius: 999,
+                            border: `1px solid ${theme.borderStrong}`, background: theme.surface, color: theme.primary,
+                            cursor: 'pointer', fontFamily: 'inherit', fontSize: '0.85rem', fontWeight: 700, boxShadow: theme.shadow,
+                        }}>
+                            <ChevronDown size={15} /> {tr('gallery.showMore')}
+                        </button>
+                    </div>
+                )}
+                </>
             ) : (
                 <div style={{ padding: '28px 16px', textAlign: 'center', color: theme.textSubtle, fontSize: '0.9rem' }}>
                     {tr('gallery.noMatch')}{' '}

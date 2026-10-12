@@ -44,6 +44,8 @@ const gallery = {
     clear: 'Temizle',
     noMatch: 'Bu filtrelere uyan şablon yok.',
     clearFilters: 'Filtreleri temizle',
+    showMore: 'Daha fazla göster',
+    shownOf: '{{shown}} / {{total}} şablon gösteriliyor',
     dropBank: 'Banka bilgisi şartını kaldır',
     categories: {
         ticaret: 'Ticaret & Perakende',
