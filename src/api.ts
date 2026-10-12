@@ -145,6 +145,7 @@ export const api = {
                 throw Object.assign(new Error(data.error || `İstek başarısız (${res.status})`), {
                     status: res.status,
                     paymentRequired: !!data.paymentRequired,
+                    verificationRequired: !!data.verificationRequired,
                 });
             }
             return data;
@@ -259,17 +260,29 @@ export const api = {
     },
 
     // Convenience Wrappers
-    login: (username: string, password: string) => {
+    login: (username: string, password: string, lang?: string) => {
         return api.request('/auth/login', {
             method: 'POST',
-            body: JSON.stringify({ username, password })
+            body: JSON.stringify({ username, password, lang })
         });
     },
 
+    /** Onay gerekiyorsa `{ verificationRequired, email }`, gerekmiyorsa `{ token }` döner. */
     register: (details: any) => api.request('/auth/register', {
         method: 'POST',
         body: JSON.stringify(details)
     }),
+
+    verifyEmail: (username: string, code: string): Promise<{ token: string }> => api.request('/auth/verify-email', {
+        method: 'POST',
+        body: JSON.stringify({ username, code }),
+    }),
+
+    resendVerificationCode: (username: string, lang?: string): Promise<{ sent: boolean; retryAfter?: number }> =>
+        api.request('/auth/resend-code', {
+            method: 'POST',
+            body: JSON.stringify({ username, lang }),
+        }),
 
     /** Sunucuda Google istemci kimliği tanımlıysa döner; değilse Google ile giriş kapalıdır. */
     googleClientId: async (): Promise<string | null> => {

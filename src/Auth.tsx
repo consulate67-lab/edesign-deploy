@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { LogIn, UserPlus, ArrowLeft } from 'lucide-react';
+import { LogIn, UserPlus, ArrowLeft, MailCheck } from 'lucide-react';
 import { api } from './api';
 import { theme, techBackground } from './theme';
 import { useLocaleT } from './i18n';
@@ -7,6 +7,7 @@ import { LanguageSwitcher } from './i18n/LanguageSwitcher';
 import { GoogleSignIn } from './GoogleSignIn';
 
 type AuthMode = 'login' | 'register';
+type ApiError = { message?: string; verificationRequired?: boolean };
 
 interface AuthProps {
     mode?: AuthMode;
@@ -23,8 +24,13 @@ export const Auth: React.FC<AuthProps> = ({
     onSwitchMode,
     onBackToLanding,
 }) => {
-    const { t } = useLocaleT();
+    const { t, locale } = useLocaleT();
     const [isLogin, setIsLogin] = useState(mode === 'login');
+    // Onay kodu bekleyen e-posta; doluyken form yerine kod adımı gösterilir.
+    const [verifyEmail, setVerifyEmail] = useState<string | null>(null);
+    const [verifyAfterRegister, setVerifyAfterRegister] = useState(false);
+    const [code, setCode] = useState('');
+    const [resendWait, setResendWait] = useState(0);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [fullName, setFullName] = useState('');
@@ -42,6 +48,27 @@ export const Auth: React.FC<AuthProps> = ({
         return () => clearTimeout(t);
     }, []);
 
+    useEffect(() => {
+        if (resendWait <= 0) return;
+        const id = setTimeout(() => setResendWait((s) => s - 1), 1000);
+        return () => clearTimeout(id);
+    }, [resendWait]);
+
+    const startVerification = (email: string, afterRegister: boolean) => {
+        setVerifyEmail(email);
+        setVerifyAfterRegister(afterRegister);
+        setCode('');
+        setError('');
+        setSuccessMessage('');
+        setResendWait(60);
+    };
+
+    const finishLogin = (token: string, afterRegister: boolean) => {
+        api.setToken(token);
+        if (afterRegister && onRegister) onRegister();
+        else onLogin();
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
@@ -50,29 +77,69 @@ export const Auth: React.FC<AuthProps> = ({
 
         try {
             if (isLogin) {
-                const res = await api.login(username, password);
-                api.setToken(res.token);
-                onLogin();
+                const res = await api.login(username, password, locale);
+                finishLogin(res.token, false);
             } else {
-                await api.register({
+                const res = await api.register({
                     username,
                     password,
                     full_name: fullName,
                     company_name: companyName,
                     phone_number: phoneNumber,
+                    lang: locale,
                 });
-
-                // Auto-login after successful register — better UX
-                const res = await api.login(username, password);
-                api.setToken(res.token);
-                if (onRegister) onRegister();
-                else onLogin();
+                if (res.verificationRequired) startVerification(res.email || username.trim(), true);
+                else finishLogin(res.token, true);
             }
-        } catch (err: any) {
-            setError(err.message || t('common.genericError'));
+        } catch (err) {
+            const e = err as ApiError;
+            if (e.verificationRequired) startVerification(username.trim(), false);
+            else setError(e.message || t('common.genericError'));
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const handleVerify = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!verifyEmail) return;
+        setError('');
+        setSuccessMessage('');
+        setIsLoading(true);
+        try {
+            const res = await api.verifyEmail(verifyEmail, code.trim());
+            finishLogin(res.token, verifyAfterRegister);
+        } catch (err) {
+            setError((err as ApiError).message || t('common.genericError'));
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleResend = async () => {
+        if (!verifyEmail || resendWait > 0) return;
+        setError('');
+        setSuccessMessage('');
+        try {
+            const res = await api.resendVerificationCode(verifyEmail, locale);
+            if (res.sent) {
+                setSuccessMessage(t('auth.codeResent'));
+                setResendWait(60);
+            } else if (res.retryAfter) {
+                setResendWait(res.retryAfter);
+            }
+        } catch (err) {
+            setError((err as ApiError).message || t('common.genericError'));
+        }
+    };
+
+    const leaveVerification = () => {
+        setVerifyEmail(null);
+        setCode('');
+        setError('');
+        setSuccessMessage('');
+        setIsLogin(true);
+        if (onSwitchMode) onSwitchMode('login');
     };
 
     const handleToggleMode = () => {
@@ -176,7 +243,7 @@ export const Auth: React.FC<AuthProps> = ({
                     position: 'relative',
                     zIndex: 1,
                     width: '100%',
-                    maxWidth: isLogin ? 440 : 560,
+                    maxWidth: isLogin || verifyEmail ? 440 : 560,
                     background: 'rgba(255, 255, 255, 0.92)',
                     backdropFilter: 'blur(20px)',
                     WebkitBackdropFilter: 'blur(20px)',
@@ -210,7 +277,7 @@ export const Auth: React.FC<AuthProps> = ({
                             margin: 0,
                         }}
                     >
-                        {isLogin ? t('auth.welcomeBack') : t('auth.createTitle')}
+                        {verifyEmail ? t('auth.verifyTitle') : isLogin ? t('auth.welcomeBack') : t('auth.createTitle')}
                     </h1>
                     <p
                         style={{
@@ -220,7 +287,13 @@ export const Auth: React.FC<AuthProps> = ({
                             lineHeight: 1.5,
                         }}
                     >
-                        {isLogin ? t('auth.loginSub') : t('auth.registerSub')}
+                        {verifyEmail ? (
+                            <>
+                                {t('auth.verifySubBefore')}
+                                <strong style={{ color: theme.text, wordBreak: 'break-all' }}>{verifyEmail}</strong>
+                                {t('auth.verifySubAfter')}
+                            </>
+                        ) : isLogin ? t('auth.loginSub') : t('auth.registerSub')}
                     </p>
                 </div>
 
@@ -258,6 +331,82 @@ export const Auth: React.FC<AuthProps> = ({
                     </div>
                 )}
 
+                {verifyEmail ? (
+                <form onSubmit={handleVerify} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                    <div>
+                        <label style={labelStyle}>{t('auth.code')}</label>
+                        <input
+                            type="text"
+                            inputMode="numeric"
+                            autoComplete="one-time-code"
+                            pattern="[0-9]{6}"
+                            maxLength={6}
+                            required
+                            autoFocus
+                            placeholder="••••••"
+                            value={code}
+                            onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                            onFocus={() => setFocusedField('code')}
+                            onBlur={() => setFocusedField(null)}
+                            style={{ ...inputStyle('code'), fontSize: 24, fontWeight: 700, letterSpacing: 10, textAlign: 'center' }}
+                        />
+                        <p style={{ color: theme.textSubtle, fontSize: 12, margin: '8px 0 0', lineHeight: 1.5 }}>
+                            {t('auth.checkSpam')}
+                        </p>
+                    </div>
+                    <button
+                        type="submit"
+                        disabled={isLoading || code.length !== 6}
+                        style={{
+                            marginTop: 6,
+                            height: 48,
+                            border: 'none',
+                            borderRadius: 12,
+                            fontSize: 15,
+                            fontWeight: 700,
+                            color: '#ffffff',
+                            cursor: isLoading ? 'wait' : code.length !== 6 ? 'not-allowed' : 'pointer',
+                            background: theme.gradient,
+                            boxShadow: theme.shadowBrand,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: 8,
+                            fontFamily: 'inherit',
+                            opacity: isLoading || code.length !== 6 ? 0.6 : 1,
+                        }}
+                    >
+                        {isLoading ? t('auth.processing') : <><MailCheck size={18} /> {t('auth.verifySubmit')}</>}
+                    </button>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
+                        <button
+                            type="button"
+                            onClick={leaveVerification}
+                            style={{ background: 'none', border: 'none', color: theme.textMuted, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: '6px 4px' }}
+                        >
+                            {t('auth.verifyBack')}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleResend}
+                            disabled={resendWait > 0}
+                            style={{
+                                background: 'none',
+                                border: 'none',
+                                color: resendWait > 0 ? theme.textSubtle : theme.primary,
+                                fontSize: 13,
+                                fontWeight: 600,
+                                cursor: resendWait > 0 ? 'default' : 'pointer',
+                                fontFamily: 'inherit',
+                                padding: '6px 4px',
+                            }}
+                        >
+                            {resendWait > 0 ? t('auth.resendIn', { seconds: resendWait }) : t('auth.resend')}
+                        </button>
+                    </div>
+                </form>
+                ) : (
+                <>
                 <GoogleSignIn
                     mode={isLogin ? 'login' : 'register'}
                     onSuccess={(created) => {
@@ -426,6 +575,8 @@ export const Auth: React.FC<AuthProps> = ({
                         {isLogin ? t('auth.toRegister') : t('auth.toLogin')}
                     </button>
                 </div>
+                </>
+                )}
             </div>
 
             {/* Footer mark */}

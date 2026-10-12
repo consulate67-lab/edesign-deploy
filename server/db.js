@@ -146,6 +146,17 @@ export const initDb = async () => {
         await ensureColumn(probe, 'free_design_used', 'INTEGER NOT NULL DEFAULT 0');
         await ensureColumn(probe, 'last_seen_at', 'TIMESTAMPTZ');
         await ensureColumn(probe, 'billing_profile', 'JSONB');
+        // Boşsa e-posta sahipliği kanıtlanmamıştır (server/email-verify.js).
+        await ensureColumn(probe, 'email_verified_at', 'TIMESTAMPTZ');
+        await probe.query(`
+            CREATE TABLE IF NOT EXISTS email_verifications (
+                user_id     INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+                code_hash   TEXT NOT NULL,
+                expires_at  TIMESTAMPTZ NOT NULL,
+                attempts    INTEGER NOT NULL DEFAULT 0,
+                sent_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            )
+        `);
 
         // Useful indexes for the auth query path.
         await probe.query(`CREATE INDEX IF NOT EXISTS idx_users_username ON users (username)`);

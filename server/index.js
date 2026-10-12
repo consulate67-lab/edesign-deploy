@@ -8,6 +8,7 @@ import { applyLicenseLock, hasLicenseLock, isValidTaxId, normalizeTaxId, withIss
 import { TEST_WATERMARK_PNG } from '../shared/test-watermark-png.js';
 import { createRequireAdmin, registerAdminAuthRoutes } from './admin-auth.js';
 import { registerAdminRoutes } from './admin.js';
+import { EMAIL_PATTERN, needsEmailVerification, pickLang, registerEmailVerifyRoutes, sendVerificationCode } from './email-verify.js';
 import { registerAssistantRoutes } from './assistant.js';
 import { registerGalleryRoutes } from './gallery.js';
 import { registerPaytrRoutes } from './paytr.js';
@@ -123,6 +124,7 @@ initDb().then(async _db => {
     db = _db;
     const requireAdmin = createRequireAdmin({ db, secret: EFFECTIVE_SECRET });
     registerAdminAuthRoutes(app, { db, secret: EFFECTIVE_SECRET, requireAdmin });
+    registerEmailVerifyRoutes(app, { db, secret: EFFECTIVE_SECRET, issueSession });
     registerAdminRoutes(app, { db, requireAdmin, packages: PACKAGE_PRICES, website: new URL(FRONTEND_URL).origin });
     registerGalleryRoutes(app, { db, requireAdmin });
     registerSupportRoutes(app, { db, authenticateToken });
@@ -164,29 +166,54 @@ app.get('/api/health', (_req, res) => {
 
 // Routes
 
+const issueSession = (user) => ({
+    token: jwt.sign({ id: user.id, username: user.username, role: user.role }, EFFECTIVE_SECRET),
+    user: { id: user.id, username: user.username, role: user.role, credits: user.credits },
+});
+
 // Register
 app.post('/api/auth/register', async (req, res) => {
-    const { username, password, full_name, company_name, phone_number } = req.body;
+    const { password, full_name, company_name, phone_number } = req.body;
+    const username = typeof req.body?.username === 'string' ? req.body.username.trim() : '';
 
     if (!username || !password || !full_name || !company_name) {
         return res.status(400).json({ error: 'Lütfen tüm zorunlu alanları doldurunuz (E-posta, Şifre, Ad Soyad, Firma)' });
     }
+    if (!EMAIL_PATTERN.test(username) || username.length > 254) {
+        return res.status(400).json({ error: 'Lütfen geçerli bir e-posta adresi girin.' });
+    }
 
     try {
-        // Öncelikli kontrol: Kullanıcı zaten var mı?
-        const existingUser = await db.get('SELECT id FROM users WHERE username = ?', [username]);
-        if (existingUser) {
-            return res.status(400).json({ error: 'Bu e-posta adresi zaten kayıtlı.' });
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const existing = await db.get(
+            `SELECT u.*, EXISTS (SELECT 1 FROM designs d WHERE d.user_id = u.id) AS has_designs
+               FROM users u WHERE lower(u.username) = lower(?)`,
+            [username]
+        );
+        let user;
+        if (existing) {
+            // Onaylanmamış ve hiç kullanılmamış kayıt (ör. yanlış yazılmış ya da başkasının
+            // adresiyle açılmış) gerçek sahibinin yeniden kaydolmasını engellemez.
+            const unused = needsEmailVerification(existing) && !existing.has_designs && existing.credits === 0;
+            if (!unused) return res.status(400).json({ error: 'Bu e-posta adresi zaten kayıtlı.' });
+            user = await db.get(
+                `UPDATE users SET password = ?, full_name = ?, company_name = ?, phone_number = ?, updated_at = NOW()
+                  WHERE id = ? RETURNING *`,
+                [hashedPassword, full_name, company_name, phone_number, existing.id]
+            );
+        } else {
+            user = (await db.run(
+                `INSERT INTO users (username, password, full_name, company_name, phone_number)
+                 VALUES (?, ?, ?, ?, ?) RETURNING *`,
+                [username, hashedPassword, full_name, company_name, phone_number]
+            )).rows[0];
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const result = await db.run(
-            'INSERT INTO users (username, password, full_name, company_name, phone_number) VALUES (?, ?, ?, ?, ?)',
-            [username, hashedPassword, full_name, company_name, phone_number]
-        );
-
-        res.json({ message: 'User created', userId: result.lastID });
+        if (!needsEmailVerification(user)) return res.json(issueSession(user));
+        await sendVerificationCode(db, EFFECTIVE_SECRET, user, pickLang(req.body));
+        res.json({ verificationRequired: true, email: user.username });
     } catch (e) {
+        if (e.status) return res.status(e.status).json({ error: e.message });
         console.error("Kayıt Hatası:", e);
         if (e.message.includes('UNIQUE constraint') || e.message.includes('already exists')) {
             return res.status(400).json({ error: 'Bu e-posta adresi zaten kayıtlı.' });
@@ -206,10 +233,17 @@ app.post('/api/auth/login', async (req, res) => {
         const validPassword = await bcrypt.compare(password, user.password);
         if (!validPassword) return res.status(400).json({ error: 'Girdiğiniz şifre hatalı. Lütfen tekrar deneyin.' });
 
-        const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, EFFECTIVE_SECRET);
-        res.json({ token, user: { id: user.id, username: user.username, role: user.role, credits: user.credits } });
+        if (needsEmailVerification(user)) {
+            await sendVerificationCode(db, EFFECTIVE_SECRET, user, pickLang(req.body));
+            return res.status(403).json({
+                error: 'E-posta adresiniz henüz onaylanmadı. Adresinize gönderilen onay kodunu girin.',
+                verificationRequired: true,
+                email: user.username,
+            });
+        }
+        res.json(issueSession(user));
     } catch (e) {
-        res.status(500).json({ error: e.message });
+        res.status(e.status || 500).json({ error: e.message });
     }
 });
 
@@ -260,8 +294,11 @@ app.post('/api/auth/google', async (req, res) => {
             created = true;
             console.log(`[google] new user #${user.id}`);
         }
-        const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, EFFECTIVE_SECRET);
-        res.json({ token, created, user: { id: user.id, username: user.username, role: user.role, credits: user.credits } });
+        if (!user.email_verified_at) {
+            await db.run('UPDATE users SET email_verified_at = NOW() WHERE id = ?', [user.id]);
+            await db.run('DELETE FROM email_verifications WHERE user_id = ?', [user.id]);
+        }
+        res.json({ created, ...issueSession(user) });
     } catch (e) {
         console.error('[google] login error:', e);
         res.status(500).json({ error: 'Sunucu hatası.' });
