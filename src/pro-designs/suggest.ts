@@ -97,6 +97,19 @@ export function placeTexts(texts: string[]): Partial<Record<TextKey, string>> {
     return joined;
 }
 
+const compact = (s: string) => fold(s).replace(/[^a-z0-9]+/g, '');
+
+/** Yapay zekânın yerleştirmediği özgün metinleri kural tabanlı alanlarına ekler. */
+function completeTexts(ai: ProBrief['texts'], texts: string[]): ProBrief['texts'] {
+    const out = { ...ai };
+    const placed = compact(Object.values(out).join(' '));
+    const missing = texts.filter(t => compact(t) && !placed.includes(compact(t)));
+    for (const [k, v] of Object.entries(placeTexts(missing)) as [TextKey, string][]) {
+        out[k] = k === 'thanks' ? v : [out[k], v].filter(Boolean).join('\n');
+    }
+    return out;
+}
+
 export function ruleBrief(input: Pick<BriefInput, 'sectorId' | 'moods' | 'wishes' | 'texts'>): ProBrief {
     const score = new Map<ProStyleId, number>(PRO_SKINS.map((s, i) => [s, -i * 0.01]));
     const bump = (s: ProStyleId, n: number) => score.set(s, (score.get(s) ?? 0) + n);
@@ -133,7 +146,7 @@ export async function requestBrief(input: BriefInput): Promise<BriefResult> {
         const styles = [...new Set([...b.styles.filter(s => PRO_SKINS.includes(s)), ...rules.styles])].slice(0, 3);
         return {
             source: 'ai',
-            brief: { ...b, styles, accent: isHex(b.accent) ? b.accent : null, texts: { ...rules.texts, ...b.texts } },
+            brief: { ...b, styles, accent: isHex(b.accent) ? b.accent : null, texts: completeTexts(b.texts ?? {}, input.texts) },
             quota: data.quota ?? null,
         };
     } catch {

@@ -74,7 +74,7 @@ const systemPrompt = (input) => [
     'Metin alanları:',
     ...Object.entries(TEXT_KEYS).map(([k, d]) => `- ${k}: ${d}`),
     'XSLT\'den çıkarılan özel metinleri anlamına göre bu alanlara yerleştir; kelimeleri koru, yalnızca yazım hatasını düzelt. Aynı alana düşen birden fazla metni satır sonuyla (\\n) birleştir.',
-    'Yasal bilgi, telefon, adres, IBAN UYDURMA. Metinlerde yoksa slogan ekleme; thanks için sektöre uygun kısa bir Türkçe teşekkür cümlesi önerebilirsin.',
+    'Firma unvanı, yasal bilgi, sicil no, telefon, adres, IBAN, slogan, duyuru UYDURMA: thanks dışındaki alanlara yalnızca verilen metinleri koy, metin yoksa alanı hiç yazma. thanks için sektöre uygun kısa bir Türkçe teşekkür cümlesi önerebilirsin.',
     input.sections.length ? `Bölümler (yalnızca bu kimlikleri kullan): ${input.sections.map((s) => `${s.id} = ${s.label}${s.detected ? ' [XSLT\'de var]' : ''}`).join('; ')}. XSLT\'de olanları açık tut.` : '',
     `Gerekçe her şablon için tek kısa cümle olsun, kullanıcıya hitap etsin ve ${LANGS[input.lang]} yazılsın. Belge metinleri (texts) Türkçe kalır.`,
     'YALNIZCA şu biçimde geçerli JSON döndür, başka hiçbir şey yazma:',
@@ -85,6 +85,30 @@ const parseJson = (text) => {
     const m = /\{[\s\S]*\}/.exec(text);
     if (!m) throw new Error('JSON yok');
     return JSON.parse(m[0]);
+};
+
+const norm = (s) => s.toLocaleLowerCase('tr').replace(/[^\p{L}\p{N}]+/gu, '');
+
+/**
+ * Model yasaklara rağmen sicil no, unvan, slogan uydurabiliyor: teşekkür dışındaki alanlarda
+ * yalnızca kullanıcının XSLT'sinde geçen parçalar kalır. Yerleşmeyen özgün metni istemci ekler.
+ */
+const groundTexts = (texts, input) => {
+    const sources = input.texts.map(norm).filter(Boolean);
+    const out = {};
+    for (const [key, value] of Object.entries(texts)) {
+        if (key === 'thanks') {
+            if (value.length <= 140 && !/[\d@]|www\.|https?:/i.test(value)) out.thanks = value.replace(/\n/g, ' ');
+            continue;
+        }
+        const segs = value.split(/\n|\s+[·|•]\s+/).map((s) => s.trim()).filter(Boolean);
+        const kept = segs.filter((seg) => {
+            const n = norm(seg);
+            return n.length >= 4 && sources.some((src) => src.includes(n));
+        });
+        if (kept.length) out[key] = kept.length === segs.length ? value : kept.join('\n');
+    }
+    return out;
 };
 
 const sanitizeBrief = (raw, input) => {
@@ -111,7 +135,7 @@ const sanitizeBrief = (raw, input) => {
         font: FONTS.includes(raw?.font) ? raw.font : null,
         colorMode: COLOR_MODES.includes(raw?.colorMode) ? raw.colorMode : null,
         reasons,
-        texts,
+        texts: groundTexts(texts, input),
         sections,
     };
 };
