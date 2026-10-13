@@ -1,0 +1,46 @@
+edXdocu · Diseñador de e-documentos
+
+SU DISEÑO DE FACTURA ELECTRÓNICA, LISTO EN MINUTOS
+
+Conforme a EN 16931, Peppol BIS 3 y XRechnung: listo para 37 países, incluidos los formatos nacionales de EE. UU., India, China y Rusia. Sin XSLT, solo arrastrar y soltar.
+
+Pruébelo ahora: https://www.edxdocu.com/?lang=es&utm_source=email&utm_medium=email&utm_campaign=tanitim-intl&utm_content=hero-es
+
+37 países · EN 16931 Peppol BIS 3 · XRechnung · 100 % web, sin instalación
+
+
+¿PARA QUÉ SIRVE?
+Su factura, con su imagen. Su logotipo, sello, datos bancarios y tabla de líneas: todo se coloca donde quiera arrastrando y soltando.
+
+
+LISTO EN 3 PASOS
+1. Elija el país y el documento
+   El asistente muestra los documentos locales con el perfil XML adecuado. Empiece con una plantilla o suba su propio XSLT.
+2. Añada logotipo, sello y datos bancarios
+   Arrastre y suelte los campos; ajuste colores, fuentes y diseño viendo el resultado.
+3. Previsualice con su XML y descargue
+   Vea el resultado al instante con una factura real y cargue el XSLT en su plataforma de facturación electrónica o Peppol.
+
+
+- Arrastrar y soltar: No necesita saber XSLT ni programar.
+- EN 16931 y Peppol: Peppol BIS 3, XRechnung 3.0 y verificación de reglas básicas.
+- Vista previa en vivo: Vea cada cambio con su propio XML.
+- Etiquetas locales: Etiquetas en el idioma del país o en inglés.
+
+
+UN EDITOR, 37 PAÍSES
+EN 16931 (UBL), Peppol BIS Billing 3.0, XRechnung 3.0, CIUS-RO, HR CIUS, CIUS-PT, Peppol Despatch Advice, DBNAlliance (US), GST e-Invoice · e-Way Bill (IN), FNS UPD 5.03 (RU), 数电发票 (CN), UBL-TR (TR)
+
+¿Para quién? Puntos de acceso Peppol, proveedores de facturación electrónica, fabricantes de ERP y software contable, asesorías y cualquier empresa que quiera enviar sus facturas con su propia imagen.
+
+
+CREE SU PRIMER DISEÑO HOY
+Crear cuenta: https://www.edxdocu.com/?lang=es&utm_source=email&utm_medium=email&utm_campaign=tanitim-intl&utm_content=final-es
+--
+edXdocu · Diseñador de e-documentos
+destek@edxdocu.com · www.edxdocu.com
+
+Este correo informativo se ha enviado a su empresa porque puede ser de interés para su sector de actividad.
+Si no desea recibir más mensajes, puede darse de baja con un clic; su solicitud se aplica de inmediato.
+{{UNSUBSCRIBE_URL}}&lang=es
+Para conocer el origen de su dirección o solicitar su eliminación de nuestros registros, escriba a destek@edxdocu.com.

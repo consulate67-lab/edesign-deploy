@@ -1,14 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Eye, Mail, Pause, Play, RefreshCw, RotateCcw, Send, Trash2, Upload, XCircle } from 'lucide-react';
-import brochureHtml from '../../../marketing/email-tanitim.html?raw';
-import brochureText from '../../../marketing/email-tanitim.txt?raw';
 import { useUiStore } from '../../store/uiStore';
 import { adminApi } from '../adminApi';
-import type { CampaignStatus, MailCampaign, MailCampaignDetail, MailCampaignList } from '../contracts';
+import type { CampaignStatus, MailCampaign, MailCampaignDetail, MailCampaignList, MailContent } from '../contracts';
 import { C, btn, errorText, fmtDateTime, fmtNumber, inputStyle, labelStyle } from '../format';
 import { Badge, Card, Empty, ErrorBox, Modal, SectionHeader, Spinner } from '../ui';
-
-const DEFAULT_SUBJECT = 'e-Fatura tasarımınız artık dakikalar içinde hazır';
+import { MAIL_LANGS, foldCountry, langForCountry, langLabel, type MailLang } from './bulkmail/countries';
+import { isPersonal, parseRecipients, rowsToTsv, type Recipient } from './bulkmail/recipients';
+import { BROCHURES } from './bulkmail/templates';
 
 const STATUS: Record<CampaignStatus, { label: string; color: string }> = {
     draft: { label: 'Taslak', color: C.dim },
@@ -18,49 +17,8 @@ const STATUS: Record<CampaignStatus, { label: string; color: string }> = {
     cancelled: { label: 'İptal edildi', color: C.red },
 };
 
-const EMAIL_RE = /[A-Za-z0-9._%+'-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}/g;
-
-/** Bireysel (tüketici) posta sağlayıcıları: onaysız ticari ileti yalnız tacir/esnafa gönderilebildiği için varsayılan olarak ayıklanır. */
-const PERSONAL_DOMAINS = new Set([
-    'gmail.com', 'googlemail.com', 'hotmail.com', 'hotmail.com.tr', 'outlook.com', 'outlook.com.tr', 'live.com', 'live.com.tr',
-    'msn.com', 'windowslive.com', 'yahoo.com', 'yahoo.com.tr', 'ymail.com', 'icloud.com', 'me.com', 'mac.com', 'yandex.com',
-    'yandex.com.tr', 'yandex.ru', 'mynet.com', 'aol.com', 'gmx.com', 'gmx.de', 'gmx.net', 'mail.ru', 'mail.com', 'proton.me',
-    'protonmail.com', 'superonline.com', 'ttmail.com', 'turk.net', 'e-kolay.net', 'windowslive.com.tr',
-]);
-const isPersonal = (email: string) => PERSONAL_DOMAINS.has(email.slice(email.lastIndexOf('@') + 1));
-
-interface ParsedList {
-    recipients: { email: string; name: string }[];
-    duplicates: number;
-    invalid: string[];
-}
-
-/** Her satır: "adres", "Ad Soyad <adres>", "adres;Ad Soyad" (CSV) ya da virgülle ayrılmış birden çok adres. */
-const parseRecipients = (raw: string): ParsedList => {
-    const seen = new Set<string>();
-    const recipients: ParsedList['recipients'] = [];
-    const invalid: string[] = [];
-    let duplicates = 0;
-    for (const line of raw.split(/\r?\n/)) {
-        const trimmed = line.trim();
-        if (!trimmed) continue;
-        const found = [...trimmed.matchAll(EMAIL_RE)].map(m => m[0]);
-        if (found.length === 0) {
-            if (!/e-?posta|e-?mail|mail/i.test(trimmed)) invalid.push(trimmed.slice(0, 80));
-            continue;
-        }
-        const name = found.length === 1
-            ? trimmed.replace(found[0], ' ').replace(/[<>"'`;,|\t]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120)
-            : '';
-        for (const raw of found) {
-            const email = raw.toLowerCase();
-            if (seen.has(email)) { duplicates++; continue; }
-            seen.add(email);
-            recipients.push({ email, name });
-        }
-    }
-    return { recipients, duplicates, invalid };
-};
+interface CountryRow { key: string; label: string; count: number; lang: MailLang }
+interface LangGroup { lang: MailLang; recipients: Recipient[] }
 
 const fmtHours = (count: number, perHour: number) => {
     const minutes = Math.ceil((count / Math.max(perHour, 1)) * 60);
@@ -98,10 +56,11 @@ export const BulkMail: React.FC = () => {
     const [detail, setDetail] = useState<MailCampaignDetail | null>(null);
 
     const [name, setName] = useState(() => `Tanıtım · ${todayLabel()}`);
-    const [subject, setSubject] = useState(DEFAULT_SUBJECT);
     const [listText, setListText] = useState('');
-    const [html, setHtml] = useState(brochureHtml);
-    const [text, setText] = useState(brochureText);
+    const [contents, setContents] = useState<Record<MailLang, MailContent>>(BROCHURES);
+    const [previewLang, setPreviewLang] = useState<MailLang>('tr');
+    const [langOverrides, setLangOverrides] = useState<Record<string, MailLang>>({});
+    const [readingFile, setReadingFile] = useState(false);
     const [editHtml, setEditHtml] = useState(false);
     const [rate, setRate] = useState<number | null>(null);
     const [testTo, setTestTo] = useState('');
@@ -117,6 +76,31 @@ export const BulkMail: React.FC = () => {
         () => (businessOnly && personalCount ? { ...parsedAll, recipients: parsedAll.recipients.filter(r => !isPersonal(r.email)) } : parsedAll),
         [parsedAll, businessOnly, personalCount],
     );
+
+    const fallbackLang: MailLang = parsed.hasCountry ? 'en' : 'tr';
+    const countryRows = useMemo(() => {
+        const rows = new Map<string, CountryRow>();
+        for (const r of parsed.recipients) {
+            const key = foldCountry(r.country);
+            const row = rows.get(key);
+            if (row) row.count++;
+            else rows.set(key, { key, label: r.country || 'Ülkesi belirtilmemiş', count: 1, lang: langOverrides[key] ?? langForCountry(r.country, fallbackLang) });
+        }
+        return [...rows.values()].sort((a, b) => b.count - a.count || a.label.localeCompare(b.label, 'tr'));
+    }, [parsed, langOverrides, fallbackLang]);
+
+    const groups = useMemo<LangGroup[]>(() => {
+        const langOf = new Map(countryRows.map(r => [r.key, r.lang]));
+        return MAIL_LANGS
+            .map(({ id }) => ({ lang: id, recipients: parsed.recipients.filter(r => langOf.get(foldCountry(r.country)) === id) }))
+            .filter(g => g.recipients.length > 0);
+    }, [parsed, countryRows]);
+
+    const totalRecipients = parsed.recipients.length;
+    const previewTabs = groups.length ? groups.map(g => g.lang) : MAIL_LANGS.map(l => l.id);
+    const activeLang = previewTabs.includes(previewLang) ? previewLang : previewTabs[0];
+    const content = contents[activeLang];
+    const setContent = (patch: Partial<MailContent>) => setContents(prev => ({ ...prev, [activeLang]: { ...prev[activeLang], ...patch } }));
     const perHour = rate ?? data?.defaultRate ?? 80;
     const rateMax = data?.rateMax ?? 500;
 
@@ -146,17 +130,27 @@ export const BulkMail: React.FC = () => {
             pushToast({ kind: 'error', title: 'Dosya çok büyük', description: 'En fazla 5 MB yükleyebilirsiniz.', ttl: 6000 });
             return;
         }
-        const content = await file.text();
-        setListText(prev => (prev.trim() ? `${prev.trim()}\n${content}` : content));
+        setReadingFile(true);
+        try {
+            const loaded = /\.xlsx$/i.test(file.name)
+                ? rowsToTsv(await import('./bulkmail/xlsx').then(m => m.readXlsx(file)))
+                : await file.text();
+            setListText(prev => (prev.trim() ? `${prev.trim()}\n${loaded}` : loaded));
+        } catch (err) {
+            pushToast({ kind: 'error', title: 'Dosya okunamadı', description: errorText(err), ttl: 8000 });
+        } finally {
+            setReadingFile(false);
+        }
     };
 
-    const content = { subject: subject.trim(), html, text };
-    const contentOk = !!content.subject && !!html.trim();
+    const ready = (lang: MailLang) => !!contents[lang].subject.trim() && !!contents[lang].html.trim();
+    const contentOk = groups.length > 0 && groups.every(g => ready(g.lang));
+    const campaignName = (lang: MailLang) => (groups.length > 1 || lang !== 'tr' ? `${name.trim()} · ${langLabel(lang)}` : name.trim());
 
     const sendTest = async () => {
         setSendingTest(true);
         try {
-            await adminApi.testCampaign(content, testTo.trim());
+            await adminApi.testCampaign({ ...content, subject: content.subject.trim() }, testTo.trim());
             pushToast({ kind: 'success', title: 'Test e-postası gönderildi', description: `${testTo.trim()} adresinin gelen kutusunu (ve spam klasörünü) kontrol edin.`, ttl: 7000 });
         } catch (e) {
             pushToast({ kind: 'error', title: 'Test gönderilemedi', description: errorText(e), ttl: 9000 });
@@ -166,19 +160,29 @@ export const BulkMail: React.FC = () => {
     };
 
     const start = async () => {
-        const n = parsed.recipients.length;
-        if (!window.confirm(`${fmtNumber(n)} alıcıya "${content.subject}" konulu e-posta gönderimi başlatılsın mı?\n\nSaatte ${perHour} e-posta ile yaklaşık ${fmtHours(n, perHour)} sürer.`)) return;
+        const summary = groups.map(g => `• ${langLabel(g.lang)}: ${fmtNumber(g.recipients.length)} alıcı — "${contents[g.lang].subject.trim()}"`).join('\n');
+        if (!window.confirm(`${fmtNumber(totalRecipients)} alıcıya gönderim başlatılsın mı?\n\n${summary}\n\nSaatte ${perHour} e-posta ile yaklaşık ${fmtHours(totalRecipients, perHour)} sürer. Diller sırayla gönderilir.`)) return;
         setStarting(true);
+        const started: MailLang[] = [];
         try {
-            const created = await adminApi.createCampaign({ name: name.trim(), ...content, ratePerHour: perHour, recipients: parsed.recipients });
-            await adminApi.startCampaign(created.id);
-            pushToast({ kind: 'success', title: 'Gönderim başladı', description: 'E-postalar arka planda sırayla gidiyor; bu sayfayı kapatabilirsiniz.', ttl: 7000 });
+            for (const g of groups) {
+                const c = contents[g.lang];
+                const created = await adminApi.createCampaign({
+                    name: campaignName(g.lang), subject: c.subject.trim(), html: c.html, text: c.text, ratePerHour: perHour,
+                    recipients: g.recipients.map(({ email, name: n }) => ({ email, name: n })),
+                });
+                await adminApi.startCampaign(created.id);
+                started.push(g.lang);
+            }
+            pushToast({ kind: 'success', title: 'Gönderim başladı', description: `${groups.length > 1 ? `${groups.length} dilde ayrı gönderim oluşturuldu. ` : ''}E-postalar arka planda sırayla gidiyor; bu sayfayı kapatabilirsiniz.`, ttl: 8000 });
             setListText('');
+            setLangOverrides({});
             setConsent(false);
             setName(`Tanıtım · ${todayLabel()}`);
             await load();
         } catch (e) {
-            pushToast({ kind: 'error', title: 'Gönderim başlatılamadı', description: errorText(e), ttl: 9000 });
+            const done = started.length ? ` Başlatılan diller: ${started.map(langLabel).join(', ')}; kalanları listeden çıkarıp yeniden başlatın.` : '';
+            pushToast({ kind: 'error', title: 'Gönderim başlatılamadı', description: `${errorText(e)}${done}`, ttl: 12000 });
             await load();
         } finally {
             setStarting(false);
@@ -212,7 +216,7 @@ export const BulkMail: React.FC = () => {
         }
     };
 
-    const canStart = !starting && contentOk && !!name.trim() && parsed.recipients.length > 0 && consent && perHour >= 10 && perHour <= rateMax;
+    const canStart = !starting && contentOk && !!name.trim() && totalRecipients > 0 && consent && perHour >= 10 && perHour <= rateMax;
     const testOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(testTo.trim());
 
     return (
@@ -235,25 +239,21 @@ export const BulkMail: React.FC = () => {
                             <input style={inputStyle} value={name} maxLength={120} onChange={e => setName(e.target.value)} />
                         </div>
                         <div>
-                            <label style={labelStyle}>Konu satırı</label>
-                            <input style={inputStyle} value={subject} maxLength={200} onChange={e => setSubject(e.target.value)} />
-                        </div>
-                        <div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                                 <label style={{ ...labelStyle, marginBottom: 0 }}>Alıcı listesi</label>
-                                <button type="button" style={{ ...btn('secondary', true), marginLeft: 'auto' }} onClick={() => fileRef.current?.click()}>
-                                    <Upload size={13} /> Dosyadan yükle (.csv, .txt)
+                                <button type="button" style={{ ...btn('secondary', true), marginLeft: 'auto' }} disabled={readingFile} onClick={() => fileRef.current?.click()}>
+                                    {readingFile ? <Spinner size={13} /> : <Upload size={13} />} Dosyadan yükle (.xlsx, .csv, .txt)
                                 </button>
-                                <input ref={fileRef} type="file" accept=".csv,.txt,text/csv,text/plain" hidden onChange={e => void onFile(e)} />
+                                <input ref={fileRef} type="file" accept=".xlsx,.csv,.txt,text/csv,text/plain,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden onChange={e => void onFile(e)} />
                             </div>
                             <textarea
-                                style={{ ...inputStyle, minHeight: 170, fontFamily: 'Consolas, "Cascadia Code", monospace', fontSize: '0.8rem', resize: 'vertical' }}
-                                placeholder={'Her satıra bir adres yazın ya da yapıştırın:\nornek@firma.com\nAhmet Yılmaz <ahmet@firma.com>\nayse@firma.com;Ayşe Demir'}
+                                style={{ ...inputStyle, minHeight: 170, fontFamily: 'Consolas, "Cascadia Code", monospace', fontSize: '0.8rem', resize: 'vertical', whiteSpace: 'pre', overflowX: 'auto' }}
+                                placeholder={'Her satıra bir adres yazın ya da yapıştırın:\nornek@firma.com\nAhmet Yılmaz <ahmet@firma.com>\n\nÜlkeye göre dil için Excel tablosunu başlıklarıyla yükleyin\n(Ülke, E-Posta, Yetkili sütunları).'}
                                 value={listText}
                                 onChange={e => setListText(e.target.value)}
                             />
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8, alignItems: 'center' }}>
-                                <Badge color={C.green}>{fmtNumber(parsed.recipients.length)} geçerli adres</Badge>
+                                <Badge color={C.green}>{fmtNumber(totalRecipients)} geçerli adres</Badge>
                                 {parsed.duplicates > 0 && <Badge color={C.amber}>{fmtNumber(parsed.duplicates)} tekrar çıkarıldı</Badge>}
                                 {parsed.invalid.length > 0 && <Badge color={C.red}>{fmtNumber(parsed.invalid.length)} satırda adres yok</Badge>}
                                 {businessOnly && personalCount > 0 && <Badge color={C.sky}>{fmtNumber(personalCount)} bireysel adres ayıklandı</Badge>}
@@ -265,7 +265,7 @@ export const BulkMail: React.FC = () => {
                                 </div>
                             )}
                             <div style={{ fontSize: '0.72rem', color: C.dim, marginTop: 6 }}>
-                                Excel listesini önce Dosya → Farklı Kaydet → "CSV UTF-8" olarak kaydedin.
+                                Excel dosyası doğrudan yüklenebilir. Başlık satırında "Ülke" sütunu varsa her alıcıya kendi ülkesinin dilinde broşür gider.
                             </div>
                             <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginTop: 8, fontSize: '0.76rem', color: C.text, lineHeight: 1.5, cursor: 'pointer' }}>
                                 <input type="checkbox" checked={businessOnly} onChange={e => setBusinessOnly(e.target.checked)} style={{ marginTop: 2, accentColor: C.accent }} />
@@ -277,6 +277,33 @@ export const BulkMail: React.FC = () => {
                                 </div>
                             )}
                         </div>
+                        {totalRecipients > 0 && (
+                            <div>
+                                <label style={labelStyle}>{parsed.hasCountry ? 'Ülkeye göre broşür dili' : 'Broşür dili'}</label>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+                                    {groups.map(g => <Badge key={g.lang} color={C.accent}>{langLabel(g.lang)}: {fmtNumber(g.recipients.length)}</Badge>)}
+                                </div>
+                                <div style={{ maxHeight: 230, overflowY: 'auto', border: `1px solid ${C.border}`, borderRadius: 10 }}>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem' }}>
+                                        <tbody>
+                                            {countryRows.map(r => (
+                                                <tr key={r.key} style={{ borderBottom: `1px solid ${C.border}` }}>
+                                                    <td style={{ padding: '5px 10px', color: r.key ? C.text : C.muted }}>{r.label}</td>
+                                                    <td style={{ padding: '5px 10px', color: C.muted, textAlign: 'right', whiteSpace: 'nowrap' }}>{fmtNumber(r.count)} alıcı</td>
+                                                    <td style={{ padding: '4px 8px', width: 130 }}>
+                                                        <select value={r.lang} aria-label={`${r.label} dili`}
+                                                            style={{ ...inputStyle, padding: '4px 8px', fontSize: '0.78rem', height: 'auto' }}
+                                                            onChange={e => setLangOverrides(prev => ({ ...prev, [r.key]: e.target.value as MailLang }))}>
+                                                            {MAIL_LANGS.map(l => <option key={l.id} value={l.id}>{l.label}</option>)}
+                                                        </select>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
                         <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: 12, alignItems: 'end' }}>
                             <div>
                                 <label style={labelStyle}>Saatlik gönderim</label>
@@ -284,15 +311,15 @@ export const BulkMail: React.FC = () => {
                                     onChange={e => setRate(Math.round(Number(e.target.value)) || 0)} />
                             </div>
                             <div style={{ fontSize: '0.76rem', color: C.muted, lineHeight: 1.5, paddingBottom: 4 }}>
-                                {parsed.recipients.length > 0 && <>Tahmini süre: <strong style={{ color: C.text }}>{fmtHours(parsed.recipients.length, perHour)}</strong>. </>}
+                                {totalRecipients > 0 && <>Tahmini süre: <strong style={{ color: C.text }}>{fmtHours(totalRecipients, perHour)}</strong>. </>}
                                 Hosting e-posta hesabının saatlik sınırını aşmayın; aşılırsa alan adı kara listeye girebilir ve üyelere giden onay kodları da gecikir.
                             </div>
                         </div>
                         <div style={{ padding: 12, borderRadius: 12, background: C.soft, border: `1px solid ${C.border}`, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                            <label style={{ ...labelStyle, marginBottom: 0 }}>Önce kendinize test gönderin</label>
+                            <label style={{ ...labelStyle, marginBottom: 0 }}>Önce kendinize test gönderin · {langLabel(activeLang)} broşür</label>
                             <div style={{ display: 'flex', gap: 8 }}>
                                 <input style={inputStyle} type="email" placeholder="siz@firma.com" value={testTo} onChange={e => setTestTo(e.target.value)} />
-                                <button type="button" style={btn('secondary')} disabled={!testOk || !contentOk || sendingTest} onClick={() => void sendTest()}>
+                                <button type="button" style={btn('secondary')} disabled={!testOk || !ready(activeLang) || sendingTest} onClick={() => void sendTest()}>
                                     {sendingTest ? <Spinner size={14} /> : <Send size={14} />} Test gönder
                                 </button>
                             </div>
@@ -303,16 +330,30 @@ export const BulkMail: React.FC = () => {
                         </label>
                         <button type="button" style={{ ...btn('primary'), opacity: canStart ? 1 : 0.5, padding: '11px 16px' }} disabled={!canStart} onClick={() => void start()}>
                             {starting ? <Spinner size={15} color="white" /> : <Play size={15} />}
-                            {parsed.recipients.length > 0 ? `${fmtNumber(parsed.recipients.length)} alıcıya gönderimi başlat` : 'Gönderimi başlat'}
+                            {totalRecipients > 0
+                                ? `${fmtNumber(totalRecipients)} alıcıya gönderimi başlat${groups.length > 1 ? ` (${groups.length} dil)` : ''}`
+                                : 'Gönderimi başlat'}
                         </button>
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0 }}>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                            {previewTabs.map(l => (
+                                <button key={l} type="button" style={{ ...btn(l === activeLang ? 'primary' : 'ghost', true), ...(ready(l) ? null : { color: C.redText }) }}
+                                    onClick={() => setPreviewLang(l)}>
+                                    {langLabel(l)}
+                                </button>
+                            ))}
+                        </div>
+                        <div>
+                            <label style={labelStyle}>Konu satırı · {langLabel(activeLang)}</label>
+                            <input style={inputStyle} value={content.subject} maxLength={200} onChange={e => setContent({ subject: e.target.value })} />
+                        </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                             <label style={{ ...labelStyle, marginBottom: 0 }}>{editHtml ? 'İçerik (HTML ve düz metin)' : 'Önizleme'}</label>
                             <div style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>
-                                {(html !== brochureHtml || text !== brochureText) && (
-                                    <button type="button" style={btn('ghost', true)} onClick={() => { setHtml(brochureHtml); setText(brochureText); }}>
+                                {(content.html !== BROCHURES[activeLang].html || content.text !== BROCHURES[activeLang].text || content.subject !== BROCHURES[activeLang].subject) && (
+                                    <button type="button" style={btn('ghost', true)} onClick={() => setContent(BROCHURES[activeLang])}>
                                         <RotateCcw size={13} /> Broşürü geri yükle
                                     </button>
                                 )}
@@ -324,16 +365,16 @@ export const BulkMail: React.FC = () => {
                         {editHtml ? (
                             <>
                                 <textarea style={{ ...inputStyle, minHeight: 380, fontFamily: 'Consolas, monospace', fontSize: '0.74rem', resize: 'vertical' }}
-                                    value={html} onChange={e => setHtml(e.target.value)} spellCheck={false} />
+                                    value={content.html} onChange={e => setContent({ html: e.target.value })} spellCheck={false} />
                                 <label style={labelStyle}>Düz metin sürümü (HTML göstermeyen programlar için)</label>
                                 <textarea style={{ ...inputStyle, minHeight: 140, fontFamily: 'Consolas, monospace', fontSize: '0.74rem', resize: 'vertical' }}
-                                    value={text} onChange={e => setText(e.target.value)} spellCheck={false} />
+                                    value={content.text} onChange={e => setContent({ text: e.target.value })} spellCheck={false} />
                                 <div style={{ fontSize: '0.72rem', color: C.muted, lineHeight: 1.5 }}>
                                     Alıcıya göre doldurulan alanlar: <code>{'{{UNSUBSCRIBE_URL}}'}</code> listeden çıkma bağlantısı, <code>{'{{AD}}'}</code> listedeki ad, <code>{'{{EMAIL}}'}</code> alıcı adresi.
                                 </div>
                             </>
                         ) : (
-                            <iframe title="E-posta önizlemesi" sandbox="" srcDoc={html}
+                            <iframe title="E-posta önizlemesi" sandbox="" srcDoc={content.html}
                                 style={{ width: '100%', height: 640, border: `1px solid ${C.border}`, borderRadius: 12, background: '#f1f4f9' }} />
                         )}
                     </div>

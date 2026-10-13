@@ -24,6 +24,16 @@ const savedLocale = (): Locale | null => {
     }
 };
 
+/** Bağlantıyla gelen dil (?lang=de, ör. tanıtım e-postası); saklanmaz, yalnız bu açılışta geçerlidir. */
+const urlLocale = (): Locale | null => {
+    try {
+        const v = new URLSearchParams(window.location.search).get('lang');
+        return isLocale(v) ? v : null;
+    } catch {
+        return null;
+    }
+};
+
 // İlk giriş: ülke bölgeden bulunur, arayüz o ülkenin dilinde açılır; desteklenmeyen dil → İngilizce.
 const initialCountry = (() => {
     const { country, setCountry } = useUiStore.getState();
@@ -52,7 +62,7 @@ void i18n
             fr: { translation: fr }, es: { translation: es }, zh: { translation: zh },
             hi: { translation: hi }, ru: { translation: withSlavicPlurals(ru as unknown as Tree) },
         },
-        lng: savedLocale() ?? countryLocale(initialCountry),
+        lng: urlLocale() ?? savedLocale() ?? countryLocale(initialCountry),
         fallbackLng: 'en',
         supportedLngs: LOCALES,
         interpolation: { escapeValue: false },

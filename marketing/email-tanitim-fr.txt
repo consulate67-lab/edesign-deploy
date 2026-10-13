@@ -1,0 +1,46 @@
+edXdocu · Concepteur d’e-documents
+
+VOTRE MODÈLE DE FACTURE ÉLECTRONIQUE EN QUELQUES MINUTES
+
+Conforme EN 16931, Peppol BIS 3 et XRechnung – prêt pour 37 pays, y compris les formats nationaux des États-Unis, de l’Inde, de la Chine et de la Russie. Sans XSLT, par simple glisser-déposer.
+
+Essayer maintenant: https://www.edxdocu.com/?lang=fr&utm_source=email&utm_medium=email&utm_campaign=tanitim-intl&utm_content=hero-fr
+
+37 pays · EN 16931 Peppol BIS 3 · XRechnung · 100 % en ligne, sans installation
+
+
+À QUOI ÇA SERT ?
+Votre facture, à votre image. Votre logo, votre cachet, vos coordonnées bancaires et le tableau des lignes – chaque élément placé où vous voulez par glisser-déposer.
+
+
+PRÊT EN 3 ÉTAPES
+1. Choisissez le pays et le document
+   L’assistant liste les documents locaux avec le bon profil XML. Partez d’un modèle prêt à l’emploi ou importez votre propre XSLT.
+2. Ajoutez logo, cachet et coordonnées bancaires
+   Glissez-déposez les champs ; ajustez couleurs, polices et mise en page en direct.
+3. Prévisualisez avec votre XML, puis téléchargez
+   Voyez le résultat immédiatement avec une vraie facture et chargez le XSLT dans votre plateforme de facturation électronique ou Peppol.
+
+
+- Glisser-déposer: Aucune connaissance XSLT ni code requise.
+- EN 16931 & Peppol: Peppol BIS 3, XRechnung 3.0 et contrôle des règles de base.
+- Aperçu en direct: Chaque modification visible avec votre propre XML.
+- Libellés locaux: Libellés dans la langue du pays, ou en anglais.
+
+
+UN ÉDITEUR, 37 PAYS
+EN 16931 (UBL), Peppol BIS Billing 3.0, XRechnung 3.0, CIUS-RO, HR CIUS, CIUS-PT, Peppol Despatch Advice, DBNAlliance (US), GST e-Invoice · e-Way Bill (IN), FNS UPD 5.03 (RU), 数电发票 (CN), UBL-TR (TR)
+
+Pour qui ? Points d’accès Peppol, plateformes de facturation électronique, éditeurs d’ERP et de logiciels comptables, experts-comptables et toute entreprise qui souhaite envoyer ses factures à son image.
+
+
+CRÉEZ VOTRE PREMIER MODÈLE DÈS AUJOURD’HUI
+Créer un compte: https://www.edxdocu.com/?lang=fr&utm_source=email&utm_medium=email&utm_campaign=tanitim-intl&utm_content=final-fr
+--
+edXdocu · Concepteur d’e-documents
+destek@edxdocu.com · www.edxdocu.com
+
+Cet e-mail d’information a été envoyé à votre entreprise car il peut concerner votre domaine d’activité.
+Si vous ne souhaitez plus le recevoir, vous pouvez vous désinscrire en un clic ; votre demande est appliquée immédiatement.
+{{UNSUBSCRIBE_URL}}&lang=fr
+Pour connaître l’origine de votre adresse ou demander sa suppression de nos fichiers, écrivez à destek@edxdocu.com.

@@ -1,0 +1,46 @@
+edXdocu · 电子单据设计器
+
+您的电子发票版式， 几分钟即可完成
+
+符合 EN 16931、Peppol BIS 3 和 XRechnung，适用于 37 个国家，并支持美国、印度、中国（数电发票）和俄罗斯的本国格式。 无需 XSLT，拖放即可。
+
+立即试用: https://www.edxdocu.com/?lang=zh&utm_source=email&utm_medium=email&utm_campaign=tanitim-intl&utm_content=hero-zh
+
+37 个国家 · EN 16931 Peppol BIS 3 · XRechnung · 100% 网页版，无需安装
+
+
+能做什么？
+体现您品牌的发票. 您的标志、印章、银行信息和明细表格—— 拖放即可放到任何位置。
+
+
+三步完成
+1. 选择国家和单据
+   向导会列出当地单据及对应的 XML 规范。可从现成模板开始，也可上传您自己的 XSLT。
+2. 添加标志、印章和银行信息
+   拖放字段，直观调整颜色、字体和版式。
+3. 用您的 XML 预览并下载
+   用真实发票即时查看效果，然后将 XSLT 导入您的电子发票或 Peppol 平台。
+
+
+- 拖放设计: 无需 XSLT 或编程知识。
+- EN 16931 与 Peppol: Peppol BIS 3、XRechnung 3.0 及核心规则检查。
+- 实时预览: 每次修改都能用您自己的 XML 查看。
+- 本地语言标签: 标签可使用该国语言或英语。
+
+
+一个编辑器，覆盖 37 个国家
+EN 16931 (UBL), Peppol BIS Billing 3.0, XRechnung 3.0, CIUS-RO, HR CIUS, CIUS-PT, Peppol Despatch Advice, DBNAlliance (US), GST e-Invoice · e-Way Bill (IN), FNS UPD 5.03 (RU), 数电发票 (CN), UBL-TR (TR)
+
+适用对象：Peppol 接入点、电子发票服务商、ERP 和财务软件厂商、会计师事务所， 以及所有希望以自有品牌发送发票的企业。
+
+
+今天就创建您的第一个版式
+创建账户: https://www.edxdocu.com/?lang=zh&utm_source=email&utm_medium=email&utm_campaign=tanitim-intl&utm_content=final-zh
+--
+edXdocu · 电子单据设计器
+destek@edxdocu.com · www.edxdocu.com
+
+本信息邮件发送给贵公司，因为其内容可能与贵公司的业务领域相关。
+如不希望再收到此类邮件，您可以一键退订，退订请求将立即生效。
+{{UNSUBSCRIBE_URL}}&lang=zh
+如需了解您的邮箱地址来源或要求从我们的记录中删除，请发送邮件至 destek@edxdocu.com。
