@@ -309,6 +309,7 @@ const onConnection = (ws, req, secret) => {
     } catch {
         return ws.close(4401, 'unauthorized');
     }
+    if (!claims?.exp) return ws.close(4401, 'unauthorized');
 
     // Mesajlar sırayla işlenir (rr olaylarının sırası korunur); kimlik doğrulama bitene kadar bekler.
     let queue = (isAdminClaims(claims) ? registerAdmin(ws, claims) : registerUser(ws, claims));

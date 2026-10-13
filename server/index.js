@@ -8,7 +8,7 @@ import { applyLicenseLock, hasLicenseLock, isValidLicenseId, isValidTaxId, norma
 import { TEST_WATERMARK_PNG } from '../shared/test-watermark-png.js';
 import { createRequireAdmin, registerAdminAuthRoutes } from './admin-auth.js';
 import { registerAdminRoutes } from './admin.js';
-import { EMAIL_PATTERN, needsEmailVerification, pickLang, registerEmailVerifyRoutes, sendVerificationCode } from './email-verify.js';
+import { EMAIL_PATTERN, needsEmailVerification, needsLoginCode, pickLang, registerEmailVerifyRoutes, sendVerificationCode } from './email-verify.js';
 import { registerAssistantRoutes } from './assistant.js';
 import { registerGalleryRoutes } from './gallery.js';
 import { registerPaytrRoutes } from './paytr.js';
@@ -113,7 +113,8 @@ const authenticateToken = (req, res, next) => {
     if (!token) return res.sendStatus(401);
 
     jwt.verify(token, EFFECTIVE_SECRET, (err, user) => {
-        if (err) return res.sendStatus(403);
+        // Süresiz (e-posta kodundan önceki) oturumlar kabul edilmez.
+        if (err || !user?.exp) return res.sendStatus(403);
         req.user = user;
         next();
     });
@@ -166,8 +167,9 @@ app.get('/api/health', (_req, res) => {
 
 // Routes
 
+const SESSION_TTL = '24h';
 const issueSession = (user) => ({
-    token: jwt.sign({ id: user.id, username: user.username, role: user.role }, EFFECTIVE_SECRET),
+    token: jwt.sign({ id: user.id, username: user.username, role: user.role }, EFFECTIVE_SECRET, { expiresIn: SESSION_TTL }),
     user: { id: user.id, username: user.username, role: user.role, credits: user.credits },
 });
 
@@ -233,10 +235,13 @@ app.post('/api/auth/login', async (req, res) => {
         const validPassword = await bcrypt.compare(password, user.password);
         if (!validPassword) return res.status(400).json({ error: 'Girdiğiniz şifre hatalı. Lütfen tekrar deneyin.' });
 
-        if (needsEmailVerification(user)) {
-            await sendVerificationCode(db, EFFECTIVE_SECRET, user, pickLang(req.body));
+        if (needsLoginCode()) {
+            const unverified = needsEmailVerification(user);
+            await sendVerificationCode(db, EFFECTIVE_SECRET, user, pickLang(req.body), unverified ? 'verify' : 'login');
             return res.status(403).json({
-                error: 'E-posta adresiniz henüz onaylanmadı. Adresinize gönderilen onay kodunu girin.',
+                error: unverified
+                    ? 'E-posta adresiniz henüz onaylanmadı. Adresinize gönderilen onay kodunu girin.'
+                    : 'Giriş için e-posta adresinize gönderilen kodu girin.',
                 verificationRequired: true,
                 email: user.username,
             });

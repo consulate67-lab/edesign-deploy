@@ -11,9 +11,12 @@ const resendLimiter = createRateLimiter({ max: 10, windowMs: 10 * 60_000 });
 
 export const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-/** SMTP tanımlı değilse doğrulama istenmez; yöneticiler hiçbir zaman beklemez. */
+/** Hesap henüz e-posta sahipliğini kanıtlamamış (kayıt onayı bekliyor). Mail tanımlı değilse istenmez. */
 export const needsEmailVerification = (user) =>
     mailConfigured() && !user.email_verified_at && user.role !== 'admin';
+
+/** Şifreyle her girişte e-postaya gönderilen kod istenir; mail tanımlı değilse doğrudan oturum açılır. */
+export const needsLoginCode = () => mailConfigured();
 
 const hashCode = (secret, userId, code) =>
     createHmac('sha256', secret).update(`email-verify:${userId}:${code}`).digest('hex');
@@ -37,8 +40,26 @@ const MESSAGES = {
     },
 };
 
-const buildMail = (code, lang) => {
-    const m = MESSAGES[lang] || MESSAGES.en;
+const LOGIN_MESSAGES = {
+    tr: {
+        subject: (code) => `${code} - edXdocu giriş kodunuz`,
+        title: 'Giriş onay kodu',
+        intro: 'edXdocu hesabınıza giriş yapmak için aşağıdaki kodu giriş ekranına yazın:',
+        expiry: `Kod ${CODE_TTL_MINUTES} dakika geçerlidir.`,
+        ignore: 'Bu girişi siz yapmadıysanız şifrenizi hemen değiştirin; kod olmadan hesabınıza girilemez.',
+    },
+    en: {
+        subject: (code) => `${code} - your edXdocu sign-in code`,
+        title: 'Sign-in code',
+        intro: 'Enter the code below on the sign-in screen to sign in to your edXdocu account:',
+        expiry: `The code is valid for ${CODE_TTL_MINUTES} minutes.`,
+        ignore: 'If this was not you, change your password now; nobody can sign in without this code.',
+    },
+};
+
+const buildMail = (code, lang, purpose) => {
+    const set = purpose === 'login' ? LOGIN_MESSAGES : MESSAGES;
+    const m = set[lang] || set.en;
     const text = `${m.title}\n\n${m.intro}\n\n${code}\n\n${m.expiry}\n${m.ignore}\n`;
     const html = `<!doctype html><html><body style="margin:0;background:#f5f3ff;font-family:Arial,Helvetica,sans-serif;color:#1f2937">
 <div style="max-width:480px;margin:32px auto;background:#fff;border-radius:16px;padding:32px;border:1px solid #e5e7eb">
@@ -56,7 +77,7 @@ const buildMail = (code, lang) => {
  * dolmadıysa yeni kod üretmez (önceki kod geçerli kalır).
  * @returns {Promise<{ sent: boolean, retryAfter?: number }>}
  */
-export const sendVerificationCode = async (db, secret, user, lang) => {
+export const sendVerificationCode = async (db, secret, user, lang, purpose = 'verify') => {
     const last = await db.get(
         `SELECT CEIL(EXTRACT(EPOCH FROM (sent_at + INTERVAL '${RESEND_COOLDOWN_SECONDS} seconds' - NOW())))::int AS wait
            FROM email_verifications WHERE user_id = ? AND expires_at > NOW()`,
@@ -74,7 +95,7 @@ export const sendVerificationCode = async (db, secret, user, lang) => {
         [user.id, hashCode(secret, user.id, code)]
     );
     try {
-        await sendMail({ to: user.username, ...buildMail(code, lang) });
+        await sendMail({ to: user.username, ...buildMail(code, lang, purpose) });
     } catch (e) {
         await db.run('DELETE FROM email_verifications WHERE user_id = ?', [user.id]);
         console.error(`[email-verify] mail gönderilemedi (user #${user.id}):`, e.message);
@@ -96,8 +117,8 @@ export const registerEmailVerifyRoutes = (app, { db, secret, issueSession }) => 
 
         const user = await db.get('SELECT * FROM users WHERE username = ?', [username]);
         if (!user) return res.status(400).json({ error: 'Onay kodu hatalı.' });
-        if (!needsEmailVerification(user)) return res.json(issueSession(user));
 
+        // Oturum yalnız geçerli bir kodla açılır; kod da yalnız kayıtta ya da doğru şifreden sonra üretilir.
         const row = await db.get(
             `UPDATE email_verifications SET attempts = attempts + 1
               WHERE user_id = ? AND expires_at > NOW() AND attempts < ?
@@ -111,9 +132,11 @@ export const registerEmailVerifyRoutes = (app, { db, secret, issueSession }) => 
             return res.status(400).json({ error: 'Onay kodu hatalı.', attemptsLeft: MAX_VERIFY_ATTEMPTS - row.attempts });
         }
 
-        await db.run('UPDATE users SET email_verified_at = NOW(), updated_at = NOW() WHERE id = ?', [user.id]);
+        if (!user.email_verified_at) {
+            await db.run('UPDATE users SET email_verified_at = NOW(), updated_at = NOW() WHERE id = ?', [user.id]);
+            console.log(`[email-verify] user #${user.id} e-postasını doğruladı.`);
+        }
         await db.run('DELETE FROM email_verifications WHERE user_id = ?', [user.id]);
-        console.log(`[email-verify] user #${user.id} e-postasını doğruladı.`);
         res.json(issueSession(user));
     });
 
@@ -124,9 +147,13 @@ export const registerEmailVerifyRoutes = (app, { db, secret, issueSession }) => 
             return res.status(429).json({ error: 'Çok fazla istek gönderildi. Lütfen 10 dakika sonra tekrar deneyin.' });
         }
         const user = await db.get('SELECT * FROM users WHERE username = ?', [username]);
-        if (!user || !needsEmailVerification(user)) return res.json({ sent: false });
+        if (!user || !mailConfigured()) return res.json({ sent: false });
+        // Yeni kod yalnız kayıt ya da doğru şifreyle başlamış, süresi dolmamış bir doğrulama için gönderilir.
+        const pending = await db.get('SELECT 1 FROM email_verifications WHERE user_id = ? AND expires_at > NOW()', [user.id]);
+        if (!pending) return res.json({ sent: false });
         try {
-            res.json(await sendVerificationCode(db, secret, user, pickLang(req.body)));
+            const purpose = needsEmailVerification(user) ? 'verify' : 'login';
+            res.json(await sendVerificationCode(db, secret, user, pickLang(req.body), purpose));
         } catch (e) {
             res.status(e.status || 500).json({ error: e.message });
         }

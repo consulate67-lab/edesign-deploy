@@ -277,7 +277,9 @@ export const Auth: React.FC<AuthProps> = ({
                             margin: 0,
                         }}
                     >
-                        {verifyEmail ? t('auth.verifyTitle') : isLogin ? t('auth.welcomeBack') : t('auth.createTitle')}
+                        {verifyEmail
+                            ? t(verifyAfterRegister ? 'auth.verifyTitle' : 'auth.verifyLoginTitle')
+                            : isLogin ? t('auth.welcomeBack') : t('auth.createTitle')}
                     </h1>
                     <p
                         style={{
@@ -289,9 +291,9 @@ export const Auth: React.FC<AuthProps> = ({
                     >
                         {verifyEmail ? (
                             <>
-                                {t('auth.verifySubBefore')}
+                                {t(verifyAfterRegister ? 'auth.verifySubBefore' : 'auth.verifyLoginSubBefore')}
                                 <strong style={{ color: theme.text, wordBreak: 'break-all' }}>{verifyEmail}</strong>
-                                {t('auth.verifySubAfter')}
+                                {t(verifyAfterRegister ? 'auth.verifySubAfter' : 'auth.verifyLoginSubAfter')}
                             </>
                         ) : isLogin ? t('auth.loginSub') : t('auth.registerSub')}
                     </p>
