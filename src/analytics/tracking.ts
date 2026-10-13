@@ -1,5 +1,5 @@
 /**
- * Google etiketi (Consent Mode v2), Meta Pixel ve LinkedIn Insight Tag.
+ * Google Tag Manager / Google etiketi (Consent Mode v2), Meta Pixel ve LinkedIn Insight Tag.
  * Google onaydan önce çerezsiz çalışır; Meta ve LinkedIn yalnız reklam onayı verilince yüklenir.
  */
 import { TRACKING, hasAnyTracking, hasGoogle } from './config';
@@ -61,9 +61,21 @@ const startGoogle = (c: Consent | null) => {
         wait_for_update: 500,
     });
     if (c) applyGoogleConsent(c);
-    gtag('js', new Date());
-    for (const id of googleIds()) gtag('config', id, { send_page_view: false });
-    loadScript(`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(googleIds()[0])}`);
+    const ids = googleIds();
+    if (ids.length) {
+        gtag('js', new Date());
+        for (const id of ids) gtag('config', id, { send_page_view: false });
+        loadScript(`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(ids[0])}`);
+    }
+    if (TRACKING.gtmId) {
+        window.dataLayer.push({ 'gtm.start': Date.now(), event: 'gtm.js' });
+        loadScript(`https://www.googletagmanager.com/gtm.js?id=${encodeURIComponent(TRACKING.gtmId)}`);
+    }
+};
+
+/** GTM tetikleyicileri için özel olay; GTM tanımlı değilse hiçbir şey yapmaz. */
+const gtmEvent = (event: string, params: Record<string, unknown>) => {
+    if (TRACKING.gtmId) window.dataLayer?.push({ event, ...params });
 };
 
 let marketingOn = false;
@@ -128,7 +140,9 @@ export const initTracking = () => {
 /** Uygulama tek sayfa olduğu için her ekran sanal bir sayfa yolu olarak raporlanır. */
 export const trackPageView = (path: string, title: string) => {
     if (!started) return;
-    gtag('event', 'page_view', { page_location: `${window.location.origin}${path}`, page_path: path, page_title: title });
+    const page = { page_location: `${window.location.origin}${path}`, page_path: path, page_title: title };
+    if (googleIds().length) gtag('event', 'page_view', page);
+    gtmEvent('virtual_page_view', page);
     if (marketingOn && path !== '/') window.fbq?.('track', 'PageView');
 };
 
@@ -138,7 +152,8 @@ const linkedinConversion = (id: string) => {
 
 export const trackSignUp = () => {
     if (!started) return;
-    gtag('event', 'sign_up', { method: 'email' });
+    if (googleIds().length) gtag('event', 'sign_up', { method: 'email' });
+    gtmEvent('sign_up', { method: 'email' });
     if (TRACKING.googleAdsConversions.signUp) gtag('event', 'conversion', { send_to: TRACKING.googleAdsConversions.signUp });
     if (marketingOn) window.fbq?.('track', 'CompleteRegistration');
     linkedinConversion(TRACKING.linkedinConversions.signUp);
@@ -146,12 +161,14 @@ export const trackSignUp = () => {
 
 export const trackPurchase = (p: { transactionId: string; value: number; currency: string; itemId: string; itemName: string }) => {
     if (!started) return;
-    gtag('event', 'purchase', {
+    const purchase = {
         transaction_id: p.transactionId,
         value: p.value,
         currency: p.currency,
         items: [{ item_id: p.itemId, item_name: p.itemName, price: p.value, quantity: 1 }],
-    });
+    };
+    if (googleIds().length) gtag('event', 'purchase', purchase);
+    gtmEvent('purchase', { ecommerce: purchase });
     if (TRACKING.googleAdsConversions.purchase) {
         gtag('event', 'conversion', {
             send_to: TRACKING.googleAdsConversions.purchase,

@@ -3,6 +3,8 @@
  * Bu değerler sayfa kaynağında zaten herkese görünür, gizli bilgi değildir.
  */
 export const TRACKING = {
+    /** Google Tag Manager kapsayıcısı 'GTM-XXXXXXX'; etiketler GTM panelinden yönetilir. */
+    gtmId: 'GTM-K39HMWQT',
     /** Google etiketi: Analytics 'G-XXXXXXX' veya Google Ads 'AW-XXXXXXX'. */
     googleTagId: '',
     /** Google Ads dönüşüm etiketleri ('AW-XXXXXXX/abcDEF'); boşsa yalnız Analytics olayı gider. */
@@ -15,6 +17,6 @@ export const TRACKING = {
     linkedinConversions: { signUp: '', purchase: '' },
 };
 
-export const hasGoogle = () => !!TRACKING.googleTagId;
+export const hasGoogle = () => !!(TRACKING.gtmId || TRACKING.googleTagId);
 export const hasMarketing = () => !!(TRACKING.metaPixelId || TRACKING.linkedinPartnerId);
 export const hasAnyTracking = () => hasGoogle() || hasMarketing();
