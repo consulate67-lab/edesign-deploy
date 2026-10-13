@@ -29,6 +29,7 @@ dist-ssr
 .env.*.local
 .env.production
 .env.ftp
+.env.mail
 dist-web/
 
 # Python helper scripts + their outputs (XSLT validation tools)
