@@ -13,7 +13,7 @@ import { readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 
 const UI = ['tr', 'en', 'de', 'fr', 'es'];
-const EXTRA = ['it', 'nl', 'pt', 'pl', 'cs', 'sk', 'sl', 'hr', 'hu', 'ro', 'bg', 'el', 'da', 'sv', 'nb', 'fi', 'et', 'lv', 'lt', 'is', 'mt', 'ga', 'ca', 'eu', 'gl'];
+const EXTRA = ['it', 'nl', 'pt', 'pl', 'cs', 'sk', 'sl', 'hr', 'hu', 'ro', 'bg', 'el', 'da', 'sv', 'nb', 'fi', 'et', 'lv', 'lt', 'is', 'mt', 'ga', 'ca', 'eu', 'gl', 'zh', 'hi', 'ru'];
 const ALL = [...UI, ...EXTRA];
 
 const FILES = [

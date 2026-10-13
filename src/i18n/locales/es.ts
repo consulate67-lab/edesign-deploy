@@ -23,12 +23,12 @@ const es: Messages = {
         login: 'Iniciar sesión',
         register: 'Registrarse',
         badgeNew: 'NUEVO',
-        news: 'Europa: perfiles EN 16931, Peppol BIS 3 y XRechnung añadidos',
+        news: 'Documentos electrónicos de EE. UU., Rusia, India y China; interfaz en chino, hindi y ruso',
         heroLine: 'diseñar ahora es',
         heroAccent: 'muy fácil',
         heroSubLead: 'Conformes con EN 16931 y Peppol:',
         heroSubStrong: 'facturas, notas de crédito y albaranes',
-        heroSubRest: 'para los países de la UE y del EEE, el Reino Unido y Suiza. Elige una plantilla, añade logotipo, sello y datos bancarios, y previsualiza con tu XML. Diseños profesionales en minutos, sin saber XSLT.',
+        heroSubRest: 'para los países de la UE y del EEE, el Reino Unido y Suiza, además de los formatos nacionales de EE. UU., Rusia (UPD), India (e-factura GST, e-way bill) y China (factura totalmente digital). Elige una plantilla, añade logotipo, sello y datos bancarios, y previsualiza con tu XML. Diseños profesionales en minutos, sin saber XSLT.',
         heroSubEurope: 'Cada país recibe sus propios nombres de documento, con etiquetas en su idioma.',
         ctaOpen: 'Crear cuenta',
         ctaPricing: 'Ver precios',
@@ -97,8 +97,8 @@ const es: Messages = {
                     a: 'Factura, nota de crédito, factura rectificativa, factura de anticipo, factura parcial y albarán (aviso de expedición). Al elegir un país en el asistente, sus documentos aparecen con su nombre local y el perfil XML correspondiente: EN 16931, Peppol BIS Billing 3.0, XRechnung 3.0 (UBL), CIUS-RO, HR CIUS, CIUS-PT o Peppol Despatch Advice. Los documentos que comparten el mismo formato XML usan la misma plantilla.',
                 },
                 {
-                    q: '¿Puedo diseñar documentos para países europeos?',
-                    a: 'Sí. Al elegir un país en el asistente se muestran sus equivalentes de factura electrónica, factura a consumidores y aviso de expedición. Hay plantillas, XML de ejemplo y controles de reglas básicos para EN 16931, Peppol BIS Billing 3.0, XRechnung 3.0 (UBL) y Peppol Despatch Advice, con etiquetas en el idioma del país. Los controles son un subconjunto de las reglas Schematron oficiales y los documentos no se envían a ningún portal oficial.',
+                    q: '¿Puedo diseñar documentos para otros países?',
+                    a: 'Sí. Al elegir un país en el asistente se muestran sus equivalentes de factura electrónica, e-archivo y aviso de envío. Hay plantillas, XML de ejemplo y comprobaciones básicas para EN 16931, Peppol BIS Billing 3.0, XRechnung 3.0 (UBL) y Peppol Despatch Advice, y para formatos nacionales: EE. UU. (DBNAlliance UBL), Rusia (FNS UPD 5.03), India (e-factura GST, e-way bill) y China (factura totalmente digital). Las etiquetas aparecen en el idioma del país. Las comprobaciones son un subconjunto de las reglas oficiales y los documentos no se envían a ningún portal oficial.',
                 },
                 {
                     q: '¿Necesito saber XSLT?',
@@ -368,6 +368,8 @@ const es: Messages = {
         defaultXml: 'XML de ejemplo predeterminado',
         defaultXmlHint: 'Documento de ejemplo para {{doc}} ({{file}})',
         europeanSamples: 'Documentos de ejemplo europeos',
+
+        countrySamples: 'Documentos de ejemplo del país',
         gibSamples: 'Documentos de ejemplo oficiales de la GİB',
         gibNote: 'Ejemplos de escenarios y tipos de UBL-TR 1.2.1 y del paquete e-Fatura; prueba tu diseño con casos especiales.',
         ownXml: 'Elegir mi propio archivo XML',
@@ -456,6 +458,8 @@ const es: Messages = {
         invoiceTemplateDesc: 'Vendedor / comprador, líneas, desglose del IVA, datos de pago; etiquetas en el idioma de documento elegido',
         despatchTemplate: 'Diseño de aviso de expedición Peppol',
         despatchTemplateDesc: 'Envío, unidades de manipulación (SSCC), lote / caducidad y cantidades pendientes',
+
+        nationalTemplateDesc: 'Diseño según el formato oficial del país; etiquetas en el idioma del documento (local o inglés)',
         designRecommended: 'Recomendado para este tipo de documento',
         designs: {
             classic: { name: 'Clásico', desc: 'Vendedor / comprador en tarjetas, acento azul; todos los campos EN 16931' },
@@ -527,6 +531,14 @@ const es: Messages = {
         subProfileOk: 'Subperfil conforme con EN 16931: {{profile}}',
         otherProfile: 'Este XML usa el perfil {{detected}}; se aplicaron las reglas de {{profile}} que elegiste.',
         rulesPassed: 'Controles básicos de {{profile}} superados (subconjunto del Schematron oficial)',
+
+        nationalRequired: 'Falta un campo obligatorio: {{field}}',
+
+        nationalFormat: 'Formato de {{field}} no válido: {{value}}',
+
+        nationalTotal: '{{field}} = {{actual}}, calculado a partir de las líneas: {{expected}}',
+
+        nationalRulesPassed: '{{profile}}: comprobaciones básicas de campos e importes superadas (subconjunto del esquema oficial)',
         info: {
             docNo: 'N.º de documento',
             date: 'Fecha',

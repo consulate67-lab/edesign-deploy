@@ -5,6 +5,9 @@ import en from './locales/en';
 import de from './locales/de';
 import fr from './locales/fr';
 import es from './locales/es';
+import zh from './locales/zh';
+import hi from './locales/hi';
+import ru from './locales/ru';
 import { LOCALES, useUiStore, type Locale } from '../store/uiStore';
 import { countryLocale, detectCountry } from './region';
 
@@ -30,12 +33,24 @@ const initialCountry = (() => {
     return detected;
 })();
 
+type Tree = { [key: string]: unknown };
+
+/** Rusçada 2–4 (few) ve 5+ (many) biçimleri; metinler sayıdan bağımsız yazıldığı için _other kullanılır. */
+const withSlavicPlurals = (tree: Tree): Tree => Object.fromEntries(Object.entries(tree).flatMap(([key, value]): [string, unknown][] => {
+    if (value && typeof value === 'object' && !Array.isArray(value)) return [[key, withSlavicPlurals(value as Tree)]];
+    if (typeof value !== 'string') return [[key, value]];
+    if (!key.endsWith('_other')) return [[key, value]];
+    const base = key.slice(0, -'_other'.length);
+    return [[key, value], ...['few', 'many'].filter(f => !(`${base}_${f}` in tree)).map((f): [string, unknown] => [`${base}_${f}`, value])];
+}));
+
 void i18n
     .use(initReactI18next)
     .init({
         resources: {
             tr: { translation: tr }, en: { translation: en }, de: { translation: de },
-            fr: { translation: fr }, es: { translation: es },
+            fr: { translation: fr }, es: { translation: es }, zh: { translation: zh },
+            hi: { translation: hi }, ru: { translation: withSlavicPlurals(ru as unknown as Tree) },
         },
         lng: savedLocale() ?? countryLocale(initialCountry),
         fallbackLng: 'en',

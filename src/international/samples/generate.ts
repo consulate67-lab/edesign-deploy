@@ -8,6 +8,7 @@ import type { DocLanguage } from '../registry/docLanguages';
 import { KIND_SPECS } from '../registry/countryDocuments';
 import { docTextPack, type IntlDocKind, type SampleTexts } from '../docText';
 import { COUNTRY_SAMPLES, type CountrySample, type SampleParty } from './countrySamples';
+import { generateNationalXml, isNationalProfile } from './national';
 
 const NS = {
     Invoice: 'urn:oasis:names:specification:ubl:schema:xsd:Invoice-2',
@@ -19,7 +20,8 @@ const CBC = 'urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-
 
 const EN16931 = 'urn:cen.eu:en16931:2017';
 const PEPPOL_PROFILE = 'urn:fdc:peppol.eu:2017:poacc:billing:01:1.0';
-const CUSTOMIZATION: Record<string, { id: string; profile?: string }> = {
+const CUSTOMIZATION: Record<string, { id: string; profile?: string; ubl?: string }> = {
+    'us-dbna-ubl': { id: `${NS.Invoice}::Invoice##DBNAlliance-1.0-data-Core`, profile: 'bdx:noprocess', ubl: '2.3' },
     'de-xrechnung-ubl': { id: `${EN16931}#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0`, profile: PEPPOL_PROFILE },
     'peppol-bis-billing-3': { id: `${EN16931}#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0`, profile: PEPPOL_PROFILE },
     'ro-cius': { id: `${EN16931}#compliant#urn:efactura.mfinante.ro:CIUS-RO:1.0.1` },
@@ -115,7 +117,8 @@ function billing(country: CountryCode, kind: IntlDocKind, lang: DocLanguage, pro
     return [
         '<?xml version="1.0" encoding="UTF-8"?>',
         `<${root} xmlns="${NS[root]}" xmlns:cac="${CAC}" xmlns:cbc="${CBC}">`,
-        el('cbc:CustomizationID', custom.id),
+        custom.ubl ? el('cbc:UBLVersionID', custom.ubl) : '',
+        el('cbc:CustomizationID', credit ? custom.id.replace(`${NS.Invoice}::Invoice`, `${NS.CreditNote}::CreditNote`) : custom.id),
         custom.profile ? el('cbc:ProfileID', custom.profile) : '',
         el('cbc:ID', id),
         el('cbc:IssueDate', isoDate(today)),
@@ -231,5 +234,6 @@ export const hasCountrySample = (country: CountryCode) => country in COUNTRY_SAM
 
 /** Örnek XML; `profileId` faturalar için CustomizationID / ProfileID'yi belirler. */
 export function generateSampleXml(country: CountryCode, kind: IntlDocKind, lang: DocLanguage, profileId: string): string {
+    if (isNationalProfile(profileId)) return generateNationalXml(country, kind, lang, profileId);
     return kind === 'despatch' ? despatch(country, lang) : billing(country, kind, lang, profileId);
 }

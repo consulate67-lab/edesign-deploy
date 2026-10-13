@@ -23,12 +23,12 @@ const de: Messages = {
         login: 'Anmelden',
         register: 'Registrieren',
         badgeNew: 'NEU',
-        news: 'Europa: Profile für EN 16931, Peppol BIS 3 und XRechnung hinzugefügt',
+        news: 'E-Belege für USA, Russland, Indien und China; Oberfläche auch auf Chinesisch, Hindi und Russisch',
         heroLine: 'gestalten –',
         heroAccent: 'ganz einfach',
         heroSubLead: 'EN-16931- und Peppol-konforme',
         heroSubStrong: 'Rechnungen, Gutschriften und Lieferscheine',
-        heroSubRest: 'für die Länder von EU und EWR, das Vereinigte Königreich und die Schweiz. Vorlage wählen, Logo, Stempel und Bankdaten ergänzen, mit Ihrer XML prüfen. Professionelle Layouts in Minuten – ganz ohne XSLT-Kenntnisse.',
+        heroSubRest: 'für die Länder von EU und EWR, das Vereinigte Königreich und die Schweiz, dazu nationale Formate für USA, Russland (UPD), Indien (GST-E-Rechnung, E-Way Bill) und China (vollständig digitale E-Rechnung). Vorlage wählen, Logo, Stempel und Bankdaten ergänzen, mit Ihrer XML prüfen. Professionelle Layouts in Minuten – ganz ohne XSLT-Kenntnisse.',
         heroSubEurope: 'Jedes Land erhält seine landesüblichen Belegnamen und Beschriftungen in der Landessprache.',
         ctaOpen: 'Konto eröffnen',
         ctaPricing: 'Preise ansehen',
@@ -97,8 +97,8 @@ const de: Messages = {
                     a: 'Rechnung, Gutschrift, Rechnungskorrektur, Anzahlungsrechnung, Teilrechnung und Lieferschein (Lieferavis). Wählen Sie im Assistenten ein Land, werden dessen Belege unter ihren landesüblichen Namen mit dem passenden XML-Profil angezeigt: EN 16931, Peppol BIS Billing 3.0, XRechnung 3.0 (UBL), CIUS-RO, HR CIUS, CIUS-PT oder Peppol Despatch Advice. Belege mit demselben XML-Format nutzen dieselbe Vorlage.',
                 },
                 {
-                    q: 'Kann ich Belege für europäische Länder gestalten?',
-                    a: 'Ja. Wählen Sie im Assistenten ein Land, werden dessen Entsprechungen für E-Rechnung, Verbraucherrechnung und Lieferavis angezeigt. Für EN 16931, Peppol BIS Billing 3.0, XRechnung 3.0 (UBL) und Peppol Despatch Advice stehen Vorlagen, Beispiel-XML und grundlegende Regelprüfungen bereit; die Beschriftungen erscheinen in der Landessprache. Die Prüfungen sind eine Teilmenge der offiziellen Schematron-Regeln, und Belege werden an kein offizielles Portal übermittelt.',
+                    q: 'Kann ich Belege für andere Länder gestalten?',
+                    a: 'Ja. Wählen Sie im Assistenten ein Land, werden dessen Entsprechungen von E-Rechnung, E-Archiv und Lieferavis aufgelistet. Vorlagen, Beispiel-XML und grundlegende Regelprüfungen gibt es für EN 16931, Peppol BIS Billing 3.0, XRechnung 3.0 (UBL) und Peppol Despatch Advice sowie für nationale Formate: USA (DBNAlliance UBL), Russland (FNS UPD 5.03), Indien (GST-E-Rechnung, E-Way Bill) und China (vollständig digitale E-Rechnung). Beschriftungen erscheinen in der Landessprache. Die Prüfungen sind eine Teilmenge der amtlichen Regeln, und Belege werden an kein Behördenportal gesendet.',
                 },
                 {
                     q: 'Muss ich XSLT beherrschen?',
@@ -368,6 +368,8 @@ const de: Messages = {
         defaultXml: 'Standard-Beispiel-XML',
         defaultXmlHint: 'Fertiger Beispielbeleg für {{doc}} ({{file}})',
         europeanSamples: 'Europäische Beispielbelege',
+
+        countrySamples: 'Beispielbelege des Landes',
         gibSamples: 'Offizielle GİB-Beispielbelege',
         gibNote: 'Szenario- und Typbeispiele aus UBL-TR 1.2.1 und dem e-Fatura-Paket; testen Sie Ihr Design mit Sonderfällen.',
         ownXml: 'Eigene XML-Datei wählen',
@@ -456,6 +458,8 @@ const de: Messages = {
         invoiceTemplateDesc: 'Verkäufer / Käufer, Positionen, USt.-Aufschlüsselung, Zahlungsangaben; Beschriftung in der gewählten Belegsprache',
         despatchTemplate: 'Peppol-Lieferavis-Layout',
         despatchTemplateDesc: 'Sendung, Packstücke (SSCC), Charge / Verfallsdatum und Rückstände',
+
+        nationalTemplateDesc: 'Ansicht nach dem amtlichen Druckmuster des Landes; Beschriftungen in der Belegsprache (Landessprache oder Englisch)',
         designRecommended: 'Empfohlen für diese Belegart',
         designs: {
             classic: { name: 'Klassisch', desc: 'Verkäufer / Käufer als Karten, blauer Akzent; alle EN-16931-Felder' },
@@ -527,6 +531,14 @@ const de: Messages = {
         subProfileOk: 'EN-16931-konformes Unterprofil: {{profile}}',
         otherProfile: 'Diese XML verwendet das Profil {{detected}}; die gewählten Regeln von {{profile}} wurden angewendet.',
         rulesPassed: 'Grundlegende Regelprüfung für {{profile}} bestanden (Teilmenge des offiziellen Schematron)',
+
+        nationalRequired: 'Pflichtfeld fehlt: {{field}}',
+
+        nationalFormat: '{{field}} hat ein ungültiges Format: {{value}}',
+
+        nationalTotal: '{{field}} = {{actual}}, aus den Positionen berechnet: {{expected}}',
+
+        nationalRulesPassed: '{{profile}}: grundlegende Feld- und Betragsprüfungen bestanden (Teilmenge des amtlichen Schemas)',
         info: {
             docNo: 'Belegnummer',
             date: 'Datum',

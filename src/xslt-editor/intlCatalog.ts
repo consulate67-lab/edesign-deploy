@@ -810,7 +810,7 @@ const es: Labels = {
     },
 };
 
-const LABELS: Record<Locale, Labels> = { tr, en, de, fr, es };
+const LABELS: Partial<Record<Locale, Labels>> = { tr, en, de, fr, es };
 
 type Cat = keyof Labels['cat'];
 type Party = keyof Labels['party'];

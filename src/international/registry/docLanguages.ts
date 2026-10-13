@@ -8,6 +8,7 @@ export const DOC_LANGUAGES = [
     'it', 'nl', 'pt', 'pl', 'cs', 'sk', 'sl', 'hr', 'hu', 'ro', 'bg', 'el',
     'da', 'sv', 'nb', 'fi', 'et', 'lv', 'lt', 'is',
     'mt', 'ga', 'ca', 'eu', 'gl',
+    'zh', 'hi', 'ru',
 ] as const;
 
 export type DocLanguage = (typeof DOC_LANGUAGES)[number];
@@ -25,9 +26,9 @@ export const isDocLanguage = (v: string | null | undefined): v is DocLanguage =>
  */
 export type NumberStyle = 'dot' | 'comma' | 'space';
 
-const SPACE_GROUP: DocLanguage[] = ['fr', 'pt', 'pl', 'cs', 'sk', 'hu', 'bg', 'sv', 'nb', 'fi', 'et', 'lv', 'lt'];
+const SPACE_GROUP: DocLanguage[] = ['fr', 'pt', 'pl', 'cs', 'sk', 'hu', 'bg', 'sv', 'nb', 'fi', 'et', 'lv', 'lt', 'ru'];
 
-const DOT_GROUP: DocLanguage[] = ['en', 'mt', 'ga'];
+const DOT_GROUP: DocLanguage[] = ['en', 'mt', 'ga', 'zh', 'hi'];
 
 export const numberStyleOf = (lang: DocLanguage): NumberStyle =>
     DOT_GROUP.includes(lang) ? 'dot' : SPACE_GROUP.includes(lang) ? 'space' : 'comma';

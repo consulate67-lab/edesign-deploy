@@ -26,13 +26,13 @@ const tr = {
         login: 'Giriş',
         register: 'Üye ol',
         badgeNew: 'YENİ',
-        news: 'Avrupa: EN 16931, Peppol BIS 3 ve XRechnung profilleri eklendi',
+        news: 'ABD, Rusya, Hindistan ve Çin e-belgeleri eklendi; arayüz Çince, Hintçe ve Rusça da',
         heroLine: 'tasarımı artık',
         heroAccent: 'çok kolay',
         heroSubLead: 'GİB uyumlu',
         heroSubStrong: 'e-Fatura, e-Arşiv, e-İrsaliye',
         heroSubRest: 've 12 tür daha. Şablonu seç, logo-kaşe-bankasını ekle, XML önizle. XSLT bilgisi olmadan dakikalar içinde profesyonel tasarım.',
-        heroSubEurope: 'Avrupa için EN 16931, Peppol ve XRechnung şablonları da hazır.',
+        heroSubEurope: 'Avrupa için EN 16931, Peppol ve XRechnung; ABD, Rusya, Hindistan ve Çin için ulusal şablonlar da hazır.',
         ctaOpen: 'Hesap aç',
         ctaPricing: 'Fiyatları gör',
         alreadyMember: 'Zaten üyeyim',
@@ -100,8 +100,8 @@ const tr = {
                     a: 'Toplam 15 belge türü: e-Fatura, e-Arşiv, e-İrsaliye, e-İrsaliye Yanıtı, e-İhracat, e-SMM, e-Müstahsil, e-Gider Pusulası, e-Döviz / Kıymetli Maden, e-Dekont, e-Sigorta Komisyon Gider Belgesi, e-Bilet, e-Bilet Raporu, e-Yolcu Listesi ve e-Makbuz. Her tür için GİB resmi XSLT veya hazır şablon yüklenir.',
                 },
                 {
-                    q: 'Avrupa ülkeleri için de belge tasarlayabilir miyim?',
-                    a: 'Evet. Sihirbazda ülkeyi seçtiğinizde o ülkenin e-fatura, e-arşiv ve e-irsaliye karşılıkları listelenir. EN 16931, Peppol BIS Billing 3.0, XRechnung 3.0 (UBL) ve Peppol Sevk Bildirimi için şablon, örnek XML ve temel kural kontrolü hazırdır; etiketler ülkenin dilinde gösterilir. Kontroller resmî Schematron kurallarının bir alt kümesidir ve belgeler resmî portallara gönderilmez.',
+                    q: 'Yurt dışı için de belge tasarlayabilir miyim?',
+                    a: 'Evet. Sihirbazda ülkeyi seçtiğinizde o ülkenin e-fatura, e-arşiv ve e-irsaliye karşılıkları listelenir. EN 16931, Peppol BIS Billing 3.0, XRechnung 3.0 (UBL) ve Peppol Sevk Bildirimi ile ulusal biçimler için şablon, örnek XML ve temel kural kontrolü hazırdır: ABD (DBNAlliance UBL), Rusya (ФНС УПД 5.03), Hindistan (GST e-Invoice, e-Way Bill) ve Çin (数电票). Etiketler ülkenin dilinde gösterilir. Kontroller resmî kuralların bir alt kümesidir ve belgeler resmî portallara gönderilmez.',
                 },
                 {
                     q: 'XSLT bilmem gerekiyor mu?',
@@ -371,6 +371,8 @@ const tr = {
         defaultXml: 'Varsayılan örnek XML',
         defaultXmlHint: '{{doc}} için hazır örnek belge ({{file}})',
         europeanSamples: 'Avrupa örnek belgeleri',
+
+        countrySamples: 'Ülke örnek belgeleri',
         gibSamples: 'GİB resmi örnek belgeler',
         gibNote: 'UBL-TR 1.2.1 ve e-Fatura paketindeki senaryo / tip örnekleri; tasarımınızı özel durumlarla deneyin.',
         ownXml: 'Kendi XML dosyamı seç',
@@ -459,6 +461,8 @@ const tr = {
         invoiceTemplateDesc: 'Satıcı / alıcı, kalemler, KDV dökümü, ödeme bilgisi; etiketler seçilen belge dilinde',
         despatchTemplate: 'Peppol Sevk Bildirimi Görünümü',
         despatchTemplateDesc: 'Sevkiyat, taşıma birimleri (SSCC), parti / son kullanma ve bekleyen miktarlar',
+
+        nationalTemplateDesc: 'Ülkenin resmî basılı biçimine göre görünüm; etiketler belge dilinde (yerel dil veya İngilizce)',
         designRecommended: 'Bu belge türü için önerilen',
         designs: {
             classic: { name: 'Klasik', desc: 'Kart görünümlü satıcı / alıcı, mavi vurgu; tüm EN 16931 alanları' },
@@ -530,6 +534,14 @@ const tr = {
         subProfileOk: 'EN 16931 uyumlu alt profil: {{profile}}',
         otherProfile: 'Bu XML {{detected}} profilinde; seçtiğiniz {{profile}} kuralları uygulandı.',
         rulesPassed: '{{profile}} temel kural kontrolleri geçti (resmî Schematron’un alt kümesi)',
+
+        nationalRequired: 'Zorunlu alan eksik: {{field}}',
+
+        nationalFormat: '{{field}} biçimi geçersiz: {{value}}',
+
+        nationalTotal: '{{field}} = {{actual}}, kalemlerden hesaplanan {{expected}}',
+
+        nationalRulesPassed: '{{profile}} temel alan ve tutar kontrolleri geçti (resmî şemanın alt kümesi)',
         info: {
             docNo: 'Belge no',
             date: 'Tarih',

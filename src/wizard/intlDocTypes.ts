@@ -1,5 +1,5 @@
 import {
-    countryDocuments, docTitle, findDocumentProfile, generateSampleXml, KIND_SPECS,
+    countryDocuments, docTitle, findCountry, findDocumentProfile, generateSampleXml, KIND_SPECS,
     type CountryDocument, type DocLanguage, type IntlDocKind,
 } from '../international';
 import { CLASSIC_DESIGN_ID, composeInvoiceDesign, findInvoiceDesign, INVOICE_DESIGNS } from '../international/designs/invoiceDesigns';
@@ -9,6 +9,15 @@ import type { DefaultXsltOption, DocFamily, OfficialSample, WizardDocType } from
 
 type DesignId = Exclude<keyof Messages['intl']['designs'], 'classic'>;
 
+type Titles = Partial<Record<DocLanguage, string>>;
+
+/** Ulusal (UBL dışı) biçim: kendi görünümü, belge adları ve örnek ülkesi; Avrupa tasarımları uygulanmaz. */
+interface NationalTemplate {
+    name: string;
+    country: string;
+    titles: Partial<Record<IntlDocKind, Titles>>;
+}
+
 interface IntlTemplate {
     family: DocFamily;
     moduleId: string;
@@ -16,6 +25,7 @@ interface IntlTemplate {
     labelKey: 'intl.invoiceTemplate' | 'intl.despatchTemplate';
     descriptionKey: 'intl.invoiceTemplateDesc' | 'intl.despatchTemplateDesc';
     sampleXml: string;
+    national?: NationalTemplate;
 }
 
 const percent = (...rates: number[]) => {
@@ -51,14 +61,62 @@ const TEMPLATES: Record<string, IntlTemplate> = {
     'ro-cius': { ...INVOICE_TEMPLATE, sampleXml: 'ebelge/samples/intl/EN16931-UBL-Fatura-FR.xml' },
     'hr-cius': { ...INVOICE_TEMPLATE, sampleXml: 'ebelge/samples/intl/EN16931-UBL-Fatura-FR.xml' },
     'pt-cius-pt': { ...INVOICE_TEMPLATE, sampleXml: 'ebelge/samples/intl/EN16931-UBL-Fatura-FR.xml' },
+    'us-dbna-ubl': { ...INVOICE_TEMPLATE, sampleXml: 'ebelge/samples/intl/US-invoice-en.xml' },
     'peppol-despatch-3': {
         family: 'despatch', moduleId: 'intl-despatch', inlineKey: 'intl/peppol-despatch-advice.xslt',
         labelKey: 'intl.despatchTemplate', descriptionKey: 'intl.despatchTemplateDesc',
         sampleXml: 'ebelge/samples/intl/Peppol-Irsaliye-NL.xml',
     },
+    'ru-upd-503': {
+        ...INVOICE_TEMPLATE, moduleId: 'intl-ru-upd', inlineKey: 'intl/ru-upd-503.xslt', sampleXml: 'ebelge/samples/intl/RU-invoice-ru.xml',
+        national: {
+            name: 'ФНС УПД 5.03', country: 'RU',
+            titles: {
+                invoice: { ru: 'Универсальный передаточный документ (УПД)', en: 'Universal transfer document (UPD)' },
+                prepayment: { ru: 'Счёт-фактура на аванс', en: 'Advance VAT invoice' },
+                despatch: { ru: 'Документ об отгрузке (УПД, ДОП)', en: 'Shipment document (UPD, DOP)' },
+            },
+        },
+    },
+    'cn-fully-digital': {
+        ...INVOICE_TEMPLATE, moduleId: 'intl-cn-invoice', inlineKey: 'intl/cn-fully-digital.xslt', sampleXml: 'ebelge/samples/intl/CN-invoice-zh.xml',
+        national: {
+            name: '数电票 (全面数字化的电子发票)', country: 'CN',
+            titles: {
+                invoice: { zh: '电子发票（增值税专用发票）', en: 'Fully digitalised e-invoice (special VAT)' },
+                credit: { zh: '红字电子发票', en: 'Red-letter e-invoice (credit)' },
+            },
+        },
+    },
+    'in-gst-einvoice': {
+        ...INVOICE_TEMPLATE, moduleId: 'intl-in-einvoice', inlineKey: 'intl/in-gst-einvoice.xslt', sampleXml: 'ebelge/samples/intl/IN-invoice-en.xml',
+        national: {
+            name: 'GST e-Invoice INV-01', country: 'IN',
+            titles: {
+                invoice: { en: 'Tax Invoice (GST e-Invoice)', hi: 'कर बीजक (जीएसटी ई-इनवॉइस)' },
+                credit: { en: 'Credit Note (GST e-Invoice)', hi: 'क्रेडिट नोट (जीएसटी ई-इनवॉइस)' },
+            },
+        },
+    },
+    'in-eway-bill': {
+        family: 'despatch', moduleId: 'intl-in-ewaybill', inlineKey: 'intl/in-eway-bill.xslt',
+        labelKey: 'intl.despatchTemplate', descriptionKey: 'intl.despatchTemplateDesc', sampleXml: 'ebelge/samples/intl/IN-despatch-en.xml',
+        national: {
+            name: 'E-Way Bill EWB-01', country: 'IN',
+            titles: { despatch: { en: 'E-Way Bill (EWB-01)', hi: 'ई-वे बिल (EWB-01)' } },
+        },
+    },
 };
 
 export const hasIntlTemplate = (profileId: string) => profileId in TEMPLATES;
+
+const titleOf = (tpl: IntlTemplate, lang: DocLanguage, kind: IntlDocKind) => {
+    const titles = tpl.national?.titles[kind];
+    return titles ? titles[lang] ?? titles.en ?? Object.values(titles)[0] ?? docTitle(lang, kind) : docTitle(lang, kind);
+};
+
+const templateLabel = (tpl: IntlTemplate) => tpl.national?.name ?? i18n.t(tpl.labelKey);
+const templateDescription = (tpl: IntlTemplate) => tpl.national ? i18n.t('intl.nationalTemplateDesc') : i18n.t(tpl.descriptionKey);
 
 const LANG_PARAM = /(<xsl:param\s+name="lang"\s+select=")'[a-z]{2}'("\s*\/>)/;
 
@@ -70,7 +128,7 @@ const loadTemplate = async (tpl: IntlTemplate) => (await import('../xsltContent'
 /** Fatura ailesinde tasarım uygulanmış şablon; classic (veya bilinmeyen) temel şablondur. */
 const loadDesign = async (tpl: IntlTemplate, designId: string) => {
     const base = await loadTemplate(tpl);
-    const design = tpl.family === 'invoice' ? findInvoiceDesign(designId) : undefined;
+    const design = tpl.family === 'invoice' && !tpl.national ? findInvoiceDesign(designId) : undefined;
     return design ? composeInvoiceDesign(base, design) : base;
 };
 
@@ -88,10 +146,10 @@ export const invoiceDesignIds = (kind?: IntlDocKind) => {
 
 const designOptions = (tpl: IntlTemplate, lang: DocLanguage, kind?: IntlDocKind): DefaultXsltOption[] => {
     const classic: DefaultXsltOption = {
-        id: `${tpl.moduleId}-${lang}`, label: i18n.t(tpl.labelKey), description: i18n.t(tpl.descriptionKey), moduleId: tpl.moduleId,
+        id: `${tpl.moduleId}-${lang}`, label: templateLabel(tpl), description: templateDescription(tpl), moduleId: tpl.moduleId,
         load: async () => withDocumentLanguage(await loadTemplate(tpl), lang),
     };
-    if (tpl.family !== 'invoice') return [classic];
+    if (tpl.family !== 'invoice' || tpl.national) return [classic];
     return invoiceDesignIds(kind).map(id => id === CLASSIC_DESIGN_ID
         ? { ...classic, label: i18n.t('intl.designs.classic.name'), description: i18n.t('intl.designs.classic.desc') }
         : {
@@ -114,11 +172,11 @@ const sampleName = (country: string, kind: IntlDocKind, lang: DocLanguage) => `e
 /** Ülkenin aynı şablonu kullanan diğer belgeleri (ör. fatura şablonunda iade faturası verisi). */
 const siblingSamples = (country: string, current: CountryDocument, lang: DocLanguage): OfficialSample[] =>
     countryDocuments(country)
-        .filter(d => d.kind !== current.kind && TEMPLATES[d.profileId]?.family === TEMPLATES[current.profileId]?.family)
+        .filter(d => d.kind !== current.kind && TEMPLATES[d.profileId]?.inlineKey === TEMPLATES[current.profileId]?.inlineKey)
         .map(d => ({
             file: sampleName(country, d.kind, lang),
-            label: docTitle(lang, d.kind),
-            tag: [i18n.t(`intl.kinds.${d.kind}`), KIND_SPECS[d.kind].typeCode].filter(Boolean).join(' · '),
+            label: titleOf(TEMPLATES[d.profileId], lang, d.kind),
+            tag: [i18n.t(`intl.kinds.${d.kind}`), TEMPLATES[d.profileId].national ? '' : KIND_SPECS[d.kind].typeCode].filter(Boolean).join(' · '),
             text: () => generateSampleXml(country, d.kind, lang, d.profileId),
         }));
 
@@ -132,13 +190,16 @@ export function countryDocType(country: string, doc: CountryDocument, lang: DocL
     if (!tpl || !profile || profile.implementation !== 'available') return null;
     return {
         id: `intl-${country}-${doc.kind}-${lang}`,
-        label: docTitle(lang, doc.kind),
+        label: titleOf(tpl, lang, doc.kind),
         description: i18n.t(`intl.kindDesc.${doc.kind}`),
         color: KIND_COLORS[doc.kind],
         family: tpl.family,
         sampleXml: sampleName(country, doc.kind, lang),
         sampleText: () => generateSampleXml(country, doc.kind, lang, doc.profileId),
-        officialSamples: [...siblingSamples(country, doc, lang), ...(tpl.family === 'despatch' ? despatchSamples() : invoiceSamples())],
+        officialSamples: [
+            ...siblingSamples(country, doc, lang),
+            ...(tpl.national ? [] : tpl.family === 'despatch' ? despatchSamples() : invoiceSamples()),
+        ],
         officialNote: i18n.t('intl.countrySamplesNote'),
         defaults: designOptions(tpl, lang, doc.kind),
         intlProfileId: doc.profileId,
@@ -162,5 +223,21 @@ export const intlModuleDocTypes = (): WizardDocType[] => ([
         id, label: i18n.t(labelKey), description: i18n.t('intl.europeanProfile'), color: '#2563eb', family: tpl.family, sampleXml: tpl.sampleXml,
         defaults: [{ id, label: i18n.t(tpl.labelKey), description: i18n.t(tpl.descriptionKey), moduleId: tpl.moduleId, load: () => loadTemplate(tpl) }],
         intlProfileId: profile,
-    };
-});
+    } as WizardDocType;
+}).concat(nationalModuleDocTypes());
+
+function nationalModuleDocTypes(): WizardDocType[] {
+    return Object.entries(TEMPLATES).flatMap(([profileId, tpl]) => {
+        const national = tpl.national;
+        const doc = national && countryDocuments(national.country).find(d => d.profileId === profileId);
+        if (!national || !doc) return [];
+        const lang = findCountry(national.country)?.docLanguages[0] ?? 'en';
+        return [{
+            id: tpl.moduleId, label: national.name, description: titleOf(tpl, lang, doc.kind), color: KIND_COLORS[doc.kind], family: tpl.family,
+            sampleXml: tpl.sampleXml,
+            sampleText: () => generateSampleXml(national.country, doc.kind, lang, profileId),
+            defaults: [{ id: tpl.moduleId, label: national.name, description: templateDescription(tpl), moduleId: tpl.moduleId, load: () => loadTemplate(tpl) }],
+            intlProfileId: profileId, country: national.country, intlKind: doc.kind, docLanguage: lang,
+        }];
+    });
+}

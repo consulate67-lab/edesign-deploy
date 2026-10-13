@@ -1,13 +1,13 @@
 import React from 'react';
 import {
-    AT, BE, BG, CH, CY, CZ, DE, DK, EE, ES, FI, FR, GB, GR, HR, HU, IE, IS, IT, LI, LT, LU, LV, MT, NL, NO, PL, PT, RO, SE, SI, SK, TR,
+    AT, BE, BG, CH, CN, CY, CZ, DE, DK, EE, ES, FI, FR, GB, GR, HR, HU, IE, IN, IS, IT, LI, LT, LU, LV, MT, NL, NO, PL, PT, RO, RU, SE, SI, SK, TR, US,
 } from 'country-flag-icons/react/3x2';
 
 type FlagIcon = typeof TR;
 
-/** Yalnız kayıttaki ülkelerin bayrakları; paket ağaç sallamayla diğerlerini dışarıda bırakır. */
+/** YalnÄ±z kayÄ±ttaki Ã¼lkelerin bayraklarÄ±; paket aÄŸaÃ§ sallamayla diÄŸerlerini dÄ±ÅŸarÄ±da bÄ±rakÄ±r. */
 const FLAGS: Record<string, FlagIcon> = {
-    AT, BE, BG, CH, CY, CZ, DE, DK, EE, ES, FI, FR, GB, GR, HR, HU, IE, IS, IT, LI, LT, LU, LV, MT, NL, NO, PL, PT, RO, SE, SI, SK, TR,
+    AT, BE, BG, CH, CN, CY, CZ, DE, DK, EE, ES, FI, FR, GB, GR, HR, HU, IE, IN, IS, IT, LI, LT, LU, LV, MT, NL, NO, PL, PT, RO, RU, SE, SI, SK, TR, US,
 };
 
 export const Flag: React.FC<{ code: string; title?: string; height?: number; style?: React.CSSProperties }> = ({ code, title, height = 14, style }) => {

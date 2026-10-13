@@ -1,6 +1,7 @@
 import { FAMILY_INFO, EFATURA_PROFILE_IDS, type DocFamily, type WizardDocType } from './docTypes';
 import { detectDocumentProfile, europeanInvoiceIssues, findDocumentProfile, peppolDespatchIssues } from '../international';
 import i18n, { currentLocale } from '../i18n';
+import { nationalXmlChecks } from './nationalChecks';
 
 export type CheckLevel = 'ok' | 'warn' | 'error';
 export interface Check { level: CheckLevel; text: string }
@@ -67,6 +68,15 @@ export function validateXslt(text: string, docType: WizardDocType, sampleXml: st
     info.push([i18n.t('validate.xsltVersion'), version]);
     info.push([i18n.t('validate.templateCount'), String(doc.getElementsByTagNameNS(XSL_NS, 'template').length)]);
 
+    const national = findDocumentProfile(docType.intlProfileId ?? '');
+    if (national?.syntax === 'national') {
+        const roots = national.roots.map(r => r.localName);
+        checks.push(roots.some(r => text.includes(r))
+            ? { level: 'ok', text: i18n.t('validate.structureOk', { structure: national.name }) }
+            : { level: 'warn', text: i18n.t('validate.xsltNoFamily') });
+        return result([...checks, ...sampleRunChecks(doc, docType, sampleXml)], info);
+    }
+
     // Namespace bildirimi belirleyicidir; kopyala-yapıştır kalıntısı eleman
     // adları (ör. irsaliye XSLT'sinde InvoiceLine) yalnızca namespace yoksa sayılır.
     const families = new Set<DocFamily>();
@@ -108,14 +118,17 @@ export function validateXslt(text: string, docType: WizardDocType, sampleXml: st
         checks.push({ level: 'warn', text: i18n.t('validate.xsltVersionWarn', { version }) });
     }
 
-    if (sampleXml && !checks.some(c => c.level === 'error')) {
-        const xml = parseXml(sampleXml);
-        const err = xml.error ? null : tryTransform(doc, xml.doc);
-        checks.push(err
-            ? { level: 'error', text: i18n.t('validate.sampleRunFailed', { doc: docType.label, error: err }) }
-            : { level: 'ok', text: i18n.t('validate.sampleRunOk', { doc: docType.label }) });
-    }
+    if (!checks.some(c => c.level === 'error')) checks.push(...sampleRunChecks(doc, docType, sampleXml));
     return result(checks, info);
+}
+
+function sampleRunChecks(xslt: Document, docType: WizardDocType, sampleXml: string | null): Check[] {
+    if (!sampleXml) return [];
+    const xml = parseXml(sampleXml);
+    const err = xml.error ? null : tryTransform(xslt, xml.doc);
+    return [err
+        ? { level: 'error', text: i18n.t('validate.sampleRunFailed', { doc: docType.label, error: err }) }
+        : { level: 'ok', text: i18n.t('validate.sampleRunOk', { doc: docType.label }) }];
 }
 
 const childText = (parent: Element, localName: string, ns = CBC_NS): string => {
@@ -1110,6 +1123,17 @@ export function validateXml(text: string, docType: WizardDocType, xslt: string |
     if (error) return result([{ level: 'error', text: i18n.t('validate.notXml', { error }) }], info);
 
     const root = doc.documentElement;
+    const national = findDocumentProfile(docType.intlProfileId ?? '');
+    if (national?.syntax === 'national') {
+        if (!national.roots.some(r => r.localName === root.localName)) {
+            const expected = national.roots.map(r => `<${r.localName}>`).join(' / ');
+            return result([{ level: 'error', text: i18n.t('validate.wrongFamily', { found: `<${root.localName}>`, doc: docType.label, expected }) }], info);
+        }
+        checks.push({ level: 'ok', text: i18n.t('validate.structureOk', { structure: `${national.name} <${root.localName}>` }) });
+        nationalXmlChecks(root, national.name, checks, info);
+        if (xslt) checks.push(xsltRunCheck(xslt, doc));
+        return result(checks, info);
+    }
     const family = familyOfRoot(root);
     if (docType.intlProfileId && (family === docType.family || (docType.family === 'invoice' && family === 'creditNote'))) {
         checks.push({ level: 'ok', text: i18n.t('validate.structureOk', { structure: `UBL 2.1 ${root.localName}` }) });

@@ -226,6 +226,47 @@ export const documentProfiles: DocumentProfile[] = [
         id: 'bg-unp', name: 'NAP СВФР (УНП)', families: ['despatch'], purpose: 'reporting', syntax: 'national',
         roots: [], validationArtifacts: ['NAP СВФР XSD'], implementation: 'planned',
     },
+
+    // ---------------- ABD ----------------
+    {
+        id: 'us-dbna-ubl', name: 'DBNAlliance Core Invoice (UBL 2.3)', families: ['invoice'], purpose: 'document', syntax: 'UBL',
+        roots: UBL_BILLING_ROOTS, customizationIds: [`${UBL_INVOICE}::Invoice##DBNAlliance-1.0`, `${UBL_CREDIT_NOTE}::CreditNote##DBNAlliance-1.0`],
+        validationArtifacts: ['UBL 2.3 XSD', 'DBNAlliance Core Schematron'], implementation: 'available',
+    },
+
+    // ---------------- Rusya ----------------
+    {
+        id: 'ru-upd-503', name: 'ФНС УПД / счёт-фактура 5.03 (КНД 1115131)', families: ['invoice', 'despatch'], purpose: 'document', syntax: 'national',
+        roots: [{ localName: 'Файл', namespace: '' }],
+        validationArtifacts: ['ФНС XSD ON_NSCHFDOPPR 5.03', 'Приказ ЕД-7-26/970@ (ред. ЕД-7-26/1032@)'], implementation: 'available',
+    },
+    {
+        id: 'ru-ukd', name: 'ФНС УКД (корректировочный счёт-фактура)', families: ['invoice'], purpose: 'document', syntax: 'national',
+        roots: [], validationArtifacts: ['ФНС XSD ON_NKORSCHFDOPPR'], implementation: 'planned',
+    },
+    {
+        id: 'ru-etrn', name: 'ЭТрН — электронная транспортная накладная (ГИС ЭПД)', families: ['despatch'], purpose: 'document', syntax: 'national',
+        roots: [], validationArtifacts: ['ФНС XSD ЭТрН (ЕД-7-26/1065@)', 'ГИС ЭПД'], implementation: 'planned',
+    },
+
+    // ---------------- Hindistan ----------------
+    {
+        id: 'in-gst-einvoice', name: 'GST e-Invoice INV-01 (IRP schema 1.1)', families: ['invoice'], purpose: 'reporting', syntax: 'national',
+        roots: [{ localName: 'GSTInvoice', namespace: '' }],
+        validationArtifacts: ['GSTN e-Invoice JSON schema 1.1', 'IRP: IRN + signed QR'], implementation: 'available',
+    },
+    {
+        id: 'in-eway-bill', name: 'E-Way Bill EWB-01 (CGST Rule 138)', families: ['despatch'], purpose: 'reporting', syntax: 'national',
+        roots: [{ localName: 'EWayBill', namespace: '' }],
+        validationArtifacts: ['NIC E-Way Bill JSON schema'], implementation: 'available',
+    },
+
+    // ---------------- Çin ----------------
+    {
+        id: 'cn-fully-digital', name: '数电发票 (全面数字化的电子发票, GB/T 42965)', families: ['invoice', 'archive'], purpose: 'document', syntax: 'national',
+        roots: [{ localName: 'EInvoice', namespace: '' }],
+        validationArtifacts: ['GB/T 42965.1-2023', '税务机关 SM2 签名'], implementation: 'available',
+    },
 ];
 
 /**
@@ -493,6 +534,34 @@ export const countryDocumentRules: CountryDocumentRules[] = [
         archive: NO_ARCHIVE,
         despatch: OPTIONAL_DESPATCH,
         sources: ['https://www.gov.uk/government/publications/procurement-act-2023-guidance-documents-manage-phase/guidance-electronic-invoicing-and-payment-html'],
+    },
+    {
+        country: 'US',
+        invoice: { mandate: 'b2g-only', profiles: ['us-dbna-ubl', 'en16931-ubl'], note: 'Federal zorunluluk yok; federal kurumlar e-faturaya geçmek zorunda (OMB M-15-19, IPP). B2B ağı DBNAlliance (UBL 2.3) gönüllü.' },
+        archive: { ...NO_ARCHIVE, note: 'Satış vergisi eyalet düzeyinde; perakende fişi bildirimi yok.' },
+        despatch: { ...OPTIONAL_DESPATCH, note: 'Yaygın sevk bildirimi ANSI X12 856 (ASN); zorunluluk yok.' },
+        sources: ['https://obamawhitehouse.archives.gov/sites/default/files/omb/memoranda/2015/m-15-19.pdf', 'https://www.ipp.gov/', 'https://dbnalliance.org/'],
+    },
+    {
+        country: 'RU',
+        invoice: { mandate: 'voluntary', profiles: ['ru-upd-503', 'ru-ukd'], note: 'Elektronik fatura gönüllü (ЭДО operatörü üzerinden); elektronik düzenlenirse yalnız ФНС 5.03 formatı geçerli (5.01/5.02 1.4.2025’ten beri geçersiz). KDV 1.1.2026’dan beri %22 (avansta 22/122). İzlenebilir mallarda elektronik zorunlu.' },
+        archive: { equivalent: 'reporting', profiles: [], note: 'Perakende satış çevrim içi yazar kasa fişiyle (54-ФЗ) OFD üzerinden ФНС’ye iletilir; şema eklenmedi.' },
+        despatch: { equivalent: 'document', profiles: ['ru-etrn', 'ru-upd-503'], note: 'ЭТрН 1.9.2026’dan beri zorunlu (259-ФЗ md. 18.1, 140-ФЗ), ГИС ЭПД üzerinden; malın devri УПД (ДОП) ile belgelenir.' },
+        sources: ['https://www.klerk.ru/doc/597510/', 'https://mintrans.gov.ru/press-center/news/12933', 'https://mintrans.gov.ru/activities/214/376/453/454'],
+    },
+    {
+        country: 'IN',
+        invoice: { mandate: 'mandatory', profiles: ['in-gst-einvoice'], note: 'Toplam ciro 5 crore ₹ üzerindeki işletmelerde B2B ve ihracat faturası IRP’ye bildirilir (IRN + imzalı QR); ciro 10 crore ₹ ve üzeriyse 30 gün içinde.' },
+        archive: { equivalent: 'none', profiles: [], note: 'B2C faturada dinamik QR kod zorunlu; IRP’ye bildirilmez.' },
+        despatch: { equivalent: 'reporting', profiles: ['in-eway-bill'], note: '50.000 ₹ üzeri sevkiyatta e-Way Bill (EWB-01) zorunlu; e-faturadan otomatik üretilebilir.' },
+        sources: ['https://einvoice1.gst.gov.in/', 'https://docs.ewaybillgst.gov.in/', 'https://cbic-gst.gov.in/'],
+    },
+    {
+        country: 'CN',
+        invoice: { mandate: 'mandatory', profiles: ['cn-fully-digital'], note: '数电发票 1.12.2024’ten beri tüm ülkede (国家税务总局公告2024年第11号); kâğıtla eşdeğer, numara vergi idaresince verilir.' },
+        archive: { equivalent: 'invoice', profiles: ['cn-fully-digital'], note: 'Tüketiciye 电子发票（普通发票） düzenlenir; iade için 红字发票.' },
+        despatch: { equivalent: 'optional', profiles: [], note: 'Elektronik sevk belgesi zorunluluğu yok.' },
+        sources: ['https://fgk.chinatax.gov.cn/zcfgk/c100012/c5236067/content.html', 'https://www.gov.cn/zhengce/zhengceku/202411/content_6989164.htm'],
     },
 ];
 

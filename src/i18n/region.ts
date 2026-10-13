@@ -36,6 +36,22 @@ const TIMEZONE_COUNTRY: Record<string, CountryCode> = {
     'Asia/Nicosia': 'CY', 'Asia/Famagusta': 'CY', 'Europe/Nicosia': 'CY',
     'Europe/Vaduz': 'LI',
     'Europe/London': 'GB', 'Europe/Belfast': 'GB',
+    ...Object.fromEntries([
+        'America/New_York', 'America/Detroit', 'America/Chicago', 'America/Denver', 'America/Phoenix', 'America/Boise',
+        'America/Los_Angeles', 'America/Anchorage', 'America/Juneau', 'America/Sitka', 'America/Nome', 'America/Adak',
+        'America/Indiana/Indianapolis', 'America/Indianapolis', 'America/Kentucky/Louisville', 'America/Louisville',
+        'America/North_Dakota/Center', 'America/Menominee', 'Pacific/Honolulu',
+        'US/Eastern', 'US/Central', 'US/Mountain', 'US/Pacific', 'US/Alaska', 'US/Hawaii', 'US/Arizona',
+    ].map((tz) => [tz, 'US'])),
+    ...Object.fromEntries([
+        'Europe/Moscow', 'Europe/Kaliningrad', 'Europe/Samara', 'Europe/Volgograd', 'Europe/Saratov', 'Europe/Ulyanovsk',
+        'Europe/Astrakhan', 'Europe/Kirov', 'Asia/Yekaterinburg', 'Asia/Omsk', 'Asia/Novosibirsk', 'Asia/Barnaul',
+        'Asia/Tomsk', 'Asia/Novokuznetsk', 'Asia/Krasnoyarsk', 'Asia/Irkutsk', 'Asia/Chita', 'Asia/Yakutsk',
+        'Asia/Khandyga', 'Asia/Vladivostok', 'Asia/Ust-Nera', 'Asia/Magadan', 'Asia/Sakhalin', 'Asia/Srednekolymsk',
+        'Asia/Kamchatka', 'Asia/Anadyr', 'W-SU',
+    ].map((tz) => [tz, 'RU'])),
+    'Asia/Kolkata': 'IN', 'Asia/Calcutta': 'IN',
+    'Asia/Shanghai': 'CN', 'Asia/Urumqi': 'CN', 'Asia/Chongqing': 'CN', 'Asia/Chungking': 'CN', 'Asia/Harbin': 'CN', 'PRC': 'CN',
 };
 
 /**

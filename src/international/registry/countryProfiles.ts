@@ -1,5 +1,5 @@
 /**
- * Country registry — Türkiye + AB/AEA + Birleşik Krallık + İsviçre.
+ * Country registry — Türkiye + AB/AEA + Birleşik Krallık + İsviçre + ABD, Rusya, Hindistan, Çin.
  *
  * Bu kayıt yalnız ülke metadatasını tutar. Hangi belge için hangi XML
  * profilinin geçerli olduğu `documentProfiles.ts` içindedir; arayüz dili
@@ -11,9 +11,9 @@ import type { DocLanguage } from './docLanguages';
 export type CountryCode = string; // ISO 3166-1 alpha-2
 
 /** Müşteri arayüzünde desteklenen diller. */
-export type UiLanguage = 'tr' | 'en' | 'de' | 'fr' | 'es';
+export type UiLanguage = 'tr' | 'en' | 'de' | 'fr' | 'es' | 'zh' | 'hi' | 'ru';
 
-export type CountryRegion = 'TR' | 'EU' | 'EEA' | 'GB' | 'CH';
+export type CountryRegion = 'TR' | 'EU' | 'EEA' | 'GB' | 'CH' | 'US' | 'RU' | 'IN' | 'CN';
 
 export interface CountryProfile {
     code: CountryCode;
@@ -67,6 +67,11 @@ export const countryProfiles: CountryProfile[] = [
 
     { code: 'GB', name: 'United Kingdom', region: 'GB', currency: 'GBP', locale: 'en-GB', uiLanguage: 'en', docLanguages: ['en'] },
     { code: 'CH', name: 'Switzerland', region: 'CH', currency: 'CHF', locale: 'de-CH', uiLanguage: 'de', docLanguages: ['de', 'fr', 'it'] },
+
+    { code: 'US', name: 'United States', region: 'US', currency: 'USD', locale: 'en-US', uiLanguage: 'en', docLanguages: ['en', 'es'] },
+    { code: 'RU', name: 'Russia', region: 'RU', currency: 'RUB', locale: 'ru-RU', uiLanguage: 'ru', docLanguages: ['ru'] },
+    { code: 'IN', name: 'India', region: 'IN', currency: 'INR', locale: 'en-IN', uiLanguage: 'hi', docLanguages: ['en', 'hi'] },
+    { code: 'CN', name: 'China', region: 'CN', currency: 'CNY', locale: 'zh-CN', uiLanguage: 'zh', docLanguages: ['zh'] },
 ];
 
 export const findCountry = (code: CountryCode): CountryProfile | undefined =>

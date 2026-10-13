@@ -8,8 +8,8 @@ import { persist, createJSONStorage } from 'zustand/middleware';
  */
 
 export type ThemeMode = 'light' | 'dark';
-export type Locale = 'tr' | 'en' | 'de' | 'fr' | 'es';
-export const LOCALES: Locale[] = ['tr', 'en', 'de', 'fr', 'es'];
+export type Locale = 'tr' | 'en' | 'de' | 'fr' | 'es' | 'zh' | 'hi' | 'ru';
+export const LOCALES: Locale[] = ['tr', 'en', 'de', 'fr', 'es', 'zh', 'hi', 'ru'];
 
 export interface ToastMessage {
     id: string;

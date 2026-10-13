@@ -9,13 +9,14 @@ import type { DocLanguage } from '../international/registry/docLanguages';
 import { getCatalog, docRootOf, type CatalogField } from './fieldCatalog';
 import { isIntlXml } from './docLanguage';
 import { intlCatalog, type IntlRoot } from './intlCatalog';
+import { nationalCatalog, nationalRootOf } from './nationalCatalog';
 import type { GibDict } from './catalogLabels/types';
 import en from './catalogLabels/en';
 import de from './catalogLabels/de';
 import fr from './catalogLabels/fr';
 import es from './catalogLabels/es';
 
-const DICTS: Record<Exclude<Locale, 'tr'>, GibDict> = { en, de, fr, es };
+const DICTS: Partial<Record<Exclude<Locale, 'tr'>, GibDict>> & { en: GibDict } = { en, de, fr, es };
 
 /** Uzun önekler önce: "Asıl Alıcı" "Alıcı"dan önce denenmeli. */
 const PARTY_PREFIXES = ['Sipariş Veren', 'Asıl Alıcı', 'Teslim Alan', 'Düzenleyen', 'Gönderen', 'Satıcı', 'Alıcı', 'Çiftçi'];
@@ -75,6 +76,8 @@ function gibCatalog(xml: string, lang: DocLanguage): CatalogField[] {
 const INTL_ROOT = /<(?:[\w.-]+:)?(Invoice|CreditNote|DespatchAdvice)[\s>]/;
 
 export function buildCatalog(xml: string, lang: DocLanguage): CatalogField[] {
+    const national = nationalRootOf(xml);
+    if (national) return nationalCatalog(national, lang);
     if (isIntlXml(xml)) {
         const root = xml.match(INTL_ROOT)?.[1] as IntlRoot | undefined;
         if (root) return intlCatalog(root, lang);

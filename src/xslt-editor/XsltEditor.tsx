@@ -253,6 +253,10 @@ const MODULES: ModuleDef[] = [
     { id: 'makbuz',        label: 'e-Makbuz',          inlineKey: 'gib/v2/e-Makbuz-Sablon.xslt' },
     { id: 'intl-invoice',  label: 'EN 16931 Fatura',   inlineKey: 'intl/en16931-invoice.xslt' },
     { id: 'intl-despatch', label: 'Peppol Sevk Bildirimi', inlineKey: 'intl/peppol-despatch-advice.xslt' },
+    { id: 'intl-ru-upd',   label: 'Rusya УПД 5.03',    inlineKey: 'intl/ru-upd-503.xslt' },
+    { id: 'intl-in-einvoice', label: 'Hindistan GST e-Invoice', inlineKey: 'intl/in-gst-einvoice.xslt' },
+    { id: 'intl-in-ewaybill', label: 'Hindistan e-Way Bill', inlineKey: 'intl/in-eway-bill.xslt' },
+    { id: 'intl-cn-invoice', label: 'Çin 数电票',       inlineKey: 'intl/cn-fully-digital.xslt' },
 
     // Sprint 9 — Antrepo profesyonel şablonlar (public/ altından, ?raw inline)
     { id: 'antrepo-fatura', label: 'GİB Resmi e-Fatura', antrepoId: 'antrepo-fatura', isAntrepo: true },

@@ -194,7 +194,7 @@ const IntlDocTypePicker: React.FC<{
                     {docs.map(d => {
                         const kind = d.intlKind ?? 'invoice';
                         const active = d.id === selectedId;
-                        const code = KIND_SPECS[kind].typeCode;
+                        const code = findDocumentProfile(d.intlProfileId ?? '')?.syntax === 'national' ? '' : KIND_SPECS[kind].typeCode;
                         const Icon = kind === 'despatch' ? Truck : FileText;
                         return (
                             <button key={d.id} type="button" data-intl-doc={kind} data-intl-profile={d.intlProfileId} onClick={() => onPick(d)} style={card(active, d.color)}>
@@ -537,7 +537,7 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
                         <>
                             <button type="button" data-xml-option="gib" onClick={() => setXmlChoice('gib')} style={{ ...card(xmlChoice === 'gib', '#0ea5e9'), marginTop: 12 }}>
                                 <div style={{ fontWeight: 700, fontSize: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
-                                    <Landmark size={16} /> {docType.intlProfileId ? t('wizard.europeanSamples') : t('wizard.gibSamples')} ({docType.officialSamples.length})
+                                    <Landmark size={16} /> {!docType.intlProfileId ? t('wizard.gibSamples') : findDocumentProfile(docType.intlProfileId)?.syntax === 'national' ? t('wizard.countrySamples') : t('wizard.europeanSamples')} ({docType.officialSamples.length})
                                 </div>
                                 <div style={{ color: theme.textMuted, fontSize: 12, marginTop: 3 }}>
                                     {docType.officialNote ?? t('wizard.gibNote')}

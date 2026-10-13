@@ -203,4 +203,24 @@ export const COUNTRY_SAMPLES: Record<CountryCode, CountrySample> = {
         buyer: p('Hotel Bellevue', 'Bellevue Hotels AG', 'Rue du Rhône 30', '1204', 'Genève', 'CHE-987.654.321 MWST', ['0183', 'CHE987654321'], ['0183', 'CHE987654321']),
         iban: 'CH9300762011623852957', bic: 'UBSWCHZH80A', prefix: 'RE', carrier: 'Planzer Transport AG', rate: 8.1, scale: 0.95,
     },
+    US: {
+        seller: p('Hudson Office Furniture', 'Hudson Office Furniture Inc.', '350 Fifth Avenue', 'NY 10118', 'New York', 'EIN 12-3456789', ['0060', '081466849'], ['0060', '081466849'], ['Emily Carter', '+1 212 555 0148', 'billing@hudsonoffice.com']),
+        buyer: p('Brooklyn Bridge Hotel', 'Brooklyn Hospitality LLC', '60 Furman Street', 'NY 11201', 'Brooklyn', 'EIN 98-7654321', ['0060', '832749615'], ['0060', '832749615']),
+        iban: '000123456789', bic: '021000021', prefix: 'INV', carrier: 'Empire Freight Lines', rate: 8.875, scale: 1.1,
+    },
+    RU: {
+        seller: p('Офисная мебель', 'ООО «Офисная мебель»', 'ул. Тверская, д. 12', '125009', 'Москва', '7701234567', ['', '7701234567'], ['КПП', '770101001'], ['Иванова Мария Сергеевна', '+7 495 123-45-67', 'buh@ofismebel.ru']),
+        buyer: p('Гостиница «Нева»', 'АО «Гостиница Нева»', 'Невский пр-т, д. 50', '191025', 'Санкт-Петербург', '7801987654', ['', '7801987654'], ['КПП', '780101001']),
+        iban: '40702810400000012345', bic: '044525225', prefix: 'УПД', carrier: 'ООО «ТрансЛогистик»', rate: 22, scale: 95,
+    },
+    IN: {
+        seller: p('Sharma Office Furniture', 'Sharma Office Furniture Pvt Ltd', '14, MG Road', '560001', 'Bengaluru', '29AABCS1234F1Z5', ['', '29AABCS1234F1Z5'], ['', 'U36100KA2015PTC012345'], ['Priya Sharma', '+91 80 4123 4567', 'accounts@sharmafurniture.in']),
+        buyer: p('Hotel Marine Plaza', 'Marine Hospitality Pvt Ltd', '29, Marine Drive', '400020', 'Mumbai', '27AAGCM5678K1Z2', ['', '27AAGCM5678K1Z2']),
+        iban: '50200012345678', bic: 'HDFC0000523', prefix: 'INV', carrier: 'VRL Logistics Ltd', rate: 18, scale: 90,
+    },
+    CN: {
+        seller: p('华美办公家具', '上海华美办公家具有限公司', '上海市浦东新区世纪大道100号', '200120', '上海', '91310115MA1H8XYZ3K', ['', '91310115MA1H8XYZ3K'], undefined, ['王丽', '021-58881234', 'finance@huamei-office.cn']),
+        buyer: p('北京长城酒店', '北京长城酒店管理有限公司', '北京市朝阳区建国门外大街8号', '100022', '北京', '91110105MA01ABCD2X', ['', '91110105MA01ABCD2X']),
+        iban: '31001234567890123456', bic: '中国建设银行上海浦东分行', prefix: '', carrier: '顺丰速运', rate: 13, scale: 7.8,
+    },
 };

@@ -23,12 +23,12 @@ const en: Messages = {
         login: 'Sign in',
         register: 'Sign up',
         badgeNew: 'NEW',
-        news: 'Europe: EN 16931, Peppol BIS 3 and XRechnung profiles added',
+        news: 'USA, Russia, India and China e-documents added; interface in Chinese, Hindi and Russian',
         heroLine: 'design is now',
         heroAccent: 'really easy',
         heroSubLead: 'EN 16931 and Peppol compliant',
         heroSubStrong: 'invoices, credit notes and delivery notes',
-        heroSubRest: 'for EU and EEA countries, the UK and Switzerland. Pick a template, add your logo, stamp and bank details, preview with your XML. Professional layouts in minutes, no XSLT knowledge needed.',
+        heroSubRest: 'for EU and EEA countries, the UK and Switzerland, plus national formats for the USA, Russia (UPD), India (GST e-invoice, e-way bill) and China (fully digital e-invoice). Pick a template, add your logo, stamp and bank details, preview with your XML. Professional layouts in minutes, no XSLT knowledge needed.',
         heroSubEurope: 'Each country’s documents carry their local names, with labels in its language.',
         ctaOpen: 'Create account',
         ctaPricing: 'See pricing',
@@ -97,8 +97,8 @@ const en: Messages = {
                     a: 'Invoice, credit note, corrected invoice, prepayment invoice, partial invoice and delivery note (despatch advice). When you choose a country in the wizard, its documents are listed under their local names with the matching XML profile: EN 16931, Peppol BIS Billing 3.0, XRechnung 3.0 (UBL), CIUS-RO, HR CIUS, CIUS-PT or Peppol Despatch Advice. Documents that share the same XML format use the same template.',
                 },
                 {
-                    q: 'Can I design documents for European countries?',
-                    a: 'Yes. When you pick a country in the wizard, its equivalents of e-invoice, e-archive and despatch advice are listed. Templates, sample XML files and core rule checks are ready for EN 16931, Peppol BIS Billing 3.0, XRechnung 3.0 (UBL) and Peppol Despatch Advice, with labels in the country’s language. The checks are a subset of the official Schematron rules, and documents are not sent to any official portal.',
+                    q: 'Can I design documents for other countries?',
+                    a: 'Yes. When you pick a country in the wizard, its equivalents of e-invoice, e-archive and despatch advice are listed. Templates, sample XML files and core rule checks are ready for EN 16931, Peppol BIS Billing 3.0, XRechnung 3.0 (UBL) and Peppol Despatch Advice, and for national formats: USA (DBNAlliance UBL), Russia (FNS UPD 5.03), India (GST e-invoice, e-way bill) and China (fully digital e-invoice). Labels are shown in the country’s language. The checks are a subset of the official rules, and documents are not sent to any official portal.',
                 },
                 {
                     q: 'Do I need to know XSLT?',
@@ -368,6 +368,8 @@ const en: Messages = {
         defaultXml: 'Default sample XML',
         defaultXmlHint: 'Ready-made sample for {{doc}} ({{file}})',
         europeanSamples: 'European sample documents',
+
+        countrySamples: 'Country sample documents',
         gibSamples: 'Official GİB sample documents',
         gibNote: 'Scenario and type samples from UBL-TR 1.2.1 and the e-Fatura package; try your design with special cases.',
         ownXml: 'Choose my own XML file',
@@ -456,6 +458,8 @@ const en: Messages = {
         invoiceTemplateDesc: 'Seller / buyer, lines, VAT breakdown, payment details; labels in the selected document language',
         despatchTemplate: 'Peppol despatch advice layout',
         despatchTemplateDesc: 'Shipment, handling units (SSCC), lot / expiry and backorder quantities',
+
+        nationalTemplateDesc: 'Layout based on the official print form of the country; labels in the document language (local or English)',
         designRecommended: 'Recommended for this document type',
         designs: {
             classic: { name: 'Classic', desc: 'Card-style seller / buyer, blue accent; every EN 16931 field' },
@@ -527,6 +531,14 @@ const en: Messages = {
         subProfileOk: 'EN 16931 compliant sub-profile: {{profile}}',
         otherProfile: 'This XML uses the {{detected}} profile; the {{profile}} rules you selected were applied.',
         rulesPassed: '{{profile}} core rule checks passed (a subset of the official Schematron)',
+
+        nationalRequired: 'Required field missing: {{field}}',
+
+        nationalFormat: '{{field}} has an invalid format: {{value}}',
+
+        nationalTotal: '{{field}} = {{actual}}, calculated from the lines: {{expected}}',
+
+        nationalRulesPassed: '{{profile}} basic field and amount checks passed (subset of the official schema)',
         info: {
             docNo: 'Document no.',
             date: 'Date',

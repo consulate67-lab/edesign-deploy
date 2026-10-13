@@ -23,12 +23,12 @@ const fr: Messages = {
         login: 'Connexion',
         register: 'S’inscrire',
         badgeNew: 'NOUVEAU',
-        news: 'Europe : profils EN 16931, Peppol BIS 3 et XRechnung ajoutés',
+        news: 'Documents électroniques États-Unis, Russie, Inde et Chine ; interface en chinois, hindi et russe',
         heroLine: 'se conçoit désormais',
         heroAccent: 'en toute simplicité',
         heroSubLead: 'Conformes EN 16931 et Peppol :',
         heroSubStrong: 'factures, avoirs et bons de livraison',
-        heroSubRest: 'pour les pays de l’UE et de l’EEE, le Royaume-Uni et la Suisse. Choisissez un modèle, ajoutez logo, cachet et coordonnées bancaires, prévisualisez avec votre XML. Une mise en page professionnelle en quelques minutes, sans connaître XSLT.',
+        heroSubRest: 'pour les pays de l’UE et de l’EEE, le Royaume-Uni et la Suisse, ainsi que les formats nationaux des États-Unis, de la Russie (UPD), de l’Inde (e-facture GST, e-way bill) et de la Chine (facture entièrement numérique). Choisissez un modèle, ajoutez logo, cachet et coordonnées bancaires, prévisualisez avec votre XML. Une mise en page professionnelle en quelques minutes, sans connaître XSLT.',
         heroSubEurope: 'Chaque pays retrouve ses propres noms de documents, avec des libellés dans sa langue.',
         ctaOpen: 'Créer un compte',
         ctaPricing: 'Voir les tarifs',
@@ -97,8 +97,8 @@ const fr: Messages = {
                     a: 'Facture, avoir, facture rectificative, facture d’acompte, facture partielle et bon de livraison (avis d’expédition). Lorsque vous choisissez un pays dans l’assistant, ses documents s’affichent sous leur nom local avec le profil XML correspondant : EN 16931, Peppol BIS Billing 3.0, XRechnung 3.0 (UBL), CIUS-RO, HR CIUS, CIUS-PT ou Peppol Despatch Advice. Les documents qui partagent le même format XML utilisent le même modèle.',
                 },
                 {
-                    q: 'Puis-je concevoir des documents pour les pays européens ?',
-                    a: 'Oui. Lorsque vous choisissez un pays dans l’assistant, ses équivalents de la facture électronique, de la facture aux consommateurs et de l’avis d’expédition s’affichent. Modèles, XML d’exemple et contrôles de règles de base sont prêts pour EN 16931, Peppol BIS Billing 3.0, XRechnung 3.0 (UBL) et Peppol Despatch Advice, avec des libellés dans la langue du pays. Les contrôles sont un sous-ensemble des règles Schematron officielles et les documents ne sont envoyés à aucun portail officiel.',
+                    q: 'Puis-je concevoir des documents pour d’autres pays ?',
+                    a: 'Oui. Lorsque vous choisissez un pays dans l’assistant, ses équivalents de la facture électronique, de l’e-archive et de l’avis d’expédition sont listés. Modèles, exemples XML et contrôles de base sont prêts pour EN 16931, Peppol BIS Billing 3.0, XRechnung 3.0 (UBL) et Peppol Despatch Advice, ainsi que pour les formats nationaux : États-Unis (DBNAlliance UBL), Russie (FNS UPD 5.03), Inde (e-facture GST, e-way bill) et Chine (facture entièrement numérique). Les libellés sont dans la langue du pays. Les contrôles sont un sous-ensemble des règles officielles et les documents ne sont envoyés à aucun portail officiel.',
                 },
                 {
                     q: 'Dois-je connaître XSLT ?',
@@ -368,6 +368,8 @@ const fr: Messages = {
         defaultXml: 'XML d’exemple par défaut',
         defaultXmlHint: 'Exemple prêt à l’emploi pour {{doc}} ({{file}})',
         europeanSamples: 'Documents d’exemple européens',
+
+        countrySamples: 'Documents d’exemple du pays',
         gibSamples: 'Documents d’exemple officiels de la GİB',
         gibNote: 'Exemples de scénarios et de types issus d’UBL-TR 1.2.1 et du paquet e-Fatura ; testez votre conception avec des cas particuliers.',
         ownXml: 'Choisir mon propre fichier XML',
@@ -456,6 +458,8 @@ const fr: Messages = {
         invoiceTemplateDesc: 'Vendeur / acheteur, lignes, ventilation de la TVA, paiement ; libellés dans la langue de document choisie',
         despatchTemplate: 'Mise en page avis d’expédition Peppol',
         despatchTemplateDesc: 'Expédition, unités de manutention (SSCC), lot / péremption et reliquats',
+
+        nationalTemplateDesc: 'Mise en page selon le modèle officiel du pays ; libellés dans la langue du document (locale ou anglais)',
         designRecommended: 'Recommandé pour ce type de document',
         designs: {
             classic: { name: 'Classique', desc: 'Vendeur / acheteur en cartes, accent bleu ; tous les champs EN 16931' },
@@ -527,6 +531,14 @@ const fr: Messages = {
         subProfileOk: 'Sous-profil conforme EN 16931 : {{profile}}',
         otherProfile: 'Ce XML utilise le profil {{detected}} ; les règles {{profile}} choisies ont été appliquées.',
         rulesPassed: 'Contrôles de base {{profile}} réussis (sous-ensemble du Schematron officiel)',
+
+        nationalRequired: 'Champ obligatoire manquant : {{field}}',
+
+        nationalFormat: 'Format de {{field}} invalide : {{value}}',
+
+        nationalTotal: '{{field}} = {{actual}}, calculé à partir des lignes : {{expected}}',
+
+        nationalRulesPassed: '{{profile}} : contrôles de base des champs et montants réussis (sous-ensemble du schéma officiel)',
         info: {
             docNo: 'N° de document',
             date: 'Date',

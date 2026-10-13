@@ -27,6 +27,7 @@ export const KIND_SPECS: Record<IntlDocKind, { root: IntlRootName; typeCode?: st
 
 /** Fatura profilleri, ülke kaydında birden çoksa bu öncelikle seçilir. */
 const INVOICE_PROFILE_KINDS: [profileId: string, kinds: IntlDocKind[]][] = [
+    ['us-dbna-ubl', ['invoice', 'credit']],
     ['de-xrechnung-ubl', ['invoice', 'credit', 'corrected', 'partial']],
     ['ro-cius', ['invoice', 'credit', 'corrected']],
     ['hr-cius', ['invoice', 'credit', 'corrected']],
@@ -42,10 +43,34 @@ export interface CountryDocument {
     profileId: string;
 }
 
+/**
+ * UBL dışı ulusal biçimler: belge türleri ulusal XML'in kendi işlevleriyle eşlenir.
+ *  - RU УПД 5.03: invoice = СЧФДОП, prepayment = СЧФ (avans), despatch = ДОП.
+ *  - IN: GST e-Invoice (INV / CRN) + e-Way Bill.
+ *  - CN 数电发票: invoice = 蓝字专票, credit = 红字发票.
+ */
+const NATIONAL_DOCUMENTS: Record<CountryCode, CountryDocument[]> = {
+    RU: [
+        { kind: 'invoice', profileId: 'ru-upd-503' },
+        { kind: 'prepayment', profileId: 'ru-upd-503' },
+        { kind: 'despatch', profileId: 'ru-upd-503' },
+    ],
+    IN: [
+        { kind: 'invoice', profileId: 'in-gst-einvoice' },
+        { kind: 'credit', profileId: 'in-gst-einvoice' },
+        { kind: 'despatch', profileId: 'in-eway-bill' },
+    ],
+    CN: [
+        { kind: 'invoice', profileId: 'cn-fully-digital' },
+        { kind: 'credit', profileId: 'cn-fully-digital' },
+    ],
+};
+
 /** Ülkenin hazır şablonla tasarlanabilen belgeleri (fatura türleri + sevk belgesi). */
 export function countryDocuments(country: CountryCode): CountryDocument[] {
     const rules = findCountryRules(country);
     if (!rules || country === 'TR') return [];
+    if (NATIONAL_DOCUMENTS[country]) return NATIONAL_DOCUMENTS[country];
     const invoice = INVOICE_PROFILE_KINDS.find(([id]) => rules.invoice.profiles.includes(id));
     return [
         ...(invoice ? invoice[1].map((kind) => ({ kind, profileId: invoice[0] })) : []),

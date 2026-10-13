@@ -726,7 +726,7 @@ export function docRootOf(xml: string): DocRoot {
     return name && name in CATALOGS ? name : 'Invoice';
 }
 
-const LINE_PREFIX_RE = /^(Invoice\/InvoiceLine|DespatchAdvice\/DespatchLine|ReceiptAdvice\/ReceiptLine|CreditNote\/CreditNoteLine|eBilet\/(?:bilet|biletIptal)|eYolcuListesi\/yolcuListesi\/koltukListesi\/koltuk)\//;
+const LINE_PREFIX_RE = /^(Invoice\/InvoiceLine|DespatchAdvice\/DespatchLine|ReceiptAdvice\/ReceiptLine|CreditNote\/CreditNoteLine|eBilet\/(?:bilet|biletIptal)|eYolcuListesi\/yolcuListesi\/koltukListesi\/koltuk|Файл\/Документ\/ТаблСчФакт\/СведТов|GSTInvoice\/ItemList|EWayBill\/itemList|EInvoice\/EInvoiceData\/IssuItemInformation)\//;
 
 /** Satır (kalem) alanı mı — yol satır elemanıyla (InvoiceLine, bilet, koltuk…) başlıyor. */
 export const isLineField = (f: CatalogField) => LINE_PREFIX_RE.test(f.path);
@@ -737,8 +737,10 @@ export function lineRootXPath(f: CatalogField): string | null {
     return prefix ? fieldXPath({ ...f, path: prefix }) : null;
 }
 
-const STEP_RE = /^(@?[\w.-]+)(?:\[((?:[\w.-]+\/)*@?[\w.-]+)='([^']*)'\])?$/;
-const PRED_RE = /\[(?:[\w.-]+\/)*@?[\w.-]+='([^']*)'\]/;
+const STEP_RE = /^(@?[\w.\u0400-\u04FF-]+)(?:\[((?:[\w.\u0400-\u04FF-]+\/)*@?[\w.\u0400-\u04FF-]+)='([^']*)'\])?$/;
+const PRED_RE = /\[(?:[\w.\u0400-\u04FF-]+\/)*@?[\w.\u0400-\u04FF-]+='([^']*)'\]/;
+/** Ulusal biçimlerin kökleri (namespace'siz, Kiril adlar olabilir). */
+const NATIONAL_ROOT_RE = /^(Файл|GSTInvoice|EWayBill|EInvoice)\//;
 
 /** Yolu adımlara böler; köşeli parantez içindeki `/` ayırıcı sayılmaz. */
 const splitPath = (path: string) => path.split(/\/(?![^[]*\])/);
@@ -785,7 +787,8 @@ function usesName(xsltLocalNames: Set<string>, xsltText: string, step: string): 
     const name = step.replace(/^@/, '');
     if (xsltLocalNames.has(name)) return true;
     if (!/^[a-z]/.test(name)) return false;
-    const lead = step.startsWith('@') ? '@' : '[\\w.-]+:';
+    // e-Way Bill öğeleri namespace'siz ve küçük harfli; XSLT'de öneksiz geçer.
+    const lead = step.startsWith('@') ? '@' : /\bEWayBill\b/.test(xsltText) ? '(?:^|[\\s"\'/(|[])' : '[\\w.-]+:';
     return new RegExp(`(?:${lead}|local-name\\(\\)\\s*=\\s*['"])${name}(?![\\w.-])`).test(xsltText);
 }
 
@@ -793,6 +796,7 @@ function usesName(xsltLocalNames: Set<string>, xsltText: string, step: string): 
 export function xsltLocalNameSet(xslt: string): Set<string> {
     const set = new Set<string>();
     for (const m of xslt.matchAll(/\b([A-Z][A-Za-z0-9]+|unitCode|schemeID|currencyID)\b/g)) set.add(m[1]);
+    for (const m of xslt.matchAll(/[\u0400-\u04FF][\u0400-\u04FF0-9_]*/g)) set.add(m[0]);
     return set;
 }
 
@@ -862,7 +866,15 @@ export function labelForXPath(xpath: string, catalog: CatalogField[], context = 
     const full = steps.join('/');
     // e-Bilet adları küçük harfle başlar; namespace'li eleman XPath 1.0'da önek ya da local-name() ister.
     const lowerCase = /^[a-z]/.test(catalog[0]?.path ?? '');
-    const names = lowerCase
+    const national = NATIONAL_ROOT_RE.test(catalog[0]?.path ?? '');
+    const names = national
+        ? Array.from(full
+            .replace(/\*\[local-name\(\)\s*=\s*['"]([^'"]+)['"]\]/g, '$1')
+            .replace(/\$[\w.-]+/g, '')
+            .replace(/\[[^\]]*\]/g, '')
+            .replace(/@[\w.\u0400-\u04FF-]+/g, '')
+            .matchAll(/(?:[A-Za-z_][\w.-]*:)?([A-Za-z_\u0400-\u04FF][\w.\u0400-\u04FF-]*)(?![\w.\u0400-\u04FF-]|\s*\()/g)).map(m => m[1])
+        : lowerCase
         ? Array.from(full
             .replace(/\*\[local-name\(\)\s*=\s*['"]([\w.-]+)['"]\]/g, 'x:$1')
             .replace(/\$[\w.-]+/g, '')
@@ -871,7 +883,7 @@ export function labelForXPath(xpath: string, catalog: CatalogField[], context = 
         : Array.from(full.replace(/\[[^\]]*\]/g, '').matchAll(/(?:[A-Za-z_][\w.-]*:)?([A-Z][A-Za-z0-9]+)/g)).map(m => m[1]);
     if (!names.length) return null;
     const leaf = names[names.length - 1];
-    const attr = xpath.match(/@([\w.-]+)\s*\)?\s*$/)?.[1] ?? null;
+    const attr = xpath.match(/@([\w.\u0400-\u04FF-]+)\s*\)?\s*$/)?.[1] ?? null;
     let best: CatalogField[] = [];
     let bestScore = 0;
     for (const f of catalog) {
@@ -915,7 +927,7 @@ const ATTR_SUFFIX = { currencyID: 'editor.attr.currency', unitCode: 'editor.attr
 export function bindingLabel(xpath: string, catalog: CatalogField[], context = ''): string | null {
     const direct = labelForXPath(xpath, catalog, context);
     if (direct) return direct.label;
-    const attr = xpath.match(/\/?@([\w.-]+)\s*\)?\s*$/);
+    const attr = xpath.match(/\/?@([\w.\u0400-\u04FF-]+)\s*\)?\s*$/);
     if (!attr) return null;
     const parent = labelForXPath(xpath.slice(0, attr.index), catalog, context);
     const key = ATTR_SUFFIX[attr[1] as keyof typeof ATTR_SUFFIX];
@@ -973,7 +985,7 @@ export const formatted = (expr: string, decimals: number, lang: DocLanguage) =>
 export function isInLineContext(xslt: string, offset: number): boolean {
     const { selects, match } = contextAt(xslt, offset);
     const inner = selects.length ? selects[selects.length - 1] : match;
-    return !!inner && /(InvoiceLine|DespatchLine|ReceiptLine|CreditNoteLine|[:'"](?:bilet|biletIptal|koltuk)\b)/.test(inner);
+    return !!inner && /(InvoiceLine|DespatchLine|ReceiptLine|CreditNoteLine|[:'"](?:bilet|biletIptal|koltuk)\b|СведТов|IssuItemInformation|\bItemList\b|\bitemList\b)/.test(inner);
 }
 
 const escapeText = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');

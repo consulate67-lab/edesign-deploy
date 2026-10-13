@@ -4,7 +4,7 @@ import { findCountryRules, type DocumentFamily } from './documentProfiles';
 type NoteKey = `${string}.${DocumentFamily}`;
 
 /** `countryDocumentRules` notlarının çevirileri; Türkçe asıl metin kayıtta durur. */
-const NOTES: Record<Exclude<UiLanguage, 'tr'>, Record<NoteKey, string>> = {
+const NOTES: Partial<Record<Exclude<UiLanguage, 'tr'>, Record<NoteKey, string>>> = {
     en: {
         'DE.invoice': 'Receiving since 2025; issuing from 2027 for large businesses, from 2028 for all.',
         'DE.archive': 'Cash register system (KassenSichV/TSE) applies; not an XML invoice.',
@@ -44,8 +44,32 @@ const NOTES: Record<Exclude<UiLanguage, 'tr'>, Record<NoteKey, string>> = {
         'HR.archive': 'B2C fiskalizacija (JIR) message; schema not added yet.',
         'SI.invoice': 'B2B in 2028.',
         'GB.invoice': 'B2B mandate for VAT invoices in April 2029; Peppol mandatory in the NHS.',
+        'US.invoice': 'No federal mandate; federal agencies must move to e-invoicing (OMB M-15-19, IPP). The B2B network DBNAlliance (UBL 2.3) is voluntary.',
+        'US.archive': 'Sales tax is levied by the states; retail receipts are not reported.',
+        'US.despatch': 'Advance ship notices commonly use ANSI X12 856 (ASN); not mandatory.',
+        'RU.invoice': 'Voluntary (via an EDI operator); electronic invoices must use FNS format 5.03 (5.01/5.02 invalid since 1.4.2025). VAT 22% since 1.1.2026 (22/122 on advances). Electronic mandatory for traceable goods.',
+        'RU.archive': 'Retail sales are sent to the FNS via online cash registers (54-FZ) and the fiscal data operator; schema not added.',
+        'RU.despatch': 'Electronic consignment note (ETrN) mandatory since 1.9.2026 via GIS EPD; transfer of goods is documented with the UPD (DOP).',
+        'IN.invoice': 'B2B and export invoices of businesses with turnover above ₹5 crore are registered on the IRP (IRN + signed QR); within 30 days at ₹10 crore and above.',
+        'IN.archive': 'B2C invoices need a dynamic QR code; not reported to the IRP.',
+        'IN.despatch': 'E-way bill (EWB-01) mandatory for movements above ₹50,000; can be generated from the e-invoice.',
+        'CN.invoice': 'Fully digitalised e-invoices nationwide since 1.12.2024 (SAT Announcement 2024 No. 11); same legal effect as paper, numbers assigned by the tax authority.',
+        'CN.archive': 'Consumers receive an e-invoice (general invoice); returns use a red-letter invoice.',
+        'CN.despatch': 'No electronic delivery note mandate.',
     },
     de: {
+        'US.invoice': 'Keine bundesweite Pflicht; Bundesbehörden müssen auf E-Rechnung umstellen (OMB M-15-19, IPP). Das B2B-Netz DBNAlliance (UBL 2.3) ist freiwillig.',
+        'US.archive': 'Umsatzsteuer (Sales Tax) auf Ebene der Bundesstaaten; keine Meldung von Kassenbelegen.',
+        'US.despatch': 'Lieferavis üblich als ANSI X12 856 (ASN); keine Pflicht.',
+        'RU.invoice': 'Freiwillig (über EDI-Betreiber); elektronisch nur im FNS-Format 5.03 (5.01/5.02 seit 1.4.2025 ungültig). MwSt. seit 1.1.2026 22 % (Anzahlung 22/122). Für rückverfolgbare Waren elektronisch Pflicht.',
+        'RU.archive': 'Einzelhandel über Online-Kassen (54-FZ) und Fiskaldatenbetreiber an die FNS; Schema nicht hinzugefügt.',
+        'RU.despatch': 'Elektronischer Frachtbrief (ETrN) seit 1.9.2026 Pflicht (GIS EPD); Warenübergabe mit UPD (DOP).',
+        'IN.invoice': 'B2B- und Exportrechnungen ab ₹5 Crore Umsatz werden beim IRP registriert (IRN + signierter QR); ab ₹10 Crore binnen 30 Tagen.',
+        'IN.archive': 'B2C-Rechnungen brauchen einen dynamischen QR-Code; keine IRP-Meldung.',
+        'IN.despatch': 'E-Way Bill (EWB-01) ab ₹50.000 Warenwert Pflicht; aus der E-Rechnung erzeugbar.',
+        'CN.invoice': 'Vollständig digitalisierte E-Rechnung landesweit seit 1.12.2024 (SAT-Bekanntmachung 2024 Nr. 11); Nummer vergibt die Steuerbehörde.',
+        'CN.archive': 'Verbraucher erhalten eine E-Rechnung (allgemeine Rechnung); Rückgaben über Rotrechnung.',
+        'CN.despatch': 'Keine Pflicht zum elektronischen Lieferschein.',
         'DE.invoice': 'Empfang seit 2025; Ausstellung ab 2027 für große Unternehmen, ab 2028 für alle.',
         'DE.archive': 'Kassensystem (KassenSichV/TSE); keine XML-Rechnung.',
         'AT.archive': 'RKSV-Kassenbeleg; einzelne Verkäufe werden nicht übermittelt.',
@@ -86,6 +110,18 @@ const NOTES: Record<Exclude<UiLanguage, 'tr'>, Record<NoteKey, string>> = {
         'GB.invoice': 'B2B-Pflicht für Umsatzsteuerrechnungen ab April 2029; Peppol im NHS Pflicht.',
     },
     fr: {
+        'US.invoice': 'Aucune obligation fédérale ; les agences fédérales doivent passer à la facture électronique (OMB M-15-19, IPP). Le réseau B2B DBNAlliance (UBL 2.3) est facultatif.',
+        'US.archive': 'Taxe sur les ventes au niveau des États ; pas de déclaration des tickets.',
+        'US.despatch': 'Avis d’expédition généralement en ANSI X12 856 (ASN) ; non obligatoire.',
+        'RU.invoice': 'Facultative (via un opérateur EDI) ; en électronique, seul le format FNS 5.03 est valable (5.01/5.02 invalides depuis le 1.4.2025). TVA à 22 % depuis le 1.1.2026 (22/122 sur acomptes). Obligatoire pour les biens traçables.',
+        'RU.archive': 'Ventes au détail transmises à la FNS par caisses en ligne (54-FZ) ; schéma non ajouté.',
+        'RU.despatch': 'Lettre de voiture électronique (ETrN) obligatoire depuis le 1.9.2026 via GIS EPD ; remise des biens par UPD (DOP).',
+        'IN.invoice': 'Factures B2B et export des entreprises au-delà de ₹5 crore enregistrées sur l’IRP (IRN + QR signé) ; sous 30 jours à partir de ₹10 crore.',
+        'IN.archive': 'Factures B2C avec QR code dynamique ; non déclarées à l’IRP.',
+        'IN.despatch': 'E-way bill (EWB-01) obligatoire au-delà de ₹50 000 ; peut être généré depuis la facture électronique.',
+        'CN.invoice': 'Facture électronique entièrement numérisée dans tout le pays depuis le 1.12.2024 (annonce SAT 2024 n° 11) ; numéro attribué par l’administration fiscale.',
+        'CN.archive': 'Les consommateurs reçoivent une facture électronique (ordinaire) ; retours par facture rouge.',
+        'CN.despatch': 'Pas d’obligation de bon de livraison électronique.',
         'DE.invoice': 'Réception depuis 2025 ; émission dès 2027 pour les grandes entreprises, dès 2028 pour toutes.',
         'DE.archive': 'Système de caisse (KassenSichV/TSE) ; pas de facture XML.',
         'AT.archive': 'Ticket de caisse RKSV ; les ventes ne sont pas transmises une à une.',
@@ -126,6 +162,18 @@ const NOTES: Record<Exclude<UiLanguage, 'tr'>, Record<NoteKey, string>> = {
         'GB.invoice': 'Obligation B2B pour les factures avec TVA en avril 2029 ; Peppol obligatoire au NHS.',
     },
     es: {
+        'US.invoice': 'Sin obligación federal; las agencias federales deben pasar a la factura electrónica (OMB M-15-19, IPP). La red B2B DBNAlliance (UBL 2.3) es voluntaria.',
+        'US.archive': 'El impuesto sobre ventas es estatal; no se comunican los tiques.',
+        'US.despatch': 'El aviso de envío suele ser ANSI X12 856 (ASN); no obligatorio.',
+        'RU.invoice': 'Voluntaria (mediante operador EDI); en electrónico solo vale el formato FNS 5.03 (5.01/5.02 inválidos desde el 1.4.2025). IVA del 22 % desde el 1.1.2026 (22/122 en anticipos). Obligatoria para bienes trazables.',
+        'RU.archive': 'Las ventas minoristas se envían a la FNS por cajas en línea (54-FZ); esquema no añadido.',
+        'RU.despatch': 'Carta de porte electrónica (ETrN) obligatoria desde el 1.9.2026 vía GIS EPD; la entrega se documenta con el UPD (DOP).',
+        'IN.invoice': 'Las facturas B2B y de exportación de empresas con más de ₹5 crore se registran en el IRP (IRN + QR firmado); en 30 días desde ₹10 crore.',
+        'IN.archive': 'Las facturas B2C llevan QR dinámico; no se comunican al IRP.',
+        'IN.despatch': 'E-way bill (EWB-01) obligatorio por encima de ₹50.000; se puede generar desde la factura electrónica.',
+        'CN.invoice': 'Factura electrónica totalmente digital en todo el país desde el 1.12.2024 (anuncio SAT 2024 n.º 11); el número lo asigna la administración tributaria.',
+        'CN.archive': 'El consumidor recibe una factura electrónica (ordinaria); las devoluciones con factura roja.',
+        'CN.despatch': 'Sin obligación de albarán electrónico.',
         'DE.invoice': 'Recepción desde 2025; emisión desde 2027 para grandes empresas y desde 2028 para todas.',
         'DE.archive': 'Sistema de caja (KassenSichV/TSE); no es una factura XML.',
         'AT.archive': 'Recibo de caja RKSV; las ventas no se transmiten una a una.',
@@ -165,11 +213,54 @@ const NOTES: Record<Exclude<UiLanguage, 'tr'>, Record<NoteKey, string>> = {
         'SI.invoice': 'B2B en 2028.',
         'GB.invoice': 'Obligación B2B para facturas con IVA en abril de 2029; Peppol obligatorio en el NHS.',
     },
+    zh: {
+        'US.invoice': '无联邦强制要求；联邦机构须改用电子发票（OMB M-15-19、IPP）。B2B 网络 DBNAlliance（UBL 2.3）为自愿。',
+        'US.archive': '销售税由各州征收；零售小票无需申报。',
+        'US.despatch': '发货通知通常采用 ANSI X12 856（ASN）；非强制。',
+        'RU.invoice': '自愿（通过电子文件交换运营商）；电子开具时仅认可 FNS 5.03 格式（5.01/5.02 自 2025.4.1 起失效）。自 2026.1.1 起增值税 22%（预付款 22/122）。可追溯商品须电子开具。',
+        'RU.archive': '零售通过在线收银机（54-FZ）经财政数据运营商报送 FNS；未添加模式。',
+        'RU.despatch': '电子运单（ETrN）自 2026.9.1 起强制，经 GIS EPD 传输；货物交接以 УПД（ДОП）记载。',
+        'IN.invoice': '营业额超过 5 crore 卢比的企业，B2B 与出口发票须在 IRP 登记（IRN + 签名二维码）；10 crore 及以上须在 30 天内登记。',
+        'IN.archive': 'B2C 发票须带动态二维码；不向 IRP 报送。',
+        'IN.despatch': '货值超过 50,000 卢比的运输须开具电子运单（EWB-01）；可由电子发票自动生成。',
+        'CN.invoice': '自 2024.12.1 起全国推行数电发票（国家税务总局公告2024年第11号）；与纸质发票具有同等效力，号码由税务机关赋予。',
+        'CN.archive': '向消费者开具电子发票（普通发票）；退货开具红字发票。',
+        'CN.despatch': '无电子发货单强制要求。',
+    },
+    hi: {
+        'US.invoice': 'कोई संघीय अनिवार्यता नहीं; संघीय एजेंसियों को ई-इनवॉइस अपनाना होगा (OMB M-15-19, IPP)। B2B नेटवर्क DBNAlliance (UBL 2.3) स्वैच्छिक है।',
+        'US.archive': 'बिक्री कर राज्य स्तर पर; खुदरा रसीदों की रिपोर्टिंग नहीं।',
+        'US.despatch': 'शिपमेंट सूचना सामान्यतः ANSI X12 856 (ASN); अनिवार्य नहीं।',
+        'RU.invoice': 'स्वैच्छिक (EDI ऑपरेटर के माध्यम से); इलेक्ट्रॉनिक रूप में केवल FNS 5.03 प्रारूप मान्य (5.01/5.02 1.4.2025 से अमान्य)। 1.1.2026 से VAT 22% (अग्रिम पर 22/122)। ट्रेस योग्य वस्तुओं के लिए इलेक्ट्रॉनिक अनिवार्य।',
+        'RU.archive': 'खुदरा बिक्री ऑनलाइन कैश रजिस्टर (54-FZ) से FNS को भेजी जाती है; स्कीमा नहीं जोड़ा गया।',
+        'RU.despatch': 'इलेक्ट्रॉनिक परिवहन बिल (ETrN) 1.9.2026 से GIS EPD के माध्यम से अनिवार्य; माल हस्तांतरण UPD (DOP) से।',
+        'IN.invoice': '₹5 करोड़ से अधिक टर्नओवर वाले व्यवसायों के B2B और निर्यात बीजक IRP पर पंजीकृत होते हैं (IRN + हस्ताक्षरित QR); ₹10 करोड़ और अधिक पर 30 दिनों के भीतर।',
+        'IN.archive': 'B2C बीजक पर डायनेमिक QR कोड आवश्यक; IRP को रिपोर्ट नहीं।',
+        'IN.despatch': '₹50,000 से अधिक के माल परिवहन पर ई-वे बिल (EWB-01) अनिवार्य; ई-इनवॉइस से स्वतः बन सकता है।',
+        'CN.invoice': '1.12.2024 से पूरे देश में पूर्ण डिजिटल ई-इनवॉइस (SAT घोषणा 2024 सं. 11); कागज़ के समान मान्य, संख्या कर प्राधिकरण देता है।',
+        'CN.archive': 'उपभोक्ताओं को ई-इनवॉइस (सामान्य बीजक); वापसी पर रेड-लेटर बीजक।',
+        'CN.despatch': 'इलेक्ट्रॉनिक डिलीवरी नोट की अनिवार्यता नहीं।',
+    },
+    ru: {
+        'US.invoice': 'Федеральной обязанности нет; федеральные ведомства переходят на электронные счета (OMB M-15-19, IPP). B2B-сеть DBNAlliance (UBL 2.3) добровольна.',
+        'US.archive': 'Налог с продаж взимается штатами; передача чеков не требуется.',
+        'US.despatch': 'Уведомление об отгрузке обычно в формате ANSI X12 856 (ASN); не обязательно.',
+        'RU.invoice': 'Добровольно (через оператора ЭДО); в электронном виде допустим только формат ФНС 5.03 (5.01/5.02 недействительны с 1.4.2025). НДС 22 % с 1.1.2026 (с аванса 22/122). Для прослеживаемых товаров электронный документ обязателен.',
+        'RU.archive': 'Розничные продажи передаются в ФНС через онлайн-кассы (54-ФЗ) и ОФД; схема не добавлена.',
+        'RU.despatch': 'ЭТрН обязательна с 1.9.2026 (ГИС ЭПД); передача товаров оформляется УПД (ДОП).',
+        'IN.invoice': 'Счета B2B и экспортные счета компаний с оборотом свыше ₹5 крор регистрируются на IRP (IRN + подписанный QR); при обороте от ₹10 крор — в течение 30 дней.',
+        'IN.archive': 'В счетах B2C нужен динамический QR-код; на IRP не передаются.',
+        'IN.despatch': 'E-way bill (EWB-01) обязателен при перевозке товаров свыше ₹50 000; может формироваться из электронного счёта.',
+        'CN.invoice': 'Полностью цифровые электронные счета по всей стране с 1.12.2024 (объявление ГНУ 2024 № 11); номер присваивает налоговый орган.',
+        'CN.archive': 'Потребителю выдаётся электронный счёт (обычный); возвраты — «красным» счётом.',
+        'CN.despatch': 'Обязательной электронной накладной нет.',
+    },
 };
 
 /** Ülke + belge ailesi notu arayüz dilinde; çeviri yoksa Türkçe kayıt notu. */
 export const countryNote = (country: string, family: DocumentFamily, lang: UiLanguage): string | undefined => {
     const note = findCountryRules(country)?.[family].note;
     if (!note || lang === 'tr') return note;
-    return NOTES[lang][`${country}.${family}`] ?? note;
+    const key: NoteKey = `${country}.${family}`;
+    return NOTES[lang]?.[key] ?? NOTES.en?.[key] ?? note;
 };

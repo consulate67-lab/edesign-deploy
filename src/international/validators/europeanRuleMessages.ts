@@ -462,12 +462,12 @@ const es: RuleMessages = {
     gtin: 'El GTIN (schemeID 0160) debe tener 8, 12, 13 o 14 dígitos — {values}.',
 };
 
-const CATALOG: Record<UiLanguage, RuleMessages> = { tr, en, de, fr, es };
+const CATALOG: Partial<Record<UiLanguage, RuleMessages>> = { tr, en, de, fr, es };
 
 export type RuleMessage = (key: RuleMessageKey, params?: Record<string, string | number>) => string;
 
 /** Seçilen dil için mesaj üretici; bilinmeyen yer tutucular olduğu gibi kalır. */
 export const ruleMessages = (lang: UiLanguage = 'tr'): RuleMessage => {
-    const catalog = CATALOG[lang] ?? tr;
+    const catalog = CATALOG[lang] ?? en;
     return (key, params) => catalog[key].replace(/\{(\w+)\}/g, (m, name: string) => (params && name in params ? String(params[name]) : m));
 };

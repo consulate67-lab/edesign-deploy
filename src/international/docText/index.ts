@@ -30,9 +30,12 @@ import ga from './ga';
 import ca from './ca';
 import eu from './eu';
 import gl from './gl';
+import zh from './zh';
+import hi from './hi';
+import ru from './ru';
 
 const EXTRA: Record<ExtraDocLanguage, ExtraDocTextPack> = {
-    it, nl, pt, pl, cs, sk, sl, hr, hu, ro, bg, el, da, sv, nb, fi, et, lv, lt, is: isl, mt, ga, ca, eu, gl,
+    it, nl, pt, pl, cs, sk, sl, hr, hu, ro, bg, el, da, sv, nb, fi, et, lv, lt, is: isl, mt, ga, ca, eu, gl, zh, hi, ru,
 };
 
 const PACKS: Record<DocLanguage, DocTextPack> = { tr, en, de, fr, es, ...EXTRA };

@@ -49,6 +49,10 @@ import gibDekontRaw from '../public/ebelge/gib/dekont.xslt?raw';
 import gibSigortaKomisyonRaw from '../public/ebelge/gib/sigorta-komisyon-gider.xslt?raw';
 import intlInvoiceRaw from '../public/ebelge/intl/en16931-invoice.xslt?raw';
 import intlDespatchRaw from '../public/ebelge/intl/peppol-despatch-advice.xslt?raw';
+import ruUpdRaw from '../public/ebelge/intl/ru-upd-503.xslt?raw';
+import inEinvoiceRaw from '../public/ebelge/intl/in-gst-einvoice.xslt?raw';
+import inEwayBillRaw from '../public/ebelge/intl/in-eway-bill.xslt?raw';
+import cnInvoiceRaw from '../public/ebelge/intl/cn-fully-digital.xslt?raw';
 
 export const INLINE_XSLT_CONTENT: Record<string, string> = {
     'gib/general.xslt': gibGeneralRaw,
@@ -81,6 +85,11 @@ export const INLINE_XSLT_CONTENT: Record<string, string> = {
     // Avrupa profilleri (EN 16931 / Peppol / XRechnung); etiket dili lang parametresiyle seçilir.
     'intl/en16931-invoice.xslt': intlInvoiceRaw,
     'intl/peppol-despatch-advice.xslt': intlDespatchRaw,
+    // Ulusal biçimler (ФНС УПД 5.03, GST e-Invoice / e-Way Bill, 数电票)
+    'intl/ru-upd-503.xslt': ruUpdRaw,
+    'intl/in-gst-einvoice.xslt': inEinvoiceRaw,
+    'intl/in-eway-bill.xslt': inEwayBillRaw,
+    'intl/cn-fully-digital.xslt': cnInvoiceRaw,
 };
 
 /**
