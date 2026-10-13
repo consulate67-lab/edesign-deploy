@@ -16,6 +16,7 @@ import { theme } from '../theme';
 import i18n, { useLocaleT } from '../i18n';
 import { Flag } from '../i18n/flags';
 import { useCountry, useUiStore } from '../store/uiStore';
+import { ProDesignStep } from '../pro-designs/ProDesignStep';
 
 export interface WizardResult {
     moduleId: string;
@@ -28,6 +29,7 @@ interface LoadedFile { name: string; size: number; text: string; result: Validat
 
 const MAX_BYTES = 5 * 1024 * 1024;
 const STEP_KEYS = ['type', 'xslt', 'xml'] as const;
+const PRO_FAMILIES: DocFamily[] = ['invoice', 'creditNote', 'despatch', 'receiptAdvice'];
 
 const familyLabel = (family: DocFamily) =>
     (i18n.t('wizard.family', { returnObjects: true }) as Record<string, string>)[family] ?? FAMILY_INFO[family].label;
@@ -391,25 +393,37 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
         }
     };
 
+    const chosenXml = (xmlChoice === 'own' ? ownXml?.text : xmlChoice === 'gib' ? gibXml?.text : sampleXml) ?? null;
+    const ownName = ownXslt?.name.replace(/\.(xslt|xsl)$/i, '') ?? '';
+    // Kendi XSLT'sini yükleyen (Türkiye, UBL) kullanıcıya tasarım ekranından önce profesyonel öneri sunulur.
+    const proEligible = xsltChoice === 'own' && !!docType && !docType.country && PRO_FAMILIES.includes(docType.family);
+    const stepKeys: readonly (typeof STEP_KEYS[number] | 'pro')[] = proEligible ? [...STEP_KEYS, 'pro'] : STEP_KEYS;
+
     const finish = () => {
-        if (!docType || !xsltText) return;
-        const xml = xmlChoice === 'own' ? ownXml?.text : xmlChoice === 'gib' ? gibXml?.text : sampleXml;
-        if (!xml) return;
+        if (!docType || !xsltText || !chosenXml) return;
         onFinish({
             moduleId: xsltChoice === 'own' ? docType.id : selectedDefault?.moduleId ?? docType.id,
             docName: xsltChoice === 'own' && ownXslt
-                ? ownXslt.name.replace(/\.(xslt|xsl)$/i, '')
+                ? ownName
                 : t('wizard.designName', { doc: `${docType.label}${docType.country ? ` ${docType.country}` : ''}` }),
             xslt: xsltText,
-            xml,
+            xml: chosenXml,
         });
     };
 
+    const finishPro = (xslt: string, skinName: string) => {
+        if (!docType || !chosenXml) return;
+        onFinish({ moduleId: docType.id, docName: `${ownName || docType.label} · ${skinName}`, xslt, xml: chosenXml });
+    };
+
+    const xmlReady = xmlChoice === 'own' ? !!ownXml?.result.ok : xmlChoice === 'gib' ? !!gibXml?.result.ok : !!defaultXmlResult?.ok;
     const canNext = step === 1
         ? (xsltChoice === 'own' ? !!ownXslt?.result.ok : !!selectedDefault) && !!sampleXml
-        : step === 2
-            ? (xmlChoice === 'own' ? !!ownXml?.result.ok : xmlChoice === 'gib' ? !!gibXml?.result.ok : !!defaultXmlResult?.ok)
+        : step === 2 || step === 3
+            ? xmlReady
             : false;
+    const onNext = step === 1 ? goToData : step === 2 && proEligible ? () => { setError(null); setStep(3); } : finish;
+    const nextLabel = step === 1 ? t('wizard.nextData') : step === 2 && proEligible ? t('wizard.nextPro') : step === 3 ? t('wizard.pro.keepOwn') : t('wizard.openDesigner');
 
     const sectionTitle = (title: string, sub: string) => (
         <div style={{ marginBottom: 18 }}>
@@ -424,7 +438,7 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
             borderRadius: 24, padding: '28px 28px 22px', boxShadow: theme.shadow, color: theme.text,
         }}>
             <div style={{ display: 'flex', gap: 8, marginBottom: 26 }}>
-                {STEP_KEYS.map((s, i) => (
+                {stepKeys.map((s, i) => (
                     <div key={s} style={{ flex: 1 }}>
                         <div style={{ height: 4, borderRadius: 4, background: i <= step ? theme.gradient : theme.border }} />
                         <div style={{ marginTop: 6, fontSize: 12, fontWeight: 700, color: i === step ? theme.primary : theme.textSubtle }}>
@@ -568,6 +582,10 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
                 </>
             )}
 
+            {step === 3 && docType && xsltText && chosenXml && (
+                <ProDesignStep docType={docType} xslt={xsltText} xml={chosenXml} onUse={finishPro} />
+            )}
+
             {error && <div style={{ marginTop: 14, color: theme.redText, fontSize: 13 }}>{error}</div>}
 
             <div data-wizard-footer style={{
@@ -580,7 +598,7 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
                     <ArrowLeft size={16} /> {t('common.back')}
                 </button>
                 {step > 0 && (
-                    <button type="button" data-wizard-next disabled={!canNext || busy} onClick={step === 1 ? goToData : finish}
+                    <button type="button" data-wizard-next disabled={!canNext || busy} onClick={onNext}
                         style={{
                             padding: '10px 22px', borderRadius: 10, border: 'none', fontWeight: 700, fontFamily: 'inherit',
                             background: canNext && !busy ? theme.gradient : theme.surfaceAlt,
@@ -589,7 +607,7 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
                             display: 'flex', alignItems: 'center', gap: 6,
                         }}>
                         {busy ? <Loader2 size={16} /> : null}
-                        {step === 1 ? t('wizard.nextData') : t('wizard.openDesigner')} <ArrowRight size={16} />
+                        {nextLabel} <ArrowRight size={16} />
                     </button>
                 )}
             </div>

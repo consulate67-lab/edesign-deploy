@@ -422,6 +422,18 @@ const createSupportSchema = async (client) => {
         )
     `);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_assistant_kb_status ON assistant_kb (status)`);
+
+    await client.query(`
+        CREATE TABLE IF NOT EXISTS design_ai_usage (
+            id          SERIAL PRIMARY KEY,
+            user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            doc_type    TEXT NOT NULL DEFAULT '',
+            sector      TEXT NOT NULL DEFAULT '',
+            wishes      TEXT NOT NULL DEFAULT '',
+            created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_design_ai_usage_user ON design_ai_usage (user_id, created_at DESC)`);
     // Asistan arayüz dilinde yanıt verir; önbellek ve öğrenilen kayıtlar dile (ve fiyat para birimine) göre ayrılır.
     await ensureTableColumn(client, 'assistant_log', 'lang', `TEXT NOT NULL DEFAULT 'tr'`);
     await ensureTableColumn(client, 'assistant_log', 'currency', `TEXT NOT NULL DEFAULT 'TRY'`);

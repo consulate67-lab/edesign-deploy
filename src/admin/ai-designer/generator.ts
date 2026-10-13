@@ -6,9 +6,10 @@
 import { karekodSnippet } from '../../xslt-editor/karekod';
 import { FAMILY_INFO, type WizardDocType } from '../../wizard/docTypes';
 import { CATEGORIES, SECTORS } from '../../sector-templates/types';
-import type { DesignParams, StyleId } from './types';
+import type { BaseStyleId, DesignParams, ProStyleId, StyleId } from './types';
 import { QR_DOCS, isSectionOn, sectionsFor } from './questions';
-import { FONTS, STYLES, colorName, labelOf } from './vocab';
+import { FONTS, STYLES, colorName, isProStyle, labelOf } from './vocab';
+import { PRO_BASE, cssPro, type ProPalette } from './proStyles';
 import { esc, escAttr, escComment, isHex, mix, readableAccent, textOn, uniq } from './utils';
 
 export interface GenerateOptions { variant?: number }
@@ -61,7 +62,9 @@ const STOPAJ = `(${TAX('0003')} or ${TAX('0011')})`;
 // ---------------------------------------------------------------------------
 // Düzen ve tema
 // ---------------------------------------------------------------------------
-const ORDERS: Record<StyleId, { h: number[]; t: number[]; p: number[] }> = {
+const baseOf = (s: StyleId): BaseStyleId => (s in PRO_BASE ? PRO_BASE[s as ProStyleId] : s as BaseStyleId);
+
+const ORDERS: Record<BaseStyleId, { h: number[]; t: number[]; p: number[] }> = {
     klasik: { h: [0, 2, 1], t: [2, 1, 0], p: [2, 0, 1] },
     modern: { h: [1, 0, 2], t: [0, 1, 2], p: [0, 1, 2] },
     kurumsal: { h: [0, 1, 2], t: [1, 2, 0], p: [1, 2, 0] },
@@ -72,7 +75,7 @@ const ORDERS: Record<StyleId, { h: number[]; t: number[]; p: number[] }> = {
 function layoutOf(p: DesignParams, variant: number): Layout {
     const v0 = Math.abs(Math.floor(Number(variant) || 0));
     const round = Math.floor(v0 / 3);
-    const o = ORDERS[p.style] ?? ORDERS.modern;
+    const o = ORDERS[baseOf(p.style)] ?? ORDERS.modern;
     return {
         header: o.h[v0 % 3],
         table: o.t[(v0 + round) % o.t.length],
@@ -82,8 +85,8 @@ function layoutOf(p: DesignParams, variant: number): Layout {
     };
 }
 
-const RADIUS: Record<StyleId, number> = { klasik: 0, modern: 10, kurumsal: 3, minimal: 0, kompakt: 4 };
-const PAD: Record<StyleId, number> = { klasik: 24, modern: 26, kurumsal: 26, minimal: 34, kompakt: 16 };
+const RADIUS: Record<BaseStyleId, number> = { klasik: 0, modern: 10, kurumsal: 3, minimal: 0, kompakt: 4 };
+const PAD: Record<BaseStyleId, number> = { klasik: 24, modern: 26, kurumsal: 26, minimal: 34, kompakt: 16 };
 
 function themeOf(p: DesignParams): Theme {
     const A = readableAccent(p.accent);
@@ -110,8 +113,8 @@ function themeOf(p: DesignParams): Theme {
         font: fontStack,
         headFont: p.style === 'klasik' ? "Georgia, 'Times New Roman', serif" : fontStack,
         size,
-        radius: RADIUS[p.style] ?? 6,
-        pad: PAD[p.style] ?? 24,
+        radius: RADIUS[baseOf(p.style)] ?? 6,
+        pad: PAD[baseOf(p.style)] ?? 24,
         cell: p.style === 'kompakt' ? '3px 6px' : p.style === 'minimal' ? '8px 6px' : '6px 8px',
     };
 }
@@ -224,6 +227,9 @@ function cssA4(c: Ctx): string {
         '.sign td.s { width: 42%; text-align: center; vertical-align: bottom; padding-top: 36px; }',
         '.sline { border-top: 1px solid #9ca3af; padding-top: 4px; font-weight: 700; }',
         '.shint { color: #6b7280; font-size: .85em; }',
+        '.stampbox { margin-top: 16px; text-align: right; }',
+        '.stampbox img { max-height: 100px; max-width: 230px; }',
+        '.stampbox .lbl { font-size: .78em; color: #6b7280; letter-spacing: 1px; text-transform: uppercase; }',
         `.foot { margin-top: 18px; padding-top: 10px; border-top: 1px solid ${T.line}; text-align: center; color: #6b7280; font-size: .9em; }`,
         `.thanks { color: ${T.A}; font-weight: 800; font-size: 1.15em; margin-bottom: 6px; font-family: ${T.headFont}; }`,
         `.fbox { text-align: left; background: ${T.tint}; border-radius: ${R}; padding: 7px 10px; margin: 6px 0; color: #374151; }`,
@@ -960,6 +966,10 @@ function signature(c: Ctx): string {
     return `<div class="in"><table class="sign"><tr>${cell(a)}<td><xsl:text> </xsl:text></td>${cell(b)}</tr></table></div>`;
 }
 
+const stampBlock = (c: Ctx) => (c.p.stamp
+    ? `<div class="in"><div class="stampbox"><img data-xslt-obj="obj-kase" alt="Kaşe / İmza" src="${escAttr(c.p.stamp)}"/><div class="lbl">Kaşe / İmza</div></div></div>`
+    : '');
+
 function footer(c: Ctx, statement: string): string {
     const t = c.p.texts;
     const parts = [
@@ -994,7 +1004,7 @@ function ublBody(c: Ctx): string {
         + `<xsl:variable name="sup" select="${d.sup}"/><xsl:variable name="cus" select="${d.cus}"/>`
         + '<xsl:variable name="lmt" select="cac:LegalMonetaryTotal"/><xsl:variable name="cur" select="string(cbc:DocumentCurrencyCode)"/>'
         + SUP_NAME_VAR + gtip
-        + `<div class="page">${head}${parties}${renderBoxes(ublBoxes(c, d))}${linesTable(c, d)}${bottomArea(c, d)}${banks}${signature(c)}`
+        + `<div class="page">${head}${parties}${renderBoxes(ublBoxes(c, d))}${linesTable(c, d)}${bottomArea(c, d)}${banks}${stampBlock(c)}${signature(c)}`
         + footer(c, `Bu belge elektronik ortamda düzenlenmiştir. ETTN: ${v('cbc:UUID')}`)
         + '</div></xsl:for-each>';
 }
@@ -1147,6 +1157,139 @@ function passengerListBody(c: Ctx): string {
 }
 
 // ---------------------------------------------------------------------------
+// Profesyonel şablonlar (yalnızca A4 UBL)
+// ---------------------------------------------------------------------------
+const PRO_LAYOUT: Record<ProStyleId, Layout> = {
+    antet: { header: 0, table: 1, party: 0, totals: 0, topBar: false },
+    serit: { header: 0, table: 0, party: 0, totals: 1, topBar: false },
+    panel: { header: 0, table: 1, party: 0, totals: 0, topBar: false },
+    isvec: { header: 0, table: 1, party: 0, totals: 0, topBar: false },
+    tutar: { header: 0, table: 1, party: 0, totals: 0, topBar: false },
+    kart: { header: 0, table: 0, party: 0, totals: 0, topBar: false },
+};
+
+function proPalette(c: Ctx): ProPalette {
+    const { T, p } = c;
+    const [logoH, logoW] = LOGO_BOX[p.logoSize] ?? LOGO_BOX.orta;
+    const sade = p.colorMode === 'sade';
+    const A = sade ? '#334155' : T.A;
+    return {
+        A,
+        dark: sade ? '#1e293b' : T.dark,
+        deep: sade ? '#1e293b' : mix(T.A, '#0b1220', p.colorMode === 'canli' ? 0.35 : 0.58),
+        tint: T.tint, tint2: T.tint2, line: T.line,
+        font: T.font,
+        size: ({ kucuk: 9.5, normal: 10.5, buyuk: 11.5 }[p.fontScale] ?? 10.5),
+        logoH, logoW,
+    };
+}
+
+const metaCells = (rows: MetaRow[], cls: string) => {
+    const main = rows.filter(r => !r.mono);
+    const mono = rows.filter(r => r.mono);
+    return `<table class="${cls}"><tr>${main.map(r => iff(r.test, `<td><div class="lbl">${esc(r.label)}</div><div class="val">${r.value}</div></td>`)).join('')}</tr></table>`
+        + mono.map(r => iff(r.test, `<div class="ettn-line">${esc(r.label)}: <span class="ettn">${r.value}</span></div>`)).join('');
+};
+
+const metaStack = (rows: MetaRow[]) =>
+    rows.map(r => iff(r.test, `<div class="sm"><div class="lbl">${esc(r.label)}</div><div class="${r.mono ? 'ettn' : 'val'}">${r.value}</div></div>`)).join('');
+
+const SUP_CONTACT = '<xsl:for-each select="$sup/cac:Contact/cbc:Telephone | $sup/cac:Contact/cbc:ElectronicMail | $sup/cbc:WebsiteURI"><xsl:if test="position() &gt; 1"><xsl:text>  ·  </xsl:text></xsl:if><xsl:value-of select="."/></xsl:for-each>';
+const SUP_CITY = `${v('$sup/cac:PostalAddress/cbc:CitySubdivisionName')}<xsl:if test="$sup/cac:PostalAddress/cbc:CityName">${xt(' / ')}${v('$sup/cac:PostalAddress/cbc:CityName')}</xsl:if>`;
+
+function proUblBody(c: Ctx, skin: ProStyleId): string {
+    const { p } = c;
+    const d = ublDoc(c.dt);
+    const meta = ublMeta(c, d);
+    const name = '<xsl:value-of select="$supName"/>';
+    const monogram = '<xsl:value-of select="substring(normalize-space($supName), 1, 1)"/>';
+    const sub = `${v('cbc:ProfileID')}<xsl:if test="${d.typeCode}">${xt(' · ')}${v(d.typeCode)}</xsl:if>`;
+    const img = p.logo ? `<img class="logo" data-xslt-obj="obj-logo" alt="${escAttr(p.companyName || 'Logo')}" src="${escAttr(p.logo)}"/>` : '';
+    const logo = (chip: boolean) => (p.logo ? (chip ? `<span class="chip">${img}</span>` : img) : `<div class="mono">${monogram}</div>`);
+    const extras = (p.profession && c.on('meslek') ? `<div class="prof">${esc(p.profession)}</div>` : '')
+        + (p.texts.slogan ? `<div class="slogan">${esc(p.texts.slogan)}</div>` : '');
+    const qr = c.qr && p.qrPosition !== 'alt' ? karekodSnippet('obj-karekod', true) : '';
+    const qrTd = qr ? `<td class="qr-cell">${qr}</td>` : '';
+    const note = p.texts.headerNote ? `<div class="topnote">${esc(p.texts.headerNote)}</div>` : '';
+    const party = (label: string, sel: string) => `<div class="pbox"><div class="plabel">${esc(label)}</div>${call('taraf', { p: sel })}</div>`;
+    const parties = `<div class="in"><table class="parties"><tr><td class="pcell">${party(d.supLabel, '$sup')}</td>`
+        + `<td class="gap"><xsl:text> </xsl:text></td><td class="pcell">${party(d.cusLabel, '$cus')}</td></tr></table></div>`;
+    const boxes = renderBoxes(ublBoxes(c, d));
+    const banksAlt = p.bankPosition === 'alt' ? `<div class="in" style="margin-top:6px">${banksBlock(c, false)}</div>` : '';
+    const foot = footer(c, `Bu belge elektronik ortamda düzenlenmiştir. ETTN: ${v('cbc:UUID')}`);
+    const tail = `${stampBlock(c)}${signature(c)}${foot}`;
+    let page: string;
+
+    switch (skin) {
+        case 'antet': {
+            const contact = `<div class="lh-contact">${SUP_CITY}<xsl:if test="$sup/cac:Contact/cbc:Telephone or $sup/cac:Contact/cbc:ElectronicMail or $sup/cbc:WebsiteURI">${xt('  ·  ')}${SUP_CONTACT}</xsl:if></div>`;
+            const head = `${note}<div class="lh">${logo(false)}<div class="lh-name">${name}</div>${extras}${contact}</div><div class="lh-rule"><xsl:text> </xsl:text></div>`
+                + `<div class="in"><table class="hdr th-row"><tr><td class="mid"><div class="doc-title">${d.title}</div><div class="doc-sub">${sub}</div></td>`
+                + `<td class="mid">${metaTable(meta)}</td>${qrTd}</tr></table></div>`;
+            page = `<div class="page">${head}${parties}${boxes}${linesTable(c, d)}${bottomArea(c, d)}${banksAlt}${tail}</div>`;
+            break;
+        }
+        case 'serit': {
+            const head = `${note}<div class="band"><table><tr><td class="b-logo">${logo(true)}</td><td><div class="b-name">${name}</div>${extras}</td>`
+                + `<td><div class="b-title">${d.title}</div><div class="b-no">${esc(d.noLabel)}${xt(' ')}${v('cbc:ID')}</div></td></tr></table></div><div class="accent-bar"><xsl:text> </xsl:text></div>`
+                + `<div class="in"><table class="hdr"><tr><td class="mid">${metaCells(meta, 'metas')}</td>${qrTd}</tr></table></div>`;
+            page = `<div class="page">${head}${parties}${boxes}${linesTable(c, d)}${bottomArea(c, d)}${banksAlt}${tail}</div>`;
+            break;
+        }
+        case 'panel': {
+            const banks = banksBlock(c, true);
+            const side = `${logo(true)}<div class="side-name">${name}</div>${extras}`
+                + `<div class="side-title">${d.title}</div><div class="side-acc"><xsl:text> </xsl:text></div>${metaStack(meta)}`
+                + `<div class="side-sec">${party(d.supLabel, '$sup')}</div>`
+                + (banks ? `<div class="side-sec">${banks}</div>` : '')
+                + (qr ? `<div class="side-qr">${qr}</div>` : '');
+            const mainCtx: Ctx = { ...c, qr: false, p: { ...p, banks: [] } };
+            const main = `${note}<div class="in">${party(d.cusLabel, '$cus')}</div>${boxes}${linesTable(c, d)}${bottomArea(mainCtx, d)}${tail}`;
+            page = `<div class="page"><table class="split"><tr><td class="side">${side}</td><td class="main">${main}</td></tr></table></div>`;
+            break;
+        }
+        case 'isvec': {
+            const head = `${note}<div class="in"><table class="sw-top"><tr><td>${logo(false)}</td><td class="sw-co"><b>${name}</b>${extras}<div>${SUP_CITY}</div></td></tr></table>`
+                + `<table class="hdr"><tr><td><div class="doc-title">${d.title}<span class="dot">.</span></div><div class="doc-sub">${sub}</div></td>${qrTd}</tr></table>`
+                + `${metaCells(meta, 'grid')}</div>`;
+            page = `<div class="page">${head}${parties}${boxes}${linesTable(c, d)}${bottomArea(c, d)}${banksAlt}${tail}</div>`;
+            break;
+        }
+        case 'tutar': {
+            const totals = ublTotals(c, d);
+            const firstBank = p.banks.find(b => b.iban);
+            const brandRow = `<table class="brand"><tr><td class="b-logo">${logo(false)}</td><td><div class="b-name">${name}</div>${extras}</td></tr></table>`;
+            const head = `${note}<div class="in"><table class="hdr"><tr><td class="mid">${brandRow}</td><td class="mid tr"><div class="doc-title">${d.title}</div><div class="doc-sub">${sub}</div></td></tr></table>`;
+            const due = '(cac:PaymentMeans/cbc:PaymentDueDate | cac:PaymentTerms/cbc:PaymentDueDate)[1]';
+            const hero = totals
+                ? `<div class="hero-wrap"><table class="hero"><tr><td><div class="lbl">${esc(totals.grandLabel)}</div><div class="amt">${totals.grandValue}</div>`
+                + (totals.words ? `<div class="hwords">${call('yaziyla', { n: '$lmt/cbc:PayableAmount', c: '$lmt/cbc:PayableAmount/@currencyID' })}</div>` : '') + '</td>'
+                + `<td><xsl:choose><xsl:when test="${due}"><div class="lbl">Son Ödeme</div><div class="val">${date(due)}</div></xsl:when><xsl:otherwise><div class="lbl">Tarih</div><div class="val">${date('cbc:IssueDate')}</div></xsl:otherwise></xsl:choose>`
+                + `<div class="lbl" style="margin-top:10px">${esc(d.noLabel)}</div><div class="val">${v('cbc:ID')}</div></td>`
+                + (firstBank ? `<td><div class="lbl">IBAN</div><div class="hero-iban">${esc(firstBank.iban)}</div><div class="desc">${esc(firstBank.bank)}${firstBank.currency ? ` · ${esc(firstBank.currency)}` : ''}</div></td>` : '')
+                + `${qrTd}</tr></table></div>`
+                : '';
+            const metaRow = totals ? metaCells(meta, 'metas') : `<table class="hdr"><tr><td>${metaCells(meta, 'metas')}</td>${qrTd}</tr></table>`;
+            page = `<div class="page">${head}${hero}${metaRow}</div>${parties}${boxes}${linesTable(c, d)}${bottomArea(c, d)}${banksAlt}${tail}</div>`;
+            break;
+        }
+        case 'kart': {
+            const pills = `<xsl:if test="cbc:ProfileID"><span class="pill">${v('cbc:ProfileID')}</span></xsl:if><xsl:if test="${d.typeCode}"><span class="pill">${v(d.typeCode)}</span></xsl:if>`;
+            const brandRow = `<table class="brand"><tr><td class="b-logo">${logo(false)}</td><td><div class="b-name">${name}</div>${extras}</td></tr></table>`;
+            const head = `<div class="grad"><xsl:text> </xsl:text></div>${note}<div class="in"><div class="hcard"><table class="hdr"><tr><td class="mid">${brandRow}</td>`
+                + `<td class="mid tr"><div class="doc-title">${d.title}</div>${pills}</td>${qrTd}</tr></table><div class="hsep"><xsl:text> </xsl:text></div>${metaCells(meta, 'metas')}</div></div>`;
+            page = `<div class="page">${head}${parties}${boxes}<div class="cw">${linesTable(c, d)}</div><div class="cw">${bottomArea(c, d)}</div>${banksAlt}${tail}</div>`;
+            break;
+        }
+    }
+    const gtip = c.on('ihracatBilgi') ? '<xsl:variable name="hasGtip" select="boolean(cac:InvoiceLine/cac:Delivery/cac:Shipment/cac:GoodsItem/cbc:RequiredCustomsID)"/>' : '';
+    return `<xsl:for-each select="/n1:${d.root}">`
+        + `<xsl:variable name="sup" select="${d.sup}"/><xsl:variable name="cus" select="${d.cus}"/>`
+        + '<xsl:variable name="lmt" select="cac:LegalMonetaryTotal"/><xsl:variable name="cur" select="string(cbc:DocumentCurrencyCode)"/>'
+        + SUP_NAME_VAR + gtip + page + '</xsl:for-each>';
+}
+
+// ---------------------------------------------------------------------------
 // Ana giriş
 // ---------------------------------------------------------------------------
 const UBL_NS_DECL = (ns: string) =>
@@ -1179,11 +1322,14 @@ function normalize(params: DesignParams, dt: WizardDocType): DesignParams {
 export function generateDesign(params: DesignParams, docType: WizardDocType, opts: GenerateOptions = {}): GeneratedDesign {
     const p = normalize(params, docType);
     const variant = opts.variant ?? p.variant ?? 0;
-    const L = layoutOf(p, variant);
-    const T = themeOf(p);
     const fam = docType.family;
     const ubl = fam === 'invoice' || fam === 'creditNote' || fam === 'despatch' || fam === 'receiptAdvice';
-    const c: Ctx = { p, dt: docType, L, T, on: id => isSectionOn(p, id), qr: ubl && QR_DOCS.includes(docType.id) };
+    const fis = fam === 'invoice' && p.paper === 'fis80';
+    const pro = isProStyle(p.style) && ubl && !fis ? p.style as ProStyleId : null;
+    const pb: DesignParams = isProStyle(p.style) && !pro ? { ...p, style: baseOf(p.style) } : p;
+    const L = pro ? PRO_LAYOUT[pro] : layoutOf(pb, variant);
+    const T = themeOf({ ...pb, style: baseOf(pb.style) });
+    const c: Ctx = { p: pb, dt: docType, L, T, on: id => isSectionOn(p, id), qr: ubl && QR_DOCS.includes(docType.id) };
     const styleLabel = labelOf(STYLES, p.style);
     const comment = `Tasarım Yapay Zekası ile üretildi: ${docType.label}, ${styleLabel} stil, vurgu ${p.accent}, varyasyon ${variant}.`;
     let xslt: string;
@@ -1194,12 +1340,11 @@ export function generateDesign(params: DesignParams, docType: WizardDocType, opt
             body: fam === 'ebiletReport' ? ebiletReportBody(c) : passengerListBody(c),
         });
     } else {
-        const fis = fam === 'invoice' && p.paper === 'fis80';
         xslt = stylesheet({
             comment, nsDecl: UBL_NS_DECL(FAMILY_INFO[fam].ns), exclude: 'n1 cac cbc', templates: `${BASE_TEMPLATES}\n${UBL_TEMPLATES}`,
-            css: fis ? cssReceipt(c) : cssA4(c),
+            css: pro ? cssPro(pro, proPalette(c)) : fis ? cssReceipt(c) : cssA4(c),
             title: `${esc(docType.label)} <xsl:value-of select="/*/cbc:ID"/>`,
-            body: fis ? receiptBody(c) : ublBody(c),
+            body: pro ? proUblBody(c, pro) : fis ? receiptBody(c) : ublBody(c),
         });
     }
     return { xslt, ...describe(c, variant) };

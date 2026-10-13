@@ -8,7 +8,16 @@ export const STYLES: Labeled<StyleId>[] = [
     { id: 'kurumsal', label: 'Kurumsal', help: 'Yan şerit, koyu tablo başlığı, düzenli bilgi kutuları' },
     { id: 'minimal', label: 'Minimal', help: 'Bol beyaz alan, ince çizgiler, renk yalnızca vurguda' },
     { id: 'kompakt', label: 'Kompakt', help: 'Küçük yazı, sık satırlar; çok kalemli belgeler tek sayfaya sığar' },
+    { id: 'antet', label: 'Zarif Antetli', help: 'Pro · Ortalanmış antet, tırnaklı başlıklar, ince çift çizgiler; avukat, mimar, danışman' },
+    { id: 'serit', label: 'Kurumsal Şerit', help: 'Pro · Koyu tam genişlik başlık şeridi, bilgi kartları, güçlü toplam bandı' },
+    { id: 'panel', label: 'Yan Panel', help: 'Pro · Solda koyu bilgi paneli (satıcı, banka, karekod), sağda kalemler' },
+    { id: 'isvec', label: 'İsviçre Minimal', help: 'Pro · Büyük ince başlık, ızgara bilgi satırı, yalnızca çizgiler' },
+    { id: 'tutar', label: 'Tutar Önde', help: 'Pro · Ödenecek tutar, vade ve IBAN üstte büyük kartta; tahsilat odaklı' },
+    { id: 'kart', label: 'Modern Kart', help: 'Pro · Yumuşak zemin üzerinde yuvarlak kartlar, degrade şerit, rozetler' },
 ];
+
+export const PRO_STYLE_IDS: StyleId[] = ['antet', 'serit', 'panel', 'isvec', 'tutar', 'kart'];
+export const isProStyle = (s: StyleId): boolean => PRO_STYLE_IDS.includes(s);
 
 export const FONTS: (Labeled<FontId> & { stack: string })[] = [
     { id: 'segoe', label: 'Segoe UI', stack: "'Segoe UI', Tahoma, Arial, sans-serif" },

@@ -1,5 +1,5 @@
 /**
- * Doğrulama matrisi: her belge tipi × 5 stil × parametre kombinasyonları × varyasyonlar.
+ * Doğrulama matrisi: her belge tipi × tüm stiller × parametre kombinasyonları × varyasyonlar.
  * Tarayıcıda çalışır (XSLTProcessor gerekir):
  *   const m = await import('/edesign-deploy/src/admin/ai-designer/verify.ts'); await m.runMatrix();
  */
@@ -9,8 +9,9 @@ import { generateDesign } from './generator';
 import { customizeSampleXml, isTransformError, renderHtml } from './preview';
 import { RECEIPT_PAPER_DOCS, defaultParams, sectionsFor } from './questions';
 import type { DesignParams, StyleId } from './types';
+import { STYLES as STYLE_DEFS } from './vocab';
 
-const STYLES: StyleId[] = ['klasik', 'modern', 'kurumsal', 'minimal', 'kompakt'];
+const STYLES: StyleId[] = STYLE_DEFS.map(s => s.id);
 const LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
 const TRICKY = 'Ağ & Yol <Test> "çift" \'tek\' {Süslü} ]]> -- son';
 

@@ -3,7 +3,10 @@
  * cevaplar DesignParams'a çevrilir; üretici yalnızca DesignParams ile çalışır.
  */
 
-export type StyleId = 'klasik' | 'modern' | 'kurumsal' | 'minimal' | 'kompakt';
+export type BaseStyleId = 'klasik' | 'modern' | 'kurumsal' | 'minimal' | 'kompakt';
+/** Profesyonel şablonlar: kendi sayfa kompozisyonu ve CSS'i olan A4 UBL düzenleri. */
+export type ProStyleId = 'antet' | 'serit' | 'panel' | 'isvec' | 'tutar' | 'kart';
+export type StyleId = BaseStyleId | ProStyleId;
 export type FontId = 'segoe' | 'arial' | 'trebuchet' | 'georgia' | 'tahoma' | 'calibri';
 export type FontScale = 'kucuk' | 'normal' | 'buyuk';
 export type ColorMode = 'canli' | 'dengeli' | 'sade';
@@ -30,6 +33,8 @@ export interface DesignParams {
     companyName: string;
     /** data:image/...;base64 */
     logo: string | null;
+    /** İmza / kaşe görseli (data:image/...); profesyonel şablonlarda imza alanına konur. */
+    stamp?: string | null;
     /** e-SMM: meslek / unvan satırı. */
     profession: string;
     style: StyleId;

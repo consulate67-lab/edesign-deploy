@@ -10,6 +10,7 @@ import { createRequireAdmin, registerAdminAuthRoutes } from './admin-auth.js';
 import { registerAdminRoutes } from './admin.js';
 import { EMAIL_PATTERN, needsEmailVerification, needsLoginCode, pickLang, registerEmailVerifyRoutes, sendVerificationCode } from './email-verify.js';
 import { registerAssistantRoutes } from './assistant.js';
+import { registerDesignAiRoutes } from './design-ai.js';
 import { registerGalleryRoutes } from './gallery.js';
 import { registerPaytrRoutes } from './paytr.js';
 import { attachRealtime, touchLastSeen } from './realtime.js';
@@ -130,6 +131,7 @@ initDb().then(async _db => {
     registerGalleryRoutes(app, { db, requireAdmin });
     registerSupportRoutes(app, { db, authenticateToken });
     registerAssistantRoutes(app, { db, requireAdmin, packages: PACKAGE_PRICES });
+    registerDesignAiRoutes(app, { db, authenticateToken });
     registerPaytrRoutes(app, {
         db,
         authenticateToken,
