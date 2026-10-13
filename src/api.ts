@@ -391,7 +391,7 @@ export const api = {
         }
         const { applyLicenseLock, hasLicenseLock, isValidLicenseId, normalizeLicenseId, withIssuerTaxId } = await import('../shared/license-lock.js');
         const taxId = normalizeLicenseId(payload.license_tax_id);
-        if (!isValidLicenseId(taxId)) throw new Error('Tasarımın kullanılacağı geçerli bir VKN (10 hane), TCKN (11 hane) ya da ülke önekli KDV numarası (ör. IE1234567T) girin.');
+        if (!isValidLicenseId(taxId)) throw new Error('Tasarımın kullanılacağı geçerli bir VKN (10 hane), TCKN (11 hane), ülke önekli KDV numarası (ör. IE1234567T) ya da ulusal vergi numarası (ör. US123456789, RU7701234567, GSTIN, USCC, CNPJ) girin.');
         if (hasLicenseLock(payload.xslt_content)) throw new Error('Bu dosya başka bir lisansa kilitli; tekrar onaylanamaz.');
         const locked = applyLicenseLock(payload.xslt_content, taxId);
         const baseXml = payload.xml_content ?? existing?.xml_content ?? null;

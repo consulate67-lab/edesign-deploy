@@ -61,15 +61,62 @@ export const isVatId = (value) => {
     return !!m && VAT_PREFIXES.has(m[1]) && /\d/.test(m[2]);
 };
 
-/** Lisans kimliği: KDV numarası boşluksuz büyük harf, VKN/TCKN yalnız rakam. */
-export const normalizeLicenseId = (value) => (isVatId(value) ? compactVat(value) : normalizeTaxId(value));
+// Ulusal vergi numaraları, ülke önekiyle: ABD EIN, Rusya ИНН, Hindistan GSTIN, Çin birleşik sosyal kredi kodu,
+// Brezilya CNPJ / CPF. GSTIN, kredi kodu ve CNPJ öneksiz de yazılabilir; ИНН, EIN ve CPF önek ister
+// (10 haneli ИНН VKN ile, 11 haneli CPF TCKN ile karışır).
+const GSTIN_RE = /^\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/;
+const USCC_RE = /^[0-9A-Z]{2}\d{6}[0-9A-Z]{10}$/;
+
+/** CNPJ (14 hane) ve CPF (11 hane) sağlama haneleri, mod 11. */
+const isValidBrId = (v) => {
+    if (!/^(?:\d{11}|\d{14})$/.test(v) || /^(\d)\1+$/.test(v)) return false;
+    const weight = v.length === 14 ? (k) => 2 + (k % 8) : (k) => k + 2;
+    const dv = (s) => {
+        let sum = 0;
+        for (let i = s.length - 1, k = 0; i >= 0; i--, k++) sum += Number(s[i]) * weight(k);
+        const r = sum % 11;
+        return r < 2 ? 0 : 11 - r;
+    };
+    const base = v.slice(0, -2);
+    const d1 = dv(base);
+    return v === `${base}${d1}${dv(`${base}${d1}`)}`;
+};
+
+const NATIONAL_IDS = {
+    US: { kind: 'EIN', re: /^US\d{9}$/ },
+    RU: { kind: 'INN', re: /^RU(?:\d{10}|\d{12})$/ },
+    IN: { kind: 'GSTIN', re: new RegExp(`^IN${GSTIN_RE.source.slice(1)}`) },
+    CN: { kind: 'USCC', re: new RegExp(`^CN${USCC_RE.source.slice(1)}`) },
+    BR: { kind: 'CNPJ', re: { test: (v) => /^BR\d+$/.test(v) && isValidBrId(v.slice(2)) } },
+};
+const compactNational = (value) => {
+    const v = compactVat(value);
+    if (GSTIN_RE.test(v)) return `IN${v}`;
+    if (USCC_RE.test(v)) return `CN${v}`;
+    return /^\d{14}$/.test(v) && isValidBrId(v) ? `BR${v}` : v;
+};
+const nationalIdCountry = (value) => {
+    const v = compactNational(value);
+    return Object.keys(NATIONAL_IDS).find((c) => NATIONAL_IDS[c].re.test(v)) ?? null;
+};
+
+/** Lisans kimliği: KDV ve ulusal numaralar boşluksuz büyük harf, VKN/TCKN yalnız rakam. */
+export const normalizeLicenseId = (value) => (
+    isVatId(value) ? compactVat(value) : nationalIdCountry(value) ? compactNational(value) : normalizeTaxId(value)
+);
 
 export const isValidLicenseId = (value) => {
     const v = normalizeLicenseId(value);
-    return isVatId(v) || isValidTaxId(v);
+    return isVatId(v) || !!nationalIdCountry(v) || isValidTaxId(v);
 };
 
-export const licenseIdKind = (id) => (isVatId(id) ? 'VAT' : String(id ?? '').length === 11 ? 'TCKN' : 'VKN');
+export const licenseIdKind = (id) => {
+    if (isVatId(id)) return 'VAT';
+    const national = nationalIdCountry(id);
+    if (national === 'BR') return compactNational(id).length === 13 ? 'CPF' : 'CNPJ';
+    if (national) return NATIONAL_IDS[national].kind;
+    return String(id ?? '').length === 11 ? 'TCKN' : 'VKN';
+};
 
 // Belgeyi düzenleyenin kimliği, kök elemana göre: fatura / dekont / müstahsil vb.
 // satıcı, irsaliye gönderen, irsaliye yanıtı alıcı, uygulama yanıtı gönderen,
@@ -96,6 +143,27 @@ const VAT_ISSUER_XPATH = `(${[
     `${DESPATCH_SELLER}[not(${ln('PartyTaxScheme')}/${ln('CompanyID')})]/${ln('EndpointID')}`,
 ].join(' | ')})[1]`;
 const UPPER = "translate(normalize-space(%), 'abcdefghijklmnopqrstuvwxyz ./-', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')";
+const DIGITS = (x) => `translate(${x},translate(${x},'0123456789',''),'')`;
+
+// Ulusal formatlarda satıcının numarası; önekle birleştirilip lisanstakiyle karşılaştırılır.
+const RU_SELLER_INN = `(/${ln('Файл')}/${ln('Документ')}/${ln('СвСчФакт')}/${ln('СвПрод')}/${ln('ИдСв')}/*/@*[local-name()='ИННЮЛ' or local-name()='ИННФЛ'])[1]`;
+const IN_SELLER_GSTIN = `(/${ln('GSTInvoice')}/${ln('SellerDtls')}/${ln('Gstin')} | /${ln('EWayBill')}/${ln('fromGstin')})[1]`;
+const CN_SELLER_ID = `(/${ln('EInvoice')}/${ln('EInvoiceData')}/${ln('SellerInformation')}/${ln('SellerIdNum')})[1]`;
+const BR_EMIT = `${ln('emit')}/*[local-name()='CNPJ' or local-name()='CPF']`;
+const BR_SELLER_ID = `(${[
+    `/${ln('nfeProc')}/${ln('NFe')}/${ln('infNFe')}/${BR_EMIT}`,
+    `/${ln('NFe')}/${ln('infNFe')}/${BR_EMIT}`,
+    `/${ln('cteProc')}/${ln('CTe')}/${ln('infCte')}/${BR_EMIT}`,
+    `/${ln('CTe')}/${ln('infCte')}/${BR_EMIT}`,
+    `/${ln('NFSe')}/${ln('infNFSe')}/${BR_EMIT}`,
+].join(' | ')})[1]`;
+const NATIONAL_ISSUER = {
+    US: `concat('US',${DIGITS(`string(${VAT_ISSUER_XPATH})`)})`,
+    RU: `concat('RU',${DIGITS(`string(${RU_SELLER_INN})`)})`,
+    IN: `concat('IN',${UPPER.replace('%', IN_SELLER_GSTIN)})`,
+    CN: `concat('CN',${UPPER.replace('%', CN_SELLER_ID)})`,
+    BR: `concat('BR',${DIGITS(`string(${BR_SELLER_ID})`)})`,
+};
 
 const ISSUER_ROLE = {
     Invoice: 'AccountingSupplierParty',
@@ -112,6 +180,8 @@ const ISSUER_ROLE = {
 export function withIssuerTaxId(xml, taxId) {
     if (typeof xml !== 'string' || !xml) return xml;
     if (isVatId(taxId)) return withIssuerVatId(xml, compactVat(taxId));
+    const national = nationalIdCountry(taxId);
+    if (national) return withIssuerNationalId(xml, national, compactNational(taxId));
     const id = normalizeTaxId(taxId);
     const scheme = id.length === 11 ? 'TCKN' : 'VKN';
     const root = xml.match(/<(?![?!])(?:[\w.-]+:)?([\w.-]+)/)?.[1];
@@ -127,6 +197,23 @@ export function withIssuerTaxId(xml, taxId) {
         /(<(?:[\w.-]+:)?gonderen[\s>][\s\S]*?<((?:[\w.-]+:)?(?:vkn|tckn))>)[^<]*(<\/\2>)/,
         (_all, open, _tag, close) => `${open}${id}${close}`,
     );
+}
+
+function withIssuerNationalId(xml, country, id) {
+    if (country === 'US') return withIssuerVatId(xml, id);
+    const value = id.slice(2);
+    const put = (_all, open, close) => `${open}${value}${close}`;
+    const inBlock = (tag, re) => xml.replace(new RegExp(`<${tag}[\\s>][\\s\\S]*?</${tag}>`), (part) => part.replace(re, put));
+    if (country === 'RU') return inBlock('СвПрод', /(ИНН(?:ЮЛ|ФЛ)=")[^"]*(")/);
+    if (country === 'CN') return inBlock('SellerInformation', /(<SellerIdNum>)[^<]*(<\/SellerIdNum>)/);
+    if (country === 'BR') {
+        const tag = value.length === 14 ? 'CNPJ' : 'CPF';
+        const swap = (part) => part.replace(/<(CNPJ|CPF)>[^<]*<\/\1>/, `<${tag}>${value}</${tag}>`);
+        return xml.replace(/<emit>[\s\S]*?<\/emit>/, swap).replace(/<prest>[\s\S]*?<\/prest>/, swap);
+    }
+    return /<EWayBill[\s>]/.test(xml)
+        ? xml.replace(/(<fromGstin>)[^<]*(<\/fromGstin>)/, put)
+        : inBlock('SellerDtls', /(<Gstin>)[^<]*(<\/Gstin>)/);
 }
 
 function withIssuerVatId(xml, id) {
@@ -281,8 +368,9 @@ const spread = (length) => {
  */
 export function applyLicenseLock(xslt, taxId, { sealUrls = [] } = {}) {
     const id = normalizeLicenseId(taxId);
-    if (!isValidLicenseId(id)) throw new Error('Geçersiz VKN/TCKN ya da KDV numarası.');
+    if (!isValidLicenseId(id)) throw new Error('Geçersiz VKN/TCKN, KDV ya da ulusal vergi numarası.');
     const vat = isVatId(id);
+    const national = nationalIdCountry(id);
     if (hasLicenseLock(xslt)) throw new Error('Bu dosya zaten lisans kilitli.');
     for (const u of sealUrls) {
         if (!/^https?:\/\/[^\s'"()\\]+$/.test(u) || u.split(SEAL_TAX_ID).length !== 2) {
@@ -314,7 +402,9 @@ export function applyLicenseLock(xslt, taxId, { sealUrls = [] } = {}) {
     decls.push(`<${p}:variable name="${tableVar}" select="'${TABLE}'"/>`);
     decls.push(vat
         ? `<${p}:variable name="${idVar}" select="${UPPER.replace('%', VAT_ISSUER_XPATH)}"/>`
-        : `<${p}:variable name="${idVar}" select="normalize-space(${ISSUER_XPATH})"/>`);
+        : national
+            ? `<${p}:variable name="${idVar}" select="${NATIONAL_ISSUER[national]}"/>`
+            : `<${p}:variable name="${idVar}" select="normalize-space(${ISSUER_XPATH})"/>`);
     const idPart = sampleTerms(tableVar, idVar, id, Array.from({ length: Math.max(11, id.length) }, (_, i) => i + 1));
     terms.push(...idPart.terms);
     sum += idPart.sum;

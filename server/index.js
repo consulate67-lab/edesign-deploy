@@ -694,7 +694,7 @@ app.post('/api/designs/export', authenticateToken, async (req, res) => {
         const taxId = normalizeLicenseId(license_tax_id);
         if (!isValidLicenseId(taxId)) {
             await client.query('ROLLBACK');
-            return res.status(400).json({ error: 'Tasarimin kullanilacagi gecerli bir VKN (10 hane), TCKN (11 hane) ya da ulke onekli KDV numarasi (or. IE1234567T) girin.' });
+            return res.status(400).json({ error: 'Tasarimin kullanilacagi gecerli bir VKN (10 hane), TCKN (11 hane), ulke onekli KDV numarasi (or. IE1234567T) ya da ulusal vergi numarasi (or. US123456789, RU7701234567, GSTIN, USCC, CNPJ) girin.' });
         }
         if (hasLicenseLock(xslt_content)) {
             await client.query('ROLLBACK');
