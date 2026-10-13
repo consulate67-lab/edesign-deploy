@@ -48,7 +48,10 @@ const isStandard = (s: string) => {
 /** Etiket değil, firmaya özgü metin mi: cümle, iletişim / sicil bilgisi ya da en az beş kelime. */
 const isCustomText = (t: string) => {
     if (t.length < 8 || !/[a-zçğıöşü]{3}/i.test(t) || isStandard(t) || /:\s*$/.test(t)) return false;
-    if (/@|www\.|https?:|\d{5,}|mersis|sicil|kep\b/i.test(t)) return true;
+    const f = fold(t);
+    if (/kdv|tevkifat|matrah|hesaplanan|vergi|iskonto|toplam|tutar/.test(f) && !/[.!?]$/.test(t)) return false;
+    if (/@|www\.|https?:|\d{5,}/.test(t)) return true;
+    if (/mersis|sicil|kep\b/.test(f)) return /\d{4,}/.test(t);
     const words = t.split(/\s+/).length;
     return words >= 5 || (/[.!?]$/.test(t) && words >= 3);
 };

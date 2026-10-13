@@ -1,19 +1,18 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Check, Image as ImageIcon, Landmark, Loader2, Maximize2, Sparkles, Type, X } from 'lucide-react';
 import type { WizardDocType } from '../wizard/docTypes';
-import { generateDesign } from '../admin/ai-designer/generator';
-import { dominantColor, sectionsFor } from '../admin/ai-designer/questions';
-import type { ProStyleId } from '../admin/ai-designer/types';
 import { transformXmlWithXslt } from '../xsltTransformer';
-import { SECTORS } from '../sector-templates/types';
+import { SECTORS, type SectorTemplate } from '../sector-templates/types';
 import { theme } from '../theme';
 import { useLocaleT } from '../i18n';
 import { analyzeXslt, type ImageRole } from './analyzeXslt';
-import { MOODS, fetchQuota, paramsFor, requestBrief, type BriefResult, type Mood, type Quota } from './suggest';
+import { MOODS, loadTemplate, personalizeTemplate, rankTemplates, sectorLabel, type Mood } from './library';
+import { fetchQuota, requestPicks, type PickResult, type Quota } from './suggest';
 
 const PAGE_W = 794;
+const NO_SCROLL = '<style>html,body{overflow:hidden!important;}</style>';
 
-interface Option { style: ProStyleId; xslt: string; html: string; reason: string }
+interface Option { template: SectorTemplate; xslt: string; xml: string; html: string; reason: string }
 
 const well: React.CSSProperties = { background: theme.surfaceAlt, border: `1px solid ${theme.border}`, borderRadius: 12, padding: 14 };
 const chip = (on: boolean): React.CSSProperties => ({
@@ -34,7 +33,7 @@ const Preview: React.FC<{ html: string; width: number; height: number }> = ({ ht
     const scale = width / PAGE_W;
     return (
         <div style={{ width, height, overflow: 'hidden', position: 'relative', borderRadius: 10, border: `1px solid ${theme.border}`, background: '#fff' }}>
-            <iframe title="" srcDoc={html} tabIndex={-1} aria-hidden scrolling="no" style={{
+            <iframe title="" srcDoc={NO_SCROLL + html} sandbox="allow-scripts" tabIndex={-1} aria-hidden scrolling="no" style={{
                 position: 'absolute', top: 0, left: 0, width: PAGE_W, height: height / scale, border: 0,
                 transform: `scale(${scale})`, transformOrigin: '0 0', pointerEvents: 'none', background: '#fff',
             }} />
@@ -44,14 +43,13 @@ const Preview: React.FC<{ html: string; width: number; height: number }> = ({ ht
 
 /**
  * Kendi XSLT'sini yükleyen kullanıcıya, logo / banka / özel metinlerini koruyarak
- * sektörüne ve isteğine göre üç profesyonel tasarım önerir.
+ * sektörüne ve isteğine göre elle hazırlanmış kütüphaneden üç tasarım önerir.
  */
 export const ProDesignStep: React.FC<{
     docType: WizardDocType;
     xslt: string;
-    xml: string;
-    onUse: (xslt: string, skinName: string) => void;
-}> = ({ docType, xslt, xml, onUse }) => {
+    onUse: (xslt: string, name: string, sampleXml: string) => void;
+}> = ({ docType, xslt, onUse }) => {
     const { t, locale } = useLocaleT();
     const analysis = useMemo(() => analyzeXslt(xslt), [xslt]);
     const [roles, setRoles] = useState<ImageRole[]>(() => analysis.images.map(i => i.guess));
@@ -60,10 +58,10 @@ export const ProDesignStep: React.FC<{
     const [sectorId, setSectorId] = useState('');
     const [moods, setMoods] = useState<Mood[]>(['modern']);
     const [wishes, setWishes] = useState('');
-    const [logoColor, setLogoColor] = useState<string | null>(null);
+    const [logoSize, setLogoSize] = useState<{ width: number; height: number } | null>(null);
     const [quota, setQuota] = useState<Quota | null>(null);
     const [busy, setBusy] = useState(false);
-    const [result, setResult] = useState<BriefResult | null>(null);
+    const [result, setResult] = useState<PickResult | null>(null);
     const [options, setOptions] = useState<Option[]>([]);
     const [zoom, setZoom] = useState<Option | null>(null);
 
@@ -74,8 +72,8 @@ export const ProDesignStep: React.FC<{
 
     useEffect(() => {
         let alive = true;
-        setLogoColor(null);
-        if (logoSrc) loadImage(logoSrc).then(img => { if (alive) setLogoColor(dominantColor(img, img.naturalWidth, img.naturalHeight)); }).catch(() => {});
+        setLogoSize(null);
+        if (logoSrc) loadImage(logoSrc).then(img => { if (alive) setLogoSize({ width: img.naturalWidth || 1, height: img.naturalHeight || 1 }); }).catch(() => {});
         return () => { alive = false; };
     }, [logoSrc]);
 
@@ -85,7 +83,6 @@ export const ProDesignStep: React.FC<{
     }));
 
     const sortedSectors = useMemo(() => [...SECTORS].sort((a, b) => a.label.localeCompare(b.label, 'tr')), []);
-    const skinName = (s: ProStyleId) => t(`wizard.pro.skins.${s}.name`);
 
     const suggest = async () => {
         setBusy(true);
@@ -93,21 +90,20 @@ export const ProDesignStep: React.FC<{
         try {
             const banks = analysis.banks.filter((_, i) => bankOn[i]);
             const texts = analysis.texts.filter((_, i) => textOn[i]);
-            const sections = sectionsFor(docType.id).map(s => ({ id: s.id, label: s.label, detected: analysis.sections.includes(s.id) }));
-            const res = await requestBrief({
-                docType: docType.label, sectorId, wishes, moods, texts, sections,
-                hasLogo: !!logoSrc, bankCount: banks.length, accentHint: logoColor ?? analysis.accentHint, lang: locale,
+            const ranked = rankTemplates({ docTypeId: docType.id, sectorId, moods, wishes, hasBanks: banks.length > 0 });
+            const res = await requestPicks({
+                docType: docType.label, sectorId, wishes, moods, hasLogo: !!logoSrc, bankCount: banks.length, lang: locale, ranked,
             });
-            const detected = Object.fromEntries(sections.filter(s => s.detected).map(s => [s.id, true]));
-            const brief = { ...res.brief, sections: { ...detected, ...res.brief.sections } };
-            const assets = { logo: logoSrc, stamp: stampSrc, banks, logoColor, xsltColor: analysis.accentHint };
+            const assets = { logo: logoSrc && logoSize ? { src: logoSrc, ...logoSize } : null, stamp: stampSrc, banks, texts };
             const next: Option[] = [];
-            for (const style of brief.styles) {
+            for (const pick of res.picks) {
                 try {
-                    const g = generateDesign(paramsFor(docType.id, sectorId, brief, style, assets), docType);
-                    next.push({ style, xslt: g.xslt, html: transformXmlWithXslt(xml, g.xslt), reason: brief.reasons[style] ?? t(`wizard.pro.skins.${style}.desc`) });
+                    const pair = await loadTemplate(pick.template);
+                    const personal = personalizeTemplate(pair.xslt, assets);
+                    await new Promise(r => setTimeout(r, 0));
+                    next.push({ template: pick.template, xslt: personal, xml: pair.xml, html: transformXmlWithXslt(pair.xml, personal), reason: pick.reason ?? pick.template.description });
                 } catch (e) {
-                    console.warn('[pro-design]', style, e);
+                    console.warn('[pro-design]', pick.template.id, e);
                 }
             }
             setResult(res);
@@ -230,7 +226,7 @@ export const ProDesignStep: React.FC<{
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(270px, 1fr))', gap: 14 }}>
                         {options.map((o, i) => (
-                            <div key={o.style} data-pro-option={o.style} style={{
+                            <div key={o.template.id} data-pro-option={o.template.id} style={{
                                 border: `1px solid ${i === 0 ? theme.primary : theme.border}`, borderRadius: 14, padding: 12, background: theme.surface,
                                 boxShadow: i === 0 ? `0 0 0 3px ${theme.primary}22` : theme.shadowSm, display: 'flex', flexDirection: 'column', gap: 10,
                             }}>
@@ -238,12 +234,13 @@ export const ProDesignStep: React.FC<{
                                     <Preview html={o.html} width={244} height={330} />
                                     <span style={{ position: 'absolute', right: 8, top: 8, background: '#0f172acc', color: '#fff', borderRadius: 8, padding: 5, display: 'flex' }}><Maximize2 size={14} /></span>
                                 </button>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                    <span style={{ fontWeight: 800, fontSize: 15 }}>{skinName(o.style)}</span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                                    <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: `${o.template.accent}1f`, color: o.template.accent }}>{sectorLabel(o.template.sector)}</span>
                                     {i === 0 && <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: theme.surfaceTint, color: theme.primary }}>{t('wizard.pro.recommended')}</span>}
                                 </div>
+                                <div style={{ fontWeight: 800, fontSize: 14, lineHeight: 1.35 }}>{o.template.name}</div>
                                 <div style={{ fontSize: 12, color: theme.textMuted, lineHeight: 1.5, flex: 1 }}>{o.reason}</div>
-                                <button type="button" data-pro-use={o.style} onClick={() => onUse(o.xslt, skinName(o.style))} style={{
+                                <button type="button" data-pro-use={o.template.id} onClick={() => onUse(o.xslt, o.template.name, o.xml)} style={{
                                     padding: '9px 14px', borderRadius: 10, border: 'none', fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer',
                                     background: theme.gradient, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                                 }}>
@@ -261,15 +258,15 @@ export const ProDesignStep: React.FC<{
                 }}>
                     <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 14, padding: 14, boxShadow: theme.shadow, position: 'relative' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 10 }}>
-                            <b style={{ color: '#0f172a' }}>{skinName(zoom.style)}</b>
+                            <b style={{ color: '#0f172a' }}>{zoom.template.name}</b>
                             <div style={{ display: 'flex', gap: 8 }}>
-                                <button type="button" onClick={() => onUse(zoom.xslt, skinName(zoom.style))} style={{ padding: '7px 12px', borderRadius: 8, border: 'none', background: theme.gradient, color: '#fff', fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>
+                                <button type="button" onClick={() => onUse(zoom.xslt, zoom.template.name, zoom.xml)} style={{ padding: '7px 12px', borderRadius: 8, border: 'none', background: theme.gradient, color: '#fff', fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>
                                     {t('wizard.pro.use')}
                                 </button>
                                 <button type="button" aria-label={t('common.close')} onClick={() => setZoom(null)} style={{ padding: 6, borderRadius: 8, border: `1px solid ${theme.border}`, background: '#fff', cursor: 'pointer', display: 'flex' }}><X size={16} /></button>
                             </div>
                         </div>
-                        <iframe title={skinName(zoom.style)} srcDoc={zoom.html} style={{
+                        <iframe title={zoom.template.name} srcDoc={zoom.html} sandbox="allow-scripts" style={{
                             display: 'block', width: PAGE_W + 40, maxWidth: 'calc(100vw - 60px)', height: 'calc(100vh - 140px)', border: `1px solid ${theme.border}`, borderRadius: 10, background: '#fff',
                         }} />
                     </div>

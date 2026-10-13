@@ -411,9 +411,10 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
         });
     };
 
-    const finishPro = (xslt: string, skinName: string) => {
-        if (!docType || !chosenXml) return;
-        onFinish({ moduleId: docType.id, docName: `${ownName || docType.label} · ${skinName}`, xslt, xml: chosenXml });
+    const finishPro = (xslt: string, name: string, sampleXml: string) => {
+        if (!docType) return;
+        const xml = xmlChoice === 'own' && chosenXml ? chosenXml : sampleXml;
+        onFinish({ moduleId: docType.id, docName: ownName ? `${ownName} · ${name}` : name, xslt, xml });
     };
 
     const xmlReady = xmlChoice === 'own' ? !!ownXml?.result.ok : xmlChoice === 'gib' ? !!gibXml?.result.ok : !!defaultXmlResult?.ok;
@@ -582,8 +583,8 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
                 </>
             )}
 
-            {step === 3 && docType && xsltText && chosenXml && (
-                <ProDesignStep docType={docType} xslt={xsltText} xml={chosenXml} onUse={finishPro} />
+            {step === 3 && docType && xsltText && (
+                <ProDesignStep docType={docType} xslt={xsltText} onUse={finishPro} />
             )}
 
             {error && <div style={{ marginTop: 14, color: theme.redText, fontSize: 13 }}>{error}</div>}
