@@ -8,6 +8,7 @@
 const AI_KEY = process.env.ASSISTANT_AI_KEY || process.env.GEMINI_API_KEY || '';
 const AI_URL = process.env.ASSISTANT_AI_URL || 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
 const AI_MODEL = process.env.DESIGN_AI_MODEL || process.env.ASSISTANT_AI_MODEL || 'gemini-3.5-flash';
+const AI_MODELS = [...new Set([AI_MODEL, ...(AI_URL.includes('googleapis.com') ? ['gemini-flash-latest', 'gemini-2.5-flash'] : [])])];
 const DAILY_LIMIT = Number(process.env.DESIGN_AI_DAILY_LIMIT || 5);
 
 const PRO_STYLES = {
@@ -115,32 +116,49 @@ const sanitizeBrief = (raw, input) => {
     };
 };
 
+class TransientAiError extends Error {}
+
+const askModel = async (model, messages, input, signal) => {
+    const body = { model, messages, temperature: 0.4, max_tokens: 1200 };
+    if (AI_URL.includes('googleapis.com')) body.reasoning_effort = 'none';
+    const res = await fetch(AI_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${AI_KEY}` },
+        body: JSON.stringify(body),
+        signal,
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) {
+        const msg = data?.error?.message || data?.[0]?.error?.message || `HTTP ${res.status}`;
+        const transient = res.status === 429 || res.status >= 500 || /demand|overload|unavailable/i.test(msg);
+        throw transient ? new TransientAiError(`${model}: ${msg}`) : new Error(`${model}: ${msg}`);
+    }
+    const text = data?.choices?.[0]?.message?.content;
+    if (typeof text !== 'string' || !text.trim()) throw new TransientAiError(`${model}: boş yanıt`);
+    return sanitizeBrief(parseJson(text), input);
+};
+
+/** Geçici hatalarda (yoğunluk, 429/5xx) sıradaki modele geçer; toplam süre 30 sn ile sınırlı. */
 const askBrief = async (input) => {
     const user = JSON.stringify({
         belge: input.docType, sektor: input.sector, istek: input.wishes, tarz: input.moods,
         xsltOzelMetinler: input.texts, logoVar: input.hasLogo, bankaHesabi: input.bankCount, logoRengi: input.accentHint,
     });
-    const body = {
-        model: AI_MODEL,
-        messages: [{ role: 'system', content: systemPrompt(input) }, { role: 'user', content: user }],
-        temperature: 0.4,
-        max_tokens: 1200,
-    };
-    if (AI_URL.includes('googleapis.com')) body.reasoning_effort = 'none';
+    const messages = [{ role: 'system', content: systemPrompt(input) }, { role: 'user', content: user }];
     const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 25_000);
+    const timer = setTimeout(() => ctrl.abort(), 30_000);
+    let last;
     try {
-        const res = await fetch(AI_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${AI_KEY}` },
-            body: JSON.stringify(body),
-            signal: ctrl.signal,
-        });
-        const data = await res.json().catch(() => null);
-        if (!res.ok) throw new Error(data?.error?.message || data?.[0]?.error?.message || `HTTP ${res.status}`);
-        const text = data?.choices?.[0]?.message?.content;
-        if (typeof text !== 'string' || !text.trim()) throw new Error('boş yanıt');
-        return sanitizeBrief(parseJson(text), input);
+        for (const model of AI_MODELS) {
+            try {
+                return await askModel(model, messages, input, ctrl.signal);
+            } catch (e) {
+                last = e;
+                if (!(e instanceof TransientAiError) || ctrl.signal.aborted) throw e;
+                console.warn('[design-ai] model geçici olarak yanıt vermedi, sıradaki deneniyor:', e.message);
+            }
+        }
+        throw last;
     } finally {
         clearTimeout(timer);
     }

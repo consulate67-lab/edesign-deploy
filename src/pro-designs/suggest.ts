@@ -119,7 +119,7 @@ export async function requestBrief(input: BriefInput): Promise<BriefResult> {
     const sector = SECTORS.find(s => s.id === input.sectorId);
     try {
         const token = api.getToken();
-        const res = await fetch(`${API_URL}/api/design-ai/brief`, {
+        const res = await fetch(`${API_URL}/design-ai/brief`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
             body: JSON.stringify({ ...input, sector: sector?.label ?? '' }),
@@ -144,7 +144,7 @@ export async function requestBrief(input: BriefInput): Promise<BriefResult> {
 export async function fetchQuota(): Promise<Quota | null> {
     try {
         const token = api.getToken();
-        const res = await fetch(`${API_URL}/api/design-ai/quota`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+        const res = await fetch(`${API_URL}/design-ai/quota`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
         return res.ok ? await res.json() : null;
     } catch {
         return null;
