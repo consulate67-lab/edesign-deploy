@@ -1,9 +1,13 @@
 import type { MailContent } from '../../contracts';
-import type { MailLang } from './countries';
+import type { BrochureId } from './countries';
 import trHtml from '../../../../marketing/email-tanitim.html?raw';
 import trText from '../../../../marketing/email-tanitim.txt?raw';
 import enHtml from '../../../../marketing/email-tanitim-en.html?raw';
 import enText from '../../../../marketing/email-tanitim-en.txt?raw';
+import enUsHtml from '../../../../marketing/email-tanitim-en-us.html?raw';
+import enUsText from '../../../../marketing/email-tanitim-en-us.txt?raw';
+import enInHtml from '../../../../marketing/email-tanitim-en-in.html?raw';
+import enInText from '../../../../marketing/email-tanitim-en-in.txt?raw';
 import deHtml from '../../../../marketing/email-tanitim-de.html?raw';
 import deText from '../../../../marketing/email-tanitim-de.txt?raw';
 import frHtml from '../../../../marketing/email-tanitim-fr.html?raw';
@@ -18,10 +22,12 @@ import hiHtml from '../../../../marketing/email-tanitim-hi.html?raw';
 import hiText from '../../../../marketing/email-tanitim-hi.txt?raw';
 import subjects from '../../../../marketing/email-tanitim-subjects.json';
 
-/** Dile göre hazır tanıtım broşürü; yabancı diller `marketing/build-intl-brochures.mjs` ile üretilir. */
-export const BROCHURES: Record<MailLang, MailContent> = {
+/** Hazır tanıtım broşürleri; yabancı diller `marketing/build-intl-brochures.mjs` ile üretilir. */
+export const BROCHURES: Record<BrochureId, MailContent> = {
     tr: { subject: 'e-Fatura tasarımınız artık dakikalar içinde hazır', html: trHtml, text: trText },
     en: { subject: subjects.en, html: enHtml, text: enText },
+    'en-us': { subject: subjects['en-us'], html: enUsHtml, text: enUsText },
+    'en-in': { subject: subjects['en-in'], html: enInHtml, text: enInText },
     de: { subject: subjects.de, html: deHtml, text: deText },
     fr: { subject: subjects.fr, html: frHtml, text: frText },
     es: { subject: subjects.es, html: esHtml, text: esText },

@@ -1,4 +1,5 @@
 // Yabancı dil tanıtım e-postalarını üretir: node marketing/build-intl-brochures.mjs
+// Her ülkeye kendi resmî formatı öne çıkarılarak yazılır; EN 16931 yalnız Avrupa'yı kapsar.
 // Türkçe broşür (email-tanitim.html) elle bakılır; buradaki metinler değişince betiği yeniden çalıştırın.
 import { writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -189,14 +190,14 @@ const T = {
         ],
     },
     ru: {
-        subject: 'Макет электронного счёта за несколько минут – EN 16931 и Peppol',
-        title: 'edXdocu · Макет электронного счёта за несколько минут',
-        preheader: 'Создавайте макеты счетов EN 16931, Peppol и XRechnung перетаскиванием – без XSLT.',
+        subject: 'Макет УПД за несколько минут – формат ФНС 5.03',
+        title: 'edXdocu · Макет УПД за несколько минут',
+        preheader: 'Оформляйте УПД по формату ФНС 5.03 перетаскиванием – без XSLT. Для Европы – EN 16931 и Peppol.',
         badge: 'НОВИНКА · Конструктор e-документов',
-        h1: 'Макет электронного счёта –<br>за несколько минут',
-        sub: 'Соответствие <strong>EN 16931, Peppol BIS 3 и XRechnung</strong> – для 37 стран, включая национальные форматы США, Индии, Китая и России (УПД).<br>Без XSLT – простым перетаскиванием.',
+        h1: 'Ваш макет УПД –<br>за несколько минут',
+        sub: 'Макеты <strong>УПД по формату ФНС 5.03</strong> (счёт-фактура и передаточный документ), а также EN 16931 и Peppol для Европы и национальные форматы США, Индии и Китая – всего 37 стран.<br>Без XSLT – простым перетаскиванием.',
         cta1: 'Попробовать',
-        stats: [['37', 'стран'], ['EN 16931', 'Peppol BIS 3 · XRechnung'], ['100%', 'онлайн, без установки']],
+        stats: [['37', 'стран'], ['УПД 5.03', 'формат ФНС России'], ['100%', 'онлайн, без установки']],
         whatLabel: 'ДЛЯ ЧЕГО?',
         whatTitle: 'Ваш счёт в вашем фирменном стиле',
         whatText: 'Логотип, печать, банковские реквизиты и таблица позиций –<br class="hide-sm"> всё размещается там, где нужно, перетаскиванием.',
@@ -210,16 +211,16 @@ const T = {
         steps: [
             ['Выберите страну и документ', 'Мастер покажет местные документы с нужным XML-профилем. Начните с готового шаблона или загрузите свой XSLT.'],
             ['Добавьте логотип, печать и реквизиты', 'Перетаскивайте поля; настраивайте цвета, шрифты и макет, сразу видя результат.'],
-            ['Проверьте на своём XML и скачайте', 'Сразу увидите результат на реальном счёте и загрузите XSLT в свою платформу ЭДО или Peppol.'],
+            ['Проверьте на своём XML и скачайте', 'Сразу увидите результат на реальном документе и загрузите XSLT в свою систему ЭДО или учётную систему.'],
         ],
         features: [
             ['Перетаскивание', 'Знание XSLT и программирования не требуется.'],
-            ['EN 16931 и Peppol', 'Peppol BIS 3, XRechnung 3.0 и проверка основных правил.'],
+            ['УПД 5.03 (ФНС)', 'Счёт-фактура и передаточный документ по XSD ФНС; для Европы – EN 16931 и Peppol.'],
             ['Предпросмотр', 'Каждое изменение сразу видно на вашем XML.'],
             ['Местный язык', 'Подписи на языке страны или на английском.'],
         ],
         formatsTitle: 'Один редактор, 37 стран',
-        who: '<strong>Для кого?</strong> Точки доступа Peppol, операторы ЭДО и электронных счетов, разработчики ERP и учётных систем, бухгалтеры<br class="hide-sm"> и любая компания, которая хочет отправлять счета в своём фирменном стиле.',
+        who: '<strong>Для кого?</strong> Операторы ЭДО, разработчики ERP и учётных систем, бухгалтеры<br class="hide-sm"> и любая компания, которая хочет оформлять документы в своём фирменном стиле.',
         finalTitle: 'Создайте первый макет уже сегодня',
         finalText: 'Откройте аккаунт, выберите шаблон и увидите результат через несколько минут.',
         cta2: 'Создать аккаунт',
@@ -231,14 +232,14 @@ const T = {
         ],
     },
     zh: {
-        subject: '几分钟完成电子发票版式设计 – EN 16931 与 Peppol',
-        title: 'edXdocu · 几分钟完成电子发票版式设计',
-        preheader: '拖放即可设计 EN 16931、Peppol 和 XRechnung 发票版式，无需 XSLT。',
+        subject: '几分钟完成数电发票版式设计 – GB/T 42965',
+        title: 'edXdocu · 几分钟完成数电发票版式设计',
+        preheader: '拖放即可设计数电发票（GB/T 42965）版式，无需 XSLT；欧洲业务另支持 EN 16931 和 Peppol。',
         badge: '全新 · 电子单据设计器',
-        h1: '您的电子发票版式，<br>几分钟即可完成',
-        sub: '符合 <strong>EN 16931、Peppol BIS 3 和 XRechnung</strong>，适用于 37 个国家，并支持美国、印度、中国（数电发票）和俄罗斯的本国格式。<br>无需 XSLT，拖放即可。',
+        h1: '您的数电发票版式，<br>几分钟即可完成',
+        sub: '支持 <strong>数电发票（GB/T 42965）</strong>，同时覆盖欧洲的 EN 16931 / Peppol 以及美国、印度和俄罗斯的本国格式，共 37 个国家。<br>无需 XSLT，拖放即可。',
         cta1: '立即试用',
-        stats: [['37', '个国家'], ['EN 16931', 'Peppol BIS 3 · XRechnung'], ['100%', '网页版，无需安装']],
+        stats: [['37', '个国家'], ['数电发票', 'GB/T 42965'], ['100%', '网页版，无需安装']],
         whatLabel: '能做什么？',
         whatTitle: '体现您品牌的发票',
         whatText: '您的标志、印章、银行信息和明细表格——<br class="hide-sm">拖放即可放到任何位置。',
@@ -252,16 +253,16 @@ const T = {
         steps: [
             ['选择国家和单据', '向导会列出当地单据及对应的 XML 规范。可从现成模板开始，也可上传您自己的 XSLT。'],
             ['添加标志、印章和银行信息', '拖放字段，直观调整颜色、字体和版式。'],
-            ['用您的 XML 预览并下载', '用真实发票即时查看效果，然后将 XSLT 导入您的电子发票或 Peppol 平台。'],
+            ['用您的 XML 预览并下载', '用真实发票即时查看效果，然后将 XSLT 导入您的电子发票或 ERP 系统。'],
         ],
         features: [
             ['拖放设计', '无需 XSLT 或编程知识。'],
-            ['EN 16931 与 Peppol', 'Peppol BIS 3、XRechnung 3.0 及核心规则检查。'],
+            ['数电发票', '按 GB/T 42965 结构设计版式；欧洲业务另支持 EN 16931 与 Peppol。'],
             ['实时预览', '每次修改都能用您自己的 XML 查看。'],
             ['本地语言标签', '标签可使用该国语言或英语。'],
         ],
         formatsTitle: '一个编辑器，覆盖 37 个国家',
-        who: '<strong>适用对象：</strong>Peppol 接入点、电子发票服务商、ERP 和财务软件厂商、会计师事务所，<br class="hide-sm">以及所有希望以自有品牌发送发票的企业。',
+        who: '<strong>适用对象：</strong>电子发票服务商、ERP 和财务软件厂商、会计师事务所，<br class="hide-sm">以及所有希望以自有品牌输出发票的企业。',
         finalTitle: '今天就创建您的第一个版式',
         finalText: '开通账户，选择模板，几分钟内即可看到效果。',
         cta2: '创建账户',
@@ -273,14 +274,14 @@ const T = {
         ],
     },
     hi: {
-        subject: 'आपका ई-इनवॉइस लेआउट, कुछ ही मिनटों में – EN 16931 और Peppol',
-        title: 'edXdocu · आपका ई-इनवॉइस लेआउट, कुछ ही मिनटों में',
-        preheader: 'ड्रैग-एंड-ड्रॉप से EN 16931, Peppol और XRechnung इनवॉइस लेआउट बनाएँ – XSLT की ज़रूरत नहीं।',
+        subject: 'आपका GST ई-इनवॉइस लेआउट, कुछ ही मिनटों में',
+        title: 'edXdocu · आपका GST ई-इनवॉइस लेआउट, कुछ ही मिनटों में',
+        preheader: 'ड्रैग-एंड-ड्रॉप से GST ई-इनवॉइस (INV-01) और ई-वे बिल लेआउट बनाएँ – XSLT की ज़रूरत नहीं।',
         badge: 'नया · ई-दस्तावेज़ डिज़ाइनर',
-        h1: 'आपका ई-इनवॉइस लेआउट,<br>कुछ ही मिनटों में तैयार',
-        sub: '<strong>EN 16931, Peppol BIS 3 और XRechnung</strong> के अनुरूप – 37 देशों के लिए तैयार, जिनमें अमेरिका, भारत (GST ई-इनवॉइस), चीन और रूस के राष्ट्रीय फ़ॉर्मेट शामिल हैं।<br>XSLT के बिना, बस ड्रैग-एंड-ड्रॉप।',
+        h1: 'आपका GST ई-इनवॉइस लेआउट,<br>कुछ ही मिनटों में तैयार',
+        sub: '<strong>GST ई-इनवॉइस (INV-01) और ई-वे बिल</strong> के लिए तैयार – साथ ही यूरोप के लिए EN 16931 / Peppol और अमेरिका, चीन व रूस के राष्ट्रीय फ़ॉर्मेट: कुल 37 देश।<br>XSLT के बिना, बस ड्रैग-एंड-ड्रॉप।',
         cta1: 'अभी आज़माएँ',
-        stats: [['37', 'देश'], ['EN 16931', 'Peppol BIS 3 · XRechnung'], ['100%', 'वेब-आधारित, कोई इंस्टॉलेशन नहीं']],
+        stats: [['37', 'देश'], ['GST', 'ई-इनवॉइस · ई-वे बिल'], ['100%', 'वेब-आधारित, कोई इंस्टॉलेशन नहीं']],
         whatLabel: 'यह क्या करता है?',
         whatTitle: 'आपका इनवॉइस, आपके ब्रांड में',
         whatText: 'आपका लोगो, मुहर, बैंक विवरण और आइटम तालिका –<br class="hide-sm"> सब कुछ ड्रैग-एंड-ड्रॉप से जहाँ चाहें वहाँ।',
@@ -294,16 +295,16 @@ const T = {
         steps: [
             ['देश और दस्तावेज़ चुनें', 'विज़ार्ड सही XML प्रोफ़ाइल के साथ स्थानीय दस्तावेज़ दिखाता है। तैयार टेम्पलेट से शुरू करें या अपनी XSLT फ़ाइल अपलोड करें।'],
             ['लोगो, मुहर और बैंक विवरण जोड़ें', 'फ़ील्ड को ड्रैग-एंड-ड्रॉप करें; रंग, फ़ॉन्ट और लेआउट देखते हुए बदलें।'],
-            ['अपने XML से प्रीव्यू करें और डाउनलोड करें', 'असली इनवॉइस के साथ तुरंत परिणाम देखें और XSLT को अपने ई-इनवॉइसिंग या Peppol प्लेटफ़ॉर्म में लोड करें।'],
+            ['अपने XML से प्रीव्यू करें और डाउनलोड करें', 'असली इनवॉइस के साथ तुरंत परिणाम देखें और XSLT को अपने ई-इनवॉइसिंग या ERP सिस्टम में लोड करें।'],
         ],
         features: [
             ['ड्रैग-एंड-ड्रॉप', 'XSLT या कोडिंग का ज्ञान ज़रूरी नहीं।'],
-            ['EN 16931 और Peppol', 'Peppol BIS 3, XRechnung 3.0 और मूल नियमों की जाँच।'],
+            ['GST ई-इनवॉइस', 'INV-01 (IRP स्कीमा 1.1) और ई-वे बिल; यूरोप के लिए EN 16931 और Peppol।'],
             ['लाइव प्रीव्यू', 'हर बदलाव अपने XML के साथ देखें।'],
             ['स्थानीय लेबल', 'लेबल देश की भाषा में या अंग्रेज़ी में।'],
         ],
         formatsTitle: 'एक एडिटर, 37 देश',
-        who: '<strong>किसके लिए?</strong> Peppol एक्सेस पॉइंट, ई-इनवॉइसिंग सेवा प्रदाता, ERP और अकाउंटिंग सॉफ़्टवेयर कंपनियाँ, अकाउंटेंट<br class="hide-sm"> और हर वह कंपनी जो अपने ब्रांड में इनवॉइस भेजना चाहती है।',
+        who: '<strong>किसके लिए?</strong> GST सुविधा प्रदाता (GSP), ई-इनवॉइसिंग सेवा प्रदाता, ERP और अकाउंटिंग सॉफ़्टवेयर कंपनियाँ, अकाउंटेंट<br class="hide-sm"> और हर वह कंपनी जो अपने ब्रांड में इनवॉइस भेजना चाहती है।',
         finalTitle: 'आज ही अपना पहला लेआउट बनाएँ',
         finalText: 'खाता खोलें, टेम्पलेट चुनें और कुछ ही मिनटों में परिणाम देखें।',
         cta2: 'खाता बनाएँ',
@@ -316,11 +317,55 @@ const T = {
     },
 };
 
+const withFeature = (features, feature) => features.map((f, i) => (i === 1 ? feature : f));
+const withStep = (steps, text) => steps.map((s, i) => (i === 2 ? [s[0], text] : s));
+
+T['en-in'] = {
+    ...T.en,
+    subject: 'Your GST e-invoice layout, ready in minutes',
+    title: 'edXdocu · Your GST e-invoice layout, ready in minutes',
+    preheader: 'Design GST e-Invoice (INV-01) and e-Way Bill layouts with drag and drop. No XSLT needed.',
+    h1: 'Your GST e-invoice layout,<br>ready in minutes',
+    sub: 'Ready for <strong>GST e-Invoice (INV-01) and e-Way Bill</strong> – plus EN 16931 / Peppol for Europe and national formats for the USA, China and Russia: 37 countries in total.<br>No XSLT, just drag and drop.',
+    stats: [['37', 'countries'], ['GST', 'e-Invoice · e-Way Bill'], ['100%', 'web-based, no installation']],
+    inv: {
+        ...T.en.inv, company: 'Sample Office Supplies Pvt. Ltd.', taxId: 'GSTIN: 27ABCDE1234F1Z5', doc: 'Tax Invoice',
+        bankValue: 'A/c No.: 0000 0000 0000 · IFSC: XXXX0000000',
+    },
+    steps: withStep(T.en.steps, 'See the result instantly with a real invoice and load the XSLT into your e-invoicing or ERP system.'),
+    features: withFeature(T.en.features, ['GST e-Invoice', 'INV-01 (IRP schema 1.1) and e-Way Bill; EN 16931 and Peppol for Europe.']),
+    who: '<strong>Who is it for?</strong> GST Suvidha Providers (GSPs), e-invoicing providers, ERP and accounting software vendors, accountants<br class="hide-sm"> and every company that wants to send invoices in its own brand.',
+};
+
+T['en-us'] = {
+    ...T.en,
+    subject: 'Your e-invoice layout, ready in minutes – DBNAlliance UBL',
+    preheader: 'Design DBNAlliance (UBL 2.3) e-invoice layouts with drag and drop. No XSLT needed.',
+    sub: 'Ready for <strong>DBNAlliance e-invoicing (UBL 2.3)</strong> – plus EN 16931 / Peppol for Europe and national formats for India, China and Russia: 37 countries in total.<br>No XSLT, just drag and drop.',
+    stats: [['37', 'countries'], ['DBNAlliance', 'UBL 2.3 · US e-invoicing'], ['100%', 'web-based, no installation']],
+    inv: {
+        ...T.en.inv, company: 'Sample Office Supplies Inc.', taxId: 'EIN: 12-3456789', date: 'Date: 10/13/2026',
+        bankValue: 'Routing: 000000000 · Account: 0000000000',
+    },
+    steps: withStep(T.en.steps, 'See the result instantly with a real invoice and load the XSLT into your e-invoicing or ERP platform.'),
+    features: withFeature(T.en.features, ['DBNAlliance', 'Core Invoice on UBL 2.3; EN 16931 and Peppol for Europe.']),
+    who: '<strong>Who is it for?</strong> DBNAlliance access points, e-invoicing providers, ERP and accounting software vendors, accountants<br class="hide-sm"> and every company that wants to send invoices in its own brand.',
+};
+
+/** Broşürün format listesinde öne alınan ulusal format. */
+const LEAD_FORMAT = {
+    ru: 'FNS UPD 5.03 (RU)', zh: '数电发票 (CN)', hi: 'GST e-Invoice · e-Way Bill (IN)',
+    'en-in': 'GST e-Invoice · e-Way Bill (IN)', 'en-us': 'DBNAlliance (US)',
+};
+const formatsFor = (id) => (LEAD_FORMAT[id] ? [LEAD_FORMAT[id], ...FORMATS.filter((f) => f !== LEAD_FORMAT[id])] : FORMATS);
+
 const esc = (s) => s.replace(/&(?![a-z#0-9]+;)/gi, '&amp;');
 const strip = (s) => s.replace(/<br[^>]*>/g, ' ').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
-const link = (lang, content) => `${SITE}?lang=${lang}&utm_source=email&utm_medium=email&utm_campaign=tanitim-intl&utm_content=${content}-${lang}`;
+const siteLang = (id) => id.slice(0, 2);
+const link = (id, content) => `${SITE}?lang=${siteLang(id)}&utm_source=email&utm_medium=email&utm_campaign=tanitim-intl&utm_content=${content}-${id}`;
 
-const html = (lang, source) => {
+const html = (id, source) => {
+    const lang = siteLang(id);
     const d = JSON.parse(JSON.stringify(source), (_, v) => (typeof v === 'string' ? esc(v) : v));
     const F = FONTS[lang] ?? LATIN;
     const ls = FONTS[lang] ? '0' : '1.5px';
@@ -328,7 +373,7 @@ const html = (lang, source) => {
     const label = (text) => `<p style="margin:0 0 6px 0;font-family:${F};font-size:12px;font-weight:bold;letter-spacing:${ls};color:#6d28d9;text-align:center;">${text}</p>`;
     const stat = ([value, caption], i) => `
           <td class="stat${i === 0 ? ' stat-first' : ''}" width="${i === 1 ? 34 : 33}%" align="center" style="padding:22px 0;${i ? 'border-left:1px solid #e4e7ef;' : ''}font-family:${F};">
-            <div style="font-size:${value.length > 6 ? 22 : 26}px;font-weight:bold;color:#6d28d9;">${value}</div>
+            <div style="font-size:${value.length > 9 ? 19 : value.length > 6 ? 22 : 26}px;font-weight:bold;color:#6d28d9;">${value}</div>
             <div style="font-size:13px;color:#4a5568;padding-top:2px;">${caption}</div>
           </td>`;
     const step = ([title, text], i) => `
@@ -419,7 +464,7 @@ const html = (lang, source) => {
 
   <tr>
     <td align="center" class="px" style="padding:28px 40px 20px 40px;background-color:#ffffff;">
-      <a href="${esc(link(lang, 'logo'))}" target="_blank">
+      <a href="${esc(link(id, 'logo'))}" target="_blank">
         <img src="${SITE}logo-600x200.png" width="180" height="60" alt="edXdocu" style="width:180px;height:60px;color:#6d28d9;font-family:${LATIN};font-size:26px;font-weight:bold;">
       </a>
     </td>
@@ -439,7 +484,7 @@ const html = (lang, source) => {
       </h1>
       <p style="margin:0 0 28px 0;font-family:${F};font-size:16px;line-height:25px;color:#ede9fe;">
         ${d.sub.replace(/<strong>/g, '<strong style="color:#ffffff;">')}
-      </p>${button(esc(link(lang, 'hero')), d.cta1, '#ffffff', '#5b21b6')}
+      </p>${button(esc(link(id, 'hero')), d.cta1, '#ffffff', '#5b21b6')}
     </td>
   </tr>
 
@@ -532,7 +577,7 @@ const html = (lang, source) => {
     <td bgcolor="#f6f7fb" class="px" style="background-color:#f6f7fb;padding:30px 40px;text-align:center;">
       <h2 style="margin:0 0 14px 0;font-family:${F};font-size:19px;line-height:26px;color:#0b1324;">${d.formatsTitle}</h2>
       <p style="margin:0;font-family:${LATIN};font-size:14px;line-height:26px;color:#4a5568;">
-        ${FORMATS.map((f) => `<span style="white-space:nowrap;">${f}</span>`).join(' &nbsp;·&nbsp; ')}
+        ${formatsFor(id).map((f) => `<span style="white-space:nowrap;">${f}</span>`).join(' &nbsp;·&nbsp; ')}
       </p>
       <p style="margin:18px 0 0 0;font-family:${F};font-size:14px;line-height:22px;color:#0b1324;">
         ${d.who}
@@ -545,14 +590,14 @@ const html = (lang, source) => {
       <h2 style="margin:0 0 10px 0;font-family:${F};font-size:24px;line-height:31px;color:#ffffff;">${d.finalTitle}</h2>
       <p style="margin:0 0 24px 0;font-family:${F};font-size:15px;line-height:23px;color:#cbd5e1;">
         ${d.finalText}
-      </p>${button(esc(link(lang, 'final')), d.cta2, '#f59e0b', '#ffffff')}
+      </p>${button(esc(link(id, 'final')), d.cta2, '#f59e0b', '#ffffff')}
     </td>
   </tr>
 
   <tr>
     <td class="px" style="padding:26px 40px 30px 40px;background-color:#ffffff;text-align:center;font-family:${F};font-size:12px;line-height:19px;color:#7a8599;">
       <strong style="color:#4a5568;">${d.brand}</strong><br>
-      <a href="mailto:${MAIL}" style="color:#6d28d9;">${MAIL}</a> &nbsp;·&nbsp; <a href="${esc(link(lang, 'footer'))}" target="_blank" style="color:#6d28d9;">www.edxdocu.com</a>
+      <a href="mailto:${MAIL}" style="color:#6d28d9;">${MAIL}</a> &nbsp;·&nbsp; <a href="${esc(link(id, 'footer'))}" target="_blank" style="color:#6d28d9;">www.edxdocu.com</a>
       <br><br>
       ${legal}
     </td>
@@ -569,7 +614,8 @@ const html = (lang, source) => {
 `;
 };
 
-const text = (lang, d) => {
+const text = (id, d) => {
+    const lang = siteLang(id);
     const legal = d.legal.map((line) => line.replace('{link}', '').replace('{/link}', '').replace('{mail}', MAIL));
     return [
         d.brand,
@@ -578,7 +624,7 @@ const text = (lang, d) => {
         '',
         strip(d.sub),
         '',
-        `${d.cta1}: ${link(lang, 'hero')}`,
+        `${d.cta1}: ${link(id, 'hero')}`,
         '',
         d.stats.map(([v, c]) => `${v} ${c}`).join(' · '),
         '',
@@ -595,13 +641,13 @@ const text = (lang, d) => {
         '',
         '',
         d.formatsTitle.toUpperCase(),
-        FORMATS.join(', '),
+        formatsFor(id).join(', '),
         '',
         strip(d.who),
         '',
         '',
         d.finalTitle.toUpperCase(),
-        `${d.cta2}: ${link(lang, 'final')}`,
+        `${d.cta2}: ${link(id, 'final')}`,
         '--',
         d.brand,
         `${MAIL} · www.edxdocu.com`,
@@ -615,10 +661,10 @@ const text = (lang, d) => {
 };
 
 const subjects = {};
-for (const [lang, d] of Object.entries(T)) {
-    writeFileSync(join(OUT, `email-tanitim-${lang}.html`), html(lang, d));
-    writeFileSync(join(OUT, `email-tanitim-${lang}.txt`), text(lang, d));
-    subjects[lang] = d.subject;
+for (const [id, d] of Object.entries(T)) {
+    writeFileSync(join(OUT, `email-tanitim-${id}.html`), html(id, d));
+    writeFileSync(join(OUT, `email-tanitim-${id}.txt`), text(id, d));
+    subjects[id] = d.subject;
 }
 writeFileSync(join(OUT, 'email-tanitim-subjects.json'), `${JSON.stringify(subjects, null, 4)}\n`);
 console.log('ok', Object.keys(T).join(', '));

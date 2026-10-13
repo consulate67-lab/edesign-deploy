@@ -1,0 +1,46 @@
+edXdocu · e-Document Designer
+
+YOUR E-INVOICE LAYOUT, READY IN MINUTES
+
+Ready for DBNAlliance e-invoicing (UBL 2.3) – plus EN 16931 / Peppol for Europe and national formats for India, China and Russia: 37 countries in total. No XSLT, just drag and drop.
+
+Try it now: https://www.edxdocu.com/?lang=en&utm_source=email&utm_medium=email&utm_campaign=tanitim-intl&utm_content=hero-en-us
+
+37 countries · DBNAlliance UBL 2.3 · US e-invoicing · 100% web-based, no installation
+
+
+WHAT DOES IT DO?
+Your invoice, in your brand. Your logo, stamp, bank details and item table – each placed exactly where you want with drag and drop.
+
+
+READY IN 3 STEPS
+1. Pick the country and document
+   The wizard lists the local documents with the right XML profile. Start from a ready template or upload your own XSLT.
+2. Add your logo, stamp and bank details
+   Drag and drop the fields; adjust colours, fonts and layout visually.
+3. Preview with your XML, then download
+   See the result instantly with a real invoice and load the XSLT into your e-invoicing or ERP platform.
+
+
+- Drag & Drop: No XSLT or coding needed.
+- DBNAlliance: Core Invoice on UBL 2.3; EN 16931 and Peppol for Europe.
+- Live Preview: See every change with your own XML.
+- Local Labels: Labels in the country’s language, or in English.
+
+
+ONE EDITOR, 37 COUNTRIES
+DBNAlliance (US), EN 16931 (UBL), Peppol BIS Billing 3.0, XRechnung 3.0, CIUS-RO, HR CIUS, CIUS-PT, Peppol Despatch Advice, GST e-Invoice · e-Way Bill (IN), FNS UPD 5.03 (RU), 数电发票 (CN), UBL-TR (TR)
+
+Who is it for? DBNAlliance access points, e-invoicing providers, ERP and accounting software vendors, accountants and every company that wants to send invoices in its own brand.
+
+
+CREATE YOUR FIRST LAYOUT TODAY
+Create account: https://www.edxdocu.com/?lang=en&utm_source=email&utm_medium=email&utm_campaign=tanitim-intl&utm_content=final-en-us
+--
+edXdocu · e-Document Designer
+destek@edxdocu.com · www.edxdocu.com
+
+This informational email was sent to your business because it may be relevant to your field of activity.
+If you prefer not to receive it, you can unsubscribe with one click; your request is applied immediately.
+{{UNSUBSCRIBE_URL}}&lang=en
+To learn the source of your address or have it deleted from our records, write to destek@edxdocu.com.

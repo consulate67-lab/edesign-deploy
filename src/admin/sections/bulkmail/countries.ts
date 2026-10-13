@@ -1,10 +1,13 @@
 import { countryProfiles, type UiLanguage } from '../../../international/registry/countryProfiles';
 
-export type MailLang = UiLanguage;
+/** Broşür sürümü: site dili, ya da aynı dilde ülkesinin resmî formatını öne çıkaran sürüm. */
+export type BrochureId = UiLanguage | 'en-in' | 'en-us';
 
-export const MAIL_LANGS: { id: MailLang; label: string }[] = [
+export const BROCHURE_OPTIONS: { id: BrochureId; label: string }[] = [
     { id: 'tr', label: 'Türkçe' },
-    { id: 'en', label: 'İngilizce' },
+    { id: 'en', label: 'İngilizce · Avrupa' },
+    { id: 'en-us', label: 'İngilizce · ABD' },
+    { id: 'en-in', label: 'İngilizce · Hindistan' },
     { id: 'de', label: 'Almanca' },
     { id: 'fr', label: 'Fransızca' },
     { id: 'es', label: 'İspanyolca' },
@@ -13,7 +16,7 @@ export const MAIL_LANGS: { id: MailLang; label: string }[] = [
     { id: 'hi', label: 'Hintçe' },
 ];
 
-export const langLabel = (id: MailLang) => MAIL_LANGS.find(l => l.id === id)?.label ?? id;
+export const brochureLabel = (id: BrochureId) => BROCHURE_OPTIONS.find(l => l.id === id)?.label ?? id;
 
 /** Karşılaştırma anahtarı: küçük harf, Türkçe ve aksanlı harfler sadeleşir, noktalama atılır. */
 export const foldCountry = (s: string) => s
@@ -107,21 +110,24 @@ const NAMES: Record<string, string[]> = {
 
 const BY_NAME = new Map(Object.entries(NAMES).flatMap(([code, names]) => names.map(n => [foldCountry(n), code] as const)));
 
-/** Sitede tanımlı olmayan ülkelerin ticari yazışma dili. */
-const EXTRA_LANG: Record<string, MailLang> = {
-    MX: 'es', AR: 'es', CL: 'es', CO: 'es', PE: 'es', UY: 'es', EC: 'es',
-    BY: 'ru', KZ: 'ru', UZ: 'ru', KG: 'ru',
-};
-
-/** Hindistan'da iş yazışması İngilizce yürüdüğü için site dilinden (Hintçe) ayrılır; panelden değiştirilebilir. */
-const LANG_OVERRIDE: Record<string, MailLang> = { IN: 'en' };
+/** Hindistan'da iş yazışması İngilizce yürür; ABD ve Hindistan kendi formatını öne çıkaran sürümü alır. */
+const BROCHURE_OVERRIDE: Record<string, BrochureId> = { IN: 'en-in', US: 'en-us' };
 
 export const countryCode = (name: string): string | null => BY_NAME.get(foldCountry(name)) ?? null;
 
-/** Ülke adından broşür dili; bilinmeyen ülke İngilizce, ülke yoksa `fallback`. */
-export const langForCountry = (name: string, fallback: MailLang): MailLang => {
-    if (!name.trim()) return fallback;
+export type CountryStatus = 'supported' | 'unsupported' | 'unknown';
+
+export interface CountryMatch { status: CountryStatus; brochure: BrochureId | null }
+
+/**
+ * Ülke adından broşür. Sitenin belge sunmadığı ülkeye (ör. BAE, Malezya, Kazakistan) ve tanınmayan
+ * ada broşür seçilmez; o ülkelerde tasarlanabilecek resmî format olmadığı için varsayılan olarak gönderilmez.
+ */
+export const brochureForCountry = (name: string, fallback: BrochureId): CountryMatch => {
+    if (!name.trim()) return { status: 'supported', brochure: fallback };
     const code = countryCode(name);
-    if (!code) return 'en';
-    return LANG_OVERRIDE[code] ?? countryProfiles.find(c => c.code === code)?.uiLanguage ?? EXTRA_LANG[code] ?? 'en';
+    if (!code) return { status: 'unknown', brochure: null };
+    const profile = countryProfiles.find(c => c.code === code);
+    if (!profile) return { status: 'unsupported', brochure: null };
+    return { status: 'supported', brochure: BROCHURE_OVERRIDE[code] ?? profile.uiLanguage };
 };
