@@ -30,6 +30,7 @@ dist-ssr
 .env.production
 .env.ftp
 .env.mail
+.env.brevo
 dist-web/
 
 # Python helper scripts + their outputs (XSLT validation tools)
