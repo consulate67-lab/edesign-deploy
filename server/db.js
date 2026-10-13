@@ -1,4 +1,5 @@
 import pg from 'pg';
+import { createCampaignSchema } from './campaigns.js';
 
 /**
  * Thin adapter that exposes the SQLite-style API (run/get/all) on top of
@@ -240,6 +241,7 @@ export const initDb = async () => {
         await probe.query(`CREATE INDEX IF NOT EXISTS idx_payments_invoice_status ON payments (invoice_status) WHERE invoice_status IS NOT NULL`);
 
         await createSupportSchema(probe);
+        await createCampaignSchema(probe);
         await promoteAdmins(probe);
     } finally {
         probe.release();

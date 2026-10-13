@@ -414,3 +414,48 @@ export interface AssistantLog {
 }
 
 export type AssistantLogFilter = 'review' | 'unanswered' | 'negative' | 'positive' | 'all';
+
+export type CampaignStatus = 'draft' | 'sending' | 'paused' | 'done' | 'cancelled';
+
+export interface MailCampaign {
+    id: number;
+    name: string;
+    subject: string;
+    rate_per_hour: number;
+    status: CampaignStatus;
+    last_error: string | null;
+    created_at: string;
+    started_at: string | null;
+    finished_at: string | null;
+    total: number;
+    pending: number;
+    sent: number;
+    failed: number;
+    skipped: number;
+}
+
+export interface MailCampaignList {
+    campaigns: MailCampaign[];
+    unsubscribed: number;
+    mailReady: boolean;
+    defaultRate: number;
+    rateMax: number;
+}
+
+export interface MailCampaignDetail {
+    campaign: MailCampaign;
+    failures: { email: string; error: string | null; sent_at: string | null }[];
+}
+
+export interface MailContent {
+    subject: string;
+    html: string;
+    text: string;
+}
+
+export interface MailCampaignInput extends MailContent {
+    name: string;
+    ratePerHour: number;
+    recipients: { email: string; name: string }[];
+}
+

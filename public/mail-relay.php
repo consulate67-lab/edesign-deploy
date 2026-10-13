@@ -35,6 +35,18 @@ $text = (string) ($msg['text'] ?? '');
 $html = (string) ($msg['html'] ?? '');
 if ($subject === '' || ($text === '' && $html === '')) fail(400, 'content');
 
+// Toplu gönderimde Gmail/Outlook'un "abonelikten çık" düğmesi için; başka başlık kabul edilmez.
+$extraHeaders = [];
+$allowedHeaders = ['List-Unsubscribe', 'List-Unsubscribe-Post'];
+if (is_array($msg['headers'] ?? null)) {
+    foreach ($allowedHeaders as $name) {
+        $value = $msg['headers'][$name] ?? null;
+        if (is_string($value) && $value !== '' && strlen($value) <= 600 && !preg_match('/[\r\n]/', $value)) {
+            $extraHeaders[] = "$name: $value";
+        }
+    }
+}
+
 $from = $cfg['smtp_user'];
 $fromName = (string) ($cfg['from_name'] ?? 'edXdocu');
 $encode = fn (string $s) => '=?UTF-8?B?' . base64_encode($s) . '?=';
@@ -49,6 +61,7 @@ $headers = [
     'MIME-Version: 1.0',
     "Content-Type: multipart/alternative; boundary=\"$boundary\"",
 ];
+$headers = array_merge($headers, $extraHeaders);
 $part = fn (string $type, string $body) => "--$boundary\r\nContent-Type: $type; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n"
     . chunk_split(base64_encode($body), 76, "\r\n");
 $data = implode("\r\n", $headers) . "\r\n\r\n"

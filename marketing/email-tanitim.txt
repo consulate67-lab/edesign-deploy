@@ -1,0 +1,54 @@
+edXdocu · eBelge Tasarımcı
+
+E-BELGE TASARIMINIZ ARTIK DAKİKALAR İÇİNDE HAZIR
+
+GİB uyumlu e-Fatura, e-Arşiv, e-İrsaliye ve 12 belge türü daha.
+XSLT bilmeden, sürükle-bırak ile.
+
+Hemen deneyin: https://www.edxdocu.com/?utm_source=email&utm_medium=email&utm_campaign=tanitim&utm_content=hero
+
+15 belge türü · GİB UBL-TR resmi uyumlu · %100 web tabanlı, kurulum yok
+
+
+NE İŞE YARAR?
+Faturanız, kendi kimliğinizle. Logonuz, kaşeniz, banka bilgileriniz ve ürün
+tablonuz; hepsi istediğiniz yere sürükle-bırak ile yerleşir.
+
+
+3 ADIMDA HAZIR
+1. Belge türünü ve şablonu seçin
+   Hazır şablonla başlayın ya da kendi XSLT dosyanızı yükleyin.
+2. Logo, kaşe ve banka bilgilerinizi ekleyin
+   Alanları sürükleyip bırakın; renk, yazı ve yerleşimi görerek düzenleyin.
+3. Kendi XML'inizle önizleyin, indirin
+   Sonucu anında görün, hazır XSLT dosyasını entegratörünüze yükleyin.
+
+
+NEDEN edXdocu?
+- Sürükle & Bırak: XSLT ya da kod bilgisi gerekmez.
+- GİB Uyumlu: UBL-TR 1.2.1 ve e-Fatura Paketi v29.
+- Anlık Önizleme: Her değişikliği kendi XML'inizle görün.
+- Avrupa'ya Hazır: EN 16931, Peppol ve XRechnung şablonları.
+
+
+TEK EDİTÖRDE 15 E-BELGE
+e-Fatura, e-Arşiv, e-İrsaliye, e-İrsaliye Yanıtı, e-İhracat, e-SMM,
+e-Müstahsil, e-Gider Pusulası, e-Döviz / Kıymetli Maden, e-Dekont,
+e-Sigorta Komisyon Gider Belgesi, e-Bilet, e-Bilet Raporu, e-Yolcu Listesi,
+e-Makbuz
+
+Kimler için? Muhasebe ofisleri, yazılım firmaları, entegratörler ve faturasını
+kendi kurumsal kimliğiyle göndermek isteyen her işletme.
+
+
+İLK TASARIMINIZI BUGÜN OLUŞTURUN
+Hesap açın: https://www.edxdocu.com/?utm_source=email&utm_medium=email&utm_campaign=tanitim&utm_content=final
+Sorunuz mu var? WhatsApp: 0533 666 01 25 (https://wa.me/905336660125)
+
+--
+edXdocu · eBelge Tasarımcı
+Merkez Mahallesi Ege Sokak No:4 Kağıthane / İstanbul
+destek@edxdocu.com · www.edxdocu.com
+
+Bu e-postayı, ticari elektronik ileti almaya onay verdiğiniz için aldınız.
+Listeden çıkmak için: {{UNSUBSCRIBE_URL}}

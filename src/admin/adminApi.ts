@@ -2,8 +2,8 @@ import { API_URL } from '../api';
 import type {
     AdminIdentity, AdminInvoice, AdminInvoiceList, AdminLoginResponse, AdminSettingsStatus, AdminStats, AdminUserDetail, AdminUserRow,
     AdminVerifyResponse, AiMemoryEntry, AiMemoryInput, AssistantBuiltinEntry, AssistantKbEntry, AssistantKbInput, AssistantLog,
-    AssistantLogFilter, AssistantOverview, GalleryDesign, GalleryDesignInput, InvoiceScope, InvoiceUpdateInput, RemoteSession,
-    SupportMessage, SupportTicket, TicketStatus,
+    AssistantLogFilter, AssistantOverview, GalleryDesign, GalleryDesignInput, InvoiceScope, InvoiceUpdateInput, MailCampaign,
+    MailCampaignDetail, MailCampaignInput, MailCampaignList, MailContent, RemoteSession, SupportMessage, SupportTicket, TicketStatus,
 } from './contracts';
 
 /** Yönetici oturumu kullanıcı oturumundan ayrıdır; aynı sekmede ikisi birlikte açık kalabilir. */
@@ -140,6 +140,18 @@ export const adminApi = {
 
     settingsStatus: () => request<AdminSettingsStatus>('/admin/settings/status'),
     telegramTest: () => request<{ success: true }>('/admin/settings/telegram-test', { method: 'POST' }),
+
+    campaigns: () => request<MailCampaignList>('/admin/campaigns'),
+    campaign: (id: number) => request<MailCampaignDetail>(`/admin/campaigns/${id}`),
+    createCampaign: (input: MailCampaignInput) => request<MailCampaign>('/admin/campaigns', { method: 'POST', body: input }),
+    testCampaign: (content: MailContent, to: string) =>
+        request<{ sent: true }>('/admin/campaigns/test', { method: 'POST', body: { ...content, to } }),
+    startCampaign: (id: number) =>
+        request<MailCampaign>(`/admin/campaigns/${id}/start`, { method: 'POST', body: { consentConfirmed: true } }),
+    pauseCampaign: (id: number) => request<MailCampaign>(`/admin/campaigns/${id}/pause`, { method: 'POST' }),
+    cancelCampaign: (id: number) => request<MailCampaign>(`/admin/campaigns/${id}/cancel`, { method: 'POST' }),
+    retryCampaignFailures: (id: number) => request<MailCampaign>(`/admin/campaigns/${id}/retry-failed`, { method: 'POST' }),
+    deleteCampaign: (id: number) => request<{ success: true }>(`/admin/campaigns/${id}`, { method: 'DELETE' }),
 };
 
 /** Yönetici WebSocket bağlantısı (presence, online destek, talep bildirimleri). */

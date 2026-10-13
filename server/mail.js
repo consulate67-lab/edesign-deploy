@@ -34,8 +34,8 @@ const getTransporter = () => {
     return transporter;
 };
 
-const sendViaRelay = async ({ to, subject, text, html }) => {
-    const body = JSON.stringify({ to, subject, text, html });
+const sendViaRelay = async ({ to, subject, text, html, headers }) => {
+    const body = JSON.stringify({ to, subject, text, html, ...(headers && { headers }) });
     const ts = String(Math.floor(Date.now() / 1000));
     const signature = createHmac('sha256', env('MAIL_RELAY_SECRET')).update(`${ts}.${body}`).digest('hex');
     const res = await fetch(env('MAIL_RELAY_URL'), {
@@ -47,9 +47,10 @@ const sendViaRelay = async ({ to, subject, text, html }) => {
     if (!res.ok) throw new Error(`mail relay ${res.status}: ${(await res.text().catch(() => '')).slice(0, 200)}`);
 };
 
-export const sendMail = async ({ to, subject, text, html }) => {
-    if (relayConfigured()) return sendViaRelay({ to, subject, text, html });
+/** `headers` yalnız List-Unsubscribe / List-Unsubscribe-Post için kullanılır (köprü başkasını kabul etmez). */
+export const sendMail = async ({ to, subject, text, html, headers }) => {
+    if (relayConfigured()) return sendViaRelay({ to, subject, text, html, headers });
     if (!smtpConfigured()) throw new Error('SMTP yapılandırılmamış.');
     const from = env('MAIL_FROM') || `edXdocu <${env('SMTP_USER')}>`;
-    await getTransporter().sendMail({ from, to, subject, text, html });
+    await getTransporter().sendMail({ from, to, subject, text, html, headers });
 };
