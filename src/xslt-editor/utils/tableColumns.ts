@@ -77,7 +77,9 @@ export function addColumnAfterCell(
     }
 
     type Op = { at: number; apply: (s: string) => string };
+    type Insert = { row: number; kind: ColumnRowKind; tag: SourceTag; before: boolean };
     const ops: Op[] = [];
+    const inserts: Insert[] = [];
     const seen = new Set<number>();
     const rows = Array.from(table.rows);
     const rowKinds = rows.map(r => {
@@ -111,13 +113,31 @@ export function addColumnAfterCell(
         ref ??= { c: cells[cells.length - 1], before: false };
 
         const tag = findLiteralTagByOrdinal(xslt, ordinalOf(ref.c)!);
-        if (!tag) return;
-        const at = ref.before ? tag.start : elementEnd(xslt, tag);
-        const indent = indentOf(xslt, tag.start);
-        const markup = `${cellOpenTag(xslt, tag)}${content(kind)}</${tag.name}>`;
-        const text = ref.before ? `${markup}\n${indent}` : `\n${indent}${markup}`;
-        ops.push({ at, apply: s => s.slice(0, at) + text + s.slice(at) });
+        if (tag) inserts.push({ row: i, kind, tag, before: ref.before });
     });
+
+    // Çok satırlı başlıkta kolon adı tek hücrede durur: ilk başlık satırındaki
+    // hücre aynı bölümdeki (rowspan thead/tbody sınırını aşamaz) alt başlık
+    // satırlarını kaplar; kalan başlık satırlarına boş hücre eklenir.
+    const heads = inserts.filter(x => x.kind === 'header');
+    const section = (x: Insert) => rows[x.row].parentElement;
+    let headSpan = 1;
+    while (headSpan < heads.length && heads[headSpan].row === heads[0].row + headSpan
+        && section(heads[headSpan]) === section(heads[0])) headSpan++;
+    const covered = new Set(heads.slice(1, headSpan));
+
+    for (const x of inserts) {
+        if (covered.has(x)) continue;
+        const { tag, before } = x;
+        const at = before ? tag.start : elementEnd(xslt, tag);
+        const indent = indentOf(xslt, tag.start);
+        let open = cellOpenTag(xslt, tag);
+        if (x === heads[0] && headSpan > 1) open = open.replace(/>$/, ` rowspan="${headSpan}">`);
+        const kind = x.kind === 'header' && x !== heads[0] ? 'other' : x.kind;
+        const markup = `${open}${content(kind)}</${tag.name}>`;
+        const text = before ? `${markup}\n${indent}` : `\n${indent}${markup}`;
+        ops.push({ at, apply: s => s.slice(0, at) + text + s.slice(at) });
+    }
 
     if (!ops.length) return null;
     ops.sort((a, b) => b.at - a.at);

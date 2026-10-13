@@ -8,7 +8,7 @@ const tutorials: typeof tr = {
     help: '使用说明',
     helpHint: '涵盖设计器全部功能的简短教程视频',
     playerTitle: '教程视频',
-    videoLangNote: '视频为英语配音，并配有字幕。',
+    videoLangNote: '',
     watch: '观看',
     close: '关闭 (Esc)',
     groupStart: '入门',

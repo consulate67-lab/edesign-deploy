@@ -142,14 +142,18 @@ export const chartAttrs = (m: ChartModel): [string, string][] => [
 
 const isNumeric = (f: CatalogField) => f.format === 'amount' || f.format === 'number';
 
+/** Satır tutarı ve mal adı yolları: UBL, УПД, GST e-Invoice / e-Way Bill, 数电票. */
+const LINE_AMOUNT_RE = /(?:LineExtensionAmount|СведТов\/@СтТовБезНДС|ItemList\/AssAmt|itemList\/taxableAmount|IssuItemInformation\/Amount)$/;
+const LINE_NAME_RE = /(?:Item\/Name|СведТов\/@НаимТов|ItemList\/PrdDesc|itemList\/productName|IssuItemInformation\/ItemName)$/;
+
 /** Yeni grafik: fatura satırlarının tutarları, etiket olarak mal / hizmet adı. */
 export function defaultChart(catalog: CatalogField[]): ChartModel {
     const lineNums = catalog.filter(f => isLineField(f) && isNumeric(f));
-    const value = lineNums.find(f => /LineExtensionAmount$/.test(f.path)) ?? lineNums[0];
+    const value = lineNums.find(f => LINE_AMOUNT_RE.test(f.path)) ?? lineNums.find(f => f.format === 'amount') ?? lineNums[0];
     if (value) {
         const root = lineRootXPath(value);
         const texts = catalog.filter(f => isLineField(f) && !isNumeric(f) && lineRootXPath(f) === root);
-        const label = texts.find(f => /Item\/Name$/.test(f.path)) ?? texts[0];
+        const label = texts.find(f => LINE_NAME_RE.test(f.path)) ?? texts[0];
         return { ...DEFAULT_CHART, value: value.key, label: label?.key ?? '', title: value.label };
     }
     const nums = catalog.filter(isNumeric).slice(0, 3);

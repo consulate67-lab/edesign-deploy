@@ -8,7 +8,7 @@ const tutorials: typeof tr = {
     help: 'यह कैसे काम करता है',
     helpHint: 'डिज़ाइनर की हर सुविधा को समझाने वाले छोटे ट्यूटोरियल वीडियो',
     playerTitle: 'ट्यूटोरियल वीडियो',
-    videoLangNote: 'वीडियो अंग्रेज़ी में वर्णित हैं और उनमें अंग्रेज़ी सबटाइटल हैं।',
+    videoLangNote: '',
     watch: 'देखें',
     close: 'बंद करें (Esc)',
     groupStart: 'शुरुआत करें',
