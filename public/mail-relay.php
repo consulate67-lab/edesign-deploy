@@ -72,8 +72,9 @@ $data = implode("\r\n", $headers) . "\r\n\r\n"
 $host = (string) ($cfg['smtp_host'] ?? 'smtp.edxdocu.com');
 $port = (int) ($cfg['smtp_port'] ?? 587);
 $sock = @stream_socket_client(($port === 465 ? 'ssl://' : 'tcp://') . "$host:$port", $errno, $errstr, 15);
-if (!$sock) fail(502, "smtp connect: $errstr");
+if (!$sock) fail(502, "smtp CONNECT: $errstr");
 stream_set_timeout($sock, 20);
+$step = 'CONNECT';
 
 $read = function () use ($sock): array {
     $lines = '';
@@ -90,25 +91,33 @@ $cmd = function (?string $line, array $expect) use ($sock, $read): string {
     return $reply;
 };
 
+// Hata metnindeki adım adı (RCPT, AUTH...) API'nin alıcı hatasını sunucu hatasından ayırması için gerekli.
 try {
     $cmd(null, [220]);
+    $step = 'EHLO';
     $ehlo = $cmd('EHLO ' . ($_SERVER['SERVER_NAME'] ?? 'edxdocu.com'), [250]);
     if ($port !== 465 && stripos($ehlo, 'STARTTLS') !== false) {
+        $step = 'STARTTLS';
         $cmd('STARTTLS', [220]);
         if (!stream_socket_enable_crypto($sock, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) throw new RuntimeException('starttls');
         $cmd('EHLO ' . ($_SERVER['SERVER_NAME'] ?? 'edxdocu.com'), [250]);
     }
+    $step = 'AUTH';
     $cmd('AUTH LOGIN', [334]);
     $cmd(base64_encode($cfg['smtp_user']), [334]);
     $cmd(base64_encode($cfg['smtp_pass']), [235]);
+    $step = 'MAIL';
     $cmd("MAIL FROM:<$from>", [250]);
+    $step = 'RCPT';
     $cmd("RCPT TO:<$to>", [250, 251]);
+    $step = 'DATA';
     $cmd('DATA', [354]);
     $cmd(preg_replace('/^\./m', '..', $data) . '.', [250]);
+    $step = 'QUIT';
     $cmd('QUIT', [221]);
 } catch (Throwable $e) {
     fclose($sock);
-    fail(502, 'smtp: ' . substr($e->getMessage(), 0, 200));
+    fail(502, "smtp $step: " . substr($e->getMessage(), 0, 200));
 }
 fclose($sock);
 echo json_encode(['sent' => true]);

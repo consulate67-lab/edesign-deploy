@@ -92,6 +92,17 @@ const apiBase = () => {
     return domain ? `https://${domain}` : null;
 };
 
+/**
+ * Yalnız alıcı adresine özgü retler. Geri kalanı (bağlantı, AUTH, sunucunun IP'yi engellemesi,
+ * dış alan adına aktarımı reddetmesi "not local" vb.) gönderen tarafın sorunudur; o alıcıyı
+ * başarısız saymak yerine kampanya durdurulur.
+ */
+const isRecipientError = (message) => {
+    if (/mail relay 400: .*"recipient"/.test(message)) return true;
+    const reply = message.match(/smtp RCPT: (5\d\d.*)/)?.[1];
+    return !!reply && !/not local|relay|denied|blocked|limit|quota exceeded|spam/i.test(reply);
+};
+
 const escapeHtml = (s) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 /** {{UNSUBSCRIBE_URL}}, {{AD}} ve {{EMAIL}} alıcıya göre doldurulur. */
@@ -313,9 +324,17 @@ export const registerCampaignRoutes = (app, { db, requireAdmin, secret, website 
                 failStreak = 0;
             } catch (e) {
                 const message = String(e.message || e).slice(0, 300);
+                console.warn(`[campaigns] #${c.id} ${r.email}: ${message}`);
+                if (!isRecipientError(message)) {
+                    failStreak = 0;
+                    await db.run(
+                        `UPDATE mail_campaigns SET status = 'paused', last_error = ?, updated_at = NOW() WHERE id = ?`,
+                        [`Gönderen SMTP sunucusu iletiyi kabul etmediği için duraklatıldı; alıcılar bekliyor. Sorun giderilince devam ettirin. Son hata: ${message}`, c.id]
+                    );
+                    return;
+                }
                 await db.run(`UPDATE mail_campaign_recipients SET status = 'failed', error = ?, sent_at = NOW() WHERE id = ?`, [message, r.id]);
                 failStreak += 1;
-                console.warn(`[campaigns] #${c.id} ${r.email}: ${message}`);
                 if (failStreak >= MAX_CONSECUTIVE_FAILURES) {
                     failStreak = 0;
                     await db.run(
