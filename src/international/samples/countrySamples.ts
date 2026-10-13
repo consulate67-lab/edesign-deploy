@@ -223,4 +223,9 @@ export const COUNTRY_SAMPLES: Record<CountryCode, CountrySample> = {
         buyer: p('北京长城酒店', '北京长城酒店管理有限公司', '北京市朝阳区建国门外大街8号', '100022', '北京', '91110105MA01ABCD2X', ['', '91110105MA01ABCD2X']),
         iban: '31001234567890123456', bic: '中国建设银行上海浦东分行', prefix: '', carrier: '顺丰速运', rate: 13, scale: 7.8,
     },
+    BR: {
+        seller: p('Ergo Móveis Corporativos', 'Ergo Móveis Corporativos Ltda', 'Av. Paulista, 1500, Bela Vista', '01310200', 'São Paulo', '12345678000195', ['', '12345678000195'], ['IE', '110042490114'], ['Fernanda Lima', '1132514400', 'faturamento@ergomoveis.com.br']),
+        buyer: p('Hotel Taquaral', 'Hotel Taquaral Ltda', 'Av. Heitor Penteado, 2145, Taquaral', '13087000', 'Campinas', '98765432000198', ['', '98765432000198'], ['IM', '4123987'], ['Ricardo Alves', '1932541800', 'compras@hoteltaquaral.com.br']),
+        iban: '13000123-4', bic: '341 / 0912', prefix: '', carrier: 'Rodo Expresso Paulista Ltda', rate: 18, scale: 6.2,
+    },
 };

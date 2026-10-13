@@ -2,11 +2,11 @@ edXdocu · e-Document Designer
 
 YOUR E-INVOICE LAYOUT, READY IN MINUTES
 
-EN 16931, Peppol BIS 3 and XRechnung compliant – ready for 37 countries, including national formats for the USA, India, China and Russia. No XSLT, just drag and drop.
+EN 16931, Peppol BIS 3 and XRechnung compliant – ready for 38 countries, including national formats for the USA, Brazil, India, China and Russia. No XSLT, just drag and drop.
 
 Try it now: https://www.edxdocu.com/?lang=en&utm_source=email&utm_medium=email&utm_campaign=tanitim-intl&utm_content=hero-en
 
-37 countries · EN 16931 Peppol BIS 3 · XRechnung · 100% web-based, no installation
+38 countries · EN 16931 Peppol BIS 3 · XRechnung · 100% web-based, no installation
 
 
 WHAT DOES IT DO?
@@ -28,8 +28,8 @@ READY IN 3 STEPS
 - Local Labels: Labels in the country’s language, or in English.
 
 
-ONE EDITOR, 37 COUNTRIES
-EN 16931 (UBL), Peppol BIS Billing 3.0, XRechnung 3.0, CIUS-RO, HR CIUS, CIUS-PT, Peppol Despatch Advice, DBNAlliance (US), GST e-Invoice · e-Way Bill (IN), FNS UPD 5.03 (RU), 数电发票 (CN), UBL-TR (TR)
+ONE EDITOR, 38 COUNTRIES
+EN 16931 (UBL), Peppol BIS Billing 3.0, XRechnung 3.0, CIUS-RO, HR CIUS, CIUS-PT, Peppol Despatch Advice, DBNAlliance (US), NF-e · NFS-e · CT-e (BR), GST e-Invoice · e-Way Bill (IN), FNS UPD 5.03 (RU), 数电发票 (CN), UBL-TR (TR)
 
 Who is it for? Peppol access points, e-invoicing providers, ERP and accounting software vendors, accountants and every company that wants to send invoices in its own brand.
 

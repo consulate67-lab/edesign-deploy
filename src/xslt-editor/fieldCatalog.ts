@@ -726,7 +726,7 @@ export function docRootOf(xml: string): DocRoot {
     return name && name in CATALOGS ? name : 'Invoice';
 }
 
-const LINE_PREFIX_RE = /^(Invoice\/InvoiceLine|DespatchAdvice\/DespatchLine|ReceiptAdvice\/ReceiptLine|CreditNote\/CreditNoteLine|eBilet\/(?:bilet|biletIptal)|eYolcuListesi\/yolcuListesi\/koltukListesi\/koltuk|Файл\/Документ\/ТаблСчФакт\/СведТов|GSTInvoice\/ItemList|EWayBill\/itemList|EInvoice\/EInvoiceData\/IssuItemInformation)\//;
+const LINE_PREFIX_RE = /^(Invoice\/InvoiceLine|DespatchAdvice\/DespatchLine|ReceiptAdvice\/ReceiptLine|CreditNote\/CreditNoteLine|eBilet\/(?:bilet|biletIptal)|eYolcuListesi\/yolcuListesi\/koltukListesi\/koltuk|Файл\/Документ\/ТаблСчФакт\/СведТов|GSTInvoice\/ItemList|EWayBill\/itemList|EInvoice\/EInvoiceData\/IssuItemInformation|(?:nfeProc\/)?NFe\/infNFe\/det|(?:cteProc\/)?CTe\/infCte\/vPrest\/Comp)\//;
 
 /** Satır (kalem) alanı mı — yol satır elemanıyla (InvoiceLine, bilet, koltuk…) başlıyor. */
 export const isLineField = (f: CatalogField) => LINE_PREFIX_RE.test(f.path);
@@ -740,7 +740,7 @@ export function lineRootXPath(f: CatalogField): string | null {
 const STEP_RE = /^(@?[\w.\u0400-\u04FF-]+)(?:\[((?:[\w.\u0400-\u04FF-]+\/)*@?[\w.\u0400-\u04FF-]+)='([^']*)'\])?$/;
 const PRED_RE = /\[(?:[\w.\u0400-\u04FF-]+\/)*@?[\w.\u0400-\u04FF-]+='([^']*)'\]/;
 /** Ulusal biçimlerin kökleri (namespace'siz, Kiril adlar olabilir). */
-const NATIONAL_ROOT_RE = /^(Файл|GSTInvoice|EWayBill|EInvoice)\//;
+const NATIONAL_ROOT_RE = /^(Файл|GSTInvoice|EWayBill|EInvoice|nfeProc|NFe|cteProc|CTe|NFSe)\//;
 
 /** Yolu adımlara böler; köşeli parantez içindeki `/` ayırıcı sayılmaz. */
 const splitPath = (path: string) => path.split(/\/(?![^[]*\])/);
@@ -985,7 +985,7 @@ export const formatted = (expr: string, decimals: number, lang: DocLanguage) =>
 export function isInLineContext(xslt: string, offset: number): boolean {
     const { selects, match } = contextAt(xslt, offset);
     const inner = selects.length ? selects[selects.length - 1] : match;
-    return !!inner && /(InvoiceLine|DespatchLine|ReceiptLine|CreditNoteLine|[:'"](?:bilet|biletIptal|koltuk)\b|СведТов|IssuItemInformation|\bItemList\b|\bitemList\b)/.test(inner);
+    return !!inner && /(InvoiceLine|DespatchLine|ReceiptLine|CreditNoteLine|[:'"](?:bilet|biletIptal|koltuk)\b|СведТов|IssuItemInformation|\bItemList\b|\bitemList\b|[:'"](?:det|Comp)\b)/.test(inner);
 }
 
 const escapeText = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');

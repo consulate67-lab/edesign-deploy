@@ -14,6 +14,7 @@ export const BROCHURE_OPTIONS: { id: BrochureId; label: string }[] = [
     { id: 'ru', label: 'Rusça' },
     { id: 'zh', label: 'Çince' },
     { id: 'hi', label: 'Hintçe' },
+    { id: 'pt', label: 'Portekizce · Brezilya' },
 ];
 
 export const brochureLabel = (id: BrochureId) => BROCHURE_OPTIONS.find(l => l.id === id)?.label ?? id;
@@ -110,8 +111,11 @@ const NAMES: Record<string, string[]> = {
 
 const BY_NAME = new Map(Object.entries(NAMES).flatMap(([code, names]) => names.map(n => [foldCountry(n), code] as const)));
 
-/** Hindistan'da iş yazışması İngilizce yürür; ABD ve Hindistan kendi formatını öne çıkaran sürümü alır. */
-const BROCHURE_OVERRIDE: Record<string, BrochureId> = { IN: 'en-in', US: 'en-us' };
+/**
+ * Hindistan'da iş yazışması İngilizce yürür; ABD ve Hindistan kendi formatını öne çıkaran sürümü alır.
+ * Portekizce broşür Brezilya belgelerini (NF-e) anlatır; Portekiz CIUS-PT'li Avrupa sürümünü alır.
+ */
+const BROCHURE_OVERRIDE: Record<string, BrochureId> = { IN: 'en-in', US: 'en-us', PT: 'en' };
 
 export const countryCode = (name: string): string | null => BY_NAME.get(foldCountry(name)) ?? null;
 

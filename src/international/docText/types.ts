@@ -6,10 +6,13 @@
 import type { IntlLabels } from '../../xslt-editor/intlCatalog';
 
 /** Ülke belge türleri; UBL tip kodları `countryDocuments.ts` içindedir. */
-export type IntlDocKind = 'invoice' | 'credit' | 'corrected' | 'prepayment' | 'partial' | 'selfbilled' | 'despatch';
+export type IntlDocKind = 'invoice' | 'credit' | 'corrected' | 'prepayment' | 'partial' | 'selfbilled' | 'despatch' | NationalDocKind;
+
+/** Yalnız ulusal biçimlerde olan türler (BR: NFS-e hizmet faturası, NFC-e tüketici belgesi); adları şablonda. */
+export type NationalDocKind = 'service' | 'consumer';
 
 /** Belge adları, o dilde kullanılan resmî/yaygın adlarıyla (ör. it: Fattura, Nota di credito, Documento di trasporto). */
-export type DocTitles = Record<IntlDocKind, string>;
+export type DocTitles = Record<Exclude<IntlDocKind, NationalDocKind>, string> & Partial<Record<NationalDocKind, string>>;
 
 /** Örnek XML'lerdeki serbest metinler. */
 export interface SampleTexts {

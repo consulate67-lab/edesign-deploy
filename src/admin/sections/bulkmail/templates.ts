@@ -20,6 +20,8 @@ import zhHtml from '../../../../marketing/email-tanitim-zh.html?raw';
 import zhText from '../../../../marketing/email-tanitim-zh.txt?raw';
 import hiHtml from '../../../../marketing/email-tanitim-hi.html?raw';
 import hiText from '../../../../marketing/email-tanitim-hi.txt?raw';
+import ptHtml from '../../../../marketing/email-tanitim-pt.html?raw';
+import ptText from '../../../../marketing/email-tanitim-pt.txt?raw';
 import subjects from '../../../../marketing/email-tanitim-subjects.json';
 
 /** Hazır tanıtım broşürleri; yabancı diller `marketing/build-intl-brochures.mjs` ile üretilir. */
@@ -34,4 +36,5 @@ export const BROCHURES: Record<BrochureId, MailContent> = {
     ru: { subject: subjects.ru, html: ruHtml, text: ruText },
     zh: { subject: subjects.zh, html: zhHtml, text: zhText },
     hi: { subject: subjects.hi, html: hiHtml, text: hiText },
+    pt: { subject: subjects.pt, html: ptHtml, text: ptText },
 };

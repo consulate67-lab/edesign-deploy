@@ -56,6 +56,9 @@ const UBL_CREDIT_NOTE = 'urn:oasis:names:specification:ubl:schema:xsd:CreditNote
 const UBL_DESPATCH = 'urn:oasis:names:specification:ubl:schema:xsd:DespatchAdvice-2';
 const CII_INVOICE = 'urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100';
 const EN16931 = 'urn:cen.eu:en16931:2017';
+const BR_NFE = 'http://www.portalfiscal.inf.br/nfe';
+const BR_CTE = 'http://www.portalfiscal.inf.br/cte';
+const BR_NFSE = 'http://www.sped.fazenda.gov.br/nfse';
 
 const UBL_BILLING_ROOTS: XmlRoot[] = [
     { localName: 'Invoice', namespace: UBL_INVOICE },
@@ -266,6 +269,33 @@ export const documentProfiles: DocumentProfile[] = [
         id: 'cn-fully-digital', name: '数电发票 (全面数字化的电子发票, GB/T 42965)', families: ['invoice', 'archive'], purpose: 'document', syntax: 'national',
         roots: [{ localName: 'EInvoice', namespace: '' }],
         validationArtifacts: ['GB/T 42965.1-2023', '税务机关 SM2 签名'], implementation: 'available',
+    },
+
+    // ---------------- Brezilya ----------------
+    {
+        id: 'br-nfe', name: 'NF-e modelo 55 / DANFE (leiaute 4.00 + RTC)', families: ['invoice'], purpose: 'document', syntax: 'national',
+        roots: [{ localName: 'nfeProc', namespace: BR_NFE }, { localName: 'NFe', namespace: BR_NFE }],
+        validationArtifacts: ['MOC NF-e 7.0 (Ajuste SINIEF 07/2005)', 'NT 2025.002-RTC (IBS/CBS/IS)', 'NT 2026.010 (DANFE RTC)', 'PL_010 XSD'], implementation: 'available',
+    },
+    {
+        id: 'br-nfce', name: 'NFC-e modelo 65 / DANFE NFC-e', families: ['archive'], purpose: 'document', syntax: 'national',
+        roots: [{ localName: 'nfeProc', namespace: BR_NFE }, { localName: 'NFe', namespace: BR_NFE }],
+        validationArtifacts: ['Ajuste SINIEF 19/2016', 'MOC NFC-e Anexo I (DANFE NFC-e e QR Code)', 'NT 2025.002-RTC'], implementation: 'available',
+    },
+    {
+        id: 'br-nfse', name: 'NFS-e Padrão Nacional / DANFSe v2.0', families: ['invoice'], purpose: 'document', syntax: 'national',
+        roots: [{ localName: 'NFSe', namespace: BR_NFSE }],
+        validationArtifacts: ['LC 214/2025 art. 62', 'Leiaute DPS/NFS-e SNNFSe (NT 004 RTC)', 'NT SE/CGNFS-e 008/2026 (DANFSe)'], implementation: 'available',
+    },
+    {
+        id: 'br-cte', name: 'CT-e modelo 57 / DACTE (leiaute 4.00)', families: ['despatch'], purpose: 'document', syntax: 'national',
+        roots: [{ localName: 'cteProc', namespace: BR_CTE }, { localName: 'CTe', namespace: BR_CTE }],
+        validationArtifacts: ['MOC CT-e 4.00 (Ajuste SINIEF 09/2007)', 'NT 2026.002-RTC'], implementation: 'available',
+    },
+    {
+        id: 'br-mdfe', name: 'MDF-e modelo 58 / DAMDFE', families: ['despatch'], purpose: 'document', syntax: 'national',
+        roots: [{ localName: 'mdfeProc', namespace: 'http://www.portalfiscal.inf.br/mdfe' }],
+        validationArtifacts: ['MOC MDF-e 3.00 (Ajuste SINIEF 21/2010)'], implementation: 'planned',
     },
 ];
 
@@ -562,6 +592,18 @@ export const countryDocumentRules: CountryDocumentRules[] = [
         archive: { equivalent: 'invoice', profiles: ['cn-fully-digital'], note: 'Tüketiciye 电子发票（普通发票） düzenlenir; iade için 红字发票.' },
         despatch: { equivalent: 'optional', profiles: [], note: 'Elektronik sevk belgesi zorunluluğu yok.' },
         sources: ['https://fgk.chinatax.gov.cn/zcfgk/c100012/c5236067/content.html', 'https://www.gov.cn/zhengce/zhengceku/202411/content_6989164.htm'],
+    },
+    {
+        country: 'BR',
+        invoice: { mandate: 'mandatory', profiles: ['br-nfe', 'br-nfse'], note: 'Mal satışında NF-e (model 55) zorunlu; SEFAZ yetkilendirir (44 haneli erişim anahtarı + protokol), alıcıya DANFE verilir. Hizmette ulusal NFS-e (DANFSe v2.0); Simples Nacional için 1.11.2026’dan itibaren Emissor Nacional zorunlu. Vergi reformu (LC 214/2025): IBS/CBS alanları 3.8.2026’dan beri zorunlu, 2026 test oranları CBS %0,9 + IBS %0,1.' },
+        archive: { equivalent: 'invoice', profiles: ['br-nfce'], note: 'Perakendede NFC-e (model 65); tüketiciye QR kodlu DANFE NFC-e verilir (Ajuste SINIEF 19/2016).' },
+        despatch: { equivalent: 'document', profiles: ['br-cte', 'br-mdfe'], note: 'Malla birlikte DANFE dolaşır; taşıyıcı CT-e (model 57, DACTE) düzenler, yük manifestosu için MDF-e (model 58) gerekir.' },
+        sources: [
+            'https://www.nfe.fazenda.gov.br/portal/principal.aspx',
+            'https://www.gov.br/nfse/pt-br',
+            'https://www.cte.fazenda.gov.br/portal/',
+            'https://www.gov.br/receitafederal/pt-br/assuntos/noticias/2026/julho/receita-federal-e-comite-gestor-do-ibs-publicam-o-cronograma-de-implementacao-dos-documentos-fiscais-eletronicos-da-reforma-tributaria-do-consumo',
+        ],
     },
 ];
 

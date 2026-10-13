@@ -4,6 +4,9 @@
  *  - IN: GST e-Invoice INV-01 (IRP JSON şema 1.1) ve e-Way Bill (EWB-01); JSON alan adları XML eleman adı olarak
  *        korunur, diziler aynı adlı tekrar eden elemanlardır (ItemList, itemList).
  *  - CN: 数电发票 XML (GB/T 42965), vergi idaresi imzası örnekte yer tutucudur.
+ *  - BR: NF-e / NFC-e 4.00 (NT 2025.002-RTC IBS/CBS grupları), NFS-e padrão nacional (DPS + NFS-e),
+ *        CT-e 4.00. Erişim anahtarları ve CNPJ/CPF kontrol haneleri gerçek algoritmayla üretilir;
+ *        dijital imza (Signature) örnekte yoktur.
  * Tutarlar satırlardan hesaplanır; belge numaraları ve kimlikler kurgusaldır.
  */
 import type { CountryCode } from '../registry/countryProfiles';
@@ -367,11 +370,438 @@ function cnInvoice(kind: IntlDocKind, lang: DocLanguage): string {
     ].join('\n');
 }
 
+// ---------------------------------------------------------------- Brezilya
+
+const BR_NFE_NS = 'http://www.portalfiscal.inf.br/nfe';
+const BR_CTE_NS = 'http://www.portalfiscal.inf.br/cte';
+const BR_NFSE_NS = 'http://www.sped.fazenda.gov.br/nfse';
+
+/** IBGE município kodu ve UF. */
+const BR_MUN: Record<string, [cMun: string, uf: string]> = {
+    'São Paulo': ['3550308', 'SP'], Campinas: ['3509502', 'SP'], Guarulhos: ['3518800', 'SP'],
+};
+const BR_UF_CODE: Record<string, string> = { SP: '35' };
+
+/** Módulo 11 (pesos 2–9, da direita): DV da chave de acesso NF-e / NFC-e / CT-e / NFS-e. */
+export function brMod11(digits: string): number {
+    let weight = 2;
+    let sum = 0;
+    for (let i = digits.length - 1; i >= 0; i--) {
+        sum += Number(digits[i]) * weight;
+        weight = weight === 9 ? 2 : weight + 1;
+    }
+    const r = sum % 11;
+    return r < 2 ? 0 : 11 - r;
+}
+
+const brOffset = (d: Date, time: string) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${time}-03:00`;
+const brIso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const brYyMm = (d: Date) => `${String(d.getFullYear()).slice(2)}${pad(d.getMonth() + 1)}`;
+
+/** Chave de acesso de 44 dígitos: cUF AAMM CNPJ mod série nNF tpEmis cNF DV. */
+function brChave(uf: string, d: Date, cnpj: string, mod: string, serie: string, n: string, code: string): string {
+    const base = `${BR_UF_CODE[uf]}${brYyMm(d)}${cnpj}${mod}${serie.padStart(3, '0')}${n.padStart(9, '0')}1${code}`;
+    return base + brMod11(base);
+}
+
+interface BrParty { cnpj?: string; cpf?: string; name: string; fant?: string; street: string; nro: string; bairro: string; city: string; cep: string; ie?: string; im?: string; fone?: string; email?: string }
+
+const brParty = (p: CountrySample['seller']): BrParty => {
+    const [street, nro, bairro] = p.street.split(', ');
+    return {
+        cnpj: p.vat, name: p.legal, fant: p.name, street, nro, bairro, city: p.city, cep: p.postal,
+        ie: p.reg?.[0] === 'IE' ? p.reg[1] : undefined, im: p.reg?.[0] === 'IM' ? p.reg[1] : undefined,
+        fone: p.contact?.[1], email: p.contact?.[2],
+    };
+};
+
+const BR_RETAIL: BrParty = {
+    cnpj: '23456789000195', name: 'Casa & Conforto Móveis Ltda', fant: 'Casa & Conforto', street: 'Rua Augusta', nro: '1200', bairro: 'Consolação',
+    city: 'São Paulo', cep: '01304001', ie: '148273650110', fone: '1131427788', email: 'loja@casaeconforto.com.br',
+};
+const BR_CARRIER: BrParty = {
+    cnpj: '45678901000175', name: 'Rodo Expresso Paulista Ltda', fant: 'Rodo Expresso', street: 'Rod. Presidente Dutra', nro: 'km 225', bairro: 'Jardim Presidente Dutra',
+    city: 'Guarulhos', cep: '07034000', ie: '336145870115', fone: '1124631900', email: 'cte@rodoexpresso.com.br',
+};
+
+/** enderEmit / enderDest / enderReme … (NF-e e CT-e). */
+function brAddress(tag: string, p: BrParty, withCountry = true) {
+    const [cMun, uf] = BR_MUN[p.city] ?? BR_MUN['São Paulo'];
+    return [
+        `<${tag}>`, el('xLgr', p.street), el('nro', p.nro), el('xBairro', p.bairro), el('cMun', cMun), el('xMun', p.city), el('UF', uf), el('CEP', p.cep),
+        withCountry ? `${el('cPais', '1058')}${el('xPais', 'Brasil')}` : '', p.fone ? el('fone', p.fone) : '', `</${tag}>`,
+    ].join('');
+}
+
+interface BrItem { code: string; name: string; ncm: string; unit: string; qty: number; price: number }
+
+function brItems(s: CountrySample, en: boolean): BrItem[] {
+    return [
+        { code: 'ERG-CH-120', name: en ? 'Ergonomic office chair, black mesh back' : 'Cadeira de escritório ergonômica, encosto em tela preta', ncm: '94013900', unit: 'UN', qty: 4, price: localPrice(289, s.scale) },
+        { code: 'MES-160', name: en ? 'Office desk 160 x 80 cm' : 'Mesa de escritório 160 x 80 cm', ncm: '94033000', unit: 'UN', qty: 2, price: localPrice(420, s.scale) },
+        { code: 'MAT-150', name: en ? 'Floor protection mat' : 'Protetor de piso para cadeira', ncm: '39181000', unit: 'UN', qty: 2, price: localPrice(24.5, s.scale) },
+    ];
+}
+
+/** Tributos do item de uma empresa do regime normal: ICMS, PIS/COFINS não cumulativos e IBS/CBS (fase de teste 2026). */
+function brTaxes(vProd: number, icmsRate: number) {
+    const vICMS = round2(vProd * icmsRate / 100);
+    const vBCPis = round2(vProd - vICMS);
+    const vPIS = round2(vBCPis * 0.0165);
+    const vCOFINS = round2(vBCPis * 0.076);
+    const vBC = round2(vProd - vICMS - vPIS - vCOFINS);
+    const vIBSUF = round2(vBC * 0.001);
+    const vCBS = round2(vBC * 0.009);
+    return { vICMS, vBCPis, vPIS, vCOFINS, vBC, vIBSUF, vIBSMun: 0, vCBS };
+}
+
+const brIbsCbs = (t: ReturnType<typeof brTaxes>) => [
+    '<IBSCBS>', el('CST', '000'), el('cClassTrib', '000001'),
+    '<gIBSCBS>', el('vBC', money(t.vBC)),
+    `<gIBSUF>${el('pIBSUF', '0.1000')}${el('vIBSUF', money(t.vIBSUF))}</gIBSUF>`,
+    `<gIBSMun>${el('pIBSMun', '0.0000')}${el('vIBSMun', money(t.vIBSMun))}</gIBSMun>`,
+    el('vIBS', money(t.vIBSUF + t.vIBSMun)),
+    `<gCBS>${el('pCBS', '0.9000')}${el('vCBS', money(t.vCBS))}</gCBS>`,
+    '</gIBSCBS>', '</IBSCBS>',
+].join('');
+
+const brIbsCbsTot = (vBC: number, vIBSUF: number, vIBSMun: number, vCBS: number) => [
+    '<IBSCBSTot>', el('vBCIBSCBS', money(vBC)),
+    '<gIBS>',
+    `<gIBSUF>${el('vDif', '0.00')}${el('vDevTrib', '0.00')}${el('vIBSUF', money(vIBSUF))}</gIBSUF>`,
+    `<gIBSMun>${el('vDif', '0.00')}${el('vDevTrib', '0.00')}${el('vIBSMun', money(vIBSMun))}</gIBSMun>`,
+    el('vIBS', money(vIBSUF + vIBSMun)), el('vCredPres', '0.00'), el('vCredPresCondSus', '0.00'),
+    '</gIBS>',
+    `<gCBS>${el('vDif', '0.00')}${el('vDevTrib', '0.00')}${el('vCBS', money(vCBS))}${el('vCredPres', '0.00')}${el('vCredPresCondSus', '0.00')}</gCBS>`,
+    '</IBSCBSTot>',
+].join('');
+
+const brProt = (tag: 'protNFe' | 'protCTe', key: 'chNFe' | 'chCTe', chave: string, d: Date, nProt: string, motivo: string) =>
+    `<${tag} versao="4.00"><infProt>${el('tpAmb', 1)}${el('verAplic', 'SP-PL_010')}${el(key, chave)}${el('dhRecbto', brOffset(d, '15:30:42'))}${el('nProt', nProt)}${el('digVal', 'k4Vq3b2Yc8Rz1mWpN0aTfE7uHsJ=')}${el('cStat', 100)}${el('xMotivo', motivo)}</infProt></${tag}>`;
+
+/** Notas da venda modelo usadas no NF-e e referenciadas no CT-e. */
+function brSale(s: CountrySample, en: boolean) {
+    const lines = brItems(s, en).map(l => {
+        const vProd = round2(l.qty * l.price);
+        return { l, vProd, t: brTaxes(vProd, s.rate) };
+    });
+    const vProd = round2(lines.reduce((n, r) => n + r.vProd, 0));
+    return { lines, vProd };
+}
+
+const brNfeKey = (d: Date, n: string, code: string, cnpj = '12345678000195') => brChave('SP', d, cnpj, '55', '1', n, code);
+
+/** NF-e modelo 55: invoice = venda (finNFe 1), credit = devolução (4), corrected = complementar (2). */
+function brNfe(kind: IntlDocKind, lang: DocLanguage): string {
+    const s = COUNTRY_SAMPLES.BR;
+    const en = lang !== 'pt';
+    const today = new Date();
+    const credit = kind === 'credit';
+    const complement = kind === 'corrected';
+    const emit = brParty(s.seller);
+    const dest = brParty(s.buyer);
+    const sale = brSale(s, en);
+    const originalKey = brNfeKey(addDays(today, -12), '4180', '30418027');
+    const n = credit ? '4231' : complement ? '4232' : '4180';
+    const issued = credit || complement ? today : addDays(today, -12);
+    const chave = credit || complement ? brNfeKey(today, n, credit ? '30423112' : '30423213') : originalKey;
+
+    const rows = credit
+        ? [{ ...sale.lines[0], l: { ...sale.lines[0].l, qty: 1 }, vProd: sale.lines[0].l.price, t: brTaxes(sale.lines[0].l.price, s.rate) }]
+        : complement
+            ? [{ l: { ...sale.lines[0].l, name: en ? `Price supplement – ${sale.lines[0].l.name}` : `Complemento de preço – ${sale.lines[0].l.name}`, qty: 0, price: 0 }, vProd: 400, t: brTaxes(400, s.rate) }]
+            : sale.lines;
+    const cfop = credit ? '1202' : '5102';
+    const vProd = round2(rows.reduce((n2, r) => n2 + r.vProd, 0));
+    const tot = (k: keyof ReturnType<typeof brTaxes>) => round2(rows.reduce((n2, r) => n2 + r.t[k], 0));
+    const vNF = vProd;
+    const vTotTrib = round2(tot('vICMS') + tot('vPIS') + tot('vCOFINS'));
+    const natOp = credit ? 'Devolução de venda de mercadoria' : complement ? 'Complemento de preço' : 'Venda de mercadoria adquirida de terceiros';
+    const dups = credit || complement ? [] : [30, 60, 90].map((days, i) => {
+        const part = i < 2 ? round2(Math.floor(vNF / 3 * 100) / 100) : round2(vNF - 2 * Math.floor(vNF / 3 * 100) / 100);
+        return { nDup: `00${i + 1}`, dVenc: brIso(addDays(issued, days)), vDup: part };
+    });
+    const infCpl = credit
+        ? (en ? `Return of 1 chair damaged in transport. Ref. NF-e 4180.` : `Devolução de 1 cadeira avariada no transporte. Ref. NF-e nº 4180.`)
+        : complement
+            ? (en ? 'Price supplement under the contract adjustment clause. Ref. NF-e 4180.' : 'Complemento de preço conforme cláusula de reajuste contratual. Ref. NF-e nº 4180.')
+            : `${en ? 'Purchase order' : 'Pedido de compra'} PC-${today.getFullYear()}-3310. ${en ? 'Approximate taxes' : 'Tributos aproximados'}: R$ ${money(vTotTrib).replace('.', ',')} (Lei 12.741/2012).`;
+    const cNF = chave.slice(35, 43);
+
+    return [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        `<nfeProc xmlns="${BR_NFE_NS}" versao="4.00">`,
+        '<NFe>',
+        `<infNFe Id="NFe${chave}" versao="4.00">`,
+        '<ide>',
+        el('cUF', '35'), el('cNF', cNF), el('natOp', natOp), el('mod', '55'), el('serie', '1'), el('nNF', n),
+        el('dhEmi', brOffset(issued, '15:30:00')), credit ? '' : el('dhSaiEnt', brOffset(issued, '16:00:00')),
+        el('tpNF', credit ? 0 : 1), el('idDest', 1), el('cMunFG', '3550308'), el('tpImp', 1), el('tpEmis', 1), el('cDV', chave.slice(-1)),
+        el('tpAmb', 1), el('finNFe', credit ? 4 : complement ? 2 : 1), el('indFinal', 1), el('indPres', 9), el('procEmi', 0), el('verProc', 'eDesign 1.0'),
+        credit || complement ? `<NFref>${el('refNFe', originalKey)}</NFref>` : '',
+        '</ide>',
+        '<emit>', el('CNPJ', emit.cnpj ?? ''), el('xNome', emit.name), el('xFant', emit.fant ?? ''), brAddress('enderEmit', emit), el('IE', emit.ie ?? ''), el('CRT', 3), '</emit>',
+        '<dest>', el('CNPJ', dest.cnpj ?? ''), el('xNome', dest.name), brAddress('enderDest', dest), el('indIEDest', 9), el('IM', dest.im ?? ''), el('email', dest.email ?? ''), '</dest>',
+        ...rows.map(({ l, vProd: v, t }, i) => [
+            `<det nItem="${i + 1}">`,
+            '<prod>',
+            el('cProd', l.code), el('cEAN', 'SEM GTIN'), el('xProd', l.name), el('NCM', l.ncm), el('CFOP', cfop),
+            el('uCom', l.unit), el('qCom', l.qty.toFixed(4)), el('vUnCom', l.price.toFixed(10)), el('vProd', money(v)),
+            el('cEANTrib', 'SEM GTIN'), el('uTrib', l.unit), el('qTrib', l.qty.toFixed(4)), el('vUnTrib', l.price.toFixed(10)), el('indTot', 1),
+            '</prod>',
+            '<imposto>',
+            el('vTotTrib', money(t.vICMS + t.vPIS + t.vCOFINS)),
+            `<ICMS><ICMS00>${el('orig', 0)}${el('CST', '00')}${el('modBC', 3)}${el('vBC', money(v))}${el('pICMS', s.rate.toFixed(4))}${el('vICMS', money(t.vICMS))}</ICMS00></ICMS>`,
+            `<PIS><PISAliq>${el('CST', '01')}${el('vBC', money(t.vBCPis))}${el('pPIS', '1.6500')}${el('vPIS', money(t.vPIS))}</PISAliq></PIS>`,
+            `<COFINS><COFINSAliq>${el('CST', '01')}${el('vBC', money(t.vBCPis))}${el('pCOFINS', '7.6000')}${el('vCOFINS', money(t.vCOFINS))}</COFINSAliq></COFINS>`,
+            brIbsCbs(t),
+            '</imposto>',
+            '</det>',
+        ].join('')),
+        '<total>',
+        '<ICMSTot>',
+        el('vBC', money(vProd)), el('vICMS', money(tot('vICMS'))), el('vICMSDeson', '0.00'), el('vFCP', '0.00'), el('vBCST', '0.00'), el('vST', '0.00'),
+        el('vFCPST', '0.00'), el('vFCPSTRet', '0.00'), el('vProd', money(vProd)), el('vFrete', '0.00'), el('vSeg', '0.00'), el('vDesc', '0.00'),
+        el('vII', '0.00'), el('vIPI', '0.00'), el('vIPIDevol', '0.00'), el('vPIS', money(tot('vPIS'))), el('vCOFINS', money(tot('vCOFINS'))),
+        el('vOutro', '0.00'), el('vNF', money(vNF)), el('vTotTrib', money(vTotTrib)),
+        '</ICMSTot>',
+        brIbsCbsTot(tot('vBC'), tot('vIBSUF'), tot('vIBSMun'), tot('vCBS')),
+        '</total>',
+        '<transp>',
+        el('modFrete', credit || complement ? 9 : 0),
+        credit || complement ? '' : `<transporta>${el('CNPJ', BR_CARRIER.cnpj ?? '')}${el('xNome', BR_CARRIER.name)}${el('IE', BR_CARRIER.ie ?? '')}${el('xEnder', `${BR_CARRIER.street}, ${BR_CARRIER.nro}`)}${el('xMun', BR_CARRIER.city)}${el('UF', 'SP')}</transporta>`,
+        credit || complement ? '' : `<vol>${el('qVol', 8)}${el('esp', 'CAIXA')}${el('marca', 'ERGO')}${el('nVol', '1/8')}${el('pesoL', '164.000')}${el('pesoB', '182.500')}</vol>`,
+        '</transp>',
+        dups.length ? [
+            '<cobr>',
+            `<fat>${el('nFat', n)}${el('vOrig', money(vNF))}${el('vDesc', '0.00')}${el('vLiq', money(vNF))}</fat>`,
+            ...dups.map(d => `<dup>${el('nDup', d.nDup)}${el('dVenc', d.dVenc)}${el('vDup', money(d.vDup))}</dup>`),
+            '</cobr>',
+        ].join('') : '',
+        '<pag>',
+        dups.length
+            ? `<detPag>${el('indPag', 1)}${el('tPag', '15')}${el('vPag', money(vNF))}</detPag>`
+            : `<detPag>${el('tPag', '90')}${el('vPag', '0.00')}</detPag>`,
+        '</pag>',
+        `<infAdic>${el('infCpl', infCpl)}</infAdic>`,
+        '</infNFe>',
+        '</NFe>',
+        brProt('protNFe', 'chNFe', chave, issued, `135${String(issued.getFullYear()).slice(2)}${credit ? '0012349871' : complement ? '0012349872' : '0012345678'}`, 'Autorizado o uso da NF-e'),
+        '</nfeProc>',
+    ].filter(Boolean).join('\n');
+}
+
+/** NFC-e modelo 65 de uma loja do Simples Nacional (CSOSN 102; IBS/CBS a partir de 2027 para o SN). */
+function brNfce(lang: DocLanguage): string {
+    const s = COUNTRY_SAMPLES.BR;
+    const en = lang !== 'pt';
+    const today = new Date();
+    const emit = BR_RETAIL;
+    const all = brItems(s, en);
+    const rows = [{ ...all[0], qty: 1 }, { ...all[2], qty: 1 }].map(l => ({ l, vProd: round2(l.qty * l.price) }));
+    const vNF = round2(rows.reduce((n, r) => n + r.vProd, 0));
+    const fed = round2(vNF * 0.1345);
+    const est = round2(vNF * 0.18);
+    const n = '52831';
+    const chave = brChave('SP', today, emit.cnpj ?? '', '65', '1', n, '71829304');
+    return [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        `<nfeProc xmlns="${BR_NFE_NS}" versao="4.00">`,
+        '<NFe>',
+        `<infNFe Id="NFe${chave}" versao="4.00">`,
+        '<ide>',
+        el('cUF', '35'), el('cNF', chave.slice(35, 43)), el('natOp', 'Venda ao consumidor'), el('mod', '65'), el('serie', '1'), el('nNF', n),
+        el('dhEmi', brOffset(today, '18:42:05')), el('tpNF', 1), el('idDest', 1), el('cMunFG', '3550308'), el('tpImp', 4), el('tpEmis', 1),
+        el('cDV', chave.slice(-1)), el('tpAmb', 1), el('finNFe', 1), el('indFinal', 1), el('indPres', 1), el('procEmi', 0), el('verProc', 'eDesign 1.0'),
+        '</ide>',
+        '<emit>', el('CNPJ', emit.cnpj ?? ''), el('xNome', emit.name), el('xFant', emit.fant ?? ''), brAddress('enderEmit', emit), el('IE', emit.ie ?? ''), el('CRT', 1), '</emit>',
+        `<dest>${el('CPF', '12345678909')}${el('indIEDest', 9)}</dest>`,
+        ...rows.map(({ l, vProd }, i) => [
+            `<det nItem="${i + 1}">`,
+            '<prod>',
+            el('cProd', l.code), el('cEAN', 'SEM GTIN'), el('xProd', l.name), el('NCM', l.ncm), el('CFOP', '5102'),
+            el('uCom', l.unit), el('qCom', l.qty.toFixed(4)), el('vUnCom', l.price.toFixed(10)), el('vProd', money(vProd)),
+            el('cEANTrib', 'SEM GTIN'), el('uTrib', l.unit), el('qTrib', l.qty.toFixed(4)), el('vUnTrib', l.price.toFixed(10)), el('indTot', 1),
+            '</prod>',
+            '<imposto>',
+            el('vTotTrib', money(round2(vProd * 0.3145))),
+            `<ICMS><ICMSSN102>${el('orig', 0)}${el('CSOSN', '102')}</ICMSSN102></ICMS>`,
+            `<PIS><PISOutr>${el('CST', '49')}${el('vBC', '0.00')}${el('pPIS', '0.0000')}${el('vPIS', '0.00')}</PISOutr></PIS>`,
+            `<COFINS><COFINSOutr>${el('CST', '49')}${el('vBC', '0.00')}${el('pCOFINS', '0.0000')}${el('vCOFINS', '0.00')}</COFINSOutr></COFINS>`,
+            '</imposto>',
+            '</det>',
+        ].join('')),
+        '<total><ICMSTot>',
+        ...['vBC', 'vICMS', 'vICMSDeson', 'vFCP', 'vBCST', 'vST', 'vFCPST', 'vFCPSTRet'].map(k => el(k, '0.00')),
+        el('vProd', money(vNF)), ...['vFrete', 'vSeg', 'vDesc', 'vII', 'vIPI', 'vIPIDevol', 'vPIS', 'vCOFINS', 'vOutro'].map(k => el(k, '0.00')),
+        el('vNF', money(vNF)), el('vTotTrib', money(round2(fed + est))),
+        '</ICMSTot></total>',
+        `<transp>${el('modFrete', 9)}</transp>`,
+        '<pag>',
+        `<detPag>${el('indPag', 0)}${el('tPag', '03')}${el('vPag', money(vNF))}<card>${el('tpIntegra', 2)}${el('CNPJ', '01027058000191')}${el('tBand', '01')}${el('cAut', '274615')}</card></detPag>`,
+        el('vTroco', '0.00'),
+        '</pag>',
+        `<infAdic>${el('infCpl', `${en ? 'Approx. taxes' : 'Trib. aprox.'} R$ ${money(fed).replace('.', ',')} ${en ? 'federal' : 'Federal'} ${en ? 'and' : 'e'} R$ ${money(est).replace('.', ',')} ${en ? 'state' : 'Estadual'} - ${en ? 'Source' : 'Fonte'}: IBPT. ${en ? 'Thank you, come back soon!' : 'Obrigado, volte sempre!'}`)}</infAdic>`,
+        '</infNFe>',
+        `<infNFeSupl>${el('qrCode', `https://www.nfce.fazenda.sp.gov.br/qrcode?p=${chave}|2|1|1|5E8C2A7D41F0B93C6A1E4D27F58B0C3916E2A4D7`)}${el('urlChave', 'https://www.nfce.fazenda.sp.gov.br/consulta')}</infNFeSupl>`,
+        '</NFe>',
+        brProt('protNFe', 'chNFe', chave, today, `135${String(today.getFullYear()).slice(2)}0098765432`, 'Autorizado o uso da NF-e'),
+        '</nfeProc>',
+    ].join('\n');
+}
+
+/** NFS-e padrão nacional (DPS gerada pelo prestador, NFS-e emitida pela Sefin Nacional). */
+function brNfse(lang: DocLanguage): string {
+    const s = COUNTRY_SAMPLES.BR;
+    const en = lang !== 'pt';
+    const today = new Date();
+    const prest = brParty(s.seller);
+    const toma = brParty(s.buyer);
+    const nNFSe = '1287';
+    const base = `3550308${2}${2}${prest.cnpj}${nNFSe.padStart(13, '0')}${brYyMm(today)}${'384615072'}`;
+    const chave = base + brMod11(base);
+    const vServ = round2(6 * localPrice(65, s.scale));
+    const vISSQN = round2(vServ * 0.05);
+    const vPis = round2(vServ * 0.0165);
+    const vCofins = round2(vServ * 0.076);
+    const vBC = round2(vServ - vISSQN - vPis - vCofins);
+    const vIBSUF = round2(vBC * 0.001);
+    const vCBS = round2(vBC * 0.009);
+    const vLiq = vServ;
+    const desc = en
+        ? 'Assembly and installation of 6 office workstations (chairs and desks) at the customer’s premises, including levelling and cable routing.'
+        : 'Montagem e instalação de 6 estações de trabalho (cadeiras e mesas) nas dependências do tomador, incluindo nivelamento e passagem de cabos.';
+    const endNac = (p: BrParty) => {
+        const [cMun] = BR_MUN[p.city] ?? BR_MUN['São Paulo'];
+        return `<end><endNac>${el('cMun', cMun)}${el('CEP', p.cep)}</endNac>${el('xLgr', p.street)}${el('nro', p.nro)}${el('xBairro', p.bairro)}</end>`;
+    };
+    return [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        `<NFSe xmlns="${BR_NFSE_NS}" versao="1.01">`,
+        `<infNFSe Id="NFS${chave}">`,
+        el('xLocEmi', 'São Paulo'), el('xLocPrestacao', 'Campinas'), el('nNFSe', nNFSe), el('cLocIncid', '3550308'), el('xLocIncid', 'São Paulo'),
+        el('xTribNac', 'Instalação e montagem de aparelhos, máquinas e equipamentos, inclusive montagem industrial, prestados ao usuário final, exclusivamente com material por ele fornecido.'),
+        el('verAplic', 'SefinNac_1.6.0'), el('ambGer', 2), el('tpEmis', 1), el('procEmi', 1), el('cStat', 100), el('dhProc', brOffset(today, '10:15:27')),
+        el('nDFSe', '208437162'),
+        '<emit>', el('CNPJ', prest.cnpj ?? ''), el('IM', '4.876.512-3'), el('xNome', prest.name), el('xFant', prest.fant ?? ''),
+        `<enderNac>${el('xLgr', prest.street)}${el('nro', prest.nro)}${el('xBairro', prest.bairro)}${el('cMun', '3550308')}${el('UF', 'SP')}${el('CEP', prest.cep)}</enderNac>`,
+        el('fone', prest.fone ?? ''), el('email', prest.email ?? ''), '</emit>',
+        `<valores>${el('vBC', money(vServ))}${el('pAliqAplic', '5.00')}${el('vISSQN', money(vISSQN))}${el('vTotalRet', '0.00')}${el('vLiq', money(vLiq))}</valores>`,
+        '<IBSCBS>',
+        el('cLocalidadeIncid', '3509502'), el('xLocalidadeIncid', 'Campinas'),
+        '<valores>', el('vBC', money(vBC)), el('vCalcReeRepRes', '0.00'),
+        `<uf>${el('pIBSUF', '0.10')}${el('pRedAliqUF', '0.00')}${el('pAliqEfetUF', '0.10')}</uf>`,
+        `<mun>${el('pIBSMun', '0.00')}${el('pRedAliqMun', '0.00')}${el('pAliqEfetMun', '0.00')}</mun>`,
+        `<fed>${el('pCBS', '0.90')}${el('pRedAliqCBS', '0.00')}${el('pAliqEfetCBS', '0.90')}</fed>`,
+        '</valores>',
+        '<totCIBS>', el('vTotNF', money(round2(vLiq + vIBSUF + vCBS))),
+        `<gIBS>${el('vIBSTot', money(vIBSUF))}<gIBSUFTot>${el('vDifUF', '0.00')}${el('vIBSUF', money(vIBSUF))}</gIBSUFTot><gIBSMunTot>${el('vDifMun', '0.00')}${el('vIBSMun', '0.00')}</gIBSMunTot></gIBS>`,
+        `<gCBS>${el('vDifCBS', '0.00')}${el('vCBS', money(vCBS))}</gCBS>`,
+        '</totCIBS>',
+        '</IBSCBS>',
+        '<DPS versao="1.01">',
+        `<infDPS Id="DPS35503082${prest.cnpj}00001${nNFSe.padStart(15, '0')}">`,
+        el('tpAmb', 1), el('dhEmi', brOffset(today, '10:14:58')), el('verAplic', 'eDesign 1.0'), el('serie', '1'), el('nDPS', nNFSe), el('dCompet', brIso(today)),
+        el('tpEmit', 1), el('cLocEmi', '3550308'),
+        '<prest>', el('CNPJ', prest.cnpj ?? ''), el('IM', '4.876.512-3'), el('xNome', prest.name), endNac(prest), el('fone', prest.fone ?? ''), el('email', prest.email ?? ''),
+        `<regTrib>${el('opSimpNac', 1)}${el('regEspTrib', 0)}</regTrib>`, '</prest>',
+        '<toma>', el('CNPJ', toma.cnpj ?? ''), el('IM', toma.im ?? ''), el('xNome', toma.name), endNac(toma), el('fone', toma.fone ?? ''), el('email', toma.email ?? ''), '</toma>',
+        '<serv>',
+        `<locPrest>${el('cLocPrestacao', '3509502')}${el('cPaisPrestacao', 'BR')}</locPrest>`,
+        `<cServ>${el('cTribNac', '140601')}${el('xDescServ', desc)}${el('cNBS', '114051000')}</cServ>`,
+        `<infoCompl>${el('xPed', `PC-${today.getFullYear()}-3310`)}${el('xInfComp', en ? 'Service related to NF-e 4180 (goods supplied by the customer).' : 'Serviço referente à NF-e nº 4180 (bens fornecidos pelo tomador).')}</infoCompl>`,
+        '</serv>',
+        '<valores>',
+        `<vServPrest>${el('vServ', money(vServ))}</vServPrest>`,
+        '<trib>',
+        `<tribMun>${el('tribISSQN', 1)}${el('tpRetISSQN', 1)}</tribMun>`,
+        `<tribFed><piscofins>${el('CST', '01')}${el('vBCPisCofins', money(vServ))}${el('pAliqPis', '1.65')}${el('pAliqCofins', '7.60')}${el('vPis', money(vPis))}${el('vCofins', money(vCofins))}${el('tpRetPisCofins', 2)}</piscofins></tribFed>`,
+        `<totTrib><vTotTrib>${el('vTotTribFed', money(round2(vPis + vCofins + vCBS)))}${el('vTotTribEst', money(vIBSUF))}${el('vTotTribMun', money(vISSQN))}</vTotTrib></totTrib>`,
+        '</trib>',
+        '</valores>',
+        `<IBSCBS>${el('finNFSe', 0)}${el('indFinal', 0)}${el('cIndOp', '100301')}${el('indDest', 0)}<valores><trib><gIBSCBS>${el('CST', '000')}${el('cClassTrib', '000001')}</gIBSCBS></trib></valores></IBSCBS>`,
+        '</infDPS>',
+        '</DPS>',
+        '</infNFSe>',
+        '</NFSe>',
+    ].join('\n');
+}
+
+/** CT-e modelo 57 (rodoviário) do frete da venda modelo; o tomador é o remetente (CIF). */
+function brCte(lang: DocLanguage): string {
+    const s = COUNTRY_SAMPLES.BR;
+    const en = lang !== 'pt';
+    const today = new Date();
+    const issued = addDays(today, -12);
+    const emit = BR_CARRIER;
+    const rem = brParty(s.seller);
+    const dest = brParty(s.buyer);
+    const { vProd: vCarga } = brSale(s, en);
+    const comps: [string, number][] = [
+        ['FRETE PESO', 620], ['FRETE VALOR', round2(vCarga * 0.002)], ['PEDÁGIO', 38.4], ['GRIS', round2(vCarga * 0.001)],
+    ];
+    const vTPrest = round2(comps.reduce((n, [, v]) => n + v, 0));
+    const vICMS = round2(vTPrest * 0.12);
+    const vBC = round2(vTPrest - vICMS);
+    const vIBSUF = round2(vBC * 0.001);
+    const vCBS = round2(vBC * 0.009);
+    const nCT = '7715';
+    const chave = brChave('SP', issued, emit.cnpj ?? '', '57', '1', nCT, '52190846');
+    const party = (tag: string, addrTag: string, p: BrParty) => [
+        `<${tag}>`, el('CNPJ', p.cnpj ?? ''), p.ie ? el('IE', p.ie) : '', el('xNome', p.name), p.fant ? el('xFant', p.fant) : '', p.fone ? el('fone', p.fone) : '',
+        brAddress(addrTag, { ...p, fone: undefined }), p.email ? el('email', p.email) : '', `</${tag}>`,
+    ].join('');
+    return [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        `<cteProc xmlns="${BR_CTE_NS}" versao="4.00">`,
+        '<CTe>',
+        `<infCte Id="CTe${chave}" versao="4.00">`,
+        '<ide>',
+        el('cUF', '35'), el('cCT', chave.slice(35, 43)), el('CFOP', '5353'), el('natOp', 'Prestação de serviço de transporte a estabelecimento comercial'),
+        el('mod', '57'), el('serie', '1'), el('nCT', nCT), el('dhEmi', brOffset(issued, '16:20:00')), el('tpImp', 1), el('tpEmis', 1), el('cDV', chave.slice(-1)),
+        el('tpAmb', 1), el('tpCTe', 0), el('procEmi', 0), el('verProc', 'eDesign 1.0'),
+        el('cMunEnv', '3518800'), el('xMunEnv', 'Guarulhos'), el('UFEnv', 'SP'), el('modal', '01'), el('tpServ', 0),
+        el('cMunIni', '3550308'), el('xMunIni', 'São Paulo'), el('UFIni', 'SP'), el('cMunFim', '3509502'), el('xMunFim', 'Campinas'), el('UFFim', 'SP'),
+        el('retira', 1), el('indIEToma', 1), `<toma3>${el('toma', 0)}</toma3>`,
+        '</ide>',
+        `<compl>${el('xObs', en ? 'Deliver to the hotel goods receiving area, Mon–Fri 8am–5pm.' : 'Entregar no recebimento de mercadorias do hotel, seg. a sex. das 8h às 17h.')}</compl>`,
+        '<emit>', el('CNPJ', emit.cnpj ?? ''), el('IE', emit.ie ?? ''), el('xNome', emit.name), el('xFant', emit.fant ?? ''),
+        brAddress('enderEmit', emit, false), el('CRT', 3), '</emit>',
+        party('rem', 'enderReme', rem),
+        party('dest', 'enderDest', { ...dest, ie: undefined }),
+        '<vPrest>', el('vTPrest', money(vTPrest)), el('vRec', money(vTPrest)),
+        ...comps.map(([name, v]) => `<Comp>${el('xNome', name)}${el('vComp', money(v))}</Comp>`),
+        '</vPrest>',
+        '<imp>',
+        `<ICMS><ICMS00>${el('CST', '00')}${el('vBC', money(vTPrest))}${el('pICMS', '12.00')}${el('vICMS', money(vICMS))}</ICMS00></ICMS>`,
+        el('vTotTrib', money(round2(vICMS + vTPrest * 0.0925))),
+        `<IBSCBS>${el('CST', '000')}${el('cClassTrib', '000001')}<gIBSCBS>${el('vBC', money(vBC))}<gIBSUF>${el('pIBSUF', '0.1000')}${el('vIBSUF', money(vIBSUF))}</gIBSUF><gIBSMun>${el('pIBSMun', '0.0000')}${el('vIBSMun', '0.00')}</gIBSMun>${el('vIBS', money(vIBSUF))}<gCBS>${el('pCBS', '0.9000')}${el('vCBS', money(vCBS))}</gCBS></gIBSCBS></IBSCBS>`,
+        '</imp>',
+        '<infCTeNorm>',
+        '<infCarga>', el('vCarga', money(vCarga)), el('proPred', en ? 'Office furniture' : 'Móveis de escritório'), el('xOutCat', en ? 'Boxed' : 'Encaixotado'),
+        `<infQ>${el('cUnid', '01')}${el('tpMed', 'PESO BRUTO')}${el('qCarga', '182.5000')}</infQ>`,
+        `<infQ>${el('cUnid', '03')}${el('tpMed', 'VOLUMES')}${el('qCarga', '8.0000')}</infQ>`,
+        '</infCarga>',
+        `<infDoc><infNFe>${el('chave', brNfeKey(issued, '4180', '30418027'))}</infNFe></infDoc>`,
+        `<infModal versaoModal="4.00"><rodo>${el('RNTRC', '04518263')}</rodo></infModal>`,
+        '</infCTeNorm>',
+        '</infCte>',
+        `<infCTeSupl>${el('qrCodCTe', `https://nfe.fazenda.sp.gov.br/CTeConsulta/qrCode?chCTe=${chave}&tpAmb=1`)}</infCTeSupl>`,
+        '</CTe>',
+        brProt('protCTe', 'chCTe', chave, issued, `135${String(issued.getFullYear()).slice(2)}0045612378`, 'Autorizado o uso do CT-e'),
+        '</cteProc>',
+    ].join('\n');
+}
+
 const GENERATORS: Record<string, (kind: IntlDocKind, lang: DocLanguage) => string> = {
     'ru-upd-503': ruUpd,
     'in-gst-einvoice': inEinvoice,
     'in-eway-bill': (_kind, lang) => inEwayBill(lang),
     'cn-fully-digital': cnInvoice,
+    'br-nfe': brNfe,
+    'br-nfce': (_kind, lang) => brNfce(lang),
+    'br-nfse': (_kind, lang) => brNfse(lang),
+    'br-cte': (_kind, lang) => brCte(lang),
 };
 
 export const isNationalProfile = (profileId: string) => profileId in GENERATORS;

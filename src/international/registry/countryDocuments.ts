@@ -23,6 +23,8 @@ export const KIND_SPECS: Record<IntlDocKind, { root: IntlRootName; typeCode?: st
     partial: { root: 'Invoice', typeCode: '326' },
     selfbilled: { root: 'Invoice', typeCode: '389' },
     despatch: { root: 'DespatchAdvice' },
+    service: { root: 'Invoice' },
+    consumer: { root: 'Invoice' },
 };
 
 /** Fatura profilleri, ülke kaydında birden çoksa bu öncelikle seçilir. */
@@ -48,6 +50,8 @@ export interface CountryDocument {
  *  - RU УПД 5.03: invoice = СЧФДОП, prepayment = СЧФ (avans), despatch = ДОП.
  *  - IN: GST e-Invoice (INV / CRN) + e-Way Bill.
  *  - CN 数电发票: invoice = 蓝字专票, credit = 红字发票.
+ *  - BR: NF-e mod. 55 (invoice = finNFe 1, credit = 4 devolução, corrected = 2 complementar),
+ *        NFS-e padrão nacional (service), NFC-e mod. 65 (consumer), CT-e mod. 57 (despatch).
  */
 const NATIONAL_DOCUMENTS: Record<CountryCode, CountryDocument[]> = {
     RU: [
@@ -63,6 +67,14 @@ const NATIONAL_DOCUMENTS: Record<CountryCode, CountryDocument[]> = {
     CN: [
         { kind: 'invoice', profileId: 'cn-fully-digital' },
         { kind: 'credit', profileId: 'cn-fully-digital' },
+    ],
+    BR: [
+        { kind: 'invoice', profileId: 'br-nfe' },
+        { kind: 'credit', profileId: 'br-nfe' },
+        { kind: 'corrected', profileId: 'br-nfe' },
+        { kind: 'service', profileId: 'br-nfse' },
+        { kind: 'consumer', profileId: 'br-nfce' },
+        { kind: 'despatch', profileId: 'br-cte' },
     ],
 };
 

@@ -1,5 +1,5 @@
 /**
- * Country registry — Türkiye + AB/AEA + Birleşik Krallık + İsviçre + ABD, Rusya, Hindistan, Çin.
+ * Country registry — Türkiye + AB/AEA + Birleşik Krallık + İsviçre + ABD, Rusya, Hindistan, Çin, Brezilya.
  *
  * Bu kayıt yalnız ülke metadatasını tutar. Hangi belge için hangi XML
  * profilinin geçerli olduğu `documentProfiles.ts` içindedir; arayüz dili
@@ -11,9 +11,9 @@ import type { DocLanguage } from './docLanguages';
 export type CountryCode = string; // ISO 3166-1 alpha-2
 
 /** Müşteri arayüzünde desteklenen diller. */
-export type UiLanguage = 'tr' | 'en' | 'de' | 'fr' | 'es' | 'zh' | 'hi' | 'ru';
+export type UiLanguage = 'tr' | 'en' | 'de' | 'fr' | 'es' | 'zh' | 'hi' | 'ru' | 'pt';
 
-export type CountryRegion = 'TR' | 'EU' | 'EEA' | 'GB' | 'CH' | 'US' | 'RU' | 'IN' | 'CN';
+export type CountryRegion = 'TR' | 'EU' | 'EEA' | 'GB' | 'CH' | 'US' | 'RU' | 'IN' | 'CN' | 'BR';
 
 export interface CountryProfile {
     code: CountryCode;
@@ -54,7 +54,7 @@ export const countryProfiles: CountryProfile[] = [
     { code: 'MT', name: 'Malta', region: 'EU', currency: 'EUR', locale: 'en-MT', uiLanguage: 'en', docLanguages: ['en', 'mt'] },
     { code: 'NL', name: 'Netherlands', region: 'EU', currency: 'EUR', locale: 'nl-NL', uiLanguage: 'en', docLanguages: ['nl'] },
     { code: 'PL', name: 'Poland', region: 'EU', currency: 'PLN', locale: 'pl-PL', uiLanguage: 'en', docLanguages: ['pl'] },
-    { code: 'PT', name: 'Portugal', region: 'EU', currency: 'EUR', locale: 'pt-PT', uiLanguage: 'en', docLanguages: ['pt'] },
+    { code: 'PT', name: 'Portugal', region: 'EU', currency: 'EUR', locale: 'pt-PT', uiLanguage: 'pt', docLanguages: ['pt'] },
     { code: 'RO', name: 'Romania', region: 'EU', currency: 'RON', locale: 'ro-RO', uiLanguage: 'en', docLanguages: ['ro'] },
     { code: 'SK', name: 'Slovakia', region: 'EU', currency: 'EUR', locale: 'sk-SK', uiLanguage: 'en', docLanguages: ['sk'] },
     { code: 'SI', name: 'Slovenia', region: 'EU', currency: 'EUR', locale: 'sl-SI', uiLanguage: 'en', docLanguages: ['sl'] },
@@ -72,6 +72,7 @@ export const countryProfiles: CountryProfile[] = [
     { code: 'RU', name: 'Russia', region: 'RU', currency: 'RUB', locale: 'ru-RU', uiLanguage: 'ru', docLanguages: ['ru'] },
     { code: 'IN', name: 'India', region: 'IN', currency: 'INR', locale: 'en-IN', uiLanguage: 'hi', docLanguages: ['en', 'hi'] },
     { code: 'CN', name: 'China', region: 'CN', currency: 'CNY', locale: 'zh-CN', uiLanguage: 'zh', docLanguages: ['zh'] },
+    { code: 'BR', name: 'Brazil', region: 'BR', currency: 'BRL', locale: 'pt-BR', uiLanguage: 'pt', docLanguages: ['pt'] },
 ];
 
 export const findCountry = (code: CountryCode): CountryProfile | undefined =>

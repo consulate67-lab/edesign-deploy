@@ -257,6 +257,10 @@ const MODULES: ModuleDef[] = [
     { id: 'intl-in-einvoice', label: 'Hindistan GST e-Invoice', inlineKey: 'intl/in-gst-einvoice.xslt' },
     { id: 'intl-in-ewaybill', label: 'Hindistan e-Way Bill', inlineKey: 'intl/in-eway-bill.xslt' },
     { id: 'intl-cn-invoice', label: 'Çin 数电票',       inlineKey: 'intl/cn-fully-digital.xslt' },
+    { id: 'intl-br-nfe',   label: 'Brezilya NF-e (DANFE)', inlineKey: 'intl/br-nfe-danfe.xslt' },
+    { id: 'intl-br-nfce',  label: 'Brezilya NFC-e',    inlineKey: 'intl/br-nfce.xslt' },
+    { id: 'intl-br-nfse',  label: 'Brezilya NFS-e (DANFSe)', inlineKey: 'intl/br-nfse-danfse.xslt' },
+    { id: 'intl-br-cte',   label: 'Brezilya CT-e (DACTE)', inlineKey: 'intl/br-cte-dacte.xslt' },
 
     // Sprint 9 — Antrepo profesyonel şablonlar (public/ altından, ?raw inline)
     { id: 'antrepo-fatura', label: 'GİB Resmi e-Fatura', antrepoId: 'antrepo-fatura', isAntrepo: true },

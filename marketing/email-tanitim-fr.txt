@@ -2,11 +2,11 @@ edXdocu · Concepteur d’e-documents
 
 VOTRE MODÈLE DE FACTURE ÉLECTRONIQUE EN QUELQUES MINUTES
 
-Conforme EN 16931, Peppol BIS 3 et XRechnung – prêt pour 37 pays, y compris les formats nationaux des États-Unis, de l’Inde, de la Chine et de la Russie. Sans XSLT, par simple glisser-déposer.
+Conforme EN 16931, Peppol BIS 3 et XRechnung – prêt pour 38 pays, y compris les formats nationaux des États-Unis, du Brésil, de l’Inde, de la Chine et de la Russie. Sans XSLT, par simple glisser-déposer.
 
 Essayer maintenant: https://www.edxdocu.com/?lang=fr&utm_source=email&utm_medium=email&utm_campaign=tanitim-intl&utm_content=hero-fr
 
-37 pays · EN 16931 Peppol BIS 3 · XRechnung · 100 % en ligne, sans installation
+38 pays · EN 16931 Peppol BIS 3 · XRechnung · 100 % en ligne, sans installation
 
 
 À QUOI ÇA SERT ?
@@ -28,8 +28,8 @@ PRÊT EN 3 ÉTAPES
 - Libellés locaux: Libellés dans la langue du pays, ou en anglais.
 
 
-UN ÉDITEUR, 37 PAYS
-EN 16931 (UBL), Peppol BIS Billing 3.0, XRechnung 3.0, CIUS-RO, HR CIUS, CIUS-PT, Peppol Despatch Advice, DBNAlliance (US), GST e-Invoice · e-Way Bill (IN), FNS UPD 5.03 (RU), 数电发票 (CN), UBL-TR (TR)
+UN ÉDITEUR, 38 PAYS
+EN 16931 (UBL), Peppol BIS Billing 3.0, XRechnung 3.0, CIUS-RO, HR CIUS, CIUS-PT, Peppol Despatch Advice, DBNAlliance (US), NF-e · NFS-e · CT-e (BR), GST e-Invoice · e-Way Bill (IN), FNS UPD 5.03 (RU), 数电发票 (CN), UBL-TR (TR)
 
 Pour qui ? Points d’accès Peppol, plateformes de facturation électronique, éditeurs d’ERP et de logiciels comptables, experts-comptables et toute entreprise qui souhaite envoyer ses factures à son image.
 

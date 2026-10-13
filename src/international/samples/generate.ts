@@ -102,8 +102,8 @@ function billing(country: CountryCode, kind: IntlDocKind, lang: DocLanguage, pro
         : kind === 'partial' ? [full[1]]
             : kind === 'prepayment' ? [{ name: fill(t.prepaymentItem, { pct: 30 }), qty: 1, unit: 'C62', price: round2(fullNet * 0.3) }]
                 : full;
-    const note = { invoice: t.note, credit: t.creditNote, corrected: t.correctedNote, prepayment: fill(t.prepaymentNote, { order }), partial: t.partialNote, selfbilled: t.note, despatch: t.note }[kind];
-    const id = { invoice: invoiceNo, credit: `${s.prefix}-${year}-0419`, corrected: `${s.prefix}-${year}-0420`, prepayment: `${s.prefix}-${year}-0402`, partial: `${s.prefix}-${year}-0410`, selfbilled: `${s.prefix}-${year}-0421`, despatch: '' }[kind];
+    const note = { invoice: t.note, credit: t.creditNote, corrected: t.correctedNote, prepayment: fill(t.prepaymentNote, { order }), partial: t.partialNote, selfbilled: t.note, despatch: t.note, service: t.note, consumer: t.note }[kind];
+    const id = { invoice: invoiceNo, credit: `${s.prefix}-${year}-0419`, corrected: `${s.prefix}-${year}-0420`, prepayment: `${s.prefix}-${year}-0402`, partial: `${s.prefix}-${year}-0410`, selfbilled: `${s.prefix}-${year}-0421`, despatch: '', service: invoiceNo, consumer: invoiceNo }[kind];
 
     const lineSum = round2(lines.reduce((n, l) => n + round2(l.qty * l.price), 0));
     const discount = kind === 'invoice' ? round2(lineSum * 0.05) : 0;

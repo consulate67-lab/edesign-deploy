@@ -2,11 +2,11 @@ edXdocu · ई-दस्तावेज़ डिज़ाइनर
 
 आपका GST ई-इनवॉइस लेआउट, कुछ ही मिनटों में तैयार
 
-GST ई-इनवॉइस (INV-01) और ई-वे बिल के लिए तैयार – साथ ही यूरोप के लिए EN 16931 / Peppol और अमेरिका, चीन व रूस के राष्ट्रीय फ़ॉर्मेट: कुल 37 देश। XSLT के बिना, बस ड्रैग-एंड-ड्रॉप।
+GST ई-इनवॉइस (INV-01) और ई-वे बिल के लिए तैयार – साथ ही यूरोप के लिए EN 16931 / Peppol और अमेरिका, ब्राज़ील, चीन व रूस के राष्ट्रीय फ़ॉर्मेट: कुल 38 देश। XSLT के बिना, बस ड्रैग-एंड-ड्रॉप।
 
 अभी आज़माएँ: https://www.edxdocu.com/?lang=hi&utm_source=email&utm_medium=email&utm_campaign=tanitim-intl&utm_content=hero-hi
 
-37 देश · GST ई-इनवॉइस · ई-वे बिल · 100% वेब-आधारित, कोई इंस्टॉलेशन नहीं
+38 देश · GST ई-इनवॉइस · ई-वे बिल · 100% वेब-आधारित, कोई इंस्टॉलेशन नहीं
 
 
 यह क्या करता है?
@@ -28,8 +28,8 @@ GST ई-इनवॉइस (INV-01) और ई-वे बिल के लिए
 - स्थानीय लेबल: लेबल देश की भाषा में या अंग्रेज़ी में।
 
 
-एक एडिटर, 37 देश
-GST e-Invoice · e-Way Bill (IN), EN 16931 (UBL), Peppol BIS Billing 3.0, XRechnung 3.0, CIUS-RO, HR CIUS, CIUS-PT, Peppol Despatch Advice, DBNAlliance (US), FNS UPD 5.03 (RU), 数电发票 (CN), UBL-TR (TR)
+एक एडिटर, 38 देश
+GST e-Invoice · e-Way Bill (IN), EN 16931 (UBL), Peppol BIS Billing 3.0, XRechnung 3.0, CIUS-RO, HR CIUS, CIUS-PT, Peppol Despatch Advice, DBNAlliance (US), NF-e · NFS-e · CT-e (BR), FNS UPD 5.03 (RU), 数电发票 (CN), UBL-TR (TR)
 
 किसके लिए? GST सुविधा प्रदाता (GSP), ई-इनवॉइसिंग सेवा प्रदाता, ERP और अकाउंटिंग सॉफ़्टवेयर कंपनियाँ, अकाउंटेंट और हर वह कंपनी जो अपने ब्रांड में इनवॉइस भेजना चाहती है।
 

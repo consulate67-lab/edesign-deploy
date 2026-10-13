@@ -53,6 +53,10 @@ import ruUpdRaw from '../public/ebelge/intl/ru-upd-503.xslt?raw';
 import inEinvoiceRaw from '../public/ebelge/intl/in-gst-einvoice.xslt?raw';
 import inEwayBillRaw from '../public/ebelge/intl/in-eway-bill.xslt?raw';
 import cnInvoiceRaw from '../public/ebelge/intl/cn-fully-digital.xslt?raw';
+import brNfeRaw from '../public/ebelge/intl/br-nfe-danfe.xslt?raw';
+import brNfceRaw from '../public/ebelge/intl/br-nfce.xslt?raw';
+import brNfseRaw from '../public/ebelge/intl/br-nfse-danfse.xslt?raw';
+import brCteRaw from '../public/ebelge/intl/br-cte-dacte.xslt?raw';
 
 export const INLINE_XSLT_CONTENT: Record<string, string> = {
     'gib/general.xslt': gibGeneralRaw,
@@ -85,11 +89,15 @@ export const INLINE_XSLT_CONTENT: Record<string, string> = {
     // Avrupa profilleri (EN 16931 / Peppol / XRechnung); etiket dili lang parametresiyle seçilir.
     'intl/en16931-invoice.xslt': intlInvoiceRaw,
     'intl/peppol-despatch-advice.xslt': intlDespatchRaw,
-    // Ulusal biçimler (ФНС УПД 5.03, GST e-Invoice / e-Way Bill, 数电票)
+    // Ulusal biçimler (ФНС УПД 5.03, GST e-Invoice / e-Way Bill, 数电票, DANFE / DANFE NFC-e / DANFSe / DACTE)
     'intl/ru-upd-503.xslt': ruUpdRaw,
     'intl/in-gst-einvoice.xslt': inEinvoiceRaw,
     'intl/in-eway-bill.xslt': inEwayBillRaw,
     'intl/cn-fully-digital.xslt': cnInvoiceRaw,
+    'intl/br-nfe-danfe.xslt': brNfeRaw,
+    'intl/br-nfce.xslt': brNfceRaw,
+    'intl/br-nfse-danfse.xslt': brNfseRaw,
+    'intl/br-cte-dacte.xslt': brCteRaw,
 };
 
 /**

@@ -47,6 +47,6 @@ export const extraDocTextPack = (lang: DocLanguage): ExtraDocTextPack | null =>
     (EXTRA as Partial<Record<DocLanguage, ExtraDocTextPack>>)[lang] ?? null;
 
 /** Belgenin o dildeki adı (ör. it + credit → 'Nota di credito'). */
-export const docTitle = (lang: DocLanguage, kind: IntlDocKind): string => PACKS[lang].titles[kind];
+export const docTitle = (lang: DocLanguage, kind: IntlDocKind): string => PACKS[lang].titles[kind] ?? PACKS.en.titles[kind] ?? kind;
 
 export type { DocTextPack, ExtraDocTextPack, IntlDocKind, SampleTexts, DocObjectTexts, DocTitles } from './types';

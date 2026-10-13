@@ -14,6 +14,7 @@ const NATIVE_NAMES: Record<Locale, string> = {
     zh: '简体中文',
     hi: 'हिन्दी',
     ru: 'Русский',
+    pt: 'Português (Brasil)',
 };
 
 /** Her dilin bayrağı: İngilizce için Birleşik Krallık. */
@@ -26,6 +27,7 @@ const LANGUAGE_FLAG: Record<Locale, string> = {
     zh: 'CN',
     hi: 'IN',
     ru: 'RU',
+    pt: 'BR',
 };
 
 /** Sayfa dili seçici. Belge dili buradan değil, sihirbazdaki ülkeden gelir. */

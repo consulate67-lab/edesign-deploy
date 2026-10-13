@@ -15,7 +15,7 @@ export const INTL_SHOWCASE_DOCS: { id: IntlDocKind; code: string; a: string }[] 
 ];
 
 /** Ülke seçilmemişse ya da Türkiye ise önizlemede önce gösterilen ülke. */
-const LANGUAGE_COUNTRY: Record<Exclude<UiLanguage, 'tr'>, string> = { en: 'GB', de: 'DE', fr: 'FR', es: 'ES', zh: 'CN', hi: 'IN', ru: 'RU' };
+const LANGUAGE_COUNTRY: Record<Exclude<UiLanguage, 'tr'>, string> = { en: 'GB', de: 'DE', fr: 'FR', es: 'ES', zh: 'CN', hi: 'IN', ru: 'RU', pt: 'BR' };
 const FOREIGN_COUNTRIES = countryProfiles.map(c => c.code).filter(c => c !== 'TR');
 
 /** round: kaçıncı ülke; fatura türlerinde her ülke sıradaki hazır tasarımla gösterilir. */

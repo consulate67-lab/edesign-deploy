@@ -106,6 +106,39 @@ const TEMPLATES: Record<string, IntlTemplate> = {
             titles: { despatch: { en: 'E-Way Bill (EWB-01)', hi: 'ई-वे बिल (EWB-01)' } },
         },
     },
+    'br-nfe': {
+        ...INVOICE_TEMPLATE, moduleId: 'intl-br-nfe', inlineKey: 'intl/br-nfe-danfe.xslt', sampleXml: 'ebelge/samples/intl/BR-invoice-pt.xml',
+        national: {
+            name: 'NF-e 4.00 · DANFE', country: 'BR',
+            titles: {
+                invoice: { pt: 'NF-e (DANFE)', en: 'Electronic invoice NF-e (DANFE)' },
+                credit: { pt: 'NF-e de devolução', en: 'NF-e for returned goods' },
+                corrected: { pt: 'NF-e complementar', en: 'Supplementary NF-e' },
+            },
+        },
+    },
+    'br-nfce': {
+        ...INVOICE_TEMPLATE, moduleId: 'intl-br-nfce', inlineKey: 'intl/br-nfce.xslt', sampleXml: 'ebelge/samples/intl/BR-consumer-pt.xml',
+        national: {
+            name: 'NFC-e · DANFE NFC-e', country: 'BR',
+            titles: { consumer: { pt: 'NFC-e (DANFE NFC-e)', en: 'Consumer e-invoice NFC-e' } },
+        },
+    },
+    'br-nfse': {
+        ...INVOICE_TEMPLATE, moduleId: 'intl-br-nfse', inlineKey: 'intl/br-nfse-danfse.xslt', sampleXml: 'ebelge/samples/intl/BR-service-pt.xml',
+        national: {
+            name: 'NFS-e Padrão Nacional · DANFSe', country: 'BR',
+            titles: { service: { pt: 'NFS-e (DANFSe)', en: 'Service e-invoice NFS-e (DANFSe)' } },
+        },
+    },
+    'br-cte': {
+        family: 'despatch', moduleId: 'intl-br-cte', inlineKey: 'intl/br-cte-dacte.xslt',
+        labelKey: 'intl.despatchTemplate', descriptionKey: 'intl.despatchTemplateDesc', sampleXml: 'ebelge/samples/intl/BR-despatch-pt.xml',
+        national: {
+            name: 'CT-e 4.00 · DACTE', country: 'BR',
+            titles: { despatch: { pt: 'CT-e (DACTE)', en: 'Electronic bill of lading CT-e (DACTE)' } },
+        },
+    },
 };
 
 export const hasIntlTemplate = (profileId: string) => profileId in TEMPLATES;
@@ -164,7 +197,7 @@ const designOptions = (tpl: IntlTemplate, lang: DocLanguage, kind?: IntlDocKind)
 
 const KIND_COLORS: Record<IntlDocKind, string> = {
     invoice: '#2563eb', credit: '#ea580c', corrected: '#7c3aed', prepayment: '#0891b2',
-    partial: '#4f46e5', selfbilled: '#be185d', despatch: '#0d9488',
+    partial: '#4f46e5', selfbilled: '#be185d', despatch: '#0d9488', service: '#16a34a', consumer: '#ca8a04',
 };
 
 const sampleName = (country: string, kind: IntlDocKind, lang: DocLanguage) => `ebelge/samples/intl/${country}-${kind}-${lang}.xml`;

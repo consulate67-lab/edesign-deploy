@@ -1,10 +1,11 @@
 /**
  * Ulusal (UBL dışı) e-belge biçimlerinin temel kontrolleri: zorunlu alanlar, kimlik / tarih
  * biçimleri ve kalem toplamlarının belge toplamıyla uyumu. Resmî XSD / JSON şemasının alt kümesidir.
- *   - Файл (ФНС УПД 5.03), GSTInvoice (GST e-Invoice INV-01), EWayBill (EWB-01), EInvoice (数电票).
+ *   - Файл (ФНС УПД 5.03), GSTInvoice (GST e-Invoice INV-01), EWayBill (EWB-01), EInvoice (数电票),
+ *     nfeProc / NFe (NF-e, NFC-e), cteProc / CTe (CT-e), NFSe (NFS-e Padrão Nacional).
  */
 import i18n from '../i18n';
-import { chineseAmount } from '../international/samples/national';
+import { brMod11, chineseAmount } from '../international/samples/national';
 import type { Check } from './validate';
 
 type Row = [string, string];
@@ -211,11 +212,194 @@ function cnInvoice(root: Element): Rules {
     };
 }
 
+/** Kontrol hanesi tutmayan değeri biçim hatası olarak raporlamak için hiç eşleşmeyen desen. */
+const NEVER = /(?!)/;
+const checked = (field: string, value: string, ok: (v: string) => boolean): Rules['formats'] =>
+    value && !ok(value) ? [[field, value, NEVER]] : [];
+
+const brChaveOk = (len: number) => (v: string) => new RegExp(`^\\d{${len}}$`).test(v) && brMod11(v.slice(0, -1)) === Number(v.slice(-1));
+const brCnpjOk = (v: string) => {
+    if (!/^\d{14}$/.test(v) || /^(\d)\1+$/.test(v)) return false;
+    const d1 = brMod11(v.slice(0, 12));
+    return d1 === Number(v[12]) && brMod11(v.slice(0, 13)) === Number(v[13]);
+};
+const brCpfOk = (v: string) => {
+    if (!/^\d{11}$/.test(v) || /^(\d)\1+$/.test(v)) return false;
+    const dv = (base: string) => {
+        const r = [...base].reduce((n, c, i) => n + Number(c) * (base.length + 1 - i), 0) % 11;
+        return r < 2 ? 0 : 11 - r;
+    };
+    return dv(v.slice(0, 9)) === Number(v[9]) && dv(v.slice(0, 10)) === Number(v[10]);
+};
+const brDoc = (field: string, el: Element | null): Rules['formats'] =>
+    [...checked(`${field}/CNPJ`, txt(el, 'CNPJ'), brCnpjOk), ...checked(`${field}/CPF`, txt(el, 'CPF'), brCpfOk)];
+const BR_DATETIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/;
+const CFOP = /^[1-7]\d{3}$/;
+
+/** NF-e (modelo 55) ve NFC-e (modelo 65), MOC 7.0 + NT 2025.002 (IBS/CBS). */
+function brNfe(root: Element): Rules {
+    const nfe = root.localName === 'NFe' ? root : at(root, 'NFe');
+    const inf = at(nfe, 'infNFe');
+    const ide = at(inf, 'ide');
+    const emit = at(inf, 'emit');
+    const dest = at(inf, 'dest');
+    const dets = kids(inf, 'det');
+    const t = at(inf, 'total/ICMSTot');
+    const v = (name: string) => num(txt(t, name));
+    const fat = at(inf, 'cobr/fat');
+    const dups = kids(at(inf, 'cobr'), 'dup');
+    const ibscbs = at(inf, 'total/IBSCBSTot');
+    const chave = attr(inf, 'Id').replace(/^NFe/, '');
+    const mod = txt(ide, 'mod');
+    const prot = txt(root, 'protNFe/infProt/chNFe');
+    const counted = dets.filter(d => txt(d, 'prod/indTot') !== '0');
+    const L = labels();
+    return {
+        required: [
+            ['infNFe/@Id', chave],
+            ...['cUF', 'natOp', 'mod', 'serie', 'nNF', 'dhEmi', 'tpNF', 'finNFe'].map((n): Row => [`ide/${n}`, txt(ide, n)]),
+            ['emit/CNPJ', txt(emit, 'CNPJ') || txt(emit, 'CPF')],
+            ['emit/xNome', txt(emit, 'xNome')],
+            ['emit/IE', txt(emit, 'IE')],
+            ['emit/CRT', txt(emit, 'CRT')],
+            ...(mod === '55' ? [['dest/xNome', txt(dest, 'xNome')] as Row] : []),
+            ['det', dets.length ? '1' : ''],
+            ['total/ICMSTot/vNF', txt(t, 'vNF')],
+            ['pag/detPag', at(inf, 'pag/detPag') ? '1' : ''],
+        ],
+        formats: [
+            ...checked('infNFe/@Id', chave, brChaveOk(44)),
+            ['ide/mod', mod, /^(55|65)$/],
+            ['ide/finNFe', txt(ide, 'finNFe'), /^[1-6]$/],
+            ['ide/tpNF', txt(ide, 'tpNF'), /^[01]$/],
+            ['ide/dhEmi', txt(ide, 'dhEmi'), BR_DATETIME],
+            ['emit/CRT', txt(emit, 'CRT'), /^[1-4]$/],
+            ...brDoc('emit', emit),
+            ...brDoc('dest', dest),
+            ...each(dets, 'det/prod/NCM', d => txt(d, 'prod/NCM'), /^(\d{8}|00)$/),
+            ...each(dets, 'det/prod/CFOP', d => txt(d, 'prod/CFOP'), CFOP),
+            ...(chave && mod && chave.length === 44 && chave.slice(20, 22) !== mod ? [['infNFe/@Id (mod)', chave, NEVER] as Rules['formats'][number]] : []),
+            ...(prot && chave && prot !== chave ? [['protNFe/infProt/chNFe', prot, NEVER] as Rules['formats'][number]] : []),
+        ],
+        totals: [
+            ...total('ICMSTot/vProd', txt(t, 'vProd'), sum(counted, d => txt(d, 'prod/vProd')), counted.length),
+            ...total('ICMSTot/vICMS', txt(t, 'vICMS'), sum(dets, d => txt(at(d, 'imposto/ICMS')?.firstElementChild, 'vICMS')), dets.length),
+            ...total('ICMSTot/vNF', txt(t, 'vNF'), v('vProd') - v('vDesc') - v('vICMSDeson') + v('vST') + v('vFCPST') + v('vFrete') + v('vSeg')
+                + v('vOutro') + v('vII') + v('vIPI') + v('vIPIDevol') + num(txt(inf, 'total/ISSQNtot/vServ')), 1),
+            ...(fat ? total('cobr/fat/vLiq', txt(fat, 'vLiq'), sum(dups, d => txt(d, 'vDup')), dups.length) : []),
+            ...(ibscbs ? total('IBSCBSTot/gCBS/vCBS', txt(ibscbs, 'gCBS/vCBS'), sum(dets, d => txt(d, 'imposto/IBSCBS/gIBSCBS/gCBS/vCBS')), dets.length) : []),
+            ...(ibscbs ? total('IBSCBSTot/gIBS/gIBSUF/vIBSUF', txt(ibscbs, 'gIBS/gIBSUF/vIBSUF'), sum(dets, d => txt(d, 'imposto/IBSCBS/gIBSCBS/gIBSUF/vIBSUF')), dets.length) : []),
+        ],
+        info: [
+            [L.docNo, `${txt(ide, 'serie')}/${txt(ide, 'nNF')}`], [L.date, txt(ide, 'dhEmi').slice(0, 10)],
+            [L.type, `${mod === '65' ? 'NFC-e' : 'NF-e'} · finNFe ${txt(ide, 'finNFe')}`], [L.currency, 'BRL'],
+            [L.seller, txt(emit, 'xNome')], [L.buyer, txt(dest, 'xNome') || txt(dest, 'CPF') || txt(dest, 'CNPJ')],
+            [L.lines, String(dets.length)], [L.payable, txt(t, 'vNF')], ['Chave', chave],
+        ],
+    };
+}
+
+/** CT-e modelo 57, MOC 4.00. */
+function brCte(root: Element): Rules {
+    const cte = root.localName === 'CTe' ? root : at(root, 'CTe');
+    const inf = at(cte, 'infCte');
+    const ide = at(inf, 'ide');
+    const emit = at(inf, 'emit');
+    const p = at(inf, 'vPrest');
+    const comps = kids(p, 'Comp');
+    const chave = attr(inf, 'Id').replace(/^CTe/, '');
+    const prot = txt(root, 'protCTe/infProt/chCTe');
+    const L = labels();
+    return {
+        required: [
+            ['infCte/@Id', chave],
+            ...['cUF', 'CFOP', 'natOp', 'mod', 'serie', 'nCT', 'dhEmi', 'tpCTe', 'modal', 'tpServ', 'cMunIni', 'cMunFim'].map((n): Row => [`ide/${n}`, txt(ide, n)]),
+            ['emit/CNPJ', txt(emit, 'CNPJ') || txt(emit, 'CPF')],
+            ['emit/IE', txt(emit, 'IE')],
+            ['emit/xNome', txt(emit, 'xNome')],
+            ['vPrest/vTPrest', txt(p, 'vTPrest')],
+            ['vPrest/vRec', txt(p, 'vRec')],
+            ['imp/ICMS', at(inf, 'imp/ICMS') ? '1' : ''],
+            ...(txt(ide, 'tpCTe') === '0' ? [['infCTeNorm/infCarga/vCarga', txt(inf, 'infCTeNorm/infCarga/vCarga')] as Row] : []),
+        ],
+        formats: [
+            ...checked('infCte/@Id', chave, brChaveOk(44)),
+            ['ide/mod', txt(ide, 'mod'), /^57$/],
+            ['ide/CFOP', txt(ide, 'CFOP'), CFOP],
+            ['ide/modal', txt(ide, 'modal'), /^0[1-6]$/],
+            ['ide/dhEmi', txt(ide, 'dhEmi'), BR_DATETIME],
+            ...brDoc('emit', emit),
+            ...brDoc('rem', at(inf, 'rem')),
+            ...brDoc('dest', at(inf, 'dest')),
+            ...each(kids(at(inf, 'infCTeNorm/infDoc'), 'infNFe'), 'infDoc/infNFe/chave', e => txt(e, 'chave'), /^\d{44}$/),
+            ...(prot && chave && prot !== chave ? [['protCTe/infProt/chCTe', prot, NEVER] as Rules['formats'][number]] : []),
+        ],
+        totals: comps.length ? total('vPrest/vTPrest', txt(p, 'vTPrest'), sum(comps, c => txt(c, 'vComp')), comps.length) : [],
+        info: [
+            [L.docNo, `${txt(ide, 'serie')}/${txt(ide, 'nCT')}`], [L.date, txt(ide, 'dhEmi').slice(0, 10)], [L.type, 'CT-e'], [L.currency, 'BRL'],
+            [L.seller, txt(emit, 'xNome')], [L.despatchParty, txt(inf, 'rem/xNome')], [L.deliveryParty, txt(inf, 'dest/xNome')],
+            [L.payable, txt(p, 'vTPrest')], ['Chave', chave],
+        ],
+    };
+}
+
+/** NFS-e Padrão Nacional (leiaute 1.01, NT 004/2025 IBS/CBS). */
+function brNfse(root: Element): Rules {
+    const inf = at(root, 'infNFSe');
+    const dps = at(inf, 'DPS/infDPS');
+    const emit = at(inf, 'emit');
+    const toma = at(dps, 'toma');
+    const val = at(inf, 'valores');
+    const chave = attr(inf, 'Id').replace(/^NFS/, '');
+    const vServ = txt(dps, 'valores/vServPrest/vServ');
+    const L = labels();
+    return {
+        required: [
+            ['infNFSe/@Id', chave],
+            ['infNFSe/nNFSe', txt(inf, 'nNFSe')],
+            ['infNFSe/dhProc', txt(inf, 'dhProc')],
+            ['infNFSe/cLocIncid', txt(inf, 'cLocIncid')],
+            ['emit/CNPJ', txt(emit, 'CNPJ') || txt(emit, 'CPF')],
+            ['emit/xNome', txt(emit, 'xNome')],
+            ['valores/vLiq', txt(val, 'vLiq')],
+            ['DPS/infDPS', dps ? '1' : ''],
+            ['infDPS/dhEmi', txt(dps, 'dhEmi')],
+            ['infDPS/dCompet', txt(dps, 'dCompet')],
+            ['serv/cServ/cTribNac', txt(dps, 'serv/cServ/cTribNac')],
+            ['serv/cServ/xDescServ', txt(dps, 'serv/cServ/xDescServ')],
+            ['vServPrest/vServ', vServ],
+        ],
+        formats: [
+            ...checked('infNFSe/@Id', chave, brChaveOk(50)),
+            ['infNFSe/cLocIncid', txt(inf, 'cLocIncid'), /^\d{7}$/],
+            ['serv/cServ/cTribNac', txt(dps, 'serv/cServ/cTribNac'), /^\d{6}$/],
+            ['infDPS/dCompet', txt(dps, 'dCompet'), /^\d{4}-\d{2}-\d{2}$/],
+            ['infDPS/dhEmi', txt(dps, 'dhEmi'), BR_DATETIME],
+            ...brDoc('emit', emit),
+            ...brDoc('toma', toma),
+        ],
+        totals: [
+            ...(txt(val, 'pAliqAplic') ? total('valores/vISSQN', txt(val, 'vISSQN'), num(txt(val, 'vBC')) * num(txt(val, 'pAliqAplic')) / 100, 1) : []),
+            ...total('valores/vLiq', txt(val, 'vLiq'), num(vServ) - num(txt(dps, 'valores/vDescCondIncond/vDescIncond'))
+                - num(txt(dps, 'valores/vDescCondIncond/vDescCond')) - num(txt(val, 'vTotalRet')), 1),
+        ],
+        info: [
+            [L.docNo, txt(inf, 'nNFSe')], [L.date, txt(dps, 'dCompet')], [L.type, 'NFS-e'], [L.currency, 'BRL'],
+            [L.seller, txt(emit, 'xNome')], [L.buyer, txt(toma, 'xNome')], [L.payable, txt(val, 'vLiq')], ['Chave', chave],
+        ],
+    };
+}
+
 const RULES: Record<string, (root: Element) => Rules> = {
     Файл: ruUpd,
     GSTInvoice: inEinvoice,
     EWayBill: inEwayBill,
     EInvoice: cnInvoice,
+    nfeProc: brNfe,
+    NFe: brNfe,
+    cteProc: brCte,
+    CTe: brCte,
+    NFSe: brNfse,
 };
 
 /** Ulusal biçim kontrolleri; bilinmeyen kökte yalnız yapı onayı kalır. */

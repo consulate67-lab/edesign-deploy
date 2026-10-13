@@ -53,6 +53,12 @@ const TEXT = {
         done: 'आपको हमसे आगे प्रचार ईमेल नहीं मिलेंगे। खाते से जुड़ी ज़रूरी सूचनाएँ (जैसे लॉगिन कोड) इससे प्रभावित नहीं होतीं।',
         error: 'अनुरोध पूरा नहीं हो सका। कृपया बाद में फिर कोशिश करें।', home: 'edxdocu.com पर जाएँ',
     },
+    pt: {
+        title: 'Cancelar o recebimento de e-mails promocionais', lead: 'Se você não quer mais receber os e-mails promocionais da edXdocu, clique no botão abaixo.',
+        button: 'Cancelar inscrição', busy: 'Processando…', doneTitle: 'Sua inscrição foi cancelada',
+        done: 'Você não receberá mais e-mails promocionais nossos. Os avisos obrigatórios da conta (por exemplo, códigos de acesso) não são afetados.',
+        error: 'Não foi possível concluir a solicitação. Tente novamente mais tarde.', home: 'Ir para edxdocu.com',
+    },
 };
 
 type Lang = keyof typeof TEXT;

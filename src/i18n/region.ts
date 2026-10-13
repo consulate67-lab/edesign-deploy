@@ -50,6 +50,12 @@ const TIMEZONE_COUNTRY: Record<string, CountryCode> = {
         'Asia/Khandyga', 'Asia/Vladivostok', 'Asia/Ust-Nera', 'Asia/Magadan', 'Asia/Sakhalin', 'Asia/Srednekolymsk',
         'Asia/Kamchatka', 'Asia/Anadyr', 'W-SU',
     ].map((tz) => [tz, 'RU'])),
+    ...Object.fromEntries([
+        'America/Sao_Paulo', 'America/Rio_Branco', 'America/Manaus', 'America/Cuiaba', 'America/Campo_Grande', 'America/Porto_Velho',
+        'America/Boa_Vista', 'America/Belem', 'America/Fortaleza', 'America/Recife', 'America/Maceio', 'America/Bahia',
+        'America/Araguaina', 'America/Santarem', 'America/Eirunepe', 'America/Noronha', 'America/Porto_Acre',
+        'Brazil/East', 'Brazil/West', 'Brazil/Acre', 'Brazil/DeNoronha',
+    ].map((tz) => [tz, 'BR'])),
     'Asia/Kolkata': 'IN', 'Asia/Calcutta': 'IN',
     'Asia/Shanghai': 'CN', 'Asia/Urumqi': 'CN', 'Asia/Chongqing': 'CN', 'Asia/Chungking': 'CN', 'Asia/Harbin': 'CN', 'PRC': 'CN',
 };

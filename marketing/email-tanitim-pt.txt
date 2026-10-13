@@ -1,0 +1,46 @@
+edXdocu · Designer de documentos fiscais
+
+SEU DANFE PERSONALIZADO, PRONTO EM MINUTOS
+
+Pronto para NF-e, NFC-e, NFS-e Padrão Nacional e CT-e, já com os campos de IBS e CBS da Reforma Tributária – além de EN 16931 / Peppol para a Europa: 38 países no total. Sem XSLT, basta arrastar e soltar.
+
+Experimente agora: https://www.edxdocu.com/?lang=pt&utm_source=email&utm_medium=email&utm_campaign=tanitim-intl&utm_content=hero-pt
+
+38 países · NF-e 4.00 DANFE · DANFSe · DACTE · 100% on-line, sem instalação
+
+
+PARA QUE SERVE?
+Sua nota fiscal, com a sua marca. Logotipo, carimbo, dados bancários e tabela de itens: tudo no lugar que você quiser, arrastando e soltando.
+
+
+PRONTO EM 3 PASSOS
+1. Escolha o país e o documento
+   O assistente mostra NF-e, NFC-e, NFS-e e CT-e com o leiaute XML correto. Comece por um modelo ou envie seu próprio XSLT.
+2. Adicione logotipo, carimbo e dados bancários
+   Arraste e solte os campos; ajuste cores, fontes e layout vendo o resultado.
+3. Visualize com seu XML e baixe
+   Veja o resultado na hora com uma nota real e carregue o XSLT no seu ERP ou emissor de NF-e.
+
+
+- Arrastar e soltar: Não é preciso saber XSLT nem programar.
+- Documentos fiscais: DANFE, DANFE NFC-e, DANFSe e DACTE com validação de chave de acesso, CNPJ e totais.
+- Visualização ao vivo: Veja cada alteração com o seu próprio XML.
+- Rótulos locais: Rótulos em português ou em inglês.
+
+
+UM EDITOR, 38 PAÍSES
+NF-e · NFS-e · CT-e (BR), EN 16931 (UBL), Peppol BIS Billing 3.0, XRechnung 3.0, CIUS-RO, HR CIUS, CIUS-PT, Peppol Despatch Advice, DBNAlliance (US), GST e-Invoice · e-Way Bill (IN), FNS UPD 5.03 (RU), 数电发票 (CN), UBL-TR (TR)
+
+Para quem? Emissores de NF-e, fabricantes de ERP e software contábil, escritórios de contabilidade e toda empresa que quer enviar suas notas com a própria marca.
+
+
+CRIE SEU PRIMEIRO LAYOUT HOJE
+Criar conta: https://www.edxdocu.com/?lang=pt&utm_source=email&utm_medium=email&utm_campaign=tanitim-intl&utm_content=final-pt
+--
+edXdocu · Designer de documentos fiscais
+destek@edxdocu.com · www.edxdocu.com
+
+Este e-mail informativo foi enviado à sua empresa por tratar de assunto relacionado à sua área de atuação.
+Se não quiser receber novas mensagens, você pode cancelar a inscrição com um clique; o pedido vale imediatamente.
+{{UNSUBSCRIBE_URL}}&lang=pt
+Para saber a origem do seu endereço ou pedir a exclusão dos seus dados (LGPD), escreva para destek@edxdocu.com.

@@ -8,6 +8,7 @@ import es from './locales/es';
 import zh from './locales/zh';
 import hi from './locales/hi';
 import ru from './locales/ru';
+import pt from './locales/pt';
 import { LOCALES, useUiStore, type Locale } from '../store/uiStore';
 import { countryLocale, detectCountry } from './region';
 
@@ -60,7 +61,7 @@ void i18n
         resources: {
             tr: { translation: tr }, en: { translation: en }, de: { translation: de },
             fr: { translation: fr }, es: { translation: es }, zh: { translation: zh },
-            hi: { translation: hi }, ru: { translation: withSlavicPlurals(ru as unknown as Tree) },
+            hi: { translation: hi }, ru: { translation: withSlavicPlurals(ru as unknown as Tree) }, pt: { translation: pt },
         },
         lng: urlLocale() ?? savedLocale() ?? countryLocale(initialCountry),
         fallbackLng: 'en',
