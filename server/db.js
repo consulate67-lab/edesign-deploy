@@ -1,5 +1,6 @@
 import pg from 'pg';
 import { createCampaignSchema } from './campaigns.js';
+import { createSiteConfigSchema } from './site-config.js';
 
 /**
  * Thin adapter that exposes the SQLite-style API (run/get/all) on top of
@@ -242,6 +243,7 @@ export const initDb = async () => {
 
         await createSupportSchema(probe);
         await createCampaignSchema(probe);
+        await createSiteConfigSchema(probe);
         await promoteAdmins(probe);
     } finally {
         probe.release();

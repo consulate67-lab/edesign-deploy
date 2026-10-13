@@ -1,4 +1,5 @@
 import { API_URL } from '../api';
+import type { SiteConfig } from '../analytics/config';
 import type {
     AdminIdentity, AdminInvoice, AdminInvoiceList, AdminLoginResponse, AdminSettingsStatus, AdminStats, AdminUserDetail, AdminUserRow,
     AdminVerifyResponse, AiMemoryEntry, AiMemoryInput, AssistantBuiltinEntry, AssistantKbEntry, AssistantKbInput, AssistantLog,
@@ -137,6 +138,9 @@ export const adminApi = {
     assistantLogs: (filter: AssistantLogFilter) => request<AssistantLog[]>(`/admin/assistant/logs${qs({ filter })}`),
     resolveAssistantLog: (id: number, resolved: boolean) =>
         request<AssistantLog>(`/admin/assistant/logs/${id}`, { method: 'PATCH', body: { resolved } }),
+
+    siteConfig: () => request<SiteConfig>('/admin/site-config'),
+    saveSiteConfig: (input: SiteConfig) => request<SiteConfig>('/admin/site-config', { method: 'PUT', body: input }),
 
     settingsStatus: () => request<AdminSettingsStatus>('/admin/settings/status'),
     telegramTest: () => request<{ success: true }>('/admin/settings/telegram-test', { method: 'POST' }),

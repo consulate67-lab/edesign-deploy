@@ -123,8 +123,10 @@ const setMarketing = (on: boolean) => {
 };
 
 let started = false;
+/** Ayarlar sunucudan gelmeden açılan ekran; izleme başlayınca gönderilir. */
+let pendingPage: [string, string] | null = null;
 
-/** Uygulama açılışında bir kez; yönetim panelinde çağrılmaz. */
+/** Site ayarları yüklendikten sonra bir kez; yönetim panelinde çağrılmaz. */
 export const initTracking = () => {
     if (started || !hasAnyTracking()) return;
     started = true;
@@ -135,11 +137,16 @@ export const initTracking = () => {
         if (hasGoogle()) applyGoogleConsent(next);
         setMarketing(next.marketing);
     });
+    if (pendingPage) trackPageView(...pendingPage);
+    pendingPage = null;
 };
 
 /** Uygulama tek sayfa olduğu için her ekran sanal bir sayfa yolu olarak raporlanır. */
 export const trackPageView = (path: string, title: string) => {
-    if (!started) return;
+    if (!started) {
+        pendingPage = [path, title];
+        return;
+    }
     const page = { page_location: `${window.location.origin}${path}`, page_path: path, page_title: title };
     if (googleIds().length) gtag('event', 'page_view', page);
     gtmEvent('virtual_page_view', page);

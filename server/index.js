@@ -14,6 +14,7 @@ import { registerCampaignRoutes } from './campaigns.js';
 import { registerDesignAiRoutes } from './design-ai.js';
 import { registerGalleryRoutes } from './gallery.js';
 import { registerPaytrRoutes } from './paytr.js';
+import { registerSiteConfigRoutes } from './site-config.js';
 import { attachRealtime, touchLastSeen } from './realtime.js';
 import { isSupportAllowed, registerSupportRoutes } from './support.js';
 import { createBotHandler } from './telegram-bot.js';
@@ -130,6 +131,7 @@ initDb().then(async _db => {
     registerEmailVerifyRoutes(app, { db, secret: EFFECTIVE_SECRET, issueSession });
     registerAdminRoutes(app, { db, requireAdmin, packages: PACKAGE_PRICES, website: new URL(FRONTEND_URL).origin });
     registerGalleryRoutes(app, { db, requireAdmin });
+    registerSiteConfigRoutes(app, { db, requireAdmin });
     registerCampaignRoutes(app, { db, requireAdmin, secret: EFFECTIVE_SECRET, website: new URL(FRONTEND_URL).origin });
     registerSupportRoutes(app, { db, authenticateToken });
     registerAssistantRoutes(app, { db, requireAdmin, packages: PACKAGE_PRICES });

@@ -12,11 +12,11 @@ const Check: React.FC<{ ok: boolean; children: React.ReactNode }> = ({ ok, child
     </div>
 );
 
-const Code: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+export const Code: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     <code style={{ padding: '1px 6px', borderRadius: 6, background: 'rgba(99,102,241,0.1)', color: '#4338ca', fontSize: '0.8rem', fontFamily: 'Consolas, "Cascadia Code", monospace' }}>{children}</code>
 );
 
-const Steps: React.FC<{ items: React.ReactNode[] }> = ({ items }) => (
+export const Steps: React.FC<{ items: React.ReactNode[] }> = ({ items }) => (
     <ol style={{ margin: 0, paddingLeft: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10, counterReset: 'step' }}>
         {items.map((item, i) => (
             <li key={i} style={{ display: 'flex', gap: 10, fontSize: '0.84rem', lineHeight: 1.55, color: '#334155' }}>

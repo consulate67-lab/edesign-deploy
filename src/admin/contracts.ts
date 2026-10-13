@@ -28,6 +28,8 @@
  *     GET  /admin/ai/memory?doc_type_id=&limit=              → AiMemoryEntry[] (yeniden eskiye)
  *     POST /admin/ai/memory AiMemoryInput                    → AiMemoryEntry
  *     PATCH /admin/ai/memory/:id {rating?, published?, gallery_id?} → AiMemoryEntry
+ *     GET  /admin/site-config                                → SiteConfig (src/analytics/config.ts)
+ *     PUT  /admin/site-config SiteConfig                     → SiteConfig (sosyal medya + reklam kimlikleri)
  *     GET  /admin/settings/status                            → AdminSettingsStatus
  *     POST /admin/settings/telegram-test                     → {success:true}
  *   Kullanıcı (normal oturum token'ı):
@@ -39,6 +41,7 @@
  *     GET  /support/remote/active                            → RemoteSession | null
  *   Herkese açık:
  *     GET  /gallery                                          → GalleryDesign[] (yalnızca published)
+ *     GET  /site-config                                      → SiteConfig
  *
  * WebSocket: wsUrl(token) (src/api.ts). Mesajlar JSON, `t` alanıyla ayrılır (WsMessage).
  */

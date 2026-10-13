@@ -7,7 +7,7 @@ import { Landing } from './Landing.tsx';
 import { theme } from './theme';
 import i18n from './i18n';
 import { trackPageView } from './analytics/tracking';
-import { hasAnyTracking } from './analytics/config';
+import { hasAnyTracking, useSiteConfig } from './analytics/config';
 
 // Route-level code splitting: each screen ships in its own chunk so the
 // initial bundle stays small. The designer (~150KB after minify) is the
@@ -86,6 +86,7 @@ const App: React.FC = () => {
     const [authMode, setAuthMode] = useState<AuthMode>('login');
     const [selectedDoc, setSelectedDoc] = useState<SelectedDoc | null>(initial.doc);
     const [adminRoute, setAdminRoute] = useState(isAdminHash);
+    useSiteConfig(); // çerez penceresi, sunucudan gelen kimliklere göre yeniden değerlendirilir
 
     useEffect(() => {
         const onHash = () => setAdminRoute(isAdminHash());

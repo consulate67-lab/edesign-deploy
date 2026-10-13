@@ -5,6 +5,7 @@ import './i18n'
 import App from './App.tsx'
 import { ErrorBoundary } from './components/ErrorBoundary.tsx'
 import { initTracking } from './analytics/tracking'
+import { loadSiteConfig } from './analytics/config'
 import { Unsubscribe } from './Unsubscribe.tsx'
 
 const root = document.getElementById('root')!
@@ -26,7 +27,7 @@ if (paymentResult && window.parent !== window) {
     </StrictMode>,
   )
 } else {
-  if (!/^#\/(yonetim|admin)(\/|$)/i.test(window.location.hash)) initTracking()
+  if (!/^#\/(yonetim|admin)(\/|$)/i.test(window.location.hash)) void loadSiteConfig().then(initTracking)
   createRoot(root).render(
     <StrictMode>
       <ErrorBoundary>

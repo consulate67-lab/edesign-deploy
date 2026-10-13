@@ -14,6 +14,7 @@ import { useLocaleT } from './i18n';
 import { LanguageSwitcher } from './i18n/LanguageSwitcher';
 import { useCountry } from './store/uiStore';
 import { TutorialGrid } from './help/Tutorials';
+import { SocialLinks } from './landing/SocialLinks';
 
 interface LandingProps {
     onRegister: () => void;
@@ -994,6 +995,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                     <a href="#cerez" onClick={(e) => { e.preventDefault(); setLegalModal('cerez'); }}>{t('landing.footer.cookies')}</a>
                     <a href="#iletisim" onClick={(e) => { e.preventDefault(); setLegalModal('iletisim'); }}>{t('landing.footer.contact')}</a>
                 </div>
+                <SocialLinks />
             </footer>
 
             {legalModal === 'kvkk' && <KVKKModal onClose={() => setLegalModal(null)} />}
