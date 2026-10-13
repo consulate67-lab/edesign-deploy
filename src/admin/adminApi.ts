@@ -148,6 +148,8 @@ export const adminApi = {
     campaigns: () => request<MailCampaignList>('/admin/campaigns'),
     campaign: (id: number) => request<MailCampaignDetail>(`/admin/campaigns/${id}`),
     createCampaign: (input: MailCampaignInput) => request<MailCampaign>('/admin/campaigns', { method: 'POST', body: input }),
+    previousRecipients: (emails: string[]) =>
+        request<{ emails: string[] }>('/admin/campaigns/previous', { method: 'POST', body: { emails } }),
     testCampaign: (content: MailContent, to: string) =>
         request<{ sent: true }>('/admin/campaigns/test', { method: 'POST', body: { ...content, to } }),
     startCampaign: (id: number) =>

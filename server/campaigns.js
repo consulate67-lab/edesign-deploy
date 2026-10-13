@@ -54,6 +54,8 @@ export const createCampaignSchema = async (client) => {
         )
     `);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_mail_recipients_campaign_status ON mail_campaign_recipients (campaign_id, status, id)`);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_mail_recipients_email ON mail_campaign_recipients (email)`);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_mail_recipients_sent_at ON mail_campaign_recipients (sent_at) WHERE status = 'sent'`);
     await client.query(`
         CREATE TABLE IF NOT EXISTS mail_unsubscribes (
             email       TEXT PRIMARY KEY,
@@ -128,6 +130,15 @@ const personalize = ({ subject, html, text }, { email, name }, { secret, website
     };
 };
 
+/** Brevo ücretsiz pakette günde 300 e-posta; sınır dolunca kuyruk hata almak yerine bekler (0 = sınırsız). */
+const dailyLimit = () => Math.max(0, Number(process.env.CAMPAIGN_DAILY_LIMIT) || 0);
+
+/** Herhangi bir gönderimde iletilmiş ya da gönderilen/duraklatılmış bir gönderimde sırada olan adresler. */
+const PREVIOUS_RECIPIENT = `
+    SELECT 1 FROM mail_campaign_recipients p JOIN mail_campaigns pc ON pc.id = p.campaign_id
+     WHERE p.email = t.email
+       AND (p.status = 'sent' OR (p.status = 'pending' AND pc.status IN ('sending', 'paused')))`;
+
 const CAMPAIGN_SELECT = `
     SELECT c.id, c.name, c.subject, c.rate_per_hour, c.status, c.last_error, c.created_at, c.started_at, c.finished_at,
            COUNT(r.id)::int AS total,
@@ -153,11 +164,23 @@ export const registerCampaignRoutes = (app, { db, requireAdmin, secret, website 
     const getCampaign = (id) => db.get(`${CAMPAIGN_SELECT} WHERE c.id = ? GROUP BY c.id`, [id]);
 
     app.get('/api/admin/campaigns', requireAdmin, async (_req, res) => {
-        const [campaigns, unsub] = await Promise.all([
+        const [campaigns, unsub, recent] = await Promise.all([
             db.all(`${CAMPAIGN_SELECT} GROUP BY c.id ORDER BY c.created_at DESC LIMIT 100`),
             db.get('SELECT COUNT(*)::int AS n FROM mail_unsubscribes'),
+            db.get(`SELECT COUNT(*)::int AS n FROM mail_campaign_recipients WHERE status = 'sent' AND sent_at > NOW() - INTERVAL '24 hours'`),
         ]);
-        res.json({ campaigns, unsubscribed: unsub?.n ?? 0, mailReady: mailConfigured(), defaultRate: DEFAULT_RATE, rateMax: RATE_MAX });
+        res.json({
+            campaigns, unsubscribed: unsub?.n ?? 0, mailReady: mailConfigured(), defaultRate: DEFAULT_RATE, rateMax: RATE_MAX,
+            dailyLimit: dailyLimit(), sentLast24h: recent?.n ?? 0,
+        });
+    });
+
+    app.post('/api/admin/campaigns/previous', requireAdmin, async (req, res) => {
+        const list = Array.isArray(req.body?.emails) ? req.body.emails.slice(0, MAX_RECIPIENTS) : [];
+        const emails = [...new Set(list.map(normalizeEmail).filter(Boolean))];
+        if (emails.length === 0) return res.json({ emails: [] });
+        const rows = await db.all(`SELECT t.email FROM unnest(?::text[]) AS t(email) WHERE EXISTS (${PREVIOUS_RECIPIENT})`, [emails]);
+        res.json({ emails: rows.map(r => r.email) });
     });
 
     app.get('/api/admin/campaigns/:id', requireAdmin, async (req, res) => {
@@ -188,6 +211,7 @@ export const registerCampaignRoutes = (app, { db, requireAdmin, secret, website 
         }
         if (seen.size === 0) return res.status(400).json({ error: 'Listede geçerli e-posta adresi yok.' });
         if (seen.size > MAX_RECIPIENTS) return res.status(400).json({ error: `Bir gönderimde en fazla ${MAX_RECIPIENTS.toLocaleString('tr-TR')} alıcı olabilir.` });
+        const skipPrevious = req.body?.skipPrevious !== false;
 
         const client = await db.pool.connect();
         try {
@@ -198,12 +222,20 @@ export const registerCampaignRoutes = (app, { db, requireAdmin, secret, website 
             );
             const id = rows[0].id;
             await client.query(
-                `INSERT INTO mail_campaign_recipients (campaign_id, email, name, status)
-                 SELECT $1, t.email, t.name, CASE WHEN u.email IS NULL THEN 'pending' ELSE 'skipped' END
+                `INSERT INTO mail_campaign_recipients (campaign_id, email, name, status, error)
+                 SELECT $1, t.email, t.name, s.status, s.reason
                    FROM unnest($2::text[], $3::text[]) AS t(email, name)
                    LEFT JOIN mail_unsubscribes u ON u.email = t.email
+                  CROSS JOIN LATERAL (SELECT CASE
+                        WHEN u.email IS NOT NULL THEN 'skipped'
+                        WHEN $4 AND EXISTS (${PREVIOUS_RECIPIENT}) THEN 'skipped'
+                        ELSE 'pending' END AS status,
+                      CASE
+                        WHEN u.email IS NOT NULL THEN 'Listeden çıkmış'
+                        WHEN $4 AND EXISTS (${PREVIOUS_RECIPIENT}) THEN 'Daha önce gönderilmiş ya da başka gönderimde sırada'
+                      END AS reason) s
                  ON CONFLICT DO NOTHING`,
-                [id, [...seen.keys()], [...seen.values()]]
+                [id, [...seen.keys()], [...seen.values()], skipPrevious]
             );
             await client.query('COMMIT');
             console.log(`[campaigns] ${req.admin?.username}: gönderim #${id} oluşturuldu (${seen.size} alıcı)`);
@@ -304,6 +336,11 @@ export const registerCampaignRoutes = (app, { db, requireAdmin, secret, website 
             const c = await db.get(`SELECT * FROM mail_campaigns WHERE status = 'sending' ORDER BY started_at, id LIMIT 1`);
             if (!c) return;
             if (Date.now() - lastSentAt < 3_600_000 / c.rate_per_hour) return;
+            const limit = dailyLimit();
+            if (limit) {
+                const recent = await db.get(`SELECT COUNT(*)::int AS n FROM mail_campaign_recipients WHERE status = 'sent' AND sent_at > NOW() - INTERVAL '24 hours'`);
+                if ((recent?.n ?? 0) >= limit) return;
+            }
             const r = await db.get(
                 `SELECT r.id, r.email, r.name, (u.email IS NOT NULL) AS unsubscribed
                    FROM mail_campaign_recipients r LEFT JOIN mail_unsubscribes u ON u.email = r.email

@@ -72,16 +72,35 @@ export const BulkMail: React.FC = () => {
     const [testTo, setTestTo] = useState('');
     const [consent, setConsent] = useState(false);
     const [businessOnly, setBusinessOnly] = useState(true);
+    const [skipPrevious, setSkipPrevious] = useState(true);
+    const [previous, setPrevious] = useState<ReadonlySet<string>>(() => new Set());
     const [sendingTest, setSendingTest] = useState(false);
     const [starting, setStarting] = useState(false);
     const fileRef = useRef<HTMLInputElement>(null);
 
     const parsedAll = useMemo(() => parseRecipients(listText), [listText]);
     const personalCount = useMemo(() => parsedAll.recipients.filter(r => isPersonal(r.email)).length, [parsedAll]);
-    const parsed = useMemo(
-        () => (businessOnly && personalCount ? { ...parsedAll, recipients: parsedAll.recipients.filter(r => !isPersonal(r.email)) } : parsedAll),
-        [parsedAll, businessOnly, personalCount],
+    const isPrevious = useCallback((r: Recipient) => previous.has(r.email.toLowerCase()), [previous]);
+    const previousCount = useMemo(
+        () => parsedAll.recipients.filter(r => isPrevious(r) && !(businessOnly && isPersonal(r.email))).length,
+        [parsedAll, isPrevious, businessOnly],
     );
+    const parsed = useMemo(
+        () => ({ ...parsedAll, recipients: parsedAll.recipients.filter(r => !(businessOnly && isPersonal(r.email)) && !(skipPrevious && isPrevious(r))) }),
+        [parsedAll, businessOnly, skipPrevious, isPrevious],
+    );
+
+    useEffect(() => {
+        const emails = parsedAll.recipients.map(r => r.email.toLowerCase());
+        if (!emails.length) return;
+        let cancelled = false;
+        const id = setTimeout(() => {
+            adminApi.previousRecipients(emails)
+                .then(r => { if (!cancelled) setPrevious(new Set(r.emails)); })
+                .catch(() => undefined);
+        }, 500);
+        return () => { cancelled = true; clearTimeout(id); };
+    }, [parsedAll]);
 
     const fallbackBrochure: BrochureId = parsed.hasCountry ? 'en' : 'tr';
     const countryRows = useMemo(() => {
@@ -181,7 +200,7 @@ export const BulkMail: React.FC = () => {
                 const c = contents[g.brochure];
                 const created = await adminApi.createCampaign({
                     name: campaignName(g.brochure), subject: c.subject.trim(), html: c.html, text: c.text, ratePerHour: perHour,
-                    recipients: g.recipients.map(({ email, name: n }) => ({ email, name: n })),
+                    recipients: g.recipients.map(({ email, name: n }) => ({ email, name: n })), skipPrevious,
                 });
                 await adminApi.startCampaign(created.id);
                 started.push(g.brochure);
@@ -269,6 +288,7 @@ export const BulkMail: React.FC = () => {
                                 {parsed.duplicates > 0 && <Badge color={C.amber}>{fmtNumber(parsed.duplicates)} tekrar çıkarıldı</Badge>}
                                 {parsed.invalid.length > 0 && <Badge color={C.red}>{fmtNumber(parsed.invalid.length)} satırda adres yok</Badge>}
                                 {businessOnly && personalCount > 0 && <Badge color={C.sky}>{fmtNumber(personalCount)} bireysel adres ayıklandı</Badge>}
+                                {skipPrevious && previousCount > 0 && <Badge color={C.sky}>{fmtNumber(previousCount)} daha önce gönderilmiş adres çıkarıldı</Badge>}
                                 {!!data?.unsubscribed && <span style={{ fontSize: '0.72rem', color: C.muted }}>Listeden çıkmış {fmtNumber(data.unsubscribed)} kişiye zaten gönderilmez.</span>}
                             </div>
                             {parsed.invalid.length > 0 && (
@@ -282,6 +302,10 @@ export const BulkMail: React.FC = () => {
                             <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginTop: 8, fontSize: '0.76rem', color: C.text, lineHeight: 1.5, cursor: 'pointer' }}>
                                 <input type="checkbox" checked={businessOnly} onChange={e => setBusinessOnly(e.target.checked)} style={{ marginTop: 2, accentColor: C.accent }} />
                                 <span>Bireysel adresleri (gmail, hotmail, outlook, yandex, icloud…) gönderme <span style={{ color: C.dim }}>· önerilir</span></span>
+                            </label>
+                            <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginTop: 4, fontSize: '0.76rem', color: C.text, lineHeight: 1.5, cursor: 'pointer' }}>
+                                <input type="checkbox" checked={skipPrevious} onChange={e => setSkipPrevious(e.target.checked)} style={{ marginTop: 2, accentColor: C.accent }} />
+                                <span>Daha önce gönderilmiş ya da duraklatılmış bir gönderimde sırada bekleyen adresleri çıkar <span style={{ color: C.dim }}>· önerilir</span></span>
                             </label>
                             {!businessOnly && personalCount > 0 && (
                                 <div style={{ marginTop: 6, fontSize: '0.74rem', color: C.redText, lineHeight: 1.5 }}>
@@ -334,7 +358,9 @@ export const BulkMail: React.FC = () => {
                             </div>
                             <div style={{ fontSize: '0.76rem', color: C.muted, lineHeight: 1.5, paddingBottom: 4 }}>
                                 {totalRecipients > 0 && <>Tahmini süre: <strong style={{ color: C.text }}>{fmtHours(totalRecipients, perHour)}</strong>. </>}
-                                Hosting e-posta hesabının saatlik sınırını aşmayın; aşılırsa alan adı kara listeye girebilir ve üyelere giden onay kodları da gecikir.
+                                {data?.dailyLimit
+                                    ? <>Günlük sınır {fmtNumber(data.dailyLimit)} e-posta (son 24 saatte {fmtNumber(data.sentLast24h)} gönderildi); sınır dolunca gönderim bekler, ertesi gün kendiliğinden sürer.</>
+                                    : 'Gönderim servisinin günlük sınırını aşmayın.'}
                             </div>
                         </div>
                         <div style={{ padding: 12, borderRadius: 12, background: C.soft, border: `1px solid ${C.border}`, display: 'flex', flexDirection: 'column', gap: 8 }}>

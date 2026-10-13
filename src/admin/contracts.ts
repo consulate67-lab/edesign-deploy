@@ -443,6 +443,9 @@ export interface MailCampaignList {
     mailReady: boolean;
     defaultRate: number;
     rateMax: number;
+    /** 0 = sınırsız */
+    dailyLimit: number;
+    sentLast24h: number;
 }
 
 export interface MailCampaignDetail {
@@ -460,5 +463,6 @@ export interface MailCampaignInput extends MailContent {
     name: string;
     ratePerHour: number;
     recipients: { email: string; name: string }[];
+    skipPrevious: boolean;
 }
 
