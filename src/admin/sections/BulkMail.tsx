@@ -20,6 +20,15 @@ const STATUS: Record<CampaignStatus, { label: string; color: string }> = {
 
 const EMAIL_RE = /[A-Za-z0-9._%+'-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}/g;
 
+/** Bireysel (tüketici) posta sağlayıcıları: onaysız ticari ileti yalnız tacir/esnafa gönderilebildiği için varsayılan olarak ayıklanır. */
+const PERSONAL_DOMAINS = new Set([
+    'gmail.com', 'googlemail.com', 'hotmail.com', 'hotmail.com.tr', 'outlook.com', 'outlook.com.tr', 'live.com', 'live.com.tr',
+    'msn.com', 'windowslive.com', 'yahoo.com', 'yahoo.com.tr', 'ymail.com', 'icloud.com', 'me.com', 'mac.com', 'yandex.com',
+    'yandex.com.tr', 'yandex.ru', 'mynet.com', 'aol.com', 'gmx.com', 'gmx.de', 'gmx.net', 'mail.ru', 'mail.com', 'proton.me',
+    'protonmail.com', 'superonline.com', 'ttmail.com', 'turk.net', 'e-kolay.net', 'windowslive.com.tr',
+]);
+const isPersonal = (email: string) => PERSONAL_DOMAINS.has(email.slice(email.lastIndexOf('@') + 1));
+
 interface ParsedList {
     recipients: { email: string; name: string }[];
     duplicates: number;
@@ -97,11 +106,17 @@ export const BulkMail: React.FC = () => {
     const [rate, setRate] = useState<number | null>(null);
     const [testTo, setTestTo] = useState('');
     const [consent, setConsent] = useState(false);
+    const [businessOnly, setBusinessOnly] = useState(true);
     const [sendingTest, setSendingTest] = useState(false);
     const [starting, setStarting] = useState(false);
     const fileRef = useRef<HTMLInputElement>(null);
 
-    const parsed = useMemo(() => parseRecipients(listText), [listText]);
+    const parsedAll = useMemo(() => parseRecipients(listText), [listText]);
+    const personalCount = useMemo(() => parsedAll.recipients.filter(r => isPersonal(r.email)).length, [parsedAll]);
+    const parsed = useMemo(
+        () => (businessOnly && personalCount ? { ...parsedAll, recipients: parsedAll.recipients.filter(r => !isPersonal(r.email)) } : parsedAll),
+        [parsedAll, businessOnly, personalCount],
+    );
     const perHour = rate ?? data?.defaultRate ?? 80;
     const rateMax = data?.rateMax ?? 500;
 
@@ -173,7 +188,7 @@ export const BulkMail: React.FC = () => {
     const act = async (c: MailCampaign, action: 'start' | 'pause' | 'cancel' | 'retry' | 'delete') => {
         if (action === 'cancel' && !window.confirm(`"${c.name}" gönderimi iptal edilsin mi? Bekleyen ${fmtNumber(c.pending)} e-posta gönderilmeyecek.`)) return;
         if (action === 'delete' && !window.confirm(`"${c.name}" gönderimi ve alıcı listesi silinsin mi?`)) return;
-        if (action === 'start' && !window.confirm('Alıcıların ticari ileti onayı olduğunu onaylıyor musunuz? Gönderim kaldığı yerden devam edecek.')) return;
+        if (action === 'start' && !window.confirm('Listenin yalnız şirket/esnaf adreslerinden oluştuğunu onaylıyor musunuz? Gönderim kaldığı yerden devam edecek.')) return;
         setBusyId(c.id);
         try {
             if (action === 'start') await adminApi.startCampaign(c.id);
@@ -241,6 +256,7 @@ export const BulkMail: React.FC = () => {
                                 <Badge color={C.green}>{fmtNumber(parsed.recipients.length)} geçerli adres</Badge>
                                 {parsed.duplicates > 0 && <Badge color={C.amber}>{fmtNumber(parsed.duplicates)} tekrar çıkarıldı</Badge>}
                                 {parsed.invalid.length > 0 && <Badge color={C.red}>{fmtNumber(parsed.invalid.length)} satırda adres yok</Badge>}
+                                {businessOnly && personalCount > 0 && <Badge color={C.sky}>{fmtNumber(personalCount)} bireysel adres ayıklandı</Badge>}
                                 {!!data?.unsubscribed && <span style={{ fontSize: '0.72rem', color: C.muted }}>Listeden çıkmış {fmtNumber(data.unsubscribed)} kişiye zaten gönderilmez.</span>}
                             </div>
                             {parsed.invalid.length > 0 && (
@@ -251,6 +267,15 @@ export const BulkMail: React.FC = () => {
                             <div style={{ fontSize: '0.72rem', color: C.dim, marginTop: 6 }}>
                                 Excel listesini önce Dosya → Farklı Kaydet → "CSV UTF-8" olarak kaydedin.
                             </div>
+                            <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginTop: 8, fontSize: '0.76rem', color: C.text, lineHeight: 1.5, cursor: 'pointer' }}>
+                                <input type="checkbox" checked={businessOnly} onChange={e => setBusinessOnly(e.target.checked)} style={{ marginTop: 2, accentColor: C.accent }} />
+                                <span>Bireysel adresleri (gmail, hotmail, outlook, yandex, icloud…) gönderme <span style={{ color: C.dim }}>· önerilir</span></span>
+                            </label>
+                            {!businessOnly && personalCount > 0 && (
+                                <div style={{ marginTop: 6, fontSize: '0.74rem', color: C.redText, lineHeight: 1.5 }}>
+                                    Listede {fmtNumber(personalCount)} bireysel adres var. Tüketicilere önceden onay ve İYS kaydı olmadan tanıtım e-postası göndermek idari para cezası riski taşır.
+                                </div>
+                            )}
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: 12, alignItems: 'end' }}>
                             <div>
@@ -274,7 +299,7 @@ export const BulkMail: React.FC = () => {
                         </div>
                         <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontSize: '0.8rem', color: C.text, lineHeight: 1.5, cursor: 'pointer' }}>
                             <input type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)} style={{ marginTop: 3, width: 16, height: 16, accentColor: C.accent }} />
-                            <span>Bu listedeki alıcıların ticari elektronik ileti almaya onay verdiğini ve İYS'ye kayıtlı olduğunu onaylıyorum. Her e-postada "listeden çık" bağlantısı bulunur.</span>
+                            <span>Bu listenin şirket/esnaf iş adreslerinden oluştuğunu ve adresleri yasal yollarla (ör. firmaların kendi yayımladığı iletişim bilgilerinden) edindiğimi onaylıyorum. Her e-postada tek tıkla "listeden çık" bağlantısı bulunur; çıkanlara bir daha gönderilmez.</span>
                         </label>
                         <button type="button" style={{ ...btn('primary'), opacity: canStart ? 1 : 0.5, padding: '11px 16px' }} disabled={!canStart} onClick={() => void start()}>
                             {starting ? <Spinner size={15} color="white" /> : <Play size={15} />}
