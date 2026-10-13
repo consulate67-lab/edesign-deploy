@@ -46,6 +46,8 @@ export interface SavedDesign {
     download_count: number;
     created_at: string;
     updated_at: string;
+    /** Bu tarihten sonra tasarım hesaptan silinir (server/design-retention.js). */
+    expires_at?: string | null;
 }
 
 /** server/index.js embedDesignKey ile aynı biçim. */
@@ -53,7 +55,7 @@ export const DESIGN_KEY_RE = /edesign-key:([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[
 export const designKeyOf = (xslt: string | null | undefined) => xslt?.match(DESIGN_KEY_RE)?.[1] ?? null;
 const embedDesignKey = (xslt: string, key: string) => {
     const clean = xslt.replace(/^(?:\uFEFF|\u00EF\u00BB\u00BF)+/, '').replace(/<!--\s*edesign-key:[^>]*?-->[ \t]*\r?\n?/gi, '');
-    const comment = `<!-- edesign-key:${key} | Onaylanmis tasarim. Tasarimcida tekrar duzenlenemez; hesabinizdaki Tasarimlarim bolumunden tekrar indirebilirsiniz. -->\n`;
+    const comment = `<!-- edesign-key:${key} | Onaylanmis tasarim. Tasarimcida tekrar duzenlenemez. Tasarimlar olusturulduktan 7 gun sonra hesaptan silinir; bu dosyayi saklayin. -->\n`;
     const decl = clean.match(/^\uFEFF?\s*<\?xml[^?]*\?>[ \t]*\r?\n?/);
     return decl ? clean.slice(0, decl[0].length) + comment + clean.slice(decl[0].length) : comment + clean;
 };
@@ -356,6 +358,7 @@ export const api = {
             status: design.status || 'draft',
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
+            expires_at: new Date(Date.now() + 7 * 86_400_000).toISOString(),
         };
         designs.unshift(created);
         localStorage.setItem('mock_designs', JSON.stringify(designs));
@@ -407,7 +410,7 @@ export const api = {
         const key = existing?.design_key || crypto.randomUUID();
         const now = new Date().toISOString();
         const design: SavedDesign = {
-            ...(existing ?? { id: Date.now(), created_at: now, download_count: 0 }),
+            ...(existing ?? { id: Date.now(), created_at: now, download_count: 0, expires_at: new Date(Date.now() + 7 * 86_400_000).toISOString() }),
             name: payload.name,
             module_id: payload.module_id,
             xslt_content: embedDesignKey(locked, key),

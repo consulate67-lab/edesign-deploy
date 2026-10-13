@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { initDb } from './db.js';
+import { DESIGN_RETENTION_DAYS, PURGE_PAID_DESIGN_SQL, startDesignRetention } from './design-retention.js';
 import { applyLicenseLock, hasLicenseLock, isValidLicenseId, isValidTaxId, normalizeLicenseId, withIssuerTaxId } from '../shared/license-lock.js';
 import { TEST_WATERMARK_PNG } from '../shared/test-watermark-png.js';
 import { createRequireAdmin, registerAdminAuthRoutes } from './admin-auth.js';
@@ -133,6 +134,7 @@ initDb().then(async _db => {
     registerGalleryRoutes(app, { db, requireAdmin });
     registerSiteConfigRoutes(app, { db, requireAdmin });
     registerCampaignRoutes(app, { db, requireAdmin, secret: EFFECTIVE_SECRET, website: new URL(FRONTEND_URL).origin });
+    startDesignRetention(db);
     registerSupportRoutes(app, { db, authenticateToken });
     registerAssistantRoutes(app, { db, requireAdmin, packages: PACKAGE_PRICES });
     registerDesignAiRoutes(app, { db, authenticateToken });
@@ -500,7 +502,11 @@ const serializeDesign = (row) => row ? ({
     download_count: row.download_count || 0,
     created_at: row.created_at,
     updated_at: row.updated_at,
+    expires_at: row.expires_at || null,
+    purged: !!row.purged_at,
 }) : null;
+
+const EXPIRED_MESSAGE = `Bu tasarimin ${DESIGN_RETENTION_DAYS} gunluk saklama suresi doldu ve dosyasi silindi. Onayli tasarimsa elinizdeki XSLT dosyasi calismaya devam eder.`;
 
 // POST /api/designs — Yeni tasarim olustur
 app.post('/api/designs', authenticateToken, async (req, res) => {
@@ -534,7 +540,7 @@ app.post('/api/designs', authenticateToken, async (req, res) => {
 app.get('/api/designs', authenticateToken, async (req, res) => {
     try {
         const rows = await db.all(
-            `SELECT * FROM designs WHERE user_id = ? ORDER BY updated_at DESC LIMIT 200`,
+            `SELECT * FROM designs WHERE user_id = ? AND purged_at IS NULL AND expires_at > NOW() ORDER BY updated_at DESC LIMIT 200`,
             [req.user.id]
         );
         res.json({ designs: rows.map(serializeDesign) });
@@ -554,6 +560,7 @@ app.get('/api/designs/:id', authenticateToken, async (req, res) => {
         const row = await db.get('SELECT * FROM designs WHERE id = ?', [id]);
         if (!row) return res.status(404).json({ error: 'Tasarim bulunamadi.' });
         if (row.user_id !== req.user.id) return res.status(403).json({ error: 'Bu tasarima erisim yetkiniz yok.' });
+        if (row.purged_at) return res.status(410).json({ error: EXPIRED_MESSAGE });
         res.json({ design: serializeDesign(row) });
     } catch (e) {
         console.error('[designs] get error:', e);
@@ -613,7 +620,9 @@ app.delete('/api/designs/:id', authenticateToken, async (req, res) => {
         if (!existing) return res.status(404).json({ error: 'Tasarim bulunamadi.' });
         if (existing.user_id !== req.user.id) return res.status(403).json({ error: 'Bu tasarimi silme yetkiniz yok.' });
 
-        await db.run('DELETE FROM designs WHERE id = ?', [id]);
+        // Onaylı tasarımın satırı lisans mührü için kalır (server/design-retention.js).
+        if (existing.paid_at) await db.run(PURGE_PAID_DESIGN_SQL, [id]);
+        else await db.run('DELETE FROM designs WHERE id = ?', [id]);
         // eslint-disable-next-line no-console
         console.log(`[designs] user=${req.user.id} deleted design #${id} (${existing.name})`);
         res.json({ success: true, message: 'Tasarim silindi.' });
@@ -629,7 +638,7 @@ const DESIGN_KEY_RE = /edesign-key:([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]
 const DESIGN_KEY_COMMENT_RE = /<!--\s*edesign-key:[^>]*?-->[ \t]*\r?\n?/gi;
 const embedDesignKey = (xslt, key) => {
     const clean = xslt.replace(/^(?:\uFEFF|\u00EF\u00BB\u00BF)+/, '').replace(DESIGN_KEY_COMMENT_RE, '');
-    const comment = `<!-- edesign-key:${key} | Onaylanmis tasarim. Tasarimcida tekrar duzenlenemez; hesabinizdaki Tasarimlarim bolumunden tekrar indirebilirsiniz. -->\n`;
+    const comment = `<!-- edesign-key:${key} | Onaylanmis tasarim. Tasarimcida tekrar duzenlenemez. Tasarimlar olusturulduktan ${DESIGN_RETENTION_DAYS} gun sonra hesaptan silinir; bu dosyayi saklayin. -->\n`;
     const decl = clean.match(/^\uFEFF?\s*<\?xml[^?]*\?>[ \t]*\r?\n?/);
     return decl ? clean.slice(0, decl[0].length) + comment + clean.slice(decl[0].length) : comment + clean;
 };
@@ -682,6 +691,10 @@ app.post('/api/designs/export', authenticateToken, async (req, res) => {
         }
 
         let credits = user.credits;
+        if (existing?.paid_at && existing.purged_at) {
+            await client.query('ROLLBACK');
+            return res.status(410).json({ error: EXPIRED_MESSAGE });
+        }
         if (existing?.paid_at) {
             // Onaylı tasarım kilitli: gönderilen içerik yok sayılır, saklanan dosya verilir.
             const row = (await client.query(

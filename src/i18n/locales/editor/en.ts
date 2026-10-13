@@ -136,7 +136,7 @@ const editor: typeof tr = {
     },
     locked: {
         title: 'This design is approved',
-        body: 'Approved (purchased) designs cannot be edited again. You can download the approved file for free at any time here or from the "Completed Designs" list.',
+        body: 'Approved (purchased) designs cannot be edited again. You can download the approved file for free here or from the "Completed Designs" list until its deletion date. Designs are deleted 7 days after they are created.',
         taxId: 'Licensed for {{kind}} {{taxId}}; documents issued with another tax ID show the TEST watermark.',
         downloaded: 'File downloaded; it was saved to your Downloads folder.',
     },
@@ -391,7 +391,7 @@ const editor: typeof tr = {
         usesCredit: '1 design credit is used',
         adminFree: 'admin: not deducted',
         creditsLeft: 'credits left: {{credits}}',
-        savedNote: 'The design is saved to your account; you can preview it and download it again for free at any time from the "Completed Designs" list.',
+        savedNote: 'The design is saved to your account and deleted 7 days after it was created; until then you can preview it and download it again for free from the "Completed Designs" list. Keep the file you download.',
         lockNote: 'After approval the design is locked: it cannot be edited again, only downloaded.',
         testNote: 'If you have not tried it yet, download the test file first and check it in your own system. Test downloads are free.',
         confirmCheck: 'I have checked the design and the tax ID and approve them. I understand I cannot make changes after approval.',

@@ -136,7 +136,7 @@ const editor: typeof tr = {
     },
     locked: {
         title: 'Dieses Design ist freigegeben',
-        body: 'Freigegebene (gekaufte) Designs können nicht mehr bearbeitet werden. Die freigegebene Datei können Sie jederzeit hier oder in der Liste „Fertige Designs“ kostenlos herunterladen.',
+        body: 'Freigegebene (gekaufte) Designs können nicht mehr bearbeitet werden. Die freigegebene Datei können Sie bis zum Löschdatum hier oder in der Liste „Fertige Designs“ kostenlos herunterladen. Designs werden 7 Tage nach der Erstellung gelöscht.',
         taxId: 'Lizenziert für {{kind}} {{taxId}}; Dokumente mit einer anderen Steuernummer zeigen das TEST-Wasserzeichen.',
         downloaded: 'Datei heruntergeladen; sie wurde in Ihrem Download-Ordner gespeichert.',
     },
@@ -391,7 +391,7 @@ const editor: typeof tr = {
         usesCredit: '1 Design-Guthaben wird verbraucht',
         adminFree: 'Admin: wird nicht abgezogen',
         creditsLeft: 'verbleibendes Guthaben: {{credits}}',
-        savedNote: 'Das Design wird in Ihrem Konto gespeichert; in der Liste „Fertige Designs“ können Sie es jederzeit ansehen und kostenlos erneut herunterladen.',
+        savedNote: 'Das Design wird in Ihrem Konto gespeichert und 7 Tage nach der Erstellung gelöscht; bis dahin können Sie es in der Liste „Fertige Designs“ ansehen und kostenlos erneut herunterladen. Bewahren Sie die heruntergeladene Datei auf.',
         lockNote: 'Nach der Freigabe wird das Design gesperrt: Es kann nicht mehr bearbeitet, nur noch heruntergeladen werden.',
         testNote: 'Falls noch nicht geschehen, laden Sie zuerst die Testdatei herunter und prüfen Sie sie in Ihrem System. Der Test-Download ist kostenlos.',
         confirmCheck: 'Ich habe Design und Steuernummer geprüft und gebe sie frei. Mir ist bewusst, dass ich danach nichts mehr ändern kann.',

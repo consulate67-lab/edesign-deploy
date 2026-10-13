@@ -136,7 +136,7 @@ const editor: typeof tr = {
     },
     locked: {
         title: 'Este diseño está aprobado',
-        body: 'Los diseños aprobados (comprados) no se pueden volver a editar. Puede descargar gratis el archivo aprobado en cualquier momento aquí o desde la lista «Diseños completados».',
+        body: 'Los diseños aprobados (comprados) no se pueden volver a editar. Puede descargar gratis el archivo aprobado aquí o desde la lista «Diseños completados» hasta su fecha de eliminación. Los diseños se eliminan 7 días después de crearse.',
         taxId: 'Licenciado para {{kind}} {{taxId}}; los documentos emitidos con otro identificador fiscal muestran la marca TEST.',
         downloaded: 'Archivo descargado; se guardó en su carpeta de Descargas.',
     },
@@ -391,7 +391,7 @@ const editor: typeof tr = {
         usesCredit: 'Se usa 1 crédito de diseño',
         adminFree: 'administrador: no se descuenta',
         creditsLeft: 'créditos restantes: {{credits}}',
-        savedNote: 'El diseño se guarda en su cuenta; puede previsualizarlo y volver a descargarlo gratis cuando quiera desde la lista «Diseños completados».',
+        savedNote: 'El diseño se guarda en su cuenta y se elimina 7 días después de crearse; hasta entonces puede previsualizarlo y volver a descargarlo gratis desde la lista «Diseños completados». Guarde el archivo descargado.',
         lockNote: 'Tras la aprobación el diseño se bloquea: ya no se puede editar, solo descargar.',
         testNote: 'Si aún no lo ha probado, descargue primero el archivo de prueba y revíselo en su sistema. La descarga de prueba es gratuita.',
         confirmCheck: 'He revisado el diseño y el identificador fiscal y los apruebo. Sé que no podré hacer cambios después de la aprobación.',

@@ -136,7 +136,7 @@ const editor: typeof tr = {
     },
     locked: {
         title: 'Ce modèle est validé',
-        body: 'Les modèles validés (achetés) ne peuvent plus être modifiés. Vous pouvez télécharger gratuitement le fichier validé à tout moment ici ou depuis la liste « Modèles terminés ».',
+        body: 'Les modèles validés (achetés) ne peuvent plus être modifiés. Vous pouvez télécharger gratuitement le fichier validé ici ou depuis la liste « Modèles terminés » jusqu’à sa date de suppression. Les modèles sont supprimés 7 jours après leur création.',
         taxId: 'Licence pour {{kind}} {{taxId}} ; les documents émis avec un autre identifiant fiscal affichent le filigrane TEST.',
         downloaded: 'Fichier téléchargé ; il a été enregistré dans votre dossier Téléchargements.',
     },
@@ -391,7 +391,7 @@ const editor: typeof tr = {
         usesCredit: '1 crédit de modèle est utilisé',
         adminFree: 'admin : non décompté',
         creditsLeft: 'crédits restants : {{credits}}',
-        savedNote: 'Le modèle est enregistré dans votre compte ; vous pouvez le prévisualiser et le retélécharger gratuitement à tout moment depuis la liste « Modèles terminés ».',
+        savedNote: 'Le modèle est enregistré dans votre compte et supprimé 7 jours après sa création ; d’ici là, vous pouvez le prévisualiser et le retélécharger gratuitement depuis la liste « Modèles terminés ». Conservez le fichier téléchargé.',
         lockNote: 'Après validation, le modèle est verrouillé : il ne peut plus être modifié, seulement téléchargé.',
         testNote: 'Si ce n’est pas encore fait, téléchargez d’abord le fichier de test et vérifiez-le dans votre système. Le téléchargement de test est gratuit.',
         confirmCheck: 'J’ai vérifié le modèle et l’identifiant fiscal et je les valide. Je sais que je ne pourrai plus rien modifier ensuite.',

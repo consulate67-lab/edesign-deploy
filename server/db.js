@@ -1,5 +1,6 @@
 import pg from 'pg';
 import { createCampaignSchema } from './campaigns.js';
+import { RETENTION_INTERVAL } from './design-retention.js';
 import { createSiteConfigSchema } from './site-config.js';
 
 /**
@@ -194,6 +195,11 @@ export const initDb = async () => {
         await ensureDesignsColumn(probe, 'license_tax_id', 'TEXT');
         // Çevrimiçi lisans mührünün adresindeki tahmin edilemez anahtar.
         await ensureDesignsColumn(probe, 'license_token', 'TEXT');
+        // Saklama süresi (server/design-retention.js). Sütun eklenirken mevcut tasarımlar
+        // bugünden itibaren süre alır; kimsenin işi habersiz silinmez.
+        await ensureDesignsColumn(probe, 'expires_at', `TIMESTAMPTZ NOT NULL DEFAULT (NOW() + ${RETENTION_INTERVAL})`);
+        await ensureDesignsColumn(probe, 'purged_at', 'TIMESTAMPTZ');
+        await probe.query(`CREATE INDEX IF NOT EXISTS idx_designs_expires_at ON designs (expires_at) WHERE purged_at IS NULL`);
         await probe.query(`CREATE UNIQUE INDEX IF NOT EXISTS idx_designs_design_key ON designs (design_key) WHERE design_key IS NOT NULL`);
         await probe.query(`CREATE UNIQUE INDEX IF NOT EXISTS idx_designs_license_token ON designs (license_token) WHERE license_token IS NOT NULL`);
         // Onaylı XSLT'nin açıldığı her VKN/TCKN: nerede, kaç kez, geçerli mi.

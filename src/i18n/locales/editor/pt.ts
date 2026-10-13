@@ -136,7 +136,7 @@ const editor: typeof tr = {
     },
     locked: {
         title: 'Este design está aprovado',
-        body: 'Designs aprovados (comprados) não podem ser editados novamente. Você pode baixar o arquivo aprovado gratuitamente a qualquer momento aqui ou na lista "Designs concluídos".',
+        body: 'Designs aprovados (comprados) não podem ser editados novamente. Você pode baixar o arquivo aprovado gratuitamente aqui ou na lista "Designs concluídos" até a data de exclusão. Os designs são excluídos 7 dias após a criação.',
         taxId: 'Licenciado para {{kind}} {{taxId}}; documentos emitidos com outro número de identificação fiscal exibem a marca d\'água TESTE.',
         downloaded: 'Arquivo baixado; ele foi salvo na sua pasta Downloads.',
     },
@@ -391,7 +391,7 @@ const editor: typeof tr = {
         usesCredit: '1 crédito de design é utilizado',
         adminFree: 'admin: não descontado',
         creditsLeft: 'créditos restantes: {{credits}}',
-        savedNote: 'O design é salvo na sua conta; você pode visualizá-lo e baixá-lo novamente de graça a qualquer momento na lista "Designs concluídos".',
+        savedNote: 'O design é salvo na sua conta e excluído 7 dias após a criação; até lá você pode visualizá-lo e baixá-lo novamente de graça na lista "Designs concluídos". Guarde o arquivo baixado.',
         lockNote: 'Após a aprovação, o design fica bloqueado: não pode ser editado novamente, apenas baixado.',
         testNote: 'Se você ainda não testou, baixe primeiro o arquivo de teste e verifique-o no seu próprio sistema. Downloads de teste são gratuitos.',
         confirmCheck: 'Verifiquei o design e o número de identificação fiscal e os aprovo. Entendo que não poderei fazer alterações após a aprovação.',

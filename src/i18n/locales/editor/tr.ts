@@ -134,7 +134,7 @@ const editor = {
     },
     locked: {
         title: 'Bu tasarım onaylandı',
-        body: 'Onaylanmış (satın alınmış) tasarımlar tekrar düzenlenemez. Onaylanan dosyayı istediğiniz zaman buradan veya "Tamamlanan Tasarımlar" listesinden ücretsiz indirebilirsiniz.',
+        body: 'Onaylanmış (satın alınmış) tasarımlar tekrar düzenlenemez. Onaylanan dosyayı silinme tarihine kadar buradan veya "Tamamlanan Tasarımlar" listesinden ücretsiz indirebilirsiniz. Tasarımlar oluşturulduktan 7 gün sonra silinir.',
         taxId: '{{kind}} {{taxId}} için lisanslı; başka bir VKN/TCKN ile düzenlenen belgelerde TEST yazısı çıkar.',
         downloaded: 'Dosya indirildi; bilgisayarınızın İndirilenler klasörüne kaydedildi.',
     },
@@ -406,7 +406,7 @@ const editor = {
         usesCredit: '1 tasarım hakkı kullanılır',
         adminFree: 'yönetici: düşülmez',
         creditsLeft: 'kalan hakkınız: {{credits}}',
-        savedNote: 'Tasarım hesabınıza kaydedilir; "Tamamlanan Tasarımlar" listesinden istediğiniz zaman önizleyip ücretsiz tekrar indirebilirsiniz.',
+        savedNote: 'Tasarım hesabınıza kaydedilir ve oluşturulduktan 7 gün sonra silinir; o tarihe kadar "Tamamlanan Tasarımlar" listesinden önizleyip ücretsiz tekrar indirebilirsiniz. İndirdiğiniz dosyayı saklayın.',
         lockNote: 'Onaydan sonra tasarım kilitlenir: tekrar düzenlenemez, yalnızca indirilebilir.',
         testNote: 'Henüz denemediyseniz önce test dosyasını indirip kendi sisteminizde kontrol edin. Test indirme ücretsizdir.',
         confirmCheck: 'Tasarımı ve VKN/TCKN\'yi kontrol ettim, onaylıyorum. Onaydan sonra değişiklik yapamayacağımı biliyorum.',

@@ -35,7 +35,7 @@ export const buildSeedKb = (packages) => {
             id: 's-hak',
             q: 'Tasarım hakkı ne zaman harcanır? Kaydetmek hak harcar mı?',
             keywords: 'hak kredi harcanir dusulur kaydet onay onayla ne zaman kullanilir tasarim hakki',
-            a: 'Tasarım hakkı yalnızca **Onayla** adımında, tasarım başına bir kez harcanır.\n- **Kaydet:** ücretsiz, istediğiniz kadar.\n- **Test İndir:** ücretsiz (dosyada büyük TEST yazısı bulunur).\n- **Onayla (1 hak):** tasarım kilitlenir ve TEST yazısız son dosya iner.\n- Onaylanmış tasarımı "Tamamlanan Tasarımlar" listesinden **ücretsiz** tekrar indirebilirsiniz.',
+            a: 'Tasarım hakkı yalnızca **Onayla** adımında, tasarım başına bir kez harcanır.\n- **Kaydet:** ücretsiz, istediğiniz kadar.\n- **Test İndir:** ücretsiz (dosyada büyük TEST yazısı bulunur).\n- **Onayla (1 hak):** tasarım kilitlenir ve TEST yazısız son dosya iner.\n- Onaylanmış tasarımı silinme tarihine kadar "Tamamlanan Tasarımlar" listesinden **ücretsiz** tekrar indirebilirsiniz.\n- Tasarımlar oluşturulduktan **7 gün sonra** hesaptan silinir; indirdiğiniz dosyayı saklayın.',
             actions: ['pricing'],
         },
         {
@@ -56,7 +56,7 @@ export const buildSeedKb = (packages) => {
             id: 's-onay',
             q: 'Onayladıktan sonra tasarımı değiştirebilir miyim?',
             keywords: 'onay sonrasi degistir duzenle kilit kilitlenir onaylanan tasarim tekrar duzenleme',
-            a: 'Onaylanan tasarım **kilitlenir**, artık düzenlenemez; yalnızca indirilebilir.\n- "Tamamlanan Tasarımlar" listesinden **Önizle** ve **İndir** ile ücretsiz tekrar indirebilirsiniz.\n- Değişiklik gerekiyorsa yeni bir tasarım başlatmanız gerekir (onayda yeniden 1 hak kullanılır).\n\nBu yüzden onaydan önce **Test İndir** ile denemenizi öneririm.',
+            a: 'Onaylanan tasarım **kilitlenir**, artık düzenlenemez; yalnızca indirilebilir.\n- Silinme tarihine kadar "Tamamlanan Tasarımlar" listesinden **Önizle** ve **İndir** ile ücretsiz tekrar indirebilirsiniz. Tasarımlar oluşturulduktan **7 gün sonra** silinir; onaylı dosyanız silindikten sonra da çalışmaya devam eder.\n- Değişiklik gerekiyorsa yeni bir tasarım başlatmanız gerekir (onayda yeniden 1 hak kullanılır).\n\nBu yüzden onaydan önce **Test İndir** ile denemenizi öneririm.',
             actions: [],
         },
         {
@@ -189,7 +189,7 @@ export const buildSeedKb = (packages) => {
             id: 's-tasarimlarim',
             q: 'Kaydettiğim tasarımlar nerede?',
             keywords: 'tasarimlarim kaydettigim nerede devam eden tamamlanan taslak liste bulamiyorum',
-            a: 'Giriş yaptıktan sonra seçim ekranında:\n- **Devam Eden Tasarımlar:** kaydettiğiniz taslaklar; **Devam et** ile açarsınız.\n- **Tamamlanan Tasarımlar:** onayladıklarınız; **Önizle** ve **İndir** (ücretsiz) ile tekrar indirirsiniz.',
+            a: 'Giriş yaptıktan sonra seçim ekranında:\n- **Devam Eden Tasarımlar:** kaydettiğiniz taslaklar; **Devam et** ile açarsınız.\n- **Tamamlanan Tasarımlar:** onayladıklarınız; **Önizle** ve **İndir** (ücretsiz) ile tekrar indirirsiniz.\n\nTasarımlar oluşturulduktan **7 gün sonra** silinir; her tasarımın altında kalan gün ve silinme tarihi yazar. Bulamadığınız tasarım bu süreyi doldurmuş olabilir.',
             actions: ['login'],
         },
         {

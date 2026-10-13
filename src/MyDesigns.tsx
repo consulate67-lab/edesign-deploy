@@ -28,6 +28,25 @@ const formatDate = (iso: string | null | undefined, withTime = false) => {
     });
 };
 
+const DAY_MS = 86_400_000;
+
+/** Tasarımın hesaptan silineceği tarih ve kalan gün; son iki gün kırmızı. */
+const ExpiryNote: React.FC<{ design: SavedDesign; style?: React.CSSProperties }> = ({ design, style }) => {
+    const { t } = useLocaleT();
+    const [now] = useState(() => Date.now());
+    const at = design.expires_at ? new Date(design.expires_at).getTime() : NaN;
+    if (Number.isNaN(at)) return null;
+    const days = Math.ceil((at - now) / DAY_MS);
+    const text = days <= 1
+        ? t('designs.expiresSoon', { date: formatDate(design.expires_at, true) })
+        : t('designs.expiresIn', { days, date: formatDate(design.expires_at) });
+    return (
+        <div data-design-expiry style={{ fontSize: '0.72rem', fontWeight: 600, color: days <= 2 ? theme.redText : theme.textSubtle, ...style }}>
+            {text}
+        </div>
+    );
+};
+
 const byRecent = (key: 'updated_at' | 'paid_at') => (a: SavedDesign, b: SavedDesign) =>
     new Date(b[key] ?? b.updated_at).getTime() - new Date(a[key] ?? a.updated_at).getTime();
 
@@ -134,6 +153,7 @@ export const MyDesigns: React.FC<{ onOpen: (d: SavedDesign) => void }> = ({ onOp
                                 <div style={{ fontSize: '0.75rem', color: theme.textMuted }}>
                                     {moduleLabel(d.module_id)} · {formatDate(d.updated_at)}
                                 </div>
+                                <ExpiryNote design={d} style={{ marginTop: 2 }} />
                             </div>
                             <button
                                 type="button"
@@ -244,7 +264,10 @@ export const CompletedDesigns: React.FC = () => {
                                         )}
                                     </td>
                                     <td style={td}>{moduleLabel(d.module_id)}</td>
-                                    <td style={{ ...td, whiteSpace: 'nowrap', color: theme.textMuted }}>{formatDate(d.paid_at ?? d.updated_at, true)}</td>
+                                    <td style={{ ...td, whiteSpace: 'nowrap', color: theme.textMuted }}>
+                                        {formatDate(d.paid_at ?? d.updated_at, true)}
+                                        <ExpiryNote design={d} style={{ marginTop: 2 }} />
+                                    </td>
                                     <td style={{ ...td, textAlign: 'center', color: theme.textMuted }}>{d.download_count ?? 0}</td>
                                     <td style={{ ...td, textAlign: 'right' }}>
                                         <div style={{ display: 'inline-flex', gap: '6px', alignItems: 'center' }}>

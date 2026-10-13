@@ -78,7 +78,9 @@ export const KVKKModal: React.FC<{ onClose: () => void }> = ({ onClose }) => (
         <h2 style={sectionTitleStyle}>4. Veri Saklama Süresi</h2>
         <p style={baseTextStyle}>
             Kişisel verileriniz, ilgili mevzuatın gerektirdiği süre ile sınırlı olarak
-            saklanır. Tasarım verileriniz hesap aktif olduğu sürece sistemimizde tutulur;
+            saklanır. Tasarımlarınız (XSLT, önizleme XML'i ve tasarım ayarları) oluşturulduktan
+            7 gün sonra sistemimizden silinir. Onaylanan tasarımlarda yalnızca lisans doğrulaması
+            için gereken kayıt (tasarım adı, lisanslı VKN/TCKN, onay tarihi) tutulur; diğer veriler
             hesap silindiğinde anonimleştirilir.
         </p>
 
