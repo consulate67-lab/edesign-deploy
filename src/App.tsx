@@ -6,6 +6,8 @@ import { useUiStore } from './store/uiStore';
 import { Landing } from './Landing.tsx';
 import { theme } from './theme';
 import i18n from './i18n';
+import { trackPageView } from './analytics/tracking';
+import { hasAnyTracking } from './analytics/config';
 
 // Route-level code splitting: each screen ships in its own chunk so the
 // initial bundle stays small. The designer (~150KB after minify) is the
@@ -24,6 +26,17 @@ const XSLTEditor = lazy(() =>
 const AdminApp = lazy(() => import('./admin/AdminApp').then((m) => ({ default: m.AdminApp })));
 const SupportWidget = lazy(() => import('./support/SupportWidget').then((m) => ({ default: m.SupportWidget })));
 const AssistantWidget = lazy(() => import('./assistant/AssistantWidget').then((m) => ({ default: m.AssistantWidget })));
+const CookieBanner = lazy(() => import('./analytics/CookieBanner').then((m) => ({ default: m.CookieBanner })));
+
+/** Reklam panellerinde ekranlar ayrı sayfalar olarak görünsün diye sanal yollar. */
+const PAGE_PATHS: Record<string, [string, string]> = {
+    landing: ['/', 'Ana sayfa'],
+    login: ['/giris', 'Giriş'],
+    register: ['/kayit', 'Üye ol'],
+    selection: ['/panel', 'Panel'],
+    designer: ['/tasarim', 'Tasarım'],
+    'xslt-editor': ['/xslt-editor', 'XSLT Editör'],
+};
 
 const isAdminHash = () => /^#\/(yonetim|admin)(\/|$)/i.test(window.location.hash);
 
@@ -79,6 +92,12 @@ const App: React.FC = () => {
         window.addEventListener('hashchange', onHash);
         return () => window.removeEventListener('hashchange', onHash);
     }, []);
+
+    useEffect(() => {
+        if (adminRoute) return;
+        const page = PAGE_PATHS[view === 'auth' ? authMode : view];
+        if (page) trackPageView(page[0], page[1]);
+    }, [view, authMode, adminRoute]);
 
     const userArea = !adminRoute && (view === 'selection' || view === 'designer' || view === 'xslt-editor');
     const [supportAllowed, setSupportAllowed] = useState(false);
@@ -246,6 +265,11 @@ const App: React.FC = () => {
     return (
         <>
             <ToastHost />
+            {hasAnyTracking() && (
+                <Suspense fallback={null}>
+                    <CookieBanner />
+                </Suspense>
+            )}
             {showSupport && api.getToken() && (
                 <Suspense fallback={null}>
                     <SupportWidget />

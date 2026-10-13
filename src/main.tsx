@@ -4,6 +4,7 @@ import './index.css'
 import './i18n'
 import App from './App.tsx'
 import { ErrorBoundary } from './components/ErrorBoundary.tsx'
+import { initTracking } from './analytics/tracking'
 
 const root = document.getElementById('root')!
 const paymentResult = new URLSearchParams(window.location.search).get('payment')
@@ -16,6 +17,7 @@ if (paymentResult && window.parent !== window) {
     paymentResult === 'success' ? 'Ödemeniz alındı, haklarınız yükleniyor…' : 'Ödeme tamamlanamadı.'
   }</p>`
 } else {
+  if (!/^#\/(yonetim|admin)(\/|$)/i.test(window.location.hash)) initTracking()
   createRoot(root).render(
     <StrictMode>
       <ErrorBoundary>

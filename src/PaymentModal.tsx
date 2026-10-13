@@ -6,6 +6,7 @@ import { parseBilling } from '../shared/invoice-billing.js';
 import { useUiStore } from './store/uiStore';
 import { theme } from './theme';
 import i18n, { useLocaleT } from './i18n';
+import { trackPurchase } from './analytics/tracking';
 
 interface PaymentModalProps {
     isOpen: boolean;
@@ -129,6 +130,8 @@ const PaymentDialog: React.FC<Omit<PaymentModalProps, 'isOpen'>> = ({ onClose, o
 
     const onSuccessRef = useRef(onSuccess);
     useEffect(() => { onSuccessRef.current = onSuccess; }, [onSuccess]);
+    const currencyRef = useRef(currency);
+    useEffect(() => { currencyRef.current = currency; }, [currency]);
 
     useEffect(() => {
         if (!oid || !payingPlan) return;
@@ -141,6 +144,13 @@ const PaymentDialog: React.FC<Omit<PaymentModalProps, 'isOpen'>> = ({ onClose, o
                 if (r.status === 'success') {
                     finished = true;
                     setState({ step: 'done', plan: payingPlan, credits: r.credits });
+                    trackPurchase({
+                        transactionId: oid,
+                        value: payingPlan.prices[currencyRef.current],
+                        currency: currencyRef.current,
+                        itemId: payingPlan.id,
+                        itemName: payingPlan.name,
+                    });
                     if (typeof r.credits === 'number') onSuccessRef.current(r.credits);
                     useUiStore.getState().pushToast({
                         kind: 'success',

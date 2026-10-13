@@ -5,6 +5,7 @@ import { theme, techBackground } from './theme';
 import { useLocaleT } from './i18n';
 import { LanguageSwitcher } from './i18n/LanguageSwitcher';
 import { GoogleSignIn } from './GoogleSignIn';
+import { trackSignUp } from './analytics/tracking';
 
 type AuthMode = 'login' | 'register';
 type ApiError = { message?: string; verificationRequired?: boolean };
@@ -65,6 +66,7 @@ export const Auth: React.FC<AuthProps> = ({
 
     const finishLogin = (token: string, afterRegister: boolean) => {
         api.setToken(token);
+        if (afterRegister) trackSignUp();
         if (afterRegister && onRegister) onRegister();
         else onLogin();
     };
@@ -412,6 +414,7 @@ export const Auth: React.FC<AuthProps> = ({
                 <GoogleSignIn
                     mode={isLogin ? 'login' : 'register'}
                     onSuccess={(created) => {
+                        if (created) trackSignUp();
                         if (created && onRegister) onRegister();
                         else onLogin();
                     }}

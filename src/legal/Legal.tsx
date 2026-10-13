@@ -11,6 +11,8 @@
 import React from 'react';
 import { MapPin, Phone, Mail, MessageCircle, ExternalLink } from 'lucide-react';
 import { theme } from '../theme';
+import { hasAnyTracking } from '../analytics/config';
+import { openConsentSettings } from '../analytics/consent';
 
 export const CONTACT = {
     email: 'destek@edxdocu.com',
@@ -183,20 +185,43 @@ export const CerezPolitikasiModal: React.FC<{ onClose: () => void }> = ({ onClos
             ve dolandırıcılık önleme için kullanılır. Bu çerezler devre dışı bırakılamaz.
         </p>
 
-        <h2 style={sectionTitleStyle}>2. Performans Çerezleri</h2>
+        <h2 style={sectionTitleStyle}>2. Ölçüm (Analitik) Çerezleri</h2>
         <p style={baseTextStyle}>
-            Sayfa yükleme süreleri, hata oranları gibi anonim performans verilerini
-            toplar. Kişisel bilgi içermez.
+            Google Analytics aracılığıyla hangi sayfaların ziyaret edildiğini ve ziyaretçilerin
+            siteye hangi kanaldan geldiğini ölçer. Yalnızca açık onayınızla çalışır; onay
+            vermezseniz Google'a çerez içermeyen, kimliksiz sinyaller dışında veri gönderilmez.
         </p>
 
-        <h2 style={sectionTitleStyle}>3. Çerez Tercihleri</h2>
+        <h2 style={sectionTitleStyle}>3. Reklam Çerezleri</h2>
         <p style={baseTextStyle}>
-            Tarayıcınızın ayarlarından çerezleri yönetebilirsiniz. Ancak zorunlu çerezlerin
-            devre dışı bırakılması Platform'un düzgün çalışmamasına neden olabilir.
+            Google Ads, Meta (Instagram, Facebook) ve LinkedIn reklamlarının etkisini ölçmek
+            (örneğin bir reklamdan gelip üye olunup olunmadığını) ve size uygun tanıtımlar
+            göstermek için kullanılır. Yalnızca açık onayınızla yüklenir. Bu hizmet sağlayıcılar
+            verileri yurt dışındaki sunucularında işleyebilir.
         </p>
+
+        <h2 style={sectionTitleStyle}>4. Çerez Tercihleri</h2>
+        <p style={baseTextStyle}>
+            Onayınızı istediğiniz zaman aşağıdaki düğmeyle değiştirebilir ya da geri
+            alabilirsiniz. Tarayıcınızın ayarlarından da çerezleri yönetebilirsiniz; ancak
+            zorunlu çerezlerin devre dışı bırakılması Platform'un düzgün çalışmamasına neden olabilir.
+        </p>
+        {hasAnyTracking() && (
+            <button
+                type="button"
+                onClick={() => { onClose(); openConsentSettings(); }}
+                style={{
+                    marginTop: '4px', padding: '10px 16px', borderRadius: '10px', border: 'none',
+                    background: theme.primary, color: '#fff', fontWeight: 700, fontSize: '14px',
+                    fontFamily: 'inherit', cursor: 'pointer',
+                }}
+            >
+                Çerez tercihlerini değiştir
+            </button>
+        )}
 
         <p style={{ ...baseTextStyle, marginTop: '24px', fontSize: '12px', color: theme.textSubtle }}>
-            Son güncelleme: 2026-10-02.
+            Son güncelleme: 2026-10-13.
         </p>
     </LegalModal>
 );
