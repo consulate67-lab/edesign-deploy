@@ -241,7 +241,7 @@ export const BulkMail: React.FC = () => {
             />
 
             {loadError && <ErrorBox>{loadError}</ErrorBox>}
-            {data && !data.mailReady && <ErrorBox>Sunucuda e-posta gönderimi yapılandırılmamış; gönderim başlatılamaz.</ErrorBox>}
+            {data && !data.mailReady && <ErrorBox>Toplu gönderim servisi (Brevo) yapılandırılmamış; gönderim başlatılamaz. Hosting e-posta hesabı tanıtım e-postasına izin vermediği için kampanyalar oradan gönderilmez.</ErrorBox>}
 
             <Card title="Yeni gönderim">
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 18 }}>

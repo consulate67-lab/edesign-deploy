@@ -1,15 +1,14 @@
 /**
  * Yönetim panelinden toplu tanıtım e-postası.
  *
- * Gönderim, web hostingdeki SMTP hesabından (mail-relay.php) yapılır; paylaşımlı
- * hostinglerin saatlik gönderim sınırı aşılırsa alan adı kara listeye girer ve üyelere
- * giden onay kodları da durur. Bu yüzden kuyruk saatlik hız sınırıyla tek tek gönderir,
- * art arda hata alınca kampanyayı kendiliğinden duraklatır ve sunucu yeniden başlasa da
- * kaldığı yerden devam eder.
+ * Gönderim, onay kodlarının gittiği hosting SMTP'sinden değil ayrı bir servisten
+ * (sendCampaignMail) yapılır; hosting tanıtım e-postası gönderen hesabı askıya alır.
+ * Kuyruk saatlik hız sınırıyla tek tek gönderir, hata alınca kampanyayı kendiliğinden
+ * duraklatır ve sunucu yeniden başlasa da kaldığı yerden devam eder.
  */
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { EMAIL_PATTERN } from './email-verify.js';
-import { mailConfigured, sendMail } from './mail.js';
+import { campaignMailConfigured as mailConfigured, sendCampaignMail as sendMail } from './mail.js';
 import { createRateLimiter } from './rate-limit.js';
 import { cleanText, optionalText, parseId } from './util.js';
 
@@ -237,6 +236,9 @@ export const registerCampaignRoutes = (app, { db, requireAdmin, secret, website 
         if (!id) return res.status(400).json({ error: 'Geçersiz gönderim.' });
         if (to === 'sending' && req.body?.consentConfirmed !== true) {
             return res.status(400).json({ error: 'Alıcıların ticari ileti onayı olduğunu onaylamanız gerekiyor.' });
+        }
+        if (to === 'sending' && !mailConfigured()) {
+            return res.status(503).json({ error: 'Toplu gönderim servisi (Brevo) yapılandırılmamış.' });
         }
         const row = await db.get(
             `UPDATE mail_campaigns SET status = ?, updated_at = NOW()${extra} WHERE id = ? AND status = ANY(?) RETURNING id`,

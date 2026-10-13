@@ -54,3 +54,29 @@ export const sendMail = async ({ to, subject, text, html, headers }) => {
     const from = env('MAIL_FROM') || `edXdocu <${env('SMTP_USER')}>`;
     await getTransporter().sendMail({ from, to, subject, text, html, headers });
 };
+
+/**
+ * Toplu tanıtım e-postası yalnız Brevo üzerinden gider: BREVO_API_KEY, CAMPAIGN_MAIL_FROM
+ * (Brevo'da doğrulanmış adres), CAMPAIGN_MAIL_FROM_NAME (isteğe bağlı).
+ * Hosting SMTP'si tanıtım e-postasını yasaklıyor ve saatte 100 / günde 700 sınırını aşınca
+ * hesabı askıya alıyor; askı onay kodlarını da durdurduğu için kampanyalar oraya düşmemeli.
+ */
+export const campaignMailConfigured = () => !!(env('BREVO_API_KEY') && env('CAMPAIGN_MAIL_FROM'));
+
+export const sendCampaignMail = async ({ to, subject, text, html, headers }) => {
+    if (!campaignMailConfigured()) throw new Error('Toplu gönderim servisi yapılandırılmamış.');
+    const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: { 'api-key': env('BREVO_API_KEY'), 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+            sender: { email: env('CAMPAIGN_MAIL_FROM'), name: env('CAMPAIGN_MAIL_FROM_NAME') || 'edXdocu' },
+            to: [{ email: to }],
+            subject,
+            htmlContent: html,
+            ...(text && { textContent: text }),
+            ...(headers && { headers }),
+        }),
+        signal: AbortSignal.timeout(30_000),
+    });
+    if (!res.ok) throw new Error(`brevo ${res.status}: ${(await res.text().catch(() => '')).slice(0, 200)}`);
+};
