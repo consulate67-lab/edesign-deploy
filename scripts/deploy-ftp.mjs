@@ -70,43 +70,66 @@ writeFileSync(path.join(outDir, '.htaccess'), [
 ].join('\n'));
 
 const client = new Client(60_000);
+const connect = () => client.access({
+    host: FTP_HOST,
+    user: FTP_USER,
+    password: FTP_PASS,
+    secure: FTP_SECURE,
+    // Shared hosting presents the provider's certificate, not ftp.<domain>.
+    secureOptions: { rejectUnauthorized: false },
+});
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/** The host drops long sessions (ECONNRESET / data socket timeout): reconnect and retry the same step. */
+async function withRetry(label, fn) {
+    for (let attempt = 1; ; attempt++) {
+        try {
+            if (client.closed) await connect();
+            return await fn();
+        } catch (err) {
+            if (attempt >= 6) throw err;
+            console.log(`${label}: ${err.message}, yeniden bağlanılıyor (${attempt})`);
+            client.close();
+            await sleep(5000 * attempt);
+        }
+    }
+}
+
+let uploaded = 0;
+let skipped = 0;
+/** Same size and uploaded after the local file changed → already on the server (videos, templates). */
+async function syncDir(local, remote, skip = () => false) {
+    await withRetry(remote, () => client.ensureDir(remote));
+    const existing = new Map((await withRetry(remote, async () => { await client.cd(remote); return client.list(); })).map((f) => [f.name, f]));
+    for (const name of readdirSync(local)) {
+        if (skip(name)) continue;
+        const file = path.join(local, name);
+        const st = statSync(file);
+        if (st.isDirectory()) { await syncDir(file, `${remote}/${name}`); continue; }
+        const r = existing.get(name);
+        if (r?.isFile && r.size === st.size && r.modifiedAt && r.modifiedAt >= st.mtime) { skipped++; continue; }
+        await withRetry(`${remote}/${name}`, async () => { await client.cd(remote); await client.uploadFrom(file, name); });
+        if (++uploaded % 50 === 0) console.log(`yüklenen: ${uploaded}, atlanan: ${skipped}`);
+    }
+}
+
 try {
-    await client.access({
-        host: FTP_HOST,
-        user: FTP_USER,
-        password: FTP_PASS,
-        secure: FTP_SECURE,
-        // Shared hosting presents the provider's certificate, not ftp.<domain>.
-        secureOptions: { rejectUnauthorized: false },
-    });
     const base = `/${FTP_DIR}`;
 
     // Upload everything except index.html first, so visitors never load an
     // index.html that points at assets which are not on the server yet.
-    for (const name of readdirSync(outDir)) {
-        if (name === 'index.html') continue;
-        const local = path.join(outDir, name);
-        await client.cd('/');
-        if (statSync(local).isDirectory()) {
-            await client.ensureDir(`${base}/${name}`);
-            await client.uploadFromDir(local);
-        } else {
-            await client.cd(base);
-            await client.uploadFrom(local, name);
-        }
-        console.log(`yüklendi: ${name}`);
-    }
-    await client.cd(base);
-    await client.uploadFrom(path.join(outDir, 'index.html'), 'index.html');
+    await syncDir(outDir, base, (name) => name === 'index.html');
+    console.log(`yüklendi: ${uploaded} dosya, değişmediği için atlandı: ${skipped}`);
+    await withRetry('index.html', async () => { await client.cd(base); await client.uploadFrom(path.join(outDir, 'index.html'), 'index.html'); });
     console.log('yüklendi: index.html');
 
     // Drop assets from previous builds.
     const localAssets = new Set(readdirSync(path.join(outDir, 'assets')));
-    await client.cd(`${base}/assets`);
+    const remoteAssets = await withRetry('assets', async () => { await client.cd(`${base}/assets`); return client.list(); });
     let removed = 0;
-    for (const f of await client.list()) {
+    for (const f of remoteAssets) {
         if (f.isFile && !localAssets.has(f.name)) {
-            await client.remove(f.name);
+            await withRetry(f.name, async () => { await client.cd(`${base}/assets`); await client.remove(f.name); });
             removed++;
         }
     }

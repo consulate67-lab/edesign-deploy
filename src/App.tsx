@@ -64,8 +64,10 @@ type SelectedDoc = { moduleId: string, moduleName: string, template: string, cus
 /** Sayfa yenilenince oturumdaki ekran ve açık belge geri yüklenir (sekme kapanınca silinir). */
 const VIEW_KEY = 'app_view';
 const DOC_KEY = 'app_doc';
+/** Reklam / paylaşım bağlantıları: /#kayit üye ol, /#giris giriş ekranını açar. */
+const hashAuthMode = (): AuthMode | null => (window.location.hash === '#kayit' ? 'register' : window.location.hash === '#giris' ? 'login' : null);
 const readSession = (): { view: View; doc: SelectedDoc | null } => {
-    if (!api.getToken()) return { view: 'landing', doc: null };
+    if (!api.getToken()) return { view: hashAuthMode() ? 'auth' : 'landing', doc: null };
     let doc: SelectedDoc | null = null;
     try { doc = JSON.parse(sessionStorage.getItem(DOC_KEY) || 'null'); } catch { doc = null; }
     const stored = sessionStorage.getItem(VIEW_KEY) as View | null;
@@ -83,7 +85,7 @@ const writeSession = (view: View, doc: SelectedDoc | null) => {
 const App: React.FC = () => {
     const [initial] = useState(readSession);
     const [view, setView] = useState<View>(initial.view);
-    const [authMode, setAuthMode] = useState<AuthMode>('login');
+    const [authMode, setAuthMode] = useState<AuthMode>(() => hashAuthMode() ?? 'login');
     const [selectedDoc, setSelectedDoc] = useState<SelectedDoc | null>(initial.doc);
     const [adminRoute, setAdminRoute] = useState(isAdminHash);
     useSiteConfig(); // çerez penceresi, sunucudan gelen kimliklere göre yeniden değerlendirilir

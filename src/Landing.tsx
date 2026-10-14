@@ -23,6 +23,9 @@ interface LandingProps {
 
 interface LandingDoc { label: string; code: string; id: string; a: string }
 
+const LEGAL_IDS = ['kvkk', 'sozlesme', 'cerez', 'iletisim'] as const;
+type LegalId = typeof LEGAL_IDS[number];
+
 /** Türkçe sayfada dönen GİB belge türleri; diğer dillerde Avrupa türleri (intlShowcase) gösterilir. */
 const DOC_TYPES: LandingDoc[] = [
     { label: 'e-Fatura', code: '01', id: 'fatura', a: '#2563eb' },
@@ -167,7 +170,28 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
         [locale, country, t],
     );
     const [openSss, setOpenSss] = useState<string | null>(null);
-    const [legalModal, setLegalModal] = useState<'kvkk' | 'sozlesme' | 'cerez' | 'iletisim' | null>(null);
+    const [legalModal, setLegalModal] = useState<LegalId | null>(() => {
+        const id = window.location.hash.slice(1);
+        return (LEGAL_IDS as readonly string[]).includes(id) ? id as LegalId : null;
+    });
+    // Bölümler React çizdikten sonra oluşur; /#fiyatlar gibi doğrudan açılan bağlantılarda tarayıcı kendisi kaydıramaz.
+    useEffect(() => {
+        const id = decodeURIComponent(window.location.hash.slice(1));
+        if (!/^[a-z-]+$/.test(id)) return;
+        let userScrolled = false;
+        const stop = () => { userScrolled = true; };
+        window.addEventListener('wheel', stop, { passive: true });
+        window.addEventListener('touchstart', stop, { passive: true });
+        window.addEventListener('keydown', stop);
+        const go = () => { if (!userScrolled) document.getElementById(id)?.scrollIntoView({ block: 'start' }); };
+        const timers = [150, 800, 2000].map(ms => window.setTimeout(go, ms));
+        return () => {
+            timers.forEach(clearTimeout);
+            window.removeEventListener('wheel', stop);
+            window.removeEventListener('touchstart', stop);
+            window.removeEventListener('keydown', stop);
+        };
+    }, []);
     const [buyPlan, setBuyPlan] = useState<PlanId | null>(null);
     // step: kaçıncı dönüş; belge türü step % tür sayısı, aynı türün kaçıncı gelişi (sıradaki şablon / ülke) step / tür sayısı.
     const [step, setStep] = useState(0);
