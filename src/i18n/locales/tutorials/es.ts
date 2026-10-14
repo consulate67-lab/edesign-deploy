@@ -8,7 +8,7 @@ const tutorials: typeof tr = {
     help: 'Cómo funciona',
     helpHint: 'Vídeos cortos que explican cada función del editor',
     playerTitle: 'Vídeos tutoriales',
-    videoLangNote: 'Los vídeos están narrados y subtitulados en inglés.',
+    videoLangNote: '',
     watch: 'Ver',
     close: 'Cerrar (Esc)',
     groupStart: 'Primeros pasos',

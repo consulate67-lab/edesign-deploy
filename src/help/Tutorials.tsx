@@ -7,23 +7,23 @@ import type tutorialsTr from '../i18n/locales/tutorials/tr';
 
 type TutorialId = keyof typeof tutorialsTr.items;
 
-interface Tutorial { id: TutorialId; slug: string; duration: Record<'tr' | 'en' | 'ru' | 'hi' | 'zh', string>; group: 'start' | 'editor' }
+interface Tutorial { id: TutorialId; slug: string; duration: Record<'tr' | 'en' | 'ru' | 'hi' | 'zh' | 'pt' | 'de' | 'fr' | 'es', string>; group: 'start' | 'editor' }
 
 const TUTORIALS: Tutorial[] = [
-    { id: 'signup', slug: '01-uyelik', duration: { tr: '1:26', en: '1:25', ru: '2:00', hi: '1:59', zh: '1:47' }, group: 'start' },
-    { id: 'template', slug: '02-hazir-sablon', duration: { tr: '2:10', en: '1:29', ru: '1:49', hi: '1:58', zh: '1:41' }, group: 'start' },
-    { id: 'scratch', slug: '03-sifirdan-tasarim', duration: { tr: '1:40', en: '1:27', ru: '1:43', hi: '1:50', zh: '1:26' }, group: 'start' },
-    { id: 'textImage', slug: '04-metin-resim-kutu', duration: { tr: '1:25', en: '1:09', ru: '1:27', hi: '1:31', zh: '1:34' }, group: 'editor' },
-    { id: 'tableFormula', slug: '05-tablo-formul', duration: { tr: '1:18', en: '1:04', ru: '1:06', hi: '1:16', zh: '1:26' }, group: 'editor' },
-    { id: 'qrChart', slug: '06-karekod-grafik-pay', duration: { tr: '0:57', en: '0:52', ru: '0:55', hi: '0:56', zh: '0:54' }, group: 'editor' },
-    { id: 'columnBackground', slug: '07-kolon-arka-plan', duration: { tr: '0:53', en: '0:53', ru: '0:49', hi: '0:55', zh: '0:49' }, group: 'editor' },
-    { id: 'documentFields', slug: '08-belge-alanlari', duration: { tr: '0:42', en: '0:40', ru: '0:45', hi: '0:49', zh: '0:41' }, group: 'editor' },
-    { id: 'editFields', slug: '09-alan-duzenleme', duration: { tr: '1:28', en: '1:12', ru: '1:09', hi: '1:07', zh: '1:22' }, group: 'editor' },
-    { id: 'saveApprove', slug: '10-kaydet-onayla', duration: { tr: '0:58', en: '0:53', ru: '0:57', hi: '1:06', zh: '0:54' }, group: 'editor' },
+    { id: 'signup', slug: '01-uyelik', duration: { tr: '1:26', en: '1:25', ru: '2:00', hi: '1:59', zh: '1:47', pt: '1:39', de: '2:01', fr: '2:19', es: '2:21' }, group: 'start' },
+    { id: 'template', slug: '02-hazir-sablon', duration: { tr: '2:10', en: '1:29', ru: '1:49', hi: '1:58', zh: '1:41', pt: '1:53', de: '2:01', fr: '1:45', es: '1:47' }, group: 'start' },
+    { id: 'scratch', slug: '03-sifirdan-tasarim', duration: { tr: '1:40', en: '1:27', ru: '1:43', hi: '1:50', zh: '1:26', pt: '1:51', de: '1:48', fr: '1:54', es: '1:57' }, group: 'start' },
+    { id: 'textImage', slug: '04-metin-resim-kutu', duration: { tr: '1:25', en: '1:09', ru: '1:27', hi: '1:31', zh: '1:34', pt: '1:32', de: '1:32', fr: '1:15', es: '1:38' }, group: 'editor' },
+    { id: 'tableFormula', slug: '05-tablo-formul', duration: { tr: '1:18', en: '1:04', ru: '1:06', hi: '1:16', zh: '1:26', pt: '1:28', de: '1:22', fr: '1:27', es: '1:29' }, group: 'editor' },
+    { id: 'qrChart', slug: '06-karekod-grafik-pay', duration: { tr: '0:57', en: '0:52', ru: '0:55', hi: '0:56', zh: '0:54', pt: '0:50', de: '0:55', fr: '0:59', es: '1:01' }, group: 'editor' },
+    { id: 'columnBackground', slug: '07-kolon-arka-plan', duration: { tr: '0:53', en: '0:53', ru: '0:49', hi: '0:55', zh: '0:49', pt: '1:07', de: '0:58', fr: '0:52', es: '0:56' }, group: 'editor' },
+    { id: 'documentFields', slug: '08-belge-alanlari', duration: { tr: '0:42', en: '0:40', ru: '0:45', hi: '0:49', zh: '0:41', pt: '0:50', de: '0:42', fr: '0:42', es: '0:46' }, group: 'editor' },
+    { id: 'editFields', slug: '09-alan-duzenleme', duration: { tr: '1:28', en: '1:12', ru: '1:09', hi: '1:07', zh: '1:22', pt: '1:19', de: '1:09', fr: '1:13', es: '1:19' }, group: 'editor' },
+    { id: 'saveApprove', slug: '10-kaydet-onayla', duration: { tr: '0:58', en: '0:53', ru: '0:57', hi: '1:06', zh: '0:54', pt: '1:01', de: '1:07', fr: '1:04', es: '0:58' }, group: 'editor' },
 ];
 
 type VideoLang = keyof Tutorial['duration'];
-const VIDEO_LANGS: readonly string[] = ['tr', 'en', 'ru', 'hi', 'zh'];
+const VIDEO_LANGS: readonly string[] = ['tr', 'en', 'ru', 'hi', 'zh', 'pt', 'de', 'fr', 'es'];
 /** Kendi videosu olmayan arayüz dillerinde İngilizce videolar gösterilir. */
 const videoLang = (locale: string): VideoLang => (VIDEO_LANGS.includes(locale) ? locale as VideoLang : 'en');
 const videoBase = (lang: VideoLang) => `${import.meta.env.BASE_URL}videos/egitim/${lang === 'tr' ? '' : `${lang}/`}`;

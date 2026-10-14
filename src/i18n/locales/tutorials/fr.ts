@@ -8,7 +8,7 @@ const tutorials: typeof tr = {
     help: 'Mode d’emploi',
     helpHint: 'Courtes vidéos présentant chaque fonction de l’éditeur',
     playerTitle: 'Vidéos tutoriels',
-    videoLangNote: 'Les vidéos sont commentées et sous-titrées en anglais.',
+    videoLangNote: '',
     watch: 'Regarder',
     close: 'Fermer (Échap)',
     groupStart: 'Premiers pas',

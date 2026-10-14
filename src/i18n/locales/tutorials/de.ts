@@ -8,7 +8,7 @@ const tutorials: typeof tr = {
     help: 'Anleitung',
     helpHint: 'Kurze Lernvideos zu allen Funktionen des Designers',
     playerTitle: 'Lernvideos',
-    videoLangNote: 'Die Videos sind auf Englisch vertont und untertitelt.',
+    videoLangNote: '',
     watch: 'Ansehen',
     close: 'Schließen (Esc)',
     groupStart: 'Erste Schritte',
