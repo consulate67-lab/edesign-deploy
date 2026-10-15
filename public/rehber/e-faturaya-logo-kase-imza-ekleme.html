@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>e-Faturaya Logo, Kaşe, İmza ve IBAN Ekleme | edXdocu</title>
+<meta name="description" content="e-Fatura ve e-Arşiv faturaya logo, kaşe, imza ve banka / IBAN bilgisi nasıl eklenir? Görsel boyutları, Base64 gömme ve sık yapılan hatalar." />
+<link rel="canonical" href="https://www.edxdocu.com/rehber/e-faturaya-logo-kase-imza-ekleme.html" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="edXdocu" />
+<meta property="og:locale" content="tr_TR" />
+<meta property="og:title" content="e-Faturaya Logo, Kaşe, İmza ve IBAN Ekleme" />
+<meta property="og:description" content="Logonuzu, kaşenizi ve banka bilgilerinizi e-Fatura tasarımına doğru şekilde ekleyin." />
+<meta property="og:url" content="https://www.edxdocu.com/rehber/e-faturaya-logo-kase-imza-ekleme.html" />
+<meta property="og:image" content="https://www.edxdocu.com/og-image.png" />
+<link rel="stylesheet" href="/rehber/rehber.css?v=1" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": "e-Faturaya Logo, Kaşe, İmza ve IBAN Ekleme",
+      "description": "e-Fatura tasarımına logo, kaşe, imza ve banka bilgisi eklemenin doğru yolu.",
+      "inLanguage": "tr",
+      "datePublished": "2026-10-15",
+      "dateModified": "2026-10-15",
+      "image": "https://www.edxdocu.com/og-image.png",
+      "mainEntityOfPage": "https://www.edxdocu.com/rehber/e-faturaya-logo-kase-imza-ekleme.html",
+      "author": { "@type": "Organization", "name": "edXdocu", "url": "https://www.edxdocu.com/" },
+      "publisher": { "@type": "Organization", "name": "edXdocu", "logo": { "@type": "ImageObject", "url": "https://www.edxdocu.com/logo-600x200.png" } }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "edXdocu", "item": "https://www.edxdocu.com/" },
+        { "@type": "ListItem", "position": 2, "name": "Rehber", "item": "https://www.edxdocu.com/rehber/" },
+        { "@type": "ListItem", "position": 3, "name": "Logo, kaşe ve imza ekleme" }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        { "@type": "Question", "name": "e-Faturada kaşe ve ıslak imza zorunlu mu?", "acceptedAnswer": { "@type": "Answer", "text": "Hayır. e-Fatura mali mühür veya e-imza ile elektronik olarak imzalanır. Kaşe ve imza görseli yalnızca görünüm amaçlıdır ve isteğe bağlıdır." } },
+        { "@type": "Question", "name": "Logo hangi formatta olmalı?", "acceptedAnswer": { "@type": "Answer", "text": "Şeffaf arka planlı PNG önerilir. Logo XSLT içine Base64 olarak gömüldüğü için dosya boyutunu küçük tutun; 100 KB altı idealdir." } },
+        { "@type": "Question", "name": "IBAN bilgisi her faturada otomatik görünür mü?", "acceptedAnswer": { "@type": "Answer", "text": "Evet. IBAN'ı tasarıma sabit metin olarak eklerseniz her faturada görünür. Fatura XML'inde ödeme bilgisi (PaymentMeans) varsa şablon onu da gösterebilir." } }
+      ]
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <a href="/"><img src="/logo-300x100.png" alt="edXdocu" width="300" height="100" /></a>
+  <nav><a href="/rehber/">Rehber</a><a href="/#fiyatlar">Fiyatlar</a><a class="btn" href="/#kayit">Ücretsiz deneyin</a></nav>
+</div></header>
+<main>
+  <div class="crumbs"><a href="/">edXdocu</a> › <a href="/rehber/">Rehber</a> › Logo, kaşe ve imza</div>
+  <h1>e-Faturaya logo, kaşe, imza ve IBAN ekleme</h1>
+  <p class="meta">Güncelleme: 15 Ekim 2026 · Okuma süresi: 5 dakika</p>
+  <p class="lead">Logosuz, sade bir e-Fatura işinizi görür ama kurumsal görünmez. Bu rehberde e-Fatura ve e-Arşiv tasarımınıza logo, kaşe, imza ve banka bilgilerini nasıl ekleyeceğinizi ve nelere dikkat etmeniz gerektiğini anlatıyoruz.</p>
+
+  <h2>1. Logo ekleme</h2>
+  <ul>
+    <li><strong>Format:</strong> Şeffaf arka planlı PNG en iyisidir. JPG de olur ama beyaz kutu görünebilir.</li>
+    <li><strong>Boyut:</strong> Genişliği 400-600 piksel yeterlidir. Dosyayı 100 KB'ın altında tutun.</li>
+    <li><strong>Yerleşim:</strong> Genellikle sol üst köşe; fatura başlığı ve numarası sağ üstte yer alır.</li>
+  </ul>
+  <div class="box"><strong>Neden dosya boyutu önemli?</strong> Logo XSLT dosyasının içine <strong>Base64</strong> olarak gömülür ve XSLT her faturanın XML'ine eklenir. 2 MB'lık bir logo her faturanızı 2-3 MB büyütür; bu da gönderimi yavaşlatır ve bazı entegratörlerin boyut sınırına takılabilir.</div>
+
+  <h2>2. Kaşe ve imza ekleme</h2>
+  <p>e-Faturanın hukuki geçerliliği <strong>mali mühür</strong> veya <strong>e-imza</strong> ile sağlanır; ıslak imza ve kaşe zorunlu değildir. Yine de birçok firma müşterilerinin alışkanlığı nedeniyle kaşe ve imza görselini faturada göstermek ister.</p>
+  <ol>
+    <li>Kaşenizi ve imzanızı beyaz bir kâğıda basın / atın ve tarayıcıda yüksek çözünürlükte tarayın.</li>
+    <li>Arka planı şeffaf yapın (birçok ücretsiz araç bunu tek tıkla yapar) ve PNG olarak kaydedin.</li>
+    <li>Görseli editörde toplamlar bölümünün yanına ya da altına sürükleyip bırakın, boyutunu ayarlayın.</li>
+  </ol>
+  <div class="box tip"><strong>Güvenlik ipucu:</strong> İmza görseli faturayı alan herkes tarafından görülebilir. Islak imzanızın birebir kopyası yerine kaşe ile birlikte küçük boyutlu bir görsel kullanmanızı öneririz.</div>
+
+  <h2>3. Banka ve IBAN bilgisi ekleme</h2>
+  <p>Ödemenin hızlı yapılması için IBAN'ın faturada kolay bulunması gerekir. İki yöntem vardır:</p>
+  <table>
+    <tr><th>Yöntem</th><th>Ne zaman kullanılır?</th></tr>
+    <tr><td><strong>Sabit metin</strong></td><td>Tek veya birkaç sabit banka hesabınız varsa. Banka adı, şube ve IBAN'ı tasarıma doğrudan yazarsınız; her faturada aynı görünür.</td></tr>
+    <tr><td><strong>XML'den dinamik</strong></td><td>Faturaya göre farklı hesap kullanıyorsanız. ERP'niz IBAN'ı XML'deki ödeme bilgisi (<code>cac:PaymentMeans</code>) alanına yazar, şablon bu alanı okur.</td></tr>
+  </table>
+  <p>Dövizli satış yapıyorsanız TL ve döviz hesaplarınızı ayrı satırlarda, para birimiyle birlikte gösterin.</p>
+
+  <h2>4. Diğer kurumsal öğeler</h2>
+  <ul>
+    <li><strong>Kurumsal renkler:</strong> Başlık şeridi ve tablo başlıklarında marka renginizi kullanın; metinleri siyah ya da koyu gri bırakın.</li>
+    <li><strong>İletişim bilgileri:</strong> Telefon, e-posta, web adresi ve MERSİS numarası alt bilgide yer alabilir.</li>
+    <li><strong>Notlar:</strong> İade koşulları, teslim şartları veya teşekkür mesajı için sabit bir not alanı ekleyin.</li>
+    <li><strong>Karekod:</strong> Fatura bilgilerini içeren karekod, faturanın mobil cihazla doğrulanmasını kolaylaştırır.</li>
+  </ul>
+
+  <h2>edXdocu ile nasıl yapılır?</h2>
+  <p><a href="/">edXdocu</a> editöründe logo, kaşe ve imzanızı sürükleyip bırakmanız yeterlidir. Görseller otomatik olarak Base64'e çevrilip XSLT içine gömülür. Banka bilgileri için hazır alanlar vardır. Kendi faturanızın XML'iyle anında önizleme yaparak sonucu görürsünüz. Adımların tamamı için <a href="/rehber/e-fatura-tasarimi-nasil-yapilir.html">e-Fatura tasarımı rehberine</a> bakın.</p>
+
+  <h2>Sık sorulan sorular</h2>
+  <h3>e-Faturada kaşe ve ıslak imza zorunlu mu?</h3>
+  <p>Hayır. e-Fatura mali mühür veya e-imza ile elektronik olarak imzalanır. Kaşe ve imza görseli isteğe bağlıdır.</p>
+  <h3>Logo hangi formatta olmalı?</h3>
+  <p>Şeffaf arka planlı PNG önerilir. Dosyayı 100 KB'ın altında tutun.</p>
+  <h3>IBAN bilgisi her faturada otomatik görünür mü?</h3>
+  <p>Evet. Tasarıma sabit metin olarak eklerseniz her faturada görünür. XML'de ödeme bilgisi varsa şablon onu da gösterebilir.</p>
+
+  <div class="cta"><p>Logonuzu ve kaşenizi ekleyip faturanızı önizleyin.</p><a class="btn alt" href="/#kayit">Ücretsiz deneyin</a></div>
+
+  <div class="related">
+    <h2>İlgili rehberler</h2>
+    <ul>
+      <li><a href="/rehber/e-fatura-tasarimi-nasil-yapilir.html">e-Fatura tasarımı nasıl yapılır?</a></li>
+      <li><a href="/rehber/e-arsiv-fatura-tasarimi.html">e-Arşiv fatura tasarımı</a></li>
+      <li><a href="/rehber/xslt-nedir-e-fatura-goruntu-dosyasi.html">e-Fatura XSLT nedir?</a></li>
+    </ul>
+  </div>
+</main>
+<footer>© 2026 edXdocu · Sarp Bilgisayar Yazılım ve Danışmanlık, Kağıthane / İstanbul · <a href="mailto:destek@edxdocu.com">destek@edxdocu.com</a> · +90 533 666 01 25</footer>
+</body>
+</html>

@@ -45,6 +45,16 @@ One-time payment, no subscription, credits never expire. Outside Turkey prices a
 - Deutsch: https://www.edxdocu.com/?lang=de
 - Fiyatlar: https://www.edxdocu.com/#fiyatlar
 - Sık sorulan sorular: https://www.edxdocu.com/#sss
+
+## Rehberler / Guides
+
+- [e-Fatura tasarımı nasıl yapılır? Adım adım rehber](https://www.edxdocu.com/rehber/e-fatura-tasarimi-nasil-yapilir.html)
+- [e-Fatura XSLT nedir? Görüntü dosyası nasıl çalışır?](https://www.edxdocu.com/rehber/xslt-nedir-e-fatura-goruntu-dosyasi.html)
+- [e-Faturaya logo, kaşe, imza ve IBAN ekleme](https://www.edxdocu.com/rehber/e-faturaya-logo-kase-imza-ekleme.html)
+- [e-Arşiv fatura tasarımı](https://www.edxdocu.com/rehber/e-arsiv-fatura-tasarimi.html)
+- [e-İrsaliye tasarımı](https://www.edxdocu.com/rehber/e-irsaliye-tasarimi.html)
+- [e-Fatura XSLT şablonu entegratöre ve ERP'ye nasıl yüklenir?](https://www.edxdocu.com/rehber/e-fatura-xslt-yukleme.html)
+- [e-Invoice template designer for XRechnung, Peppol and EN 16931 (English)](https://www.edxdocu.com/rehber/e-invoice-template-designer.html)
 - YouTube: https://www.youtube.com/@edXdocu-o6k
 - Instagram: https://www.instagram.com/edxdocu67/
 - İletişim / Contact: destek@edxdocu.com · +90 533 666 01 25

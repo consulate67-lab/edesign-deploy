@@ -132,6 +132,7 @@ const pt: Messages = {
             kvkk: 'Privacidade (KVKK)',
             terms: 'Termos de uso',
             cookies: 'Política de cookies',
+            guides: 'Guias',
             contact: 'Contato',
         },
     },

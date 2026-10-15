@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>e-Fatura XSLT Şablonu Entegratöre ve ERP'ye Nasıl Yüklenir? | edXdocu</title>
+<meta name="description" content="Hazırladığınız e-Fatura XSLT tasarımını entegratör portalına veya ERP / muhasebe programına yükleme adımları, test önerileri ve sık karşılaşılan sorunlar." />
+<link rel="canonical" href="https://www.edxdocu.com/rehber/e-fatura-xslt-yukleme.html" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="edXdocu" />
+<meta property="og:locale" content="tr_TR" />
+<meta property="og:title" content="e-Fatura XSLT Şablonu Entegratöre ve ERP'ye Nasıl Yüklenir?" />
+<meta property="og:description" content="XSLT tasarımınızı canlıya almadan önce yapmanız gerekenler." />
+<meta property="og:url" content="https://www.edxdocu.com/rehber/e-fatura-xslt-yukleme.html" />
+<meta property="og:image" content="https://www.edxdocu.com/og-image.png" />
+<link rel="stylesheet" href="/rehber/rehber.css?v=1" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": "e-Fatura XSLT Şablonu Entegratöre ve ERP'ye Nasıl Yüklenir?",
+      "description": "XSLT tasarımını entegratör portalına veya ERP programına yükleme ve test etme adımları.",
+      "inLanguage": "tr",
+      "datePublished": "2026-10-15",
+      "dateModified": "2026-10-15",
+      "image": "https://www.edxdocu.com/og-image.png",
+      "mainEntityOfPage": "https://www.edxdocu.com/rehber/e-fatura-xslt-yukleme.html",
+      "author": { "@type": "Organization", "name": "edXdocu", "url": "https://www.edxdocu.com/" },
+      "publisher": { "@type": "Organization", "name": "edXdocu", "logo": { "@type": "ImageObject", "url": "https://www.edxdocu.com/logo-600x200.png" } }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "edXdocu", "item": "https://www.edxdocu.com/" },
+        { "@type": "ListItem", "position": 2, "name": "Rehber", "item": "https://www.edxdocu.com/rehber/" },
+        { "@type": "ListItem", "position": 3, "name": "XSLT yükleme" }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        { "@type": "Question", "name": "Yeni XSLT yüklersem eski faturalarım değişir mi?", "acceptedAnswer": { "@type": "Answer", "text": "Hayır. XSLT her faturanın içine gönderim anında gömülür. Daha önce gönderilmiş faturalar eski tasarımla kalır; yeni tasarım yalnızca bundan sonraki faturalara uygulanır." } },
+        { "@type": "Question", "name": "e-Fatura, e-Arşiv ve e-İrsaliye için ayrı XSLT mi yüklenir?", "acceptedAnswer": { "@type": "Answer", "text": "Evet. Çoğu entegratör ve ERP her belge türü için ayrı şablon alanı sunar. e-İrsaliye farklı bir UBL belgesi olduğundan mutlaka kendi şablonunu kullanır." } }
+      ]
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <a href="/"><img src="/logo-300x100.png" alt="edXdocu" width="300" height="100" /></a>
+  <nav><a href="/rehber/">Rehber</a><a href="/#fiyatlar">Fiyatlar</a><a class="btn" href="/#kayit">Ücretsiz deneyin</a></nav>
+</div></header>
+<main>
+  <div class="crumbs"><a href="/">edXdocu</a> › <a href="/rehber/">Rehber</a> › XSLT yükleme</div>
+  <h1>e-Fatura XSLT şablonu entegratöre ve ERP'ye nasıl yüklenir?</h1>
+  <p class="meta">Güncelleme: 15 Ekim 2026 · Okuma süresi: 4 dakika</p>
+  <p class="lead">Tasarımınızı bitirdiniz ve XSLT dosyanızı indirdiniz. Şimdi bu dosyayı faturalarınızı gönderen sisteme tanıtmanız gerekiyor. e-Faturayı nereden kestiğinize göre iki yol vardır: entegratör portalı veya ERP / muhasebe programı.</p>
+
+  <h2>1. Entegratör portalına yükleme</h2>
+  <p>e-Faturalarınızı bir özel entegratörün web portalından kesiyorsanız:</p>
+  <ol>
+    <li>Portala yönetici hesabıyla giriş yapın.</li>
+    <li>Ayarlar menüsünde <strong>"Fatura şablonu"</strong>, <strong>"Tasarım"</strong>, <strong>"XSLT"</strong> veya <strong>"Görüntü dosyası"</strong> adlı bölümü bulun.</li>
+    <li>Belge türünü seçin (e-Fatura, e-Arşiv, e-İrsaliye…) ve <code>.xslt</code> dosyanızı yükleyin.</li>
+    <li>Yeni şablonu <strong>varsayılan</strong> olarak işaretleyin.</li>
+    <li>Taslak bir fatura oluşturup önizleyin; logo, tablo ve toplamların doğru göründüğünü kontrol edin.</li>
+  </ol>
+  <div class="box tip"><strong>İpucu:</strong> Bölümü bulamazsanız entegratörünüzün destek ekibine "faturalarımızda kendi XSLT tasarımımızı kullanmak istiyoruz" demeniz yeterlidir; çoğu entegratör dosyayı sizin için tanımlar.</div>
+
+  <h2>2. ERP / muhasebe programına yükleme</h2>
+  <p>Faturalarınızı ERP veya muhasebe programınızdan kesiyorsanız XSLT genellikle programın e-Fatura parametrelerinde tanımlanır:</p>
+  <ol>
+    <li>Programın e-Fatura / e-Arşiv ayarları ekranını açın.</li>
+    <li><strong>"XSLT şablonu"</strong>, <strong>"Görünüm dosyası"</strong> ya da <strong>"Fatura tasarımı"</strong> alanını bulun.</li>
+    <li>Dosyayı seçin veya sunucuda erişilebilir bir klasöre kopyalayıp yolunu gösterin.</li>
+    <li>Birden fazla firma veya şube varsa her biri için şablonu ayrı ayrı tanımlayın.</li>
+    <li>Bir test faturası oluşturup XML'ini önizleyin.</li>
+  </ol>
+
+  <h2>Canlıya almadan önce kontrol listesi</h2>
+  <ul>
+    <li>Filigranlı test dosyasıyla en az bir taslak fatura denendi.</li>
+    <li>Uzun (30+ satır), dövizli, iskontolu ve tevkifatlı faturalar önizlendi.</li>
+    <li>Türkçe karakterler (ç, ğ, ı, İ, ö, ş, ü) doğru görünüyor.</li>
+    <li>Logo ve kaşe net, dosya boyutu makul.</li>
+    <li>IBAN ve iletişim bilgileri güncel.</li>
+    <li>A4 çıktı ve telefon ekranında okunabilirlik kontrol edildi.</li>
+  </ul>
+
+  <h2>Sık karşılaşılan sorunlar</h2>
+  <table>
+    <tr><th>Sorun</th><th>Çözüm</th></tr>
+    <tr><td>Portal dosyayı kabul etmiyor</td><td>Uzantının <code>.xslt</code> veya <code>.xsl</code> olduğundan ve dosya boyutu sınırını aşmadığından emin olun.</td></tr>
+    <tr><td>Yükledim ama faturada eski tasarım görünüyor</td><td>Yeni şablonu varsayılan yapın; daha önce gönderilmiş faturalar eski tasarımla kalır.</td></tr>
+    <tr><td>Bazı alanlar boş görünüyor</td><td>ERP'nizin o alanı XML'e yazıp yazmadığını kontrol edin; şablon yalnızca XML'deki veriyi gösterebilir.</td></tr>
+  </table>
+
+  <h2>Sık sorulan sorular</h2>
+  <h3>Yeni XSLT yüklersem eski faturalarım değişir mi?</h3>
+  <p>Hayır. XSLT her faturanın içine gönderim anında gömülür; eski faturalar eski tasarımla kalır.</p>
+  <h3>e-Fatura, e-Arşiv ve e-İrsaliye için ayrı XSLT mi yüklenir?</h3>
+  <p>Evet. Çoğu sistem her belge türü için ayrı şablon alanı sunar.</p>
+
+  <div class="cta"><p>Yüklemeye hazır XSLT dosyanızı edXdocu ile hazırlayın.</p><a class="btn alt" href="/#kayit">Ücretsiz deneyin</a></div>
+
+  <div class="related">
+    <h2>İlgili rehberler</h2>
+    <ul>
+      <li><a href="/rehber/e-fatura-tasarimi-nasil-yapilir.html">e-Fatura tasarımı nasıl yapılır?</a></li>
+      <li><a href="/rehber/xslt-nedir-e-fatura-goruntu-dosyasi.html">e-Fatura XSLT nedir?</a></li>
+      <li><a href="/rehber/e-faturaya-logo-kase-imza-ekleme.html">Logo, kaşe ve imza ekleme</a></li>
+    </ul>
+  </div>
+</main>
+<footer>© 2026 edXdocu · Sarp Bilgisayar Yazılım ve Danışmanlık, Kağıthane / İstanbul · <a href="mailto:destek@edxdocu.com">destek@edxdocu.com</a> · +90 533 666 01 25</footer>
+</body>
+</html>

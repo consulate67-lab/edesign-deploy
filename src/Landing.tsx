@@ -1014,6 +1014,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                 <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
                     <a href="#nasil-kullanilir">{t('tutorials.nav')}</a>
                     <a href="#sss">{t('landing.nav.faq')}</a>
+                    <a href={locale === 'tr' ? '/rehber/' : '/rehber/e-invoice-template-designer.html'}>{t('landing.footer.guides')}</a>
                     <a href="#kvkk" onClick={(e) => { e.preventDefault(); setLegalModal('kvkk'); }}>{t('landing.footer.kvkk')}</a>
                     <a href="#sozlesme" onClick={(e) => { e.preventDefault(); setLegalModal('sozlesme'); }}>{t('landing.footer.terms')}</a>
                     <a href="#cerez" onClick={(e) => { e.preventDefault(); setLegalModal('cerez'); }}>{t('landing.footer.cookies')}</a>

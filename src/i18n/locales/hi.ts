@@ -132,6 +132,7 @@ const hi: Messages = {
             kvkk: 'गोपनीयता (KVKK)',
             terms: 'उपयोग की शर्तें',
             cookies: 'कुकी नीति',
+            guides: 'गाइड',
             contact: 'संपर्क करें',
         },
     },

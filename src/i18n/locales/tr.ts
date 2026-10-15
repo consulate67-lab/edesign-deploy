@@ -135,6 +135,7 @@ const tr = {
             kvkk: 'KVKK',
             terms: 'Kullanıcı Sözleşmesi',
             cookies: 'Çerez Politikası',
+            guides: 'Rehber',
             contact: 'İletişim',
         },
     },

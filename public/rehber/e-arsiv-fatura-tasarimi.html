@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>e-Arşiv Fatura Tasarımı: Şablon, Zorunlu Alanlar ve XSLT | edXdocu</title>
+<meta name="description" content="e-Arşiv fatura tasarımı nasıl yapılır? e-Fatura ile farkı, görünümde yer alması gereken bilgiler, internet satışı alanları ve hazır XSLT şablonları." />
+<link rel="canonical" href="https://www.edxdocu.com/rehber/e-arsiv-fatura-tasarimi.html" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="edXdocu" />
+<meta property="og:locale" content="tr_TR" />
+<meta property="og:title" content="e-Arşiv Fatura Tasarımı: Şablon, Zorunlu Alanlar ve XSLT" />
+<meta property="og:description" content="e-Arşiv faturanızı kurumsal ve kurallara uygun şekilde tasarlayın." />
+<meta property="og:url" content="https://www.edxdocu.com/rehber/e-arsiv-fatura-tasarimi.html" />
+<meta property="og:image" content="https://www.edxdocu.com/og-image.png" />
+<link rel="stylesheet" href="/rehber/rehber.css?v=1" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": "e-Arşiv Fatura Tasarımı: Şablon, Zorunlu Alanlar ve XSLT",
+      "description": "e-Arşiv fatura görünümünün tasarımı, e-Fatura ile farkları ve görünümde yer alması gereken bilgiler.",
+      "inLanguage": "tr",
+      "datePublished": "2026-10-15",
+      "dateModified": "2026-10-15",
+      "image": "https://www.edxdocu.com/og-image.png",
+      "mainEntityOfPage": "https://www.edxdocu.com/rehber/e-arsiv-fatura-tasarimi.html",
+      "author": { "@type": "Organization", "name": "edXdocu", "url": "https://www.edxdocu.com/" },
+      "publisher": { "@type": "Organization", "name": "edXdocu", "logo": { "@type": "ImageObject", "url": "https://www.edxdocu.com/logo-600x200.png" } }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "edXdocu", "item": "https://www.edxdocu.com/" },
+        { "@type": "ListItem", "position": 2, "name": "Rehber", "item": "https://www.edxdocu.com/rehber/" },
+        { "@type": "ListItem", "position": 3, "name": "e-Arşiv fatura tasarımı" }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        { "@type": "Question", "name": "e-Arşiv ve e-Fatura için aynı tasarım kullanılabilir mi?", "acceptedAnswer": { "@type": "Answer", "text": "Temel yerleşim aynı olabilir ancak e-Arşiv görünümünde belge türünün e-Arşiv Fatura olduğu açıkça yazmalı ve internet satışlarında ek bilgiler yer almalıdır. Bu yüzden ayrı bir e-Arşiv şablonu kullanmak daha güvenlidir." } },
+        { "@type": "Question", "name": "e-Arşiv faturası kağıda basılabilir mi?", "acceptedAnswer": { "@type": "Answer", "text": "Evet. Alıcı isterse e-Arşiv fatura kağıt olarak da verilebilir. Bu nedenle tasarımın A4 çıktıda da düzgün görünmesi gerekir." } }
+      ]
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <a href="/"><img src="/logo-300x100.png" alt="edXdocu" width="300" height="100" /></a>
+  <nav><a href="/rehber/">Rehber</a><a href="/#fiyatlar">Fiyatlar</a><a class="btn" href="/#kayit">Ücretsiz deneyin</a></nav>
+</div></header>
+<main>
+  <div class="crumbs"><a href="/">edXdocu</a> › <a href="/rehber/">Rehber</a> › e-Arşiv fatura tasarımı</div>
+  <h1>e-Arşiv fatura tasarımı: şablon, görünüm alanları ve XSLT</h1>
+  <p class="meta">Güncelleme: 15 Ekim 2026 · Okuma süresi: 5 dakika</p>
+  <p class="lead">e-Arşiv fatura, e-Fatura sistemine kayıtlı olmayan alıcılara (tüketiciler ve kayıtlı olmayan firmalar) düzenlenen elektronik faturadır. Müşterileriniz bu faturayı çoğunlukla e-posta ile ya da kâğıt çıktı olarak görür. Bu yüzden e-Arşiv görünümü markanızın doğrudan müşteriye dokunduğu yerdir.</p>
+
+  <h2>e-Arşiv ile e-Fatura arasındaki fark</h2>
+  <table>
+    <tr><th></th><th>e-Fatura</th><th>e-Arşiv Fatura</th></tr>
+    <tr><td>Alıcı</td><td>e-Fatura sistemine kayıtlı mükellef</td><td>Kayıtlı olmayan firma veya nihai tüketici</td></tr>
+    <tr><td>İletim</td><td>GİB üzerinden alıcının sistemine</td><td>E-posta, SMS bağlantısı veya kâğıt çıktı</td></tr>
+    <tr><td>Senaryo (ProfileID)</td><td>TEMELFATURA, TICARIFATURA…</td><td>EARSIVFATURA</td></tr>
+    <tr><td>Görünüm</td><td>Alıcı sistemlerinde XSLT ile</td><td>PDF / HTML / kâğıt; tasarım müşteride doğrudan görünür</td></tr>
+  </table>
+
+  <h2>e-Arşiv görünümünde olması gerekenler</h2>
+  <p>e-Arşiv tasarımınızda e-Faturadaki temel alanlara ek olarak şunlara dikkat edin:</p>
+  <ul>
+    <li><strong>Belge adı:</strong> Faturanın "e-Arşiv Fatura" olduğu başlıkta açıkça yazmalıdır.</li>
+    <li><strong>Fatura no ve ETTN:</strong> 16 karakterlik fatura numarası ve benzersiz ETTN görünür olmalıdır.</li>
+    <li><strong>Alıcı bilgisi:</strong> Tüketicilerde ad soyad ve TCKN; vergi numarası olmayan yabancılar için ilgili kimlik bilgisi.</li>
+    <li><strong>İletim ifadesi:</strong> Elektronik ortamda iletilen faturalarda "e-Arşiv izni kapsamında elektronik ortamda iletilmiştir." ifadesi kullanılır.</li>
+    <li><strong>İnternet satışları:</strong> Satış internet üzerinden yapıldıysa web adresi, ödeme şekli, ödeme tarihi, gönderim tarihi ve taşıyıcı firma bilgileri faturada yer alır.</li>
+  </ul>
+  <div class="box tip"><strong>Not:</strong> Mevzuat zaman zaman güncellenir. Görünümde yer alması gereken ifadeler için GİB'in güncel e-Arşiv kılavuzunu ve mali müşavirinizin önerilerini esas alın. edXdocu şablonları bu alanları XML'deki veriden otomatik okur.</div>
+
+  <h2>Kâğıt çıktı ve e-posta için tasarım ipuçları</h2>
+  <ul>
+    <li><strong>A4'e sığdırın:</strong> Kenar boşluklarını 10-15 mm tutun; uzun ürün listelerinde tablonun sayfaya taşmadığından emin olun.</li>
+    <li><strong>Okunaklı yazı:</strong> Gövde metni için 9-10 punto altına inmeyin; toplam tutarı büyük ve kalın yazın.</li>
+    <li><strong>Mobil görünüm:</strong> Müşterilerin çoğu e-Arşiv bağlantısını telefonda açar. Tek sütunda okunabilen sade bir düzen seçin.</li>
+    <li><strong>Mürekkep dostu renkler:</strong> Koyu dolgulu büyük alanlar yerine ince renkli çizgiler kullanın.</li>
+  </ul>
+
+  <h2>edXdocu ile e-Arşiv şablonu</h2>
+  <p><a href="/">edXdocu</a>'da e-Arşiv için GİB UBL-TR 1.2.1 uyumlu hazır şablonlar bulunur. Logonuzu ve banka bilgilerinizi ekleyip kendi e-Arşiv XML'inizle önizleme yapabilir, filigranlı test dosyasını ücretsiz indirebilirsiniz. Logo ve kaşe için <a href="/rehber/e-faturaya-logo-kase-imza-ekleme.html">bu rehbere</a> göz atın.</p>
+
+  <h2>Sık sorulan sorular</h2>
+  <h3>e-Arşiv ve e-Fatura için aynı tasarım kullanılabilir mi?</h3>
+  <p>Temel yerleşim aynı olabilir ancak e-Arşiv görünümünde belge türü açıkça yazmalı ve internet satışlarında ek bilgiler yer almalıdır. Ayrı bir e-Arşiv şablonu kullanmak daha güvenlidir.</p>
+  <h3>e-Arşiv faturası kâğıda basılabilir mi?</h3>
+  <p>Evet. Alıcı isterse kâğıt olarak da verilebilir. Bu yüzden tasarımın A4 çıktıda düzgün görünmesi gerekir.</p>
+
+  <div class="cta"><p>e-Arşiv faturanızı dakikalar içinde tasarlayın.</p><a class="btn alt" href="/#kayit">Ücretsiz deneyin</a></div>
+
+  <div class="related">
+    <h2>İlgili rehberler</h2>
+    <ul>
+      <li><a href="/rehber/e-fatura-tasarimi-nasil-yapilir.html">e-Fatura tasarımı nasıl yapılır?</a></li>
+      <li><a href="/rehber/e-irsaliye-tasarimi.html">e-İrsaliye tasarımı</a></li>
+      <li><a href="/rehber/e-fatura-xslt-yukleme.html">XSLT entegratöre nasıl yüklenir?</a></li>
+    </ul>
+  </div>
+</main>
+<footer>© 2026 edXdocu · Sarp Bilgisayar Yazılım ve Danışmanlık, Kağıthane / İstanbul · <a href="mailto:destek@edxdocu.com">destek@edxdocu.com</a> · +90 533 666 01 25</footer>
+</body>
+</html>

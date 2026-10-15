@@ -132,6 +132,7 @@ const zh: Messages = {
             kvkk: '隐私政策（KVKK）',
             terms: '使用条款',
             cookies: 'Cookie 政策',
+            guides: '指南',
             contact: '联系我们',
         },
     },

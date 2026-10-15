@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>e-Fatura Tasarımı Nasıl Yapılır? Adım Adım Rehber (2026) | edXdocu</title>
+<meta name="description" content="e-Fatura görünümünü (XSLT) kod yazmadan nasıl tasarlarsınız? Şablon seçimi, logo ve kaşe ekleme, XML ile önizleme ve entegratöre yükleme adımları tek rehberde." />
+<link rel="canonical" href="https://www.edxdocu.com/rehber/e-fatura-tasarimi-nasil-yapilir.html" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="edXdocu" />
+<meta property="og:locale" content="tr_TR" />
+<meta property="og:title" content="e-Fatura Tasarımı Nasıl Yapılır? Adım Adım Rehber" />
+<meta property="og:description" content="Kod yazmadan e-Fatura görünümü (XSLT) hazırlamanın 8 adımı." />
+<meta property="og:url" content="https://www.edxdocu.com/rehber/e-fatura-tasarimi-nasil-yapilir.html" />
+<meta property="og:image" content="https://www.edxdocu.com/og-image.png" />
+<link rel="stylesheet" href="/rehber/rehber.css?v=1" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": "e-Fatura Tasarımı Nasıl Yapılır? Adım Adım Rehber",
+      "description": "e-Fatura görünümünü (XSLT) kod yazmadan tasarlamanın adımları.",
+      "inLanguage": "tr",
+      "datePublished": "2026-10-15",
+      "dateModified": "2026-10-15",
+      "image": "https://www.edxdocu.com/og-image.png",
+      "mainEntityOfPage": "https://www.edxdocu.com/rehber/e-fatura-tasarimi-nasil-yapilir.html",
+      "author": { "@type": "Organization", "name": "edXdocu", "url": "https://www.edxdocu.com/" },
+      "publisher": { "@type": "Organization", "name": "edXdocu", "logo": { "@type": "ImageObject", "url": "https://www.edxdocu.com/logo-600x200.png" } }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "edXdocu", "item": "https://www.edxdocu.com/" },
+        { "@type": "ListItem", "position": 2, "name": "Rehber", "item": "https://www.edxdocu.com/rehber/" },
+        { "@type": "ListItem", "position": 3, "name": "e-Fatura tasarımı nasıl yapılır?" }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        { "@type": "Question", "name": "e-Fatura tasarımı ne kadar sürer?", "acceptedAnswer": { "@type": "Answer", "text": "Hazır bir şablondan başlayıp logo, kaşe ve banka bilgilerinizi eklediğinizde genellikle 15-30 dakika sürer." } },
+        { "@type": "Question", "name": "e-Fatura tasarımını değiştirmek faturanın geçerliliğini etkiler mi?", "acceptedAnswer": { "@type": "Answer", "text": "Hayır. Tasarım (XSLT) yalnızca faturanın ekranda ve çıktıda nasıl göründüğünü belirler. Faturanın hukuki içeriği UBL-TR XML verisidir ve mali mühür veya e-imza ile imzalanır." } },
+        { "@type": "Question", "name": "Tasarımı denemek ücretli mi?", "acceptedAnswer": { "@type": "Answer", "text": "edXdocu'da üyelik, kaydetme, önizleme ve filigranlı test indirme ücretsizdir. Tasarım hakkı yalnızca tasarımı onayladığınızda harcanır." } }
+      ]
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <a href="/"><img src="/logo-300x100.png" alt="edXdocu" width="300" height="100" /></a>
+  <nav><a href="/rehber/">Rehber</a><a href="/#fiyatlar">Fiyatlar</a><a class="btn" href="/#kayit">Ücretsiz deneyin</a></nav>
+</div></header>
+<main>
+  <div class="crumbs"><a href="/">edXdocu</a> › <a href="/rehber/">Rehber</a> › e-Fatura tasarımı</div>
+  <h1>e-Fatura tasarımı nasıl yapılır? Adım adım rehber</h1>
+  <p class="meta">Güncelleme: 15 Ekim 2026 · Okuma süresi: 6 dakika</p>
+  <p class="lead">e-Faturanızın müşterinin ekranında ve çıktısında nasıl görüneceğini <strong>XSLT</strong> adlı görünüm dosyası belirler. Bu rehberde XSLT bilmeden, sürükle-bırak yöntemiyle kurumsal bir e-Fatura tasarımını nasıl hazırlayacağınızı ve entegratörünüze nasıl yükleyeceğinizi anlatıyoruz.</p>
+
+  <h2>e-Fatura tasarımı neden önemli?</h2>
+  <p>GİB'e giden e-Fatura aslında bir <strong>UBL-TR XML</strong> dosyasıdır. Bu veriyi insanların okuyabileceği bir belgeye çeviren şey faturanın içine gömülen XSLT dosyasıdır. Varsayılan şablonlar çoğu zaman sade ve markasızdır. İyi bir tasarım şunları sağlar:</p>
+  <ul>
+    <li><strong>Kurumsal görünüm:</strong> Logonuz, renkleriniz, kaşe ve imza görseliniz her faturada yer alır.</li>
+    <li><strong>Daha az soru, daha hızlı tahsilat:</strong> IBAN, vade ve ödeme bilgisi net görünür; müşteri muhasebesi aradığını kolay bulur.</li>
+    <li><strong>Doğru bilgi:</strong> Vergi, iskonto, tevkifat ve döviz satırları düzgün hizalanır ve taşmaz.</li>
+  </ul>
+
+  <h2>Adım adım e-Fatura tasarımı</h2>
+  <ol>
+    <li><strong>Ücretsiz hesap açın.</strong> <a href="/#kayit">edxdocu.com</a> üzerinden e-posta ile kayıt olun. Kredi kartı gerekmez.</li>
+    <li><strong>Belge türünü seçin.</strong> e-Fatura, e-Arşiv, e-İrsaliye, e-SMM, e-Müstahsil dahil toplam 15 belge türünden birini seçin.</li>
+    <li><strong>Şablonu seçin.</strong> Sektörünüzle ilgili birkaç soruyu yanıtlayın, galeriden size uygun hazır şablonu seçin. İsterseniz mevcut <code>.xslt</code> / <code>.xsl</code> dosyanızı yükleyerek de başlayabilirsiniz.</li>
+    <li><strong>Logonuzu, kaşenizi ve imzanızı ekleyin.</strong> Görselleri sürükleyip istediğiniz yere bırakın, boyutlandırın. Ayrıntılar için <a href="/rehber/e-faturaya-logo-kase-imza-ekleme.html">logo, kaşe ve imza ekleme rehberine</a> bakın.</li>
+    <li><strong>Banka ve iletişim bilgilerini yazın.</strong> IBAN, banka adı, adres, telefon ve web adresinizi şablona ekleyin.</li>
+    <li><strong>Kendi XML dosyanızla önizleyin.</strong> Daha önce kestiğiniz bir e-Faturanın XML dosyasını yükleyin. Tasarımın gerçek verilerinizle nasıl göründüğünü anında görürsünüz. Uzun ürün listeleri, çok satırlı açıklamalar ve dövizli faturalar ile mutlaka deneyin.</li>
+    <li><strong>Filigranlı test dosyasını indirin.</strong> Test XSLT dosyasını ücretsiz indirip entegratörünüzün test ortamında deneyin.</li>
+    <li><strong>Onaylayın ve XSLT'yi indirin.</strong> Tasarımdan memnunsanız onaylayın; filigransız XSLT dosyanız hazır olur. Tasarım hakkı yalnızca bu adımda harcanır.</li>
+  </ol>
+
+  <div class="box tip"><strong>İpucu:</strong> Önizlemeyi en az üç farklı XML ile yapın: tek satırlı kısa bir fatura, 30+ satırlı uzun bir fatura ve dövizli ya da tevkifatlı bir fatura. Tasarım hatalarının çoğu bu durumlarda ortaya çıkar.</div>
+
+  <h2>Tasarımda bulunması gereken alanlar</h2>
+  <p>Görünüm dosyası XML'deki bilgileri ekrana taşır. Bu yüzden iyi bir şablonda en azından şu alanlar okunaklı olmalıdır:</p>
+  <table>
+    <tr><th>Bölüm</th><th>Alanlar</th></tr>
+    <tr><td>Belge bilgisi</td><td>Fatura no, ETTN, düzenleme tarihi ve saati, senaryo (Temel / Ticari / e-Arşiv), fatura tipi (Satış, İade, Tevkifat, İstisna…)</td></tr>
+    <tr><td>Satıcı / alıcı</td><td>Unvan, adres, vergi dairesi, VKN / TCKN, telefon, e-posta, web adresi</td></tr>
+    <tr><td>Satırlar</td><td>Mal / hizmet adı, miktar, birim, birim fiyat, iskonto, KDV oranı ve tutarı, satır toplamı</td></tr>
+    <tr><td>Toplamlar</td><td>Mal / hizmet toplamı, toplam iskonto, KDV, tevkifat, vergiler dahil toplam, ödenecek tutar, döviz kuru</td></tr>
+    <tr><td>Ek bilgiler</td><td>Notlar, sipariş ve irsaliye referansları, banka / IBAN bilgisi, karekod</td></tr>
+  </table>
+
+  <h2>Tasarladığım XSLT'yi nerede kullanırım?</h2>
+  <p>İndirdiğiniz XSLT dosyasını e-Fatura entegratörünüzün portalındaki şablon / tasarım bölümüne ya da ERP / muhasebe programınızın e-Fatura ayarlarındaki XSLT alanına yüklersiniz. Adımlar için <a href="/rehber/e-fatura-xslt-yukleme.html">XSLT yükleme rehberini</a> okuyun.</p>
+
+  <h2>Sık sorulan sorular</h2>
+  <h3>e-Fatura tasarımı ne kadar sürer?</h3>
+  <p>Hazır bir şablondan başlayıp logo, kaşe ve banka bilgilerinizi eklediğinizde genellikle 15-30 dakika sürer.</p>
+  <h3>Tasarımı değiştirmek faturanın geçerliliğini etkiler mi?</h3>
+  <p>Hayır. XSLT yalnızca görünümü belirler. Faturanın hukuki içeriği UBL-TR XML verisidir ve mali mühür ya da e-imza ile imzalanır.</p>
+  <h3>Tasarımı denemek ücretli mi?</h3>
+  <p>Üyelik, kaydetme, önizleme ve filigranlı test indirme ücretsizdir. Tasarım hakkı yalnızca tasarımı onayladığınızda harcanır. Paketler 3.000 TL'den başlar; <a href="/#fiyatlar">fiyatları inceleyin</a>.</p>
+
+  <div class="cta"><p>Kendi e-Fatura tasarımınızı şimdi ücretsiz deneyin.</p><a class="btn alt" href="/#kayit">Ücretsiz hesap açın</a></div>
+
+  <div class="related">
+    <h2>İlgili rehberler</h2>
+    <ul>
+      <li><a href="/rehber/xslt-nedir-e-fatura-goruntu-dosyasi.html">e-Fatura XSLT nedir? Görüntü dosyası nasıl çalışır?</a></li>
+      <li><a href="/rehber/e-arsiv-fatura-tasarimi.html">e-Arşiv fatura tasarımı</a></li>
+      <li><a href="/rehber/e-irsaliye-tasarimi.html">e-İrsaliye tasarımı</a></li>
+    </ul>
+  </div>
+</main>
+<footer>© 2026 edXdocu · Sarp Bilgisayar Yazılım ve Danışmanlık, Kağıthane / İstanbul · <a href="mailto:destek@edxdocu.com">destek@edxdocu.com</a> · +90 533 666 01 25</footer>
+</body>
+</html>

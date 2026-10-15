@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>e-Fatura XSLT Nedir? Görüntü Dosyası Nasıl Çalışır? | edXdocu</title>
+<meta name="description" content="e-Fatura XSLT dosyası nedir, UBL-TR XML ile nasıl çalışır, faturaya nasıl gömülür? Sık yapılan XSLT hataları ve çözümleri bu rehberde." />
+<link rel="canonical" href="https://www.edxdocu.com/rehber/xslt-nedir-e-fatura-goruntu-dosyasi.html" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="edXdocu" />
+<meta property="og:locale" content="tr_TR" />
+<meta property="og:title" content="e-Fatura XSLT Nedir? Görüntü Dosyası Nasıl Çalışır?" />
+<meta property="og:description" content="UBL-TR XML, XSLT ve fatura görünümü arasındaki ilişki; sık yapılan hatalar ve çözümleri." />
+<meta property="og:url" content="https://www.edxdocu.com/rehber/xslt-nedir-e-fatura-goruntu-dosyasi.html" />
+<meta property="og:image" content="https://www.edxdocu.com/og-image.png" />
+<link rel="stylesheet" href="/rehber/rehber.css?v=1" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": "e-Fatura XSLT Nedir? Görüntü Dosyası Nasıl Çalışır?",
+      "description": "UBL-TR XML ile XSLT görünüm dosyasının ilişkisi, faturaya gömülmesi ve sık yapılan hatalar.",
+      "inLanguage": "tr",
+      "datePublished": "2026-10-15",
+      "dateModified": "2026-10-15",
+      "image": "https://www.edxdocu.com/og-image.png",
+      "mainEntityOfPage": "https://www.edxdocu.com/rehber/xslt-nedir-e-fatura-goruntu-dosyasi.html",
+      "author": { "@type": "Organization", "name": "edXdocu", "url": "https://www.edxdocu.com/" },
+      "publisher": { "@type": "Organization", "name": "edXdocu", "logo": { "@type": "ImageObject", "url": "https://www.edxdocu.com/logo-600x200.png" } }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "edXdocu", "item": "https://www.edxdocu.com/" },
+        { "@type": "ListItem", "position": 2, "name": "Rehber", "item": "https://www.edxdocu.com/rehber/" },
+        { "@type": "ListItem", "position": 3, "name": "e-Fatura XSLT nedir?" }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        { "@type": "Question", "name": "e-Fatura XSLT dosyası nedir?", "acceptedAnswer": { "@type": "Answer", "text": "XSLT, e-Faturanın UBL-TR XML verisini okunabilir bir belgeye (HTML) dönüştüren görünüm şablonudur. Logo, yerleşim, tablo ve yazı tipleri bu dosyada tanımlanır." } },
+        { "@type": "Question", "name": "XSLT dosyası faturanın neresinde durur?", "acceptedAnswer": { "@type": "Answer", "text": "XSLT, Base64 olarak kodlanıp faturanın XML'indeki AdditionalDocumentReference / EmbeddedDocumentBinaryObject alanına gömülür. Böylece fatura hangi portalda açılırsa açılsın aynı görünür." } },
+        { "@type": "Question", "name": "XSLT bilmeden e-Fatura tasarımı yapılabilir mi?", "acceptedAnswer": { "@type": "Answer", "text": "Evet. edXdocu gibi görsel editörlerle sürükle-bırak yöntemiyle tasarım yapılır, XSLT kodu otomatik üretilir." } }
+      ]
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <a href="/"><img src="/logo-300x100.png" alt="edXdocu" width="300" height="100" /></a>
+  <nav><a href="/rehber/">Rehber</a><a href="/#fiyatlar">Fiyatlar</a><a class="btn" href="/#kayit">Ücretsiz deneyin</a></nav>
+</div></header>
+<main>
+  <div class="crumbs"><a href="/">edXdocu</a> › <a href="/rehber/">Rehber</a> › XSLT nedir?</div>
+  <h1>e-Fatura XSLT nedir? Görüntü dosyası nasıl çalışır?</h1>
+  <p class="meta">Güncelleme: 15 Ekim 2026 · Okuma süresi: 5 dakika</p>
+  <p class="lead">e-Fatura bir PDF değil, bir <strong>XML</strong> dosyasıdır. Faturayı ekranda gördüğünüz düzenli belgeye dönüştüren şey <strong>XSLT</strong> (Extensible Stylesheet Language Transformations) adlı görünüm şablonudur. Bu yazıda XSLT'nin ne olduğunu, faturaya nasıl eklendiğini ve en sık karşılaşılan hataları anlatıyoruz.</p>
+
+  <h2>XML veri, XSLT görünüm</h2>
+  <p>Türkiye'de e-Fatura, e-Arşiv ve e-İrsaliye belgeleri GİB'in <strong>UBL-TR 1.2.1</strong> standardına uygun XML dosyalarıdır. XML yalnızca veriyi taşır: satıcı, alıcı, satırlar, vergiler, toplamlar. Bu verinin nasıl görüneceğini XSLT belirler:</p>
+  <ul>
+    <li><strong>XML (veri):</strong> "Fatura no: ABC2026000000123, KDV: %20, Toplam: 12.000 TL"</li>
+    <li><strong>XSLT (görünüm):</strong> "Logoyu sol üste koy, fatura numarasını kalın yaz, satırları tablo yap, toplamları sağa hizala."</li>
+    <li><strong>Sonuç (HTML):</strong> Müşterinin tarayıcıda gördüğü ve yazdırdığı fatura.</li>
+  </ul>
+  <p>Aynı XML'e farklı XSLT uygulanırsa fatura bambaşka görünür ama içerik ve hukuki geçerlilik değişmez.</p>
+
+  <h2>XSLT faturaya nasıl eklenir?</h2>
+  <p>XSLT dosyası Base64 olarak kodlanır ve fatura XML'inin içine gömülür. UBL-TR'de bunun yeri <code>cac:AdditionalDocumentReference</code> altındaki <code>cbc:EmbeddedDocumentBinaryObject</code> alanıdır:</p>
+<pre>&lt;cac:AdditionalDocumentReference&gt;
+  &lt;cbc:ID&gt;...&lt;/cbc:ID&gt;
+  &lt;cbc:IssueDate&gt;2026-10-15&lt;/cbc:IssueDate&gt;
+  &lt;cbc:DocumentType&gt;XSLT&lt;/cbc:DocumentType&gt;
+  &lt;cac:Attachment&gt;
+    &lt;cbc:EmbeddedDocumentBinaryObject mimeCode="application/xml"
+        encodingCode="Base64" filename="sablon.xslt"&gt;PD94bWwg...&lt;/cbc:EmbeddedDocumentBinaryObject&gt;
+  &lt;/cac:Attachment&gt;
+&lt;/cac:AdditionalDocumentReference&gt;</pre>
+  <p>Bu işi genellikle entegratörünüz ya da ERP programınız yapar. Siz XSLT dosyasını bir kez yüklersiniz, her fatura kesildiğinde otomatik olarak içine eklenir. Fatura hangi portalda veya görüntüleyicide açılırsa açılsın aynı görünür.</p>
+
+  <h2>Sık yapılan XSLT hataları ve çözümleri</h2>
+  <table>
+    <tr><th>Sorun</th><th>Olası neden</th><th>Çözüm</th></tr>
+    <tr><td>Türkçe karakterler bozuk (Ä±, ÅŸ)</td><td>Dosya UTF-8 olarak kaydedilmemiş</td><td>XSLT'yi UTF-8 kaydedin, <code>&lt;xsl:output encoding="UTF-8"/&gt;</code> kullanın</td></tr>
+    <tr><td>Logo görünmüyor</td><td>Logo dış bir adresten çağrılıyor ya da Base64 hatalı</td><td>Logoyu Base64 olarak XSLT içine gömün; dosyayı küçük tutun</td></tr>
+    <tr><td>Tablo sayfadan taşıyor</td><td>Sabit genişlikler, uzun ürün adları</td><td>Yüzde genişlik ve satır kaydırma kullanın; uzun XML ile test edin</td></tr>
+    <tr><td>Tevkifat veya iskonto satırı yok</td><td>Şablon bu alanları okumuyor</td><td>Tevkifatlı ve iskontolu örnek XML ile önizleyin</td></tr>
+    <tr><td>Fatura boyutu çok büyük</td><td>Yüksek çözünürlüklü görseller</td><td>Logo, kaşe ve imza görsellerini sıkıştırın (ideal olarak her biri 100 KB altı)</td></tr>
+    <tr><td>Bazı portallarda farklı görünüyor</td><td>XSLT 2.0 veya tarayıcıya özel kod</td><td>XSLT 1.0 ile uyumlu kalın; tarayıcılar ve görüntüleyiciler XSLT 1.0 kullanır</td></tr>
+  </table>
+
+  <div class="box"><strong>Kod yazmadan XSLT:</strong> <a href="/">edXdocu</a> görsel editörde yaptığınız tasarımı XSLT 1.0 uyumlu koda kendisi çevirir. Logoları Base64 olarak gömer, Türkçe karakterleri UTF-8 olarak saklar ve GİB örnek XML'leriyle test edilmiş şablonlar sunar.</div>
+
+  <h2>Mevcut XSLT dosyamı düzenleyebilir miyim?</h2>
+  <p>Evet. Elinizdeki <code>.xslt</code> veya <code>.xsl</code> dosyasını edXdocu'ya yükleyip aynı görsel editörde düzenleyebilirsiniz. Kendi faturanızın XML'iyle anında önizleme yaparak değişiklikleri kontrol edersiniz.</p>
+
+  <h2>Sık sorulan sorular</h2>
+  <h3>e-Fatura XSLT dosyası nedir?</h3>
+  <p>e-Faturanın UBL-TR XML verisini okunabilir bir belgeye dönüştüren görünüm şablonudur. Logo, yerleşim, tablo ve yazı tipleri bu dosyada tanımlanır.</p>
+  <h3>XSLT olmadan e-Fatura gönderilebilir mi?</h3>
+  <p>Gönderilebilir. Bu durumda alıcı tarafındaki sistemin varsayılan görünümü kullanılır. Kendi XSLT'nizi eklediğinizde faturanız her yerde sizin tasarımınızla görünür.</p>
+  <h3>XSLT bilmeden tasarım yapılabilir mi?</h3>
+  <p>Evet. edXdocu ile sürükle-bırak yöntemiyle tasarlarsınız, XSLT kodu otomatik üretilir.</p>
+
+  <div class="cta"><p>XSLT kodu yazmadan e-Fatura tasarlayın.</p><a class="btn alt" href="/#kayit">Ücretsiz deneyin</a></div>
+
+  <div class="related">
+    <h2>İlgili rehberler</h2>
+    <ul>
+      <li><a href="/rehber/e-fatura-tasarimi-nasil-yapilir.html">e-Fatura tasarımı nasıl yapılır? Adım adım rehber</a></li>
+      <li><a href="/rehber/e-fatura-xslt-yukleme.html">Hazırlanan XSLT entegratöre ve ERP'ye nasıl yüklenir?</a></li>
+      <li><a href="/rehber/e-faturaya-logo-kase-imza-ekleme.html">e-Faturaya logo, kaşe ve imza ekleme</a></li>
+    </ul>
+  </div>
+</main>
+<footer>© 2026 edXdocu · Sarp Bilgisayar Yazılım ve Danışmanlık, Kağıthane / İstanbul · <a href="mailto:destek@edxdocu.com">destek@edxdocu.com</a> · +90 533 666 01 25</footer>
+</body>
+</html>

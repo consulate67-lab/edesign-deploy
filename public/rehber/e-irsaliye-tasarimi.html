@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>e-İrsaliye Tasarımı: Şablon, Alanlar ve XSLT Görünümü | edXdocu</title>
+<meta name="description" content="e-İrsaliye görünümü (XSLT) nasıl tasarlanır? Sevk bilgileri, araç ve şoför alanları, e-İrsaliye Yanıtı ve hazır şablonlarla kod yazmadan tasarım." />
+<link rel="canonical" href="https://www.edxdocu.com/rehber/e-irsaliye-tasarimi.html" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="edXdocu" />
+<meta property="og:locale" content="tr_TR" />
+<meta property="og:title" content="e-İrsaliye Tasarımı: Şablon, Alanlar ve XSLT Görünümü" />
+<meta property="og:description" content="Sevk, araç ve teslimat bilgilerini doğru gösteren e-İrsaliye şablonu hazırlayın." />
+<meta property="og:url" content="https://www.edxdocu.com/rehber/e-irsaliye-tasarimi.html" />
+<meta property="og:image" content="https://www.edxdocu.com/og-image.png" />
+<link rel="stylesheet" href="/rehber/rehber.css?v=1" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": "e-İrsaliye Tasarımı: Şablon, Alanlar ve XSLT Görünümü",
+      "description": "e-İrsaliye görünümünde yer alması gereken sevk, araç ve teslimat alanları ile tasarım ipuçları.",
+      "inLanguage": "tr",
+      "datePublished": "2026-10-15",
+      "dateModified": "2026-10-15",
+      "image": "https://www.edxdocu.com/og-image.png",
+      "mainEntityOfPage": "https://www.edxdocu.com/rehber/e-irsaliye-tasarimi.html",
+      "author": { "@type": "Organization", "name": "edXdocu", "url": "https://www.edxdocu.com/" },
+      "publisher": { "@type": "Organization", "name": "edXdocu", "logo": { "@type": "ImageObject", "url": "https://www.edxdocu.com/logo-600x200.png" } }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "edXdocu", "item": "https://www.edxdocu.com/" },
+        { "@type": "ListItem", "position": 2, "name": "Rehber", "item": "https://www.edxdocu.com/rehber/" },
+        { "@type": "ListItem", "position": 3, "name": "e-İrsaliye tasarımı" }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        { "@type": "Question", "name": "e-İrsaliye için e-Fatura tasarımı kullanılabilir mi?", "acceptedAnswer": { "@type": "Answer", "text": "Hayır. e-İrsaliye UBL-TR'de DespatchAdvice belgesidir ve e-Faturadan (Invoice) farklı alanlar içerir. Sevk ve taşıma bilgilerini okuyan ayrı bir XSLT gerekir." } },
+        { "@type": "Question", "name": "e-İrsaliye Yanıtı için ayrı tasarım gerekir mi?", "acceptedAnswer": { "@type": "Answer", "text": "Evet. e-İrsaliye Yanıtı (ReceiptAdvice) teslim alınan, eksik veya reddedilen miktarları gösterir ve kendi şablonunu kullanır. edXdocu'da bunun için ayrı belge türü bulunur." } }
+      ]
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <a href="/"><img src="/logo-300x100.png" alt="edXdocu" width="300" height="100" /></a>
+  <nav><a href="/rehber/">Rehber</a><a href="/#fiyatlar">Fiyatlar</a><a class="btn" href="/#kayit">Ücretsiz deneyin</a></nav>
+</div></header>
+<main>
+  <div class="crumbs"><a href="/">edXdocu</a> › <a href="/rehber/">Rehber</a> › e-İrsaliye tasarımı</div>
+  <h1>e-İrsaliye tasarımı: şablon, alanlar ve XSLT görünümü</h1>
+  <p class="meta">Güncelleme: 15 Ekim 2026 · Okuma süresi: 4 dakika</p>
+  <p class="lead">e-İrsaliye, malın sevkini belgeleyen elektronik belgedir ve yolda araçta, depoda, teslimatta okunur. Bu yüzden görünümünün sade, hızlı okunur ve sevk bilgilerini eksiksiz gösterir olması gerekir.</p>
+
+  <h2>e-İrsaliye, e-Faturadan nasıl ayrılır?</h2>
+  <p>UBL-TR'de e-Fatura bir <code>Invoice</code>, e-İrsaliye ise bir <code>DespatchAdvice</code> belgesidir. e-İrsaliyede tutar ve vergi yerine <strong>sevk ve teslimat</strong> bilgileri öne çıkar. Bu nedenle e-Fatura şablonu e-İrsaliye için kullanılamaz; ayrı bir XSLT gerekir.</p>
+
+  <h2>e-İrsaliye görünümünde bulunması gereken alanlar</h2>
+  <table>
+    <tr><th>Bölüm</th><th>Alanlar</th></tr>
+    <tr><td>Belge</td><td>İrsaliye no, ETTN, düzenleme tarihi ve saati, senaryo (Temel İrsaliye), irsaliye tipi (Sevk, Matbudan)</td></tr>
+    <tr><td>Sevk</td><td>Fiili sevk tarihi ve saati, sevk eden ve teslim alan taraflar, teslimat adresi</td></tr>
+    <tr><td>Taşıma</td><td>Taşıyıcı firma unvanı ve VKN, araç plakası, dorse plakası, şoför adı soyadı ve TCKN</td></tr>
+    <tr><td>Satırlar</td><td>Mal adı, kod, sevk edilen miktar ve birim; varsa lot / seri no</td></tr>
+    <tr><td>Referanslar</td><td>Sipariş numarası ve tarihi, ilgili fatura veya önceki irsaliye bilgisi</td></tr>
+  </table>
+
+  <h2>Tasarım ipuçları</h2>
+  <ul>
+    <li><strong>Sevk bilgilerini üste alın:</strong> Plaka, şoför ve teslimat adresi ilk bakışta görünmelidir; yolda yapılan kontrollerde ilk aranan bilgiler bunlardır.</li>
+    <li><strong>Fiyat sütunlarını gizleyin:</strong> İrsaliyede tutar göstermek zorunlu değildir. Fiyatsız bir şablon, malın değerini taşıyıcıyla paylaşmamanızı sağlar.</li>
+    <li><strong>Teslim alan imza alanı:</strong> Kâğıt çıktı alan firmalar için altta "teslim eden / teslim alan" kutuları bırakın.</li>
+    <li><strong>Çok satırlı sevkiyatlar:</strong> Yüzlerce satırlık irsaliyelerde tablo başlığının her sayfada tekrar etmesi okunabilirliği artırır.</li>
+  </ul>
+
+  <h2>e-İrsaliye Yanıtı tasarımı</h2>
+  <p>Alıcı, malı teslim aldığında <strong>e-İrsaliye Yanıtı</strong> (<code>ReceiptAdvice</code>) gönderir. Bu belgede teslim alınan, eksik, fazla ve reddedilen miktarlar gösterilir. edXdocu'da e-İrsaliye Yanıtı ayrı bir belge türü olarak tasarlanabilir.</p>
+
+  <h2>edXdocu ile e-İrsaliye şablonu</h2>
+  <p><a href="/">edXdocu</a>'da e-İrsaliye ve e-İrsaliye Yanıtı için GİB UBL-TR uyumlu hazır şablonlar bulunur. Logonuzu ekleyin, sütunları seçin, kendi irsaliye XML'inizle önizleyin. Kod yazmanız gerekmez.</p>
+
+  <h2>Sık sorulan sorular</h2>
+  <h3>e-İrsaliye için e-Fatura tasarımı kullanılabilir mi?</h3>
+  <p>Hayır. e-İrsaliye farklı bir UBL belgesidir (DespatchAdvice) ve sevk alanlarını okuyan ayrı bir XSLT gerekir.</p>
+  <h3>e-İrsaliye Yanıtı için ayrı tasarım gerekir mi?</h3>
+  <p>Evet. e-İrsaliye Yanıtı kendi şablonunu kullanır; edXdocu'da bunun için ayrı belge türü vardır.</p>
+
+  <div class="cta"><p>e-İrsaliye şablonunuzu kod yazmadan hazırlayın.</p><a class="btn alt" href="/#kayit">Ücretsiz deneyin</a></div>
+
+  <div class="related">
+    <h2>İlgili rehberler</h2>
+    <ul>
+      <li><a href="/rehber/e-fatura-tasarimi-nasil-yapilir.html">e-Fatura tasarımı nasıl yapılır?</a></li>
+      <li><a href="/rehber/e-arsiv-fatura-tasarimi.html">e-Arşiv fatura tasarımı</a></li>
+      <li><a href="/rehber/xslt-nedir-e-fatura-goruntu-dosyasi.html">e-Fatura XSLT nedir?</a></li>
+    </ul>
+  </div>
+</main>
+<footer>© 2026 edXdocu · Sarp Bilgisayar Yazılım ve Danışmanlık, Kağıthane / İstanbul · <a href="mailto:destek@edxdocu.com">destek@edxdocu.com</a> · +90 533 666 01 25</footer>
+</body>
+</html>

@@ -132,6 +132,7 @@ const fr: Messages = {
             kvkk: 'Confidentialité (KVKK)',
             terms: 'Conditions d’utilisation',
             cookies: 'Politique de cookies',
+            guides: 'Guides',
             contact: 'Contact',
         },
     },
