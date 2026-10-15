@@ -1,0 +1,3 @@
+# Railway yüklemesi 250 MB ile sınırlı; bu dosyalar FTP ile sitede yayınlanır, sunucu kullanmaz.
+public/videos/
+.trash-*
