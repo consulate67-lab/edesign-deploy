@@ -14,6 +14,10 @@ const tr = {
         label: 'Dil',
         hint: 'Sayfa dili. Belgenin dili, tasarım sihirbazında seçtiğiniz ülkeye göre belirlenir.',
     },
+    seo: {
+        title: 'e-Fatura Tasarımı ve XSLT Şablon Programı | edXdocu',
+        description: 'e-Fatura, e-Arşiv, e-İrsaliye ve 15 e-belge türü için XSLT bilmeden sürükle-bırak tasarım. GİB UBL-TR uyumlu hazır şablonlar, logo, kaşe ve banka bilgisi. Ücretsiz deneyin.',
+    },
     common: {
         back: 'Geri',
         close: 'Kapat',

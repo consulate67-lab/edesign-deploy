@@ -11,6 +11,10 @@ const en: Messages = {
         label: 'Language',
         hint: 'Page language. The document language follows the country you choose in the design wizard.',
     },
+    seo: {
+        title: 'E-Invoice Template Designer (XSLT) for EN 16931 & Peppol | edXdocu',
+        description: 'Design e-invoice, delivery note and receipt layouts without writing XSLT. Drag-and-drop editor with ready templates for EN 16931, Peppol BIS 3, XRechnung, UBL-TR and national formats. Try it free.',
+    },
     common: {
         back: 'Back',
         close: 'Close',

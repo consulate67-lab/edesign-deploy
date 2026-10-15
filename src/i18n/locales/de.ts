@@ -11,6 +11,10 @@ const de: Messages = {
         label: 'Sprache',
         hint: 'Sprache der Seite. Die Belegsprache richtet sich nach dem im Design-Assistenten gewählten Land.',
     },
+    seo: {
+        title: 'E-Rechnung Layout-Designer (XSLT) für XRechnung & Peppol | edXdocu',
+        description: 'Gestalten Sie E-Rechnungen, Lieferscheine und Belege ohne XSLT-Kenntnisse. Drag-and-drop-Editor mit fertigen Vorlagen für XRechnung, EN 16931 und Peppol BIS 3. Kostenlos testen.',
+    },
     common: {
         back: 'Zurück',
         close: 'Schließen',

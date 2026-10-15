@@ -1,0 +1,31 @@
+User-agent: *
+Allow: /
+Disallow: /mail-relay.php
+Disallow: /seal.php
+
+# Yapay zekâ arama ve yanıt tarayıcıları da siteyi okuyabilir.
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+Sitemap: https://www.edxdocu.com/sitemap.xml

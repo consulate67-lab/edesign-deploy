@@ -11,6 +11,10 @@ const fr: Messages = {
         label: 'Langue',
         hint: 'Langue de la page. La langue du document suit le pays choisi dans l’assistant de conception.',
     },
+    seo: {
+        title: 'Concepteur de factures électroniques (XSLT) EN 16931 & Peppol | edXdocu',
+        description: 'Concevez la mise en page de vos factures électroniques, bons de livraison et reçus sans XSLT. Éditeur glisser-déposer avec modèles prêts pour EN 16931, Peppol BIS 3 et formats nationaux. Essai gratuit.',
+    },
     common: {
         back: 'Retour',
         close: 'Fermer',

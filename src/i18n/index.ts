@@ -35,10 +35,20 @@ const urlLocale = (): Locale | null => {
     }
 };
 
+/**
+ * Arama motoru / yapay zekâ tarayıcıları ABD'den gelir; bölgeden dil seçilirse site İngilizce indekslenir.
+ * Bu yüzden ?lang= yoksa ana sürüm (Türkçe) gösterilir; diğer diller ?lang= adresleriyle taranır.
+ */
+const isCrawler = typeof navigator !== 'undefined' && /bot\b|bot\/|crawl|spider|slurp|mediapartners|google-inspectiontool|facebookexternalhit/i.test(navigator.userAgent);
+
 // İlk giriş: ülke bölgeden bulunur, arayüz o ülkenin dilinde açılır; desteklenmeyen dil → İngilizce.
 const initialCountry = (() => {
     const { country, setCountry } = useUiStore.getState();
     if (country) return country;
+    if (isCrawler && !urlLocale()) {
+        setCountry('TR');
+        return 'TR';
+    }
     const detected = detectCountry();
     if (detected) setCountry(detected);
     return detected;
@@ -89,9 +99,20 @@ export const chooseLanguage = (lng: Locale) => {
     void i18n.changeLanguage(lng);
 };
 
+const SITE_URL = 'https://www.edxdocu.com/';
+
+/** Başlık, açıklama ve canonical dile göre; ?lang= adresi kendi canonical'ını taşır ki hreflang sürümleri ayrı indekslensin. */
+const applySeo = (lng: Locale) => {
+    if (typeof document === 'undefined' || /^#\/(yonetim|admin)(\/|$)/i.test(location.hash)) return;
+    document.title = i18n.t('seo.title');
+    document.querySelector('meta[name="description"]')?.setAttribute('content', i18n.t('seo.description'));
+    document.querySelector('link[rel="canonical"]')?.setAttribute('href', urlLocale() === lng && lng !== 'tr' ? `${SITE_URL}?lang=${lng}` : SITE_URL);
+};
+
 const applyLocale = (lng: string) => {
     if (!isLocale(lng)) return;
     if (typeof document !== 'undefined') document.documentElement.lang = lng;
+    applySeo(lng);
     if (useUiStore.getState().locale !== lng) useUiStore.getState().setLocale(lng);
 };
 

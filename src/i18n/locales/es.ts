@@ -11,6 +11,10 @@ const es: Messages = {
         label: 'Idioma',
         hint: 'Idioma de la página. El idioma del documento sigue el país elegido en el asistente de diseño.',
     },
+    seo: {
+        title: 'Diseñador de facturas electrónicas (XSLT) EN 16931 y Peppol | edXdocu',
+        description: 'Diseña facturas electrónicas, albaranes y recibos sin saber XSLT. Editor de arrastrar y soltar con plantillas listas para EN 16931, Peppol BIS 3 y formatos nacionales. Pruébalo gratis.',
+    },
     common: {
         back: 'Atrás',
         close: 'Cerrar',
