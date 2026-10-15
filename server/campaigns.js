@@ -64,10 +64,13 @@ export const createCampaignSchema = async (client) => {
     `);
 };
 
+/** Brevo yalnız ASCII adres kabul eder; ardışık / baştaki / sondaki nokta ve tireyle başlayan alan adı reddedilir. */
+const STRICT_EMAIL = /^[a-z0-9!#$%&*+/=?^_`{|}~-]+(\.[a-z0-9!#$%&*+/=?^_`{|}~-]+)*@([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}$/;
+
 const normalizeEmail = (value) => {
     if (typeof value !== 'string') return null;
     const email = value.trim().toLowerCase();
-    return email.length <= 254 && EMAIL_PATTERN.test(email) && !/[<>,;"'\s]/.test(email) ? email : null;
+    return email.length <= 254 && EMAIL_PATTERN.test(email) && STRICT_EMAIL.test(email) ? email : null;
 };
 
 const unsubToken = (secret, email) => {
@@ -100,6 +103,7 @@ const apiBase = () => {
  */
 const isRecipientError = (message) => {
     if (/mail relay 400: .*"recipient"/.test(message)) return true;
+    if (/^brevo 400: .*not valid in to/i.test(message)) return true;
     const reply = message.match(/smtp RCPT: (5\d\d.*)/)?.[1];
     return !!reply && !/not local|relay|denied|blocked|limit|quota exceeded|spam/i.test(reply);
 };
