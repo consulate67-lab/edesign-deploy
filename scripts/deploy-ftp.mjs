@@ -52,16 +52,15 @@ if (!existsSync(path.join(outDir, 'index.html'))) {
 
 // Hashed assets can be cached forever; index.html must always be revalidated
 // so a new deploy is picked up immediately.
-// Search engines must see a single address: http:// and the bare domain redirect permanently to https://www.
+// Search engines must see a single address: the bare domain redirects permanently to https://www.
+// Plesk already sends http:// to https://; a %{HTTPS} check here loops on LiteSpeed, so only the host is tested.
 writeFileSync(path.join(outDir, '.htaccess'), [
     'Options -Indexes',
     'AddType application/xml .xslt .xsl',
     'AddType text/plain .txt',
     '<IfModule mod_rewrite.c>',
     '  RewriteEngine On',
-    '  RewriteCond %{HTTP_HOST} ^edxdocu\\.com$ [NC,OR]',
-    '  RewriteCond %{HTTPS} !=on',
-    '  RewriteCond %{HTTP_HOST} ^(www\\.)?edxdocu\\.com$ [NC]',
+    '  RewriteCond %{HTTP_HOST} ^edxdocu\\.com$ [NC]',
     '  RewriteRule ^ https://www.edxdocu.com%{REQUEST_URI} [L,R=301]',
     '</IfModule>',
     '<IfModule mod_headers.c>',
