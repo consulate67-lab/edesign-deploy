@@ -1,6 +1,6 @@
 import React, { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-    Bell, BellOff, Bot, ChevronsLeft, ChevronsRight, Images, LayoutDashboard, LifeBuoy, LogOut, Mail, Megaphone, Menu, MessagesSquare, MonitorSmartphone, Receipt,
+    Bell, BellOff, Bot, ChevronsLeft, ChevronsRight, Images, Inbox, LayoutDashboard, LifeBuoy, LogOut, Mail, Megaphone, Menu, MessagesSquare, MonitorSmartphone, Receipt,
     Settings as SettingsIcon, Share2, ShieldCheck, Users as UsersIcon,
 } from 'lucide-react';
 import { useUiStore } from '../store/uiStore';
@@ -25,6 +25,7 @@ import { Marketing } from './sections/Marketing';
 const AiSection = lazy(() => import('./sections/AiSection').then(m => ({ default: m.AiSection })));
 const AssistantSection = lazy(() => import('./sections/AssistantSection').then(m => ({ default: m.AssistantSection })));
 const BulkMail = lazy(() => import('./sections/BulkMail').then(m => ({ default: m.BulkMail })));
+const Webmail = lazy(() => import('./sections/Webmail').then(m => ({ default: m.Webmail })));
 const SocialPosts = lazy(() => import('./sections/SocialPosts').then(m => ({ default: m.SocialPosts })));
 const CobrowseViewer = lazy(() => import('../support/cobrowse/CobrowseViewer').then(m => ({ default: m.CobrowseViewer })));
 
@@ -39,6 +40,7 @@ const NAV: { id: SectionId; label: string; icon: React.ReactNode }[] = [
     { id: 'ai', label: 'Tasarım yapay zekası', icon: <Bot size={18} /> },
     { id: 'assistant', label: 'Site asistanı', icon: <MessagesSquare size={18} /> },
     { id: 'gallery', label: 'Galeri tasarımları', icon: <Images size={18} /> },
+    { id: 'webmail', label: 'E-posta kutusu', icon: <Inbox size={18} /> },
     { id: 'mail', label: 'Toplu e-posta', icon: <Mail size={18} /> },
     { id: 'social', label: 'Sosyal paylaşım', icon: <Share2 size={18} /> },
     { id: 'marketing', label: 'Sosyal medya ve reklam', icon: <Megaphone size={18} /> },
@@ -173,6 +175,14 @@ const AdminShell: React.FC<{ identity: AdminIdentity; onLogout: () => void }> = 
         adminApi.settingsStatus().then(setSettings).catch(() => setSettings(null));
     }, []);
 
+    const [mailUnread, setMailUnread] = useState(0);
+    useEffect(() => {
+        const load = () => adminApi.mailAccounts().then(r => setMailUnread(r.accounts.reduce((n, a) => n + a.unread, 0))).catch(() => {});
+        load();
+        const id = setInterval(load, 120000);
+        return () => clearInterval(id);
+    }, []);
+
     const go = useCallback<AdminCtx['go']>((s, opts) => {
         setSection(s);
         setFocus(opts ?? null);
@@ -203,7 +213,7 @@ const AdminShell: React.FC<{ identity: AdminIdentity; onLogout: () => void }> = 
         remote, reloadRemote, inviteUser, connect, go, focus, clearFocus, galleryDraft, setGalleryDraft,
     };
 
-    const badgeFor = (id: SectionId) => id === 'tickets' ? unreadTickets : id === 'remote' ? pendingRemote : 0;
+    const badgeFor = (id: SectionId) => id === 'tickets' ? unreadTickets : id === 'remote' ? pendingRemote : id === 'webmail' ? mailUnread : 0;
     const showLabels = tablet ? !collapsed : true;
     const sidebarW = showLabels ? 236 : 68;
     const tgOk = settings ? settings.telegram.configured && settings.telegram.chatConfigured : null;
@@ -331,6 +341,13 @@ const AdminShell: React.FC<{ identity: AdminIdentity; onLogout: () => void }> = 
                             <SectionBoundary>
                                 <Suspense fallback={<div style={{ display: 'flex', gap: 8, color: C.muted, padding: 20 }}><Spinner /> Yükleniyor…</div>}>
                                     <BulkMail />
+                                </Suspense>
+                            </SectionBoundary>
+                        )}
+                        {section === 'webmail' && (
+                            <SectionBoundary>
+                                <Suspense fallback={<div style={{ display: 'flex', gap: 8, color: C.muted, padding: 20 }}><Spinner /> Yükleniyor…</div>}>
+                                    <Webmail />
                                 </Suspense>
                             </SectionBoundary>
                         )}

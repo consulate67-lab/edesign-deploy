@@ -532,3 +532,77 @@ export interface SocialPostInput {
     texts: Partial<Record<SocialPlatform, string>>;
 }
 
+// ------------------------------------------------------------ e-posta kutusu (/admin/mail/*)
+
+export interface MailAccount {
+    id: number;
+    email: string;
+    name: string;
+    signature: string;
+    pop_host: string | null;
+    smtp_host: string | null;
+    smtp_port: number | null;
+    server_count: number | null;
+    last_sync_at: string | null;
+    last_error: string | null;
+    created_at: string;
+    unread: number;
+    inbox: number;
+}
+
+export interface MailAccountInput {
+    email?: string;
+    name: string;
+    signature: string;
+    password?: string;
+    popHost?: string;
+    smtpHost?: string;
+    smtpPort?: number | null;
+}
+
+export type MailFolder = 'inbox' | 'unread' | 'starred' | 'sent' | 'trash';
+export interface MailAddress { name: string; address: string }
+
+export interface MailListItem {
+    id: number;
+    account_id: number;
+    account_email: string;
+    folder: 'inbox' | 'sent' | 'trash';
+    from_addr: string;
+    from_name: string;
+    to_addrs: MailAddress[];
+    subject: string;
+    snippet: string;
+    seen: boolean;
+    starred: boolean;
+    sent_at: string;
+    size: number;
+    has_attachments: boolean;
+}
+
+export interface MailAttachment { i: number; filename: string; contentType: string; size: number; inline: boolean }
+
+export interface MailMessage extends Omit<MailListItem, 'has_attachments'> {
+    message_id: string | null;
+    cc_addrs: MailAddress[];
+    bcc_addrs: MailAddress[];
+    reply_to: string | null;
+    text_body: string | null;
+    html_body: string | null;
+    attachments: MailAttachment[];
+}
+
+export type MailAction = 'read' | 'unread' | 'star' | 'unstar' | 'trash' | 'restore' | 'purge';
+
+export interface MailSendInput {
+    accountId: number;
+    to: string;
+    cc: string;
+    bcc: string;
+    subject: string;
+    html: string;
+    attachments: { filename: string; contentType: string; data: string }[];
+    replyTo?: number;
+    forwardAttachmentsOf?: number;
+}
+

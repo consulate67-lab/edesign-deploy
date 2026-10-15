@@ -4,7 +4,8 @@ import type {
     AdminIdentity, AdminInvoice, AdminInvoiceList, AdminLoginResponse, AdminSettingsStatus, AdminStats, AdminUserDetail, AdminUserRow,
     AdminVerifyResponse, AiMemoryEntry, AiMemoryInput, AssistantBuiltinEntry, AssistantKbEntry, AssistantKbInput, AssistantLog,
     AssistantLogFilter, AssistantOverview, GalleryDesign, GalleryDesignInput, InvoiceScope, InvoiceUpdateInput, MailCampaign,
-    MailCampaignDetail, MailCampaignInput, MailCampaignList, MailContent, RemoteSession, SocialGenerateInput, SocialMetaConnectInput,
+    MailAccount, MailAccountInput, MailAction, MailCampaignDetail, MailCampaignInput, MailCampaignList, MailContent, MailFolder, MailListItem,
+    MailMessage, MailSendInput, RemoteSession, SocialGenerateInput, SocialMetaConnectInput,
     SocialMetaConnectResult, SocialMetaStatus, SocialPlatform, SocialPost, SocialPostInput, SocialStatus, SupportMessage, SupportTicket,
     TicketStatus,
 } from './contracts';
@@ -179,6 +180,30 @@ export const adminApi = {
         request<SocialPost>(`/admin/social/posts/${id}/publish`, { method: 'POST', body: { platform }, timeoutMs: 120000 }),
     markSocialPost: (id: number, platform: SocialPlatform, done: boolean) =>
         request<SocialPost>(`/admin/social/posts/${id}/mark`, { method: 'POST', body: { platform, done } }),
+
+    mailAccounts: () => request<{ configured: boolean; accounts: MailAccount[] }>('/admin/mail/accounts'),
+    addMailAccount: (input: MailAccountInput) =>
+        request<MailAccount>('/admin/mail/accounts', { method: 'POST', body: input, timeoutMs: 60000 }),
+    updateMailAccount: (id: number, input: MailAccountInput) =>
+        request<MailAccount>(`/admin/mail/accounts/${id}`, { method: 'PUT', body: input, timeoutMs: 60000 }),
+    deleteMailAccount: (id: number) => request<{ success: true }>(`/admin/mail/accounts/${id}`, { method: 'DELETE' }),
+    syncMailAccount: (id: number) =>
+        request<{ fetched: number; remaining: number; account: MailAccount }>(`/admin/mail/accounts/${id}/sync`, { method: 'POST', timeoutMs: 90000 }),
+    mailMessages: (params: { account?: number | 'all'; folder: MailFolder; q?: string; offset?: number; limit?: number }) =>
+        request<{ messages: MailListItem[]; total: number }>(`/admin/mail/messages${qs(params)}`),
+    mailMessage: (id: number) => request<MailMessage>(`/admin/mail/messages/${id}`),
+    mailAction: (ids: number[], action: MailAction, server?: boolean) =>
+        request<{ updated?: number; deleted?: number; warning?: string }>('/admin/mail/messages/actions', { method: 'POST', body: { ids, action, server }, timeoutMs: 60000 }),
+    sendMail: (input: MailSendInput) =>
+        request<{ id: number | null; warning?: string }>('/admin/mail/send', { method: 'POST', body: input, timeoutMs: 90000 }),
+    mailAttachment: async (id: number, index: number): Promise<Blob> => {
+        const res = await fetch(`${API_URL}/admin/mail/messages/${id}/attachments/${index}`, {
+            headers: { Authorization: `Bearer ${adminSession.getToken() ?? ''}` },
+        }).catch(() => null);
+        if (!res) throw new AdminApiError('Sunucuya ulaşılamadı.', 0);
+        if (!res.ok) throw new AdminApiError((await res.json().catch(() => ({}))).error || `Ek indirilemedi (${res.status})`, res.status);
+        return res.blob();
+    },
 };
 
 /** Yönetici WebSocket bağlantısı (presence, online destek, talep bildirimleri). */

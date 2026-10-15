@@ -33,6 +33,7 @@
     "i18next": "^26.4.2",
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.562.0",
+    "mailparser": "^3.9.39",
     "nodemailer": "^7.0.13",
     "pg": "^8.23.0",
     "react": "^19.2.0",

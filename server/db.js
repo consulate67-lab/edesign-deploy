@@ -3,6 +3,7 @@ import { createCampaignSchema } from './campaigns.js';
 import { RETENTION_INTERVAL } from './design-retention.js';
 import { createSiteConfigSchema } from './site-config.js';
 import { createSocialSchema } from './social.js';
+import { createWebmailSchema } from './webmail.js';
 
 /**
  * Thin adapter that exposes the SQLite-style API (run/get/all) on top of
@@ -252,6 +253,7 @@ export const initDb = async () => {
         await createCampaignSchema(probe);
         await createSiteConfigSchema(probe);
         await createSocialSchema(probe);
+        await createWebmailSchema(probe);
         await promoteAdmins(probe);
     } finally {
         probe.release();
