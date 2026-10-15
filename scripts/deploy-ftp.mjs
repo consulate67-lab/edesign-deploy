@@ -52,9 +52,18 @@ if (!existsSync(path.join(outDir, 'index.html'))) {
 
 // Hashed assets can be cached forever; index.html must always be revalidated
 // so a new deploy is picked up immediately.
+// Search engines must see a single address: http:// and the bare domain redirect permanently to https://www.
 writeFileSync(path.join(outDir, '.htaccess'), [
     'Options -Indexes',
     'AddType application/xml .xslt .xsl',
+    'AddType text/plain .txt',
+    '<IfModule mod_rewrite.c>',
+    '  RewriteEngine On',
+    '  RewriteCond %{HTTP_HOST} ^edxdocu\\.com$ [NC,OR]',
+    '  RewriteCond %{HTTPS} !=on',
+    '  RewriteCond %{HTTP_HOST} ^(www\\.)?edxdocu\\.com$ [NC]',
+    '  RewriteRule ^ https://www.edxdocu.com%{REQUEST_URI} [L,R=301]',
+    '</IfModule>',
     '<IfModule mod_headers.c>',
     '  <FilesMatch "\\.(html)$">',
     '    Header set Cache-Control "no-cache, no-store, must-revalidate"',
@@ -80,17 +89,21 @@ const connect = () => client.access({
 });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-/** The host drops long sessions (ECONNRESET / data socket timeout): reconnect and retry the same step. */
+/**
+ * The host drops long sessions (ECONNRESET / data socket timeout): reconnect and retry the same step.
+ * The host also blocks this IP for a while (HTTPS 503, FTP silent) after too many requests, so retries
+ * are few and spaced out; hammering reconnects only extends the block.
+ */
 async function withRetry(label, fn) {
     for (let attempt = 1; ; attempt++) {
         try {
             if (client.closed) await connect();
             return await fn();
         } catch (err) {
-            if (attempt >= 6) throw err;
+            if (attempt >= 4) throw err;
             console.log(`${label}: ${err.message}, yeniden bağlanılıyor (${attempt})`);
             client.close();
-            await sleep(5000 * attempt);
+            await sleep(20_000 * attempt);
         }
     }
 }
