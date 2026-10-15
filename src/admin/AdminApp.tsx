@@ -1,7 +1,7 @@
 import React, { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
     Bell, BellOff, Bot, ChevronsLeft, ChevronsRight, Images, LayoutDashboard, LifeBuoy, LogOut, Mail, Megaphone, Menu, MessagesSquare, MonitorSmartphone, Receipt,
-    Settings as SettingsIcon, ShieldCheck, Users as UsersIcon,
+    Settings as SettingsIcon, Share2, ShieldCheck, Users as UsersIcon,
 } from 'lucide-react';
 import { useUiStore } from '../store/uiStore';
 import type { RealtimeStatus } from '../support/realtime';
@@ -25,6 +25,7 @@ import { Marketing } from './sections/Marketing';
 const AiSection = lazy(() => import('./sections/AiSection').then(m => ({ default: m.AiSection })));
 const AssistantSection = lazy(() => import('./sections/AssistantSection').then(m => ({ default: m.AssistantSection })));
 const BulkMail = lazy(() => import('./sections/BulkMail').then(m => ({ default: m.BulkMail })));
+const SocialPosts = lazy(() => import('./sections/SocialPosts').then(m => ({ default: m.SocialPosts })));
 const CobrowseViewer = lazy(() => import('../support/cobrowse/CobrowseViewer').then(m => ({ default: m.CobrowseViewer })));
 
 const SECTION_KEY = 'admin_section';
@@ -39,6 +40,7 @@ const NAV: { id: SectionId; label: string; icon: React.ReactNode }[] = [
     { id: 'assistant', label: 'Site asistanı', icon: <MessagesSquare size={18} /> },
     { id: 'gallery', label: 'Galeri tasarımları', icon: <Images size={18} /> },
     { id: 'mail', label: 'Toplu e-posta', icon: <Mail size={18} /> },
+    { id: 'social', label: 'Sosyal paylaşım', icon: <Share2 size={18} /> },
     { id: 'marketing', label: 'Sosyal medya ve reklam', icon: <Megaphone size={18} /> },
     { id: 'settings', label: 'Ayarlar', icon: <SettingsIcon size={18} /> },
 ];
@@ -329,6 +331,13 @@ const AdminShell: React.FC<{ identity: AdminIdentity; onLogout: () => void }> = 
                             <SectionBoundary>
                                 <Suspense fallback={<div style={{ display: 'flex', gap: 8, color: C.muted, padding: 20 }}><Spinner /> Yükleniyor…</div>}>
                                     <BulkMail />
+                                </Suspense>
+                            </SectionBoundary>
+                        )}
+                        {section === 'social' && (
+                            <SectionBoundary>
+                                <Suspense fallback={<div style={{ display: 'flex', gap: 8, color: C.muted, padding: 20 }}><Spinner /> Yükleniyor…</div>}>
+                                    <SocialPosts />
                                 </Suspense>
                             </SectionBoundary>
                         )}

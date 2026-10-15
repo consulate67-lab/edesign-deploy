@@ -10,7 +10,7 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 import { EMAIL_PATTERN } from './email-verify.js';
 import { campaignMailConfigured as mailConfigured, sendCampaignMail as sendMail } from './mail.js';
 import { createRateLimiter } from './rate-limit.js';
-import { cleanText, optionalText, parseId } from './util.js';
+import { cleanText, optionalText, parseId, publicApiBase } from './util.js';
 
 const MAX_RECIPIENTS = 20_000;
 const HTML_MAX = 150_000;
@@ -89,13 +89,6 @@ const readUnsubToken = (secret, token) => {
     return sig.length === expected.length && timingSafeEqual(Buffer.from(sig), Buffer.from(expected)) ? email : null;
 };
 
-const apiBase = () => {
-    const explicit = (process.env.PUBLIC_API_URL || '').trim().replace(/\/+$/, '');
-    if (explicit) return explicit;
-    const domain = (process.env.RAILWAY_PUBLIC_DOMAIN || '').trim();
-    return domain ? `https://${domain}` : null;
-};
-
 /**
  * Yalnız alıcı adresine özgü retler. Geri kalanı (bağlantı, AUTH, sunucunun IP'yi engellemesi,
  * dış alan adına aktarımı reddetmesi "not local" vb.) gönderen tarafın sorunudur; o alıcıyı
@@ -118,7 +111,7 @@ const personalize = ({ subject, html, text }, { email, name }, { secret, website
         .replaceAll('{{UNSUBSCRIBE_URL}}', pageUrl)
         .replaceAll('{{AD}}', esc(name || ''))
         .replaceAll('{{EMAIL}}', esc(email));
-    const api = apiBase();
+    const api = publicApiBase();
     const headers = {
         'List-Unsubscribe': api
             ? `<${api}/api/mail/unsubscribe?u=${token}>, <mailto:destek@edxdocu.com?subject=unsubscribe>`

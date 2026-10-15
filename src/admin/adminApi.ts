@@ -4,7 +4,9 @@ import type {
     AdminIdentity, AdminInvoice, AdminInvoiceList, AdminLoginResponse, AdminSettingsStatus, AdminStats, AdminUserDetail, AdminUserRow,
     AdminVerifyResponse, AiMemoryEntry, AiMemoryInput, AssistantBuiltinEntry, AssistantKbEntry, AssistantKbInput, AssistantLog,
     AssistantLogFilter, AssistantOverview, GalleryDesign, GalleryDesignInput, InvoiceScope, InvoiceUpdateInput, MailCampaign,
-    MailCampaignDetail, MailCampaignInput, MailCampaignList, MailContent, RemoteSession, SupportMessage, SupportTicket, TicketStatus,
+    MailCampaignDetail, MailCampaignInput, MailCampaignList, MailContent, RemoteSession, SocialGenerateInput, SocialMetaConnectInput,
+    SocialMetaConnectResult, SocialMetaStatus, SocialPlatform, SocialPost, SocialPostInput, SocialStatus, SupportMessage, SupportTicket,
+    TicketStatus,
 } from './contracts';
 
 /** Yönetici oturumu kullanıcı oturumundan ayrıdır; aynı sekmede ikisi birlikte açık kalabilir. */
@@ -45,15 +47,16 @@ interface RequestOpts {
     body?: unknown;
     /** Giriş uçlarında 401 "hatalı şifre" demektir, oturumu kapatmaz. */
     auth?: boolean;
+    timeoutMs?: number;
 }
 
-async function request<T>(endpoint: string, { method = 'GET', body, auth = true }: RequestOpts = {}): Promise<T> {
+async function request<T>(endpoint: string, { method = 'GET', body, auth = true, timeoutMs = 30000 }: RequestOpts = {}): Promise<T> {
     const token = adminSession.getToken();
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (auth && token) headers.Authorization = `Bearer ${token}`;
 
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 30000);
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
     let res: Response;
     try {
         res = await fetch(`${API_URL}${endpoint}`, {
@@ -158,6 +161,24 @@ export const adminApi = {
     cancelCampaign: (id: number) => request<MailCampaign>(`/admin/campaigns/${id}/cancel`, { method: 'POST' }),
     retryCampaignFailures: (id: number) => request<MailCampaign>(`/admin/campaigns/${id}/retry-failed`, { method: 'POST' }),
     deleteCampaign: (id: number) => request<{ success: true }>(`/admin/campaigns/${id}`, { method: 'DELETE' }),
+
+    socialStatus: () => request<SocialStatus>('/admin/social/status'),
+    connectMeta: (input: SocialMetaConnectInput) =>
+        request<SocialMetaConnectResult>('/admin/social/meta', { method: 'POST', body: input }),
+    disconnectMeta: () => request<{ meta: SocialMetaStatus }>('/admin/social/meta', { method: 'DELETE' }),
+    uploadSocialImage: (data: string) =>
+        request<{ id: number; url: string | null }>('/admin/social/images', { method: 'POST', body: { data }, timeoutMs: 90000 }),
+    socialPosts: () => request<SocialPost[]>('/admin/social/posts'),
+    generateSocialPost: (input: SocialGenerateInput) =>
+        request<SocialPost>('/admin/social/generate', { method: 'POST', body: input, timeoutMs: 60000 }),
+    createSocialPost: (input: SocialPostInput) => request<SocialPost>('/admin/social/posts', { method: 'POST', body: input }),
+    updateSocialPost: (id: number, input: SocialPostInput) =>
+        request<SocialPost>(`/admin/social/posts/${id}`, { method: 'PUT', body: input }),
+    deleteSocialPost: (id: number) => request<{ success: true }>(`/admin/social/posts/${id}`, { method: 'DELETE' }),
+    publishSocialPost: (id: number, platform: 'facebook' | 'instagram') =>
+        request<SocialPost>(`/admin/social/posts/${id}/publish`, { method: 'POST', body: { platform }, timeoutMs: 120000 }),
+    markSocialPost: (id: number, platform: SocialPlatform, done: boolean) =>
+        request<SocialPost>(`/admin/social/posts/${id}/mark`, { method: 'POST', body: { platform, done } }),
 };
 
 /** Yönetici WebSocket bağlantısı (presence, online destek, talep bildirimleri). */

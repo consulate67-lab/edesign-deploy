@@ -30,6 +30,17 @@
  *     PATCH /admin/ai/memory/:id {rating?, published?, gallery_id?} → AiMemoryEntry
  *     GET  /admin/site-config                                → SiteConfig (src/analytics/config.ts)
  *     PUT  /admin/site-config SiteConfig                     → SiteConfig (sosyal medya + reklam kimlikleri)
+ *     GET  /admin/social/status                              → SocialStatus
+ *     POST /admin/social/meta SocialMetaConnectInput         → SocialMetaConnectResult (birden çok sayfa varsa seçim listesi)
+ *     DELETE /admin/social/meta                              → {meta}
+ *     POST /admin/social/images {data: JPEG data URL}        → {id, url}
+ *     GET  /admin/social/posts                               → SocialPost[] (son 60)
+ *     POST /admin/social/generate SocialGenerateInput        → SocialPost (yapay zekâ metinleriyle yeni taslak)
+ *     POST /admin/social/posts SocialPostInput               → SocialPost
+ *     PUT  /admin/social/posts/:id SocialPostInput           → SocialPost
+ *     DELETE /admin/social/posts/:id                         → {success:true}
+ *     POST /admin/social/posts/:id/publish {platform}        → SocialPost (facebook | instagram)
+ *     POST /admin/social/posts/:id/mark {platform, done}     → SocialPost (linkedin | x | groups)
  *     GET  /admin/settings/status                            → AdminSettingsStatus
  *     POST /admin/settings/telegram-test                     → {success:true}
  *   Kullanıcı (normal oturum token'ı):
@@ -464,5 +475,60 @@ export interface MailCampaignInput extends MailContent {
     ratePerHour: number;
     recipients: { email: string; name: string }[];
     skipPrevious: boolean;
+}
+
+/** facebook / instagram Meta API ile yayınlanır; diğerleri elle paylaşılıp işaretlenir. */
+export type SocialPlatform = 'facebook' | 'instagram' | 'linkedin' | 'x' | 'groups';
+export type SocialLang = 'tr' | 'en' | 'de';
+export type SocialTone = 'samimi' | 'kurumsal' | 'bilgilendirici' | 'enerjik';
+
+export type SocialMetaStatus =
+    | { connected: false }
+    | { connected: true; pageId: string; pageName: string; instagram: string | null; longLived: boolean; connectedAt: string };
+
+export interface SocialStatus {
+    ai: boolean;
+    /** Sunucunun herkese açık adresi biliniyor mu (Instagram görseli oradan çeker). */
+    imageHosting: boolean;
+    meta: SocialMetaStatus;
+}
+
+export interface SocialMetaConnectInput { token: string; appId: string; appSecret: string; pageId?: string }
+export interface SocialMetaConnectResult { meta: SocialMetaStatus; pages: { id: string; name: string; instagram: string | null }[] }
+
+export interface SocialResult {
+    status: 'published' | 'shared' | 'failed' | 'pending';
+    id?: string;
+    url?: string;
+    error?: string;
+    at: string;
+}
+
+export interface SocialPost {
+    id: number;
+    topic: string;
+    link: string;
+    image_id: number | null;
+    image_url: string | null;
+    texts: Partial<Record<SocialPlatform, string>>;
+    results: Partial<Record<SocialPlatform, SocialResult>>;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface SocialGenerateInput {
+    topic: string;
+    notes: string;
+    link: string;
+    lang: SocialLang;
+    tone: SocialTone;
+    platforms: SocialPlatform[];
+}
+
+export interface SocialPostInput {
+    topic: string;
+    link: string;
+    imageId: number | null;
+    texts: Partial<Record<SocialPlatform, string>>;
 }
 

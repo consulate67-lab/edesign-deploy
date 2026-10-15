@@ -21,6 +21,14 @@ export const optionalText = (value, max) => {
 
 export const isPlainObject = (value) => !!value && typeof value === 'object' && !Array.isArray(value);
 
+/** Sunucunun dışarıdan erişilen adresi (e-posta bağlantıları, Meta'nın çektiği görseller); bilinmiyorsa null. */
+export const publicApiBase = () => {
+    const explicit = (process.env.PUBLIC_API_URL || '').trim().replace(/\/+$/, '');
+    if (explicit) return explicit;
+    const domain = (process.env.RAILWAY_PUBLIC_DOMAIN || '').trim();
+    return domain ? `https://${domain}` : null;
+};
+
 /** users tablosuyla birleştirilmiş satırdan (user_id + kullanıcı kolonları) TicketUser. */
 export const toTicketUser = (row) => ({
     id: row.user_id,
