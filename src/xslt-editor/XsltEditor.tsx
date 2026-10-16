@@ -688,13 +688,37 @@ const FieldGradient: React.FC<{ label: string; currentValue: string; dirLabels: 
     );
 };
 
+/** Önizleme hover / seçim / bırakma vurguları — şablonun gerçek arka planı değil. */
+const isEditorChromeBackground = (color: string) => {
+    const m = color.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\s*\)/i);
+    if (!m) return false;
+    const r = Number(m[1]), g = Number(m[2]), b = Number(m[3]), a = m[4] === undefined ? 1 : Number(m[4]);
+    if (!(a > 0) || a >= 0.35) return false;
+    // indigo hover, sarı seçim, yeşil bırakma, mor boş etiket
+    return (Math.abs(r - 99) <= 2 && Math.abs(g - 102) <= 2 && Math.abs(b - 241) <= 2)
+        || (Math.abs(r - 252) <= 2 && Math.abs(g - 211) <= 2 && Math.abs(b - 77) <= 2)
+        || (Math.abs(r - 16) <= 2 && Math.abs(g - 185) <= 2 && Math.abs(b - 129) <= 2)
+        || (Math.abs(r - 167) <= 2 && Math.abs(g - 139) <= 2 && Math.abs(b - 250) <= 2);
+};
+
+/** Öğenin kendi arka planı (inline tercih; hover vurgusu yok sayılır). */
+function ownBackground(el: HTMLElement, cs: CSSStyleDeclaration): string {
+    const inline = el.style.getPropertyValue('background-color').trim();
+    if (inline && inline !== 'transparent') return inline;
+    const computed = cs.backgroundColor;
+    if (!computed || computed === 'transparent' || computed === 'rgba(0, 0, 0, 0)' || isEditorChromeBackground(computed)) return '';
+    return /rgba\([^)]*,\s*0?\.\d+\s*\)/.test(computed) ? computed : cssColorToHex(computed);
+}
+
 /** Öğede görünen arka plan, şeffafsa üst öğelerden gelen renk. */
 function inheritedBackground(el: HTMLElement): string {
     for (let p = el.parentElement; p && p.tagName !== 'HTML'; p = p.parentElement) {
         const c = p.ownerDocument.defaultView?.getComputedStyle(p);
         if (!c) break;
         if (c.backgroundImage && c.backgroundImage !== 'none') return 'gradient';
-        if (c.backgroundColor !== 'rgba(0, 0, 0, 0)' && c.backgroundColor !== 'transparent') return cssColorToHex(c.backgroundColor);
+        if (c.backgroundColor !== 'rgba(0, 0, 0, 0)' && c.backgroundColor !== 'transparent' && !isEditorChromeBackground(c.backgroundColor)) {
+            return cssColorToHex(c.backgroundColor);
+        }
     }
     return '';
 }
@@ -5239,7 +5263,6 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             : '#c2410c';
                         const canPersist = !!el && selectedSourceTagFound;
                         const fieldKey = (name: string) => `${sel.id}-${name}`;
-                        const transparentToEmpty = (c: string) => (c === 'rgba(0, 0, 0, 0)' || c === 'transparent' ? '' : c);
                         const sectionTitle = (text: string, color = '#5b6680') => (
                             <div style={{ fontSize: '10px', fontWeight: 700, color, letterSpacing: '0.4px', textTransform: 'uppercase', margin: '14px 0 8px', paddingTop: '12px', borderTop: '1px solid #e4e8f6' }}>
                                 {text}
@@ -5593,8 +5616,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
 
                                     {el && cs && !isLine && (() => {
                                         const grid: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' };
-                                        const rawBg = transparentToEmpty(cs.backgroundColor);
-                                        const ownBg = rawBg && !/rgba\([^)]*,\s*0?\.\d+\s*\)/.test(rawBg) ? cssColorToHex(rawBg) : rawBg;
+                                        const ownBg = ownBackground(el, cs);
                                         const fromParent = !ownBg && cs.backgroundImage === 'none' ? inheritedBackground(el) : '';
                                         const shadowValue = cs.boxShadow === 'none' ? '' : cs.boxShadow;
                                         const shadowOptions = [

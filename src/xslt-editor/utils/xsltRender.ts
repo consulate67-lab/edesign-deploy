@@ -517,12 +517,13 @@ export function renderAndAnnotateXslt(
     outline-offset: 1px;
     cursor: pointer;
     position: relative;
-    transition: outline-color 0.15s ease-out, background-color 0.15s ease-out;
+    transition: outline-color 0.15s ease-out;
 }
+/* Hover yalnız çerçeve kullanır. Arka plan rengi eklenmez: getComputedStyle
+   özellik panelinde bunu gerçek şablon rengi sanıyordu (her tıklamada mavi). */
 [data-render-index]:hover {
     outline: 2px solid rgba(99, 102, 241, 0.95);
     outline-offset: 0;
-    background-color: rgba(99, 102, 241, 0.08);
 }
 [data-render-index]:hover::after {
     content: attr(data-bind-index);
@@ -556,24 +557,6 @@ export function renderAndAnnotateXslt(
    inline style değişikliği yapılabilir olduğunu görsel olarak bildirir. */
 div, span, p, table, tr, td, th, h1, h2, h3, h4, h5, h6, img, a {
     cursor: pointer;
-    transition: background-color 0.15s ease-out;
-}
-div:not([data-render-index]):hover,
-span:not([data-render-index]):hover,
-p:not([data-render-index]):hover,
-table:not([data-render-index]):hover,
-tr:not([data-render-index]):hover,
-td:not([data-render-index]):hover,
-th:not([data-render-index]):hover,
-h1:not([data-render-index]):hover,
-h2:not([data-render-index]):hover,
-h3:not([data-render-index]):hover,
-h4:not([data-render-index]):hover,
-h5:not([data-render-index]):hover,
-h6:not([data-render-index]):hover,
-img:not([data-render-index]):hover,
-a:not([data-render-index]):hover {
-    background-color: rgba(99, 102, 241, 0.04);
 }
 </style>`;
 
