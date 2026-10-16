@@ -46,3 +46,6 @@ malformed_check.txt
 .unpack-*
 .unpack
 .trash-*
+
+# e-fatura mükellef listesi ve e-posta keşfi (yerel veri)
+data/

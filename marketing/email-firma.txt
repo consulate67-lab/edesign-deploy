@@ -1,0 +1,47 @@
+edXdocu · eBelge Tasarımcı
+
+FİRMANIZIN PROFESYONEL YÜZÜ FATURANIZ İLE MÜŞTERİNİZE ULAŞSIN
+
+Her e-Fatura ve e-Arşiv çıktısı sizin logonuz, kaşeniz ve kurumsal kimliğinizle görünsün.
+XSLT bilmeden, sürükle-bırak ile; GİB UBL-TR uyumlu.
+
+Tasarıma başlayın: https://www.edxdocu.com/?utm_source=email&utm_medium=email&utm_campaign=firma&utm_content=hero
+
+GİB UBL-TR uyumlu XSLT · 15 e-belge türü · Kurulum yok, abonelik yok
+
+
+NEDEN ÖNEMLİ?
+Fatura, müşterinin elindeki kartvizitiniz. e-Fatura mükellefi olarak her gönderdiğiniz
+belge firmanızı temsil eder. Genel entegratör şablonu yerine kendi görünümünüzü kullanın.
+
+
+3 ADIMDA ENTEGRATÖRE HAZIR XSLT
+1. e-Fatura / e-Arşiv şablonunu seçin
+   Hazır şablonla başlayın veya mevcut XSLT dosyanızı yükleyip görsel olarak düzenleyin.
+2. Kurumsal kimliğinizi yerleştirin
+   Logo, kaşe, imza, banka bilgileri; renk ve yazı tipi sizde.
+3. İndirin, entegratöre yükleyin
+   Onaylanan XSLT dosyasını e-fatura entegratörünüze veya ERP programınıza verin.
+
+
+NEDEN edXdocu?
+- Kod yazmadan: XSLT bilmenize gerek yok.
+- GİB uyumlu: UBL-TR 1.2.1 ve e-Fatura Paketi v29.
+- Kendi XML’inizle test: Sonucu gerçek faturanızla görün.
+- Tek seferlik ödeme: Abonelik yok; haklar süresiz.
+
+
+KİMLER İÇİN?
+e-Fatura / e-Arşiv mükellefi şirketler, mali müşavir ofisleri, ERP kullanan KOBİ’ler
+ve müşterisine kurumsal fatura göstermek isteyen her işletme.
+
+
+MÜŞTERİNİZ FATURANIZI AÇINCA SİZİ GÖRSÜN
+Hesap açın: https://www.edxdocu.com/?utm_source=email&utm_medium=email&utm_campaign=firma&utm_content=final
+--
+edXdocu · eBelge Tasarımcı
+destek@edxdocu.com · www.edxdocu.com
+
+Bu bilgilendirme e-postası, e-fatura mükellefi işletmenize faaliyet alanınızla ilgili olabileceği düşüncesiyle gönderilmiştir.
+Bir daha almak istemiyorsanız tek tıkla listeden çıkın (talebiniz hemen uygulanır): {{UNSUBSCRIBE_URL}}
+Adresinizin kaynağını öğrenmek veya kayıtlarımızdan silinmesini istemek için: destek@edxdocu.com

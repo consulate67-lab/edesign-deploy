@@ -2,6 +2,8 @@ import type { MailContent } from '../../contracts';
 import type { BrochureId } from './countries';
 import trHtml from '../../../../marketing/email-tanitim.html?raw';
 import trText from '../../../../marketing/email-tanitim.txt?raw';
+import trFirmaHtml from '../../../../marketing/email-firma.html?raw';
+import trFirmaText from '../../../../marketing/email-firma.txt?raw';
 import enHtml from '../../../../marketing/email-tanitim-en.html?raw';
 import enText from '../../../../marketing/email-tanitim-en.txt?raw';
 import enUsHtml from '../../../../marketing/email-tanitim-en-us.html?raw';
@@ -27,6 +29,11 @@ import subjects from '../../../../marketing/email-tanitim-subjects.json';
 /** Hazır tanıtım broşürleri; yabancı diller `marketing/build-intl-brochures.mjs` ile üretilir. */
 export const BROCHURES: Record<BrochureId, MailContent> = {
     tr: { subject: 'e-Fatura tasarımınız artık dakikalar içinde hazır', html: trHtml, text: trText },
+    'tr-firma': {
+        subject: 'Firmanızın profesyonel yüzü faturanız ile müşterinize ulaşsın',
+        html: trFirmaHtml,
+        text: trFirmaText,
+    },
     en: { subject: subjects.en, html: enHtml, text: enText },
     'en-us': { subject: subjects['en-us'], html: enUsHtml, text: enUsText },
     'en-in': { subject: subjects['en-in'], html: enInHtml, text: enInText },
