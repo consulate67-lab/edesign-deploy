@@ -31,13 +31,25 @@ export const openDb = () => {
             website       TEXT,
             enriched_at   TEXT,
             notes         TEXT,
+            csv_batch     TEXT,
             updated_at    TEXT NOT NULL DEFAULT (datetime('now'))
         );
         CREATE INDEX IF NOT EXISTS mukellefler_status ON mukellefler (email_status);
         CREATE INDEX IF NOT EXISTS mukellefler_email ON mukellefler (email) WHERE email IS NOT NULL;
     `);
+    // Eski DB’lere csv_batch kolonu
+    try { db.exec(`ALTER TABLE mukellefler ADD COLUMN csv_batch TEXT`); } catch { /* var */ }
     return db;
 };
+
+/** Unvan karşılaştırma için sadeleştirme. */
+export const foldUnvan = (s) => String(s || '')
+    .toLocaleLowerCase('tr')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/\b(anonim|limited|ltd|sti|sirketi|sanayi|ticaret|ve|as|a\.?s\.?|tic|san)\b/gi, ' ')
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 
 /** Yalnız 10 haneli VKN (tüzel kişi); 11 haneli TCKN elenir. */
 export const isCorporateVkn = (id) => /^\d{10}$/.test(String(id || '').trim());
