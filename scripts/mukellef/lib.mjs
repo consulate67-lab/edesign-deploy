@@ -17,6 +17,7 @@ export const openDb = () => {
     ensureDirs();
     const db = new DatabaseSync(DB_PATH);
     db.exec(`
+        PRAGMA busy_timeout = 30000;
         PRAGMA journal_mode = WAL;
         CREATE TABLE IF NOT EXISTS mukellefler (
             vkn           TEXT PRIMARY KEY,
