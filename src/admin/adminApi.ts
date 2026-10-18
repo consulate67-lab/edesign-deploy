@@ -3,7 +3,8 @@ import type { SiteConfig } from '../analytics/config';
 import type {
     AdminIdentity, AdminInvoice, AdminInvoiceList, AdminLoginResponse, AdminSettingsStatus, AdminStats, AdminUserDetail, AdminUserRow,
     AdminVerifyResponse, AiMemoryEntry, AiMemoryInput, AssistantBuiltinEntry, AssistantKbEntry, AssistantKbInput, AssistantLog,
-    AssistantLogFilter, AssistantOverview, GalleryDesign, GalleryDesignInput, InvoiceScope, InvoiceUpdateInput, MailCampaign,
+    AssistantLogFilter, AssistantOverview, GalleryDesign, GalleryDesignInput, InvoiceScope, InvoiceUpdateInput, MailBannedEntry,
+    MailBannedList, MailBannedScanResult, MailCampaign,
     MailAccount, MailAccountInput, MailAction, MailCampaignDetail, MailCampaignInput, MailCampaignList, MailContent, MailFolder, MailListItem,
     MailMessage, MailSendInput, RemoteSession, SocialGenerateInput, SocialMetaConnectInput,
     SocialMetaConnectResult, SocialMetaStatus, SocialPlatform, SocialPost, SocialPostInput, SocialStatus, SupportMessage, SupportTicket,
@@ -154,6 +155,14 @@ export const adminApi = {
     createCampaign: (input: MailCampaignInput) => request<MailCampaign>('/admin/campaigns', { method: 'POST', body: input }),
     previousRecipients: (emails: string[]) =>
         request<{ emails: string[] }>('/admin/campaigns/previous', { method: 'POST', body: { emails } }),
+    bannedEmails: (q = '') =>
+        request<MailBannedList>(`/admin/campaigns/banned${q ? `?q=${encodeURIComponent(q)}` : ''}`),
+    banEmail: (email: string, note = '') =>
+        request<MailBannedEntry>('/admin/campaigns/banned', { method: 'POST', body: { email, note } }),
+    unbanEmail: (email: string) =>
+        request<{ success: true }>(`/admin/campaigns/banned/${encodeURIComponent(email)}`, { method: 'DELETE' }),
+    scanBannedFromInbox: () =>
+        request<MailBannedScanResult>('/admin/campaigns/banned/scan', { method: 'POST' }),
     testCampaign: (content: MailContent, to: string) =>
         request<{ sent: true }>('/admin/campaigns/test', { method: 'POST', body: { ...content, to } }),
     startCampaign: (id: number) =>

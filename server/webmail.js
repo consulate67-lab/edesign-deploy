@@ -12,6 +12,7 @@
 import { createCipheriv, createDecipheriv, createHash, createHmac, randomBytes } from 'node:crypto';
 import { simpleParser } from 'mailparser';
 import MailComposer from 'nodemailer/lib/mail-composer/index.js';
+import { banFromIncomingMail } from './mail-blocklist.js';
 import { cleanText, optionalText, parseId } from './util.js';
 
 const env = (name) => (process.env[name] || '').trim();
@@ -241,7 +242,18 @@ export const registerWebmailRoutes = (app, { db, requireAdmin, secret }) => {
                 JSON.stringify(m.to), JSON.stringify(m.cc), JSON.stringify(bcc), m.reply_to ?? null, m.subject, m.snippet,
                 m.text, m.html, JSON.stringify(m.attachments), raw, raw.length, typeof seen === 'function' ? seen(m.date) : !!seen, m.date]
         );
-        return rows[0]?.id ?? null;
+        const id = rows[0]?.id ?? null;
+        if (id && folder === 'inbox' && m.from?.address) {
+            const { rows: accounts } = await q('SELECT email FROM mail_accounts');
+            void banFromIncomingMail(db, {
+                from: m.from.address,
+                subject: m.subject,
+                text: m.text,
+                html: m.html,
+                ownEmails: accounts.map((a) => a.email),
+            }).catch((e) => console.warn(`[webmail] yasaklı liste: ${e.message}`));
+        }
+        return id;
     };
 
     /** Sunucudaki yeni iletileri (en yeniden eskiye) alır; büyük kutular birkaç turda tamamlanır. */

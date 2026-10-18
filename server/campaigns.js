@@ -8,6 +8,12 @@
  */
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { EMAIL_PATTERN } from './email-verify.js';
+import {
+    banEmail,
+    ensureBlocklistColumns,
+    isUnsubscribeIntent,
+    normalizeBlockEmail,
+} from './mail-blocklist.js';
 import { campaignMailConfigured as mailConfigured, sendCampaignMail as sendMail } from './mail.js';
 import { createRateLimiter } from './rate-limit.js';
 import { cleanText, optionalText, parseId, publicApiBase } from './util.js';
@@ -62,6 +68,7 @@ export const createCampaignSchema = async (client) => {
             created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
         )
     `);
+    await ensureBlocklistColumns(client);
 };
 
 /** Brevo yalnız ASCII adres kabul eder; ardışık / baştaki / sondaki nokta ve tireyle başlayan alan adı reddedilir. */
@@ -170,6 +177,65 @@ export const registerCampaignRoutes = (app, { db, requireAdmin, secret, website 
             campaigns, unsubscribed: unsub?.n ?? 0, mailReady: mailConfigured(), defaultRate: DEFAULT_RATE, rateMax: RATE_MAX,
             dailyLimit: dailyLimit(), sentLast24h: recent?.n ?? 0,
         });
+    });
+
+    const SOURCE_LABEL = { link: 'Çıkış linki', reply: 'Abonelikten çık yanıtı', manual: 'Elle eklendi', scan: 'Gelen kutusu taraması' };
+
+    app.get('/api/admin/campaigns/banned', requireAdmin, async (req, res) => {
+        const q = typeof req.query.q === 'string' ? req.query.q.trim().toLowerCase() : '';
+        const rows = q
+            ? await db.all(
+                `SELECT email, source, note, created_at FROM mail_unsubscribes
+                  WHERE email ILIKE ? ORDER BY created_at DESC LIMIT 2000`,
+                [`%${q.replace(/[%_]/g, '')}%`]
+            )
+            : await db.all(`SELECT email, source, note, created_at FROM mail_unsubscribes ORDER BY created_at DESC LIMIT 2000`);
+        res.json({
+            items: rows.map((r) => ({ ...r, sourceLabel: SOURCE_LABEL[r.source] || r.source })),
+            total: rows.length,
+        });
+    });
+
+    app.post('/api/admin/campaigns/banned', requireAdmin, async (req, res) => {
+        const email = normalizeBlockEmail(req.body?.email);
+        if (!email) return res.status(400).json({ error: 'Geçerli bir e-posta adresi yazın.' });
+        const note = optionalText(req.body?.note, 400) ?? '';
+        await banEmail(db, email, { source: 'manual', note: note || 'Elle yasaklandı' });
+        const row = await db.get(`SELECT email, source, note, created_at FROM mail_unsubscribes WHERE email = ?`, [email]);
+        res.status(201).json({ ...row, sourceLabel: SOURCE_LABEL[row.source] || row.source });
+    });
+
+    app.delete('/api/admin/campaigns/banned/:email', requireAdmin, async (req, res) => {
+        const email = normalizeBlockEmail(decodeURIComponent(req.params.email || ''));
+        if (!email) return res.status(400).json({ error: 'Geçersiz e-posta.' });
+        const { changes } = await db.run(`DELETE FROM mail_unsubscribes WHERE email = ?`, [email]);
+        if (!changes) return res.status(404).json({ error: 'Bu adres yasaklı listede yok.' });
+        res.json({ success: true });
+    });
+
+    /** Gelen kutudaki “abonelikten çık” maillerini tarayıp yasaklı listeye ekler. */
+    app.post('/api/admin/campaigns/banned/scan', requireAdmin, async (_req, res) => {
+        const messages = await db.all(
+            `SELECT from_addr, subject, text_body, html_body FROM mail_messages
+              WHERE folder = 'inbox' AND from_addr <> '' ORDER BY id DESC LIMIT 5000`
+        );
+        const ownSet = new Set((await db.all(`SELECT email FROM mail_accounts`)).map((r) => r.email.toLowerCase()));
+        let added = 0;
+        const found = [];
+        for (const m of messages) {
+            const email = normalizeBlockEmail(m.from_addr);
+            if (!email || ownSet.has(email)) continue;
+            if (!isUnsubscribeIntent(m.subject, m.text_body, m.html_body)) continue;
+            if (!found.includes(email)) found.push(email);
+            const before = await db.get(`SELECT email FROM mail_unsubscribes WHERE email = ?`, [email]);
+            if (before) continue;
+            await banEmail(db, email, {
+                source: 'scan',
+                note: `Gelen posta: ${(m.subject || '').slice(0, 120)}`,
+            });
+            added += 1;
+        }
+        res.json({ scanned: messages.length, matched: found.length, added, emails: found.slice(0, 200) });
     });
 
     app.post('/api/admin/campaigns/previous', requireAdmin, async (req, res) => {
@@ -309,8 +375,7 @@ export const registerCampaignRoutes = (app, { db, requireAdmin, secret, website 
         if (!unsubLimiter(req.ip)) return res.status(429).json({ error: 'Çok fazla istek. Lütfen biraz sonra tekrar deneyin.' });
         const email = readUnsubToken(secret, req.query.u ?? req.body?.u);
         if (!email) return res.status(400).json({ error: 'Bağlantı geçersiz ya da eksik.' });
-        await db.run('INSERT INTO mail_unsubscribes (email) VALUES (?) ON CONFLICT (email) DO NOTHING RETURNING email', [email]);
-        await db.run(`UPDATE mail_campaign_recipients SET status = 'skipped' WHERE email = ? AND status = 'pending'`, [email]);
+        await banEmail(db, email, { source: 'link', note: 'Listeden çıkma bağlantısı' });
         res.json({ success: true });
     };
     app.post('/api/mail/unsubscribe', unsubscribe);

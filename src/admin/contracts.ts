@@ -459,6 +459,28 @@ export interface MailCampaignList {
     sentLast24h: number;
 }
 
+export type MailBanSource = 'link' | 'reply' | 'manual' | 'scan';
+
+export interface MailBannedEntry {
+    email: string;
+    source: MailBanSource | string;
+    sourceLabel: string;
+    note: string;
+    created_at: string;
+}
+
+export interface MailBannedList {
+    items: MailBannedEntry[];
+    total: number;
+}
+
+export interface MailBannedScanResult {
+    scanned: number;
+    matched: number;
+    added: number;
+    emails: string[];
+}
+
 export interface MailCampaignDetail {
     campaign: MailCampaign;
     failures: { email: string; error: string | null; sent_at: string | null }[];

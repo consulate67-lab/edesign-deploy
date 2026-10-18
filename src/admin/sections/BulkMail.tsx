@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Eye, Mail, Pause, Play, RefreshCw, RotateCcw, Send, Trash2, Upload, XCircle } from 'lucide-react';
+import { Ban, Eye, Mail, Pause, Play, RefreshCw, RotateCcw, Search, Send, Trash2, Upload, XCircle } from 'lucide-react';
 import { useUiStore } from '../../store/uiStore';
 import { adminApi } from '../adminApi';
-import type { CampaignStatus, MailCampaign, MailCampaignDetail, MailCampaignList, MailContent } from '../contracts';
+import type { CampaignStatus, MailBannedEntry, MailCampaign, MailCampaignDetail, MailCampaignList, MailContent } from '../contracts';
 import { C, btn, errorText, fmtDateTime, fmtNumber, inputStyle, labelStyle } from '../format';
 import { Badge, Card, Empty, ErrorBox, Modal, SectionHeader, Spinner } from '../ui';
 import { BROCHURE_OPTIONS, brochureForCountry, brochureLabel, foldCountry, type BrochureId, type CountryStatus } from './bulkmail/countries';
@@ -74,21 +74,41 @@ export const BulkMail: React.FC = () => {
     const [businessOnly, setBusinessOnly] = useState(true);
     const [skipPrevious, setSkipPrevious] = useState(true);
     const [previous, setPrevious] = useState<ReadonlySet<string>>(() => new Set());
+    const [banned, setBanned] = useState<MailBannedEntry[]>([]);
+    const [banQ, setBanQ] = useState('');
+    const [banEmailInput, setBanEmailInput] = useState('');
+    const [banBusy, setBanBusy] = useState(false);
     const [sendingTest, setSendingTest] = useState(false);
     const [starting, setStarting] = useState(false);
     const fileRef = useRef<HTMLInputElement>(null);
 
+    const bannedSet = useMemo(() => new Set(banned.map(b => b.email.toLowerCase())), [banned]);
     const parsedAll = useMemo(() => parseRecipients(listText), [listText]);
     const personalCount = useMemo(() => parsedAll.recipients.filter(r => isPersonal(r.email)).length, [parsedAll]);
     const isPrevious = useCallback((r: Recipient) => previous.has(r.email.toLowerCase()), [previous]);
+    const isBanned = useCallback((r: Recipient) => bannedSet.has(r.email.toLowerCase()), [bannedSet]);
     const previousCount = useMemo(
         () => parsedAll.recipients.filter(r => isPrevious(r) && !(businessOnly && isPersonal(r.email))).length,
         [parsedAll, isPrevious, businessOnly],
     );
-    const parsed = useMemo(
-        () => ({ ...parsedAll, recipients: parsedAll.recipients.filter(r => !(businessOnly && isPersonal(r.email)) && !(skipPrevious && isPrevious(r))) }),
-        [parsedAll, businessOnly, skipPrevious, isPrevious],
+    const bannedInList = useMemo(
+        () => parsedAll.recipients.filter(r => isBanned(r) && !(businessOnly && isPersonal(r.email))).length,
+        [parsedAll, isBanned, businessOnly],
     );
+    const parsed = useMemo(
+        () => ({
+            ...parsedAll,
+            recipients: parsedAll.recipients.filter(
+                r => !(businessOnly && isPersonal(r.email)) && !(skipPrevious && isPrevious(r)) && !isBanned(r),
+            ),
+        }),
+        [parsedAll, businessOnly, skipPrevious, isPrevious, isBanned],
+    );
+
+    const loadBanned = useCallback(async (q = '') => {
+        const r = await adminApi.bannedEmails(q);
+        setBanned(r.items);
+    }, []);
 
     useEffect(() => {
         const emails = parsedAll.recipients.map(r => r.email.toLowerCase());
@@ -136,7 +156,12 @@ export const BulkMail: React.FC = () => {
 
     const load = useCallback(async () => {
         try {
-            setData(await adminApi.campaigns());
+            const [campaigns, bannedList] = await Promise.all([
+                adminApi.campaigns(),
+                adminApi.bannedEmails().catch(() => ({ items: [] as MailBannedEntry[], total: 0 })),
+            ]);
+            setData(campaigns);
+            setBanned(bannedList.items);
             setLoadError(null);
         } catch (e) {
             setLoadError(errorText(e));
@@ -144,6 +169,53 @@ export const BulkMail: React.FC = () => {
     }, []);
 
     useEffect(() => { void load(); }, [load]);
+
+    const onBanAdd = async () => {
+        const email = banEmailInput.trim();
+        if (!email) return;
+        setBanBusy(true);
+        try {
+            await adminApi.banEmail(email);
+            setBanEmailInput('');
+            await loadBanned(banQ);
+            pushToast({ kind: 'success', title: 'Yasaklandı', description: `${email} artık gönderilmeyecek.`, ttl: 4000 });
+        } catch (e) {
+            pushToast({ kind: 'error', title: 'Eklenemedi', description: errorText(e), ttl: 6000 });
+        } finally {
+            setBanBusy(false);
+        }
+    };
+
+    const onBanRemove = async (email: string) => {
+        setBanBusy(true);
+        try {
+            await adminApi.unbanEmail(email);
+            await loadBanned(banQ);
+            pushToast({ kind: 'success', title: 'Kaldırıldı', description: email, ttl: 4000 });
+        } catch (e) {
+            pushToast({ kind: 'error', title: 'Silinemedi', description: errorText(e), ttl: 6000 });
+        } finally {
+            setBanBusy(false);
+        }
+    };
+
+    const onBanScan = async () => {
+        setBanBusy(true);
+        try {
+            const r = await adminApi.scanBannedFromInbox();
+            await loadBanned(banQ);
+            pushToast({
+                kind: 'success',
+                title: 'Gelen kutusu tarandı',
+                description: `${fmtNumber(r.scanned)} ileti · ${fmtNumber(r.matched)} eşleşme · ${fmtNumber(r.added)} yeni yasak`,
+                ttl: 7000,
+            });
+        } catch (e) {
+            pushToast({ kind: 'error', title: 'Tarama başarısız', description: errorText(e), ttl: 6000 });
+        } finally {
+            setBanBusy(false);
+        }
+    };
 
     const anySending = !!data?.campaigns.some(c => c.status === 'sending');
     useEffect(() => {
@@ -289,7 +361,8 @@ export const BulkMail: React.FC = () => {
                                 {parsed.invalid.length > 0 && <Badge color={C.red}>{fmtNumber(parsed.invalid.length)} satırda adres yok</Badge>}
                                 {businessOnly && personalCount > 0 && <Badge color={C.sky}>{fmtNumber(personalCount)} bireysel adres ayıklandı</Badge>}
                                 {skipPrevious && previousCount > 0 && <Badge color={C.sky}>{fmtNumber(previousCount)} daha önce gönderilmiş adres çıkarıldı</Badge>}
-                                {!!data?.unsubscribed && <span style={{ fontSize: '0.72rem', color: C.muted }}>Listeden çıkmış {fmtNumber(data.unsubscribed)} kişiye zaten gönderilmez.</span>}
+                                {bannedInList > 0 && <Badge color={C.red}>{fmtNumber(bannedInList)} yasaklı adres listeden çıkarıldı</Badge>}
+                                {!!data?.unsubscribed && <span style={{ fontSize: '0.72rem', color: C.muted }}>Yasaklı / listeden çıkmış {fmtNumber(data.unsubscribed)} kişiye gönderilmez.</span>}
                             </div>
                             {parsed.invalid.length > 0 && (
                                 <div style={{ marginTop: 6, fontSize: '0.72rem', color: C.redText, lineHeight: 1.5 }}>
@@ -427,6 +500,75 @@ export const BulkMail: React.FC = () => {
                         )}
                     </div>
                 </div>
+            </Card>
+
+            <Card
+                title="Yasaklı mailler"
+                actions={(
+                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                        <button type="button" style={btn('secondary', true)} disabled={banBusy} onClick={() => void onBanScan()}>
+                            {banBusy ? <Spinner size={13} /> : <Search size={13} />} Gelen kutuyu tara
+                        </button>
+                        <button type="button" style={btn('ghost', true)} disabled={banBusy} onClick={() => void loadBanned(banQ)}>
+                            <RefreshCw size={13} /> Yenile
+                        </button>
+                    </div>
+                )}
+            >
+                <div style={{ fontSize: '0.78rem', color: C.muted, lineHeight: 1.5, marginBottom: 12 }}>
+                    “Abonelikten çık”, unsubscribe veya benzeri yanıt gönderen adresler otomatik eklenir; bu kişilere toplu e-posta gitmez.
+                    Link ile listeden çıkanlar da burada görünür.
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
+                    <input
+                        style={{ ...inputStyle, flex: '1 1 220px', maxWidth: 360 }}
+                        placeholder="Ara…"
+                        value={banQ}
+                        onChange={e => setBanQ(e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter') void loadBanned(banQ); }}
+                    />
+                    <button type="button" style={btn('ghost', true)} onClick={() => void loadBanned(banQ)}><Search size={13} /> Ara</button>
+                    <input
+                        style={{ ...inputStyle, flex: '1 1 220px', maxWidth: 320 }}
+                        placeholder="Elle yasakla: ornek@firma.com"
+                        value={banEmailInput}
+                        onChange={e => setBanEmailInput(e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter') void onBanAdd(); }}
+                    />
+                    <button type="button" style={btn('danger', true)} disabled={banBusy || !banEmailInput.trim()} onClick={() => void onBanAdd()}>
+                        <Ban size={13} /> Yasakla
+                    </button>
+                </div>
+                {banned.length === 0 ? (
+                    <Empty>Yasaklı adres yok. Gelen kutuyu tarayın veya elle ekleyin.</Empty>
+                ) : (
+                    <div style={{ maxHeight: 320, overflowY: 'auto', border: `1px solid ${C.border}`, borderRadius: 10 }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem' }}>
+                            <thead>
+                                <tr style={{ textAlign: 'left', color: C.muted, fontSize: '0.7rem', position: 'sticky', top: 0, background: C.card }}>
+                                    {['E-posta', 'Kaynak', 'Not', 'Tarih', ''].map(h => (
+                                        <th key={h} style={{ padding: '8px 10px', borderBottom: `1px solid ${C.border}`, fontWeight: 700 }}>{h}</th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {banned.map(b => (
+                                    <tr key={b.email} style={{ borderBottom: `1px solid ${C.border}` }}>
+                                        <td style={{ padding: '8px 10px', fontWeight: 600 }}>{b.email}</td>
+                                        <td style={{ padding: '8px 10px' }}><Badge color={b.source === 'reply' || b.source === 'scan' ? C.amber : C.dim}>{b.sourceLabel}</Badge></td>
+                                        <td style={{ padding: '8px 10px', color: C.muted, maxWidth: 240 }}>{b.note || '—'}</td>
+                                        <td style={{ padding: '8px 10px', color: C.muted, whiteSpace: 'nowrap' }}>{fmtDateTime(b.created_at)}</td>
+                                        <td style={{ padding: '8px 10px' }}>
+                                            <button type="button" title="Yasağı kaldır" style={btn('ghost', true)} disabled={banBusy} onClick={() => void onBanRemove(b.email)}>
+                                                <Trash2 size={13} />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
             </Card>
 
             <Card title="Gönderimler" pad={false}>
