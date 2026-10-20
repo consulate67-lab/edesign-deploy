@@ -82,7 +82,11 @@ export const GIB_PACKAGES = {
     eSMM: 'https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/e-SMM_Olusturma.pdf',
     eMustahsil: 'https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/e-Mustahsil_Makbuzu_Teknik_Kilavuzu_V1.1.pdf',
     eDekont: 'https://ebelge.gib.gov.tr/dosyalar/eDekont_Paketi.rar',
-    eBilet: 'https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/eBiletPaketi.zip',
+    eBilet: 'https://ebelge.gib.gov.tr/dosyalar/ebilet/e-BiletPaketi.zip',
+    eGiderPusulasi: 'https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/e-Gider_Pusulasi_Paketi.rar',
+    eDoviz: 'https://ebelge.gib.gov.tr/dosyalar/e-doviz_ve_kiymetlimaden_alim-satim_paketi_v1.3.rar',
+    eSigortaKomisyon: 'https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/e-Sigorta_Komisyon_Gider_Belgesi_V1.3.rar',
+    ublTr: 'https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/UBL-TR1.2.1_Paketi.zip',
 } as const;
 
 /**
