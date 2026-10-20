@@ -57,21 +57,29 @@ const toTemplate = (d: GalleryDesign): SectorTemplate => {
 
 let dbTemplates: SectorTemplate[] | null = null;
 let dbRequest: Promise<SectorTemplate[]> | null = null;
+let dbFetchedAt = 0;
+const DB_TTL_MS = 60_000;
 
-/** Yönetim panelinde yayınlanan galeri tasarımları; bir kez istenir, sunucuya ulaşılamazsa boş liste. */
-export const loadDbTemplates = (): Promise<SectorTemplate[]> => {
-    dbRequest ??= fetch(`${API_URL}/gallery`)
+/** Yönetim panelinde yayınlanan galeri tasarımları; TTL ile yenilenir, sunucuya ulaşılamazsa boş liste. */
+export const loadDbTemplates = (force = false): Promise<SectorTemplate[]> => {
+    if (!force && dbTemplates && Date.now() - dbFetchedAt < DB_TTL_MS) {
+        return Promise.resolve(dbTemplates);
+    }
+    if (!force && dbRequest) return dbRequest;
+    dbRequest = fetch(`${API_URL}/gallery`)
         .then(res => (res.ok ? res.json() : []))
         .then((list: unknown) => {
             dbTemplates = Array.isArray(list)
                 ? (list as GalleryDesign[]).filter(d => d && d.published !== false && d.xslt && d.xml).map(toTemplate)
                 : [];
+            dbFetchedAt = Date.now();
             return dbTemplates;
         })
         .catch(() => {
-            dbTemplates = [];
+            dbTemplates = dbTemplates ?? [];
             return dbTemplates;
-        });
+        })
+        .finally(() => { dbRequest = null; });
     return dbRequest;
 };
 

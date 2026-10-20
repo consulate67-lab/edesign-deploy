@@ -663,7 +663,7 @@ export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => 
 
     useEffect(() => {
         let alive = true;
-        loadDbTemplates().then(list => { if (alive) setDbTemplates(list); });
+        loadDbTemplates(true).then(list => { if (alive) setDbTemplates(list); });
         return () => { alive = false; };
     }, []);
 

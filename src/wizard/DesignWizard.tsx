@@ -18,7 +18,7 @@ import { Flag } from '../i18n/flags';
 import { useCountry, useUiStore } from '../store/uiStore';
 import { ProDesignStep } from '../pro-designs/ProDesignStep';
 import {
-    fetchOfficialRevisions, officialArtifactDownloadUrl, revisionsAffecting,
+    fetchOfficialRevisions, revisionsAffecting,
     type PublicOfficialRevision,
 } from '../officialArtifacts';
 
@@ -458,29 +458,20 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
             <div style={{ fontWeight: 800, fontSize: 13, color: '#0369a1', marginBottom: 6 }}>
                 {t('wizard.revisionBannerTitle')}
             </div>
-            {relevantRevs.map(r => {
-                const xsltFile = (r.files || []).find(f => /\.xslt?$/i.test(f.path));
-                return (
-                    <div key={r.id} style={{ fontSize: 12, color: theme.text, marginBottom: 8, lineHeight: 1.45 }}>
-                        <div>{t('wizard.revisionBannerBody', {
-                            source: r.source_label,
-                            summary: r.summary || '',
-                        })}</div>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 6 }}>
-                            {xsltFile && (
-                                <a href={officialArtifactDownloadUrl(xsltFile.path)} download
-                                    style={{ color: '#0369a1', fontWeight: 700, textDecoration: 'none' }}>
-                                    {t('wizard.revisionDownload')}
-                                </a>
-                            )}
-                            <a href={r.remote_url} target="_blank" rel="noreferrer"
-                                style={{ color: '#0369a1', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                                <ExternalLink size={12} /> {t('wizard.revisionSourceLink')}
-                            </a>
-                        </div>
+            {relevantRevs.map(r => (
+                <div key={r.id} style={{ fontSize: 12, color: theme.text, marginBottom: 8, lineHeight: 1.45 }}>
+                    <div>{t('wizard.revisionBannerBody', {
+                        source: r.source_label,
+                        summary: r.summary || '',
+                    })}</div>
+                    <div style={{ marginTop: 6 }}>
+                        <a href={r.remote_url} target="_blank" rel="noreferrer"
+                            style={{ color: '#0369a1', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                            <ExternalLink size={12} /> {t('wizard.revisionSourceLink')}
+                        </a>
                     </div>
-                );
-            })}
+                </div>
+            ))}
         </div>
     );
 

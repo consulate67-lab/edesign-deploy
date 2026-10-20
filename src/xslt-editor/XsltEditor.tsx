@@ -32,7 +32,7 @@ import Editor from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
 import {
     ArrowLeft, Save, Download, FileCode2,
-    AlertCircle, Eye, RefreshCw, CheckCircle2, Sparkles, Search, ZoomIn, ZoomOut,
+    AlertCircle, AlertTriangle, Eye, RefreshCw, CheckCircle2, Sparkles, Search, ZoomIn, ZoomOut,
     PanelLeftClose, PanelLeftOpen, X, Lock, Undo2, Redo2,
     Image as ImageIcon, Type, Table2, TextCursorInput, Calculator, Plus, Columns3, Wallpaper, QrCode, BarChart3, ChartNoAxesGantt,
 } from 'lucide-react';
@@ -49,7 +49,7 @@ import {
     type CatalogField, type FormulaModel, type FormulaOp, type FieldTransform,
 } from './fieldCatalog';
 import { transformXmlWithXslt } from '../xsltTransformer';
-import { getInlineXslt } from '../xsltContent';
+import { loadCurrentBaseXslt, syncOfficialBaseIfNeeded } from '../designRevisionSync';
 import { getAntrepoTemplateById } from './antrepoTemplates';
 import { renderAndAnnotateXslt, parseXsltInstrumented, updateXSLTBinding, removeXsltBinding, nextXsltObjId, XSLT_ELEMENT_SNIPPETS, IMAGE_PLACEHOLDER_MARK } from './utils/xsltRender';
 import { pickImageFile, readImageFile, dataUrlFormat, dataUrlBytes, formatBytes } from './utils/imageFile';
@@ -1605,6 +1605,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     // ------------------------------------------------------------------------
     const [moduleId] = useState<string>(initialModuleId);
     const [xsltContent, setXsltContent] = useState<string>('');
+    const [revisionNotice, setRevisionNotice] = useState<{ kind: 'applied' | 'review'; text: string } | null>(null);
     const [xmlContent, setXmlContent] = useState<string>(initialXml || SAMPLE_XML);
     const [activeTab] = useState<'xslt' | 'xml'>('xslt');
     const [previewHtml, setPreviewHtml] = useState<string>('');
@@ -1783,8 +1784,10 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     // Modül değişimi → inline XSLT yükle
     // ------------------------------------------------------------------------
     useEffect(() => {
+        let cancelled = false;
         pendingPreviewScrollRef.current = 0;
         setSelectedObject(null);
+        setRevisionNotice(null);
         // Önceki belgeye ait bekleyen düzenlemeler yeni belgeye yazılmasın.
         if (sourceEditDebounceRef.current) clearTimeout(sourceEditDebounceRef.current);
         if (propertyDebounceRef.current) clearTimeout(propertyDebounceRef.current);
@@ -1798,38 +1801,56 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             resetHistory(content);
             setXsltContent(content);
         };
-        if (initialXslt && moduleId === initialModuleId) {
-            // İlk yükleme, kullanıcı verisi varsa onu kullan
-            const userXslt = stripFieldGuide(stripLeadingBom(stripTestWatermark(initialXslt)));
-            load(designKeyOf(userXslt) ? userXslt : refreshObjectContents(userXslt, catalogRef.current, documentLanguage(userXslt, initialXml || SAMPLE_XML)));
-            return;
-        }
-        // Sprint 9 — Antrepo ise antrepoTemplates'tan al
-        if (currentModule.antrepoId) {
-            const tmpl = getAntrepoTemplateById(currentModule.antrepoId);
-            if (tmpl) {
-                load(stripLeadingBom(tmpl.xslt));
-                console.log(
-                    `[XSLTEditor] Module switch → ${currentModule.id} loaded Antrepo ${tmpl.xslt.length} chars`
-                );
+        const run = async () => {
+            if (initialXslt && moduleId === initialModuleId) {
+                const userXslt = stripFieldGuide(stripLeadingBom(stripTestWatermark(initialXslt)));
+                if (designKeyOf(userXslt)) {
+                    if (!cancelled) load(userXslt);
+                    return;
+                }
+                const synced = await syncOfficialBaseIfNeeded(userXslt, currentModule.inlineKey, moduleId);
+                if (cancelled) return;
+                const next = synced.xslt;
+                load(refreshObjectContents(next, catalogRef.current, documentLanguage(next, initialXml || SAMPLE_XML)));
+                if (synced.kind === 'applied') {
+                    setRevisionNotice({ kind: 'applied', text: t('designs.revisionAppliedToast') });
+                } else if (synced.kind === 'review') {
+                    setRevisionNotice({ kind: 'review', text: synced.summary });
+                }
                 return;
             }
-            console.warn(`[XSLTEditor] Antrepo template bulunamadı: ${currentModule.antrepoId}`);
-            load('<!-- Antrepo template bulunamadı -->');
-            return;
-        }
-        // Minimal şablonlar — xsltContent'ten al
-        const inline = getInlineXslt(currentModule.inlineKey || '');
-        if (inline) {
-            load(stripLeadingBom(inline));
-            console.log(
-                `[XSLTEditor] Module switch → ${currentModule.id} loaded ${inline.length} chars from ${currentModule.inlineKey}`
-            );
-        } else {
-            console.warn(`[XSLTEditor] Inline XSLT yok: ${currentModule.inlineKey}`);
-            load('<!-- Bu modül için inline XSLT bulunamadı -->');
-        }
-    }, [moduleId, currentModule.antrepoId, currentModule.inlineKey, initialXslt, initialXml, initialModuleId, resetHistory]);
+            // Sprint 9 — Antrepo ise antrepoTemplates'tan al
+            if (currentModule.antrepoId) {
+                const tmpl = getAntrepoTemplateById(currentModule.antrepoId);
+                if (tmpl) {
+                    if (!cancelled) {
+                        load(stripLeadingBom(tmpl.xslt));
+                        console.log(
+                            `[XSLTEditor] Module switch → ${currentModule.id} loaded Antrepo ${tmpl.xslt.length} chars`
+                        );
+                    }
+                    return;
+                }
+                console.warn(`[XSLTEditor] Antrepo template bulunamadı: ${currentModule.antrepoId}`);
+                if (!cancelled) load('<!-- Antrepo template bulunamadı -->');
+                return;
+            }
+            // Resmi yayın varsa onu, yoksa paket içi şablonu kullan
+            const base = await loadCurrentBaseXslt(currentModule.inlineKey);
+            if (cancelled) return;
+            if (base) {
+                load(base);
+                console.log(
+                    `[XSLTEditor] Module switch → ${currentModule.id} loaded ${base.length} chars from ${currentModule.inlineKey}`
+                );
+            } else {
+                console.warn(`[XSLTEditor] Inline XSLT yok: ${currentModule.inlineKey}`);
+                load('<!-- Bu modül için inline XSLT bulunamadı -->');
+            }
+        };
+        void run();
+        return () => { cancelled = true; };
+    }, [moduleId, currentModule.antrepoId, currentModule.inlineKey, initialXslt, initialXml, initialModuleId, resetHistory, t]);
 
     // ------------------------------------------------------------------------
     // Canlı preview — 500ms debounce
@@ -3817,6 +3838,44 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 overflow: 'hidden',
             }}
         >
+            {revisionNotice && (
+                <div
+                    data-revision-notice={revisionNotice.kind}
+                    style={{
+                        display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 16px',
+                        background: revisionNotice.kind === 'applied' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.12)',
+                        borderBottom: `1px solid ${revisionNotice.kind === 'applied' ? 'rgba(16, 185, 129, 0.35)' : 'rgba(245, 158, 11, 0.4)'}`,
+                        color: revisionNotice.kind === 'applied' ? '#047857' : '#92400e',
+                        fontSize: 12, lineHeight: 1.45, flexShrink: 0,
+                    }}
+                >
+                    {revisionNotice.kind === 'applied'
+                        ? <CheckCircle2 size={16} style={{ flexShrink: 0, marginTop: 1 }} />
+                        : <AlertTriangle size={16} style={{ flexShrink: 0, marginTop: 1 }} />}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: 800, marginBottom: 2 }}>
+                            {revisionNotice.kind === 'applied'
+                                ? t('designs.revisionAppliedToast')
+                                : t('designs.revisionReviewTitle')}
+                        </div>
+                        {revisionNotice.kind === 'review' && (
+                            <div>
+                                {t('designs.revisionReviewBody')}
+                                {revisionNotice.text ? ` (${revisionNotice.text})` : ''}
+                            </div>
+                        )}
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => setRevisionNotice(null)}
+                        aria-label={t('common.close')}
+                        style={{ background: 'transparent', border: 'none', color: 'inherit', cursor: 'pointer', padding: 2 }}
+                    >
+                        <X size={14} />
+                    </button>
+                </div>
+            )}
+
             {/* Üst toolbar — 56px */}
             <div
                 style={{

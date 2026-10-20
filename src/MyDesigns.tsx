@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { FileCode, PenLine, Trash2, Download, Lock, Eye, X, Search, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { FileCode, PenLine, Trash2, Download, Lock, Eye, X, Search, CheckCircle2, ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
 import { api, type SavedDesign } from './api';
 import { WIZARD_DOC_TYPES, loadSampleXml } from './wizard/docTypes';
 import { intlModuleDocTypes } from './wizard/intlDocTypes';
@@ -10,6 +10,8 @@ import { transformXmlWithXslt } from './xsltTransformer';
 import { theme } from './theme';
 import i18n, { currentLocale, useLocaleT } from './i18n';
 import { licenseIdKind } from '../shared/license-lock.js';
+import { designNeedsRevisionReview } from './designRevisionSync';
+import { fetchOfficialRevisions, type PublicOfficialRevision } from './officialArtifacts';
 
 const MAX_DRAFTS = 5;
 const PAGE_SIZE = 10;
@@ -126,22 +128,53 @@ const ghostBtn: React.CSSProperties = {
 export const MyDesigns: React.FC<{ onOpen: (d: SavedDesign) => void }> = ({ onOpen }) => {
     const { t } = useLocaleT();
     const { designs, remove } = useDesigns();
+    const [officialRevs, setOfficialRevs] = useState<PublicOfficialRevision[]>([]);
     const drafts = useMemo(() => (designs ?? []).filter(d => !d.paid).sort(byRecent('updated_at')).slice(0, MAX_DRAFTS), [designs]);
+    const reviewIds = useMemo(() => {
+        const ids = new Set<number>();
+        for (const d of drafts) {
+            if (designNeedsRevisionReview(d.module_id, d.xslt_content, officialRevs).length) ids.add(d.id);
+        }
+        return ids;
+    }, [drafts, officialRevs]);
+
+    useEffect(() => {
+        let alive = true;
+        fetchOfficialRevisions().then(list => { if (alive) setOfficialRevs(list); }).catch(() => {});
+        return () => { alive = false; };
+    }, []);
 
     if (!drafts.length) return null;
 
     return (
         <div data-my-designs style={{ width: '100%', marginBottom: '2rem' }}>
             {sectionTitle(t('designs.draftsTitle'), t('designs.draftsNote', { count: MAX_DRAFTS }))}
+            {reviewIds.size > 0 && (
+                <div data-designs-revision-banner style={{
+                    marginBottom: 12, padding: '10px 12px', borderRadius: 12,
+                    background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.35)',
+                    color: '#92400e', fontSize: 13, lineHeight: 1.45, display: 'flex', gap: 8, alignItems: 'flex-start',
+                }}>
+                    <AlertTriangle size={16} style={{ flexShrink: 0, marginTop: 2 }} />
+                    <div>
+                        <div style={{ fontWeight: 800, marginBottom: 2 }}>{t('designs.revisionReviewTitle')}</div>
+                        <div>{t('designs.revisionReviewBody')}</div>
+                    </div>
+                </div>
+            )}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '12px' }}>
-                {drafts.map(d => (
+                {drafts.map(d => {
+                    const needsReview = reviewIds.has(d.id);
+                    return (
                     <div
                         key={d.id}
                         data-design-id={d.id}
+                        data-needs-revision-review={needsReview ? '1' : undefined}
                         style={{
                             display: 'flex', flexDirection: 'column', gap: '8px', padding: '14px 16px',
                             background: theme.surface, borderRadius: '12px',
-                            border: `1px solid ${theme.border}`, boxShadow: theme.shadowSm,
+                            border: `1px solid ${needsReview ? 'rgba(245, 158, 11, 0.55)' : theme.border}`,
+                            boxShadow: theme.shadowSm,
                         }}
                     >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -164,19 +197,29 @@ export const MyDesigns: React.FC<{ onOpen: (d: SavedDesign) => void }> = ({ onOp
                                 <Trash2 size={15} />
                             </button>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                             <span style={{
                                 fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: 999,
                                 background: theme.surfaceAlt, color: theme.textMuted, border: `1px solid ${theme.border}`,
                             }}>
                                 {t('designs.draftBadge')}
                             </span>
+                            {needsReview && (
+                                <span style={{
+                                    fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: 999,
+                                    background: 'rgba(245, 158, 11, 0.15)', color: '#92400e',
+                                    border: '1px solid rgba(245, 158, 11, 0.4)',
+                                }}>
+                                    {t('designs.revisionReviewBadge')}
+                                </span>
+                            )}
                             <button type="button" data-open-design={d.id} onClick={() => onOpen(d)} style={{ ...primaryBtn, marginLeft: 'auto' }}>
                                 <PenLine size={13} /> {t('designs.continue')}
                             </button>
                         </div>
                     </div>
-                ))}
+                    );
+                })}
             </div>
         </div>
     );
