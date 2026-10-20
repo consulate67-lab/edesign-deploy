@@ -7,13 +7,14 @@
  */
 import { createHash } from 'node:crypto';
 import AdmZip from 'adm-zip';
+import { createExtractorFromData } from 'node-unrar-js';
 import { parseId } from './util.js';
 
 const CHECK_INTERVAL_MS = 6 * 60 * 60_000;
 const FETCH_TIMEOUT_MS = 45_000;
 const MAX_PACKAGE_BYTES = 40 * 1024 * 1024;
 
-/** @typedef {{ id: string, label: string, kind: 'zip'|'jar'|'file', url: string, probes?: string[], extractMap: Record<string, string>, affects: string[], notes?: string }} SourceDef */
+/** @typedef {{ id: string, label: string, kind: 'zip'|'jar'|'rar'|'pdf', url: string, probes?: string[], extractMap: Record<string, string>, affects: string[], notes?: string, autoSampleXml?: boolean }} SourceDef */
 
 /** @type {SourceDef[]} */
 export const GIB_SOURCE_DEFS = [
@@ -34,8 +35,8 @@ export const GIB_SOURCE_DEFS = [
             'XAdESv141.xsd': 'ebelge/earsiv/XAdESv141.xsd',
             'xmldsig-core-schema.xsd': 'ebelge/earsiv/xmldsig-core-schema.xsd',
         },
-        affects: ['earsiv', 'fatura'],
-        notes: 'Şema / schematron paketi; resmi görselleştirme XSLT içermez.',
+        affects: ['earsiv', 'fatura', 'smm', 'makbuz', 'mustahsil', 'dekont'],
+        notes: 'Şema / schematron paketi; e-SMM / e-MM / e-Dekont de e-Arşiv ailesindedir.',
     },
     {
         id: 'efatura-paket',
@@ -45,6 +46,7 @@ export const GIB_SOURCE_DEFS = [
         probes: Array.from({ length: 6 }, (_, i) =>
             `https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/e-FaturaPaketi%20(${29 + i}).zip`),
         extractMap: {},
+        autoSampleXml: true,
         affects: ['fatura', 'earsiv', 'ihracat', 'mikro_ihracat'],
         notes: 'Örnek XML ve şema; XSLT genelde görüntüleyici JAR içindedir. .xslt/.xml örnekleri otomatik eşlenir.',
     },
@@ -59,6 +61,54 @@ export const GIB_SOURCE_DEFS = [
         },
         affects: ['fatura', 'earsiv'],
         notes: 'GİB resmi görselleştirme XSLT kaynağı.',
+    },
+    {
+        id: 'edekont-paket',
+        label: 'e-Dekont Paketi',
+        kind: 'rar',
+        url: 'https://ebelge.gib.gov.tr/dosyalar/eDekont_Paketi.rar',
+        probes: [
+            'https://ebelge.gib.gov.tr/dosyalar/eDekont_Paketi.rar',
+            'https://ebelge.gib.gov.tr/dosyalar/e-Dekont_Paketi.rar',
+            'https://ebelge.gib.gov.tr/dosyalar/eDekont_Paket.rar',
+            'https://ebelge.gib.gov.tr/dosyalar/e-Dekont.rar',
+        ],
+        extractMap: {
+            'eArsiv.xsd': 'ebelge/earsiv/EArsiv.xsd',
+            'dekont.xml': 'ebelge/samples/gib/dekont.xml',
+        },
+        autoSampleXml: true,
+        affects: ['dekont'],
+        notes: 'GİB duyurularındaki e-Dekont RAR paketi (örnek XML + eArsiv.xsd + teknik kılavuz).',
+    },
+    {
+        id: 'esmm-kilavuz',
+        label: 'e-SMM Kılavuz / doküman',
+        kind: 'pdf',
+        url: 'https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/e-SMM_Olusturma.pdf',
+        // Aynı dosyanın sürüm adları; farklı broşür/PDF karıştırılmaz.
+        probes: [
+            'https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/e-SMM_Olusturma.pdf',
+            'https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/e-SMM_Olusturma_V2.pdf',
+        ],
+        extractMap: {},
+        affects: ['smm'],
+        notes: 'GİB e-SMM için ayrı zip yayımlamıyor; kılavuz/PDF değişince bildirim üretilir. Şema için e-Arşiv paketine bakın.',
+    },
+    {
+        id: 'emakbuz-mustahsil',
+        label: 'e-Makbuz / e-Müstahsil (e-MM) Kılavuz',
+        kind: 'pdf',
+        url: 'https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/e-Mustahsil_Makbuzu_Teknik_Kilavuzu_V1.1.pdf',
+        probes: [
+            'https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/e-Mustahsil_Makbuzu_Teknik_Kilavuzu_V1.0.pdf',
+            'https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/e-Mustahsil_Makbuzu_Teknik_Kilavuzu_V1.1.pdf',
+            'https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/e-Mustahsil_Makbuzu_Teknik_Kilavuzu_V1.2.pdf',
+            'https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/e-Mustahsil_Makbuzu_Teknik_Kilavuzu_V1.3.pdf',
+        ],
+        extractMap: {},
+        affects: ['makbuz', 'mustahsil'],
+        notes: 'e-MM teknik kılavuzu (PDF). Ayrı e-Makbuz zip yok; şema e-Arşiv paketinde.',
     },
 ];
 
@@ -137,59 +187,116 @@ async function resolveSourceUrl(def) {
 
 const basename = (p) => p.replace(/\\/g, '/').split('/').pop() || p;
 
-/**
- * ZIP/JAR içinden metin dosyalarını çıkarır.
- * extractMap: zipEntryPath → artefact path
- * Efatura paketi için map boşsa .xslt/.xsd/.xml örneklerini ebelge/ altına koyar.
- */
-function extractArtifacts(buffer, def) {
-    const zip = new AdmZip(buffer);
-    const entries = zip.getEntries().filter(e => !e.isDirectory);
-    const byName = new Map();
-    for (const e of entries) {
-        const name = e.entryName.replace(/\\/g, '/');
-        byName.set(name, e);
-        byName.set(basename(name), e);
-    }
+const isTextEntry = (name) => /\.(xslt?|xsd|xml|wsdl|json|txt|md|csv)$/i.test(name);
 
+/** Yüklenen / indirilen buffer türü (kaynak kind'ına yedek). */
+const detectArchiveKind = (buffer, fallback) => {
+    if (!buffer || buffer.length < 4) return fallback;
+    if (buffer[0] === 0x50 && buffer[1] === 0x4b) return 'zip'; // ZIP / JAR
+    if (buffer.toString('ascii', 0, 4) === 'Rar!') return 'rar';
+    if (buffer.toString('ascii', 0, 4) === '%PDF') return 'pdf';
+    return fallback;
+};
+
+/** @returns {Promise<{ name: string, data: Buffer }[]>} */
+async function listArchiveEntries(buffer, kind) {
+    if (kind === 'rar') {
+        const extractor = await createExtractorFromData({ data: new Uint8Array(buffer) });
+        const headers = [...extractor.getFileList().fileHeaders].filter(h => !h.flags.directory);
+        const extracted = extractor.extract({ files: headers.map(h => h.name) });
+        const files = [...extracted.files];
+        return files
+            .filter(f => f.extraction && f.fileHeader && !f.fileHeader.flags.directory)
+            .map(f => ({
+                name: String(f.fileHeader.name).replace(/\\/g, '/'),
+                data: Buffer.from(f.extraction),
+            }));
+    }
+    const zip = new AdmZip(buffer);
+    return zip.getEntries()
+        .filter(e => !e.isDirectory)
+        .map(e => ({
+            name: e.entryName.replace(/\\/g, '/'),
+            data: e.getData(),
+        }));
+}
+
+/**
+ * ZIP/JAR/RAR/PDF içeriğinden artefact üretir.
+ */
+async function extractArtifacts(buffer, def, remoteMeta = {}) {
     /** @type {{ path: string, content: string, from: string, bytes: number, sha256: string }[]} */
     const files = [];
+
+    if (def.kind === 'pdf') {
+        const name = basename(def.url).replace(/[^\w.\-()+%]/g, '_') || 'kilavuz.pdf';
+        files.push({
+            path: `ebelge/kilavuzlar/${name}.meta.json`,
+            content: JSON.stringify({
+                label: def.label,
+                url: remoteMeta.url || def.url,
+                contentLength: remoteMeta.contentLength || String(buffer.length),
+                lastModified: remoteMeta.lastModified || null,
+                sha256: sha256(buffer),
+                kind: 'pdf',
+            }, null, 2),
+            from: name,
+            bytes: buffer.length,
+            sha256: sha256(buffer),
+        });
+        return { files, entryCount: 1, entryNames: [name] };
+    }
+
+    const entries = await listArchiveEntries(buffer, def.kind === 'jar' ? 'zip' : def.kind);
+    const byName = new Map();
+    for (const e of entries) {
+        byName.set(e.name, e);
+        byName.set(basename(e.name), e);
+    }
     const used = new Set();
 
     for (const [from, to] of Object.entries(def.extractMap || {})) {
         const e = byName.get(from) || byName.get(basename(from));
-        if (!e) continue;
-        const content = e.getData().toString('utf8');
-        files.push({ path: to, content, from: e.entryName, bytes: content.length, sha256: sha256(content) });
-        used.add(e.entryName);
+        if (!e || !isTextEntry(e.name)) continue;
+        const content = e.data.toString('utf8');
+        files.push({ path: to, content, from: e.name, bytes: content.length, sha256: sha256(content) });
+        used.add(e.name);
     }
 
-    if (def.id === 'efatura-paket') {
+    if (def.autoSampleXml || def.id === 'efatura-paket' || def.id === 'edekont-paket') {
         for (const e of entries) {
-            if (used.has(e.entryName)) continue;
-            const name = e.entryName.replace(/\\/g, '/');
-            const base = basename(name);
+            if (used.has(e.name)) continue;
+            const base = basename(e.name);
             if (/\.xslt?$/i.test(base)) {
+                const content = e.data.toString('utf8');
                 files.push({
                     path: `ebelge/gib/from-paket/${base}`,
-                    content: e.getData().toString('utf8'),
-                    from: name,
-                    bytes: e.header.size,
-                    sha256: sha256(e.getData()),
+                    content,
+                    from: e.name,
+                    bytes: e.data.length,
+                    sha256: sha256(e.data),
                 });
-            } else if (/\.xml$/i.test(base) && /ornek|örnek|sample|temel|ticari|iade|ytb|hks|sarj/i.test(base)) {
+            } else if (/\.xml$/i.test(base) && /ornek|örnek|sample|temel|ticari|iade|ytb|hks|sarj|dekont|rapor|pos|para|fatura|gta|vta|epih|pago|pal/i.test(base)) {
                 files.push({
                     path: `ebelge/samples/gib/${base}`,
-                    content: e.getData().toString('utf8'),
-                    from: name,
-                    bytes: e.header.size,
-                    sha256: sha256(e.getData()),
+                    content: e.data.toString('utf8'),
+                    from: e.name,
+                    bytes: e.data.length,
+                    sha256: sha256(e.data),
+                });
+            } else if (/\.xsd$/i.test(base) && /earsiv|efatura|ubl/i.test(base)) {
+                const dest = /earsiv/i.test(base) ? `ebelge/earsiv/${base}` : `ebelge/xsd/from-paket/${base}`;
+                files.push({
+                    path: dest,
+                    content: e.data.toString('utf8'),
+                    from: e.name,
+                    bytes: e.data.length,
+                    sha256: sha256(e.data),
                 });
             }
         }
     }
 
-    // Viewer JAR: default.xslt varsa general.xslt yoksa general'e de kopyala
     if (def.id === 'ebelge-viewer') {
         const defXslt = files.find(f => f.path.endsWith('e-Fatura.xslt'));
         if (defXslt && !files.some(f => f.path.endsWith('general.xslt'))) {
@@ -206,7 +313,7 @@ function extractArtifacts(buffer, def) {
     return {
         files,
         entryCount: entries.length,
-        entryNames: entries.slice(0, 80).map(e => e.entryName),
+        entryNames: entries.slice(0, 80).map(e => e.name),
     };
 }
 
@@ -274,6 +381,21 @@ export const createGibRevisionsSchema = async (client) => {
             url: 'https://ebelge.gib.gov.tr/EFaturaGoruntuleyici/Windows/Java17/EBelgeGoruntuleyici.jar',
             contentLength: '669202',
             lastModified: 'Mon, 25 Jul 2016 07:14:17 GMT',
+        },
+        'edekont-paket': {
+            url: 'https://ebelge.gib.gov.tr/dosyalar/eDekont_Paketi.rar',
+            contentLength: '1526917',
+            lastModified: 'Thu, 18 Sep 2025 08:46:38 GMT',
+        },
+        'esmm-kilavuz': {
+            url: 'https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/e-SMM_Olusturma.pdf',
+            contentLength: '343625',
+            lastModified: 'Fri, 04 Oct 2019 10:42:38 GMT',
+        },
+        'emakbuz-mustahsil': {
+            url: 'https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/e-Mustahsil_Makbuzu_Teknik_Kilavuzu_V1.1.pdf',
+            contentLength: '869907',
+            lastModified: 'Fri, 22 May 2026 08:31:13 GMT',
         },
     };
 
@@ -397,7 +519,8 @@ async function applyPackageBuffer(db, revision, buffer, meta, adminId) {
         extractMap: source.extract_map || {}, affects: source.affects || [],
     };
 
-    const extracted = extractArtifacts(buffer, def);
+    const kind = detectArchiveKind(buffer, def.kind);
+    const extracted = await extractArtifacts(buffer, { ...def, kind }, meta);
     if (!extracted.files.length) {
         throw new Error('Paketten eşlenen dosya çıkarılamadı. extractMap veya paket içeriğini kontrol edin.');
     }

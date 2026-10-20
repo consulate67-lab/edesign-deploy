@@ -77,9 +77,11 @@ export const GIB_PACKAGES = {
     eIrsaliye: 'https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/eIrsaliyePaketi.zip',
     eIhracat: 'https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/eIhracatPaketi.zip',
     eMikroIhracat: 'https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/eMikroIhracatPaketi.zip',
-    eMakbuz: 'https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/eMakbuzPaketi.zip',
-    eSMM: 'https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/eSMM_Paketi.zip',
-    eMustahsil: 'https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/eMustahsilPaketi.zip',
+    /** Ayrı zip yok; e-MM teknik kılavuzu + e-Arşiv paketi. */
+    eMakbuz: 'https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/e-Mustahsil_Makbuzu_Teknik_Kilavuzu_V1.1.pdf',
+    eSMM: 'https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/e-SMM_Olusturma.pdf',
+    eMustahsil: 'https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/e-Mustahsil_Makbuzu_Teknik_Kilavuzu_V1.1.pdf',
+    eDekont: 'https://ebelge.gib.gov.tr/dosyalar/eDekont_Paketi.rar',
     eBilet: 'https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/eBiletPaketi.zip',
 } as const;
 

@@ -157,7 +157,7 @@ export const Revisions: React.FC = () => {
                 }
             />
             {error && <div style={{ marginBottom: 14 }}><ErrorBox>{error}</ErrorBox></div>}
-            <input ref={fileRef} type="file" accept=".zip,.jar,application/zip,application/java-archive" hidden
+            <input ref={fileRef} type="file" accept=".zip,.jar,.rar,.pdf,application/zip,application/java-archive,application/pdf" hidden
                 onChange={(e) => void onUpload(e.target.files?.[0] ?? null)} />
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 14, marginBottom: 18 }}>

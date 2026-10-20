@@ -33,9 +33,10 @@ public/ebelge/
 | e-İrsaliye | `https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/eIrsaliyePaketi.zip` | ❌ 404 — public URL yok |
 | e-İhracat | `https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/eIhracatPaketi.zip` | ❌ 404 — public URL yok |
 | e-Mikro İhracat | `https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/eMikroIhracatPaketi.zip` | ❌ 404 |
-| e-Makbuz | `https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/eMakbuzPaketi.zip` | ❌ 404 |
-| e-SMM | `https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/eSMM_Paketi.zip` | ❌ 404 |
-| e-Müstahsil | `https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/eMustahsilPaketi.zip` | ❌ 404 |
+| e-Makbuz / e-MM | `https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/e-Mustahsil_Makbuzu_Teknik_Kilavuzu_V1.1.pdf` | ✅ PDF kılavuz (ayrı zip yok) |
+| e-SMM | `https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/e-SMM_Olusturma.pdf` | ✅ PDF (ayrı zip yok; şema e-Arşiv’de) |
+| e-Dekont | `https://ebelge.gib.gov.tr/dosyalar/eDekont_Paketi.rar` | ✅ RAR paket |
+| e-Müstahsil | `https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/e-Mustahsil_Makbuzu_Teknik_Kilavuzu_V1.1.pdf` | ✅ PDF kılavuz |
 | e-Bilet | `https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/eBiletPaketi.zip` | ❌ 404 |
 | EBelge Görüntüleyici (JAR) | `https://ebelge.gib.gov.tr/EFaturaGoruntuleyici/Windows/Java17/EBelgeGoruntuleyici.jar` | ✅ 669 KB (sadece e-Fatura için XSLT içerir) |
 
