@@ -362,7 +362,7 @@ export const Selection: React.FC<SelectionProps> = ({ onLogout, onSelectXsltEdit
                             )}
                         </div>
 
-                        {isTurkey && (
+                        {isTurkey && !manualOpen && (
                             <>
                                 <div data-selection-or style={{
                                     width: '100%', display: 'flex', alignItems: 'center', gap: 14,
