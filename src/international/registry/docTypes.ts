@@ -73,7 +73,7 @@ export const GIB_VIEWER_BASE = 'https://ebelge.gib.gov.tr/EFaturaGoruntuleyici/W
 /** Tüm GİB paket URL'leri (referans). */
 export const GIB_PACKAGES = {
     eFatura: 'https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/e-FaturaPaketi%20(29).zip',
-    eArsiv: 'https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/earsiv_paket_v1.1_8.zip',
+    eArsiv: 'https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/earsiv_paket_v1.1_9.zip',
     eIrsaliye: 'https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/eIrsaliyePaketi.zip',
     eIhracat: 'https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/eIhracatPaketi.zip',
     eMikroIhracat: 'https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/eMikroIhracatPaketi.zip',

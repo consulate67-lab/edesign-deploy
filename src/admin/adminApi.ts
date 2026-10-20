@@ -4,6 +4,7 @@ import type {
     AdminIdentity, AdminInvoice, AdminInvoiceList, AdminLoginResponse, AdminSettingsStatus, AdminStats, AdminUserDetail, AdminUserRow,
     AdminVerifyResponse, AiMemoryEntry, AiMemoryInput, AssistantBuiltinEntry, AssistantKbEntry, AssistantKbInput, AssistantLog,
     AssistantLogFilter, AssistantOverview, GalleryDesign, GalleryDesignInput, InvoiceScope, InvoiceUpdateInput, MailBannedEntry,
+    OfficialCheckResult, OfficialRevision, OfficialSource,
     MailBannedList, MailBannedScanResult, MailCampaign,
     MailAccount, MailAccountInput, MailAction, MailCampaignDetail, MailCampaignInput, MailCampaignList, MailContent, MailFolder, MailListItem,
     MailMessage, MailSendInput, RemoteSession, SocialGenerateInput, SocialMetaConnectInput,
@@ -213,6 +214,20 @@ export const adminApi = {
         if (!res.ok) throw new AdminApiError((await res.json().catch(() => ({}))).error || `Ek indirilemedi (${res.status})`, res.status);
         return res.blob();
     },
+
+    officialSources: () => request<OfficialSource[]>('/admin/official-revisions/sources'),
+    officialRevisions: (status?: OfficialRevision['status']) =>
+        request<OfficialRevision[]>(`/admin/official-revisions${qs({ status })}`),
+    checkOfficialRevisions: () =>
+        request<OfficialCheckResult>('/admin/official-revisions/check', { method: 'POST', timeoutMs: 90000 }),
+    approveOfficialRevision: (id: number) =>
+        request<OfficialRevision>(`/admin/official-revisions/${id}/approve`, { method: 'POST', timeoutMs: 120000 }),
+    rejectOfficialRevision: (id: number) =>
+        request<OfficialRevision>(`/admin/official-revisions/${id}/reject`, { method: 'POST' }),
+    uploadOfficialRevision: (id: number, data: string, filename: string) =>
+        request<OfficialRevision>(`/admin/official-revisions/${id}/upload`, {
+            method: 'POST', body: { data, filename }, timeoutMs: 120000,
+        }),
 };
 
 /** Yönetici WebSocket bağlantısı (presence, online destek, talep bildirimleri). */

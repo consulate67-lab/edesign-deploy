@@ -1,7 +1,7 @@
 import React, { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
     Bell, BellOff, Bot, ChevronsLeft, ChevronsRight, Images, Inbox, LayoutDashboard, LifeBuoy, LogOut, Mail, Megaphone, Menu, MessagesSquare, MonitorSmartphone, Receipt,
-    Settings as SettingsIcon, Share2, ShieldCheck, Users as UsersIcon,
+    Settings as SettingsIcon, Share2, ShieldAlert, ShieldCheck, Users as UsersIcon,
 } from 'lucide-react';
 import { useUiStore } from '../store/uiStore';
 import type { RealtimeStatus } from '../support/realtime';
@@ -21,6 +21,7 @@ import { RemoteSupport } from './sections/RemoteSupport';
 import { Gallery } from './sections/Gallery';
 import { Settings } from './sections/Settings';
 import { Marketing } from './sections/Marketing';
+import { Revisions } from './sections/Revisions';
 
 const AiSection = lazy(() => import('./sections/AiSection').then(m => ({ default: m.AiSection })));
 const AssistantSection = lazy(() => import('./sections/AssistantSection').then(m => ({ default: m.AssistantSection })));
@@ -44,6 +45,7 @@ const NAV: { id: SectionId; label: string; icon: React.ReactNode }[] = [
     { id: 'mail', label: 'Toplu e-posta', icon: <Mail size={18} /> },
     { id: 'social', label: 'Sosyal paylaşım', icon: <Share2 size={18} /> },
     { id: 'marketing', label: 'Sosyal medya ve reklam', icon: <Megaphone size={18} /> },
+    { id: 'revisions', label: 'Kurumsal revizyonlar', icon: <ShieldAlert size={18} /> },
     { id: 'settings', label: 'Ayarlar', icon: <SettingsIcon size={18} /> },
 ];
 
@@ -83,6 +85,7 @@ const AdminShell: React.FC<{ identity: AdminIdentity; onLogout: () => void }> = 
     const [viewer, setViewer] = useState<RemoteSession | null>(null);
     const [settings, setSettings] = useState<AdminSettingsStatus | null>(null);
     const [galleryDraft, setGalleryDraft] = useState<GalleryDraft | null>(null);
+    const [pendingRevisions, setPendingRevisions] = useState(0);
     const [notifPerm, setNotifPerm] = useState(notificationPermission);
     const wide = useMediaQuery('(min-width: 1100px)');
     const tablet = useMediaQuery('(min-width: 768px)');
@@ -173,6 +176,12 @@ const AdminShell: React.FC<{ identity: AdminIdentity; onLogout: () => void }> = 
 
     useEffect(() => {
         adminApi.settingsStatus().then(setSettings).catch(() => setSettings(null));
+        const loadRevs = () => adminApi.officialRevisions('pending')
+            .then(list => setPendingRevisions(list.length))
+            .catch(() => setPendingRevisions(0));
+        void loadRevs();
+        const revTimer = setInterval(loadRevs, 60_000);
+        return () => clearInterval(revTimer);
     }, []);
 
     const [mailUnread, setMailUnread] = useState(0);
@@ -213,7 +222,7 @@ const AdminShell: React.FC<{ identity: AdminIdentity; onLogout: () => void }> = 
         remote, reloadRemote, inviteUser, connect, go, focus, clearFocus, galleryDraft, setGalleryDraft,
     };
 
-    const badgeFor = (id: SectionId) => id === 'tickets' ? unreadTickets : id === 'remote' ? pendingRemote : id === 'webmail' ? mailUnread : 0;
+    const badgeFor = (id: SectionId) => id === 'tickets' ? unreadTickets : id === 'remote' ? pendingRemote : id === 'webmail' ? mailUnread : id === 'revisions' ? pendingRevisions : 0;
     const showLabels = tablet ? !collapsed : true;
     const sidebarW = showLabels ? 236 : 68;
     const tgOk = settings ? settings.telegram.configured && settings.telegram.chatConfigured : null;
@@ -359,6 +368,7 @@ const AdminShell: React.FC<{ identity: AdminIdentity; onLogout: () => void }> = 
                             </SectionBoundary>
                         )}
                         {section === 'marketing' && <Marketing />}
+                        {section === 'revisions' && <Revisions />}
                         {section === 'settings' && <Settings onStatus={setSettings} />}
                     </main>
                 </div>

@@ -93,7 +93,12 @@ export const FAMILY_INFO: Record<DocFamily, { root: string; ns: string; label: s
     ebiletPassengerList: { root: 'eYolcuListesi', ns: 'http://ebilet.efatura.gov.tr', label: 'e-Yolcu Listesi (eYolcuListesi)' },
 };
 
-const inline = (key: string) => async () => (await import('../xsltContent')).getInlineXslt(key) ?? '';
+const inline = (key: string) => async () => {
+    const { getOfficialXsltOverride } = await import('../officialArtifacts');
+    const override = await getOfficialXsltOverride(key);
+    if (override) return override;
+    return (await import('../xsltContent')).getInlineXslt(key) ?? '';
+};
 const antrepo = (id: string) => async () => (await import('../xslt-editor/antrepoTemplates')).getAntrepoTemplateById(id)?.xslt ?? '';
 
 /**

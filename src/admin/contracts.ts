@@ -50,9 +50,19 @@
  *     POST /support/tickets/:id/read                         → {success:true}
  *     POST /support/remote {ticketId?, note?}                → RemoteSession (kullanıcı onayıyla açılır)
  *     GET  /support/remote/active                            → RemoteSession | null
+ *   Kurumsal revizyonlar (GİB paket / XSLT):
+ *     GET  /admin/official-revisions/sources                 → OfficialSource[]
+ *     GET  /admin/official-revisions?status=                 → OfficialRevision[]
+ *     POST /admin/official-revisions/check                   → OfficialCheckResult
+ *     POST /admin/official-revisions/:id/approve             → OfficialRevision (indir + uygula)
+ *     POST /admin/official-revisions/:id/reject              → OfficialRevision
+ *     POST /admin/official-revisions/:id/upload {data,filename} → OfficialRevision
  *   Herkese açık:
  *     GET  /gallery                                          → GalleryDesign[] (yalnızca published)
  *     GET  /site-config                                      → SiteConfig
+ *     GET  /official-revisions                               → uygulanan revizyonlar (kullanıcı bildirimi)
+ *     GET  /official-artifacts                               → artefact meta listesi
+ *     GET  /official-artifacts/:encodedPath                  → içerik veya ?download=1
  *
  * WebSocket: wsUrl(token) (src/api.ts). Mesajlar JSON, `t` alanıyla ayrılır (WsMessage).
  */
@@ -626,5 +636,59 @@ export interface MailSendInput {
     attachments: { filename: string; contentType: string; data: string }[];
     replyTo?: number;
     forwardAttachmentsOf?: number;
+}
+
+/** GİB / kurumsal paket revizyon takibi (server/gib-revisions.js). */
+export type OfficialRevisionStatus = 'pending' | 'approved' | 'rejected' | 'applied' | 'failed';
+
+export interface OfficialSource {
+    id: string;
+    label: string;
+    url: string;
+    kind: string;
+    tracked_meta: {
+        url?: string;
+        contentLength?: string;
+        lastModified?: string;
+        etag?: string;
+        sha256?: string;
+    };
+    extract_map: Record<string, string>;
+    affects: string[];
+    notes: string | null;
+    enabled: boolean;
+    last_checked_at: string | null;
+    updated_at: string;
+}
+
+export interface OfficialRevisionDiffFile {
+    path: string;
+    from?: string;
+    bytes: number;
+    sha256: string;
+    changed: boolean;
+    previous_sha256?: string | null;
+}
+
+export interface OfficialRevision {
+    id: number;
+    source_id: string;
+    source_label: string | null;
+    status: OfficialRevisionStatus;
+    remote_url: string;
+    remote_meta: OfficialSource['tracked_meta'] & { uploaded?: boolean; uploadedAs?: string };
+    summary: string | null;
+    diff_summary: { files?: OfficialRevisionDiffFile[]; entryCount?: number } | null;
+    detected_at: string;
+    reviewed_at: string | null;
+    reviewed_by: number | null;
+    applied_at: string | null;
+    error: string | null;
+    affects: string[];
+}
+
+export interface OfficialCheckResult {
+    checked: { id: string; ok: boolean; pending?: boolean; unchanged?: boolean; baseline?: boolean; error?: string; meta?: unknown }[];
+    created: OfficialRevision[];
 }
 

@@ -29,7 +29,7 @@ public/ebelge/
 | Belge | Resmi Paket URL | Durum |
 |---|---|---|
 | e-Fatura | `https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/e-FaturaPaketi%20(29).zip` | ✅ v29 (24.08.2026) — XSLT viewer JAR'da |
-| e-Arşiv | `https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/earsiv_paket_v1.1_8.zip` | ✅ v1.1.8 (27.07.2026) — şema var, XSLT yok |
+| e-Arşiv | `https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/earsiv_paket_v1.1_9.zip` | ✅ v1.1.9 — şema var, XSLT yok (v1.1.8 hâlâ erişilebilir) |
 | e-İrsaliye | `https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/eIrsaliyePaketi.zip` | ❌ 404 — public URL yok |
 | e-İhracat | `https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/eIhracatPaketi.zip` | ❌ 404 — public URL yok |
 | e-Mikro İhracat | `https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/eMikroIhracatPaketi.zip` | ❌ 404 |
@@ -89,7 +89,11 @@ fetch('/ebelge/gib/e-Fatura.xslt').then(r => r.text());
 
 ## Güncelleme
 
-GİB paketleri sık güncelleniyor. Güncel XSLT'leri almak için:
+GİB paketleri sık güncelleniyor. Canlı sistemde sunucu 6 saatte bir kaynakları kontrol eder;
+yönetim paneli → **Kurumsal revizyonlar** üzerinden onaylanınca paket indirilir (veya elle
+yüklenir) ve `official_artifacts` tablosuna yazılır. Kullanıcı sihirbazında bildirim görünür.
+
+Elle XSLT almak için:
 
 ```bash
 curl -L -o /tmp/eblg.jar "https://ebelge.gib.gov.tr/EFaturaGoruntuleyici/Windows/Java17/EBelgeGoruntuleyici.jar"
