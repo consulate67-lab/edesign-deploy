@@ -408,6 +408,7 @@ async function applyPackageBuffer(db, revision, buffer, meta, adminId) {
         const changed = !prev || prev.content_sha256 !== f.sha256;
         diff.push({ path: f.path, from: f.from, bytes: f.bytes, sha256: f.sha256, changed, previous_sha256: prev?.content_sha256 || null });
         if (changed) {
+            // RETURNING path: adapter aksi halde olmayan "id" sütununu ister.
             await db.run(
                 `INSERT INTO official_artifacts (path, content, content_sha256, revision_id, source_id, updated_at)
                  VALUES (?, ?, ?, ?, ?, NOW())
@@ -416,7 +417,8 @@ async function applyPackageBuffer(db, revision, buffer, meta, adminId) {
                     content_sha256 = EXCLUDED.content_sha256,
                     revision_id = EXCLUDED.revision_id,
                     source_id = EXCLUDED.source_id,
-                    updated_at = NOW()`,
+                    updated_at = NOW()
+                 RETURNING path`,
                 [f.path, f.content, f.sha256, revision.id, source.id]
             );
         }
