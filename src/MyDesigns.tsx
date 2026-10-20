@@ -125,7 +125,7 @@ const ghostBtn: React.CSSProperties = {
 };
 
 /** Devam eden (onaylanmamış) tasarımlar — en son düzenlenen 5 tanesi. */
-export const MyDesigns: React.FC<{ onOpen: (d: SavedDesign) => void }> = ({ onOpen }) => {
+export const MyDesigns: React.FC<{ onOpen: (d: SavedDesign) => void; forceShow?: boolean }> = ({ onOpen, forceShow }) => {
     const { t } = useLocaleT();
     const { designs, remove } = useDesigns();
     const [officialRevs, setOfficialRevs] = useState<PublicOfficialRevision[]>([]);
@@ -144,7 +144,28 @@ export const MyDesigns: React.FC<{ onOpen: (d: SavedDesign) => void }> = ({ onOp
         return () => { alive = false; };
     }, []);
 
-    if (!drafts.length) return null;
+    if (!forceShow && !drafts.length) return null;
+    if (forceShow && designs === null) {
+        return (
+            <div data-my-designs style={{ width: '100%', marginBottom: '2rem' }}>
+                {sectionTitle(t('designs.draftsTitle'), t('designs.draftsNote', { count: MAX_DRAFTS }))}
+                <div style={{ color: theme.textMuted, fontSize: 14 }}>{t('common.loading')}</div>
+            </div>
+        );
+    }
+    if (forceShow && !drafts.length) {
+        return (
+            <div data-my-designs style={{ width: '100%', marginBottom: '2rem' }}>
+                {sectionTitle(t('designs.draftsTitle'), t('designs.draftsNote', { count: MAX_DRAFTS }))}
+                <div data-designs-empty style={{
+                    padding: '28px 20px', textAlign: 'center', borderRadius: 14,
+                    border: `1px dashed ${theme.borderStrong}`, background: theme.surfaceAlt, color: theme.textMuted, fontSize: 14,
+                }}>
+                    {t('selection.emptyDrafts')}
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div data-my-designs style={{ width: '100%', marginBottom: '2rem' }}>
@@ -235,7 +256,7 @@ const td: React.CSSProperties = {
 };
 
 /** Onaylanmış (satın alınmış) tasarımlar — kilitli; önizlenir ve tekrar indirilir. */
-export const CompletedDesigns: React.FC = () => {
+export const CompletedDesigns: React.FC<{ forceShow?: boolean }> = ({ forceShow }) => {
     const { t, locale } = useLocaleT();
     const { designs, remove } = useDesigns();
     const [query, setQuery] = useState('');
@@ -253,7 +274,28 @@ export const CompletedDesigns: React.FC = () => {
     const current = Math.min(page, pageCount - 1);
     const rows = filtered.slice(current * PAGE_SIZE, (current + 1) * PAGE_SIZE);
 
-    if (!completed.length) return null;
+    if (!forceShow && !completed.length) return null;
+    if (forceShow && designs === null) {
+        return (
+            <div data-completed-designs style={{ width: '100%', marginBottom: '2rem' }}>
+                {sectionTitle(t('designs.completedTitle'), t('designs.completedNote'))}
+                <div style={{ color: theme.textMuted, fontSize: 14 }}>{t('common.loading')}</div>
+            </div>
+        );
+    }
+    if (forceShow && !completed.length) {
+        return (
+            <div data-completed-designs style={{ width: '100%', marginBottom: '2rem' }}>
+                {sectionTitle(t('designs.completedTitle'), t('designs.completedNote'))}
+                <div data-designs-empty style={{
+                    padding: '28px 20px', textAlign: 'center', borderRadius: 14,
+                    border: `1px dashed ${theme.borderStrong}`, background: theme.surfaceAlt, color: theme.textMuted, fontSize: 14,
+                }}>
+                    {t('selection.emptyCompleted')}
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div data-completed-designs style={{ width: '100%', marginBottom: '2rem' }}>

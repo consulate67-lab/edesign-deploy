@@ -268,7 +268,7 @@ const IntlDocTypePicker: React.FC<{
  * veri (varsayılan / kendi XML) → tasarım ekranı. Kullanıcı dosyaları seçilen
  * belge türüne uygunluk için kontrol edilir; hata varsa ilerlenemez.
  */
-export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = ({ onFinish }) => {
+export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void; onDismiss?: () => void }> = ({ onFinish, onDismiss }) => {
     const { t, locale } = useLocaleT();
     const [step, setStep] = useState(0);
     const country = useCountry() ?? 'TR';
@@ -638,8 +638,22 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void }> = (
                 position: 'sticky', bottom: 0, zIndex: 5, padding: '14px 0 12px',
                 background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, #ffffff 28%)',
             }}>
-                <button type="button" data-wizard-back disabled={step === 0} onClick={() => { setError(null); setStep(s => Math.max(0, s - 1)); }}
-                    style={{ padding: '10px 18px', borderRadius: 10, border: `1px solid ${theme.borderStrong}`, background: theme.surface, color: step === 0 ? theme.borderStrong : theme.text, cursor: step === 0 ? 'default' : 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'inherit' }}>
+                <button
+                    type="button"
+                    data-wizard-back
+                    disabled={step === 0 && !onDismiss}
+                    onClick={() => {
+                        setError(null);
+                        if (step === 0) { onDismiss?.(); return; }
+                        setStep(s => Math.max(0, s - 1));
+                    }}
+                    style={{
+                        padding: '10px 18px', borderRadius: 10, border: `1px solid ${theme.borderStrong}`, background: theme.surface,
+                        color: step === 0 && !onDismiss ? theme.borderStrong : theme.text,
+                        cursor: step === 0 && !onDismiss ? 'default' : 'pointer',
+                        display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'inherit',
+                    }}
+                >
                     <ArrowLeft size={16} /> {t('common.back')}
                 </button>
                 {step > 0 && (

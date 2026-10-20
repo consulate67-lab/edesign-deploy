@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { LogOut, User, X, CreditCard, Building2, Phone, Mail, Sparkles } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { LogOut, User, X, CreditCard, Building2, Phone, Mail, Sparkles, PenLine, FolderOpen, ChevronDown, Check } from 'lucide-react';
 import { api } from './api';
 import { PaymentModal } from './PaymentModal.tsx';
 import { DesignWizard } from './wizard/DesignWizard';
@@ -17,16 +17,58 @@ interface SelectionProps {
     onSelectXsltEditor?: (moduleId?: string, initialXslt?: string, docName?: string, xml?: string, designId?: number) => void;
 }
 
+type DesignsPanel = 'drafts' | 'completed' | null;
+
+interface SelectionUser {
+    full_name?: string | null;
+    company_name?: string | null;
+    username?: string;
+    phone_number?: string | null;
+    role?: string;
+    credits?: number;
+}
+
 export const Selection: React.FC<SelectionProps> = ({ onLogout, onSelectXsltEditor }) => {
     const { t } = useLocaleT();
     const isTurkey = (useCountry() ?? 'TR') === 'TR';
     const [showProfileModal, setShowProfileModal] = useState(false);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
-    const [userInfo, setUserInfo] = useState<any>(null);
+    const [userInfo, setUserInfo] = useState<SelectionUser | null>(null);
+    const [manualOpen, setManualOpen] = useState(false);
+    const [designsPanel, setDesignsPanel] = useState<DesignsPanel>(null);
+    const [designsMenuOpen, setDesignsMenuOpen] = useState(false);
+    const designsMenuRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         api.getMe().then(setUserInfo).catch(console.error);
     }, []);
+
+    useEffect(() => {
+        if (!designsMenuOpen) return;
+        const onDoc = (e: MouseEvent) => {
+            if (!designsMenuRef.current?.contains(e.target as Node)) setDesignsMenuOpen(false);
+        };
+        const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setDesignsMenuOpen(false); };
+        document.addEventListener('mousedown', onDoc);
+        document.addEventListener('keydown', onKey);
+        return () => {
+            document.removeEventListener('mousedown', onDoc);
+            document.removeEventListener('keydown', onKey);
+        };
+    }, [designsMenuOpen]);
+
+    const openDesigns = (panel: DesignsPanel) => {
+        setDesignsPanel(panel);
+        setDesignsMenuOpen(false);
+        setManualOpen(false);
+    };
+
+    const topBtn: React.CSSProperties = {
+        background: '#fff', border: `1px solid ${theme.border}`,
+        padding: '0.6rem 1.2rem', borderRadius: '12px', color: theme.text, boxShadow: theme.shadowSm, cursor: 'pointer',
+        display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s',
+        backdropFilter: 'blur(10px)', fontFamily: 'inherit',
+    };
 
     return (
         <div data-selection-scroll style={{
@@ -67,7 +109,7 @@ export const Selection: React.FC<SelectionProps> = ({ onLogout, onSelectXsltEdit
                         background: theme.gradient, border: 'none',
                         padding: '0.6rem 1.4rem', borderRadius: '12px', color: 'white', cursor: 'pointer',
                         display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s',
-                        boxShadow: theme.shadowBrand, fontWeight: 'bold'
+                        boxShadow: theme.shadowBrand, fontWeight: 'bold', fontFamily: 'inherit',
                     }}
                     onMouseOver={(e) => (e.currentTarget.style.transform = 'translateY(-2px)')}
                     onMouseOut={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
@@ -76,14 +118,61 @@ export const Selection: React.FC<SelectionProps> = ({ onLogout, onSelectXsltEdit
                     <span style={{ fontSize: '0.9rem' }}>{t('selection.buy')}</span>
                 </button>
 
+                <div ref={designsMenuRef} data-designs-menu style={{ position: 'relative' }}>
+                    <button
+                        type="button"
+                        data-designs-menu-toggle
+                        aria-expanded={designsMenuOpen}
+                        aria-haspopup="menu"
+                        onClick={() => setDesignsMenuOpen(o => !o)}
+                        style={{
+                            ...topBtn,
+                            borderColor: designsPanel ? theme.primary : theme.border,
+                            background: designsPanel ? theme.primarySoft : '#fff',
+                        }}
+                    >
+                        <FolderOpen size={18} color={theme.primary} />
+                        <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>{t('selection.designsMenu')}</span>
+                        <ChevronDown size={16} color={theme.textMuted} style={{ transform: designsMenuOpen ? 'rotate(180deg)' : undefined, transition: 'transform 0.15s' }} />
+                    </button>
+                    {designsMenuOpen && (
+                        <div
+                            role="menu"
+                            data-designs-menu-list
+                            style={{
+                                position: 'absolute', top: 'calc(100% + 6px)', right: 0, minWidth: 220,
+                                background: theme.surface, border: `1px solid ${theme.border}`, borderRadius: 14,
+                                boxShadow: theme.shadowLg, padding: 6, zIndex: 60,
+                            }}
+                        >
+                            {([
+                                { id: 'drafts' as const, label: t('selection.draftsMenu') },
+                                { id: 'completed' as const, label: t('selection.completedMenu') },
+                            ]).map(item => (
+                                <button
+                                    key={item.id}
+                                    type="button"
+                                    role="menuitem"
+                                    data-designs-menu-item={item.id}
+                                    onClick={() => openDesigns(item.id)}
+                                    style={{
+                                        width: '100%', display: 'flex', alignItems: 'center', gap: 8,
+                                        padding: '10px 12px', border: 'none', borderRadius: 10, cursor: 'pointer',
+                                        background: designsPanel === item.id ? theme.primarySoft : 'transparent',
+                                        color: theme.text, fontFamily: 'inherit', fontSize: 14, fontWeight: 600, textAlign: 'left',
+                                    }}
+                                >
+                                    {designsPanel === item.id ? <Check size={15} color={theme.primary} /> : <span style={{ width: 15 }} />}
+                                    {item.label}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
                 <button
                     onClick={() => setShowProfileModal(true)}
-                    style={{
-                        background: '#fff', border: `1px solid ${theme.border}`,
-                        padding: '0.6rem 1.2rem', borderRadius: '12px', color: theme.text, boxShadow: theme.shadowSm, cursor: 'pointer',
-                        display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s',
-                        backdropFilter: 'blur(10px)'
-                    }}
+                    style={topBtn}
                     onMouseOver={(e) => (e.currentTarget.style.background = theme.primarySoft)}
                     onMouseOut={(e) => (e.currentTarget.style.background = '#fff')}
                 >
@@ -94,10 +183,7 @@ export const Selection: React.FC<SelectionProps> = ({ onLogout, onSelectXsltEdit
                 <button
                     onClick={onLogout}
                     style={{
-                        background: '#fff', border: '1px solid #fecaca',
-                        padding: '0.6rem 1.2rem', borderRadius: '12px', color: theme.redText, cursor: 'pointer',
-                        display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s',
-                        backdropFilter: 'blur(10px)'
+                        ...topBtn, border: '1px solid #fecaca', color: theme.redText,
                     }}
                     onMouseOver={(e) => {
                         e.currentTarget.style.background = theme.redSoft;
@@ -214,25 +300,90 @@ export const Selection: React.FC<SelectionProps> = ({ onLogout, onSelectXsltEdit
                     </p>
                 </div>
 
-                <MyDesigns
-                    onOpen={(d) => onSelectXsltEditor?.(d.module_id, d.xslt_content ?? undefined, d.name, d.xml_content ?? undefined, d.id)}
-                />
+                {designsPanel ? (
+                    <div data-designs-panel={designsPanel} style={{ width: '100%' }}>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+                            <button
+                                type="button"
+                                data-designs-panel-close
+                                onClick={() => setDesignsPanel(null)}
+                                style={{
+                                    display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px',
+                                    borderRadius: 10, border: `1px solid ${theme.borderStrong}`, background: theme.surface,
+                                    color: theme.textMuted, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600, fontSize: 13,
+                                }}
+                            >
+                                <X size={14} /> {t('selection.closePanel')}
+                            </button>
+                        </div>
+                        {designsPanel === 'drafts' && (
+                            <MyDesigns
+                                forceShow
+                                onOpen={(d) => onSelectXsltEditor?.(d.module_id, d.xslt_content ?? undefined, d.name, d.xml_content ?? undefined, d.id)}
+                            />
+                        )}
+                        {designsPanel === 'completed' && <CompletedDesigns forceShow />}
+                    </div>
+                ) : (
+                    <>
+                        <div style={{ width: '100%', marginBottom: '1.5rem' }}>
+                            {!manualOpen ? (
+                                <button
+                                    type="button"
+                                    data-edit-myself
+                                    onClick={() => setManualOpen(true)}
+                                    style={{
+                                        width: '100%', display: 'flex', alignItems: 'center', gap: 16,
+                                        padding: '22px 24px', borderRadius: 24, cursor: 'pointer', textAlign: 'left',
+                                        background: theme.surface, border: `1px solid ${theme.border}`,
+                                        boxShadow: theme.shadow, color: theme.text, fontFamily: 'inherit',
+                                        transition: 'border-color 0.15s, transform 0.15s',
+                                    }}
+                                    onMouseOver={(e) => { e.currentTarget.style.borderColor = theme.primary; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                                    onMouseOut={(e) => { e.currentTarget.style.borderColor = theme.border; e.currentTarget.style.transform = 'translateY(0)'; }}
+                                >
+                                    <div style={{
+                                        width: 52, height: 52, borderRadius: 16, flexShrink: 0,
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        background: theme.gradient, boxShadow: theme.shadowBrand,
+                                    }}>
+                                        <PenLine size={24} color="white" />
+                                    </div>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                        <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 4 }}>{t('selection.editMyself')}</div>
+                                        <div style={{ fontSize: 14, color: theme.textMuted, lineHeight: 1.45 }}>{t('selection.editMyselfHint')}</div>
+                                    </div>
+                                </button>
+                            ) : (
+                                <DesignWizard
+                                    onDismiss={() => setManualOpen(false)}
+                                    onFinish={(r) => onSelectXsltEditor?.(r.moduleId, r.xslt, r.docName, r.xml)}
+                                />
+                            )}
+                        </div>
 
-                <div style={{ width: '100%', marginBottom: '2rem' }}>
-                    <DesignWizard
-                        onFinish={(r) => onSelectXsltEditor?.(r.moduleId, r.xslt, r.docName, r.xml)}
-                    />
-                </div>
-
-                <CompletedDesigns />
-
-                {isTurkey && <TemplateGallery onUse={onSelectXsltEditor} />}
+                        {isTurkey && (
+                            <>
+                                <div data-selection-or style={{
+                                    width: '100%', display: 'flex', alignItems: 'center', gap: 14,
+                                    margin: '0.25rem 0 1.5rem', color: theme.textSubtle, fontSize: 13, fontWeight: 800,
+                                    letterSpacing: '0.08em', textTransform: 'uppercase',
+                                }}>
+                                    <div style={{ flex: 1, height: 1, background: theme.border }} />
+                                    {t('selection.orDivider')}
+                                    <div style={{ flex: 1, height: 1, background: theme.border }} />
+                                </div>
+                                <TemplateGallery onUse={onSelectXsltEditor} />
+                            </>
+                        )}
+                    </>
+                )}
             </div>
 
             <PaymentModal
                 isOpen={showPaymentModal}
                 onClose={() => setShowPaymentModal(false)}
-                onSuccess={(credits) => setUserInfo((prev: any) => prev ? { ...prev, credits } : null)}
+                onSuccess={(credits) => setUserInfo(prev => prev ? { ...prev, credits } : null)}
             />
         </div>
     );
