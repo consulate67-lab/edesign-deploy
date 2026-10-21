@@ -47,8 +47,8 @@ const parseDelimited = (text: string, delim: string): string[][] => {
 const findCol = (header: string[], test: (h: string) => boolean) => header.findIndex(h => test(foldCountry(h)));
 const isEmailHeader = (h: string) => /(posta|mail|courriel|correo|почт)/.test(h);
 const isCountryHeader = (h: string) => /^(ulke|country|land|pays|pais|страна)( adi| name)?$/.test(h);
-const isNameHeader = (h: string) => /^(yetkili|yetkili kisi|ad soyad|adi soyadi|isim|ad|name|full name|contact|contact person|kisi|nom|nombre)$/.test(h);
-const isCompanyHeader = (h: string) => /^(firma|firma adi|sirket|unvan|company|company name|organization|organisation|entreprise|empresa)$/.test(h);
+const isNameHeader = (h: string) => /^(yetkili|yetkili kisi|ad soyad|ad soyad kurum|adi soyadi|isim|ad|name|full name|contact|contact person|kisi|nom|nombre)$/.test(h);
+const isCompanyHeader = (h: string) => /^(firma|firma adi|sirket|unvan|kurum|kurum buro|company|company name|organization|organisation|entreprise|empresa)$/.test(h);
 
 const cleanName = (s: string) => s.replace(/[<>"'`;,|\t]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120);
 
@@ -70,16 +70,24 @@ export const parseRecipients = (raw: string): ParsedList => {
         }
     };
 
-    const firstLine = raw.split(/\r?\n/).find(l => l.trim()) ?? '';
+    const lines = raw.split(/\r?\n/);
+    const firstLine = lines.find(l => l.trim()) ?? '';
     const delim = firstLine.includes('\t') ? '\t' : firstLine.includes(';') ? ';' : ',';
-    const header = firstLine.includes('@') ? [] : parseDelimited(firstLine, delim)[0] ?? [];
+    let header: string[] = [];
+    let bodyStart = 0;
+    for (let i = 0; i < Math.min(lines.length, 15); i++) {
+        const line = lines[i];
+        if (!line.trim() || line.includes('@')) continue;
+        const cells = parseDelimited(line, delim)[0] ?? [];
+        if (findCol(cells, isEmailHeader) >= 0) { header = cells; bodyStart = i + 1; break; }
+    }
     const emailCol = findCol(header, isEmailHeader);
 
     if (emailCol >= 0) {
         const countryCol = findCol(header, isCountryHeader);
         const nameCol = findCol(header, isNameHeader);
         const companyCol = findCol(header, isCompanyHeader);
-        const rows = parseDelimited(raw.slice(raw.indexOf(firstLine) + firstLine.length), delim);
+        const rows = parseDelimited(lines.slice(bodyStart).join('\n'), delim);
         for (const row of rows) {
             if (!row.some(c => c.trim())) continue;
             const found = (row[emailCol] ?? '').match(EMAIL_RE) ?? [];

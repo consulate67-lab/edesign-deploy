@@ -4,6 +4,8 @@ import trHtml from '../../../../marketing/email-tanitim.html?raw';
 import trText from '../../../../marketing/email-tanitim.txt?raw';
 import trFirmaHtml from '../../../../marketing/email-firma.html?raw';
 import trFirmaText from '../../../../marketing/email-firma.txt?raw';
+import trMusavirHtml from '../../../../marketing/email-musavir.html?raw';
+import trMusavirText from '../../../../marketing/email-musavir.txt?raw';
 import enHtml from '../../../../marketing/email-tanitim-en.html?raw';
 import enText from '../../../../marketing/email-tanitim-en.txt?raw';
 import enUsHtml from '../../../../marketing/email-tanitim-en-us.html?raw';
@@ -33,6 +35,11 @@ export const BROCHURES: Record<BrochureId, MailContent> = {
         subject: 'Firmanızın profesyonel yüzü faturanız ile müşterinize ulaşsın',
         html: trFirmaHtml,
         text: trFirmaText,
+    },
+    'tr-musavir': {
+        subject: 'e-SMM ve e-Müstahsil makbuzunu siz tasarlayın',
+        html: trMusavirHtml,
+        text: trMusavirText,
     },
     en: { subject: subjects.en, html: enHtml, text: enText },
     'en-us': { subject: subjects['en-us'], html: enUsHtml, text: enUsText },

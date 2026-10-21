@@ -1,0 +1,36 @@
+edXdocu
+
+MALİ MÜŞAVİRLER İÇİN
+e-SMM VE e-MÜSTAHSİL MAKBUZUNU SİZ TASARLAYIN
+
+Serbest meslek makbuzu ve müstahsil makbuzu, büronuzun logosu ve kaşesiyle çıksın.
+e-Fatura ve e-Arşiv de aynı yerde. XSLT bilmeden, GİB UBL-TR uyumlu.
+
+www.edxdocu.com
+https://www.edxdocu.com/?utm_source=email&utm_medium=email&utm_campaign=musavir&utm_content=hero
+
+
+ÖNDE OLAN BELGELER
+e-SMM — Serbest meslek makbuzu. Hazır şablon; logo, kaşe ve imza sürükle-bırak.
+e-Müstahsil — Müstahsil makbuzu. Çiftçi ve üreticiden alım belgesi de aynı tasarımcıda.
+
+AYNI EDİTÖRDE
+e-Fatura — Kurumsal görünüm, UBL-TR uyumlu hazır şablon.
+e-Arşiv — e-Arşiv fatura tasarımı da aynı ekranda.
+
+
+ÜÇ ADIMDA ENTEGRATÖRE HAZIR XSLT
+1. Belgeyi seçin: e-SMM, e-Müstahsil, e-Fatura veya e-Arşiv.
+2. Logo ve kaşeyi yerleştirin. Kendi XML’inizle önizleyin.
+3. İndirip entegratöre veya ERP’ye verin.
+
+
+Ücretsiz üye olun, kendi XML’inizle deneyin. Kurulum yok, abonelik yok.
+https://www.edxdocu.com/?utm_source=email&utm_medium=email&utm_campaign=musavir&utm_content=final
+
+--
+edXdocu
+www.edxdocu.com
+
+Bu bilgilendirme, mali müşavirlik faaliyetinizle ilgili olabileceği düşüncesiyle gönderilmiştir.
+Bir daha almak istemiyorsanız tek tıkla listeden çıkın: {{UNSUBSCRIBE_URL}}

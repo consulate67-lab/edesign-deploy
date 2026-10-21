@@ -1,11 +1,12 @@
 import { countryProfiles, type UiLanguage } from '../../../international/registry/countryProfiles';
 
 /** Broşür sürümü: site dili, ya da aynı dilde ülkesinin resmî formatını öne çıkaran sürüm. */
-export type BrochureId = UiLanguage | 'en-in' | 'en-us' | 'tr-firma';
+export type BrochureId = UiLanguage | 'en-in' | 'en-us' | 'tr-firma' | 'tr-musavir';
 
 export const BROCHURE_OPTIONS: { id: BrochureId; label: string }[] = [
     { id: 'tr', label: 'Türkçe' },
     { id: 'tr-firma', label: 'Türkçe · firma' },
+    { id: 'tr-musavir', label: 'Türkçe · mali müşavir' },
     { id: 'en', label: 'İngilizce · Avrupa' },
     { id: 'en-us', label: 'İngilizce · ABD' },
     { id: 'en-in', label: 'İngilizce · Hindistan' },
