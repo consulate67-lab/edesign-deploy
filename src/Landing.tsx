@@ -86,6 +86,8 @@ const LANDING_CSS = `
   .ld-header{padding:12px 16px !important}
   .ld-logo{height:36px !important}
   .ld-section{padding-left:16px !important;padding-right:16px !important}
+  .ld-korgun-row{max-width:100%}
+  .ld-korgun-eyebrow{white-space:normal !important;max-width:46%}
 }
 @media (prefers-reduced-motion: reduce){
   .ld-float{animation:none !important}
@@ -249,12 +251,11 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                         maxWidth: 1280,
                         margin: '0 auto',
                         display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        gap: 24,
+                        flexDirection: 'column',
+                        gap: 8,
                     }}
                 >
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 8, minWidth: 0 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 24 }}>
                         <a
                             href="#"
                             onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
@@ -262,56 +263,6 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                         >
                             <img className="ld-logo" src={LOGO_URL} srcSet={LOGO_SRCSET} alt="edXdocu" width={300} height={100} style={{ display: 'block', height: 46, width: 'auto' }} />
                         </a>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 6, paddingLeft: 2 }}>
-                            <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '-0.01em', color: theme.primary, lineHeight: 1.2 }}>
-                                {t('landing.korgun.eyebrow')}
-                            </div>
-                        <a
-                            data-korgun-link
-                            href="https://erp.korgun.com.tr/cloud-erp"
-                            target="_blank"
-                            rel="noopener"
-                            className="ld-card"
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 10,
-                                padding: '5px 12px 5px 5px',
-                                background: '#fff',
-                                border: `1px solid ${theme.border}`,
-                                borderRadius: 14,
-                                textDecoration: 'none',
-                                color: theme.text,
-                                boxShadow: theme.shadowSm,
-                                minWidth: 0,
-                            }}
-                        >
-                            <span
-                                aria-hidden
-                                style={{
-                                    width: 34,
-                                    height: 34,
-                                    borderRadius: 10,
-                                    flexShrink: 0,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    background: 'linear-gradient(135deg, #0f766e, #2563eb)',
-                                    color: '#fff',
-                                    fontWeight: 800,
-                                    fontSize: 15,
-                                }}
-                            >
-                                K
-                            </span>
-                            <span style={{ minWidth: 0, textAlign: 'left' }}>
-                                <span style={{ display: 'block', fontSize: 13, fontWeight: 800, letterSpacing: '-0.01em', whiteSpace: 'nowrap' }}>{t('landing.korgun.title')}</span>
-                                <span className="ld-korgun-hint" style={{ display: 'block', marginTop: 1, fontSize: 11, color: theme.textMuted, fontWeight: 600, whiteSpace: 'nowrap' }}>{t('landing.korgun.hint')}</span>
-                            </span>
-                            <ExternalLink size={14} color={theme.primary} style={{ flexShrink: 0 }} />
-                        </a>
-                        </div>
-                    </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
                         <nav className="ld-nav" style={{ display: 'flex', gap: 28, fontSize: 14, fontWeight: 600 }}>
                             <a href="#urun">{t('landing.nav.product')}</a>
@@ -361,6 +312,56 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                                 {t('landing.register')} <ArrowRight size={14} />
                             </button>
                         </div>
+                    </div>
+                    </div>
+                    <div className="ld-korgun-row" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 10, paddingLeft: 2 }}>
+                        <div className="ld-korgun-eyebrow" style={{ fontSize: 12, fontWeight: 800, letterSpacing: '-0.01em', color: theme.primary, lineHeight: 1.2, whiteSpace: 'nowrap' }}>
+                            {t('landing.korgun.eyebrow')}
+                        </div>
+                        <a
+                            data-korgun-link
+                            href="https://erp.korgun.com.tr/cloud-erp"
+                            target="_blank"
+                            rel="noopener"
+                            className="ld-card"
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 10,
+                                padding: '5px 12px 5px 5px',
+                                background: '#fff',
+                                border: `1px solid ${theme.border}`,
+                                borderRadius: 14,
+                                textDecoration: 'none',
+                                color: theme.text,
+                                boxShadow: theme.shadowSm,
+                                flexShrink: 0,
+                            }}
+                        >
+                            <span
+                                aria-hidden
+                                style={{
+                                    width: 34,
+                                    height: 34,
+                                    borderRadius: 10,
+                                    flexShrink: 0,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    background: 'linear-gradient(135deg, #0f766e, #2563eb)',
+                                    color: '#fff',
+                                    fontWeight: 800,
+                                    fontSize: 15,
+                                }}
+                            >
+                                K
+                            </span>
+                            <span style={{ minWidth: 0, textAlign: 'left' }}>
+                                <span style={{ display: 'block', fontSize: 13, fontWeight: 800, letterSpacing: '-0.01em', whiteSpace: 'nowrap' }}>{t('landing.korgun.title')}</span>
+                                <span className="ld-korgun-hint" style={{ display: 'block', marginTop: 1, fontSize: 11, color: theme.textMuted, fontWeight: 600, whiteSpace: 'nowrap' }}>{t('landing.korgun.hint')}</span>
+                            </span>
+                            <ExternalLink size={14} color={theme.primary} style={{ flexShrink: 0 }} />
+                        </a>
                     </div>
                 </div>
             </header>
