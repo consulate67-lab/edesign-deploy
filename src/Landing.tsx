@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { ArrowRight, Sparkles, Zap, FileText, Globe, Layers, ChevronDown, Check, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Sparkles, Zap, FileText, Globe, Layers, ChevronDown, Check, ShieldCheck, ExternalLink } from 'lucide-react';
 import { KVKKModal, KullaniciSozlesmesiModal, CerezPolitikasiModal, IletisimModal } from './legal/Legal';
 import { api } from './api';
 import {
@@ -76,6 +76,7 @@ const LANDING_CSS = `
   .ld-hero-text [data-rotating-doctype]{justify-content:center}
   .ld-hero-sub{margin-left:auto !important;margin-right:auto !important}
   .ld-hero-ctas{justify-content:center}
+  .ld-korgun{margin-left:auto;margin-right:auto}
   .ld-bento{grid-template-columns:1fr 1fr}
   .ld-bento-hero{grid-row:auto;grid-column:1 / -1}
 }
@@ -441,7 +442,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                         </button>
                     </div>
 
-                    <div style={{ fontSize: 14 }}>
+                    <div style={{ fontSize: 14, marginBottom: 18 }}>
                         <a
                             href="#"
                             onClick={(e) => { e.preventDefault(); onLogin(); }}
@@ -450,6 +451,51 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                             {t('landing.alreadyMember')}
                         </a>
                     </div>
+                    <a
+                        data-korgun-link
+                        href="https://erp.korgun.com.tr/cloud-erp"
+                        target="_blank"
+                        rel="noopener"
+                        className="ld-card ld-korgun"
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 14,
+                            maxWidth: 420,
+                            padding: '12px 14px 12px 12px',
+                            background: '#fff',
+                            border: `1px solid ${theme.border}`,
+                            borderRadius: 16,
+                            textDecoration: 'none',
+                            color: theme.text,
+                            boxShadow: theme.shadowSm,
+                        }}
+                    >
+                        <span
+                            aria-hidden
+                            style={{
+                                width: 42,
+                                height: 42,
+                                borderRadius: 12,
+                                flexShrink: 0,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                background: 'linear-gradient(135deg, #0f766e, #2563eb)',
+                                color: '#fff',
+                                fontWeight: 800,
+                                fontSize: 16,
+                                letterSpacing: '-0.04em',
+                            }}
+                        >
+                            K
+                        </span>
+                        <span style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
+                            <span style={{ display: 'block', fontSize: 14, fontWeight: 800, letterSpacing: '-0.01em' }}>{t('landing.korgun.title')}</span>
+                            <span style={{ display: 'block', marginTop: 2, fontSize: 12, color: theme.textMuted, fontWeight: 600 }}>{t('landing.korgun.hint')}</span>
+                        </span>
+                        <ExternalLink size={16} color={theme.primary} style={{ flexShrink: 0 }} />
+                    </a>
                 </div>
                 <HeroPreview
                     docTypeId={activeDoc.id}

@@ -37,6 +37,7 @@ const de: Messages = {
         ctaOpen: 'Konto eröffnen',
         ctaPricing: 'Preise ansehen',
         alreadyMember: 'Ich habe bereits ein Konto',
+        korgun: { title: 'Korgun Cloud ERP', hint: 'Cloud-ERP ansehen' },
         stats: {
             complianceValue: 'EN 16931',
             gib: 'Peppol BIS 3 · XRechnung',

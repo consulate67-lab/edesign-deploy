@@ -40,6 +40,7 @@ const tr = {
         ctaOpen: 'Hesap aç',
         ctaPricing: 'Fiyatları gör',
         alreadyMember: 'Zaten üyeyim',
+        korgun: { title: 'Korgun Cloud ERP', hint: 'Bulut ERP’yi inceleyin' },
         stats: {
             complianceValue: 'GİB',
             gib: 'UBL-TR Resmi Uyumlu',

@@ -37,6 +37,7 @@ const zh: Messages = {
         ctaOpen: '创建账户',
         ctaPricing: '查看价格',
         alreadyMember: '我已有账户',
+        korgun: { title: 'Korgun Cloud ERP', hint: '查看云端 ERP' },
         stats: {
             complianceValue: '数电发票',
             gib: 'GB/T 42965 · EN 16931 · Peppol',
