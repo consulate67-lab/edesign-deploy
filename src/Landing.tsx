@@ -381,17 +381,16 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                     <div
                         style={{
                             display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: 10,
-                            padding: '5px 14px 5px 5px',
+                            alignItems: 'flex-start',
+                            gap: 12,
+                            padding: '10px 16px 12px 10px',
                             background: '#fff',
                             border: `1px solid ${theme.border}`,
-                            borderRadius: 999,
-                            fontSize: 13,
-                            fontWeight: 500,
-                            color: theme.textMuted,
+                            borderRadius: 16,
                             marginBottom: 28,
                             boxShadow: theme.shadowSm,
+                            textAlign: 'left',
+                            maxWidth: '100%',
                         }}
                     >
                         <span
@@ -406,11 +405,28 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                                 fontSize: 11,
                                 fontWeight: 700,
                                 letterSpacing: 0.5,
+                                flexShrink: 0,
+                                marginTop: 1,
                             }}
                         >
                             <Sparkles size={12} /> {t('landing.badgeNew')}
                         </span>
-                        {t('landing.news')}
+                        <span style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
+                            <span
+                                style={{
+                                    fontSize: 15,
+                                    fontWeight: 700,
+                                    color: theme.text,
+                                    letterSpacing: '-0.01em',
+                                    lineHeight: 1.3,
+                                }}
+                            >
+                                {t('landing.newsTitle')}
+                            </span>
+                            <span style={{ fontSize: 13, fontWeight: 500, color: theme.textMuted, lineHeight: 1.45 }}>
+                                {t('landing.news')}
+                            </span>
+                        </span>
                     </div>
 
                     <h1
