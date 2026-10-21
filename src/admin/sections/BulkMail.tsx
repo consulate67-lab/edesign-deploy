@@ -5,7 +5,7 @@ import { adminApi } from '../adminApi';
 import type { CampaignStatus, MailBannedEntry, MailCampaign, MailCampaignDetail, MailCampaignList, MailContent } from '../contracts';
 import { C, btn, errorText, fmtDateTime, fmtNumber, inputStyle, labelStyle } from '../format';
 import { Badge, Card, Empty, ErrorBox, Modal, SectionHeader, Spinner } from '../ui';
-import { BROCHURE_OPTIONS, brochureForCountry, brochureLabel, foldCountry, type BrochureId, type CountryStatus } from './bulkmail/countries';
+import { BROCHURE_OPTIONS, brochureForCountry, brochureLabel, foldCountry, sectorCampaignName, sectorFromList, type BrochureId, type CountryStatus } from './bulkmail/countries';
 import { isPersonal, parseRecipients, rowsToTsv, type Recipient } from './bulkmail/recipients';
 import { BROCHURES } from './bulkmail/templates';
 
@@ -81,7 +81,7 @@ export const BulkMail: React.FC = () => {
     const [sendingTest, setSendingTest] = useState(false);
     const [starting, setStarting] = useState(false);
     const fileRef = useRef<HTMLInputElement>(null);
-    const musavirApplied = useRef(false);
+    const sectorApplied = useRef<BrochureId | null>(null);
 
     const bannedSet = useMemo(() => new Set(banned.map(b => b.email.toLowerCase())), [banned]);
     const parsedAll = useMemo(() => parseRecipients(listText), [listText]);
@@ -123,8 +123,8 @@ export const BulkMail: React.FC = () => {
         return () => { cancelled = true; clearTimeout(id); };
     }, [parsedAll]);
 
-    const musavirList = /mali musavir/.test(foldCountry(listText));
-    const fallbackBrochure: BrochureId = parsed.hasCountry ? 'en' : musavirList ? 'tr-musavir' : 'tr';
+    const sectorList = sectorFromList(listText);
+    const fallbackBrochure: BrochureId = parsed.hasCountry ? 'en' : (sectorList ?? 'tr');
     const countryRows = useMemo(() => {
         const rows = new Map<string, CountryRow>();
         for (const r of parsed.recipients) {
@@ -173,13 +173,16 @@ export const BulkMail: React.FC = () => {
     useEffect(() => { void load(); }, [load]);
 
     useEffect(() => {
-        if (!musavirList) { musavirApplied.current = false; return; }
-        if (musavirApplied.current) return;
-        musavirApplied.current = true;
+        if (!sectorList) { sectorApplied.current = null; return; }
+        if (sectorApplied.current === sectorList) return;
+        sectorApplied.current = sectorList;
         setBusinessOnly(false);
-        setPreviewId('tr-musavir');
-        setName(current => (current.startsWith('Tanıtım') ? `Mali müşavir · ${todayLabel()}` : current));
-    }, [musavirList]);
+        setPreviewId(sectorList);
+        const title = sectorCampaignName(sectorList);
+        setName(current => (current.startsWith('Tanıtım') || current.startsWith('Mali müşavir') || current.startsWith('Avukat') || current.startsWith('Otobüs firması')
+            ? `${title} · ${todayLabel()}`
+            : current));
+    }, [sectorList]);
 
     const onBanAdd = async () => {
         const email = banEmailInput.trim();
@@ -381,7 +384,7 @@ export const BulkMail: React.FC = () => {
                                 </div>
                             )}
                             <div style={{ fontSize: '0.72rem', color: C.dim, marginTop: 6 }}>
-                                Excel dosyası doğrudan yüklenebilir. Başlığın üstünde açıklama satırı olsa da "E-posta" sütunu bulunur. "Ülke" sütunu varsa her alıcıya kendi dilindeki broşür gider. Mali müşavir listesinde şahıs adresleri de kalır; broşür e-SMM ve e-Müstahsil’i öne alır.
+                                Excel dosyası doğrudan yüklenebilir. Başlığın üstünde açıklama olsa da e-posta sütunu ya da satırdaki adres bulunur. Listenin başlığı mali müşavir, avukat veya otobüs firmasıysa o broşür seçilir. Şahıs adresleri de kalır.
                             </div>
                             <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginTop: 8, fontSize: '0.76rem', color: C.text, lineHeight: 1.5, cursor: 'pointer' }}>
                                 <input type="checkbox" checked={businessOnly} onChange={e => setBusinessOnly(e.target.checked)} style={{ marginTop: 2, accentColor: C.accent }} />

@@ -45,7 +45,10 @@ const parseDelimited = (text: string, delim: string): string[][] => {
 };
 
 const findCol = (header: string[], test: (h: string) => boolean) => header.findIndex(h => test(foldCountry(h)));
-const isEmailHeader = (h: string) => /(posta|mail|courriel|correo|почт)/.test(h);
+/** Kısa sütun adı. "E-POSTA LİSTESİ" gibi uzun başlık cümlesi sütun sayılmaz. */
+const isEmailHeader = (h: string) => h.length <= 40
+    && !/listesi|liste|kaynak|aciklama|derleme/.test(h)
+    && /(^| )(e posta|eposta|e mail|email|mail|posta adresi|courriel|correo|почт)( |$)/.test(` ${h} `);
 const isCountryHeader = (h: string) => /^(ulke|country|land|pays|pais|страна)( adi| name)?$/.test(h);
 const isNameHeader = (h: string) => /^(yetkili|yetkili kisi|ad soyad|ad soyad kurum|adi soyadi|isim|ad|name|full name|contact|contact person|kisi|nom|nombre)$/.test(h);
 const isCompanyHeader = (h: string) => /^(firma|firma adi|sirket|unvan|kurum|kurum buro|company|company name|organization|organisation|entreprise|empresa)$/.test(h);
@@ -75,10 +78,11 @@ export const parseRecipients = (raw: string): ParsedList => {
     const delim = firstLine.includes('\t') ? '\t' : firstLine.includes(';') ? ';' : ',';
     let header: string[] = [];
     let bodyStart = 0;
-    for (let i = 0; i < Math.min(lines.length, 15); i++) {
+    for (let i = 0; i < Math.min(lines.length, 40); i++) {
         const line = lines[i];
         if (!line.trim() || line.includes('@')) continue;
         const cells = parseDelimited(line, delim)[0] ?? [];
+        if (cells.length < 2) continue;
         if (findCol(cells, isEmailHeader) >= 0) { header = cells; bodyStart = i + 1; break; }
     }
     const emailCol = findCol(header, isEmailHeader);
@@ -90,13 +94,14 @@ export const parseRecipients = (raw: string): ParsedList => {
         const rows = parseDelimited(lines.slice(bodyStart).join('\n'), delim);
         for (const row of rows) {
             if (!row.some(c => c.trim())) continue;
-            const found = (row[emailCol] ?? '').match(EMAIL_RE) ?? [];
+            const inColumn = (row[emailCol] ?? '').match(EMAIL_RE) ?? [];
+            const found = inColumn.length ? inColumn : (row.join(' ').match(EMAIL_RE) ?? []);
             const label = (companyCol >= 0 && row[companyCol]) || row.find(c => c.trim()) || '';
             if (found.length === 0) { invalid.push(label.trim().slice(0, 80)); continue; }
             const name = cleanName((nameCol >= 0 && row[nameCol]) || (companyCol >= 0 && row[companyCol]) || '');
             add(found, name, countryCol >= 0 ? (row[countryCol] ?? '').trim() : '');
         }
-        return { recipients, duplicates, invalid, hasCountry: findCol(header, isCountryHeader) >= 0 };
+        if (recipients.length > 0) return { recipients, duplicates, invalid, hasCountry: findCol(header, isCountryHeader) >= 0 };
     }
 
     for (const line of raw.split(/\r?\n/)) {

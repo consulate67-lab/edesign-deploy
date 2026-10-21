@@ -1,0 +1,36 @@
+edXdocu
+
+OTOBÜS FİRMALARI İÇİN
+BİLETİNİZ FİRMANIZI YOLCUYA GÖSTERSİN
+
+Karayolu e-Bilet, yolcu listesi ve bilet raporu kendi logonuzla çıksın.
+Kurumsal taşıma için e-Fatura ve e-Arşiv de aynı editörde.
+
+www.edxdocu.com
+https://www.edxdocu.com/?utm_source=email&utm_medium=email&utm_campaign=otobus&utm_content=hero
+
+
+SEFER BELGELERİ
+e-Bilet — Karayolu bileti. Sefer, koltuk, güzergâh ve ödeme; logo sürükle-bırak.
+e-Yolcu Listesi — Koltuk, yolcu ve sefer tablosu.
+
+AYNI EDİTÖRDE
+e-Bilet Raporu — Dönem özeti, bilet ve iptal tabloları.
+e-Fatura ve e-Arşiv — Kurumsal taşıma faturası, GİB uyumlu.
+
+
+ÜÇ ADIMDA ENTEGRATÖRE HAZIR XSLT
+1. Belgeyi seçin: e-Bilet, e-Yolcu Listesi, e-Bilet Raporu, e-Fatura veya e-Arşiv.
+2. Firma logosunu ve sefer görünümünü yerleştirin. Kendi XML’inizle önizleyin.
+3. İndirip entegratöre verin.
+
+
+Ücretsiz üye olun, kendi XML’inizle deneyin. Kurulum yok, abonelik yok.
+https://www.edxdocu.com/?utm_source=email&utm_medium=email&utm_campaign=otobus&utm_content=final
+
+--
+edXdocu
+www.edxdocu.com
+
+Bu bilgilendirme, otobüs taşımacılığı faaliyetinizle ilgili olabileceği düşüncesiyle gönderilmiştir.
+Bir daha almak istemiyorsanız tek tıkla listeden çıkın: {{UNSUBSCRIBE_URL}}

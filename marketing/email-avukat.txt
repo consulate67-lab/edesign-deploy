@@ -1,0 +1,35 @@
+edXdocu
+
+HUKUK BÜROSU İÇİN
+BÜRONUZUN YÜZÜ, MAKBUZUNUZLA ULAŞSIN
+
+Vekalet ve danışmanlık için kestiğiniz e-SMM, logonuz ve kaşenizle görünsün.
+e-Fatura ve e-Arşiv de aynı editörde. XSLT bilmeden, GİB UBL-TR uyumlu.
+
+www.edxdocu.com
+https://www.edxdocu.com/?utm_source=email&utm_medium=email&utm_campaign=avukat&utm_content=hero
+
+
+BÜRONUN BELGESİ
+e-SMM — Serbest meslek makbuzu. Brüt, stopaj ve KDV; logo, kaşe ve imza sürükle-bırak.
+
+AYNI EDİTÖRDE
+e-Fatura — Büronun kurumsal e-faturası, UBL-TR uyumlu şablon.
+e-Arşiv — e-Arşiv fatura görünümü; logo, kaşe ve banka bilgisi.
+
+
+ÜÇ ADIMDA ENTEGRATÖRE HAZIR XSLT
+1. Belgeyi seçin: e-SMM, e-Fatura veya e-Arşiv.
+2. Büronun logosunu, kaşesini ve imzasını yerleştirin. Kendi XML’inizle önizleyin.
+3. İndirip entegratöre verin.
+
+
+Ücretsiz üye olun, kendi XML’inizle deneyin. Kurulum yok, abonelik yok.
+https://www.edxdocu.com/?utm_source=email&utm_medium=email&utm_campaign=avukat&utm_content=final
+
+--
+edXdocu
+www.edxdocu.com
+
+Bu bilgilendirme, hukuk bürosu faaliyetinizle ilgili olabileceği düşüncesiyle gönderilmiştir.
+Bir daha almak istemiyorsanız tek tıkla listeden çıkın: {{UNSUBSCRIBE_URL}}

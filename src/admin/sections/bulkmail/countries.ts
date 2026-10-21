@@ -1,12 +1,14 @@
 import { countryProfiles, type UiLanguage } from '../../../international/registry/countryProfiles';
 
 /** Broşür sürümü: site dili, ya da aynı dilde ülkesinin resmî formatını öne çıkaran sürüm. */
-export type BrochureId = UiLanguage | 'en-in' | 'en-us' | 'tr-firma' | 'tr-musavir';
+export type BrochureId = UiLanguage | 'en-in' | 'en-us' | 'tr-firma' | 'tr-musavir' | 'tr-avukat' | 'tr-otobus';
 
 export const BROCHURE_OPTIONS: { id: BrochureId; label: string }[] = [
     { id: 'tr', label: 'Türkçe' },
     { id: 'tr-firma', label: 'Türkçe · firma' },
     { id: 'tr-musavir', label: 'Türkçe · mali müşavir' },
+    { id: 'tr-avukat', label: 'Türkçe · avukat' },
+    { id: 'tr-otobus', label: 'Türkçe · otobüs firması' },
     { id: 'en', label: 'İngilizce · Avrupa' },
     { id: 'en-us', label: 'İngilizce · ABD' },
     { id: 'en-in', label: 'İngilizce · Hindistan' },
@@ -20,6 +22,22 @@ export const BROCHURE_OPTIONS: { id: BrochureId; label: string }[] = [
 ];
 
 export const brochureLabel = (id: BrochureId) => BROCHURE_OPTIONS.find(l => l.id === id)?.label ?? id;
+
+/** Listenin başlığından sektör broşürü. E-posta adreslerinin içine bakılmaz. */
+export const sectorFromList = (text: string): BrochureId | null => {
+    const head = foldCountry(text.slice(0, 4000));
+    if (/mali musavir|smmm|yeminli mali/.test(head)) return 'tr-musavir';
+    if (/\bavukat\b|hukuk burosu/.test(head)) return 'tr-avukat';
+    if (/otobus/.test(head)) return 'tr-otobus';
+    return null;
+};
+
+export const sectorCampaignName = (id: BrochureId) => (
+    id === 'tr-musavir' ? 'Mali müşavir'
+        : id === 'tr-avukat' ? 'Avukat'
+            : id === 'tr-otobus' ? 'Otobüs firması'
+                : ''
+);
 
 /** Karşılaştırma anahtarı: küçük harf, Türkçe ve aksanlı harfler sadeleşir, noktalama atılır. */
 export const foldCountry = (s: string) => s
