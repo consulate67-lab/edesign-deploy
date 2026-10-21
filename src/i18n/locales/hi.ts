@@ -37,7 +37,7 @@ const hi: Messages = {
         ctaOpen: 'खाता बनाएँ',
         ctaPricing: 'मूल्य देखें',
         alreadyMember: 'मेरा पहले से खाता है',
-        korgun: { title: 'Korgun Cloud ERP', hint: 'क्लाउड ERP देखें' },
+        korgun: { eyebrow: 'आपके व्यवसाय के लिए क्लाउड ERP', title: 'Korgun Cloud ERP', hint: 'क्लाउड ERP देखें' },
         stats: {
             complianceValue: 'GST',
             gib: 'ई-इनवॉइस · ई-वे बिल · EN 16931',

@@ -37,7 +37,7 @@ const en: Messages = {
         ctaOpen: 'Create account',
         ctaPricing: 'See pricing',
         alreadyMember: 'I already have an account',
-        korgun: { title: 'Korgun Cloud ERP', hint: 'See the cloud ERP' },
+        korgun: { eyebrow: 'Cloud ERP for your business', title: 'Korgun Cloud ERP', hint: 'See the cloud ERP' },
         stats: {
             complianceValue: 'EN 16931',
             gib: 'Peppol BIS 3 · XRechnung',

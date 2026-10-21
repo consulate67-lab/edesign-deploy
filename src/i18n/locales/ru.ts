@@ -37,7 +37,7 @@ const ru: Messages = {
         ctaOpen: 'Создать учётную запись',
         ctaPricing: 'Посмотреть цены',
         alreadyMember: 'У меня уже есть учётная запись',
-        korgun: { title: 'Korgun Cloud ERP', hint: 'Открыть облачную ERP' },
+        korgun: { eyebrow: 'Облачная ERP для вашего бизнеса', title: 'Korgun Cloud ERP', hint: 'Открыть облачную ERP' },
         stats: {
             complianceValue: 'УПД 5.03',
             gib: 'ФНС России · EN 16931 · Peppol',

@@ -254,7 +254,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                         gap: 24,
                     }}
                 >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 8, minWidth: 0 }}>
                         <a
                             href="#"
                             onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
@@ -262,6 +262,10 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                         >
                             <img className="ld-logo" src={LOGO_URL} srcSet={LOGO_SRCSET} alt="edXdocu" width={300} height={100} style={{ display: 'block', height: 46, width: 'auto' }} />
                         </a>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 6, paddingLeft: 2 }}>
+                            <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '-0.01em', color: theme.primary, lineHeight: 1.2 }}>
+                                {t('landing.korgun.eyebrow')}
+                            </div>
                         <a
                             data-korgun-link
                             href="https://erp.korgun.com.tr/cloud-erp"
@@ -306,6 +310,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                             </span>
                             <ExternalLink size={14} color={theme.primary} style={{ flexShrink: 0 }} />
                         </a>
+                        </div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
                         <nav className="ld-nav" style={{ display: 'flex', gap: 28, fontSize: 14, fontWeight: 600 }}>
