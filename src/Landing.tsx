@@ -76,7 +76,7 @@ const LANDING_CSS = `
   .ld-hero-text [data-rotating-doctype]{justify-content:center}
   .ld-hero-sub{margin-left:auto !important;margin-right:auto !important}
   .ld-hero-ctas{justify-content:center}
-  .ld-korgun{margin-left:auto;margin-right:auto}
+  .ld-korgun-hint{display:none !important}
   .ld-bento{grid-template-columns:1fr 1fr}
   .ld-bento-hero{grid-row:auto;grid-column:1 / -1}
 }
@@ -254,13 +254,59 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                         gap: 24,
                     }}
                 >
-                    <a
-                        href="#"
-                        onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                        style={{ display: 'inline-flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}
-                    >
-                        <img className="ld-logo" src={LOGO_URL} srcSet={LOGO_SRCSET} alt="edXdocu" width={300} height={100} style={{ display: 'block', height: 46, width: 'auto' }} />
-                    </a>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
+                        <a
+                            href="#"
+                            onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: 10, textDecoration: 'none', flexShrink: 0 }}
+                        >
+                            <img className="ld-logo" src={LOGO_URL} srcSet={LOGO_SRCSET} alt="edXdocu" width={300} height={100} style={{ display: 'block', height: 46, width: 'auto' }} />
+                        </a>
+                        <a
+                            data-korgun-link
+                            href="https://erp.korgun.com.tr/cloud-erp"
+                            target="_blank"
+                            rel="noopener"
+                            className="ld-card"
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 10,
+                                padding: '5px 12px 5px 5px',
+                                background: '#fff',
+                                border: `1px solid ${theme.border}`,
+                                borderRadius: 14,
+                                textDecoration: 'none',
+                                color: theme.text,
+                                boxShadow: theme.shadowSm,
+                                minWidth: 0,
+                            }}
+                        >
+                            <span
+                                aria-hidden
+                                style={{
+                                    width: 34,
+                                    height: 34,
+                                    borderRadius: 10,
+                                    flexShrink: 0,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    background: 'linear-gradient(135deg, #0f766e, #2563eb)',
+                                    color: '#fff',
+                                    fontWeight: 800,
+                                    fontSize: 15,
+                                }}
+                            >
+                                K
+                            </span>
+                            <span style={{ minWidth: 0, textAlign: 'left' }}>
+                                <span style={{ display: 'block', fontSize: 13, fontWeight: 800, letterSpacing: '-0.01em', whiteSpace: 'nowrap' }}>{t('landing.korgun.title')}</span>
+                                <span className="ld-korgun-hint" style={{ display: 'block', marginTop: 1, fontSize: 11, color: theme.textMuted, fontWeight: 600, whiteSpace: 'nowrap' }}>{t('landing.korgun.hint')}</span>
+                            </span>
+                            <ExternalLink size={14} color={theme.primary} style={{ flexShrink: 0 }} />
+                        </a>
+                    </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
                         <nav className="ld-nav" style={{ display: 'flex', gap: 28, fontSize: 14, fontWeight: 600 }}>
                             <a href="#urun">{t('landing.nav.product')}</a>
@@ -442,7 +488,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                         </button>
                     </div>
 
-                    <div style={{ fontSize: 14, marginBottom: 18 }}>
+                    <div style={{ fontSize: 14 }}>
                         <a
                             href="#"
                             onClick={(e) => { e.preventDefault(); onLogin(); }}
@@ -451,51 +497,6 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                             {t('landing.alreadyMember')}
                         </a>
                     </div>
-                    <a
-                        data-korgun-link
-                        href="https://erp.korgun.com.tr/cloud-erp"
-                        target="_blank"
-                        rel="noopener"
-                        className="ld-card ld-korgun"
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 14,
-                            maxWidth: 420,
-                            padding: '12px 14px 12px 12px',
-                            background: '#fff',
-                            border: `1px solid ${theme.border}`,
-                            borderRadius: 16,
-                            textDecoration: 'none',
-                            color: theme.text,
-                            boxShadow: theme.shadowSm,
-                        }}
-                    >
-                        <span
-                            aria-hidden
-                            style={{
-                                width: 42,
-                                height: 42,
-                                borderRadius: 12,
-                                flexShrink: 0,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                background: 'linear-gradient(135deg, #0f766e, #2563eb)',
-                                color: '#fff',
-                                fontWeight: 800,
-                                fontSize: 16,
-                                letterSpacing: '-0.04em',
-                            }}
-                        >
-                            K
-                        </span>
-                        <span style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
-                            <span style={{ display: 'block', fontSize: 14, fontWeight: 800, letterSpacing: '-0.01em' }}>{t('landing.korgun.title')}</span>
-                            <span style={{ display: 'block', marginTop: 2, fontSize: 12, color: theme.textMuted, fontWeight: 600 }}>{t('landing.korgun.hint')}</span>
-                        </span>
-                        <ExternalLink size={16} color={theme.primary} style={{ flexShrink: 0 }} />
-                    </a>
                 </div>
                 <HeroPreview
                     docTypeId={activeDoc.id}
