@@ -163,7 +163,7 @@ export const adminApi = {
     unbanEmail: (email: string) =>
         request<{ success: true }>(`/admin/campaigns/banned/${encodeURIComponent(email)}`, { method: 'DELETE' }),
     scanBannedFromInbox: () =>
-        request<MailBannedScanResult>('/admin/campaigns/banned/scan', { method: 'POST' }),
+        request<MailBannedScanResult>('/admin/campaigns/banned/scan', { method: 'POST', timeoutMs: 90000 }),
     testCampaign: (content: MailContent, to: string) =>
         request<{ sent: true }>('/admin/campaigns/test', { method: 'POST', body: { ...content, to } }),
     startCampaign: (id: number) =>

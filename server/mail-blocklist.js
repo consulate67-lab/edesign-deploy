@@ -46,7 +46,8 @@ export const banEmail = async (db, email, { source = 'manual', note = '' } = {})
              ELSE mail_unsubscribes.source END,
            note = CASE
              WHEN mail_unsubscribes.note = '' AND EXCLUDED.note <> '' THEN EXCLUDED.note
-             ELSE mail_unsubscribes.note END`,
+             ELSE mail_unsubscribes.note END
+         RETURNING email`,
         [normalized, src, noteText]
     );
     await db.run(

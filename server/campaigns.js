@@ -215,27 +215,49 @@ export const registerCampaignRoutes = (app, { db, requireAdmin, secret, website 
 
     /** Gelen kutudaki “abonelikten çık” maillerini tarayıp yasaklı listeye ekler. */
     app.post('/api/admin/campaigns/banned/scan', requireAdmin, async (_req, res) => {
-        const messages = await db.all(
-            `SELECT from_addr, subject, text_body, html_body FROM mail_messages
-              WHERE folder = 'inbox' AND from_addr <> '' ORDER BY id DESC LIMIT 5000`
-        );
-        const ownSet = new Set((await db.all(`SELECT email FROM mail_accounts`)).map((r) => r.email.toLowerCase()));
-        let added = 0;
-        const found = [];
-        for (const m of messages) {
-            const email = normalizeBlockEmail(m.from_addr);
-            if (!email || ownSet.has(email)) continue;
-            if (!isUnsubscribeIntent(m.subject, m.text_body, m.html_body)) continue;
-            if (!found.includes(email)) found.push(email);
-            const before = await db.get(`SELECT email FROM mail_unsubscribes WHERE email = ?`, [email]);
-            if (before) continue;
-            await banEmail(db, email, {
-                source: 'scan',
-                note: `Gelen posta: ${(m.subject || '').slice(0, 120)}`,
+        try {
+            const messages = await db.all(
+                `SELECT from_addr, subject,
+                        left(coalesce(snippet, ''), 500) AS snippet,
+                        left(coalesce(text_body, ''), 4000) AS text_body
+                   FROM mail_messages
+                  WHERE folder = 'inbox' AND from_addr <> ''
+                  ORDER BY id DESC
+                  LIMIT 2000`
+            );
+            const ownSet = new Set((await db.all(`SELECT email FROM mail_accounts`)).map((r) => r.email.toLowerCase()));
+            const hits = [];
+            const seen = new Set();
+            for (const m of messages) {
+                const email = normalizeBlockEmail(m.from_addr);
+                if (!email || ownSet.has(email) || seen.has(email)) continue;
+                if (!isUnsubscribeIntent(m.subject, `${m.snippet || ''}\n${m.text_body || ''}`, '')) continue;
+                seen.add(email);
+                hits.push({ email, subject: (m.subject || '').slice(0, 120) });
+            }
+            const existing = hits.length
+                ? new Set((await db.all(
+                    `SELECT email FROM mail_unsubscribes WHERE email = ANY(?::text[])`,
+                    [hits.map((h) => h.email)]
+                )).map((r) => r.email))
+                : new Set();
+            let added = 0;
+            for (const hit of hits) {
+                if (existing.has(hit.email)) continue;
+                await banEmail(db, hit.email, { source: 'scan', note: `Gelen posta: ${hit.subject}` });
+                added += 1;
+            }
+            const found = hits.map((h) => h.email);
+            res.json({ scanned: messages.length, matched: found.length, added, emails: found.slice(0, 200) });
+        } catch (e) {
+            console.error('[campaigns] inbox scan:', e);
+            const missing = e.code === '42P01';
+            res.status(400).json({
+                error: missing
+                    ? 'Gelen kutusu henüz hazır değil.'
+                    : 'Gelen kutusu taranamadı.',
             });
-            added += 1;
         }
-        res.json({ scanned: messages.length, matched: found.length, added, emails: found.slice(0, 200) });
     });
 
     app.post('/api/admin/campaigns/previous', requireAdmin, async (req, res) => {
