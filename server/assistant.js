@@ -197,6 +197,7 @@ Kurallar:
 - Önce ziyaretçinin tam olarak ne sorduğunu anla: yazım hatası, eksik sözcük, karışık dil veya önceki mesajlara gönderme olabilir. Yalnızca sorulan şeyi yanıtla; bilgi bankasındaki ilgisiz bilgileri ekleme.
 - Yalnızca BİLGİ BANKASI'ndaki bilgilere dayan. Fiyat, hak sayısı, düğme adı gibi bilgileri aynen oradan al; uydurma.
 - Bilgi bankasında olmayan site sorularında "Bu konuda kesin bilgim yok" de ve destek ekibine yazmayı öner.
+- Selim Yılmaz, kurucu, şirket sahibi ya da destek ekibinin kim olduğu sorulursa kişi tanıtma, telefon veya e-posta yazma. Yalnızca sayfanın altındaki İletişim sayfasını incelemelerini söyle.
 - Site ve e-belge tasarımı dışındaki konularda (genel sohbet, kod yazma, vergi/muhasebe danışmanlığı, başka ürünler vb.) kibarca yalnızca bu site hakkında yardımcı olabileceğini söyle ve ilgili bir site konusuna yönlendir.
 - Selamlama yapma ve kendini tanıtma ("Merhaba", "Ben Sarp" gibi); doğrudan yanıta geç. Yanıtı "Başka bir konuda yardımcı olabilir miyim?" gibi kalıplarla bitirme.
 - Samimi ve kısa yanıt ver (en fazla 120 kelime). Adım gerekiyorsa "- " ile madde kullan. Önemli düğme adlarını **kalın** yaz.
@@ -336,6 +337,21 @@ const findSmallTalk = (norm, lang) => {
     return null;
 };
 
+/** Kişi ve ekip sorularında iletişim bilgisi yazılmaz; ziyaretçi İletişim sayfasına bakmalıdır. */
+const CONTACT_PAGE_ANSWER = {
+    tr: 'Bu konuda sayfanın altındaki **İletişim** sayfasını inceleyin.',
+    en: 'For this, please review the **Contact** page at the bottom of the site.',
+    de: 'Bitte sehen Sie sich dazu die Seite **Kontakt** unten auf der Website an.',
+    fr: 'Pour cela, consultez la page **Contact** en bas du site.',
+    es: 'Para esto, revise la página **Contacto** al pie del sitio.',
+    pt: 'Para isso, consulte a página **Contato** no rodapé do site.',
+    ru: 'По этому вопросу посмотрите страницу **Контакты** внизу сайта.',
+    hi: 'इसके लिए साइट के नीचे **संपर्क** पृष्ठ देखें।',
+    zh: '关于这个问题，请查看网站底部的**联系**页面。',
+};
+
+const asksForContactPage = (norm) => /\bselim\b|\byilmaz\b|destek ekib|support team|kurucun|sirket sahibi|site sahibi/.test(norm);
+
 const ipKey = (req) => createHash('sha256').update(String(req.ip || '')).digest('hex').slice(0, 16);
 
 const parseHistory = (raw) => (Array.isArray(raw) ? raw : [])
@@ -440,6 +456,7 @@ export const registerAssistantRoutes = (app, { db, requireAdmin, packages }) => 
 
         const small = norm.split(' ').length <= 4 ? findSmallTalk(norm, detectLang(question, ui)) : null;
         const lang = small?.lang ?? detectLang(question, ui);
+        const contactPage = asksForContactPage(norm) ? (CONTACT_PAGE_ANSWER[lang] ?? CONTACT_PAGE_ANSWER.tr) : '';
         const kbLang = kbLangFor(ui, lang);
         const locale = { ui, lang, kbLang, currency };
         const text = MESSAGES[lang];
@@ -457,6 +474,9 @@ export const registerAssistantRoutes = (app, { db, requireAdmin, packages }) => 
             answer = small.answer;
             mode = 'smalltalk';
             suggestions = defaultSuggestions.slice(0, 4);
+        } else if (contactPage) {
+            answer = contactPage;
+            mode = 'kb';
         } else {
             if (!history.length && norm) {
                 const cached = await db.get(
