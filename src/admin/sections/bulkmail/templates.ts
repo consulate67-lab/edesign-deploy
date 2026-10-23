@@ -10,6 +10,8 @@ import trAvukatHtml from '../../../../marketing/email-avukat.html?raw';
 import trAvukatText from '../../../../marketing/email-avukat.txt?raw';
 import trOtobusHtml from '../../../../marketing/email-otobus.html?raw';
 import trOtobusText from '../../../../marketing/email-otobus.txt?raw';
+import trAcenteHtml from '../../../../marketing/email-acente.html?raw';
+import trAcenteText from '../../../../marketing/email-acente.txt?raw';
 import enHtml from '../../../../marketing/email-tanitim-en.html?raw';
 import enText from '../../../../marketing/email-tanitim-en.txt?raw';
 import enUsHtml from '../../../../marketing/email-tanitim-en-us.html?raw';
@@ -54,6 +56,11 @@ export const BROCHURES: Record<BrochureId, MailContent> = {
         subject: 'Firmanızın profesyonel yüzü biletinizle yolcuya ulaşsın',
         html: trOtobusHtml,
         text: trOtobusText,
+    },
+    'tr-acente': {
+        subject: 'Komisyon faturanız ve hak edişiniz acentenizin yüzü olsun',
+        html: trAcenteHtml,
+        text: trAcenteText,
     },
     en: { subject: subjects.en, html: enHtml, text: enText },
     'en-us': { subject: subjects['en-us'], html: enUsHtml, text: enUsText },

@@ -180,7 +180,7 @@ export const BulkMail: React.FC = () => {
         setBusinessOnly(false);
         setPreviewId(sectorList);
         const title = sectorCampaignName(sectorList);
-        setName(current => (current.startsWith('Tanıtım') || current.startsWith('Mali müşavir') || current.startsWith('Avukat') || current.startsWith('Otobüs firması')
+        setName(current => (current.startsWith('Tanıtım') || current.startsWith('Mali müşavir') || current.startsWith('Avukat') || current.startsWith('Otobüs firması') || current.startsWith('Sigorta acentesi')
             ? `${title} · ${todayLabel()}`
             : current));
     }, [sectorList]);
@@ -392,7 +392,7 @@ export const BulkMail: React.FC = () => {
                                 </div>
                             )}
                             <div style={{ fontSize: '0.72rem', color: C.dim, marginTop: 6 }}>
-                                Excel dosyası doğrudan yüklenebilir. Başlığın üstünde açıklama olsa da e-posta sütunu ya da satırdaki adres bulunur. Listenin başlığı, sayfa adı ya da dosya adı mali müşavir, avukat, otobüs firması veya e-bilet ise o broşür seçilir. Şahıs adresleri de kalır.
+                                Excel dosyası doğrudan yüklenebilir. Başlığın üstünde açıklama olsa da e-posta sütunu ya da satırdaki adres bulunur. Listenin başlığı, sayfa adı ya da dosya adı mali müşavir, avukat, otobüs firması, e-bilet veya sigorta acentesi ise o broşür seçilir. Şahıs adresleri de kalır.
                             </div>
                             <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginTop: 8, fontSize: '0.76rem', color: C.text, lineHeight: 1.5, cursor: 'pointer' }}>
                                 <input type="checkbox" checked={businessOnly} onChange={e => setBusinessOnly(e.target.checked)} style={{ marginTop: 2, accentColor: C.accent }} />

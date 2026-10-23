@@ -1,7 +1,7 @@
 import { countryProfiles, type UiLanguage } from '../../../international/registry/countryProfiles';
 
 /** Broşür sürümü: site dili, ya da aynı dilde ülkesinin resmî formatını öne çıkaran sürüm. */
-export type BrochureId = UiLanguage | 'en-in' | 'en-us' | 'tr-firma' | 'tr-musavir' | 'tr-avukat' | 'tr-otobus';
+export type BrochureId = UiLanguage | 'en-in' | 'en-us' | 'tr-firma' | 'tr-musavir' | 'tr-avukat' | 'tr-otobus' | 'tr-acente';
 
 export const BROCHURE_OPTIONS: { id: BrochureId; label: string }[] = [
     { id: 'tr', label: 'Türkçe' },
@@ -9,6 +9,7 @@ export const BROCHURE_OPTIONS: { id: BrochureId; label: string }[] = [
     { id: 'tr-musavir', label: 'Türkçe · mali müşavir' },
     { id: 'tr-avukat', label: 'Türkçe · avukat' },
     { id: 'tr-otobus', label: 'Türkçe · otobüs firması' },
+    { id: 'tr-acente', label: 'Türkçe · sigorta acentesi' },
     { id: 'en', label: 'İngilizce · Avrupa' },
     { id: 'en-us', label: 'İngilizce · ABD' },
     { id: 'en-in', label: 'İngilizce · Hindistan' },
@@ -29,6 +30,7 @@ export const sectorFromList = (text: string): BrochureId | null => {
     if (/mali musavir|smmm|yeminli mali/.test(head)) return 'tr-musavir';
     if (/\bavukat\b|hukuk burosu/.test(head)) return 'tr-avukat';
     if (/otobus|e bilet|ebilet|yolcu listesi/.test(head)) return 'tr-otobus';
+    if (/sigorta acente|komisyon gider|hak edis/.test(head)) return 'tr-acente';
     return null;
 };
 
@@ -36,7 +38,8 @@ export const sectorCampaignName = (id: BrochureId) => (
     id === 'tr-musavir' ? 'Mali müşavir'
         : id === 'tr-avukat' ? 'Avukat'
             : id === 'tr-otobus' ? 'Otobüs firması'
-                : ''
+                : id === 'tr-acente' ? 'Sigorta acentesi'
+                    : ''
 );
 
 /** Karşılaştırma anahtarı: küçük harf, Türkçe ve aksanlı harfler sadeleşir, noktalama atılır. */

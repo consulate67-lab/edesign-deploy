@@ -1,0 +1,34 @@
+edXdocu
+
+SİGORTA ACENTELERİ İÇİN
+HAK EDİŞİNİZ VE FATURANIZ ACENTENİZİ GÖSTERSİN
+
+Sigorta şirketine kestiğiniz komisyon faturası ile dönem hak edişiniz kendi logonuzla, aynı editörde tasarlansın.
+
+www.edxdocu.com
+https://www.edxdocu.com/?utm_source=email&utm_medium=email&utm_campaign=acente&utm_content=hero
+
+
+ACENTENİN BELGELERİ
+e-Fatura — Komisyon faturası. Sigorta şirketine kestiğiniz fatura; logo, kaşe ve banka bilgisi. GİB UBL-TR uyumlu.
+Hak ediş — e-Sigorta Komisyon Gider Belgesi. Dönem, istihsal, iptal ve net komisyon; branş, prim ve oran.
+
+AYNI EDİTÖRDE
+e-Arşiv — Bireysel müşteriye kestiğiniz fatura. Logo, kaşe ve banka bilgisi yerinde kalır.
+
+
+ÜÇ ADIMDA ENTEGRATÖRE HAZIR XSLT
+1. Belgeyi seçin: e-Fatura, e-Sigorta Komisyon Gider Belgesi veya e-Arşiv.
+2. Acente logosunu, kaşesini ve banka bilgisini yerleştirin. Kendi XML’inizle önizleyin.
+3. İndirip entegratöre verin.
+
+
+Ücretsiz üye olun, kendi XML’inizle deneyin. Kurulum yok, abonelik yok.
+https://www.edxdocu.com/?utm_source=email&utm_medium=email&utm_campaign=acente&utm_content=final
+
+--
+edXdocu
+www.edxdocu.com
+
+Bu bilgilendirme, sigorta acenteliği faaliyetinizle ilgili olabileceği düşüncesiyle gönderilmiştir.
+Bir daha almak istemiyorsanız tek tıkla listeden çıkın: {{UNSUBSCRIBE_URL}}
