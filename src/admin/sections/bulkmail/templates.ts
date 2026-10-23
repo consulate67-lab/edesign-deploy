@@ -58,7 +58,7 @@ export const BROCHURES: Record<BrochureId, MailContent> = {
         text: trOtobusText,
     },
     'tr-acente': {
-        subject: 'Komisyon faturanız ve hak edişiniz acentenizin yüzü olsun',
+        subject: 'Müşterinize kestiğiniz fatura acentenizin yüzü olsun',
         html: trAcenteHtml,
         text: trAcenteText,
     },

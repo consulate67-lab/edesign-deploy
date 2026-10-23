@@ -1,25 +1,26 @@
 edXdocu
 
 SİGORTA ACENTELERİ İÇİN
-HAK EDİŞİNİZ VE FATURANIZ ACENTENİZİ GÖSTERSİN
+MÜŞTERİYE GİDEN FATURA ACENTENİZİ GÖSTERSİN
 
-Sigorta şirketine kestiğiniz komisyon faturası ile dönem hak edişiniz kendi logonuzla, aynı editörde tasarlansın.
+Şirket müşterisine e-Fatura, bireysel müşteriye e-Arşiv.
+Poliçe ve branş satırları kendi logonuzla çıksın.
 
 www.edxdocu.com
 https://www.edxdocu.com/?utm_source=email&utm_medium=email&utm_campaign=acente&utm_content=hero
 
 
 ACENTENİN BELGELERİ
-e-Fatura — Komisyon faturası. Sigorta şirketine kestiğiniz fatura; logo, kaşe ve banka bilgisi. GİB UBL-TR uyumlu.
-Hak ediş — e-Sigorta Komisyon Gider Belgesi. Dönem, istihsal, iptal ve net komisyon; branş, prim ve oran.
+e-Fatura — e-Fatura kayıtlı şirket müşterisine kestiğiniz fatura. Kasko, trafik, sağlık satırları; logo, kaşe ve banka. GİB UBL-TR uyumlu.
+e-Arşiv — e-Fatura kullanmayan bireysel müşteriye kestiğiniz fatura. Aynı logo ve kaşe.
 
 AYNI EDİTÖRDE
-e-Arşiv — Bireysel müşteriye kestiğiniz fatura. Logo, kaşe ve banka bilgisi yerinde kalır.
+Müşteri e-Fatura mükellefiyse e-Fatura, değilse e-Arşiv. Görünüm bir kez kurulur; XSLT entegratöre yüklenir.
 
 
 ÜÇ ADIMDA ENTEGRATÖRE HAZIR XSLT
-1. Belgeyi seçin: e-Fatura, e-Sigorta Komisyon Gider Belgesi veya e-Arşiv.
-2. Acente logosunu, kaşesini ve banka bilgisini yerleştirin. Kendi XML’inizle önizleyin.
+1. Belgeyi seçin: şirket müşterisi için e-Fatura, bireysel müşteri için e-Arşiv.
+2. Acente logosunu, kaşesini ve banka bilgisini yerleştirin. Poliçe satırını kendi XML’inizle önizleyin.
 3. İndirip entegratöre verin.
 
 
