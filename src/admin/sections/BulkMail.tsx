@@ -63,6 +63,7 @@ export const BulkMail: React.FC = () => {
 
     const [name, setName] = useState(() => `Tanıtım · ${todayLabel()}`);
     const [listText, setListText] = useState('');
+    const [listSource, setListSource] = useState('');
     const [contents, setContents] = useState<Record<BrochureId, MailContent>>(BROCHURES);
     const [previewId, setPreviewId] = useState<BrochureId>('tr');
     const [overrides, setOverrides] = useState<Record<string, BrochureId | null>>({});
@@ -123,7 +124,7 @@ export const BulkMail: React.FC = () => {
         return () => { cancelled = true; clearTimeout(id); };
     }, [parsedAll]);
 
-    const sectorList = sectorFromList(listText);
+    const sectorList = sectorFromList(`${listSource}\n${listText}`);
     const fallbackBrochure: BrochureId = parsed.hasCountry ? 'en' : (sectorList ?? 'tr');
     const countryRows = useMemo(() => {
         const rows = new Map<string, CountryRow>();
@@ -248,9 +249,15 @@ export const BulkMail: React.FC = () => {
         }
         setReadingFile(true);
         try {
+            let source = file.name;
             const loaded = /\.xlsx$/i.test(file.name)
-                ? rowsToTsv(await import('./bulkmail/xlsx').then(m => m.readXlsx(file)))
+                ? await import('./bulkmail/xlsx').then(async m => {
+                    const book = await m.readXlsx(file);
+                    source = [file.name, book.sheetName].filter(Boolean).join('\n');
+                    return rowsToTsv(book.rows);
+                })
                 : await file.text();
+            setListSource(prev => [prev, source].filter(Boolean).join('\n'));
             setListText(prev => (prev.trim() ? `${prev.trim()}\n${loaded}` : loaded));
         } catch (err) {
             pushToast({ kind: 'error', title: 'Dosya okunamadı', description: errorText(err), ttl: 8000 });
@@ -293,6 +300,7 @@ export const BulkMail: React.FC = () => {
             }
             pushToast({ kind: 'success', title: 'Gönderim başladı', description: `${groups.length > 1 ? `${groups.length} broşür için ayrı gönderim oluşturuldu. ` : ''}E-postalar arka planda sırayla gidiyor; bu sayfayı kapatabilirsiniz.`, ttl: 8000 });
             setListText('');
+            setListSource('');
             setOverrides({});
             setConsent(false);
             setName(`Tanıtım · ${todayLabel()}`);
@@ -367,7 +375,7 @@ export const BulkMail: React.FC = () => {
                                 style={{ ...inputStyle, minHeight: 170, fontFamily: 'Consolas, "Cascadia Code", monospace', fontSize: '0.8rem', resize: 'vertical', whiteSpace: 'pre', overflowX: 'auto' }}
                                 placeholder={'Her satıra bir adres yazın ya da yapıştırın:\nornek@firma.com\nAhmet Yılmaz <ahmet@firma.com>\n\nÜlkeye göre dil için Excel tablosunu başlıklarıyla yükleyin\n(Ülke, E-Posta, Yetkili sütunları).'}
                                 value={listText}
-                                onChange={e => setListText(e.target.value)}
+                                onChange={e => { setListText(e.target.value); if (!e.target.value.trim()) setListSource(''); }}
                             />
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8, alignItems: 'center' }}>
                                 <Badge color={C.green}>{fmtNumber(totalRecipients)} geçerli adres</Badge>
@@ -384,7 +392,7 @@ export const BulkMail: React.FC = () => {
                                 </div>
                             )}
                             <div style={{ fontSize: '0.72rem', color: C.dim, marginTop: 6 }}>
-                                Excel dosyası doğrudan yüklenebilir. Başlığın üstünde açıklama olsa da e-posta sütunu ya da satırdaki adres bulunur. Listenin başlığı mali müşavir, avukat veya otobüs firmasıysa o broşür seçilir. Şahıs adresleri de kalır.
+                                Excel dosyası doğrudan yüklenebilir. Başlığın üstünde açıklama olsa da e-posta sütunu ya da satırdaki adres bulunur. Listenin başlığı, sayfa adı ya da dosya adı mali müşavir, avukat, otobüs firması veya e-bilet ise o broşür seçilir. Şahıs adresleri de kalır.
                             </div>
                             <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginTop: 8, fontSize: '0.76rem', color: C.text, lineHeight: 1.5, cursor: 'pointer' }}>
                                 <input type="checkbox" checked={businessOnly} onChange={e => setBusinessOnly(e.target.checked)} style={{ marginTop: 2, accentColor: C.accent }} />

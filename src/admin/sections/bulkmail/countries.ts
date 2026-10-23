@@ -28,7 +28,7 @@ export const sectorFromList = (text: string): BrochureId | null => {
     const head = foldCountry(text.slice(0, 4000));
     if (/mali musavir|smmm|yeminli mali/.test(head)) return 'tr-musavir';
     if (/\bavukat\b|hukuk burosu/.test(head)) return 'tr-avukat';
-    if (/otobus/.test(head)) return 'tr-otobus';
+    if (/otobus|e bilet|ebilet|yolcu listesi/.test(head)) return 'tr-otobus';
     return null;
 };
 

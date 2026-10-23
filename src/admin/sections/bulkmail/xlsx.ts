@@ -50,13 +50,16 @@ const colIndex = (ref: string) => {
 
 const textOf = (el: Element) => Array.from(el.getElementsByTagNameNS('*', 't')).map(t => t.textContent ?? '').join('');
 
-export async function readXlsx(file: File): Promise<string[][]> {
+export async function readXlsx(file: File): Promise<{ rows: string[][]; sheetName: string }> {
     const buf = await file.arrayBuffer();
     const entries = readEntries(buf);
     const find = (name: string) => entries.find(e => e.name === name);
     const parser = new DOMParser();
     const xml = async (e: ZipEntry) => parser.parseFromString(await readEntry(buf, e), 'application/xml');
 
+    const bookEntry = find('xl/workbook.xml');
+    const book = bookEntry ? await xml(bookEntry) : null;
+    const sheetName = book?.getElementsByTagNameNS('*', 'sheet')[0]?.getAttribute('name') ?? '';
     const sheetEntry = find('xl/worksheets/sheet1.xml')
         ?? entries.filter(e => /^xl\/worksheets\/[^/]+\.xml$/.test(e.name)).sort((a, b) => a.name.localeCompare(b.name))[0];
     if (!sheetEntry) throw new Error('Excel dosyasında sayfa bulunamadı.');
@@ -76,5 +79,5 @@ export async function readXlsx(file: File): Promise<string[][]> {
         }
         if (cells.some(Boolean)) rows.push(Array.from(cells, x => x ?? ''));
     }
-    return rows;
+    return { rows, sheetName };
 }
