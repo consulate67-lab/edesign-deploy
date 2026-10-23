@@ -30,7 +30,7 @@ export const sectorFromList = (text: string): BrochureId | null => {
     if (/mali musavir|smmm|yeminli mali/.test(head)) return 'tr-musavir';
     if (/\bavukat\b|hukuk burosu/.test(head)) return 'tr-avukat';
     if (/otobus|e bilet|ebilet|yolcu listesi/.test(head)) return 'tr-otobus';
-    if (/sigorta acente|komisyon gider|hak edis/.test(head)) return 'tr-acente';
+    if (/sigorta acente|acente\w* sigorta|komisyon gider|hak edis/.test(head)) return 'tr-acente';
     return null;
 };
 
