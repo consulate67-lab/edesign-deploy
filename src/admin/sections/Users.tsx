@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Building2, CreditCard, FileStack, LifeBuoy, Mail, MonitorSmartphone, Phone, RefreshCw, Search, Users as UsersIcon, Wallet, X } from 'lucide-react';
+import { Building2, CreditCard, Eye, FileStack, LifeBuoy, Mail, MonitorSmartphone, Phone, RefreshCw, Search, Users as UsersIcon, Wallet, X } from 'lucide-react';
 import { useUiStore } from '../../store/uiStore';
 import { adminApi } from '../adminApi';
 import { useAdmin } from '../adminContext';
@@ -9,6 +9,7 @@ import {
 } from '../format';
 import { useDebounced, useNow } from '../hooks';
 import { Avatar, Badge, Card, Dot, Drawer, Empty, ErrorBox, SectionHeader, Spinner } from '../ui';
+import { DesignWorkModal } from './DesignWorkModal';
 
 const PAYMENT_STATUS: Record<string, { label: string; color: string }> = {
     completed: { label: 'Tamamlandı', color: C.green },
@@ -24,6 +25,7 @@ const UserDetail: React.FC<{ userId: number; onClose: () => void; onChanged: (ro
     const [error, setError] = useState<string | null>(null);
     const [delta, setDelta] = useState('1');
     const [busy, setBusy] = useState(false);
+    const [designId, setDesignId] = useState<number | null>(null);
     const now = useNow(30000);
 
     useEffect(() => {
@@ -106,15 +108,22 @@ const UserDetail: React.FC<{ userId: number; onClose: () => void; onChanged: (ro
                         {user.designs.length === 0 ? <Empty>Tasarım yok.</Empty> : (
                             <div style={{ overflowX: 'auto' }}>
                                 <table className="adm-table">
-                                    <thead><tr><th>Ad</th><th>Modül</th><th>Durum</th><th>İndirme</th><th>Güncelleme</th></tr></thead>
+                                    <thead><tr><th>Ad</th><th>Modül</th><th>Durum</th><th>Değişiklik</th><th>İndirme</th><th>Güncelleme</th><th /></tr></thead>
                                     <tbody>
                                         {user.designs.map(d => (
                                             <tr key={d.id}>
                                                 <td>{d.name}</td>
                                                 <td style={{ color: C.muted }}>{d.module_id}</td>
                                                 <td>{d.paid ? <Badge color={C.green}>Ücretli</Badge> : <Badge color={C.dim}>{d.status}</Badge>}</td>
+                                                <td>{d.changed ? <Badge color={C.amber}>Değişti</Badge> : <Badge color={C.dim}>Aynı</Badge>}</td>
                                                 <td>{d.download_count}</td>
                                                 <td style={{ color: C.muted, whiteSpace: 'nowrap' }}>{fmtDate(d.updated_at)}</td>
+                                                <td>
+                                                    <button type="button" style={btn('ghost', true)} title="Varsayılan şablon ve son kayıt"
+                                                        onClick={(e) => { e.stopPropagation(); setDesignId(d.id); }}>
+                                                        <Eye size={13} /> Karşılaştır
+                                                    </button>
+                                                </td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -122,6 +131,7 @@ const UserDetail: React.FC<{ userId: number; onClose: () => void; onChanged: (ro
                             </div>
                         )}
                     </Card>
+                    {designId !== null && <DesignWorkModal query={{ designId }} onClose={() => setDesignId(null)} />}
 
                     <Card title={<><Wallet size={15} /> Ödemeler ({user.payments.length})</>}>
                         {user.payments.length === 0 ? <Empty>Ödeme yok.</Empty> : (

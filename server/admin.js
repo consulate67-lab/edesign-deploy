@@ -91,7 +91,11 @@ export const registerAdminRoutes = (app, { db, requireAdmin, packages = {}, webs
         if (!user) return res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
         const [designs, payments, tickets] = await Promise.all([
             db.all(
-                `SELECT id, name, module_id, status, paid_at IS NOT NULL AS paid, download_count, updated_at
+                `SELECT id, name, module_id, status, paid_at IS NOT NULL AS paid, download_count,
+                        created_at, updated_at,
+                        (base_xslt IS NOT NULL
+                          AND COALESCE(xslt_content, custom_content, '') <> ''
+                          AND base_xslt IS DISTINCT FROM COALESCE(xslt_content, custom_content)) AS changed
                    FROM designs WHERE user_id = ? ORDER BY updated_at DESC LIMIT 500`,
                 [id]
             ),
@@ -337,6 +341,8 @@ export const registerAdminRoutes = (app, { db, requireAdmin, packages = {}, webs
         if (!row) return res.status(404).json({ error: 'Tasarım bulunamadı.' });
         const saved = row.xslt_content || row.custom_content || '';
         const base = row.base_xslt || saved;
+        const baseLen = base.length;
+        const savedLen = saved.length;
         res.json({
             id: row.id,
             name: row.name,
@@ -349,6 +355,7 @@ export const registerAdminRoutes = (app, { db, requireAdmin, packages = {}, webs
             baseXslt: base,
             savedXslt: saved,
             xml: row.xml_content || '',
+            stats: { baseLen, savedLen, delta: savedLen - baseLen },
             user: {
                 id: row.user_id,
                 username: row.username,

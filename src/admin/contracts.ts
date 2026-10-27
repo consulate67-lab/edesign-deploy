@@ -114,8 +114,21 @@ export interface AdminUserRow {
     current_view: string | null;
 }
 
+export interface AdminUserDesign {
+    id: number;
+    name: string;
+    module_id: string;
+    status: string;
+    paid: boolean;
+    download_count: number;
+    created_at: string;
+    updated_at: string;
+    /** İlk şablon ile son kayıt farklı mı? */
+    changed: boolean;
+}
+
 export interface AdminUserDetail extends AdminUserRow {
-    designs: { id: number; name: string; module_id: string; status: string; paid: boolean; download_count: number; updated_at: string }[];
+    designs: AdminUserDesign[];
     payments: { id: number; plan_id: string; amount: number; currency: string; status: string; invoice_status: string | null; created_at: string; completed_at: string | null }[];
     tickets: SupportTicket[];
 }
@@ -358,6 +371,7 @@ export interface AdminDesignWork {
     baseXslt: string;
     savedXslt: string;
     xml: string;
+    stats?: { baseLen: number; savedLen: number; delta: number };
     user: { id: number; username: string; full_name: string | null; company_name: string | null };
     presence: PresenceEntry | null;
 }
