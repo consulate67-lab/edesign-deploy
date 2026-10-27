@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { FileCode, PenLine, Trash2, Download, Lock, Eye, X, Search, CheckCircle2, ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
+import { FileCode, PenLine, Trash2, Download, Lock, Eye, X, Search, CheckCircle2, ChevronLeft, ChevronRight, AlertTriangle, CloudUpload } from 'lucide-react';
 import { api, type SavedDesign } from './api';
+import { IntegratorDeployModal } from './IntegratorDeployModal';
 import { WIZARD_DOC_TYPES, loadSampleXml } from './wizard/docTypes';
 import { intlModuleDocTypes } from './wizard/intlDocTypes';
 import { stripLeadingBom } from './xslt-editor/utils/testWatermark';
@@ -262,6 +263,7 @@ export const CompletedDesigns: React.FC<{ forceShow?: boolean }> = ({ forceShow 
     const [query, setQuery] = useState('');
     const [page, setPage] = useState(0);
     const [preview, setPreview] = useState<SavedDesign | null>(null);
+    const [deployDesign, setDeployDesign] = useState<SavedDesign | null>(null);
 
     const completed = useMemo(() => (designs ?? []).filter(d => d.paid).sort(byRecent('paid_at')), [designs]);
     const filtered = useMemo(() => {
@@ -364,6 +366,15 @@ export const CompletedDesigns: React.FC<{ forceShow?: boolean }> = ({ forceShow 
                                             </button>
                                             <button
                                                 type="button"
+                                                data-deploy-design={d.id}
+                                                title="Entegratöre XSLT olarak yükle"
+                                                onClick={() => setDeployDesign(d)}
+                                                style={ghostBtn}
+                                            >
+                                                <CloudUpload size={13} /> Entegratör
+                                            </button>
+                                            <button
+                                                type="button"
                                                 title={t('common.delete')}
                                                 onClick={() => remove(d)}
                                                 style={{ background: 'transparent', border: 'none', color: theme.textSubtle, cursor: 'pointer', padding: 4 }}
@@ -393,6 +404,7 @@ export const CompletedDesigns: React.FC<{ forceShow?: boolean }> = ({ forceShow 
                 )}
             </div>
             {preview && <DesignPreview design={preview} onClose={() => setPreview(null)} />}
+            {deployDesign && <IntegratorDeployModal design={deployDesign} onClose={() => setDeployDesign(null)} />}
         </div>
     );
 };

@@ -5,6 +5,7 @@ import { createGibRevisionsSchema } from './gib-revisions.js';
 import { createSiteConfigSchema } from './site-config.js';
 import { createSocialSchema } from './social.js';
 import { createWebmailSchema } from './webmail.js';
+import { createIntegratorSchema } from './integrators/schema.js';
 
 /**
  * Thin adapter that exposes the SQLite-style API (run/get/all) on top of
@@ -264,6 +265,7 @@ export const initDb = async () => {
         await createSocialSchema(probe);
         await createWebmailSchema(probe);
         await createGibRevisionsSchema(probe);
+        await createIntegratorSchema(probe);
         await promoteAdmins(probe);
     } finally {
         probe.release();

@@ -148,6 +148,7 @@ export const api = {
                     status: res.status,
                     paymentRequired: !!data.paymentRequired,
                     verificationRequired: !!data.verificationRequired,
+                    deployment: data.deployment,
                 });
             }
             return data;
@@ -575,5 +576,74 @@ export const api = {
             localStorage.setItem('mock_templates', JSON.stringify(updated));
             resolve({ success: true });
         });
-    }
+    },
+
+    /** Yol A — entegratöre XSLT şablon teslimi */
+    integratorProviders: (): Promise<{ providers: IntegratorProvider[] }> =>
+        api.request('/integrators/providers'),
+    integratorAccounts: (): Promise<{ accounts: IntegratorAccount[] }> =>
+        api.request('/integrators/accounts'),
+    saveIntegratorAccount: (input: {
+        provider: string;
+        label?: string;
+        environment?: 'test' | 'live';
+        credentials: Record<string, string>;
+    }): Promise<{ account: IntegratorAccount }> =>
+        api.request('/integrators/accounts', {
+            method: 'POST',
+            body: JSON.stringify(input),
+        }),
+    deleteIntegratorAccount: (id: number): Promise<{ success: true }> =>
+        api.request(`/integrators/accounts/${id}`, { method: 'DELETE' }),
+    integratorDeployments: (designId?: number): Promise<{ deployments: TemplateDeployment[] }> =>
+        api.request(`/integrators/deployments${designId ? `?designId=${designId}` : ''}`),
+    deployDesignToIntegrator: (designId: number, accountId: number): Promise<{ deployment: TemplateDeployment }> =>
+        api.request('/integrators/deploy', {
+            method: 'POST',
+            body: JSON.stringify({ designId, accountId }),
+        }),
 };
+
+export interface IntegratorProviderField {
+    key: string;
+    label: string;
+    type: 'text' | 'password' | 'url';
+    required?: boolean;
+}
+
+export interface IntegratorProvider {
+    id: string;
+    name: string;
+    summary: string;
+    ready: boolean;
+    modules: string[];
+    fields: IntegratorProviderField[];
+}
+
+export interface IntegratorAccount {
+    id: number;
+    provider: string;
+    label: string;
+    environment: 'test' | 'live';
+    meta: Record<string, string>;
+    lastVerifiedAt: string | null;
+    lastError: string | null;
+    createdAt: string;
+    updatedAt: string;
+    providerReady: boolean;
+}
+
+export interface TemplateDeployment {
+    id: number;
+    designId: number;
+    accountId: number;
+    provider: string;
+    moduleId: string;
+    status: 'queued' | 'uploading' | 'uploaded' | 'rejected' | 'failed' | 'pending_provider';
+    remoteId: string | null;
+    fileName: string | null;
+    error: string | null;
+    attempt: number;
+    createdAt: string;
+    updatedAt: string;
+}

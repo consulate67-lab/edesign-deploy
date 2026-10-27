@@ -19,6 +19,7 @@ import { registerPaytrRoutes } from './paytr.js';
 import { registerSiteConfigRoutes } from './site-config.js';
 import { registerSocialRoutes } from './social.js';
 import { registerWebmailRoutes } from './webmail.js';
+import { registerIntegratorRoutes } from './integrators/routes.js';
 import { attachRealtime, touchLastSeen } from './realtime.js';
 import { isSupportAllowed, registerSupportRoutes } from './support.js';
 import { createBotHandler } from './telegram-bot.js';
@@ -151,6 +152,12 @@ initDb().then(async _db => {
         packages: PACKAGE_PRICES,
         frontendUrl: FRONTEND_URL,
         isAllowedOrigin: (origin) => ALLOWED_ORIGINS.includes(origin),
+    });
+    registerIntegratorRoutes(app, {
+        db,
+        authenticateToken,
+        requireAdmin,
+        secret: EFFECTIVE_SECRET,
     });
     app.use((err, _req, res, _next) => {
         const status = err.status || err.statusCode || 500;
