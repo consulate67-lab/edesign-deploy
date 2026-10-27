@@ -225,6 +225,7 @@ export function createRealtime(getToken: () => string | null, opts: RealtimeOpti
 let userRt: Realtime | null = null;
 let userOpts: RealtimeOptions = {};
 let lastView: string | null = null;
+let lastDesign: import('../admin/contracts').PresenceDesign | null = null;
 
 const readView = () => {
     try { return sessionStorage.getItem('app_view'); } catch { return null; }
@@ -240,7 +241,13 @@ export function configureUserRealtime(opts: Pick<RealtimeOptions, 'url' | 'onOpe
 }
 
 const sendHello = (rt: Realtime) => {
-    rt.send({ t: 'hello', view: lastView ?? readView(), url: location.href, title: document.title });
+    rt.send({
+        t: 'hello',
+        view: lastView ?? readView(),
+        url: location.href,
+        title: document.title,
+        design: lastDesign,
+    });
 };
 
 /** Kullanıcı oturum token'ıyla tekil WS bağlantısı (gerekirse bağlanır; çıkıştan sonra yeniden başlatır). */
@@ -260,9 +267,16 @@ export function getUserRealtime(): Realtime {
 }
 
 /** Ekran değişince çağrılır; bağlantı açıksa sunucuya hello gönderir (açılınca zaten gönderilir). */
-export function reportView(view?: string) {
+export function reportView(view?: string, design?: import('../admin/contracts').PresenceDesign | null) {
     if (view !== undefined) lastView = view;
     else lastView = null;
+    if (design !== undefined) lastDesign = design;
+    if (userRt && userRt.status === 'open') sendHello(userRt);
+}
+
+/** Açık tasarım değişince (kaydet / yükle) presence'a yazılır; ekran izlenmez. */
+export function reportDesign(design: import('../admin/contracts').PresenceDesign | null) {
+    lastDesign = design;
     if (userRt && userRt.status === 'open') sendHello(userRt);
 }
 

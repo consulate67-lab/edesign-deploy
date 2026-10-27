@@ -498,6 +498,7 @@ const serializeDesign = (row) => row ? ({
     module_id: row.module_id,
     xslt_content: row.xslt_content,
     custom_content: row.custom_content,
+    base_xslt: row.base_xslt || null,
     theme_color: row.theme_color,
     sections: row.sections_json || null,   // JSONB -> otomatik parse
     status: row.status,
@@ -528,10 +529,11 @@ app.post('/api/designs', authenticateToken, async (req, res) => {
 
     try {
         const sectionsJson = sections ? JSON.stringify(sections) : null;
+        const baseXslt = xslt_content || custom_content || null;
         const result = await db.run(
-            `INSERT INTO designs (user_id, name, module_id, xslt_content, custom_content, theme_color, sections_json, xml_content)
-             VALUES (?, ?, ?, ?, ?, ?, ?::jsonb, ?)`,
-            [req.user.id, name, module_id, xslt_content || null, custom_content || null, theme_color || null, sectionsJson, xml_content || null]
+            `INSERT INTO designs (user_id, name, module_id, xslt_content, custom_content, base_xslt, theme_color, sections_json, xml_content)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?::jsonb, ?)`,
+            [req.user.id, name, module_id, xslt_content || null, custom_content || null, baseXslt, theme_color || null, sectionsJson, xml_content || null]
         );
         const created = await db.get('SELECT * FROM designs WHERE id = ?', [result.lastID]);
         // eslint-disable-next-line no-console
@@ -595,6 +597,14 @@ app.put('/api/designs/:id', authenticateToken, async (req, res) => {
         if (name !== undefined) { updates.push('name = ?'); params.push(name); }
         if (xslt_content !== undefined) { updates.push('xslt_content = ?'); params.push(xslt_content); }
         if (custom_content !== undefined) { updates.push('custom_content = ?'); params.push(custom_content); }
+        if (!existing.base_xslt) {
+            const nextBase = (typeof xslt_content === 'string' && xslt_content)
+                || (typeof custom_content === 'string' && custom_content)
+                || existing.xslt_content
+                || existing.custom_content
+                || null;
+            if (nextBase) { updates.push('base_xslt = COALESCE(base_xslt, ?)'); params.push(nextBase); }
+        }
         if (theme_color !== undefined) { updates.push('theme_color = ?'); params.push(theme_color); }
         if (sections !== undefined) { updates.push('sections_json = ?::jsonb'); params.push(JSON.stringify(sections)); }
         if (status !== undefined) { updates.push('status = ?'); params.push(status); }
@@ -754,9 +764,9 @@ app.post('/api/designs/export', authenticateToken, async (req, res) => {
                 [designName, module_id, content, previewXml, key, existing.id, taxId, licenseToken]
             )).rows[0]
             : (await client.query(
-                `INSERT INTO designs (user_id, name, module_id, xslt_content, xml_content, design_key, paid_at, status, download_count, license_tax_id, license_token)
-                 VALUES ($1, $2, $3, $4, $5, $6, NOW(), 'downloaded', 1, $7, $8) RETURNING *`,
-                [user.id, designName, module_id, content, previewXml, key, taxId, licenseToken]
+                `INSERT INTO designs (user_id, name, module_id, xslt_content, xml_content, base_xslt, design_key, paid_at, status, download_count, license_tax_id, license_token)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), 'downloaded', 1, $8, $9) RETURNING *`,
+                [user.id, designName, module_id, content, previewXml, xslt_content, key, taxId, licenseToken]
             )).rows[0];
         await client.query('COMMIT');
         console.log(`[designs] user=${user.id} export design #${row.id} charged=${charged}`);

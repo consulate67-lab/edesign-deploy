@@ -311,6 +311,54 @@ export const registerAdminRoutes = (app, { db, requireAdmin, packages = {}, webs
         res.json(remote.serializeSession(session));
     });
 
+    /** Çevrimiçi kullanıcının açık / son tasarımı: varsayılan şablon ↔ son kayıt (ekran paylaşımı yok). */
+    app.get('/api/admin/design-work', requireAdmin, async (req, res) => {
+        const designId = parseId(req.query.designId);
+        const userId = parseId(req.query.userId);
+        let row = null;
+        if (designId) {
+            row = await db.get(
+                `SELECT d.*, u.username, u.full_name, u.company_name
+                   FROM designs d JOIN users u ON u.id = d.user_id
+                  WHERE d.id = ? AND d.purged_at IS NULL`,
+                [designId]
+            );
+        } else if (userId) {
+            row = await db.get(
+                `SELECT d.*, u.username, u.full_name, u.company_name
+                   FROM designs d JOIN users u ON u.id = d.user_id
+                  WHERE d.user_id = ? AND d.purged_at IS NULL
+                  ORDER BY d.updated_at DESC LIMIT 1`,
+                [userId]
+            );
+        } else {
+            return res.status(400).json({ error: 'designId veya userId gerekli.' });
+        }
+        if (!row) return res.status(404).json({ error: 'Tasarım bulunamadı.' });
+        const saved = row.xslt_content || row.custom_content || '';
+        const base = row.base_xslt || saved;
+        res.json({
+            id: row.id,
+            name: row.name,
+            moduleId: row.module_id,
+            status: row.status,
+            paid: !!row.paid_at,
+            updatedAt: row.updated_at,
+            createdAt: row.created_at,
+            changed: !!base && !!saved && base !== saved,
+            baseXslt: base,
+            savedXslt: saved,
+            xml: row.xml_content || '',
+            user: {
+                id: row.user_id,
+                username: row.username,
+                full_name: row.full_name,
+                company_name: row.company_name,
+            },
+            presence: presenceOf(row.user_id),
+        });
+    });
+
     // ------------------------------------------------------------ tasarım yapay zekası hafızası
 
     app.get('/api/admin/ai/memory', requireAdmin, async (req, res) => {

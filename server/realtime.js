@@ -12,7 +12,7 @@ const CHAT_MAX = 2000;
 const HELLO_FIELD_MAX = 500;
 
 let db = null;
-/** userId → { info, sockets, view, url, title, connectedAt, lastActiveAt } */
+/** userId → { info, sockets, view, url, title, design, connectedAt, lastActiveAt } */
 const users = new Map();
 const admins = new Set();
 /** Aktif oturumlar: sessionId → { userId, watchers: Set<admin ws>, orphanTimer } */
@@ -41,6 +41,7 @@ const toPresence = (userId, p) => ({
     view: p.view,
     url: p.url,
     title: p.title,
+    design: p.design ?? null,
     connectedAt: p.connectedAt,
     lastActiveAt: p.lastActiveAt,
 });
@@ -151,7 +152,22 @@ const userHandlers = {
     hello: (ws, msg) => {
         const p = users.get(ws.userId);
         const field = (v) => (typeof v === 'string' ? v.slice(0, HELLO_FIELD_MAX) : null);
-        Object.assign(p, { view: field(msg.view), url: field(msg.url), title: field(msg.title), lastActiveAt: new Date().toISOString() });
+        const designRaw = msg.design && typeof msg.design === 'object' ? msg.design : null;
+        const designId = Number(designRaw?.id);
+        const design = designRaw && Number.isInteger(designId) && designId > 0
+            ? {
+                id: designId,
+                name: field(designRaw.name) || `Tasarım #${designId}`,
+                moduleId: field(designRaw.moduleId) || field(designRaw.module_id) || null,
+            }
+            : null;
+        Object.assign(p, {
+            view: field(msg.view),
+            url: field(msg.url),
+            title: field(msg.title),
+            design,
+            lastActiveAt: new Date().toISOString(),
+        });
         touchLastSeen(db, ws.userId);
         broadcastPresence();
     },
@@ -269,7 +285,7 @@ const registerUser = async (ws, claims) => {
 
     Object.assign(ws, { role: 'user', userId: info.id });
     const now = new Date().toISOString();
-    const p = users.get(info.id) ?? { sockets: new Set(), view: null, url: null, title: null, connectedAt: now, lastActiveAt: now };
+    const p = users.get(info.id) ?? { sockets: new Set(), view: null, url: null, title: null, design: null, connectedAt: now, lastActiveAt: now };
     p.info = info;
     p.sockets.add(ws);
     users.set(info.id, p);

@@ -7,7 +7,7 @@ import type {
     OfficialCheckResult, OfficialRevision, OfficialSource,
     MailBannedList, MailBannedScanResult, MailCampaign,
     MailAccount, MailAccountInput, MailAction, MailCampaignDetail, MailCampaignInput, MailCampaignList, MailContent, MailFolder, MailListItem,
-    MailMessage, MailSendInput, RemoteSession, SocialGenerateInput, SocialMetaConnectInput,
+    MailMessage, MailSendInput, AdminDesignWork, RemoteSession, SocialGenerateInput, SocialMetaConnectInput,
     SocialMetaConnectResult, SocialMetaStatus, SocialPlatform, SocialPost, SocialPostInput, SocialStatus, SupportMessage, SupportTicket,
     TicketStatus,
 } from './contracts';
@@ -122,6 +122,8 @@ export const adminApi = {
 
     remoteSessions: () => request<RemoteSession[]>('/admin/remote'),
     inviteRemote: (userId: number) => request<RemoteSession>('/admin/remote', { method: 'POST', body: { userId } }),
+    designWork: (query: { designId?: number; userId?: number }) =>
+        request<AdminDesignWork>(`/admin/design-work${qs({ designId: query.designId, userId: query.userId })}`),
 
     gallery: () => request<GalleryDesign[]>('/admin/gallery'),
     createGallery: (input: GalleryDesignInput) => request<GalleryDesign>('/admin/gallery', { method: 'POST', body: input }),

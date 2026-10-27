@@ -147,10 +147,13 @@ const App: React.FC = () => {
 
     useEffect(() => {
         if (!userArea) return;
+        const design = (view === 'xslt-editor' || view === 'designer') && selectedDoc?.designId
+            ? { id: selectedDoc.designId, name: selectedDoc.moduleName, moduleId: selectedDoc.moduleId }
+            : null;
         import('./support/realtime')
-            .then((m) => { m.getUserRealtime(); m.reportView(view); })
+            .then((m) => { m.getUserRealtime(); m.reportView(view, design); })
             .catch(() => undefined);
-    }, [userArea, view]);
+    }, [userArea, view, selectedDoc?.designId, selectedDoc?.moduleId, selectedDoc?.moduleName]);
 
     useEffect(() => {
         if (view === 'landing' || view === 'auth') {

@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
-import { Activity, History, MonitorSmartphone, PlugZap, RefreshCw, Send } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Activity, Eye, History, MonitorSmartphone, PlugZap, RefreshCw, Send } from 'lucide-react';
+import { adminApi } from '../adminApi';
 import { useAdmin } from '../adminContext';
-import type { RemoteSession } from '../contracts';
-import { C, REMOTE_STATUS, btn, displayName, fmtDateTime, fmtDuration, fmtRelative, viewLabel } from '../format';
+import type { AdminDesignWork, PresenceEntry, RemoteSession } from '../contracts';
+import { C, REMOTE_STATUS, btn, displayName, errorText, fmtDateTime, fmtDuration, fmtRelative, viewLabel } from '../format';
 import { useNow } from '../hooks';
-import { Avatar, Badge, Card, CountBadge, Dot, Empty, SectionHeader, Spinner } from '../ui';
+import { Avatar, Badge, Card, CountBadge, Dot, Empty, Modal, SectionHeader, Spinner } from '../ui';
+import { transformXmlWithXslt } from '../../xsltTransformer';
 
 const SessionRow: React.FC<{ s: RemoteSession; now: number; onConnect?: () => void }> = ({ s, now, onConnect }) => {
     const st = REMOTE_STATUS[s.status];
@@ -32,10 +34,76 @@ const SessionRow: React.FC<{ s: RemoteSession; now: number; onConnect?: () => vo
     );
 };
 
+const PreviewPane: React.FC<{ label: string; xslt: string; xml: string }> = ({ label, xslt, xml }) => {
+    const html = useMemo(() => {
+        if (!xslt.trim()) return '<p style="padding:16px;font-family:sans-serif;color:#64748b">İçerik yok.</p>';
+        if (!xml.trim()) {
+            return `<pre style="margin:0;padding:12px;font:12px/1.45 ui-monospace,monospace;white-space:pre-wrap;word-break:break-word">${xslt.slice(0, 12000).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]!))}${xslt.length > 12000 ? '\n…' : ''}</pre>`;
+        }
+        try {
+            return transformXmlWithXslt(xml, xslt);
+        } catch (e) {
+            return `<p style="padding:16px;font-family:sans-serif;color:#b91c1c">Önizleme oluşturulamadı: ${String(e instanceof Error ? e.message : e)}</p>`;
+        }
+    }, [xslt, xml]);
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0, border: `1px solid ${C.border}`, borderRadius: 12, overflow: 'hidden', background: '#fff' }}>
+            <div style={{ padding: '8px 12px', fontSize: '0.78rem', fontWeight: 700, color: C.text, background: C.soft, borderBottom: `1px solid ${C.border}` }}>{label}</div>
+            <iframe title={label} srcDoc={html} sandbox="" style={{ flex: 1, width: '100%', minHeight: 360, border: 0, background: '#fff' }} />
+        </div>
+    );
+};
+
+const DesignWorkBody: React.FC<{ query: { designId?: number; userId?: number } }> = ({ query }) => {
+    const [work, setWork] = useState<AdminDesignWork | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const [busy, setBusy] = useState(true);
+
+    useEffect(() => {
+        let cancelled = false;
+        void adminApi.designWork(query)
+            .then((r) => { if (!cancelled) { setWork(r); setBusy(false); } })
+            .catch((e) => { if (!cancelled) { setError(errorText(e)); setBusy(false); } });
+        return () => { cancelled = true; };
+    }, [query]);
+
+    if (busy) return <div style={{ padding: 24, display: 'flex', justifyContent: 'center' }}><Spinner size={22} /></div>;
+    if (error) return <div style={{ padding: 16, color: C.redText, fontSize: '0.85rem' }}>{error}</div>;
+    if (!work) return null;
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minHeight: 0, height: '100%' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+                <div style={{ fontSize: '0.78rem', color: C.muted, lineHeight: 1.5 }}>
+                    {displayName(work.user)}
+                    {work.user.company_name ? ` · ${work.user.company_name}` : ''}
+                    {' · '}{work.moduleId}
+                    {' · '}son kayıt {fmtDateTime(work.updatedAt)}
+                    {work.paid ? ' · onaylı' : ' · taslak'}
+                    {work.presence ? ` · şu an ${viewLabel(work.presence.view)}` : ''}
+                </div>
+                <Badge color={work.changed ? C.amber : C.green}>
+                    {work.changed ? 'Son kayıt varsayılandan farklı' : 'Son kayıt varsayılanla aynı'}
+                </Badge>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, flex: 1, minHeight: 0 }}>
+                <PreviewPane label="Varsayılan (ilk şablon)" xslt={work.baseXslt} xml={work.xml} />
+                <PreviewPane label="Son kayıt" xslt={work.savedXslt} xml={work.xml} />
+            </div>
+        </div>
+    );
+};
+
+const DesignWorkModal: React.FC<{ query: { designId?: number; userId?: number }; onClose: () => void }> = ({ query, onClose }) => (
+    <Modal title="Tasarım karşılaştırması" onClose={onClose} width={1100} height="85vh">
+        <DesignWorkBody key={`${query.designId ?? ''}-${query.userId ?? ''}`} query={query} />
+    </Modal>
+);
+
 export const RemoteSupport: React.FC = () => {
     const { presence, remote, reloadRemote, connect, inviteUser, rtStatus } = useAdmin();
     const [inviting, setInviting] = useState<number | null>(null);
     const [refreshing, setRefreshing] = useState(false);
+    const [designQuery, setDesignQuery] = useState<{ designId?: number; userId?: number } | null>(null);
     const now = useNow(15000);
 
     const pending = remote.filter(s => s.status === 'requested');
@@ -49,10 +117,15 @@ export const RemoteSupport: React.FC = () => {
         setInviting(null);
     };
 
+    const openDesign = (p: PresenceEntry) => {
+        if (p.design?.id) setDesignQuery({ designId: p.design.id });
+        else setDesignQuery({ userId: p.userId });
+    };
+
     return (
         <div data-admin-section="remote">
             <SectionHeader icon={<MonitorSmartphone size={20} />} title="Online destek"
-                subtitle="Kullanıcının ekranını onayıyla canlı görün, gerekirse onun adına tıklayıp yazın. Şifre alanları kullanıcı tarafında gizlenir."
+                subtitle="Çevrimiçi kullanıcının hangi tasarımda olduğunu ve varsayılan / son kayıt halini görebilirsiniz. Ekran paylaşımı yalnızca davet ve onayla açılır."
                 actions={<button type="button" style={btn('ghost', true)} onClick={async () => { setRefreshing(true); await reloadRemote(); setRefreshing(false); }}>
                     {refreshing ? <Spinner size={14} /> : <RefreshCw size={14} />} Yenile
                 </button>} />
@@ -74,11 +147,17 @@ export const RemoteSupport: React.FC = () => {
                                         </div>
                                         <div style={{ fontSize: '0.73rem', color: C.muted, display: 'flex', alignItems: 'center', gap: 5 }}>
                                             <Dot color={C.green} size={6} /> {viewLabel(p.view)}
+                                            {p.design && <span style={{ color: C.text }}> · {p.design.name}{p.design.moduleId ? ` (${p.design.moduleId})` : ''}</span>}
                                         </div>
                                         <div style={{ fontSize: '0.68rem', color: C.dim }}>
                                             {fmtDuration(p.connectedAt, now)} süredir çevrimiçi · son hareket {fmtRelative(p.lastActiveAt, now)}
                                         </div>
                                     </div>
+                                    <button type="button" data-admin-presence-design={p.userId}
+                                        onClick={() => openDesign(p)} style={btn('ghost', true)}
+                                        title="Varsayılan şablon ve son kayıt (ekran izlenmez)">
+                                        <Eye size={13} /> Tasarım
+                                    </button>
                                     <button type="button" data-admin-presence-invite={p.userId} disabled={inviting === p.userId || busyUsers.has(p.userId)}
                                         onClick={() => void invite(p.userId)} style={{ ...btn('secondary', true), opacity: busyUsers.has(p.userId) ? 0.5 : 1 }}
                                         title={busyUsers.has(p.userId) ? 'Bu kullanıcıyla açık bir oturum var' : 'Ekran paylaşımı daveti gönder'}>
@@ -107,6 +186,7 @@ export const RemoteSupport: React.FC = () => {
                     </Card>
                 </div>
             </div>
+            {designQuery && <DesignWorkModal query={designQuery} onClose={() => setDesignQuery(null)} />}
         </div>
     );
 };

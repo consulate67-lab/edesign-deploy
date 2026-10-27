@@ -326,6 +326,12 @@ export interface AdminSettingsStatus {
     otpChannel: AdminLoginResponse['channel'];
 }
 
+export interface PresenceDesign {
+    id: number;
+    name: string;
+    moduleId: string | null;
+}
+
 export interface PresenceEntry {
     userId: number;
     username: string;
@@ -334,8 +340,26 @@ export interface PresenceEntry {
     view: string | null;
     url: string | null;
     title: string | null;
+    design?: PresenceDesign | null;
     connectedAt: string;
     lastActiveAt: string;
+}
+
+/** Yönetici: kullanıcının açık / son tasarımı — varsayılan şablon ve son kayıt. */
+export interface AdminDesignWork {
+    id: number;
+    name: string;
+    moduleId: string;
+    status: string;
+    paid: boolean;
+    updatedAt: string;
+    createdAt: string;
+    changed: boolean;
+    baseXslt: string;
+    savedXslt: string;
+    xml: string;
+    user: { id: number; username: string; full_name: string | null; company_name: string | null };
+    presence: PresenceEntry | null;
 }
 
 /** Yöneticinin ortak ekranda kullanıcı sayfasına uyguladığı işlem; id = rrweb mirror düğüm id'si. */
@@ -351,7 +375,7 @@ export type RemoteAction =
 
 export type WsMessage =
     // kullanıcı → sunucu: bulunduğu ekran (bağlanınca ve ekran değişince)
-    | { t: 'hello'; view?: string | null; url?: string | null; title?: string | null }
+    | { t: 'hello'; view?: string | null; url?: string | null; title?: string | null; design?: PresenceDesign | null }
     // sunucu → yönetici: çevrimiçi kullanıcılar (bağlanınca ve her değişiklikte)
     | { t: 'presence'; users: PresenceEntry[] }
     // sunucu → yönetici: kullanıcı online destek istedi / oturum durumu değişti

@@ -1958,6 +1958,16 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     }, [initialDesignId]);
 
     useEffect(() => {
+        if (!design.id) return;
+        void import('../support/realtime').then((m) => m.reportDesign({
+            id: design.id!,
+            name: design.name || docTitle || `Tasarım #${design.id}`,
+            moduleId,
+        }));
+        return () => { void import('../support/realtime').then((m) => m.reportDesign(null)); };
+    }, [design.id, design.name, docTitle, moduleId]);
+
+    useEffect(() => {
         if (!onWorkChange || !xsltContent) return;
         const t = setTimeout(() => onWorkChange({ moduleId, xslt: xsltContent, xml: xmlContent, designId: design.id }), 800);
         return () => clearTimeout(t);
