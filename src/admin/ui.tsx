@@ -158,17 +158,40 @@ export const Modal: React.FC<{ title: React.ReactNode; onClose: () => void; chil
     );
 };
 
+const CHUNK_RELOAD_KEY = 'edx-chunk-reload';
+
+const isChunkLoadError = (error: Error) =>
+    /Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module/i.test(error.message);
+
+/** Başarısız dinamik import aynı sekmede yeniden denenmez; sayfa yenilenir. Kısa aralıkta döngüye girilmez. */
+const reloadForChunk = () => {
+    try { sessionStorage.setItem(CHUNK_RELOAD_KEY, String(Date.now())); } catch { /* yok say */ }
+    window.location.reload();
+};
+
 /** Ayrı yüklenen bölümlerin (ör. yapay zeka) hatası tüm paneli düşürmesin. */
 export class SectionBoundary extends React.Component<{ children: React.ReactNode }, { error: Error | null }> {
     state: { error: Error | null } = { error: null };
     static getDerivedStateFromError(error: Error) { return { error }; }
+    componentDidCatch(error: Error) {
+        if (!isChunkLoadError(error)) return;
+        let last = 0;
+        try { last = Number(sessionStorage.getItem(CHUNK_RELOAD_KEY) || 0); } catch { return; }
+        if (Date.now() - last < 20_000) return;
+        reloadForChunk();
+    }
     render() {
         if (!this.state.error) return this.props.children;
+        const chunk = isChunkLoadError(this.state.error);
         return (
             <ErrorBox>
                 Bu bölüm yüklenemedi: {this.state.error.message}
                 <div style={{ marginTop: 8 }}>
-                    <button type="button" onClick={() => this.setState({ error: null })} style={{ background: 'none', border: 'none', color: C.accentText, cursor: 'pointer', fontWeight: 700, padding: 0, fontFamily: 'inherit' }}>
+                    <button
+                        type="button"
+                        onClick={() => (chunk ? reloadForChunk() : this.setState({ error: null }))}
+                        style={{ background: 'none', border: 'none', color: C.accentText, cursor: 'pointer', fontWeight: 700, padding: 0, fontFamily: 'inherit' }}
+                    >
                         Tekrar dene
                     </button>
                 </div>

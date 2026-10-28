@@ -10,6 +10,22 @@ interface State {
     error: Error | null;
 }
 
+const CHUNK_RELOAD_KEY = 'edx-chunk-reload';
+
+const isChunkLoadError = (error: Error | null) =>
+    !!error && /Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module|Loading chunk [\d]+ failed/i.test(error.message);
+
+/** Yayın sonrası eski JS önbelleği kalırsa sayfayı bir kez yenile (döngüye girme). */
+const reloadForStaleChunk = () => {
+    try {
+        const last = Number(sessionStorage.getItem(CHUNK_RELOAD_KEY) || 0);
+        if (Date.now() - last < 20_000) return false;
+        sessionStorage.setItem(CHUNK_RELOAD_KEY, String(Date.now()));
+    } catch { /* private mode */ }
+    window.location.reload();
+    return true;
+};
+
 /**
  * Catches uncaught React errors anywhere in the subtree and renders a fallback
  * UI instead of white-screening the whole app. Logs to console in DEV only.
@@ -28,14 +44,21 @@ export class ErrorBoundary extends React.Component<Props, State> {
         if (import.meta.env.DEV) {
             console.error('[ErrorBoundary]', error, info.componentStack);
         }
-        // Production: forward to a real error reporting service here.
+        if (isChunkLoadError(error)) reloadForStaleChunk();
     }
 
-    reset = () => this.setState({ hasError: false, error: null });
+    reset = () => {
+        if (isChunkLoadError(this.state.error)) {
+            reloadForStaleChunk();
+            return;
+        }
+        this.setState({ hasError: false, error: null });
+    };
 
     render(): React.ReactNode {
         if (this.state.hasError) {
             if (this.props.fallback) return this.props.fallback;
+            const chunk = isChunkLoadError(this.state.error);
             return (
                 <div
                     role="alert"
@@ -52,7 +75,9 @@ export class ErrorBoundary extends React.Component<Props, State> {
                         Beklenmeyen bir hata oluştu
                     </h2>
                     <p style={{ margin: '0 0 12px', color: '#7f1d1d' }}>
-                        {this.state.error?.message ?? 'Bilinmeyen hata'}
+                        {chunk
+                            ? 'Site güncellendi; sayfa yenilenince düzelir. Olmazsa Ctrl+Shift+R ile zorla yenileyin.'
+                            : (this.state.error?.message ?? 'Bilinmeyen hata')}
                     </p>
                     <button
                         type="button"
@@ -66,7 +91,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
                             cursor: 'pointer',
                         }}
                     >
-                        Tekrar Dene
+                        {chunk ? 'Sayfayı yenile' : 'Tekrar Dene'}
                     </button>
                 </div>
             );
