@@ -147,6 +147,14 @@ try {
     }
     console.log(`eski dosya silindi: ${removed}`);
     console.log('Yayın tamam.');
+
+    // Bing / Yandex IndexNow — arama motorlarına anında bildirim
+    const ping = spawnSync(process.execPath, [path.join(root, 'scripts', 'indexnow.mjs')], {
+        cwd: root,
+        stdio: 'inherit',
+        env: process.env,
+    });
+    if (ping.status !== 0) console.warn('IndexNow bildirimi başarısız veya kısmi; yayın yine de tamam.');
 } catch (err) {
     console.error('FTP hatası:', err.message);
     process.exitCode = 1;

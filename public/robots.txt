@@ -28,4 +28,7 @@ Allow: /
 User-agent: Applebot-Extended
 Allow: /
 
+# AI / ajanlar için kısa ürün haritası
+# https://www.edxdocu.com/llms.txt
+
 Sitemap: https://www.edxdocu.com/sitemap.xml

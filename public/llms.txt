@@ -1,60 +1,29 @@
-# edXdocu — e-Belge (e-Fatura) Tasarımcı / e-Invoice Template Designer
+# edXdocu
 
-> edXdocu (https://www.edxdocu.com) is a web app for designing the visual layout (XSLT stylesheet) of e-invoices and other e-documents without writing code. It supports Turkey's GİB UBL-TR e-documents (e-Fatura, e-Arşiv, e-İrsaliye and 12 more) and international formats (EN 16931, Peppol BIS Billing 3.0, XRechnung 3.0, US DBNAlliance UBL, Brazil NF-e, Russia УПД, India GST e-Invoice, China 数电票). The interface is available in 9 languages.
+> e-Fatura, e-Arşiv, e-İrsaliye ve diğer e-belge türlerinin görünüm (XSLT) dosyasını kod yazmadan tasarlayan web uygulaması. GİB UBL-TR uyumlu; Avrupa için EN 16931 / Peppol / XRechnung şablonları da vardır.
 
-edXdocu, GİB uyumlu e-Fatura, e-Arşiv, e-İrsaliye ve toplam 15 e-belge türünün görünüm (XSLT) dosyasını XSLT bilmeden, sürükle-bırak editörle hazırlamanızı sağlayan Türk yazılımıdır. Geliştirici: Sarp Bilgisayar Yazılım ve Danışmanlık, İstanbul.
+edXdocu bir entegratör veya fatura gönderim yazılımı değildir. Kullanıcı tasarımı onaylayıp XSLT indirir; kendi özel entegratörüne / ERP’sine yükler.
 
-## Ne işe yarar? / What it does
+## Ürün
 
-- XSLT bilmeden sürükle-bırak e-fatura tasarımı (drag-and-drop e-invoice layout editor, no XSLT knowledge needed)
-- Sektöre göre hazır şablon galerisi (ready-made templates by industry)
-- Logo, kaşe, imza, banka / IBAN bilgisi, karekod, grafik ekleme
-- Kendi XML dosyasıyla anlık önizleme ve filigranlı ücretsiz test indirme
-- Mevcut .xslt / .xsl dosyasını yükleyip görsel olarak düzenleme
-- Onaylanan tasarımın XSLT dosyasını indirip e-fatura entegratörüne / ERP'ye yükleme
-- 9 dilde arayüz: Türkçe, English, Deutsch, Français, Español, Português, Русский, हिन्दी, 中文
-
-## Desteklenen belgeler / Supported documents
-
-- Türkiye (GİB UBL-TR 1.2.1, e-Fatura Paketi v29): e-Fatura, e-Arşiv Fatura, e-İrsaliye, e-İrsaliye Yanıtı, e-İhracat, e-SMM (Serbest Meslek Makbuzu), e-Müstahsil Makbuzu, e-Gider Pusulası, e-Döviz / Kıymetli Maden, e-Dekont, e-Sigorta Komisyon Gider Belgesi, e-Bilet, e-Bilet Raporu, e-Yolcu Listesi, e-Makbuz
-- Europe: EN 16931, Peppol BIS Billing 3.0, XRechnung 3.0 (UBL), Peppol Despatch Advice
-- National: USA (DBNAlliance UBL), Brazil (NF-e, NFC-e, NFS-e, CT-e), Russia (ФНС УПД 5.03), India (GST e-Invoice, e-Way Bill), China (数电票)
-
-## Fiyatlar / Pricing
-
-Tek seferlik ödeme, abonelik yok, haklar süresiz; KDV dahil. Üyelik, kaydetme ve test indirme ücretsiz; bir tasarım hakkı yalnızca tasarım onaylandığında harcanır.
-
-- One: 3.000 TL — 1 tasarım hakkı (EUR 59)
-- Basic: 10.000 TL — 10 tasarım hakkı (EUR 199)
-- Pro: 15.000 TL — 25 tasarım hakkı (EUR 399)
-
-One-time payment, no subscription, credits never expire. Outside Turkey prices are shown in EUR / GBP.
-
-## Sık sorulanlar / FAQ
-
-- e-Fatura tasarımı için XSLT bilmem gerekir mi? Hayır; hazır şablonu görsel editörle düzenlersiniz.
-- Tasarımlar GİB uyumlu mu? Evet; UBL-TR 1.2.1 şemasına uygun ve GİB örnek XML'leriyle test edilmiştir.
-- Tasarladığım XSLT'yi nerede kullanırım? e-fatura entegratörünüzün veya ERP / muhasebe programınızın fatura görünüm (XSLT) alanına yüklersiniz.
-- Do I need to know XSLT? No. Pick a template and customise it in the visual editor.
-- Is it a full e-invoicing platform? No. edXdocu designs the document layout (XSLT); sending invoices is done by your e-invoice provider or ERP.
-
-## Bağlantılar / Links
-
-- Ana sayfa (TR): https://www.edxdocu.com/
-- English: https://www.edxdocu.com/?lang=en
-- Deutsch: https://www.edxdocu.com/?lang=de
-- Fiyatlar: https://www.edxdocu.com/#fiyatlar
-- Sık sorulan sorular: https://www.edxdocu.com/#sss
-
-## Rehberler / Guides
-
-- [e-Fatura tasarımı nasıl yapılır? Adım adım rehber](https://www.edxdocu.com/rehber/e-fatura-tasarimi-nasil-yapilir.html)
-- [e-Fatura XSLT nedir? Görüntü dosyası nasıl çalışır?](https://www.edxdocu.com/rehber/xslt-nedir-e-fatura-goruntu-dosyasi.html)
-- [e-Faturaya logo, kaşe, imza ve IBAN ekleme](https://www.edxdocu.com/rehber/e-faturaya-logo-kase-imza-ekleme.html)
+- [Ana sayfa](https://www.edxdocu.com/): Ürün özeti, fiyatlar, kayıt
+- [e-Fatura tasarımı nasıl yapılır](https://www.edxdocu.com/rehber/e-fatura-tasarimi-nasil-yapilir.html): Adım adım süreç
+- [XSLT nedir?](https://www.edxdocu.com/rehber/xslt-nedir-e-fatura-goruntu-dosyasi.html): e-belge görünüm dosyası açıklaması
+- [Logo, kaşe, imza ekleme](https://www.edxdocu.com/rehber/e-faturaya-logo-kase-imza-ekleme.html)
 - [e-Arşiv fatura tasarımı](https://www.edxdocu.com/rehber/e-arsiv-fatura-tasarimi.html)
 - [e-İrsaliye tasarımı](https://www.edxdocu.com/rehber/e-irsaliye-tasarimi.html)
-- [e-Fatura XSLT şablonu entegratöre ve ERP'ye nasıl yüklenir?](https://www.edxdocu.com/rehber/e-fatura-xslt-yukleme.html)
-- [e-Invoice template designer for XRechnung, Peppol and EN 16931 (English)](https://www.edxdocu.com/rehber/e-invoice-template-designer.html)
-- YouTube: https://www.youtube.com/@edXdocu-o6k
-- Instagram: https://www.instagram.com/edxdocu67/
-- İletişim / Contact: destek@edxdocu.com · +90 533 666 01 25
+- [XSLT’yi entegratöre yükleme](https://www.edxdocu.com/rehber/e-fatura-xslt-yukleme.html)
+- [EN / Peppol / XRechnung designer (EN)](https://www.edxdocu.com/rehber/e-invoice-template-designer.html)
+
+## Özet yanıtlar (alıntı için)
+
+- XSLT bilmek zorunlu değil; sürükle-bırak editör ve hazır GİB şablonları vardır.
+- Desteklenen TR belge türleri: e-Fatura, e-Arşiv, e-İrsaliye, e-İrsaliye Yanıtı, e-İhracat, e-SMM, e-Müstahsil, e-Gider Pusulası, e-Döviz/Kıymetli Maden, e-Dekont, e-Sigorta Komisyon, e-Bilet ve raporları.
+- Fiyat modeli: tek seferlik paket (abonelik yok); kaydetme ve TEST filigranlı indirme ücretsizdir.
+- Çıktı: onaylı XSLT dosyası; entegratör paneline veya ERP’ye kullanıcı yükler.
+- İletişim: destek@edxdocu.com · https://www.edxdocu.com/
+
+## Optional
+
+- [Sitemap](https://www.edxdocu.com/sitemap.xml)
+- [robots.txt](https://www.edxdocu.com/robots.txt)
