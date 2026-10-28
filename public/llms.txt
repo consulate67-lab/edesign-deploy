@@ -7,6 +7,9 @@ edXdocu bir entegratör veya fatura gönderim yazılımı değildir. Kullanıcı
 ## Ürün
 
 - [Ana sayfa](https://www.edxdocu.com/): Ürün özeti, fiyatlar, kayıt
+- [e-Fatura tasarım programı](https://www.edxdocu.com/rehber/e-fatura-tasarim-programi.html): Satın alma niyetli ürün sayfası
+- [Online XSLT editörü](https://www.edxdocu.com/rehber/e-fatura-xslt-editoru.html): Mevcut XSLT düzenleme
+- [e-Fatura şablon değiştirme](https://www.edxdocu.com/rehber/e-fatura-sablon-degistirme.html): Entegratör varsayılanını değiştirme
 - [e-Fatura tasarımı nasıl yapılır](https://www.edxdocu.com/rehber/e-fatura-tasarimi-nasil-yapilir.html): Adım adım süreç
 - [XSLT nedir?](https://www.edxdocu.com/rehber/xslt-nedir-e-fatura-goruntu-dosyasi.html): e-belge görünüm dosyası açıklaması
 - [Logo, kaşe, imza ekleme](https://www.edxdocu.com/rehber/e-faturaya-logo-kase-imza-ekleme.html)

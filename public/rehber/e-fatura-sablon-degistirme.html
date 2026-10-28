@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>e-Fatura Şablon Değiştirme (XSLT) — Adım Adım | edXdocu</title>
+<meta name="description" content="e-Fatura şablonunu nasıl değiştirirsiniz? Yeni XSLT’yi edXdocu’da tasarlayıp EDM, Uyumsoft, İzibiz veya ERP’nize yükleme adımları. Ücretsiz deneyin." />
+<link rel="canonical" href="https://www.edxdocu.com/rehber/e-fatura-sablon-degistirme.html" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="e-Fatura Şablon Değiştirme | edXdocu" />
+<meta property="og:description" content="Varsayılan fatura görünümünü markanıza uygun XSLT ile değiştirin." />
+<meta property="og:url" content="https://www.edxdocu.com/rehber/e-fatura-sablon-degistirme.html" />
+<meta property="og:image" content="https://www.edxdocu.com/og-image.png" />
+<link rel="stylesheet" href="/rehber/rehber.css?v=1" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "HowTo",
+      "name": "e-Fatura şablonunu değiştirme",
+      "description": "Yeni XSLT tasarlayıp özel entegratöre yükleme.",
+      "step": [
+        { "@type": "HowToStep", "name": "Yeni şablonu tasarlayın", "text": "edXdocu’da hazır şablon veya mevcut XSLT ile görünümü düzenleyin." },
+        { "@type": "HowToStep", "name": "Onaylı XSLT indirin", "text": "TEST indirmeyi deneyin; ardından tasarımı onaylayıp temiz dosyayı alın." },
+        { "@type": "HowToStep", "name": "Entegratöre yükleyin", "text": "Portal veya ERP’deki XSLT / görünüm ayarından yeni dosyayı tanımlayın." },
+        { "@type": "HowToStep", "name": "Test faturası kesin", "text": "Test ortamında bir fatura kesip görünümü doğrulayın." }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        { "@type": "Question", "name": "e-Fatura şablonu nasıl değiştirilir?", "acceptedAnswer": { "@type": "Answer", "text": "Yeni bir XSLT dosyası hazırlanır (edXdocu ile kod yazmadan), ardından özel entegratör veya ERP panelindeki görünüm / XSLT bölümüne yüklenir. GİB’e giden XML içeriği değişmez; yalnızca görüntü değişir." } },
+        { "@type": "Question", "name": "Şablon değişince eski faturalar bozulur mu?", "acceptedAnswer": { "@type": "Answer", "text": "Genelde hayır. Yeni XSLT bundan sonraki belgelerde kullanılır. Geçmiş faturaların arşiv görünümü entegratör politikasına bağlıdır." } }
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "edXdocu", "item": "https://www.edxdocu.com/" },
+        { "@type": "ListItem", "position": 2, "name": "Rehber", "item": "https://www.edxdocu.com/rehber/" },
+        { "@type": "ListItem", "position": 3, "name": "Şablon değiştirme" }
+      ]
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <a href="/"><img src="/logo-300x100.png" alt="edXdocu" width="300" height="100" /></a>
+  <nav><a href="/rehber/">Rehber</a><a href="/#fiyatlar">Fiyatlar</a><a class="btn" href="/#kayit">Şablon tasarla</a></nav>
+</div></header>
+<main>
+  <div class="crumbs"><a href="/">edXdocu</a> › <a href="/rehber/">Rehber</a> › Şablon değiştirme</div>
+  <h1>e-Fatura şablon değiştirme (XSLT)</h1>
+  <p class="meta">Güncelleme: 28 Ekim 2026</p>
+  <p class="lead">Entegratörünüzün verdiği gri varsayılan faturayı değiştirmek için <strong>yeni bir XSLT</strong> gerekir. edXdocu ile şablonu üretir, panele yüklersiniz. Hukuki içerik (XML) aynı kalır; görünüm sizin olur.</p>
+
+  <div class="cta"><p>Yeni şablonu 15–30 dakikada çıkarın.</p><a class="btn alt" href="/#kayit">Ücretsiz başla →</a></div>
+
+  <h2>4 adım</h2>
+  <ol>
+    <li><strong>Tasarla:</strong> <a href="/#kayit">edXdocu</a>’da e-Fatura / e-Arşiv şablonunu seçin, logo ve IBAN ekleyin.</li>
+    <li><strong>Önizle:</strong> Kendi XML’inizle kontrol edin.</li>
+    <li><strong>İndir:</strong> Onaylı XSLT alın (önce TEST ücretsiz).</li>
+    <li><strong>Yükle:</strong> <a href="/rehber/e-fatura-xslt-yukleme.html">Entegratör / ERP yükleme adımları</a>.</li>
+  </ol>
+
+  <h2>Hangi aramalarda bu sayfa işe yarar?</h2>
+  <p>“e-fatura şablon değiştirme”, “özel fatura tasarımı xslt”, “entegratör xslt yükleme” — satın alma niyeti yüksek sorgular. Cevap net: şablonu burada üretin, entegratörde aktif edin.</p>
+
+  <div class="cta"><p>Şablonu değiştirmek için önce dosyayı üretin.</p><a class="btn alt" href="/#kayit">Hesap aç</a></div>
+</main>
+<footer>© 2026 edXdocu · <a href="mailto:destek@edxdocu.com">destek@edxdocu.com</a></footer>
+</body>
+</html>
