@@ -27,6 +27,7 @@ function loadEnvFile(file) {
     }
 }
 loadEnvFile(path.join(root, '.env.ftp'));
+loadEnvFile(path.join(root, '.env.production'));
 
 const { FTP_HOST, FTP_USER, FTP_PASS } = process.env;
 const FTP_DIR = (process.env.FTP_DIR || 'httpdocs').replace(/^\/+|\/+$/g, '');
@@ -36,12 +37,25 @@ if (!FTP_HOST || !FTP_USER || !FTP_PASS) {
     process.exit(1);
 }
 
+// İsimtescil'de /api yok. Shell'de kalan VITE_API_URL=/api panelde 404 yapar.
+// FTP yayını her zaman Railway API adresine bağlansın.
+const FTP_API = (process.env.VITE_API_URL || '').startsWith('http')
+    ? process.env.VITE_API_URL
+    : 'https://edesign-deploy-production.up.railway.app/api';
+process.env.VITE_API_URL = FTP_API;
+
 function run(cmd, args) {
-    const r = spawnSync(cmd, args, { cwd: root, stdio: 'inherit', shell: true });
+    const r = spawnSync(cmd, args, {
+        cwd: root,
+        stdio: 'inherit',
+        shell: true,
+        env: { ...process.env, VITE_API_URL: FTP_API },
+    });
     if (r.status !== 0) process.exit(r.status ?? 1);
 }
 
 if (!process.argv.includes('--no-build')) {
+    console.log(`FTP build API: ${FTP_API}`);
     run('npx', ['tsc', '-p', 'tsconfig.app.json']);
     run('npx', ['vite', 'build', '--base', '/', '--outDir', 'dist-web', '--emptyOutDir']);
 }
