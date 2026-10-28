@@ -1,8 +1,9 @@
 # Files / directories that should NOT be copied into the Docker image.
 # Keeps the image small and avoids baking secrets / build artifacts in.
 
-# Build artifacts
+# Build artifacts (frontend Docker içinde üretilir — CLI yüklemeyi şişirmesin)
 dist
+dist-web
 node_modules
 .cache
 .vite

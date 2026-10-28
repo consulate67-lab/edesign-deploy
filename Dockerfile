@@ -27,8 +27,16 @@ ENV NODE_ENV=production \
 # Bring node_modules from the deps stage
 COPY --from=deps /app/node_modules ./node_modules
 
-# Bring the source code
+# Bring the source code (dist-web varsa doğrudan kullanılır)
 COPY . .
+
+# Frontend: paylaşımlı hosting yerine aynı süreçten sunulur.
+# Yerelde build edilmiş dist-web yoksa imaj içinde üretilir.
+ENV VITE_API_URL=/api
+RUN if [ ! -f dist-web/index.html ]; then \
+      npx vite build --base / --outDir dist-web --emptyOutDir; \
+    fi \
+ && test -f dist-web/index.html
 
 # Railway mounts a volume here for the SQLite database
 # (set in the Railway dashboard: Mount Path = /data)

@@ -21,6 +21,7 @@ import { registerSocialRoutes } from './social.js';
 import { registerWebmailRoutes } from './webmail.js';
 import { registerIntegratorRoutes } from './integrators/routes.js';
 import { attachRealtime, touchLastSeen } from './realtime.js';
+import { mountWebApp, resolveWebRoot } from './serve-web.js';
 import { isSupportAllowed, registerSupportRoutes } from './support.js';
 import { createBotHandler } from './telegram-bot.js';
 import { startPolling } from './telegram.js';
@@ -42,7 +43,7 @@ const EFFECTIVE_SECRET = SECRET_KEY || 'dev-only-insecure-fallback-do-not-use-in
 // Allowed CORS origins. Comma-separated. Defaults to local dev hosts.
 // Sprint 1.4 (2026-10-02): production domain'ler eklendi (api.edesign-deploy.com, edesign-deploy.com).
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS
-    || 'http://localhost:5173,http://localhost:3002,http://127.0.0.1:5173,http://127.0.0.1:3002,https://edesign-deploy.com,https://www.edesign-deploy.com,https://api.edesign-deploy.com,https://consulate67-lab.github.io')
+    || 'http://localhost:5173,http://localhost:3002,http://127.0.0.1:5173,http://127.0.0.1:3002,https://www.edxdocu.com,https://edxdocu.com,https://edesign-deploy-production.up.railway.app,https://edesign-deploy.com,https://www.edesign-deploy.com,https://api.edesign-deploy.com,https://consulate67-lab.github.io')
     .split(',')
     .map((o) => o.trim())
     .filter(Boolean);
@@ -159,6 +160,8 @@ initDb().then(async _db => {
         requireAdmin,
         secret: EFFECTIVE_SECRET,
     });
+    // İsimtescil/FTP düşse bile arayüz Railway üzerinden ayakta kalsın.
+    mountWebApp(app);
     app.use((err, _req, res, _next) => {
         const status = err.status || err.statusCode || 500;
         if (status >= 500) console.error('[server] error:', err);
@@ -184,6 +187,7 @@ app.get('/api/health', (_req, res) => {
         env: NODE_ENV,
         uptime: process.uptime(),
         timestamp: new Date().toISOString(),
+        web: !!resolveWebRoot(),
     });
 });
 
