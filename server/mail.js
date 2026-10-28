@@ -47,9 +47,41 @@ const sendViaRelay = async ({ to, subject, text, html, headers }) => {
     if (!res.ok) throw new Error(`mail relay ${res.status}: ${(await res.text().catch(() => '')).slice(0, 200)}`);
 };
 
+const sendViaBrevo = async ({ to, subject, text, html, headers }) => {
+    if (!campaignMailConfigured()) throw new Error('Brevo yapılandırılmamış.');
+    const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: { 'api-key': env('BREVO_API_KEY'), 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+            sender: {
+                email: env('MAIL_FROM_ADDRESS') || env('CAMPAIGN_MAIL_FROM'),
+                name: env('MAIL_FROM_NAME') || env('CAMPAIGN_MAIL_FROM_NAME') || 'edXdocu',
+            },
+            to: [{ email: to }],
+            subject,
+            htmlContent: html,
+            ...(text && { textContent: text }),
+            ...(headers && { headers }),
+        }),
+        signal: AbortSignal.timeout(30_000),
+    });
+    if (!res.ok) throw new Error(`brevo ${res.status}: ${(await res.text().catch(() => '')).slice(0, 200)}`);
+};
+
 /** `headers` yalnız List-Unsubscribe / List-Unsubscribe-Post için kullanılır (köprü başkasını kabul etmez). */
 export const sendMail = async ({ to, subject, text, html, headers }) => {
-    if (relayConfigured()) return sendViaRelay({ to, subject, text, html, headers });
+    // Hosting köprüsü (mail-relay.php) Railway'den bazen ECONNREFUSED oluyor;
+    // onay kodları ve doğrulama maili için Brevo yedek yol.
+    if (relayConfigured()) {
+        try {
+            return await sendViaRelay({ to, subject, text, html, headers });
+        } catch (err) {
+            if (!campaignMailConfigured()) throw err;
+            console.warn('[mail] köprü başarısız, Brevo ile deneniyor:', err.message);
+            return sendViaBrevo({ to, subject, text, html, headers });
+        }
+    }
+    if (campaignMailConfigured()) return sendViaBrevo({ to, subject, text, html, headers });
     if (!smtpConfigured()) throw new Error('SMTP yapılandırılmamış.');
     const from = env('MAIL_FROM') || `edXdocu <${env('SMTP_USER')}>`;
     await getTransporter().sendMail({ from, to, subject, text, html, headers });
@@ -65,18 +97,5 @@ export const campaignMailConfigured = () => !!(env('BREVO_API_KEY') && env('CAMP
 
 export const sendCampaignMail = async ({ to, subject, text, html, headers }) => {
     if (!campaignMailConfigured()) throw new Error('Toplu gönderim servisi yapılandırılmamış.');
-    const res = await fetch('https://api.brevo.com/v3/smtp/email', {
-        method: 'POST',
-        headers: { 'api-key': env('BREVO_API_KEY'), 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({
-            sender: { email: env('CAMPAIGN_MAIL_FROM'), name: env('CAMPAIGN_MAIL_FROM_NAME') || 'edXdocu' },
-            to: [{ email: to }],
-            subject,
-            htmlContent: html,
-            ...(text && { textContent: text }),
-            ...(headers && { headers }),
-        }),
-        signal: AbortSignal.timeout(30_000),
-    });
-    if (!res.ok) throw new Error(`brevo ${res.status}: ${(await res.text().catch(() => '')).slice(0, 200)}`);
+    return sendViaBrevo({ to, subject, text, html, headers });
 };
