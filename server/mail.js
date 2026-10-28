@@ -1,12 +1,9 @@
 /**
- * E-posta gönderimi. İki yol desteklenir:
+ * E-posta gönderimi:
  *
- * 1) Köprü (öncelikli): MAIL_RELAY_URL, MAIL_RELAY_SECRET
- *    Railway'in Pro dışı planları giden SMTP'yi engellediğinden ileti, web
- *    hostingdeki public/mail-relay.php dosyasına HMAC imzalı olarak gönderilir;
- *    o dosya alan adının kendi SMTP sunucusunu kullanır.
- * 2) Doğrudan SMTP: SMTP_HOST, SMTP_PORT (varsayılan 465), SMTP_USER, SMTP_PASS
- *    SMTP_SECURE (isteğe bağlı; boşsa port 465 ise true), MAIL_FROM (boşsa SMTP_USER)
+ * 1) Brevo (öncelikli, transactional + kampanya): BREVO_API_KEY, CAMPAIGN_MAIL_FROM
+ * 2) Köprü (yedek): MAIL_RELAY_URL, MAIL_RELAY_SECRET → hosting mail-relay.php
+ * 3) Doğrudan SMTP: SMTP_HOST / SMTP_USER / SMTP_PASS (Railway'de genelde kapalı)
  */
 import { createHmac } from 'node:crypto';
 import nodemailer from 'nodemailer';
@@ -15,7 +12,8 @@ const env = (name) => (process.env[name] || '').trim();
 
 const relayConfigured = () => !!(env('MAIL_RELAY_URL') && env('MAIL_RELAY_SECRET'));
 const smtpConfigured = () => !!(env('SMTP_HOST') && env('SMTP_USER') && env('SMTP_PASS'));
-export const mailConfigured = () => relayConfigured() || smtpConfigured();
+export const campaignMailConfigured = () => !!(env('BREVO_API_KEY') && env('CAMPAIGN_MAIL_FROM'));
+export const mailConfigured = () => campaignMailConfigured() || relayConfigured() || smtpConfigured();
 
 let transporter = null;
 const getTransporter = () => {
@@ -42,7 +40,7 @@ const sendViaRelay = async ({ to, subject, text, html, headers }) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Relay-Timestamp': ts, 'X-Relay-Signature': signature },
         body,
-        signal: AbortSignal.timeout(30_000),
+        signal: AbortSignal.timeout(5_000),
     });
     if (!res.ok) throw new Error(`mail relay ${res.status}: ${(await res.text().catch(() => '')).slice(0, 200)}`);
 };
@@ -70,18 +68,18 @@ const sendViaBrevo = async ({ to, subject, text, html, headers }) => {
 
 /** `headers` yalnız List-Unsubscribe / List-Unsubscribe-Post için kullanılır (köprü başkasını kabul etmez). */
 export const sendMail = async ({ to, subject, text, html, headers }) => {
-    // Hosting köprüsü (mail-relay.php) Railway'den bazen ECONNREFUSED oluyor;
-    // onay kodları ve doğrulama maili için Brevo yedek yol.
-    if (relayConfigured()) {
+    // Hosting (mail-relay.php) sıkça erişilemiyor; onay/doğrulama mailleri Brevo ile gider.
+    // Köprü yalnız Brevo yoksa veya Brevo düşerse denenir (kısa timeout).
+    if (campaignMailConfigured()) {
         try {
-            return await sendViaRelay({ to, subject, text, html, headers });
+            return await sendViaBrevo({ to, subject, text, html, headers });
         } catch (err) {
-            if (!campaignMailConfigured()) throw err;
-            console.warn('[mail] köprü başarısız, Brevo ile deneniyor:', err.message);
-            return sendViaBrevo({ to, subject, text, html, headers });
+            if (!relayConfigured()) throw err;
+            console.warn('[mail] Brevo başarısız, köprü deneniyor:', err.message);
+            return sendViaRelay({ to, subject, text, html, headers });
         }
     }
-    if (campaignMailConfigured()) return sendViaBrevo({ to, subject, text, html, headers });
+    if (relayConfigured()) return sendViaRelay({ to, subject, text, html, headers });
     if (!smtpConfigured()) throw new Error('SMTP yapılandırılmamış.');
     const from = env('MAIL_FROM') || `edXdocu <${env('SMTP_USER')}>`;
     await getTransporter().sendMail({ from, to, subject, text, html, headers });
@@ -93,8 +91,6 @@ export const sendMail = async ({ to, subject, text, html, headers }) => {
  * Hosting SMTP'si tanıtım e-postasını yasaklıyor ve saatte 100 / günde 700 sınırını aşınca
  * hesabı askıya alıyor; askı onay kodlarını da durdurduğu için kampanyalar oraya düşmemeli.
  */
-export const campaignMailConfigured = () => !!(env('BREVO_API_KEY') && env('CAMPAIGN_MAIL_FROM'));
-
 export const sendCampaignMail = async ({ to, subject, text, html, headers }) => {
     if (!campaignMailConfigured()) throw new Error('Toplu gönderim servisi yapılandırılmamış.');
     return sendViaBrevo({ to, subject, text, html, headers });
