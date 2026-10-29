@@ -1,18 +1,18 @@
 /**
  * Yönetim panelindeki posta kutusu (hostingdeki e-posta hesapları).
  *
- * Hosting posta sunucusu dışarıya yalnız şifresiz POP3 ve SMTP açıyor, Railway de giden SMTP'yi
- * engelliyor. Bu yüzden POP3 / SMTP bağlantıları hostingdeki public/webmail-gateway.php üzerinden,
- * MAIL_RELAY_SECRET ile imzalı isteklerle kurulur.
+ * POP3 / SMTP doğrudan Railway'den mail.*.edxdocu.com'a bağlanır (server/pop-smtp.js).
+ * Eski PHP köprüsü (www üzerindeki webmail-gateway.php) www Railway'e alınca çalışmaz.
  *
  * POP3'te klasör yoktur: iletiler veritabanına kopyalanır (sunucuda da kalır); gelen, gönderilen
  * ve çöp klasörleri ile okundu / yıldız bilgisi burada tutulur. Hesap parolaları AES-256-GCM ile
  * şifreli saklanır.
  */
-import { createCipheriv, createDecipheriv, createHash, createHmac, randomBytes } from 'node:crypto';
+import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto';
 import { simpleParser } from 'mailparser';
 import MailComposer from 'nodemailer/lib/mail-composer/index.js';
 import { banFromIncomingMail } from './mail-blocklist.js';
+import { runMailOp } from './pop-smtp.js';
 import { cleanText, optionalText, parseId } from './util.js';
 
 const env = (name) => (process.env[name] || '').trim();
@@ -23,8 +23,7 @@ const ATTACH_MAX = 4 * 1024 * 1024;
 const EMAIL = /^[^\s@<>()",;:]+@[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/i;
 const HOST = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/i;
 
-const gatewayUrl = () => env('WEBMAIL_GATEWAY_URL') || env('MAIL_RELAY_URL').replace(/mail-relay\.php$/, 'webmail-gateway.php');
-const configured = () => !!(gatewayUrl() && env('MAIL_RELAY_SECRET'));
+const configured = () => true;
 
 // ------------------------------------------------------------ parola şifreleme
 
@@ -56,35 +55,15 @@ const explain = (detail) => {
     if (/^smtp AUTH/i.test(detail)) return 'Gönderim için oturum açılamadı (parola ya da SMTP ayarı hatalı).';
     if (/^smtp CONNECT/i.test(detail)) return 'Giden posta sunucusuna bağlanılamadı.';
     if (/^smtp RCPT/i.test(detail)) return `Alıcı reddedildi: ${detail.replace(/^smtp RCPT:\s*/i, '')}`;
-    if (/^(timestamp|signature)$/.test(detail)) return 'Posta köprüsü imzası geçersiz (MAIL_RELAY_SECRET hostingdeki ayarla aynı olmalı).';
-    if (detail === 'not configured') return 'Hostingde posta köprüsü yapılandırılmamış.';
     return `Posta sunucusu: ${detail}`;
 };
 
-const gateway = async (op, acc, extra = {}, timeoutMs = 50_000) => {
-    const body = JSON.stringify({
-        op, user: acc.email, pass: acc.password,
-        ...(acc.pop_host && { popHost: acc.pop_host }),
-        ...(acc.smtp_host && { smtpHost: acc.smtp_host }),
-        ...(acc.smtp_port && { smtpPort: acc.smtp_port }),
-        ...extra,
-    });
-    const ts = String(Math.floor(Date.now() / 1000));
-    const signature = createHmac('sha256', env('MAIL_RELAY_SECRET')).update(`${ts}.${body}`).digest('hex');
-    let res;
+const gateway = async (op, acc, extra = {}) => {
     try {
-        res = await fetch(gatewayUrl(), {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-Relay-Timestamp': ts, 'X-Relay-Signature': signature },
-            body,
-            signal: AbortSignal.timeout(timeoutMs),
-        });
+        return await runMailOp(op, acc, extra);
     } catch (e) {
-        throw new MailError(e.name === 'TimeoutError' ? 'Posta köprüsü zamanında yanıt vermedi.' : `Posta köprüsüne ulaşılamadı: ${e.cause?.code || e.message}`);
+        throw new MailError(explain(e.message || String(e)));
     }
-    const data = await res.json().catch(() => null);
-    if (!res.ok || !data) throw new MailError(explain(data?.error || `HTTP ${res.status}`));
-    return data;
 };
 
 /** Aynı hesapta POP3 oturumları çakışırsa sunucu kutuyu kilitler; işlemler sıraya alınır. */
@@ -327,7 +306,7 @@ export const registerWebmailRoutes = (app, { db, requireAdmin, secret }) => {
     };
 
     app.post('/api/admin/mail/accounts', requireAdmin, async (req, res) => {
-        if (!configured()) return res.status(503).json({ error: 'Posta köprüsü (MAIL_RELAY_URL / MAIL_RELAY_SECRET) tanımlı değil.' });
+        if (!configured()) return res.status(503).json({ error: 'Posta kutusu şu an kullanılamıyor.' });
         try {
             const email = cleanText(req.body?.email, 254)?.toLowerCase();
             if (!email || !EMAIL.test(email)) throw new MailError('Geçerli bir e-posta adresi yazın.');
