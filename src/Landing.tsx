@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { ArrowRight, Sparkles, Zap, FileText, Globe, Layers, ChevronDown, Check, ShieldCheck, ExternalLink } from 'lucide-react';
+import { ArrowRight, Sparkles, Zap, FileText, Globe, Layers, ChevronDown, Check, ShieldCheck } from 'lucide-react';
 import { KVKKModal, KullaniciSozlesmesiModal, CerezPolitikasiModal, IletisimModal } from './legal/Legal';
 import { api } from './api';
 import {
@@ -76,7 +76,6 @@ const LANDING_CSS = `
   .ld-hero-text [data-rotating-doctype]{justify-content:center}
   .ld-hero-sub{margin-left:auto !important;margin-right:auto !important}
   .ld-hero-ctas{justify-content:center}
-  .ld-korgun-hint{display:none !important}
   .ld-bento{grid-template-columns:1fr 1fr}
   .ld-bento-hero{grid-row:auto;grid-column:1 / -1}
 }
@@ -86,8 +85,6 @@ const LANDING_CSS = `
   .ld-header{padding:12px 16px !important}
   .ld-logo{height:36px !important}
   .ld-section{padding-left:16px !important;padding-right:16px !important}
-  .ld-korgun-row{max-width:100%}
-  .ld-korgun-eyebrow{white-space:normal !important;max-width:46%}
 }
 @media (prefers-reduced-motion: reduce){
   .ld-float{animation:none !important}
@@ -313,55 +310,6 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                             </button>
                         </div>
                     </div>
-                    </div>
-                    <div className="ld-korgun-row" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 10, paddingLeft: 2 }}>
-                        <div className="ld-korgun-eyebrow" style={{ fontSize: 12, fontWeight: 800, letterSpacing: '-0.01em', color: theme.primary, lineHeight: 1.2, whiteSpace: 'nowrap' }}>
-                            {t('landing.korgun.eyebrow')}
-                        </div>
-                        <a
-                            data-korgun-link
-                            href="https://erp.korgun.com.tr/cloud-erp"
-                            target="_blank"
-                            rel="noopener"
-                            className="ld-card"
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 10,
-                                padding: '5px 12px 5px 5px',
-                                background: '#fff',
-                                border: `1px solid ${theme.border}`,
-                                borderRadius: 14,
-                                textDecoration: 'none',
-                                color: theme.text,
-                                boxShadow: theme.shadowSm,
-                                flexShrink: 0,
-                            }}
-                        >
-                            <span
-                                aria-hidden
-                                style={{
-                                    width: 34,
-                                    height: 34,
-                                    borderRadius: 10,
-                                    flexShrink: 0,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    background: 'linear-gradient(135deg, #0f766e, #2563eb)',
-                                    color: '#fff',
-                                    fontWeight: 800,
-                                    fontSize: 15,
-                                }}
-                            >
-                                K
-                            </span>
-                            <span style={{ minWidth: 0, textAlign: 'left' }}>
-                                <span style={{ display: 'block', fontSize: 13, fontWeight: 800, letterSpacing: '-0.01em', whiteSpace: 'nowrap' }}>{t('landing.korgun.title')}</span>
-                                <span className="ld-korgun-hint" style={{ display: 'block', marginTop: 1, fontSize: 11, color: theme.textMuted, fontWeight: 600, whiteSpace: 'nowrap' }}>{t('landing.korgun.hint')}</span>
-                            </span>
-                            <ExternalLink size={14} color={theme.primary} style={{ flexShrink: 0 }} />
-                        </a>
                     </div>
                 </div>
             </header>
