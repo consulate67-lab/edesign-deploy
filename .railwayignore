@@ -1,3 +1,20 @@
-# Railway yüklemesi 250 MB ile sınırlı; bu dosyalar FTP ile sitede yayınlanır, sunucu kullanmaz.
-public/videos/
+﻿node_modules/
+dist/
+dist-web/
+.git/
 .trash-*
+.unpack-*
+.tmp/
+.cursor/
+marketing/
+data/
+docs/
+e-FaturaPaketi/
+public/videos/
+*.mp4
+*.wav
+*.zip
+*.log
+osb_liste.csv
+.env
+.env.*

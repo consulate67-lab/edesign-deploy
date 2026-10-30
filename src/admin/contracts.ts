@@ -730,3 +730,47 @@ export interface OfficialCheckResult {
     created: OfficialRevision[];
 }
 
+/** Grup bazlı sayfa tıklama takibi (LinkedIn / WhatsApp / Telegram paylaşım linkleri). */
+export interface TrafficGroup {
+    id: number;
+    name: string;
+    slug: string;
+    destinationUrl: string;
+    note: string;
+    shareUrl: string;
+    createdAt: string;
+    clicksTotal: number;
+    clicks7d: number;
+    clicks30d: number;
+    uniqueTotal: number;
+    lastClickAt: string | null;
+}
+
+export interface TrafficGroupInput {
+    name: string;
+    slug?: string;
+    destinationUrl?: string;
+    note?: string;
+}
+
+export interface TrafficClickRow {
+    id: number;
+    referrer: string;
+    path: string;
+    userAgent: string;
+    createdAt: string;
+}
+
+export interface TrafficGroupDetail {
+    group: TrafficGroup;
+    byDay: { day: string; clicks: number }[];
+    byReferrer: { source: string; clicks: number }[];
+    clicks: TrafficClickRow[];
+}
+
+export interface TrafficGroupsResponse {
+    website: string;
+    totals: { groups: number; clicks: number; clicks7d: number };
+    groups: TrafficGroup[];
+}
+

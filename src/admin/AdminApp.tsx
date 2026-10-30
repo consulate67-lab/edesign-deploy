@@ -1,6 +1,6 @@
 import React, { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-    Bell, BellOff, Bot, ChevronsLeft, ChevronsRight, Images, Inbox, LayoutDashboard, LifeBuoy, LogOut, Mail, Megaphone, Menu, MessagesSquare, MonitorSmartphone, Receipt,
+    Bell, BellOff, Bot, ChevronsLeft, ChevronsRight, Images, Inbox, LayoutDashboard, LifeBuoy, LogOut, Mail, Megaphone, Menu, MessagesSquare, MonitorSmartphone, MousePointerClick, Receipt,
     Settings as SettingsIcon, Share2, ShieldAlert, ShieldCheck, Users as UsersIcon,
 } from 'lucide-react';
 import { useUiStore } from '../store/uiStore';
@@ -21,6 +21,7 @@ import { RemoteSupport } from './sections/RemoteSupport';
 import { Gallery } from './sections/Gallery';
 import { Settings } from './sections/Settings';
 import { Marketing } from './sections/Marketing';
+import { Traffic } from './sections/Traffic';
 import { Revisions } from './sections/Revisions';
 
 const AiSection = lazy(() => import('./sections/AiSection').then(m => ({ default: m.AiSection })));
@@ -45,6 +46,7 @@ const NAV: { id: SectionId; label: string; icon: React.ReactNode }[] = [
     { id: 'mail', label: 'Toplu e-posta', icon: <Mail size={18} /> },
     { id: 'social', label: 'Sosyal paylaşım', icon: <Share2 size={18} /> },
     { id: 'marketing', label: 'Sosyal medya ve reklam', icon: <Megaphone size={18} /> },
+    { id: 'traffic', label: 'Grup tıklamaları', icon: <MousePointerClick size={18} /> },
     { id: 'revisions', label: 'Kurumsal revizyonlar', icon: <ShieldAlert size={18} /> },
     { id: 'settings', label: 'Ayarlar', icon: <SettingsIcon size={18} /> },
 ];
@@ -368,6 +370,7 @@ const AdminShell: React.FC<{ identity: AdminIdentity; onLogout: () => void }> = 
                             </SectionBoundary>
                         )}
                         {section === 'marketing' && <Marketing />}
+                        {section === 'traffic' && <Traffic />}
                         {section === 'revisions' && <Revisions />}
                         {section === 'settings' && <Settings onStatus={setSettings} />}
                     </main>

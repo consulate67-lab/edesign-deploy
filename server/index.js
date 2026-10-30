@@ -22,6 +22,7 @@ import { registerWebmailRoutes } from './webmail.js';
 import { registerIntegratorRoutes } from './integrators/routes.js';
 import { attachRealtime, touchLastSeen } from './realtime.js';
 import { mountWebApp, resolveWebRoot } from './serve-web.js';
+import { registerTrafficRoutes } from './traffic.js';
 import { isSupportAllowed, registerSupportRoutes } from './support.js';
 import { createBotHandler } from './telegram-bot.js';
 import { startPolling } from './telegram.js';
@@ -142,6 +143,7 @@ initDb().then(async _db => {
     registerSocialRoutes(app, { db, requireAdmin, packages: PACKAGE_PRICES });
     registerWebmailRoutes(app, { db, requireAdmin, secret: EFFECTIVE_SECRET });
     registerCampaignRoutes(app, { db, requireAdmin, secret: EFFECTIVE_SECRET, website: new URL(FRONTEND_URL).origin });
+    registerTrafficRoutes(app, { db, requireAdmin, website: new URL(FRONTEND_URL).origin });
     startDesignRetention(db);
     startGibRevisionChecker(db);
     registerSupportRoutes(app, { db, authenticateToken });

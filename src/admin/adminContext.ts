@@ -3,7 +3,7 @@ import type { RealtimeStatus } from '../support/realtime';
 import type { AdminRealtime } from './adminApi';
 import type { AdminIdentity, PresenceEntry, RemoteSession, SupportTicket } from './contracts';
 
-export type SectionId = 'overview' | 'users' | 'invoices' | 'tickets' | 'remote' | 'ai' | 'assistant' | 'gallery' | 'webmail' | 'mail' | 'social' | 'marketing' | 'revisions' | 'settings';
+export type SectionId = 'overview' | 'users' | 'invoices' | 'tickets' | 'remote' | 'ai' | 'assistant' | 'gallery' | 'webmail' | 'mail' | 'social' | 'marketing' | 'traffic' | 'revisions' | 'settings';
 
 /** Yapay zekadan "galeriye aktar" ile gelen, kaydedilmemiş tasarım. */
 export interface GalleryDraft {
