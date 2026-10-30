@@ -10,8 +10,14 @@ marketing/
 data/
 docs/
 e-FaturaPaketi/
-public/videos/
-*.mp4
+# Canlıda yalnız TR + EN eğitim videoları; diğer diller imajı şişirir.
+public/videos/egitim/de/
+public/videos/egitim/es/
+public/videos/egitim/fr/
+public/videos/egitim/hi/
+public/videos/egitim/pt/
+public/videos/egitim/ru/
+public/videos/egitim/zh/
 *.wav
 *.zip
 *.log

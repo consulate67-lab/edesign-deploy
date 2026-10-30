@@ -22,13 +22,11 @@ const TUTORIALS: Tutorial[] = [
     { id: 'saveApprove', slug: '10-kaydet-onayla', duration: { tr: '0:58', en: '0:53', ru: '0:57', hi: '1:06', zh: '0:54', pt: '1:01', de: '1:07', fr: '1:04', es: '0:58' }, group: 'editor' },
 ];
 
-type VideoLang = keyof Tutorial['duration'];
-const VIDEO_LANGS: readonly string[] = ['tr', 'en', 'ru', 'hi', 'zh', 'pt', 'de', 'fr', 'es'];
-/** Kendi videosu olmayan arayüz dillerinde İngilizce videolar gösterilir. */
-const videoLang = (locale: string): VideoLang => (VIDEO_LANGS.includes(locale) ? locale as VideoLang : 'en');
-const videoBase = (lang: VideoLang) => `${import.meta.env.BASE_URL}videos/egitim/${lang === 'tr' ? '' : `${lang}/`}`;
-const videoUrl = (v: Tutorial, lang: VideoLang) => `${videoBase(lang)}${v.slug}.mp4`;
-const posterUrl = (v: Tutorial, lang: VideoLang) => `${videoBase(lang)}${v.slug}.jpg`;
+/** Canlıda disk limiti nedeniyle yalnız TR + EN dosyaları yayınlanır; diğer arayüz dilleri EN videoyu kullanır. */
+const videoLang = (locale: string): 'tr' | 'en' => (locale === 'tr' ? 'tr' : 'en');
+const videoBase = (lang: 'tr' | 'en') => `${import.meta.env.BASE_URL}videos/egitim/${lang === 'tr' ? '' : `${lang}/`}`;
+const videoUrl = (v: Tutorial, lang: 'tr' | 'en') => `${videoBase(lang)}${v.slug}.mp4`;
+const posterUrl = (v: Tutorial, lang: 'tr' | 'en') => `${videoBase(lang)}${v.slug}.jpg`;
 
 const TUTORIALS_CSS = `
 .tut-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
