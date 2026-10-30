@@ -5,7 +5,7 @@ import type {
     AdminVerifyResponse, AiMemoryEntry, AiMemoryInput, AssistantBuiltinEntry, AssistantKbEntry, AssistantKbInput, AssistantLog,
     AssistantLogFilter, AssistantOverview, GalleryDesign, GalleryDesignInput, InvoiceScope, InvoiceUpdateInput, MailBannedEntry,
     OfficialCheckResult, OfficialRevision, OfficialSource,
-    TrafficGroup, TrafficGroupDetail, TrafficGroupInput, TrafficGroupsResponse,
+    TrafficOverview, TrafficSourceDetail,
     MailBannedList, MailBannedScanResult, MailCampaign,
     MailAccount, MailAccountInput, MailAction, MailCampaignDetail, MailCampaignInput, MailCampaignList, MailContent, MailFolder, MailListItem,
     MailMessage, MailSendInput, AdminDesignWork, RemoteSession, SocialGenerateInput, SocialMetaConnectInput,
@@ -232,15 +232,10 @@ export const adminApi = {
             method: 'POST', body: { data, filename }, timeoutMs: 120000,
         }),
 
-    trafficGroups: () => request<TrafficGroupsResponse>('/admin/traffic/groups'),
-    createTrafficGroup: (input: TrafficGroupInput) =>
-        request<TrafficGroup>('/admin/traffic/groups', { method: 'POST', body: input }),
-    updateTrafficGroup: (id: number, input: TrafficGroupInput) =>
-        request<TrafficGroup>(`/admin/traffic/groups/${id}`, { method: 'PUT', body: input }),
-    deleteTrafficGroup: (id: number) =>
-        request<{ success: true }>(`/admin/traffic/groups/${id}`, { method: 'DELETE' }),
-    trafficGroupDetail: (id: number, limit?: number) =>
-        request<TrafficGroupDetail>(`/admin/traffic/groups/${id}/clicks${qs({ limit })}`),
+    trafficOverview: (days = 7) =>
+        request<TrafficOverview>(`/admin/traffic/overview${qs({ days })}`),
+    trafficSourceDetail: (source: string, days = 7) =>
+        request<TrafficSourceDetail>(`/admin/traffic/sources/${encodeURIComponent(source)}${qs({ days })}`),
 };
 
 /** Yönetici WebSocket bağlantısı (presence, online destek, talep bildirimleri). */

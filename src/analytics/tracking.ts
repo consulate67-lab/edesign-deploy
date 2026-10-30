@@ -4,6 +4,7 @@
  */
 import { TRACKING, hasAnyTracking, hasGoogle } from './config';
 import { onConsentChange, readConsent, type Consent } from './consent';
+import { reportPageVisit } from './visitBeacon';
 
 type Fn = (...args: unknown[]) => void;
 type Fbq = Fn & { callMethod?: Fn; queue: unknown[][]; push?: Fbq; loaded?: boolean; version?: string };
@@ -143,6 +144,8 @@ export const initTracking = () => {
 
 /** Uygulama tek sayfa olduğu için her ekran sanal bir sayfa yolu olarak raporlanır. */
 export const trackPageView = (path: string, title: string) => {
+    // Birinci taraf kaynak istatistiği (admin paneli); üçüncü taraf etiketlerinden bağımsız.
+    reportPageVisit(path, title);
     if (!started) {
         pendingPage = [path, title];
         return;

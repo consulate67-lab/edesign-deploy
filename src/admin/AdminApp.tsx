@@ -46,7 +46,7 @@ const NAV: { id: SectionId; label: string; icon: React.ReactNode }[] = [
     { id: 'mail', label: 'Toplu e-posta', icon: <Mail size={18} /> },
     { id: 'social', label: 'Sosyal paylaşım', icon: <Share2 size={18} /> },
     { id: 'marketing', label: 'Sosyal medya ve reklam', icon: <Megaphone size={18} /> },
-    { id: 'traffic', label: 'Grup tıklamaları', icon: <MousePointerClick size={18} /> },
+    { id: 'traffic', label: 'Ziyaret kaynakları', icon: <MousePointerClick size={18} /> },
     { id: 'revisions', label: 'Kurumsal revizyonlar', icon: <ShieldAlert size={18} /> },
     { id: 'settings', label: 'Ayarlar', icon: <SettingsIcon size={18} /> },
 ];

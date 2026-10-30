@@ -730,47 +730,32 @@ export interface OfficialCheckResult {
     created: OfficialRevision[];
 }
 
-/** Grup bazlı sayfa tıklama takibi (LinkedIn / WhatsApp / Telegram paylaşım linkleri). */
-export interface TrafficGroup {
-    id: number;
-    name: string;
-    slug: string;
-    destinationUrl: string;
-    note: string;
-    shareUrl: string;
-    createdAt: string;
-    clicksTotal: number;
-    clicks7d: number;
-    clicks30d: number;
-    uniqueTotal: number;
-    lastClickAt: string | null;
+/** Sayfa ziyareti — kaynak (referrer / UTM) gruplu istatistik. */
+export interface TrafficOverview {
+    days: number;
+    totals: {
+        visits: number;
+        uniqueVisitors: number;
+        visits1d: number;
+        visitsAll: number;
+    };
+    sources: { source: string; visits: number; uniqueVisitors: number; lastVisitAt: string | null }[];
+    paths: { path: string; visits: number; sources: number }[];
+    byDay: { day: string; visits: number }[];
 }
 
-export interface TrafficGroupInput {
-    name: string;
-    slug?: string;
-    destinationUrl?: string;
-    note?: string;
-}
-
-export interface TrafficClickRow {
-    id: number;
-    referrer: string;
-    path: string;
-    userAgent: string;
-    createdAt: string;
-}
-
-export interface TrafficGroupDetail {
-    group: TrafficGroup;
-    byDay: { day: string; clicks: number }[];
-    byReferrer: { source: string; clicks: number }[];
-    clicks: TrafficClickRow[];
-}
-
-export interface TrafficGroupsResponse {
-    website: string;
-    totals: { groups: number; clicks: number; clicks7d: number };
-    groups: TrafficGroup[];
+export interface TrafficSourceDetail {
+    source: string;
+    days: number;
+    paths: { path: string; visits: number; uniqueVisitors: number; lastVisitAt: string | null }[];
+    hosts: { host: string; visits: number }[];
+    recent: {
+        path: string;
+        title: string;
+        referrer: string;
+        utmSource: string;
+        utmCampaign: string;
+        createdAt: string;
+    }[];
 }
 
