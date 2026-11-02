@@ -28,6 +28,9 @@ function loadEnvFile(file) {
 }
 loadEnvFile(path.join(root, '.env.ftp'));
 loadEnvFile(path.join(root, '.env.production'));
+loadEnvFile(path.join(root, '.env.youtube'));
+/** YouTube embed canlıdayken egitim MP4'lerini FTP'ye tekrar yükleme. */
+const SKIP_EGITIM_MP4 = process.env.YOUTUBE_SKIP_EGITIM_MP4 === '1';
 
 const { FTP_HOST, FTP_USER, FTP_PASS } = process.env;
 const FTP_DIR = (process.env.FTP_DIR || 'httpdocs').replace(/^\/+|\/+$/g, '');
@@ -127,8 +130,13 @@ let skipped = 0;
 async function syncDir(local, remote, skip = () => false) {
     await withRetry(remote, () => client.ensureDir(remote));
     const existing = new Map((await withRetry(remote, async () => { await client.cd(remote); return client.list(); })).map((f) => [f.name, f]));
+    const remoteNorm = remote.replace(/\\/g, '/');
     for (const name of readdirSync(local)) {
         if (skip(name)) continue;
+        if (SKIP_EGITIM_MP4 && name.endsWith('.mp4') && remoteNorm.includes('/videos/egitim')) {
+            skipped++;
+            continue;
+        }
         const file = path.join(local, name);
         const st = statSync(file);
         if (st.isDirectory()) { await syncDir(file, `${remote}/${name}`); continue; }

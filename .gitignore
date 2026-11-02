@@ -31,6 +31,8 @@ dist-ssr
 .env.ftp
 .env.mail
 .env.brevo
+.env.youtube
+scripts/.youtube-playlists.json
 dist-web/
 
 # Python helper scripts + their outputs (XSLT validation tools)

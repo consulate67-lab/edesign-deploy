@@ -4,10 +4,12 @@ import { PlayCircle, Play, X } from 'lucide-react';
 import { useLocaleT } from '../i18n';
 import { theme } from '../theme';
 import type tutorialsTr from '../i18n/locales/tutorials/tr';
+import youtubeManifest from './tutorialYoutube.json';
 
 type TutorialId = keyof typeof tutorialsTr.items;
+type VideoLang = 'tr' | 'en' | 'ru' | 'hi' | 'zh' | 'pt' | 'de' | 'fr' | 'es';
 
-interface Tutorial { id: TutorialId; slug: string; duration: Record<'tr' | 'en' | 'ru' | 'hi' | 'zh' | 'pt' | 'de' | 'fr' | 'es', string>; group: 'start' | 'editor' }
+interface Tutorial { id: TutorialId; slug: string; duration: Record<VideoLang, string>; group: 'start' | 'editor' }
 
 const TUTORIALS: Tutorial[] = [
     { id: 'signup', slug: '01-uyelik', duration: { tr: '1:26', en: '1:25', ru: '2:00', hi: '1:59', zh: '1:47', pt: '1:39', de: '2:01', fr: '2:19', es: '2:21' }, group: 'start' },
@@ -22,11 +24,27 @@ const TUTORIALS: Tutorial[] = [
     { id: 'saveApprove', slug: '10-kaydet-onayla', duration: { tr: '0:58', en: '0:53', ru: '0:57', hi: '1:06', zh: '0:54', pt: '1:01', de: '1:07', fr: '1:04', es: '0:58' }, group: 'editor' },
 ];
 
-/** Canlıda disk limiti nedeniyle yalnız TR + EN dosyaları yayınlanır; diğer arayüz dilleri EN videoyu kullanır. */
-const videoLang = (locale: string): 'tr' | 'en' => (locale === 'tr' ? 'tr' : 'en');
+const VIDEO_LANGS = new Set<string>(['tr', 'en', 'ru', 'hi', 'zh', 'pt', 'de', 'fr', 'es']);
+
+const videoLang = (locale: string): VideoLang => (VIDEO_LANGS.has(locale) ? locale as VideoLang : 'en');
+
+type Manifest = Record<string, Record<string, string>>;
+const MANIFEST = youtubeManifest as Manifest;
+
+const youtubeId = (lang: VideoLang, slug: string) => MANIFEST[lang]?.[slug] || MANIFEST.en?.[slug] || '';
+const youtubePoster = (id: string) => (id ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg` : '');
+const youtubeEmbed = (id: string, autoPlay: boolean) =>
+    `https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1${autoPlay ? '&autoplay=1' : ''}`;
+
+/** FTP'de yalnız TR+EN MP4 garantili; YouTube ID yokken yerel yedek bunlara düşer. */
+const localFileLang = (lang: VideoLang): 'tr' | 'en' => (lang === 'tr' ? 'tr' : 'en');
 const videoBase = (lang: 'tr' | 'en') => `${import.meta.env.BASE_URL}videos/egitim/${lang === 'tr' ? '' : `${lang}/`}`;
-const videoUrl = (v: Tutorial, lang: 'tr' | 'en') => `${videoBase(lang)}${v.slug}.mp4`;
-const posterUrl = (v: Tutorial, lang: 'tr' | 'en') => `${videoBase(lang)}${v.slug}.jpg`;
+const videoUrl = (v: Tutorial, lang: VideoLang) => `${videoBase(localFileLang(lang))}${v.slug}.mp4`;
+const localPosterUrl = (v: Tutorial, lang: VideoLang) => `${videoBase(localFileLang(lang))}${v.slug}.jpg`;
+const posterUrl = (v: Tutorial, lang: VideoLang) => {
+    const id = youtubeId(lang, v.slug);
+    return id ? youtubePoster(id) : localPosterUrl(v, lang);
+};
 
 const TUTORIALS_CSS = `
 .tut-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
@@ -120,6 +138,34 @@ export const TutorialGrid: React.FC = () => {
     );
 };
 
+const MediaPane: React.FC<{ v: Tutorial; lang: VideoLang; autoPlay: boolean }> = ({ v, lang, autoPlay }) => {
+    const id = youtubeId(lang, v.slug);
+    if (id) {
+        return (
+            <iframe
+                key={`${lang}-${v.slug}-${id}`}
+                title={v.slug}
+                src={youtubeEmbed(id, autoPlay)}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                style={{ width: '100%', aspectRatio: '16 / 9', border: 0, display: 'block', background: '#0f172a' }}
+            />
+        );
+    }
+    return (
+        <video
+            key={`${lang}-${v.slug}`}
+            src={videoUrl(v, lang)}
+            poster={localPosterUrl(v, lang)}
+            controls
+            autoPlay={autoPlay}
+            playsInline
+            preload="metadata"
+            style={{ width: '100%', aspectRatio: '16 / 9', display: 'block', background: '#0f172a' }}
+        />
+    );
+};
+
 /** Video oynatıcı + yandaki liste. */
 export const TutorialPlayer: React.FC<{ initial: Tutorial; autoPlay?: boolean; onClose: () => void }> = ({ initial, autoPlay = false, onClose }) => {
     const { t, locale } = useLocaleT();
@@ -196,16 +242,7 @@ export const TutorialPlayer: React.FC<{ initial: Tutorial; autoPlay?: boolean; o
                 </div>
                 <div className="tut-player">
                     <div style={{ background: '#0f172a', display: 'flex', alignItems: 'center' }}>
-                        <video
-                            key={`${lang}-${current.slug}`}
-                            src={videoUrl(current, lang)}
-                            poster={posterUrl(current, lang)}
-                            controls
-                            autoPlay={play}
-                            playsInline
-                            preload="metadata"
-                            style={{ width: '100%', aspectRatio: '16 / 9', display: 'block', background: '#0f172a' }}
-                        />
+                        <MediaPane v={current} lang={lang} autoPlay={play} />
                     </div>
                     <div className="tut-list" style={{ borderLeft: `1px solid ${theme.border}`, maxHeight: 'min(70vh, 560px)', overflowY: 'auto', padding: '8px 0' }}>
                         {groups.map((g) => (
