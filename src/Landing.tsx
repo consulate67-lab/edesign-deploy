@@ -165,12 +165,14 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
     const priceVars = { one: priceOf('one'), basic: priceOf('basic'), pro: priceOf('pro'), from: priceOf('one') };
     const mockAmounts = MOCK_AMOUNTS[currency].map(n => formatPrice(n, currency, locale));
     const country = useCountry();
-    const brMarket = isBrazilMarket(country);
+    const brMarket = isBrazilMarket(country, locale);
     const [brVariant] = useState<BrazilVariant>(() => brazilVariant());
     const brHero = variantCopy(brVariant);
     useEffect(() => {
-        if (!brMarket) return;
         activateBrazilMarket();
+    }, []);
+    useEffect(() => {
+        if (!brMarket) return;
         document.title = brazilSeo.title;
         document.querySelector('meta[name="description"]')?.setAttribute('content', brazilSeo.description);
     }, [brMarket]);

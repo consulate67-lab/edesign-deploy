@@ -13,9 +13,16 @@ const readParam = (name: string): string | null => {
     }
 };
 
-/** `?market=br` veya tespit edilen/seçili ülke BR → Brezilya iniş modu. */
-export const isBrazilMarket = (country: string | null | undefined): boolean =>
-    country === 'BR' || readParam('market')?.toLowerCase() === 'br';
+export const brazilMarketFromUrl = (): boolean => readParam('market')?.toLowerCase() === 'br';
+
+/**
+ * Brezilya iniş metinleri yalnız Portekizce arayüzde.
+ * Böylece Türkçe seçiliyken pt kopya karışmaz (ülke BR kalsa bile).
+ */
+export const isBrazilMarket = (country: string | null | undefined, locale: string): boolean => {
+    if (locale !== 'pt') return false;
+    return country === 'BR' || brazilMarketFromUrl();
+};
 
 const storedVariant = (): BrazilVariant | null => {
     try {
@@ -41,14 +48,12 @@ export const brazilVariant = (): BrazilVariant => {
 };
 
 /**
- * Paylaşım bağlantısı (`?market=br`) gelince ülkeyi BR, dili pt yapar.
- * Yerel ziyaretçide ülke zaten BR ise yalnız dil eksikse pt'ye çeker.
+ * Yalnız `?market=br` paylaşım linki dili/ülkeyi zorlar.
+ * Ülke BR diye herkese Portekizce dayatılmaz.
  */
 export const activateBrazilMarket = (): void => {
+    if (!brazilMarketFromUrl()) return;
     const { country, setCountry } = useUiStore.getState();
-    const fromUrl = readParam('market')?.toLowerCase() === 'br';
-    if (fromUrl || country === 'BR') {
-        if (country !== 'BR') setCountry('BR');
-        chooseLanguage('pt');
-    }
+    if (country !== 'BR') setCountry('BR');
+    chooseLanguage('pt');
 };

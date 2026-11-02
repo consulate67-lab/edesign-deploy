@@ -35,6 +35,15 @@ const urlLocale = (): Locale | null => {
     }
 };
 
+/** Brezilya pazar paylaşım linki — dil pt, ülke BR (ilk boyamada karışık dil olmasın). */
+const brazilMarketUrl = (): boolean => {
+    try {
+        return new URLSearchParams(window.location.search).get('market')?.toLowerCase() === 'br';
+    } catch {
+        return false;
+    }
+};
+
 /**
  * Arama motoru / yapay zekâ tarayıcıları ABD'den gelir; bölgeden dil seçilirse site İngilizce indekslenir.
  * Bu yüzden ?lang= yoksa ana sürüm (Türkçe) gösterilir; diğer diller ?lang= adresleriyle taranır.
@@ -44,6 +53,10 @@ const isCrawler = typeof navigator !== 'undefined' && /bot\b|bot\/|crawl|spider|
 // İlk giriş: ülke bölgeden bulunur, arayüz o ülkenin dilinde açılır; desteklenmeyen dil → İngilizce.
 const initialCountry = (() => {
     const { country, setCountry } = useUiStore.getState();
+    if (brazilMarketUrl()) {
+        setCountry('BR');
+        return 'BR';
+    }
     if (country) return country;
     if (isCrawler && !urlLocale()) {
         setCountry('TR');
@@ -73,7 +86,8 @@ void i18n
             fr: { translation: fr }, es: { translation: es }, zh: { translation: zh },
             hi: { translation: hi }, ru: { translation: withSlavicPlurals(ru as unknown as Tree) }, pt: { translation: pt },
         },
-        lng: urlLocale() ?? savedLocale() ?? countryLocale(initialCountry),
+        // ?market=br, kayıtlı Türkçe dilinden önce gelir — TR UI + pt gövde karışmasını önler.
+        lng: urlLocale() ?? (brazilMarketUrl() ? 'pt' : null) ?? savedLocale() ?? countryLocale(initialCountry),
         fallbackLng: 'en',
         supportedLngs: LOCALES,
         interpolation: { escapeValue: false },
