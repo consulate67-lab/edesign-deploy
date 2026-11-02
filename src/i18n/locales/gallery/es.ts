@@ -3,6 +3,8 @@ import type tr from './tr';
 const gallery: typeof tr = {
     title: 'Plantillas listas para su sector',
     intro: 'Responda unas preguntas y le mostraremos las plantillas adecuadas con su logotipo; ábralas en el editor con un solo clic.',
+    intlTitle: 'Diseños listos para {{country}}',
+    intlIntro: 'Elija el tipo de documento y abra uno de los 25 diseños con un clic.',
     fileNotFound: 'No se encontró el archivo de plantilla: {{name}}',
     previewTitle: 'Vista previa de {{name}}',
     previewFailed: 'No se pudo cargar la vista previa',
@@ -94,6 +96,7 @@ const gallery: typeof tr = {
         holder: 'Titular de la cuenta (opcional)',
         holderPlaceholder: 'p. ej. ACME S.L.',
         invalidIban: 'IBAN no válido; revise el código de país y los dígitos.',
+        ibanPlaceholder: 'ES00 0000 0000 0000 0000 0000',
         addAccount: 'Añadir cuenta',
         removeAccount: 'Eliminar cuenta',
         back: 'Atrás',

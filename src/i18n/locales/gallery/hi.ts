@@ -3,6 +3,8 @@ import type tr from './tr';
 const gallery: typeof tr = {
     title: 'आपके क्षेत्र के लिए तैयार टेम्पलेट',
     intro: 'कुछ सवालों के जवाब दें और हम आपके लोगो के साथ मेल खाते टेम्पलेट दिखाएँगे; किसी को भी एक क्लिक में डिज़ाइनर में खोलें।',
+    intlTitle: '{{country}} के लिए तैयार डिज़ाइन',
+    intlIntro: 'दस्तावेज़ प्रकार चुनें और एक क्लिक में 25 लेआउट में से एक खोलें।',
     fileNotFound: 'टेम्पलेट फ़ाइल नहीं मिली: {{name}}',
     previewTitle: '{{name}} प्रीव्यू',
     previewFailed: 'प्रीव्यू लोड नहीं हो सका',
@@ -94,6 +96,7 @@ const gallery: typeof tr = {
         holder: 'खाताधारक (वैकल्पिक)',
         holderPlaceholder: 'जैसे ACME Pvt. Ltd.',
         invalidIban: 'अमान्य IBAN; देश कोड और अंकों की जाँच करें।',
+        ibanPlaceholder: 'IN00 0000 0000 0000 0000 00',
         addAccount: 'खाता जोड़ें',
         removeAccount: 'खाता हटाएँ',
         back: 'वापस',

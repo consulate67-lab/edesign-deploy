@@ -39,6 +39,8 @@ const familyLabel = (family: DocFamily) =>
     (i18n.t('wizard.family', { returnObjects: true }) as Record<string, string>)[family] ?? FAMILY_INFO[family].label;
 const trDocDescription = (doc: WizardDocType) =>
     (i18n.t('wizard.trDocs', { returnObjects: true }) as Record<string, string>)[doc.id] ?? doc.description;
+const trDocLabel = (doc: WizardDocType) =>
+    (i18n.t('wizard.trDocNames', { returnObjects: true }) as Record<string, string>)[doc.id] ?? doc.label;
 
 const card = (active: boolean, color: string = theme.primary): React.CSSProperties => ({
     background: active ? `${color}14` : theme.surface,
@@ -416,7 +418,7 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void; onDis
             moduleId: xsltChoice === 'own' ? docType.id : selectedDefault?.moduleId ?? docType.id,
             docName: xsltChoice === 'own' && ownXslt
                 ? ownName
-                : t('wizard.designName', { doc: `${docType.label}${docType.country ? ` ${docType.country}` : ''}` }),
+                : t('wizard.designName', { doc: `${trDocLabel(docType)}${docType.country ? ` ${docType.country}` : ''}` }),
             xslt: xsltText,
             xml: chosenXml,
         });
@@ -485,7 +487,7 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void; onDis
                     <div key={s} style={{ flex: 1 }}>
                         <div style={{ height: 4, borderRadius: 4, background: i <= step ? theme.gradient : theme.border }} />
                         <div style={{ marginTop: 6, fontSize: 12, fontWeight: 700, color: i === step ? theme.primary : theme.textSubtle }}>
-                            {i + 1}. {t(`wizard.steps.${s}`)}{i < step && i === 0 && docType ? ` · ${docType.label}${docType.country ? ` (${docType.country})` : ''}` : ''}
+                            {i + 1}. {t(`wizard.steps.${s}`)}{i < step && i === 0 && docType ? ` · ${trDocLabel(docType)}${docType.country ? ` (${docType.country})` : ''}` : ''}
                         </div>
                     </div>
                 ))}
@@ -514,7 +516,7 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void; onDis
                                         <FileText size={20} />
                                     </div>
                                     <div>
-                                        <div style={{ fontWeight: 700, fontSize: 15 }}>{d.label}</div>
+                                        <div style={{ fontWeight: 700, fontSize: 15 }}>{trDocLabel(d)}</div>
                                         <div style={{ color: theme.textMuted, fontSize: 12 }}>{trDocDescription(d)}</div>
                                     </div>
                                 </div>
@@ -526,7 +528,7 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void; onDis
 
             {step === 1 && docType && (
                 <>
-                    {sectionTitle(t('wizard.xsltTitle', { doc: docType.label }), t('wizard.xsltSub'))}
+                    {sectionTitle(t('wizard.xsltTitle', { doc: trDocLabel(docType) }), t('wizard.xsltSub'))}
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 12 }}>
                         {docType.defaults.map((d, i) => (
                             <button key={d.id} type="button" data-xslt-option={d.id} onClick={() => setXsltChoice(d.id)} style={card(xsltChoice === d.id, docType.color)}>
@@ -550,7 +552,7 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void; onDis
                             <Upload size={16} /> {t('wizard.ownXslt')}
                         </div>
                         <div style={{ color: theme.textMuted, fontSize: 12, marginTop: 3 }}>
-                            {t('wizard.ownXsltHint', { family: familyLabel(docType.family), doc: docType.label })}
+                            {t('wizard.ownXsltHint', { family: familyLabel(docType.family), doc: trDocLabel(docType) })}
                         </div>
                     </button>
                     {xsltChoice === 'own' && (
@@ -574,7 +576,7 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void; onDis
                         <div style={{ fontWeight: 700, fontSize: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
                             <Database size={16} /> {t('wizard.defaultXml')}
                         </div>
-                        <div style={{ color: theme.textMuted, fontSize: 12, marginTop: 3 }}>{t('wizard.defaultXmlHint', { doc: docType.label, file: docType.sampleXml.split('/').pop() })}</div>
+                        <div style={{ color: theme.textMuted, fontSize: 12, marginTop: 3 }}>{t('wizard.defaultXmlHint', { doc: trDocLabel(docType), file: docType.sampleXml.split('/').pop() })}</div>
                         {xmlChoice === 'default' && defaultXmlResult && <div style={{ marginTop: 10 }}><CheckList result={defaultXmlResult} /></div>}
                     </button>
                     {docType.officialSamples && docType.officialSamples.length > 0 && (
@@ -618,7 +620,7 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void; onDis
                             <Upload size={16} /> {t('wizard.ownXml')}
                         </div>
                         <div style={{ color: theme.textMuted, fontSize: 12, marginTop: 3 }}>
-                            {t('wizard.ownXmlHint', { doc: docType.label, root: FAMILY_INFO[docType.family].root })}
+                            {t('wizard.ownXmlHint', { doc: trDocLabel(docType), root: FAMILY_INFO[docType.family].root })}
                         </div>
                     </button>
                     {xmlChoice === 'own' && (

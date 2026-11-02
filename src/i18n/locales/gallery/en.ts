@@ -3,6 +3,8 @@ import type tr from './tr';
 const gallery: typeof tr = {
     title: 'Ready-made Templates for Your Sector',
     intro: 'Answer a few questions and we will show matching templates with your logo; open any of them in the designer with one click.',
+    intlTitle: 'Ready-made designs for {{country}}',
+    intlIntro: 'Pick a document type, then open one of 25 visual layouts in one click.',
     fileNotFound: 'Template file not found: {{name}}',
     previewTitle: '{{name}} preview',
     previewFailed: 'Preview could not be loaded',
@@ -94,6 +96,7 @@ const gallery: typeof tr = {
         holder: 'Account holder (optional)',
         holderPlaceholder: 'e.g. ACME Ltd.',
         invalidIban: 'Invalid IBAN; check the country code and digits.',
+        ibanPlaceholder: 'GB00 XXXX 0000 0000 0000 00',
         addAccount: 'Add account',
         removeAccount: 'Remove account',
         back: 'Back',

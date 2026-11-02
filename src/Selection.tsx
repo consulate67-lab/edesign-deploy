@@ -5,6 +5,7 @@ import { PaymentModal } from './PaymentModal.tsx';
 import { DesignWizard } from './wizard/DesignWizard';
 import { MyDesigns, CompletedDesigns } from './MyDesigns';
 import { TemplateGallery } from './sector-templates/TemplateGallery';
+import { IntlTemplateGallery } from './sector-templates/IntlTemplateGallery';
 import { theme, techBackground, gradientTextStyle } from './theme';
 import { useLocaleT } from './i18n';
 import { LanguageSwitcher } from './i18n/LanguageSwitcher';
@@ -362,7 +363,7 @@ export const Selection: React.FC<SelectionProps> = ({ onLogout, onSelectXsltEdit
                             )}
                         </div>
 
-                        {isTurkey && !manualOpen && (
+                        {!manualOpen && (
                             <>
                                 <div data-selection-or style={{
                                     width: '100%', display: 'flex', alignItems: 'center', gap: 14,
@@ -373,7 +374,9 @@ export const Selection: React.FC<SelectionProps> = ({ onLogout, onSelectXsltEdit
                                     {t('selection.orDivider')}
                                     <div style={{ flex: 1, height: 1, background: theme.border }} />
                                 </div>
-                                <TemplateGallery onUse={onSelectXsltEditor} />
+                                {isTurkey
+                                    ? <TemplateGallery onUse={onSelectXsltEditor} />
+                                    : <IntlTemplateGallery onUse={onSelectXsltEditor ?? (() => undefined)} />}
                             </>
                         )}
                     </>

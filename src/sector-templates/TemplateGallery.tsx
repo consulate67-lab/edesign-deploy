@@ -112,17 +112,20 @@ const SectorChip: React.FC<{ sector: SectorId }> = ({ sector }) => {
 };
 
 const DocBadge: React.FC<{ docTypeId: string }> = ({ docTypeId }) => {
+    const { t } = useLocaleT();
     const d = docTypeOf(docTypeId);
     const color = d?.color ?? '#64748b';
+    const names = t('wizard.trDocNames', { returnObjects: true }) as Record<string, string>;
+    const label = names?.[docTypeId] ?? d?.label ?? docTypeId;
     return (
-        <span title={d?.label ?? docTypeId} style={{
+        <span title={label} style={{
             display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 6, flexShrink: 0, maxWidth: '70%',
             background: 'rgba(255, 255, 255, 0.94)', border: `1px solid ${color}`, color: theme.text,
             boxShadow: '0 2px 8px rgba(15, 23, 42, 0.12)',
             fontSize: '0.66rem', fontWeight: 800, letterSpacing: 0.3, whiteSpace: 'nowrap',
         }}>
             <FileText size={11} color={color} style={{ flexShrink: 0 }} />
-            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{d?.label ?? docTypeId}</span>
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</span>
         </span>
     );
 };
@@ -476,10 +479,13 @@ const matchesCompany = (t: SectorTemplate, company: string) => {
     return SECTOR_BY_ID.get(t.sector)?.category === company.slice(2);
 };
 
-const docOptions = (items: SectorTemplate[]): FilterOption[] => WIZARD_DOC_TYPES.flatMap(d => {
-    const count = items.filter(t => t.docTypeId === d.id).length;
-    return count ? [{ id: d.id, label: d.label, color: d.color ?? '#64748b', count, depth: 0 as const }] : [];
-});
+const docOptions = (items: SectorTemplate[], docLabel: (id: string, fallback: string) => string): FilterOption[] =>
+    WIZARD_DOC_TYPES.flatMap(d => {
+        const count = items.filter(t => t.docTypeId === d.id).length;
+        return count
+            ? [{ id: d.id, label: docLabel(d.id, d.label), color: d.color ?? '#64748b', count, depth: 0 as const }]
+            : [];
+    });
 
 const companyOptions = (items: SectorTemplate[], categoryLabel: (id: CategoryId) => string): FilterOption[] => CATEGORIES.flatMap(c => {
     const sectors = SECTORS.filter(s => s.category === c.id).flatMap(s => {
@@ -696,7 +702,10 @@ export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => 
     const forCompany = useMemo(() => searched.filter(t => (!docType || t.docTypeId === docType) && matchesMeslek(t, meslek)), [searched, docType, meslek]);
     const forMeslek = useMemo(() => searched.filter(t => (!docType || t.docTypeId === docType) && matchesCompany(t, company)), [searched, docType, company]);
     const filtered = useMemo(() => forDoc.filter(t => !docType || t.docTypeId === docType), [forDoc, docType]);
-    const docOpts = useMemo(() => docOptions(forDoc), [forDoc]);
+    const docOpts = useMemo(() => {
+        const names = tr('wizard.trDocNames', { returnObjects: true }) as Record<string, string>;
+        return docOptions(forDoc, (id, fallback) => names?.[id] ?? fallback);
+    }, [forDoc, tr]);
     const companyOpts = useMemo(() => companyOptions(forCompany, id => tr(`gallery.categories.${id}`)), [forCompany, tr]);
     const meslekOpts = useMemo(() => meslekOptions(forMeslek), [forMeslek]);
     const anyFilter = !!(docType || company || meslek || q);

@@ -3,6 +3,8 @@ import type tr from './tr';
 const gallery: typeof tr = {
     title: '适合您行业的现成模板',
     intro: '回答几个问题，我们会展示带有您徽标的匹配模板；一键即可在设计器中打开任意模板。',
+    intlTitle: '{{country}} 的现成设计',
+    intlIntro: '选择单据类型，一键打开 25 种版式之一。',
     fileNotFound: '未找到模板文件：{{name}}',
     previewTitle: '{{name}} 预览',
     previewFailed: '无法加载预览',
@@ -94,6 +96,7 @@ const gallery: typeof tr = {
         holder: '账户持有人（可选）',
         holderPlaceholder: '例如：ACME 有限公司',
         invalidIban: 'IBAN 无效；请检查国家代码和数字。',
+        ibanPlaceholder: 'CN00 0000 0000 0000 0000 00',
         addAccount: '添加账户',
         removeAccount: '移除账户',
         back: '返回',

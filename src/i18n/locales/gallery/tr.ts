@@ -1,6 +1,8 @@
 const gallery = {
     title: 'Sektörünüze Hazır Şablonlar',
     intro: 'Birkaç soruyu yanıtlayın; size uygun şablonları logonuzla birlikte gösterelim ve tek tıkla tasarım ekranında açın.',
+    intlTitle: '{{country}} hazır tasarımları',
+    intlIntro: 'Belge türünü seçin; 25 görsel tasarım arasından birini tek tıkla açın.',
     fileNotFound: 'Şablon dosyası bulunamadı: {{name}}',
     previewTitle: '{{name}} önizleme',
     previewFailed: 'Önizleme yüklenemedi',
@@ -92,6 +94,7 @@ const gallery = {
         holder: 'Hesap sahibi (isteğe bağlı)',
         holderPlaceholder: 'Örn. ABC Ltd. Şti.',
         invalidIban: 'IBAN geçersiz; ülke kodunu ve rakamları kontrol edin.',
+        ibanPlaceholder: 'TR00 0000 0000 0000 0000 0000 00',
         addAccount: 'Hesap ekle',
         removeAccount: 'Hesabı kaldır',
         back: 'Geri',

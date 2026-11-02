@@ -3,6 +3,8 @@ import type tr from './tr';
 const gallery: typeof tr = {
     title: 'Modèles prêts pour votre secteur',
     intro: 'Répondez à quelques questions : nous vous montrons les modèles adaptés avec votre logo, à ouvrir en un clic dans l’éditeur.',
+    intlTitle: 'Modèles prêts pour {{country}}',
+    intlIntro: 'Choisissez un type de document, puis ouvrez l’un des 25 modèles en un clic.',
     fileNotFound: 'Fichier de modèle introuvable : {{name}}',
     previewTitle: 'Aperçu de {{name}}',
     previewFailed: 'Impossible de charger l’aperçu',
@@ -94,6 +96,7 @@ const gallery: typeof tr = {
         holder: 'Titulaire du compte (facultatif)',
         holderPlaceholder: 'ex. ACME SARL',
         invalidIban: 'IBAN invalide ; vérifiez le code pays et les chiffres.',
+        ibanPlaceholder: 'FR00 0000 0000 0000 0000 0000 000',
         addAccount: 'Ajouter un compte',
         removeAccount: 'Supprimer le compte',
         back: 'Retour',

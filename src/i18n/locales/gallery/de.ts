@@ -3,6 +3,8 @@ import type tr from './tr';
 const gallery: typeof tr = {
     title: 'Fertige Vorlagen für Ihre Branche',
     intro: 'Beantworten Sie ein paar Fragen – wir zeigen passende Vorlagen mit Ihrem Logo, die Sie mit einem Klick im Designer öffnen.',
+    intlTitle: 'Fertige Designs für {{country}}',
+    intlIntro: 'Dokumenttyp wählen und eines von 25 Layouts mit einem Klick öffnen.',
     fileNotFound: 'Vorlagendatei nicht gefunden: {{name}}',
     previewTitle: 'Vorschau: {{name}}',
     previewFailed: 'Vorschau konnte nicht geladen werden',
@@ -94,6 +96,7 @@ const gallery: typeof tr = {
         holder: 'Kontoinhaber (optional)',
         holderPlaceholder: 'z. B. Muster GmbH',
         invalidIban: 'Ungültige IBAN; prüfen Sie Ländercode und Ziffern.',
+        ibanPlaceholder: 'DE00 0000 0000 0000 0000 00',
         addAccount: 'Konto hinzufügen',
         removeAccount: 'Konto entfernen',
         back: 'Zurück',

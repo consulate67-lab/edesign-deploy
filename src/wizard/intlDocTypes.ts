@@ -3,11 +3,12 @@ import {
     type CountryDocument, type DocLanguage, type IntlDocKind,
 } from '../international';
 import { CLASSIC_DESIGN_ID, composeInvoiceDesign, findInvoiceDesign, INVOICE_DESIGNS } from '../international/designs/invoiceDesigns';
+import { applyDesignTheme, DESIGN_THEME_IDS, findDesignTheme } from '../international/designs/themeCatalog';
 import i18n, { currentLocale } from '../i18n';
 import type { Messages } from '../i18n/locales/tr';
 import type { DefaultXsltOption, DocFamily, OfficialSample, WizardDocType } from './docTypes';
 
-type DesignId = Exclude<keyof Messages['intl']['designs'], 'classic'>;
+type DesignId = keyof Messages['intl']['designs'];
 
 type Titles = Partial<Record<DocLanguage, string>>;
 
@@ -148,8 +149,8 @@ const titleOf = (tpl: IntlTemplate, lang: DocLanguage, kind: IntlDocKind) => {
     return titles ? titles[lang] ?? titles.en ?? Object.values(titles)[0] ?? docTitle(lang, kind) : docTitle(lang, kind);
 };
 
-const templateLabel = (tpl: IntlTemplate) => tpl.national?.name ?? i18n.t(tpl.labelKey);
-const templateDescription = (tpl: IntlTemplate) => tpl.national ? i18n.t('intl.nationalTemplateDesc') : i18n.t(tpl.descriptionKey);
+const templateDescription = (tpl: IntlTemplate) =>
+    String(tpl.national ? i18n.t('intl.nationalTemplateDesc') : i18n.t(tpl.descriptionKey));
 
 const LANG_PARAM = /(<xsl:param\s+name="lang"\s+select=")'[a-z]{2}'("\s*\/>)/;
 
@@ -158,11 +159,13 @@ export const withDocumentLanguage = (xslt: string, lang: DocLanguage) => xslt.re
 
 const loadTemplate = async (tpl: IntlTemplate) => (await import('../xsltContent')).getInlineXslt(tpl.inlineKey) ?? '';
 
-/** Fatura ailesinde tasarım uygulanmış şablon; classic (veya bilinmeyen) temel şablondur. */
+/** Yapısal EU tasarımı veya tema CSS'si uygulanmış şablon. */
 const loadDesign = async (tpl: IntlTemplate, designId: string) => {
     const base = await loadTemplate(tpl);
-    const design = tpl.family === 'invoice' && !tpl.national ? findInvoiceDesign(designId) : undefined;
-    return design ? composeInvoiceDesign(base, design) : base;
+    const structural = tpl.family === 'invoice' && !tpl.national ? findInvoiceDesign(designId) : undefined;
+    const composed = structural ? composeInvoiceDesign(base, structural) : base;
+    // Ulusal + EU tamamlayıcı temalar; yapısal tasarıma da marka CSS'si eklenebilir.
+    return applyDesignTheme(composed, designId);
 };
 
 /** Profilin şablonu, etiketleri belge diline sabitlenmiş olarak; şablonu yoksa boş. */
@@ -171,28 +174,44 @@ export const loadIntlXslt = async (profileId: string, lang: DocLanguage, designI
     return tpl ? withDocumentLanguage(await loadDesign(tpl, designId), lang) : '';
 };
 
-/** Belge türü için tasarım sırası: klasik, türe önerilenler, diğerleri. */
+/**
+ * 25 tasarım: önce türe önerilen yapısal EU stilleri, sonra tema kataloğu.
+ * Ulusal (BR DANFE vb.) belgelerde yapısal gövde yok — 25 CSS teması uygulanır.
+ */
 export const invoiceDesignIds = (kind?: IntlDocKind) => {
-    const recommended = INVOICE_DESIGNS.filter(d => kind && d.recommended?.includes(kind));
-    return [CLASSIC_DESIGN_ID, ...recommended.map(d => d.id), ...INVOICE_DESIGNS.filter(d => !recommended.includes(d)).map(d => d.id)];
+    const recommended = INVOICE_DESIGNS.filter(d => kind && d.recommended?.includes(kind)).map(d => d.id);
+    const structural = INVOICE_DESIGNS.map(d => d.id);
+    const ordered = [
+        CLASSIC_DESIGN_ID,
+        ...recommended,
+        ...structural.filter(id => !recommended.includes(id)),
+        ...DESIGN_THEME_IDS.filter(id => id !== CLASSIC_DESIGN_ID && !structural.includes(id)),
+    ];
+    // Tekilleştir, 25'e tamamla
+    return [...new Set(ordered)].slice(0, 25);
+};
+
+const designLabel = (id: string): string => {
+    const key = `intl.designs.${id as DesignId}.name`;
+    const name = String(i18n.t(key as 'intl.designs.classic.name'));
+    return name === key || name.startsWith('intl.designs.') ? findDesignTheme(id).id : name;
+};
+const designDesc = (id: string): string => {
+    const key = `intl.designs.${id as DesignId}.desc`;
+    const desc = String(i18n.t(key as 'intl.designs.classic.desc'));
+    return desc === key || desc.startsWith('intl.designs.') ? '' : desc;
 };
 
 const designOptions = (tpl: IntlTemplate, lang: DocLanguage, kind?: IntlDocKind): DefaultXsltOption[] => {
-    const classic: DefaultXsltOption = {
-        id: `${tpl.moduleId}-${lang}`, label: templateLabel(tpl), description: templateDescription(tpl), moduleId: tpl.moduleId,
-        load: async () => withDocumentLanguage(await loadTemplate(tpl), lang),
-    };
-    if (tpl.family !== 'invoice' || tpl.national) return [classic];
-    return invoiceDesignIds(kind).map(id => id === CLASSIC_DESIGN_ID
-        ? { ...classic, label: i18n.t('intl.designs.classic.name'), description: i18n.t('intl.designs.classic.desc') }
-        : {
-            id: `${tpl.moduleId}-${id}-${lang}`,
-            label: i18n.t(`intl.designs.${id as DesignId}.name`),
-            description: i18n.t(`intl.designs.${id as DesignId}.desc`),
-            moduleId: tpl.moduleId,
-            recommended: !!(kind && findInvoiceDesign(id)?.recommended?.includes(kind)),
-            load: async () => withDocumentLanguage(await loadDesign(tpl, id), lang),
-        });
+    const ids = invoiceDesignIds(kind);
+    return ids.map(id => ({
+        id: `${tpl.moduleId}-${id}-${lang}`,
+        label: designLabel(id),
+        description: id === CLASSIC_DESIGN_ID ? templateDescription(tpl) : designDesc(id),
+        moduleId: tpl.moduleId,
+        recommended: !!(kind && findInvoiceDesign(id)?.recommended?.includes(kind)),
+        load: async () => withDocumentLanguage(await loadDesign(tpl, id), lang),
+    }));
 };
 
 const KIND_COLORS: Record<IntlDocKind, string> = {

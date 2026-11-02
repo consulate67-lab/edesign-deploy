@@ -117,7 +117,7 @@ const BankAccountsForm: React.FC<{ accounts: BankAccount[]; onChange: (accounts:
                             <input
                                 value={a.iban}
                                 data-bank-field="iban"
-                                placeholder="TR00 0000 0000 0000 0000 0000 00"
+                                placeholder={t('gallery.q.ibanPlaceholder', { defaultValue: 'TR00 0000 0000 0000 0000 0000 00' })}
                                 maxLength={42}
                                 spellCheck={false}
                                 aria-invalid={bad}
@@ -183,8 +183,10 @@ export const TemplateQuestions: React.FC<{
 
     const docOpts = useMemo(() => WIZARD_DOC_TYPES.flatMap(d => {
         const count = templates.filter(x => x.docTypeId === d.id).length;
-        return count ? [{ id: d.id, label: d.label, color: d.color ?? theme.primary, count }] : [];
-    }), [templates]);
+        const names = t('wizard.trDocNames', { returnObjects: true }) as Record<string, string>;
+        const label = names?.[d.id] ?? d.label;
+        return count ? [{ id: d.id, label, color: d.color ?? theme.primary, count }] : [];
+    }), [templates, t]);
     const catOpts = useMemo(() => CATEGORIES.flatMap(c => {
         const count = templates.filter(x => matches(x, docType, c.id)).length;
         return count ? [{ ...c, label: t(`gallery.categories.${c.id}`), count }] : [];
