@@ -6,6 +6,7 @@ import {
     type BankAccount, type BankChoice, type LogoChoice, type TemplatePrefs,
 } from './personalize';
 import { WIZARD_DOC_TYPES } from '../wizard/docTypes';
+import { trDocName } from '../wizard/trDocLabels';
 import { IMAGE_ACCEPT } from '../xslt-editor/utils/imageFile';
 import { useLocaleT } from '../i18n';
 import { theme } from '../theme';
@@ -168,7 +169,7 @@ export const TemplateQuestions: React.FC<{
     onDone: (answers: TemplateAnswers) => void;
     onSkip: () => void;
 }> = ({ templates, initial, startStep = 'doc', onDone, onSkip }) => {
-    const { t } = useLocaleT();
+    const { t, locale } = useLocaleT();
     const [docType, setDocType] = useState(initial.docType);
     const [category, setCategory] = useState(initial.category);
     const [logo, setLogo] = useState<LogoChoice>(initial.prefs.logo);
@@ -183,14 +184,12 @@ export const TemplateQuestions: React.FC<{
 
     const docOpts = useMemo(() => WIZARD_DOC_TYPES.flatMap(d => {
         const count = templates.filter(x => x.docTypeId === d.id).length;
-        const names = t('wizard.trDocNames', { returnObjects: true }) as Record<string, string>;
-        const label = names?.[d.id] ?? d.label;
-        return count ? [{ id: d.id, label, color: d.color ?? theme.primary, count }] : [];
-    }), [templates, t]);
+        return count ? [{ id: d.id, label: trDocName(d.id, d.label, locale), color: d.color ?? theme.primary, count }] : [];
+    }), [templates, locale]);
     const catOpts = useMemo(() => CATEGORIES.flatMap(c => {
         const count = templates.filter(x => matches(x, docType, c.id)).length;
-        return count ? [{ ...c, label: t(`gallery.categories.${c.id}`), count }] : [];
-    }), [templates, docType, t]);
+        return count ? [{ ...c, label: t(`gallery.categories.${c.id}`, { lng: locale }), count }] : [];
+    }), [templates, docType, t, locale]);
     const candidates = useMemo(() => templates.filter(x => matches(x, docType, category)), [templates, docType, category]);
     const bankCount = candidates.filter(x => x.bank).length;
     const steps: QuestionStep[] = bankCount ? ['doc', 'category', 'logo', 'bank'] : ['doc', 'category', 'logo'];

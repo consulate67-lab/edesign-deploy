@@ -5,6 +5,7 @@ import { MESLEK_GROUPS, MESLEK_NAME } from './meslekler.generated';
 import { loadPrefs, personalizeXslt, prefsKey, savePrefs, usableAccounts, type TemplatePrefs } from './personalize';
 import { TemplateQuestions, type QuestionStep, type TemplateAnswers } from './TemplateQuestions';
 import { WIZARD_DOC_TYPES, loadXmlFile } from '../wizard/docTypes';
+import { trDocName } from '../wizard/trDocLabels';
 import { stripLeadingBom } from '../xslt-editor/utils/testWatermark';
 import { transformXmlWithXslt } from '../xsltTransformer';
 import i18n, { useLocaleT } from '../i18n';
@@ -112,11 +113,9 @@ const SectorChip: React.FC<{ sector: SectorId }> = ({ sector }) => {
 };
 
 const DocBadge: React.FC<{ docTypeId: string }> = ({ docTypeId }) => {
-    const { t } = useLocaleT();
     const d = docTypeOf(docTypeId);
     const color = d?.color ?? '#64748b';
-    const names = t('wizard.trDocNames', { returnObjects: true }) as Record<string, string>;
-    const label = names?.[docTypeId] ?? d?.label ?? docTypeId;
+    const label = trDocName(docTypeId, d?.label ?? docTypeId);
     return (
         <span title={label} style={{
             display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 6, flexShrink: 0, maxWidth: '70%',
@@ -657,7 +656,7 @@ const PrefsBar: React.FC<{
  * tasarım ekranında açılır.
  */
 export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => {
-    const { t: tr } = useLocaleT();
+    const { t: tr, locale } = useLocaleT();
     const [docType, setDocType] = useState('');
     const [company, setCompany] = useState('');
     const [meslek, setMeslek] = useState('');
@@ -702,11 +701,14 @@ export const TemplateGallery: React.FC<{ onUse?: UseHandler }> = ({ onUse }) => 
     const forCompany = useMemo(() => searched.filter(t => (!docType || t.docTypeId === docType) && matchesMeslek(t, meslek)), [searched, docType, meslek]);
     const forMeslek = useMemo(() => searched.filter(t => (!docType || t.docTypeId === docType) && matchesCompany(t, company)), [searched, docType, company]);
     const filtered = useMemo(() => forDoc.filter(t => !docType || t.docTypeId === docType), [forDoc, docType]);
-    const docOpts = useMemo(() => {
-        const names = tr('wizard.trDocNames', { returnObjects: true }) as Record<string, string>;
-        return docOptions(forDoc, (id, fallback) => names?.[id] ?? fallback);
-    }, [forDoc, tr]);
-    const companyOpts = useMemo(() => companyOptions(forCompany, id => tr(`gallery.categories.${id}`)), [forCompany, tr]);
+    const docOpts = useMemo(
+        () => docOptions(forDoc, (id, fallback) => trDocName(id, fallback, locale)),
+        [forDoc, locale],
+    );
+    const companyOpts = useMemo(
+        () => companyOptions(forCompany, id => tr(`gallery.categories.${id}`, { lng: locale })),
+        [forCompany, tr, locale],
+    );
     const meslekOpts = useMemo(() => meslekOptions(forMeslek), [forMeslek]);
     const anyFilter = !!(docType || company || meslek || q);
     const clearAll = () => { setDocType(''); setCompany(''); setMeslek(''); setQuery(''); };

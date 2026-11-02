@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, Check, AlertTriangle, XCircle, Upload, FileCode, Database, FileText, Loader2, Landmark, ExternalLink, Truck, Languages } from 'lucide-react';
 import { WIZARD_DOC_TYPES, FAMILY_INFO, loadSampleXml, loadOfficialSample, type DocFamily, type WizardDocType, type OfficialSample } from './docTypes';
 import { countryDocType, countryDocTypes, hasIntlTemplate } from './intlDocTypes';
+import { familyLabel, trDocDescription, trDocLabel } from './trDocLabels';
 import { DesignThumb } from './DesignThumb';
 import {
     countryDocLanguages, countryName, countryNote, countryProfiles, findCountryRules, findDocumentProfile, KIND_SPECS, languageName,
@@ -34,13 +35,6 @@ interface LoadedFile { name: string; size: number; text: string; result: Validat
 const MAX_BYTES = 5 * 1024 * 1024;
 const STEP_KEYS = ['type', 'xslt', 'xml'] as const;
 const PRO_FAMILIES: DocFamily[] = ['invoice', 'creditNote', 'despatch', 'receiptAdvice'];
-
-const familyLabel = (family: DocFamily) =>
-    (i18n.t('wizard.family', { returnObjects: true }) as Record<string, string>)[family] ?? FAMILY_INFO[family].label;
-const trDocDescription = (doc: WizardDocType) =>
-    (i18n.t('wizard.trDocs', { returnObjects: true }) as Record<string, string>)[doc.id] ?? doc.description;
-const trDocLabel = (doc: WizardDocType) =>
-    (i18n.t('wizard.trDocNames', { returnObjects: true }) as Record<string, string>)[doc.id] ?? doc.label;
 
 const card = (active: boolean, color: string = theme.primary): React.CSSProperties => ({
     background: active ? `${color}14` : theme.surface,
