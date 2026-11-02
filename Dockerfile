@@ -34,7 +34,7 @@ COPY . .
 # Yerelde build edilmiş dist-web yoksa imaj içinde üretilir.
 ENV VITE_API_URL=/api
 RUN if [ ! -f dist-web/index.html ]; then \
-      npx vite build --base / --outDir dist-web --emptyOutDir; \
+      NODE_OPTIONS=--max-old-space-size=4096 npx vite build --base / --outDir dist-web --emptyOutDir; \
     fi \
  && test -f dist-web/index.html
 

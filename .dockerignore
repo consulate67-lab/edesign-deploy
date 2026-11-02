@@ -38,6 +38,13 @@ malformed_check.txt
 # Documentation that doesn't belong in production
 README.md
 
+# Ağır yerel pazarlama varlıkları (e-posta şablonları hariç)
+marketing/instagram-reel-fatura
+marketing/**/*.mp4
+marketing/**/*.wav
+marketing/**/*.mp3
+marketing/**/*.jpg
+
 # Local SQLite file (Railway mounts a volume at /data)
 server/database.sqlite
 server/database.sqlite-journal
