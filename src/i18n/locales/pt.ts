@@ -12,8 +12,8 @@ const pt: Messages = {
         hint: 'Idioma da página. O idioma do documento segue o país escolhido no assistente de design.',
     },
     seo: {
-        title: 'Designer de layout de NF-e e fatura eletrônica (XSLT) | edXdocu',
-        description: 'Crie o layout de NF-e, NFC-e, NFS-e, CT-e e faturas eletrônicas EN 16931 / Peppol sem saber XSLT. Editor de arrastar e soltar com modelos prontos. Experimente grátis.',
+        title: 'DANFE com a sua marca | Layout NF-e, NFS-e e CT-e · edXdocu',
+        description: 'Personalize DANFE, DANFSe e DACTE com a marca da sua empresa. Layout NT 2026.010, 2 por página, A5/A6. XML no navegador. Experimente grátis.',
     },
     common: {
         back: 'Voltar',

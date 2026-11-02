@@ -15,6 +15,9 @@ import { LanguageSwitcher } from './i18n/LanguageSwitcher';
 import { useCountry } from './store/uiStore';
 import { TutorialGrid } from './help/Tutorials';
 import { SocialLinks } from './landing/SocialLinks';
+import { activateBrazilMarket, brazilVariant, isBrazilMarket, type BrazilVariant } from './landing/brazilMarket';
+import { BR_LANDING_DOCS, brazilCopy, brazilSeo, variantCopy } from './landing/brazilCopy';
+import { BrazilConcierge } from './landing/BrazilConcierge';
 
 interface LandingProps {
     onRegister: () => void;
@@ -85,6 +88,7 @@ const LANDING_CSS = `
   .ld-header{padding:12px 16px !important}
   .ld-logo{height:36px !important}
   .ld-section{padding-left:16px !important;padding-right:16px !important}
+  .ld-br-form-row{grid-template-columns:1fr !important}
 }
 @media (prefers-reduced-motion: reduce){
   .ld-float{animation:none !important}
@@ -159,15 +163,31 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
     const currency = usePriceCurrency();
     const priceOf = (id: PlanId) => formatPrice(PACKAGES_PLANS.find(p => p.id === id)?.prices[currency] ?? 0, currency, locale);
     const priceVars = { one: priceOf('one'), basic: priceOf('basic'), pro: priceOf('pro'), from: priceOf('one') };
-    const faqItems = t('landing.faq.items', { returnObjects: true, ...priceVars });
     const mockAmounts = MOCK_AMOUNTS[currency].map(n => formatPrice(n, currency, locale));
     const country = useCountry();
-    const docTypes = useMemo<LandingDoc[]>(() => (locale === 'tr'
-        ? DOC_TYPES
-        : INTL_SHOWCASE_DOCS.map(d => ({ ...d, label: t(`intl.kinds.${d.id}`) }))), [locale, t]);
+    const brMarket = isBrazilMarket(country);
+    const [brVariant] = useState<BrazilVariant>(() => brazilVariant());
+    const brHero = variantCopy(brVariant);
+    useEffect(() => {
+        if (!brMarket) return;
+        activateBrazilMarket();
+        document.title = brazilSeo.title;
+        document.querySelector('meta[name="description"]')?.setAttribute('content', brazilSeo.description);
+    }, [brMarket]);
+    const faqItems: { q: string; a: string }[] = brMarket
+        ? brazilCopy.faq.items
+        : (() => {
+            const items = t('landing.faq.items', { returnObjects: true, ...priceVars });
+            return Array.isArray(items) ? items as { q: string; a: string }[] : [];
+        })();
+    const docTypes = useMemo<LandingDoc[]>(() => {
+        if (brMarket) return BR_LANDING_DOCS.map(d => ({ ...d }));
+        if (locale === 'tr') return DOC_TYPES;
+        return INTL_SHOWCASE_DOCS.map(d => ({ ...d, label: t(`intl.kinds.${d.id}`) }));
+    }, [brMarket, locale, t]);
     const previewSources = useCallback(
-        (kind: string) => (locale === 'tr' ? [] : intlPreviewSources(kind, locale, country, (name) => t('hero.countrySample', { country: name }))),
-        [locale, country, t],
+        (kind: string) => (locale === 'tr' ? [] : intlPreviewSources(kind, locale, brMarket ? 'BR' : country, (name) => t('hero.countrySample', { country: name }))),
+        [locale, country, brMarket, t],
     );
     const [openSss, setOpenSss] = useState<string | null>(null);
     const [legalModal, setLegalModal] = useState<LegalId | null>(() => {
@@ -263,9 +283,10 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
                         <nav className="ld-nav" style={{ display: 'flex', gap: 28, fontSize: 14, fontWeight: 600 }}>
                             <a href="#urun">{t('landing.nav.product')}</a>
-                            <a href="#nasil-kullanilir">{t('tutorials.nav')}</a>
+                            {!brMarket && <a href="#nasil-kullanilir">{t('tutorials.nav')}</a>}
                             <a href="#belgeler">{t('landing.nav.docs')}</a>
                             <a href="#fiyatlar">{t('landing.nav.pricing')}</a>
+                            {brMarket && <a href="#concierge">Concierge</a>}
                             <a href="#sss">{t('landing.nav.faq')}</a>
                         </nav>
                         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -347,7 +368,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                                 lineHeight: 1.3,
                             }}
                         >
-                            {t('landing.newsTitle')}
+                            {brMarket ? brazilCopy.newsTitle : t('landing.newsTitle')}
                         </div>
                         <div
                             style={{
@@ -380,9 +401,9 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                                     flexShrink: 0,
                                 }}
                             >
-                                <Sparkles size={12} /> {t('landing.badgeNew')}
+                                <Sparkles size={12} /> {brMarket ? brazilCopy.badgeNew : t('landing.badgeNew')}
                             </span>
-                            {t('landing.news')}
+                            {brMarket ? brazilCopy.news : t('landing.news')}
                         </div>
                     </div>
 
@@ -397,9 +418,9 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                         }}
                     >
                         <RotatingDocType dt={activeDoc} />
-                        {t('landing.heroLine')}
+                        {brMarket ? brHero.heroLine : t('landing.heroLine')}
                         <br />
-                        <span style={gradientTextStyle}>{t('landing.heroAccent')}</span>
+                        <span style={gradientTextStyle}>{brMarket ? brHero.heroAccent : t('landing.heroAccent')}</span>
                     </h1>
 
                     <p
@@ -407,14 +428,20 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                         style={{
                             fontSize: 18,
                             color: theme.textMuted,
-                            margin: '0 0 32px',
+                            margin: brMarket ? '0 0 16px' : '0 0 32px',
                             lineHeight: 1.6,
                             maxWidth: 560,
                         }}
                     >
-                        {t('landing.heroSubLead')} <strong style={{ color: theme.text }}>{t('landing.heroSubStrong')}</strong>{' '}
-                        {t('landing.heroSubRest')} {t('landing.heroSubEurope')}
+                        {brMarket ? brHero.heroSubLead : t('landing.heroSubLead')}{' '}
+                        <strong style={{ color: theme.text }}>{brMarket ? brHero.heroSubStrong : t('landing.heroSubStrong')}</strong>{' '}
+                        {brMarket ? brHero.heroSubRest : <>{t('landing.heroSubRest')} {t('landing.heroSubEurope')}</>}
                     </p>
+                    {brMarket ? (
+                        <p className="ld-hero-sub" style={{ fontSize: 14, color: theme.greenText, margin: '0 0 28px', maxWidth: 560, fontWeight: 600 }}>
+                            {brazilCopy.heroSubPrivacy}
+                        </p>
+                    ) : null}
 
                     <div
                         className="ld-hero-ctas"
@@ -444,8 +471,28 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                                 fontFamily: 'inherit',
                             }}
                         >
-                            {t('landing.ctaOpen')} <ArrowRight size={17} />
+                            {brMarket ? brazilCopy.ctaOpen : t('landing.ctaOpen')} <ArrowRight size={17} />
                         </button>
+                        {brMarket && (
+                            <button
+                                type="button"
+                                onClick={() => document.getElementById('concierge')?.scrollIntoView({ behavior: 'smooth' })}
+                                style={{
+                                    padding: '15px 28px',
+                                    background: '#fff',
+                                    color: theme.primary,
+                                    border: `1px solid ${theme.primary}`,
+                                    borderRadius: 14,
+                                    fontSize: 16,
+                                    fontWeight: 700,
+                                    cursor: 'pointer',
+                                    boxShadow: theme.shadowSm,
+                                    fontFamily: 'inherit',
+                                }}
+                            >
+                                {brazilCopy.ctaConcierge}
+                            </button>
+                        )}
                         <button
                             type="button"
                             onClick={() => document.getElementById('fiyatlar')?.scrollIntoView({ behavior: 'smooth' })}
@@ -462,7 +509,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                                 fontFamily: 'inherit',
                             }}
                         >
-                            {t('landing.ctaPricing')}
+                            {brMarket ? brazilCopy.ctaPricing : t('landing.ctaPricing')}
                         </button>
                     </div>
 
@@ -472,7 +519,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                             onClick={(e) => { e.preventDefault(); onLogin(); }}
                             style={{ color: theme.primary, textDecoration: 'underline', textUnderlineOffset: 3, fontWeight: 600 }}
                         >
-                            {t('landing.alreadyMember')}
+                            {brMarket ? brazilCopy.alreadyMember : t('landing.alreadyMember')}
                         </a>
                     </div>
                 </div>
@@ -511,12 +558,15 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                     }}
                 >
                     <div aria-hidden style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: theme.gradient }} />
-                    {[
-                        { v: t('landing.stats.complianceValue'), l: t('landing.stats.gib'), a: '#059669' },
-                        { v: String(docTypes.length), l: t('landing.stats.docTypes'), a: theme.blue },
-                        { v: String(PACKAGES_PLANS.length), l: t('landing.stats.plans'), a: '#db2777' },
-                        { v: t('landing.stats.webValue'), l: t('landing.stats.web'), a: theme.primary },
-                    ].map((s, i) => (
+                    {(brMarket
+                        ? brazilCopy.stats.map((s, i) => ({ ...s, a: ['#059669', theme.blue, '#db2777', theme.primary][i] }))
+                        : [
+                            { v: t('landing.stats.complianceValue'), l: t('landing.stats.gib'), a: '#059669' },
+                            { v: String(docTypes.length), l: t('landing.stats.docTypes'), a: theme.blue },
+                            { v: String(PACKAGES_PLANS.length), l: t('landing.stats.plans'), a: '#db2777' },
+                            { v: t('landing.stats.webValue'), l: t('landing.stats.web'), a: theme.primary },
+                        ]
+                    ).map((s, i) => (
                         <div key={i} style={{ textAlign: 'center' }}>
                             <div style={{ fontSize: 30, fontWeight: 800, color: s.a, marginBottom: 2, letterSpacing: '-0.02em' }}>
                                 {s.v}
@@ -533,7 +583,11 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                 className="ld-section"
                 style={{ position: 'relative', zIndex: 1, padding: '56px 32px', maxWidth: 1280, margin: '0 auto' }}
             >
-                <SectionTitle eyebrow={t('landing.product.eyebrow')} title={t('landing.product.title')} subtitle={t('landing.product.subtitle')} />
+                <SectionTitle
+                    eyebrow={brMarket ? brazilCopy.product.eyebrow : t('landing.product.eyebrow')}
+                    title={brMarket ? brazilCopy.product.title : t('landing.product.title')}
+                    subtitle={brMarket ? brazilCopy.product.subtitle : t('landing.product.subtitle')}
+                />
 
                 <div className="ld-bento">
                     <div
@@ -567,10 +621,10 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                                 SHOWCASE
                             </div>
                             <h3 style={{ fontSize: 26, fontWeight: 800, margin: '8px 0 12px', color: '#fff', letterSpacing: '-0.02em' }}>
-                                {t('landing.showcase.title')}
+                                {brMarket ? brazilCopy.showcase.title : t('landing.showcase.title')}
                             </h3>
                             <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.9)', margin: '0 0 22px', lineHeight: 1.55, maxWidth: 340 }}>
-                                {t('landing.showcase.text')}
+                                {brMarket ? brazilCopy.showcase.text : t('landing.showcase.text')}
                             </p>
                             <button
                                 type="button"
@@ -591,7 +645,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                                     fontFamily: 'inherit',
                                 }}
                             >
-                                {t('landing.showcase.cta')} <ArrowRight size={14} />
+                                {brMarket ? brazilCopy.showcase.cta : t('landing.showcase.cta')} <ArrowRight size={14} />
                             </button>
                         </div>
                         {/* Dekoratif fatura önizleme */}
@@ -612,16 +666,24 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                             }}
                         >
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                                <div style={{ fontSize: 10, fontWeight: 800, color: theme.primary }}>{t('landing.mock.title')}</div>
+                                <div style={{ fontSize: 10, fontWeight: 800, color: theme.primary }}>
+                                    {brMarket ? brazilCopy.mock.title : t('landing.mock.title')}
+                                </div>
                                 <img src={MARK_URL} alt="" width={18} height={18} style={{ borderRadius: 5 }} />
                             </div>
                             <div style={{ height: 3, background: theme.gradient, borderRadius: 2, marginBottom: 8 }} />
                             <div style={{ fontSize: 8, color: '#475569', lineHeight: 1.5 }}>
-                                <div style={{ fontWeight: 700, color: '#0f172a' }}>{t('landing.mock.company')}</div>
-                                <div>{t('landing.mock.taxId')}</div>
+                                <div style={{ fontWeight: 700, color: '#0f172a' }}>
+                                    {brMarket ? brazilCopy.mock.company : t('landing.mock.company')}
+                                </div>
+                                <div>{brMarket ? brazilCopy.mock.taxId : t('landing.mock.taxId')}</div>
                                 <div style={{ marginTop: 6, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4 }}>
-                                    <div style={{ background: '#f1f5f9', padding: '3px 5px', borderRadius: 4 }}>{t('landing.mock.line1', { a: mockAmounts[0] })}</div>
-                                    <div style={{ background: '#f1f5f9', padding: '3px 5px', borderRadius: 4 }}>{t('landing.mock.line2', { b: mockAmounts[1] })}</div>
+                                    <div style={{ background: '#f1f5f9', padding: '3px 5px', borderRadius: 4 }}>
+                                        {brMarket ? brazilCopy.mock.line1 : t('landing.mock.line1', { a: mockAmounts[0] })}
+                                    </div>
+                                    <div style={{ background: '#f1f5f9', padding: '3px 5px', borderRadius: 4 }}>
+                                        {brMarket ? brazilCopy.mock.line2 : t('landing.mock.line2', { b: mockAmounts[1] })}
+                                    </div>
                                 </div>
                             </div>
                             <div
@@ -637,17 +699,25 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                                     borderRadius: 6,
                                 }}
                             >
-                                {t('landing.mock.total', { c: mockAmounts[2] })}
+                                {brMarket ? brazilCopy.mock.total : t('landing.mock.total', { c: mockAmounts[2] })}
                             </div>
                         </div>
                     </div>
 
-                    {[
-                        { icon: <Layers size={22} />, title: t('landing.features.dragTitle'), d: t('landing.features.dragText'), g: 'linear-gradient(135deg, #3b82f6, #06b6d4)' },
-                        { icon: <Zap size={22} />, title: t('landing.features.previewTitle'), d: t('landing.features.previewText'), g: 'linear-gradient(135deg, #10b981, #84cc16)' },
-                        { icon: <FileText size={22} />, title: t('landing.features.gibTitle'), d: t('landing.features.gibText'), g: 'linear-gradient(135deg, #f97316, #f59e0b)' },
-                        { icon: <Globe size={22} />, title: t('landing.features.docsTitle', { count: docTypes.length }), d: t('landing.features.docsText'), g: 'linear-gradient(135deg, #ec4899, #8b5cf6)' },
-                    ].map((f, i) => (
+                    {(brMarket
+                        ? [
+                            { icon: <Layers size={22} />, title: brazilCopy.features[0].title, d: brazilCopy.features[0].text, g: 'linear-gradient(135deg, #3b82f6, #06b6d4)' },
+                            { icon: <Zap size={22} />, title: brazilCopy.features[1].title, d: brazilCopy.features[1].text, g: 'linear-gradient(135deg, #10b981, #84cc16)' },
+                            { icon: <FileText size={22} />, title: brazilCopy.features[2].title, d: brazilCopy.features[2].text, g: 'linear-gradient(135deg, #f97316, #f59e0b)' },
+                            { icon: <Globe size={22} />, title: brazilCopy.features[3].title, d: brazilCopy.features[3].text, g: 'linear-gradient(135deg, #ec4899, #8b5cf6)' },
+                        ]
+                        : [
+                            { icon: <Layers size={22} />, title: t('landing.features.dragTitle'), d: t('landing.features.dragText'), g: 'linear-gradient(135deg, #3b82f6, #06b6d4)' },
+                            { icon: <Zap size={22} />, title: t('landing.features.previewTitle'), d: t('landing.features.previewText'), g: 'linear-gradient(135deg, #10b981, #84cc16)' },
+                            { icon: <FileText size={22} />, title: t('landing.features.gibTitle'), d: t('landing.features.gibText'), g: 'linear-gradient(135deg, #f97316, #f59e0b)' },
+                            { icon: <Globe size={22} />, title: t('landing.features.docsTitle', { count: docTypes.length }), d: t('landing.features.docsText'), g: 'linear-gradient(135deg, #ec4899, #8b5cf6)' },
+                        ]
+                    ).map((f, i) => (
                         <div
                             key={i}
                             className="ld-card"
@@ -680,6 +750,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
             </section>
 
             {/* ====================== EĞİTİM VİDEOLARI ====================== */}
+            {!brMarket && (
             <section
                 id="nasil-kullanilir"
                 className="ld-section"
@@ -688,6 +759,7 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                 <SectionTitle eyebrow={t('tutorials.eyebrow')} title={t('tutorials.title')} subtitle={t('tutorials.subtitle')} />
                 <TutorialGrid />
             </section>
+            )}
 
             {/* ====================== DOC TYPES ====================== */}
             <section
@@ -695,7 +767,10 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                 className="ld-section"
                 style={{ position: 'relative', zIndex: 1, padding: '40px 32px', maxWidth: 1280, margin: '0 auto' }}
             >
-                <SectionTitle eyebrow={t('landing.docs.eyebrow')} title={t('landing.docs.title')} />
+                <SectionTitle
+                    eyebrow={brMarket ? brazilCopy.docs.eyebrow : t('landing.docs.eyebrow')}
+                    title={brMarket ? brazilCopy.docs.title : t('landing.docs.title')}
+                />
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
                     {docTypes.map((dt) => (
                         <button
@@ -749,113 +824,190 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                 style={{ position: 'relative', zIndex: 1, padding: '72px 32px', maxWidth: 1280, margin: '0 auto' }}
             >
                 <SectionTitle
-                    eyebrow={t('landing.pricing.eyebrow')}
-                    title={t('landing.pricing.title')}
-                    subtitle={t('landing.pricing.subtitle')}
+                    eyebrow={brMarket ? brazilCopy.pricing.eyebrow : t('landing.pricing.eyebrow')}
+                    title={brMarket ? brazilCopy.pricing.title : t('landing.pricing.title')}
+                    subtitle={brMarket ? brazilCopy.pricing.subtitle : t('landing.pricing.subtitle')}
                 />
 
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'stretch', flexWrap: 'wrap', gap: 24 }}>
-                    {PACKAGES_PLANS.map(plan => (
-                        <div
-                            key={plan.id}
-                            data-pricing-plan={plan.id}
-                            className="ld-card"
-                            style={{
-                                flex: '1 1 300px',
-                                maxWidth: 380,
-                                display: 'flex',
-                                flexDirection: 'column',
-                                background: plan.highlight
-                                    ? `linear-gradient(#fff, #fff) padding-box, ${theme.gradient} border-box`
-                                    : '#fff',
-                                border: plan.highlight ? '2px solid transparent' : `1px solid ${theme.border}`,
-                                borderRadius: 24,
-                                padding: '32px 28px',
-                                position: 'relative',
-                                boxShadow: plan.highlight ? '0 20px 50px rgba(109, 40, 217, 0.18)' : theme.shadowSm,
-                            }}
-                        >
-                            {plan.highlight && (
-                                <div style={{
-                                    position: 'absolute', top: -13, left: '50%', transform: 'translateX(-50%)',
-                                    padding: '5px 14px', borderRadius: 999, background: theme.gradient,
-                                    color: '#fff', fontSize: 11, fontWeight: 800, whiteSpace: 'nowrap', letterSpacing: 0.4,
-                                    boxShadow: theme.shadowBrand,
-                                }}>
-                                    {t('pricing.best')}
+                {brMarket ? (
+                    <>
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'stretch', flexWrap: 'wrap', gap: 24 }}>
+                            {brazilCopy.pricing.plans.map(plan => (
+                                <div
+                                    key={plan.id}
+                                    data-pricing-plan={plan.id}
+                                    className="ld-card"
+                                    style={{
+                                        flex: '1 1 280px',
+                                        maxWidth: 360,
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        background: plan.highlight
+                                            ? `linear-gradient(#fff, #fff) padding-box, ${theme.gradient} border-box`
+                                            : '#fff',
+                                        border: plan.highlight ? '2px solid transparent' : `1px solid ${theme.border}`,
+                                        borderRadius: 24,
+                                        padding: '32px 28px',
+                                        position: 'relative',
+                                        boxShadow: plan.highlight ? '0 20px 50px rgba(109, 40, 217, 0.18)' : theme.shadowSm,
+                                    }}
+                                >
+                                    {plan.highlight && (
+                                        <div style={{
+                                            position: 'absolute', top: -13, left: '50%', transform: 'translateX(-50%)',
+                                            padding: '5px 14px', borderRadius: 999, background: theme.gradient,
+                                            color: '#fff', fontSize: 11, fontWeight: 800, whiteSpace: 'nowrap', letterSpacing: 0.4,
+                                            boxShadow: theme.shadowBrand,
+                                        }}>
+                                            Contador
+                                        </div>
+                                    )}
+                                    <h3 style={{ fontSize: 22, fontWeight: 800, margin: '0 0 4px', color: theme.text }}>{plan.name}</h3>
+                                    <p style={{ color: theme.textSubtle, fontSize: 13, margin: '0 0 20px' }}>{plan.hint}</p>
+                                    <div style={{ marginBottom: 20 }}>
+                                        <span style={{ fontSize: 34, fontWeight: 800, letterSpacing: '-0.02em', ...gradientTextStyle }}>
+                                            {plan.price}
+                                        </span>
+                                        <span style={{ color: theme.textSubtle, fontSize: 14, marginLeft: 6 }}>{plan.period}</span>
+                                    </div>
+                                    <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 20px', display: 'flex', flexDirection: 'column', gap: 10, flex: 1, borderTop: `1px solid ${theme.border}`, paddingTop: 16 }}>
+                                        {plan.features.map((feat, i) => (
+                                            <li key={i} style={{ color: theme.textMuted, fontSize: 14, display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                                                <span style={{ flexShrink: 0, marginTop: 1, width: 18, height: 18, borderRadius: 999, background: theme.greenSoft, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    <Check size={12} color={theme.greenText} strokeWidth={3} />
+                                                </span>
+                                                <span>{feat}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    <button
+                                        type="button"
+                                        onClick={() => document.getElementById('concierge')?.scrollIntoView({ behavior: 'smooth' })}
+                                        style={{
+                                            width: '100%', height: 48,
+                                            background: plan.highlight ? theme.gradient : theme.primarySoft,
+                                            color: plan.highlight ? '#fff' : theme.primary,
+                                            border: 'none', borderRadius: 12, fontWeight: 800, fontSize: 15,
+                                            cursor: 'pointer', fontFamily: 'inherit',
+                                            boxShadow: plan.highlight ? theme.shadowBrand : 'none',
+                                        }}
+                                    >
+                                        {brazilCopy.pricing.askLabel}
+                                    </button>
                                 </div>
-                            )}
-                            <h3 style={{ fontSize: 22, fontWeight: 800, margin: '0 0 4px', color: theme.text }}>{plan.name}</h3>
-                            <p style={{ color: theme.textSubtle, fontSize: 13, margin: '0 0 20px' }}>
-                                {t('landing.pricing.perDesign', { price: formatPrice(perDesignPrice(plan, currency), currency, locale) })}
-                            </p>
-
-                            <div style={{ marginBottom: 20 }}>
-                                <span style={{ fontSize: 42, fontWeight: 800, letterSpacing: '-0.02em', ...gradientTextStyle }}>
-                                    {formatPrice(plan.prices[currency], currency, locale)}
-                                </span>
-                                <span style={{ color: theme.textSubtle, fontSize: 14, marginLeft: 6 }}>{t('landing.pricing.oneTime')}</span>
-                            </div>
-
-                            <div style={{ paddingTop: 4, borderTop: `1px solid ${theme.border}`, marginBottom: 20, flex: 1 }}>
-                                <div style={{ color: theme.primary, fontSize: 13, fontWeight: 700, margin: '14px 0' }}>
-                                    {t('pricing.credits', { count: plan.credits })}
-                                </div>
-                                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                                    {plan.features.map((feat, i) => (
-                                        <li key={i} style={{ color: theme.textMuted, fontSize: 14, display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                                            <span
-                                                style={{
-                                                    flexShrink: 0,
-                                                    marginTop: 1,
-                                                    width: 18,
-                                                    height: 18,
-                                                    borderRadius: 999,
-                                                    background: theme.greenSoft,
-                                                    display: 'inline-flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                }}
-                                            >
-                                                <Check size={12} color={theme.greenText} strokeWidth={3} />
-                                            </span>
-                                            <span>{planFeatureText(t, plan, feat)}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-
-                            <button
-                                onClick={() => handleBuyPlan(plan)}
-                                data-buy-plan={plan.id}
-                                style={{
-                                    width: '100%',
-                                    height: 48,
-                                    background: plan.highlight ? theme.gradient : theme.primarySoft,
-                                    color: plan.highlight ? '#fff' : theme.primary,
-                                    border: 'none',
-                                    borderRadius: 12,
-                                    fontWeight: 800,
-                                    fontSize: 15,
-                                    cursor: 'pointer',
-                                    marginTop: 12,
-                                    boxShadow: plan.highlight ? theme.shadowBrand : 'none',
-                                    fontFamily: 'inherit',
-                                }}
-                            >
-                                {t('landing.pricing.buy')}
-                            </button>
-                            <p style={{ textAlign: 'center', color: theme.textSubtle, fontSize: 12, margin: '10px 0 0' }}>
-                                {t('landing.pricing.loginRequired')}
-                            </p>
+                            ))}
                         </div>
-                    ))}
-                </div>
+                        <p style={{ textAlign: 'center', color: theme.textSubtle, fontSize: 13, marginTop: 32 }}>
+                            {brazilCopy.pricing.note}
+                        </p>
+                    </>
+                ) : (
+                    <>
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'stretch', flexWrap: 'wrap', gap: 24 }}>
+                            {PACKAGES_PLANS.map(plan => (
+                                <div
+                                    key={plan.id}
+                                    data-pricing-plan={plan.id}
+                                    className="ld-card"
+                                    style={{
+                                        flex: '1 1 300px',
+                                        maxWidth: 380,
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        background: plan.highlight
+                                            ? `linear-gradient(#fff, #fff) padding-box, ${theme.gradient} border-box`
+                                            : '#fff',
+                                        border: plan.highlight ? '2px solid transparent' : `1px solid ${theme.border}`,
+                                        borderRadius: 24,
+                                        padding: '32px 28px',
+                                        position: 'relative',
+                                        boxShadow: plan.highlight ? '0 20px 50px rgba(109, 40, 217, 0.18)' : theme.shadowSm,
+                                    }}
+                                >
+                                    {plan.highlight && (
+                                        <div style={{
+                                            position: 'absolute', top: -13, left: '50%', transform: 'translateX(-50%)',
+                                            padding: '5px 14px', borderRadius: 999, background: theme.gradient,
+                                            color: '#fff', fontSize: 11, fontWeight: 800, whiteSpace: 'nowrap', letterSpacing: 0.4,
+                                            boxShadow: theme.shadowBrand,
+                                        }}>
+                                            {t('pricing.best')}
+                                        </div>
+                                    )}
+                                    <h3 style={{ fontSize: 22, fontWeight: 800, margin: '0 0 4px', color: theme.text }}>{plan.name}</h3>
+                                    <p style={{ color: theme.textSubtle, fontSize: 13, margin: '0 0 20px' }}>
+                                        {t('landing.pricing.perDesign', { price: formatPrice(perDesignPrice(plan, currency), currency, locale) })}
+                                    </p>
 
-                <p style={{ textAlign: 'center', color: theme.textSubtle, fontSize: 13, marginTop: 32 }}>
-                    {t('landing.pricing.vatIncluded')}
-                </p>
+                                    <div style={{ marginBottom: 20 }}>
+                                        <span style={{ fontSize: 42, fontWeight: 800, letterSpacing: '-0.02em', ...gradientTextStyle }}>
+                                            {formatPrice(plan.prices[currency], currency, locale)}
+                                        </span>
+                                        <span style={{ color: theme.textSubtle, fontSize: 14, marginLeft: 6 }}>{t('landing.pricing.oneTime')}</span>
+                                    </div>
+
+                                    <div style={{ paddingTop: 4, borderTop: `1px solid ${theme.border}`, marginBottom: 20, flex: 1 }}>
+                                        <div style={{ color: theme.primary, fontSize: 13, fontWeight: 700, margin: '14px 0' }}>
+                                            {t('pricing.credits', { count: plan.credits })}
+                                        </div>
+                                        <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                            {plan.features.map((feat, i) => (
+                                                <li key={i} style={{ color: theme.textMuted, fontSize: 14, display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                                                    <span
+                                                        style={{
+                                                            flexShrink: 0,
+                                                            marginTop: 1,
+                                                            width: 18,
+                                                            height: 18,
+                                                            borderRadius: 999,
+                                                            background: theme.greenSoft,
+                                                            display: 'inline-flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                        }}
+                                                    >
+                                                        <Check size={12} color={theme.greenText} strokeWidth={3} />
+                                                    </span>
+                                                    <span>{planFeatureText(t, plan, feat)}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+
+                                    <button
+                                        onClick={() => handleBuyPlan(plan)}
+                                        data-buy-plan={plan.id}
+                                        style={{
+                                            width: '100%',
+                                            height: 48,
+                                            background: plan.highlight ? theme.gradient : theme.primarySoft,
+                                            color: plan.highlight ? '#fff' : theme.primary,
+                                            border: 'none',
+                                            borderRadius: 12,
+                                            fontWeight: 800,
+                                            fontSize: 15,
+                                            cursor: 'pointer',
+                                            marginTop: 12,
+                                            boxShadow: plan.highlight ? theme.shadowBrand : 'none',
+                                            fontFamily: 'inherit',
+                                        }}
+                                    >
+                                        {t('landing.pricing.buy')}
+                                    </button>
+                                    <p style={{ textAlign: 'center', color: theme.textSubtle, fontSize: 12, margin: '10px 0 0' }}>
+                                        {t('landing.pricing.loginRequired')}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                        <p style={{ textAlign: 'center', color: theme.textSubtle, fontSize: 13, marginTop: 32 }}>
+                            {t('landing.pricing.vatIncluded')}
+                        </p>
+                    </>
+                )}
             </section>
+
+            {brMarket && <BrazilConcierge variant={brVariant} />}
 
             {/* ====================== SSS ====================== */}
             <section
@@ -863,7 +1015,11 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                 className="ld-section"
                 style={{ position: 'relative', zIndex: 1, padding: '56px 32px', maxWidth: 880, margin: '0 auto' }}
             >
-                <SectionTitle eyebrow={t('landing.faq.eyebrow')} title={t('landing.faq.title')} subtitle={t('landing.faq.subtitle')} />
+                <SectionTitle
+                    eyebrow={brMarket ? brazilCopy.faq.eyebrow : t('landing.faq.eyebrow')}
+                    title={brMarket ? brazilCopy.faq.title : t('landing.faq.title')}
+                    subtitle={brMarket ? brazilCopy.faq.subtitle : t('landing.faq.subtitle')}
+                />
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                     {faqItems.map((item) => {
@@ -981,14 +1137,16 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                                 marginBottom: 16,
                             }}
                         >
-                            <ShieldCheck size={13} style={{ animation: 'edesign-pulse 2.4s ease-in-out infinite' }} /> {t('landing.finalCta.badge')}
+                            <ShieldCheck size={13} style={{ animation: 'edesign-pulse 2.4s ease-in-out infinite' }} />
+                            {' '}{brMarket ? brazilCopy.finalCta.badge : t('landing.finalCta.badge')}
                         </div>
                         <h2 style={{ fontSize: 'clamp(28px, 3.8vw, 44px)', fontWeight: 800, margin: '0 0 12px', letterSpacing: '-0.025em', lineHeight: 1.12 }}>
-                            {t('landing.finalCta.title')}
+                            {brMarket ? brazilCopy.finalCta.title : t('landing.finalCta.title')}
                         </h2>
                         <p style={{ fontSize: 17, color: 'rgba(255,255,255,0.92)', margin: '0 0 30px', lineHeight: 1.5 }}>
-                            {t('landing.finalCta.text', priceVars)}
+                            {brMarket ? brazilCopy.finalCta.text : t('landing.finalCta.text', priceVars)}
                         </p>
+                        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
                         <button
                             type="button"
                             onClick={onRegister}
@@ -1008,8 +1166,28 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
                                 fontFamily: 'inherit',
                             }}
                         >
-                            {t('landing.ctaOpen')} <ArrowRight size={17} />
+                            {brMarket ? brazilCopy.ctaOpen : t('landing.ctaOpen')} <ArrowRight size={17} />
                         </button>
+                        {brMarket && (
+                            <button
+                                type="button"
+                                onClick={() => document.getElementById('concierge')?.scrollIntoView({ behavior: 'smooth' })}
+                                style={{
+                                    padding: '15px 28px',
+                                    background: 'rgba(255,255,255,0.16)',
+                                    color: '#fff',
+                                    border: '1px solid rgba(255,255,255,0.45)',
+                                    borderRadius: 14,
+                                    fontSize: 16,
+                                    fontWeight: 800,
+                                    cursor: 'pointer',
+                                    fontFamily: 'inherit',
+                                }}
+                            >
+                                {brazilCopy.ctaConcierge}
+                            </button>
+                        )}
+                        </div>
                     </div>
                 </div>
             </section>
