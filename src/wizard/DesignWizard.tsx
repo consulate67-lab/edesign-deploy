@@ -6,6 +6,7 @@ import { familyLabel, trDocDescription, trDocLabel } from './trDocLabels';
 import { DesignThumb } from './DesignThumb';
 import {
     countryDocLanguages, countryName, countryNote, countryProfiles, findCountryRules, findDocumentProfile, KIND_SPECS, languageName,
+    preferredDocLanguage,
     type DocLanguage, type DocumentFamily,
 } from '../international';
 import { validateXslt, validateXml, stripBom, type ValidationResult } from './validate';
@@ -273,7 +274,7 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void; onDis
         .map(c => ({ code: c.code, name: countryName(c.code, locale) }))
         .sort((a, b) => (a.code === 'TR' ? -1 : b.code === 'TR' ? 1 : a.name.localeCompare(b.name, locale))), [locale]);
     const [docLangs, setDocLangs] = useState<Record<string, DocLanguage>>({});
-    const docLang = docLangs[country] ?? countryDocLanguages(country)[0] ?? 'en';
+    const docLang = docLangs[country] ?? preferredDocLanguage(country, locale);
     const [docType, setDocType] = useState<WizardDocType | null>(null);
     const [sampleXml, setSampleXml] = useState<string | null>(null);
     const [xsltChoice, setXsltChoice] = useState<string>('');

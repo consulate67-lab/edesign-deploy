@@ -3,7 +3,7 @@ import {
     type CountryDocument, type DocLanguage, type IntlDocKind,
 } from '../international';
 import { CLASSIC_DESIGN_ID, composeInvoiceDesign, findInvoiceDesign, INVOICE_DESIGNS } from '../international/designs/invoiceDesigns';
-import { applyDesignTheme, DESIGN_THEME_IDS, findDesignTheme } from '../international/designs/themeCatalog';
+import { applyDesignTheme, DISTINCT_NATIONAL_THEME_IDS, findDesignTheme } from '../international/designs/themeCatalog';
 import i18n, { currentLocale } from '../i18n';
 import type { Messages } from '../i18n/locales/tr';
 import type { DefaultXsltOption, DocFamily, OfficialSample, WizardDocType } from './docTypes';
@@ -143,6 +143,7 @@ const TEMPLATES: Record<string, IntlTemplate> = {
 };
 
 export const hasIntlTemplate = (profileId: string) => profileId in TEMPLATES;
+export const isNationalIntlProfile = (profileId: string) => !!TEMPLATES[profileId]?.national;
 
 const titleOf = (tpl: IntlTemplate, lang: DocLanguage, kind: IntlDocKind) => {
     const titles = tpl.national?.titles[kind];
@@ -175,20 +176,19 @@ export const loadIntlXslt = async (profileId: string, lang: DocLanguage, designI
 };
 
 /**
- * 25 tasarım: önce türe önerilen yapısal EU stilleri, sonra tema kataloğu.
- * Ulusal (BR DANFE vb.) belgelerde yapısal gövde yok — 25 CSS teması uygulanır.
+ * Hazır tasarım kimlikleri.
+ * - EU EN 16931: classic + yapısal düzenler (birbirinden gerçekten farklı gövdeler).
+ * - Ulusal (BR/IN/CN/RU): yalnız görsel olarak ayrışan temalar — renk kopyaları yok.
  */
-export const invoiceDesignIds = (kind?: IntlDocKind) => {
+export const invoiceDesignIds = (kind?: IntlDocKind, opts?: { national?: boolean }) => {
+    if (opts?.national) return [...DISTINCT_NATIONAL_THEME_IDS];
     const recommended = INVOICE_DESIGNS.filter(d => kind && d.recommended?.includes(kind)).map(d => d.id);
     const structural = INVOICE_DESIGNS.map(d => d.id);
-    const ordered = [
+    return [...new Set([
         CLASSIC_DESIGN_ID,
         ...recommended,
         ...structural.filter(id => !recommended.includes(id)),
-        ...DESIGN_THEME_IDS.filter(id => id !== CLASSIC_DESIGN_ID && !structural.includes(id)),
-    ];
-    // Tekilleştir, 25'e tamamla
-    return [...new Set(ordered)].slice(0, 25);
+    ])];
 };
 
 const designLabel = (id: string): string => {
@@ -203,7 +203,7 @@ const designDesc = (id: string): string => {
 };
 
 const designOptions = (tpl: IntlTemplate, lang: DocLanguage, kind?: IntlDocKind): DefaultXsltOption[] => {
-    const ids = invoiceDesignIds(kind);
+    const ids = invoiceDesignIds(kind, { national: !!tpl.national });
     return ids.map(id => ({
         id: `${tpl.moduleId}-${id}-${lang}`,
         label: designLabel(id),

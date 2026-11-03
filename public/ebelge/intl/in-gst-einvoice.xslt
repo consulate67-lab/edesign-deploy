@@ -44,6 +44,9 @@
                 <xsl:when test="$k='rate'">|en=Unit Price|hi=इकाई मूल्य|</xsl:when>
                 <xsl:when test="$k='taxable'">|en=Taxable Value|hi=कर योग्य मूल्य|</xsl:when>
                 <xsl:when test="$k='gstRt'">|en=GST %|hi=जीएसटी %|</xsl:when>
+                <xsl:when test="$k='cgst'">|en=CGST|hi=केन्द्रीय जीएसटी|</xsl:when>
+                <xsl:when test="$k='sgst'">|en=SGST|hi=राज्य जीएसटी|</xsl:when>
+                <xsl:when test="$k='igst'">|en=IGST|hi=एकीकृत जीएसटी|</xsl:when>
                 <xsl:when test="$k='total'">|en=Total|hi=कुल|</xsl:when>
                 <xsl:when test="$k='roundOff'">|en=Round off|hi=पूर्णांकन|</xsl:when>
                 <xsl:when test="$k='invTotal'">|en=Total Invoice Value|hi=कुल बीजक मूल्य|</xsl:when>
@@ -51,10 +54,13 @@
                 <xsl:when test="$k='account'">|en=Account|hi=खाता|</xsl:when>
                 <xsl:when test="$k='ifsc'">|en=IFSC|hi=आईएफएससी|</xsl:when>
                 <xsl:when test="$k='terms'">|en=Payment Terms|hi=भुगतान शर्तें|</xsl:when>
+                <xsl:when test="$k='days'">|en=d|hi=दिन|</xsl:when>
                 <xsl:when test="$k='remarks'">|en=Remarks|hi=टिप्पणी|</xsl:when>
                 <xsl:when test="$k='prec'">|en=Original Invoice|hi=मूल बीजक|</xsl:when>
                 <xsl:when test="$k='qr'">|en=Signed QR code (IRP)|hi=हस्ताक्षरित क्यूआर कोड (आईआरपी)|</xsl:when>
-                <xsl:when test="$k='legal'">|en=Rendering of a GST e-invoice registered on the Invoice Registration Portal (IRP); the signed JSON / IRN is legally binding.|hi=इनवॉइस रजिस्ट्रेशन पोर्टल (IRP) पर पंजीकृत जीएसटी ई-इनवॉइस का दृश्य; हस्ताक्षरित JSON / IRN कानूनी रूप से मान्य है।|</xsl:when>
+                <xsl:when test="$k='uNOS'">|en=NOS|hi=नग|</xsl:when>
+                <xsl:when test="$k='uOTH'">|en=OTH|hi=अन्य|</xsl:when>
+                <xsl:when test="$k='legal'">|en=Rendering of a GST e-invoice registered on the Invoice Registration Portal (IRP); the signed JSON / IRN is legally binding.|hi=इनवॉइस रजिस्ट्रेशन पोर्टल (आईआरपी) पर पंजीकृत जीएसटी ई-इनवॉइस का दृश्य; हस्ताक्षरित JSON / आईआरएन कानूनी रूप से मान्य है।|</xsl:when>
             </xsl:choose>
         </xsl:variable>
         <xsl:variable name="hit" select="substring-before(substring-after($row, concat('|', $L, '=')), '|')"/>
@@ -101,9 +107,25 @@
     <xsl:template name="stateName">
         <xsl:param name="c"/>
         <xsl:variable name="m" select="concat('|', $c, '=')"/>
-        <xsl:variable name="list">|01=Jammu &amp; Kashmir|02=Himachal Pradesh|03=Punjab|04=Chandigarh|05=Uttarakhand|06=Haryana|07=Delhi|08=Rajasthan|09=Uttar Pradesh|10=Bihar|11=Sikkim|12=Arunachal Pradesh|13=Nagaland|14=Manipur|15=Mizoram|16=Tripura|17=Meghalaya|18=Assam|19=West Bengal|20=Jharkhand|21=Odisha|22=Chhattisgarh|23=Madhya Pradesh|24=Gujarat|26=Dadra &amp; Nagar Haveli and Daman &amp; Diu|27=Maharashtra|29=Karnataka|30=Goa|31=Lakshadweep|32=Kerala|33=Tamil Nadu|34=Puducherry|35=Andaman &amp; Nicobar Islands|36=Telangana|37=Andhra Pradesh|38=Ladakh|96=Other Country|97=Other Territory|</xsl:variable>
+        <xsl:variable name="listEn">|01=Jammu &amp; Kashmir|02=Himachal Pradesh|03=Punjab|04=Chandigarh|05=Uttarakhand|06=Haryana|07=Delhi|08=Rajasthan|09=Uttar Pradesh|10=Bihar|11=Sikkim|12=Arunachal Pradesh|13=Nagaland|14=Manipur|15=Mizoram|16=Tripura|17=Meghalaya|18=Assam|19=West Bengal|20=Jharkhand|21=Odisha|22=Chhattisgarh|23=Madhya Pradesh|24=Gujarat|26=Dadra &amp; Nagar Haveli and Daman &amp; Diu|27=Maharashtra|29=Karnataka|30=Goa|31=Lakshadweep|32=Kerala|33=Tamil Nadu|34=Puducherry|35=Andaman &amp; Nicobar Islands|36=Telangana|37=Andhra Pradesh|38=Ladakh|96=Other Country|97=Other Territory|</xsl:variable>
+        <xsl:variable name="listHi">|01=जम्मू और कश्मीर|02=हिमाचल प्रदेश|03=पंजाब|04=चंडीगढ़|05=उत्तराखंड|06=हरियाणा|07=दिल्ली|08=राजस्थान|09=उत्तर प्रदेश|10=बिहार|11=सिक्किम|12=अरुणाचल प्रदेश|13=नागालैंड|14=मणिपुर|15=मिजोरम|16=त्रिपुरा|17=मेघालय|18=असम|19=पश्चिम बंगाल|20=झारखंड|21=ओडिशा|22=छत्तीसगढ़|23=मध्य प्रदेश|24=गुजरात|26=दादरा और नगर हवेली तथा दमन और दीव|27=महाराष्ट्र|29=कर्नाटक|30=गोवा|31=लक्षद्वीप|32=केरल|33=तमिलनाडु|34=पुडुचेरी|35=अंडमान और निकोबार द्वीप समूह|36=तेलंगाना|37=आंध्र प्रदेश|38=लद्दाख|96=अन्य देश|97=अन्य क्षेत्र|</xsl:variable>
+        <xsl:variable name="names">
+            <xsl:choose>
+                <xsl:when test="$L = 'hi'"><xsl:value-of select="$listHi"/></xsl:when>
+                <xsl:otherwise><xsl:value-of select="$listEn"/></xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
         <xsl:value-of select="$c"/>
-        <xsl:if test="contains($list, $m)"> — <xsl:value-of select="substring-before(substring-after($list, $m), '|')"/></xsl:if>
+        <xsl:if test="contains($names, $m)"> — <xsl:value-of select="substring-before(substring-after($names, $m), '|')"/></xsl:if>
+    </xsl:template>
+
+    <xsl:template name="unitLabel">
+        <xsl:param name="u"/>
+        <xsl:choose>
+            <xsl:when test="$u = 'NOS'"><xsl:call-template name="t"><xsl:with-param name="k">uNOS</xsl:with-param></xsl:call-template></xsl:when>
+            <xsl:when test="$u = 'OTH'"><xsl:call-template name="t"><xsl:with-param name="k">uOTH</xsl:with-param></xsl:call-template></xsl:when>
+            <xsl:otherwise><xsl:value-of select="$u"/></xsl:otherwise>
+        </xsl:choose>
     </xsl:template>
 
     <xsl:template name="party">
@@ -221,8 +243,13 @@
                                 <th class="r"><xsl:call-template name="t"><xsl:with-param name="k">taxable</xsl:with-param></xsl:call-template></th>
                                 <th class="c"><xsl:call-template name="t"><xsl:with-param name="k">gstRt</xsl:with-param></xsl:call-template></th>
                                 <xsl:choose>
-                                    <xsl:when test="$intra"><th class="r">CGST</th><th class="r">SGST</th></xsl:when>
-                                    <xsl:otherwise><th class="r">IGST</th></xsl:otherwise>
+                                    <xsl:when test="$intra">
+                                        <th class="r"><xsl:call-template name="t"><xsl:with-param name="k">cgst</xsl:with-param></xsl:call-template></th>
+                                        <th class="r"><xsl:call-template name="t"><xsl:with-param name="k">sgst</xsl:with-param></xsl:call-template></th>
+                                    </xsl:when>
+                                    <xsl:otherwise>
+                                        <th class="r"><xsl:call-template name="t"><xsl:with-param name="k">igst</xsl:with-param></xsl:call-template></th>
+                                    </xsl:otherwise>
                                 </xsl:choose>
                                 <th class="r"><xsl:call-template name="t"><xsl:with-param name="k">total</xsl:with-param></xsl:call-template></th>
                             </tr>
@@ -234,7 +261,7 @@
                                     <td><xsl:value-of select="PrdDesc"/></td>
                                     <td><xsl:value-of select="HsnCd"/></td>
                                     <td class="r"><xsl:value-of select="Qty"/></td>
-                                    <td><xsl:value-of select="Unit"/></td>
+                                    <td><xsl:call-template name="unitLabel"><xsl:with-param name="u" select="Unit"/></xsl:call-template></td>
                                     <td class="r"><xsl:call-template name="num"><xsl:with-param name="v" select="UnitPrice"/></xsl:call-template></td>
                                     <td class="r"><xsl:call-template name="num"><xsl:with-param name="v" select="AssAmt"/></xsl:call-template></td>
                                     <td class="c"><xsl:value-of select="GstRt"/>%</td>
@@ -253,9 +280,9 @@
 
                     <table class="sum">
                         <tr><td><xsl:call-template name="t"><xsl:with-param name="k">taxable</xsl:with-param></xsl:call-template></td><td class="r">₹ <xsl:call-template name="num"><xsl:with-param name="v" select="$v/AssVal"/></xsl:call-template></td></tr>
-                        <xsl:if test="number($v/CgstVal) != 0"><tr><td>CGST</td><td class="r">₹ <xsl:call-template name="num"><xsl:with-param name="v" select="$v/CgstVal"/></xsl:call-template></td></tr></xsl:if>
-                        <xsl:if test="number($v/SgstVal) != 0"><tr><td>SGST / UTGST</td><td class="r">₹ <xsl:call-template name="num"><xsl:with-param name="v" select="$v/SgstVal"/></xsl:call-template></td></tr></xsl:if>
-                        <xsl:if test="number($v/IgstVal) != 0"><tr><td>IGST</td><td class="r">₹ <xsl:call-template name="num"><xsl:with-param name="v" select="$v/IgstVal"/></xsl:call-template></td></tr></xsl:if>
+                        <xsl:if test="number($v/CgstVal) != 0"><tr><td><xsl:call-template name="t"><xsl:with-param name="k">cgst</xsl:with-param></xsl:call-template></td><td class="r">₹ <xsl:call-template name="num"><xsl:with-param name="v" select="$v/CgstVal"/></xsl:call-template></td></tr></xsl:if>
+                        <xsl:if test="number($v/SgstVal) != 0"><tr><td><xsl:call-template name="t"><xsl:with-param name="k">sgst</xsl:with-param></xsl:call-template></td><td class="r">₹ <xsl:call-template name="num"><xsl:with-param name="v" select="$v/SgstVal"/></xsl:call-template></td></tr></xsl:if>
+                        <xsl:if test="number($v/IgstVal) != 0"><tr><td><xsl:call-template name="t"><xsl:with-param name="k">igst</xsl:with-param></xsl:call-template></td><td class="r">₹ <xsl:call-template name="num"><xsl:with-param name="v" select="$v/IgstVal"/></xsl:call-template></td></tr></xsl:if>
                         <xsl:if test="number($v/CesVal) != 0 and $v/CesVal"><tr><td>Cess</td><td class="r">₹ <xsl:call-template name="num"><xsl:with-param name="v" select="$v/CesVal"/></xsl:call-template></td></tr></xsl:if>
                         <xsl:if test="number($v/RndOffAmt) != 0"><tr><td><xsl:call-template name="t"><xsl:with-param name="k">roundOff</xsl:with-param></xsl:call-template></td><td class="r"><xsl:call-template name="num"><xsl:with-param name="v" select="$v/RndOffAmt"/></xsl:call-template></td></tr></xsl:if>
                         <tr class="grand"><td><xsl:call-template name="t"><xsl:with-param name="k">invTotal</xsl:with-param></xsl:call-template></td><td class="r">₹ <xsl:call-template name="num"><xsl:with-param name="v" select="$v/TotInvVal"/></xsl:call-template></td></tr>
@@ -268,7 +295,7 @@
                                     <div class="ph"><xsl:call-template name="t"><xsl:with-param name="k">pay</xsl:with-param></xsl:call-template></div>
                                     <div><b><xsl:value-of select="Nm"/></b></div>
                                     <div><xsl:call-template name="t"><xsl:with-param name="k">account</xsl:with-param></xsl:call-template>: <xsl:value-of select="AccDet"/> · <xsl:call-template name="t"><xsl:with-param name="k">ifsc</xsl:with-param></xsl:call-template>: <xsl:value-of select="FinInsBr"/></div>
-                                    <div class="muted"><xsl:value-of select="Mode"/><xsl:if test="CrDay"> · <xsl:value-of select="CrDay"/> d</xsl:if></div>
+                                    <div class="muted"><xsl:value-of select="Mode"/><xsl:if test="CrDay"> · <xsl:value-of select="CrDay"/> <xsl:call-template name="t"><xsl:with-param name="k">days</xsl:with-param></xsl:call-template></xsl:if></div>
                                     <xsl:if test="PayTerm"><div><xsl:call-template name="t"><xsl:with-param name="k">terms</xsl:with-param></xsl:call-template>: <xsl:value-of select="PayTerm"/></div></xsl:if>
                                 </div>
                             </xsl:for-each>

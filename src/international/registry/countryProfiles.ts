@@ -70,7 +70,7 @@ export const countryProfiles: CountryProfile[] = [
 
     { code: 'US', name: 'United States', region: 'US', currency: 'USD', locale: 'en-US', uiLanguage: 'en', docLanguages: ['en', 'es'] },
     { code: 'RU', name: 'Russia', region: 'RU', currency: 'RUB', locale: 'ru-RU', uiLanguage: 'ru', docLanguages: ['ru'] },
-    { code: 'IN', name: 'India', region: 'IN', currency: 'INR', locale: 'en-IN', uiLanguage: 'hi', docLanguages: ['en', 'hi'] },
+    { code: 'IN', name: 'India', region: 'IN', currency: 'INR', locale: 'hi-IN', uiLanguage: 'hi', docLanguages: ['hi', 'en'] },
     { code: 'CN', name: 'China', region: 'CN', currency: 'CNY', locale: 'zh-CN', uiLanguage: 'zh', docLanguages: ['zh'] },
     { code: 'BR', name: 'Brazil', region: 'BR', currency: 'BRL', locale: 'pt-BR', uiLanguage: 'pt', docLanguages: ['pt'] },
 ];
@@ -82,6 +82,20 @@ export const findCountry = (code: CountryCode): CountryProfile | undefined =>
 export const countryDocLanguages = (code: CountryCode): DocLanguage[] => {
     const own = findCountry(code)?.docLanguages ?? [];
     return own.includes('en') || code === 'TR' ? own : [...own, 'en'];
+};
+
+/**
+ * Galeri / sihirbaz varsayılan belge dili.
+ * Arayüz dili ülkede belge dili olarak varsa onu tercih eder (ör. hi→IN→hi);
+ * yoksa ülkenin birincil belge dilini kullanır.
+ */
+export const preferredDocLanguage = (
+    code: CountryCode,
+    uiLanguage?: string | null,
+): DocLanguage => {
+    const langs = countryDocLanguages(code);
+    if (uiLanguage && langs.includes(uiLanguage as DocLanguage)) return uiLanguage as DocLanguage;
+    return langs[0] ?? 'en';
 };
 
 /** Ülke adını arayüz diline göre döner (ör. 'DE' → 'Almanya' / 'Allemagne'). */

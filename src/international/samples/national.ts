@@ -134,8 +134,37 @@ function ruUpd(kind: IntlDocKind, lang: DocLanguage): string {
 // ---------------------------------------------------------------- Hindistan
 
 const inDate = (d: Date) => `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
-const IN_STATE: Record<string, string> = { Bengaluru: '29', Mumbai: '27' };
+const IN_STATE: Record<string, string> = { Bengaluru: '29', Mumbai: '27', बेंगलुरु: '29', मुंबई: '27' };
 const HSN: Record<string, string> = { 'ERG-CH-120': '94013000', 'SRV-INST': '998739', 'MAT-150': '39181090' };
+
+/** Hindi belge dilinde örnek taraflar Devanagari; GSTIN / banka kodları aynı kalır. */
+function inSample(lang: DocLanguage): CountrySample {
+    const base = COUNTRY_SAMPLES.IN;
+    if (lang !== 'hi') return base;
+    return {
+        ...base,
+        seller: {
+            ...base.seller,
+            name: 'शर्मा कार्यालय फर्नीचर',
+            legal: 'शर्मा ऑफिस फर्नीचर प्राइवेट लिमिटेड',
+            street: '१४, एमजी रोड',
+            city: 'बेंगलुरु',
+            contact: base.seller.contact
+                ? ['प्रिया शर्मा', base.seller.contact[1], base.seller.contact[2]]
+                : undefined,
+        },
+        buyer: {
+            ...base.buyer,
+            name: 'होटल मरीन प्लाजा',
+            legal: 'मरीन हॉस्पिटैलिटी प्राइवेट लिमिटेड',
+            street: '२९, मरीन ड्राइव',
+            city: 'मुंबई',
+        },
+        carrier: 'वीआरएल लॉजिस्टिक्स लिमिटेड',
+    };
+}
+
+const inPaymentMode = (lang: DocLanguage) => (lang === 'hi' ? 'प्रत्यक्ष स्थानांतरण' : 'Direct Transfer');
 
 function inParty(tag: string, p: CountrySample['seller'], buyer: boolean) {
     const state = IN_STATE[p.city] ?? '29';
@@ -156,7 +185,7 @@ function inParty(tag: string, p: CountrySample['seller'], buyer: boolean) {
 }
 
 function inEinvoice(kind: IntlDocKind, lang: DocLanguage): string {
-    const s = COUNTRY_SAMPLES.IN;
+    const s = inSample(lang);
     const t = docTextPack(lang).sample;
     const credit = kind === 'credit';
     const today = new Date();
@@ -208,7 +237,7 @@ function inEinvoice(kind: IntlDocKind, lang: DocLanguage): string {
         el('RndOffAmt', money(roundOff)),
         el('TotInvVal', money(exact + roundOff)),
         '</ValDtls>',
-        credit ? '' : `<PayDtls>${el('Nm', s.seller.legal)}${el('AccDet', s.iban)}${el('Mode', 'Direct Transfer')}${el('FinInsBr', s.bic)}${el('PayTerm', t.paymentTerms)}${el('CrDay', 30)}</PayDtls>`,
+        credit ? '' : `<PayDtls>${el('Nm', s.seller.legal)}${el('AccDet', s.iban)}${el('Mode', inPaymentMode(lang))}${el('FinInsBr', s.bic)}${el('PayTerm', t.paymentTerms)}${el('CrDay', 30)}</PayDtls>`,
         `<RefDtls>${el('InvRm', credit ? t.creditNote : t.note)}${credit ? `<PrecDocDtls>${el('InvNo', `INV/${year}/0418`)}${el('InvDt', inDate(addDays(today, -14)))}</PrecDocDtls>` : ''}</RefDtls>`,
         el('AckNo', `1126${year % 100}${credit ? '10293847' : '10293846'}`),
         el('AckDt', `${year}-${pad(today.getMonth() + 1)}-${pad(today.getDate())} 15:30:00`),
@@ -218,7 +247,7 @@ function inEinvoice(kind: IntlDocKind, lang: DocLanguage): string {
 }
 
 function inEwayBill(lang: DocLanguage): string {
-    const s = COUNTRY_SAMPLES.IN;
+    const s = inSample(lang);
     const t = docTextPack(lang).sample;
     const today = new Date();
     const year = today.getFullYear();

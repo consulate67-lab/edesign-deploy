@@ -4,11 +4,11 @@ import { useLocaleT } from '../i18n';
 import { useCountry } from '../store/uiStore';
 import { theme } from '../theme';
 import { countryDocuments } from '../international/registry/countryDocuments';
-import { countryDocLanguages, countryName, findCountry, type CountryCode } from '../international/registry/countryProfiles';
-import { invoiceDesignIds, loadIntlXslt } from '../wizard/intlDocTypes';
+import { countryName, findCountry, preferredDocLanguage, type CountryCode } from '../international/registry/countryProfiles';
+import { invoiceDesignIds, isNationalIntlProfile, loadIntlXslt } from '../wizard/intlDocTypes';
 import { generateSampleXml, type IntlDocKind } from '../international';
 import { transformXmlWithXslt } from '../xsltTransformer';
-import { DESIGN_THEME_IDS, findDesignTheme } from '../international/designs/themeCatalog';
+import { findDesignTheme } from '../international/designs/themeCatalog';
 
 type UseHandler = (moduleId?: string, initialXslt?: string, docName?: string, xml?: string) => void;
 
@@ -57,12 +57,15 @@ export const IntlTemplateGallery: React.FC<{ onUse: UseHandler; countryCode?: Co
     const [busyId, setBusyId] = useState<string | null>(null);
     const [previews, setPreviews] = useState<Record<string, string>>({});
 
-    const docLang = countryDocLanguages(country)[0] ?? 'en';
+    const docLang = preferredDocLanguage(country, locale);
     const profileFor = (k: IntlDocKind) => docs.find(d => d.kind === k)?.profileId;
 
     const activeKind = (kind || docs[0]?.kind || 'invoice') as IntlDocKind;
     const profileId = profileFor(activeKind) ?? docs[0]?.profileId ?? '';
-    const designIds = useMemo(() => invoiceDesignIds(activeKind).slice(0, 25), [activeKind]);
+    const designIds = useMemo(
+        () => invoiceDesignIds(activeKind, { national: isNationalIntlProfile(profileId) }),
+        [activeKind, profileId],
+    );
 
     useEffect(() => {
         let alive = true;
@@ -180,7 +183,7 @@ export const IntlTemplateGallery: React.FC<{ onUse: UseHandler; countryCode?: Co
                 })}
             </div>
             <p style={{ marginTop: 14, fontSize: 12, color: theme.textSubtle }}>
-                {t('gallery.shownOf', { shown: designIds.length, total: DESIGN_THEME_IDS.length })}
+                {t('gallery.shownOf', { shown: designIds.length, total: designIds.length })}
             </p>
         </div>
     );

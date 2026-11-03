@@ -146,6 +146,16 @@ export const DESIGN_THEMES: DesignTheme[] = [
 export const DESIGN_THEME_IDS = DESIGN_THEMES.map(t => t.id);
 export const findDesignTheme = (id: string) => DESIGN_THEMES.find(t => t.id === id) ?? DESIGN_THEMES[0];
 
+/**
+ * Ulusal biçimlerde (DANFE, GST, УПД, 数电票) yalnızca düzen/tipografi olarak
+ * ayrışan temalar. Renk-only varyantlar (ocean/sunset/rose…) galeride birbirinin
+ * kopyası gibi göründüğü için burada yok.
+ */
+export const DISTINCT_NATIONAL_THEME_IDS = [
+    'classic', 'corporate', 'sidebar', 'elegant', 'compact', 'bold',
+    'nordic', 'ledger', 'gradient', 'paper', 'stamp', 'fiscal',
+] as const;
+
 /** Ulusal / klasik XSLT'ye tema sınıfı + CSS uygular. */
 export function applyDesignTheme(xslt: string, themeId: string): string {
     const th = findDesignTheme(themeId);
