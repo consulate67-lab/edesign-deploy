@@ -33,6 +33,7 @@ dist-ssr
 .env.brevo
 .env.youtube
 scripts/.youtube-playlists.json
+youtube-manuel/
 dist-web/
 
 # Python helper scripts + their outputs (XSLT validation tools)
