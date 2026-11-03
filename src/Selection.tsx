@@ -10,7 +10,7 @@ import { theme, techBackground, gradientTextStyle } from './theme';
 import { useLocaleT } from './i18n';
 import { languageCountry } from './i18n/region';
 import { LanguageSwitcher } from './i18n/LanguageSwitcher';
-import { useCountry } from './store/uiStore';
+import { useUiStore } from './store/uiStore';
 import type { CountryCode } from './international/registry/countryProfiles';
 
 interface SelectionProps {
@@ -33,14 +33,13 @@ interface SelectionUser {
 
 export const Selection: React.FC<SelectionProps> = ({ onLogout, onSelectXsltEditor }) => {
     const { t, locale } = useLocaleT();
-    const storedCountry = useCountry() ?? 'TR';
-    // Türkçe arayüz → TR sektör galerisi; diğer diller → dil/ülke pazarı (ru→RU, zh→CN, es→ES, pt→BR…).
+    const setCountry = useUiStore(s => s.setCountry);
+    // Üst dil seçimi = pazar ülkesi (en→GB, de→DE, ru→RU, zh→CN, es→ES, pt→BR, tr→TR).
+    // Hazır şablonlar, XSLT/XML formatı ve belge alanları bu ülkeye göre gelir.
+    const marketCountry = languageCountry(locale) as CountryCode;
     const showTrGallery = locale === 'tr';
-    const galleryCountry = (showTrGallery
-        ? 'TR'
-        : (storedCountry !== 'TR' ? storedCountry : languageCountry(locale))) as CountryCode;
-    const [showProfileModal, setShowProfileModal] = useState(false);
-    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    useEffect(() => { setCountry(marketCountry); }, [marketCountry, setCountry]);
+    const [showProfileModal, setShowProfileModal] = useState(false);    const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [userInfo, setUserInfo] = useState<SelectionUser | null>(null);
     const [manualOpen, setManualOpen] = useState(false);
     const [designsPanel, setDesignsPanel] = useState<DesignsPanel>(null);
@@ -386,8 +385,8 @@ export const Selection: React.FC<SelectionProps> = ({ onLogout, onSelectXsltEdit
                                     <div style={{ flex: 1, height: 1, background: theme.border }} />
                                 </div>
                                 {showTrGallery
-                                    ? <TemplateGallery onUse={onSelectXsltEditor} />
-                                    : <IntlTemplateGallery countryCode={galleryCountry} onUse={onSelectXsltEditor ?? (() => undefined)} />}
+                                    ? <TemplateGallery key="gallery-tr" onUse={onSelectXsltEditor} />
+                                    : <IntlTemplateGallery key={`gallery-${marketCountry}`} countryCode={marketCountry} onUse={onSelectXsltEditor ?? (() => undefined)} />}
                             </>
                         )}
                     </>

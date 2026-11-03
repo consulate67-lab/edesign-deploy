@@ -30,7 +30,7 @@ const LANGUAGE_FLAG: Record<Locale, string> = {
     pt: 'BR',
 };
 
-/** Sayfa dili seçici. Belge dili buradan değil, sihirbazdaki ülkeden gelir. */
+/** Dil + pazar ülkesi seçici. Hazır şablonlar ve XSLT/XML formatı seçilen dilin ülkesine bağlanır. */
 export const LanguageSwitcher: React.FC<{ style?: React.CSSProperties }> = ({ style }) => {
     const { t, locale } = useLocaleT();
     const [open, setOpen] = useState(false);

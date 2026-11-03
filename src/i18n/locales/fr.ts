@@ -9,7 +9,7 @@ const fr: Messages = {
     tutorials,
     lang: {
         label: 'Langue',
-        hint: 'Langue de la page. La langue du document suit le pays choisi dans l’assistant de conception.',
+        hint: 'Langue de l’interface et marché documentaire. Modèles prêts, format XSLT/XML et champs suivent le pays de cette langue (ex. anglais → Royaume-Uni / Peppol).',
     },
     seo: {
         title: 'Concepteur de factures électroniques (XSLT) EN 16931 & Peppol | edXdocu',

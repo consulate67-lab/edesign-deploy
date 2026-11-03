@@ -9,7 +9,7 @@ const zh: Messages = {
     tutorials,
     lang: {
         label: '语言',
-        hint: '页面语言。单据语言跟随您在设计向导中选择的国家。',
+        hint: '界面语言与单据市场。现成模板、XSLT/XML 格式和字段跟随该语言对应的国家（例如中文 → 中国 / 数电票）。',
     },
     seo: {
         title: '电子发票模板设计器（XSLT）· 数电票 | edXdocu',

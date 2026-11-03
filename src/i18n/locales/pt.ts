@@ -9,7 +9,7 @@ const pt: Messages = {
     tutorials,
     lang: {
         label: 'Idioma',
-        hint: 'Idioma da página. O idioma do documento segue o país escolhido no assistente de design.',
+        hint: 'Idioma da interface e mercado do documento. Modelos prontos, formato XSLT/XML e campos seguem o país desse idioma (ex.: inglês → Reino Unido / Peppol; português → Brasil).',
     },
     seo: {
         title: 'DANFE com a sua marca | Layout NF-e, NFS-e e CT-e · edXdocu',

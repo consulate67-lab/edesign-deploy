@@ -146,6 +146,9 @@ const applyLocale = (lng: string) => {
     if (typeof document !== 'undefined') document.documentElement.lang = lng;
     applySeo(lng);
     if (useUiStore.getState().locale !== lng) useUiStore.getState().setLocale(lng);
+    // Dil = pazar ülkesi: XSLT/XML profili, hazır şablonlar ve sihirbaz belgeleri buna bağlanır.
+    const market = languageCountry(lng);
+    if (useUiStore.getState().country !== market) useUiStore.getState().setCountry(market);
 };
 
 // i18next tek kaynak; store yalnızca onu izler.

@@ -9,7 +9,7 @@ const de: Messages = {
     tutorials,
     lang: {
         label: 'Sprache',
-        hint: 'Sprache der Seite. Die Belegsprache richtet sich nach dem im Design-Assistenten gewählten Land.',
+        hint: 'Oberflächensprache und Belegmarkt. Fertige Vorlagen, XSLT/XML-Format und Felder folgen dem Land dieser Sprache (z. B. Englisch → Vereinigtes Königreich / Peppol).',
     },
     seo: {
         title: 'E-Rechnung Layout-Designer (XSLT) für XRechnung & Peppol | edXdocu',

@@ -12,7 +12,7 @@ const tr = {
     tutorials,
     lang: {
         label: 'Dil',
-        hint: 'Sayfa dili. Belgenin dili, tasarım sihirbazında seçtiğiniz ülkeye göre belirlenir.',
+        hint: 'Arayüz dili ve belge pazarı. Hazır şablonlar, XSLT/XML formatı ve alanlar seçilen dilin ülkesine göre gelir (ör. İngilizce → Birleşik Krallık / Peppol).',
     },
     seo: {
         title: 'e-Fatura Tasarımı ve XSLT Şablon Programı | edXdocu',

@@ -9,7 +9,7 @@ const en: Messages = {
     tutorials,
     lang: {
         label: 'Language',
-        hint: 'Page language. The document language follows the country you choose in the design wizard.',
+        hint: 'Interface language and document market. Ready-made templates, XSLT/XML format and fields follow that language’s country (e.g. English → United Kingdom / Peppol).',
     },
     seo: {
         title: 'E-Invoice Template Designer (XSLT) for EN 16931 & Peppol | edXdocu',
