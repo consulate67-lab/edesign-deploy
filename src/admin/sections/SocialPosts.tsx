@@ -27,12 +27,17 @@ const TOPICS: { label: string; topic: string; link: string }[] = [
     { label: 'Ücretsiz deneme çağrısı', topic: 'Ücretsiz üyelik, kendi XML dosyanla önizleme ve filigranlı ücretsiz test indirme', link: `${SITE}/#kayit` },
     { label: 'Fiyatlar ve paketler', topic: 'Abonelik yok, tek seferlik ödeme: One, Basic ve Pro paketleri', link: `${SITE}/#fiyatlar` },
     { label: 'Rehber: e-Fatura tasarımı nasıl yapılır', topic: 'Adım adım e-Fatura tasarımı rehberimiz yayında', link: `${SITE}/rehber/e-fatura-tasarimi-nasil-yapilir.html` },
+    { label: 'Rehber: online XSLT tasarımı', topic: 'Tarayıcıda kod yazmadan online e-Fatura XSLT tasarımı', link: `${SITE}/rehber/online-e-fatura-xslt-tasarimi.html` },
     { label: 'Rehber: XSLT nedir', topic: 'e-Fatura XSLT görüntü dosyası nedir, nasıl çalışır, sık yapılan hatalar', link: `${SITE}/rehber/xslt-nedir-e-fatura-goruntu-dosyasi.html` },
+    { label: 'Rehber: GİB UBL-TR uyumlu XSLT', topic: 'UBL-TR / GİB uyumlu XSLT şablon kontrol listesi', link: `${SITE}/rehber/ubl-tr-gib-uyumlu-xslt.html` },
     { label: 'Rehber: logo, kaşe, imza ekleme', topic: 'e-Faturaya logo, kaşe, imza ve IBAN eklemenin doğru yolu', link: `${SITE}/rehber/e-faturaya-logo-kase-imza-ekleme.html` },
     { label: 'Rehber: e-Arşiv tasarımı', topic: 'e-Arşiv fatura tasarımında görünümde olması gerekenler', link: `${SITE}/rehber/e-arsiv-fatura-tasarimi.html` },
     { label: 'Rehber: e-İrsaliye tasarımı', topic: 'e-İrsaliye görünümünde sevk, araç ve şoför alanları', link: `${SITE}/rehber/e-irsaliye-tasarimi.html` },
+    { label: 'Rehber: e-SMM tasarımı', topic: 'e-Serbest Meslek Makbuzu (e-SMM) görünüm tasarımı', link: `${SITE}/rehber/e-smm-tasarimi.html` },
+    { label: 'Rehber: e-İhracat tasarımı', topic: 'e-İhracat faturası XSLT görünüm tasarımı', link: `${SITE}/rehber/e-ihracat-fatura-tasarimi.html` },
     { label: 'Rehber: XSLT entegratöre yükleme', topic: 'Hazırlanan XSLT şablonunu entegratöre ve ERP programına yükleme', link: `${SITE}/rehber/e-fatura-xslt-yukleme.html` },
-    { label: 'Yurt dışı: XRechnung / Peppol', topic: 'XRechnung, Peppol BIS 3 ve EN 16931 e-fatura görünüm tasarımı', link: `${SITE}/rehber/e-invoice-template-designer.html` },
+    { label: 'Yurt dışı: XRechnung / Peppol (TR)', topic: 'Peppol BIS 3 ve XRechnung e-fatura görünüm tasarımı', link: `${SITE}/rehber/peppol-xrechnung-e-fatura-gorunumu.html` },
+    { label: 'Yurt dışı: XRechnung / Peppol (EN)', topic: 'XRechnung, Peppol BIS 3 and EN 16931 e-invoice template design', link: `${SITE}/rehber/e-invoice-template-designer.html` },
     { label: 'Serbest konu', topic: '', link: `${SITE}/` },
 ];
 

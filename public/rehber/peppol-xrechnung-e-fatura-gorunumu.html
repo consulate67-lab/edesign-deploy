@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Peppol BIS 3 / XRechnung e-Fatura Görünüm Tasarımı | edXdocu</title>
+<meta name="description" content="EN 16931, Peppol BIS 3 ve XRechnung 3.0 e-fatura görünüm (XSLT) tasarımı. Avrupa formatları için hazır şablonlar — edXdocu, kod yazmadan." />
+<meta name="robots" content="index, follow, max-image-preview:large" />
+<link rel="canonical" href="https://www.edxdocu.com/rehber/peppol-xrechnung-e-fatura-gorunumu.html" />
+<link rel="alternate" hreflang="tr" href="https://www.edxdocu.com/rehber/peppol-xrechnung-e-fatura-gorunumu.html" />
+<link rel="alternate" hreflang="en" href="https://www.edxdocu.com/rehber/e-invoice-template-designer.html" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="edXdocu" />
+<meta property="og:locale" content="tr_TR" />
+<meta property="og:title" content="Peppol / XRechnung görünüm tasarımı | edXdocu" />
+<meta property="og:description" content="Avrupa e-fatura formatları için XSLT görünümünü sürükle-bırak tasarlayın." />
+<meta property="og:url" content="https://www.edxdocu.com/rehber/peppol-xrechnung-e-fatura-gorunumu.html" />
+<meta property="og:image" content="https://www.edxdocu.com/og-image.png" />
+<link rel="stylesheet" href="/rehber/rehber.css?v=2" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": "Peppol BIS 3 / XRechnung e-fatura görünüm tasarımı",
+      "dateModified": "2026-11-03",
+      "datePublished": "2026-11-03",
+      "inLanguage": "tr",
+      "author": { "@type": "Organization", "name": "edXdocu" },
+      "publisher": { "@type": "Organization", "name": "edXdocu", "url": "https://www.edxdocu.com/" },
+      "mainEntityOfPage": "https://www.edxdocu.com/rehber/peppol-xrechnung-e-fatura-gorunumu.html"
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        { "@type": "Question", "name": "Peppol ve XRechnung GİB UBL-TR ile aynı mı?", "acceptedAnswer": { "@type": "Answer", "text": "Hayır. UBL-TR Türkiye profilidir. Peppol BIS Billing 3.0 ve XRechnung 3.0 Avrupa EN 16931 tabanlıdır; ayrı şablon ve örnek XML gerekir." } },
+        { "@type": "Question", "name": "edXdocu Avrupa formatlarını destekliyor mu?", "acceptedAnswer": { "@type": "Answer", "text": "Evet. EN 16931, Peppol BIS 3 ve XRechnung için hazır şablonlar vardır; arayüz çok dillidir." } }
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "edXdocu", "item": "https://www.edxdocu.com/" },
+        { "@type": "ListItem", "position": 2, "name": "Rehber", "item": "https://www.edxdocu.com/rehber/" },
+        { "@type": "ListItem", "position": 3, "name": "Peppol / XRechnung" }
+      ]
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <a href="/"><img src="/logo-300x100.png" alt="edXdocu" width="300" height="100" /></a>
+  <nav><a href="/rehber/">Rehber</a><a href="/#fiyatlar">Fiyatlar</a><a class="btn" href="/#kayit">Ücretsiz deneyin</a></nav>
+</div></header>
+<main>
+  <div class="crumbs"><a href="/">edXdocu</a> › <a href="/rehber/">Rehber</a> › Peppol / XRechnung</div>
+  <h1>Peppol BIS 3 / XRechnung e-fatura görünüm tasarımı</h1>
+  <p class="meta">Güncelleme: 3 Kasım 2026 · Okuma: 5 dk</p>
+  <p class="lead">Avrupa’da e-fatura çoğu ülkede EN 16931 çekirdeğine dayanır; Almanya’da <strong>XRechnung</strong>, ağ üzerinden gönderimde sıkça <strong>Peppol BIS Billing 3.0</strong> kullanılır. Görünüm dosyası yine XSLT’dir. <strong>edXdocu</strong> bu formatlar için hazır şablon sunar.</p>
+
+  <p>English guide: <a href="/rehber/e-invoice-template-designer.html" hreflang="en">e-Invoice template designer</a>.</p>
+
+  <div class="cta"><p>Avrupa şablonunu deneyin</p><a class="btn alt" href="/#kayit">Ücretsiz hesap →</a></div>
+
+  <h2>Hangi format ne zaman?</h2>
+  <table>
+    <thead><tr><th>Format</th><th>Ne zaman</th></tr></thead>
+    <tbody>
+      <tr><td>EN 16931</td><td>AB çekirdek semantik model</td></tr>
+      <tr><td>Peppol BIS 3</td><td>Peppol ağı / birçok ülke profili</td></tr>
+      <tr><td>XRechnung 3.0</td><td>Almanya kamu ve yaygın B2B</td></tr>
+      <tr><td>UBL-TR</td><td>Türkiye GİB — ayrı şablon</td></tr>
+    </tbody>
+  </table>
+
+  <h2>edXdocu’da nasıl?</h2>
+  <ol>
+    <li>Kayıt olun, ülke / format seçiminde Avrupa profilini işaretleyin.</li>
+    <li>İlgili şablonu açıp logo ve metinleri yerleştirin.</li>
+    <li>Örnek XML ile önizleyin; onaylı XSLT indirin.</li>
+  </ol>
+  <p>Türkiye GİB süreçleri için: <a href="/rehber/ubl-tr-gib-uyumlu-xslt.html">UBL-TR rehberi</a> · <a href="/rehber/online-e-fatura-xslt-tasarimi.html">online tasarım</a>.</p>
+
+  <div class="cta"><p>Peppol / XRechnung şablonunu açın</p><a class="btn alt" href="/#kayit">Başla →</a></div>
+</main>
+<footer>© 2026 edXdocu · <a href="mailto:destek@edxdocu.com">destek@edxdocu.com</a> · +90 533 666 01 25</footer>
+</body>
+</html>

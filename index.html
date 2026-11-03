@@ -7,6 +7,9 @@
     <link rel="apple-touch-icon" href="apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#6d28d9" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="application-name" content="edXdocu" />
     <meta name="description" content="e-Fatura, e-Arşiv, e-İrsaliye ve 15 e-belge türü için XSLT bilmeden sürükle-bırak tasarım. GİB UBL-TR uyumlu hazır şablonlar, logo, kaşe ve banka bilgisi. Ücretsiz deneyin." />
     <title>e-Fatura Tasarımı ve XSLT Şablon Programı | edXdocu</title>
     <link rel="canonical" href="https://www.edxdocu.com/" />
@@ -98,10 +101,12 @@
     <meta name="twitter:image" content="https://www.edxdocu.com/og-image.png" />
     <link rel="preload" as="image" href="logo-intro-x.png?v=2" />
     <script>
-      document.documentElement.classList.add('edx-js');
+      // Arama motoru botlarında #seo-static gizlenmesin (JS sonrası display:none indeks kaybettirir).
+      var edxBot = /googlebot|bingbot|yandex|duckduckbot|baiduspider|applebot|slurp|facebookexternalhit|linkedinbot|twitterbot|embedly|quora link preview|pinterest|redditbot|ahrefs|semrush|dotbot|rogerbot|screaming frog|chrome-lighthouse|bytespider/i.test(navigator.userAgent || '');
+      if (!edxBot) document.documentElement.classList.add('edx-js');
       // The intro plays once per browser session and never on the admin panel.
       try {
-        if (sessionStorage.getItem('edx-intro') || /^#\/(yonetim|admin)(\/|$)/i.test(location.hash)) {
+        if (edxBot || sessionStorage.getItem('edx-intro') || /^#\/(yonetim|admin)(\/|$)/i.test(location.hash)) {
           document.documentElement.classList.add('edx-skip');
         } else {
           sessionStorage.setItem('edx-intro', '1');
@@ -199,7 +204,7 @@
           <h1>e-Fatura tasarımı artık çok kolay: XSLT bilmeden e-belge şablonu hazırlayın</h1>
           <p>edXdocu; GİB uyumlu <strong>e-Fatura, e-Arşiv, e-İrsaliye</strong> ve 12 e-belge türünün görünüm (XSLT) dosyasını kod yazmadan tasarlamanızı sağlayan web uygulamasıdır. Şablonu seçin; logo, kaşe, imza ve banka bilgilerinizi ekleyin, kendi XML dosyanızla anında önizleyin ve XSLT dosyanızı indirin.</p>
           <p>Avrupa için EN 16931, Peppol BIS 3 ve XRechnung; ABD, Brezilya, Rusya, Hindistan ve Çin için ulusal şablonlar da hazır. Arayüz 9 dilde.</p>
-          <p><a href="/#kayit">Ücretsiz hesap açın</a> · <a href="/#fiyatlar">Fiyatlar</a> · <a href="/#sss">Sık sorulan sorular</a> · <a href="/rehber/">e-Fatura tasarım rehberi</a> · <a href="https://erp.korgun.com.tr/cloud-erp">Korgun Cloud ERP</a></p>
+          <p><a href="/#kayit">Ücretsiz hesap açın</a> · <a href="/#fiyatlar">Fiyatlar</a> · <a href="/#sss">Sık sorulan sorular</a> · <a href="/rehber/">e-Fatura tasarım rehberi</a> · <a href="/rehber/online-e-fatura-xslt-tasarimi.html">Online XSLT tasarım</a> · <a href="/rehber/e-fatura-tasarim-programi.html">e-Fatura tasarım programı</a></p>
         </header>
         <section id="seo-urun">
           <h2>Nasıl çalışır?</h2>
@@ -236,12 +241,19 @@
         <section id="seo-rehber">
           <h2>Rehberler</h2>
           <ul>
+            <li><a href="/rehber/e-fatura-tasarim-programi.html">e-Fatura tasarım programı</a></li>
+            <li><a href="/rehber/online-e-fatura-xslt-tasarimi.html">Online e-Fatura XSLT tasarımı</a></li>
+            <li><a href="/rehber/e-fatura-xslt-editoru.html">Online XSLT editörü</a></li>
             <li><a href="/rehber/e-fatura-tasarimi-nasil-yapilir.html">e-Fatura tasarımı nasıl yapılır?</a></li>
             <li><a href="/rehber/xslt-nedir-e-fatura-goruntu-dosyasi.html">e-Fatura XSLT nedir?</a></li>
+            <li><a href="/rehber/ubl-tr-gib-uyumlu-xslt.html">UBL-TR / GİB uyumlu XSLT şablon</a></li>
             <li><a href="/rehber/e-faturaya-logo-kase-imza-ekleme.html">e-Faturaya logo, kaşe, imza ve IBAN ekleme</a></li>
             <li><a href="/rehber/e-arsiv-fatura-tasarimi.html">e-Arşiv fatura tasarımı</a></li>
             <li><a href="/rehber/e-irsaliye-tasarimi.html">e-İrsaliye tasarımı</a></li>
+            <li><a href="/rehber/e-smm-tasarimi.html">e-SMM tasarımı</a></li>
+            <li><a href="/rehber/e-ihracat-fatura-tasarimi.html">e-İhracat fatura tasarımı</a></li>
             <li><a href="/rehber/e-fatura-xslt-yukleme.html">XSLT entegratöre ve ERP'ye nasıl yüklenir?</a></li>
+            <li><a href="/rehber/peppol-xrechnung-e-fatura-gorunumu.html">Peppol / XRechnung görünüm tasarımı</a></li>
             <li><a href="/rehber/e-invoice-template-designer.html" hreflang="en">e-Invoice template designer (English)</a></li>
           </ul>
         </section>

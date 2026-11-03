@@ -2,20 +2,25 @@
 
 > e-Fatura, e-Arşiv, e-İrsaliye ve diğer e-belge türlerinin görünüm (XSLT) dosyasını kod yazmadan tasarlayan web uygulaması. GİB UBL-TR uyumlu; Avrupa için EN 16931 / Peppol / XRechnung şablonları da vardır.
 
-edXdocu bir entegratör veya fatura gönderim yazılımı değildir. Kullanıcı tasarımı onaylayıp XSLT indirir; kendi özel entegratörüne / ERP’sine yükler.
+edXdocu bir entegratör veya fatura gönderim yazılımı değildir. Kullanıcı tasarımı onaylayıp XSLT indirir; kendi özel entegratörüne / ERP’sine yükler. Marka adı: **edXdocu** (edxdocu.com) — eddocu.com ile aynı ürün değildir.
 
 ## Ürün
 
 - [Ana sayfa](https://www.edxdocu.com/): Ürün özeti, fiyatlar, kayıt
 - [e-Fatura tasarım programı](https://www.edxdocu.com/rehber/e-fatura-tasarim-programi.html): Satın alma niyetli ürün sayfası
+- [Online e-Fatura XSLT tasarımı](https://www.edxdocu.com/rehber/online-e-fatura-xslt-tasarimi.html): Tarayıcıda kod yazmadan tasarım
 - [Online XSLT editörü](https://www.edxdocu.com/rehber/e-fatura-xslt-editoru.html): Mevcut XSLT düzenleme
 - [e-Fatura şablon değiştirme](https://www.edxdocu.com/rehber/e-fatura-sablon-degistirme.html): Entegratör varsayılanını değiştirme
 - [e-Fatura tasarımı nasıl yapılır](https://www.edxdocu.com/rehber/e-fatura-tasarimi-nasil-yapilir.html): Adım adım süreç
 - [XSLT nedir?](https://www.edxdocu.com/rehber/xslt-nedir-e-fatura-goruntu-dosyasi.html): e-belge görünüm dosyası açıklaması
+- [UBL-TR / GİB uyumlu XSLT](https://www.edxdocu.com/rehber/ubl-tr-gib-uyumlu-xslt.html): Uyumluluk ve sık hatalar
 - [Logo, kaşe, imza ekleme](https://www.edxdocu.com/rehber/e-faturaya-logo-kase-imza-ekleme.html)
 - [e-Arşiv fatura tasarımı](https://www.edxdocu.com/rehber/e-arsiv-fatura-tasarimi.html)
 - [e-İrsaliye tasarımı](https://www.edxdocu.com/rehber/e-irsaliye-tasarimi.html)
+- [e-SMM tasarımı](https://www.edxdocu.com/rehber/e-smm-tasarimi.html)
+- [e-İhracat fatura tasarımı](https://www.edxdocu.com/rehber/e-ihracat-fatura-tasarimi.html)
 - [XSLT’yi entegratöre yükleme](https://www.edxdocu.com/rehber/e-fatura-xslt-yukleme.html)
+- [Peppol / XRechnung (TR)](https://www.edxdocu.com/rehber/peppol-xrechnung-e-fatura-gorunumu.html)
 - [EN / Peppol / XRechnung designer (EN)](https://www.edxdocu.com/rehber/e-invoice-template-designer.html)
 
 ## Özet yanıtlar (alıntı için)

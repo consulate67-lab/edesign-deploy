@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>UBL-TR / GİB Uyumlu XSLT Şablon Nasıl Hazırlanır? | edXdocu</title>
+<meta name="description" content="GİB UBL-TR 1.2.1 uyumlu e-Fatura XSLT şablonu nedir, neden zorunludur, sık hatalar nelerdir? edXdocu ile kod yazmadan uyumlu görünüm dosyası üretin." />
+<meta name="robots" content="index, follow, max-image-preview:large" />
+<link rel="canonical" href="https://www.edxdocu.com/rehber/ubl-tr-gib-uyumlu-xslt.html" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="edXdocu" />
+<meta property="og:locale" content="tr_TR" />
+<meta property="og:title" content="UBL-TR / GİB uyumlu XSLT şablon | edXdocu" />
+<meta property="og:description" content="GİB uyumlu e-Fatura görünüm dosyası: zorunluluklar, hatalar ve pratik çözüm." />
+<meta property="og:url" content="https://www.edxdocu.com/rehber/ubl-tr-gib-uyumlu-xslt.html" />
+<meta property="og:image" content="https://www.edxdocu.com/og-image.png" />
+<link rel="stylesheet" href="/rehber/rehber.css?v=2" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": "UBL-TR / GİB uyumlu XSLT şablon",
+      "dateModified": "2026-11-03",
+      "datePublished": "2026-11-03",
+      "author": { "@type": "Organization", "name": "edXdocu" },
+      "publisher": { "@type": "Organization", "name": "edXdocu", "url": "https://www.edxdocu.com/" },
+      "mainEntityOfPage": "https://www.edxdocu.com/rehber/ubl-tr-gib-uyumlu-xslt.html"
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        { "@type": "Question", "name": "UBL-TR nedir?", "acceptedAnswer": { "@type": "Answer", "text": "UBL-TR, Türkiye’de e-Fatura XML belgelerinin GİB tarafından tanımlanan şema ve kurallar setidir. XSLT bu XML’i insan okunur HTML/PDF görünüme çevirir." } },
+        { "@type": "Question", "name": "XSLT GİB’e mi gönderilir?", "acceptedAnswer": { "@type": "Answer", "text": "Hayır. GİB’e giden asıl belge XML’dir. XSLT görünüm için kullanılır; entegratör/ERP tarafında saklanır ve belge açıldığında uygulanır." } },
+        { "@type": "Question", "name": "Uyumsuz XSLT ne olur?", "acceptedAnswer": { "@type": "Answer", "text": "Portal reddebilir, alanlar boş kalabilir veya dış bağlantılı / script içeren dosyalar güvenlik nedeniyle engellenebilir. Gömülü Base64 görseller ve şema alanlarına bağlı XPath kullanılmalıdır." } }
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "edXdocu", "item": "https://www.edxdocu.com/" },
+        { "@type": "ListItem", "position": 2, "name": "Rehber", "item": "https://www.edxdocu.com/rehber/" },
+        { "@type": "ListItem", "position": 3, "name": "UBL-TR GİB uyumlu XSLT" }
+      ]
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <a href="/"><img src="/logo-300x100.png" alt="edXdocu" width="300" height="100" /></a>
+  <nav><a href="/rehber/">Rehber</a><a href="/#fiyatlar">Fiyatlar</a><a class="btn" href="/#kayit">Ücretsiz deneyin</a></nav>
+</div></header>
+<main>
+  <div class="crumbs"><a href="/">edXdocu</a> › <a href="/rehber/">Rehber</a> › UBL-TR / GİB uyumlu XSLT</div>
+  <h1>UBL-TR / GİB uyumlu XSLT şablon nasıl hazırlanır?</h1>
+  <p class="meta">Güncelleme: 3 Kasım 2026 · Okuma: 6 dk</p>
+  <p class="lead">e-Fatura görünümü, XML’deki UBL-TR alanlarından üretilir. Şablonunuz GİB paketindeki yapıya uymazsa alanlar boş çıkar veya portal dosyayı kabul etmez. <strong>edXdocu</strong> şablonları UBL-TR 1.2.1 / e-Fatura paketine göre hazırlanır ve örnek XML ile test edilir.</p>
+
+  <div class="box tip"><strong>Kısa özet:</strong> XML = resmi veri · XSLT = görünüm. İkisini karıştırmayın; GİB’e giden XML, müşterinin gördüğü ise XSLT çıktısıdır.</div>
+
+  <h2>Uyumluluk kontrol listesi</h2>
+  <ul>
+    <li>Dış URL’den logo çekmeyin — görselleri Base64 gömün</li>
+    <li>JavaScript kullanmayın</li>
+    <li>Dosya boyutunu makul tutun (yüzlerce KB’lik şişkin görseller sorun çıkarır)</li>
+    <li>Alanları sabit metin yerine UBL yollarından okuyun</li>
+    <li>Kendi örnek XML’inizle önizleyip boş kalan alanları düzeltin</li>
+  </ul>
+
+  <h2>edXdocu ile pratik yol</h2>
+  <ol>
+    <li><a href="/#kayit">Hesap açın</a>, GİB uyumlu hazır şablon seçin.</li>
+    <li>Marka öğelerini ekleyin (<a href="/rehber/e-faturaya-logo-kase-imza-ekleme.html">logo / kaşe rehberi</a>).</li>
+    <li>Kendi XML’inizle önizleyin.</li>
+    <li>Onaylı XSLT’yi indirip <a href="/rehber/e-fatura-xslt-yukleme.html">entegratöre yükleyin</a>.</li>
+  </ol>
+
+  <h2>Sık sorulanlar</h2>
+  <h3>UBL-TR ile EN 16931 aynı mı?</h3>
+  <p>Hayır. UBL-TR Türkiye GİB profilidir. Avrupa için EN 16931 / Peppol / XRechnung ayrı şablonlar gerekir → <a href="/rehber/peppol-xrechnung-e-fatura-gorunumu.html">Peppol / XRechnung rehberi</a>.</p>
+  <h3>XSLT bilmeden uyumlu dosya olur mu?</h3>
+  <p>Evet. edXdocu görsel editörle üretir; altyapıdaki şablonlar GİB örnekleriyle doğrulanmıştır. Ayrıntı: <a href="/rehber/online-e-fatura-xslt-tasarimi.html">online XSLT tasarımı</a>.</p>
+
+  <div class="cta"><p>GİB uyumlu şablonla başlayın</p><a class="btn alt" href="/#kayit">Ücretsiz dene →</a></div>
+</main>
+<footer>© 2026 edXdocu · <a href="mailto:destek@edxdocu.com">destek@edxdocu.com</a> · +90 533 666 01 25</footer>
+</body>
+</html>

@@ -57,4 +57,24 @@ for (const endpoint of endpoints) {
 }
 
 console.log(`IndexNow: ${list.length} URL, ${ok}/${endpoints.length} uç başarılı`);
+
+// Google IndexNow kullanmaz; sitemap ping (eski ama zararsız) + bilgilendirme.
+const sitemapUrl = `https://${HOST}/sitemap.xml`;
+try {
+    const g = await fetch(`https://www.google.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`, {
+        signal: AbortSignal.timeout(15_000),
+    });
+    console.log(`Google sitemap ping: HTTP ${g.status}`);
+} catch (e) {
+    console.warn(`Google sitemap ping: ${e.message}`);
+}
+try {
+    const b = await fetch(`https://www.bing.com/indexnow?url=${encodeURIComponent(sitemapUrl)}&key=${KEY}`, {
+        signal: AbortSignal.timeout(15_000),
+    });
+    console.log(`Bing sitemap URL ping: HTTP ${b.status}`);
+} catch (e) {
+    console.warn(`Bing sitemap URL ping: ${e.message}`);
+}
+
 if (!ok) process.exitCode = 1;
