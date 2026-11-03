@@ -533,6 +533,12 @@ const es: Messages = {
             stamp: { name: 'Sello', desc: 'Borde rojo grueso; sensación oficial sellada' },
             fiscal: { name: 'Fiscal', desc: 'Estilo fiscal azul marino; cercano a formularios DANFE' },
             brand: { name: 'Marca', desc: 'Degradado morado-azul edXdocu; PDF de cliente con marca' },
+            'danfe-classic': { name: 'DANFE clásico', desc: 'Orden de referencia MOC: talón arriba, emisor · DANFE · clave de acceso' },
+            'danfe-compact': { name: 'DANFE compacto', desc: 'Tipo y filas más densos; facturas largas en una página' },
+            'danfe-landscape': { name: 'DANFE apaisado', desc: 'Página ancha horizontal — más espacio para columnas y código de barras' },
+            'danfe-canhoto-end': { name: 'Talón al final', desc: 'Talón de recepción al final de la página para corte aparte' },
+            'danfe-chave-first': { name: 'Clave primero', desc: 'Código de barras y clave a la izquierda; bloque de empresa a la derecha' },
+            'danfe-brand': { name: 'DANFE con marca', desc: 'Franja de marca y bloque DANFE en violeta' },
         },
         samplesNote: 'Los ejemplos siguen la estructura EN 16931 / Peppol; importes y desglose del IVA calculados según las reglas.',
         samples: {

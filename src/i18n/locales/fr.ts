@@ -533,6 +533,12 @@ const fr: Messages = {
             stamp: { name: 'Tampon', desc: 'Bordure rouge épaisse ; aspect officiel tamponné' },
             fiscal: { name: 'Fiscal', desc: 'Style fiscal bleu marine ; proche des formulaires DANFE' },
             brand: { name: 'Marque', desc: 'Dégradé violet-bleu edXdocu ; PDF client de marque' },
+            'danfe-classic': { name: 'DANFE classique', desc: 'Ordre de référence MOC : talon en haut, émetteur · DANFE · clé d’accès' },
+            'danfe-compact': { name: 'DANFE compact', desc: 'Police et lignes plus serrées ; factures longues sur une page' },
+            'danfe-landscape': { name: 'DANFE paysage', desc: 'Page large en paysage — plus d’espace pour colonnes et code-barres' },
+            'danfe-canhoto-end': { name: 'Talon en bas', desc: 'Talon de réception en fin de page pour découpe séparée' },
+            'danfe-chave-first': { name: 'Clé d’abord', desc: 'Code-barres et clé à gauche ; bloc entreprise à droite' },
+            'danfe-brand': { name: 'DANFE de marque', desc: 'Bandeau de marque et bloc DANFE violet' },
         },
         samplesNote: 'Les exemples suivent la structure EN 16931 / Peppol ; montants et ventilation de la TVA sont calculés selon les règles.',
         samples: {

@@ -533,6 +533,12 @@ const de: Messages = {
             stamp: { name: 'Stempel', desc: 'Dicker roter Rand; offizieller Stempelcharakter' },
             fiscal: { name: 'Fiskal', desc: 'Marineblauer Fiskalstil; nah an offiziellen DANFE-Formularen' },
             brand: { name: 'Marke', desc: 'Lila-blauer edXdocu-Verlauf; gebrandetes Kunden-PDF' },
+            'danfe-classic': { name: 'DANFE klassisch', desc: 'MOC-Referenzreihenfolge: Abriss oben, Emitente · DANFE · Zugangsschlüssel' },
+            'danfe-compact': { name: 'DANFE kompakt', desc: 'Engere Schrift und Zeilen; lange Rechnungen auf einer Seite' },
+            'danfe-landscape': { name: 'DANFE Querformat', desc: 'Breite Querseite — mehr Platz für Produktspalten und Barcode' },
+            'danfe-canhoto-end': { name: 'Abriss unten', desc: 'Empfangsabschnitt am Seitenende zum getrennten Abreißen' },
+            'danfe-chave-first': { name: 'Schlüssel zuerst', desc: 'Barcode und Schlüssel links; Firmenblock rechts' },
+            'danfe-brand': { name: 'Gebrandetes DANFE', desc: 'Markenstreifen und violetter DANFE-Block' },
         },
         samplesNote: 'Die Beispiele folgen der EN-16931- / Peppol-Struktur; Beträge und USt.-Aufschlüsselung sind regelkonform berechnet.',
         samples: {

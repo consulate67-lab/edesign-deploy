@@ -533,6 +533,12 @@ const pt: Messages = {
             stamp: { name: 'Carimbo', desc: 'Borda vermelha espessa; sensação oficial carimbada' },
             fiscal: { name: 'Fiscal', desc: 'Estilo fiscal azul-marinho; próximo aos formulários DANFE' },
             brand: { name: 'Marca', desc: 'Degradê roxo-azul edXdocu; PDF do cliente com marca' },
+            'danfe-classic': { name: 'DANFE clássico', desc: 'Ordem de referência do MOC: canhoto no topo, emitente · DANFE · chave de acesso' },
+            'danfe-compact': { name: 'DANFE compacto', desc: 'Fonte e linhas mais justas; notas longas em uma página (colunas CBS/IBS opcionais ocultas)' },
+            'danfe-landscape': { name: 'DANFE paisagem', desc: 'Página larga em paisagem — mais espaço para colunas de produto e código de barras' },
+            'danfe-canhoto-end': { name: 'Canhoto no final', desc: 'Canhoto de recebimento no fim da página para impressão e corte separados' },
+            'danfe-chave-first': { name: 'Chave primeiro', desc: 'Código de barras e chave à esquerda; bloco da empresa à direita' },
+            'danfe-brand': { name: 'DANFE com marca', desc: 'Faixa da marca e bloco DANFE em violeta — PDF marcado para o cliente' },
         },
         samplesNote: 'Os exemplos seguem a estrutura EN 16931 / Peppol; os valores e a discriminação do IVA são calculados pelas regras.',
         samples: {

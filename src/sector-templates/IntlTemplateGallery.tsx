@@ -9,6 +9,7 @@ import { invoiceDesignIds, isNationalIntlProfile, loadIntlXslt } from '../wizard
 import { generateSampleXml, type IntlDocKind } from '../international';
 import { transformXmlWithXslt } from '../xsltTransformer';
 import { findDesignTheme } from '../international/designs/themeCatalog';
+import { findBrNfeDesign } from '../international/designs/brNfeDesigns';
 
 type UseHandler = (moduleId?: string, initialXslt?: string, docName?: string, xml?: string) => void;
 
@@ -63,7 +64,10 @@ export const IntlTemplateGallery: React.FC<{ onUse: UseHandler; countryCode?: Co
     const activeKind = (kind || docs[0]?.kind || 'invoice') as IntlDocKind;
     const profileId = profileFor(activeKind) ?? docs[0]?.profileId ?? '';
     const designIds = useMemo(
-        () => invoiceDesignIds(activeKind, { national: isNationalIntlProfile(profileId) }),
+        () => invoiceDesignIds(activeKind, {
+            national: isNationalIntlProfile(profileId),
+            profileId,
+        }),
         [activeKind, profileId],
     );
 
@@ -150,7 +154,7 @@ export const IntlTemplateGallery: React.FC<{ onUse: UseHandler; countryCode?: Co
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 14 }}>
                 {designIds.map(id => {
-                    const accent = findDesignTheme(id).accent;
+                    const accent = id.startsWith('danfe-') ? findBrNfeDesign(id).accent : findDesignTheme(id).accent;
                     const label = t(`intl.designs.${id}.name`, { defaultValue: id });
                     const desc = t(`intl.designs.${id}.desc`, { defaultValue: '' });
                     return (

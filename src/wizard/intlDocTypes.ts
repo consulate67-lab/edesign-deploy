@@ -4,6 +4,7 @@ import {
 } from '../international';
 import { CLASSIC_DESIGN_ID, composeInvoiceDesign, findInvoiceDesign, INVOICE_DESIGNS } from '../international/designs/invoiceDesigns';
 import { applyDesignTheme, DISTINCT_NATIONAL_THEME_IDS, findDesignTheme } from '../international/designs/themeCatalog';
+import { BR_NFE_DESIGN_IDS, composeBrNfeDesign, findBrNfeDesign } from '../international/designs/brNfeDesigns';
 import i18n, { currentLocale } from '../i18n';
 import type { Messages } from '../i18n/locales/tr';
 import type { DefaultXsltOption, DocFamily, OfficialSample, WizardDocType } from './docTypes';
@@ -160,12 +161,16 @@ export const withDocumentLanguage = (xslt: string, lang: DocLanguage) => xslt.re
 
 const loadTemplate = async (tpl: IntlTemplate) => (await import('../xsltContent')).getInlineXslt(tpl.inlineKey) ?? '';
 
-/** Yapısal EU tasarımı veya tema CSS'si uygulanmış şablon. */
+/** Yapısal EU / BR NF-e tasarımı veya ulusal tema CSS'si uygulanmış şablon. */
 const loadDesign = async (tpl: IntlTemplate, designId: string) => {
     const base = await loadTemplate(tpl);
+    if (tpl.national?.country === 'BR' && tpl.inlineKey.includes('br-nfe-danfe')) {
+        // NF-e: yapısal DANFE düzenleri (canhoto yeri, yatay, sıkı satır…).
+        return composeBrNfeDesign(base, designId);
+    }
     const structural = tpl.family === 'invoice' && !tpl.national ? findInvoiceDesign(designId) : undefined;
     const composed = structural ? composeInvoiceDesign(base, structural) : base;
-    // Ulusal + EU tamamlayıcı temalar; yapısal tasarıma da marka CSS'si eklenebilir.
+    // Diğer ulusal (NFC-e / NFS-e / CT-e / IN / CN / RU) + EU tamamlayıcı renk temaları.
     return applyDesignTheme(composed, designId);
 };
 
@@ -177,10 +182,17 @@ export const loadIntlXslt = async (profileId: string, lang: DocLanguage, designI
 
 /**
  * Hazır tasarım kimlikleri.
- * - EU EN 16931: classic + yapısal düzenler (birbirinden gerçekten farklı gövdeler).
- * - Ulusal (BR/IN/CN/RU): yalnız görsel olarak ayrışan temalar — renk kopyaları yok.
+ * - EU EN 16931: classic + yapısal düzenler.
+ * - BR NF-e: 6 yapısal DANFE düzeni (renk değil, yerleşim).
+ * - Diğer ulusal: görsel olarak ayrışan temalar.
  */
-export const invoiceDesignIds = (kind?: IntlDocKind, opts?: { national?: boolean }) => {
+export const invoiceDesignIds = (
+    kind?: IntlDocKind,
+    opts?: { national?: boolean; profileId?: string },
+) => {
+    if (opts?.profileId === 'br-nfe' || opts?.profileId?.startsWith('br-nfe')) {
+        return [...BR_NFE_DESIGN_IDS];
+    }
     if (opts?.national) return [...DISTINCT_NATIONAL_THEME_IDS];
     const recommended = INVOICE_DESIGNS.filter(d => kind && d.recommended?.includes(kind)).map(d => d.id);
     const structural = INVOICE_DESIGNS.map(d => d.id);
@@ -194,7 +206,8 @@ export const invoiceDesignIds = (kind?: IntlDocKind, opts?: { national?: boolean
 const designLabel = (id: string): string => {
     const key = `intl.designs.${id as DesignId}.name`;
     const name = String(i18n.t(key as 'intl.designs.classic.name'));
-    return name === key || name.startsWith('intl.designs.') ? findDesignTheme(id).id : name;
+    if (name !== key && !name.startsWith('intl.designs.')) return name;
+    return findBrNfeDesign(id)?.id === id ? id : findDesignTheme(id).id;
 };
 const designDesc = (id: string): string => {
     const key = `intl.designs.${id as DesignId}.desc`;
@@ -202,12 +215,12 @@ const designDesc = (id: string): string => {
     return desc === key || desc.startsWith('intl.designs.') ? '' : desc;
 };
 
-const designOptions = (tpl: IntlTemplate, lang: DocLanguage, kind?: IntlDocKind): DefaultXsltOption[] => {
-    const ids = invoiceDesignIds(kind, { national: !!tpl.national });
+const designOptions = (tpl: IntlTemplate, lang: DocLanguage, kind?: IntlDocKind, profileId?: string): DefaultXsltOption[] => {
+    const ids = invoiceDesignIds(kind, { national: !!tpl.national, profileId });
     return ids.map(id => ({
         id: `${tpl.moduleId}-${id}-${lang}`,
         label: designLabel(id),
-        description: id === CLASSIC_DESIGN_ID ? templateDescription(tpl) : designDesc(id),
+        description: id === CLASSIC_DESIGN_ID || id === 'danfe-classic' ? templateDescription(tpl) : designDesc(id),
         moduleId: tpl.moduleId,
         recommended: !!(kind && findInvoiceDesign(id)?.recommended?.includes(kind)),
         load: async () => withDocumentLanguage(await loadDesign(tpl, id), lang),
@@ -253,7 +266,7 @@ export function countryDocType(country: string, doc: CountryDocument, lang: DocL
             ...(tpl.national ? [] : tpl.family === 'despatch' ? despatchSamples() : invoiceSamples()),
         ],
         officialNote: i18n.t('intl.countrySamplesNote'),
-        defaults: designOptions(tpl, lang, doc.kind),
+        defaults: designOptions(tpl, lang, doc.kind, doc.profileId),
         intlProfileId: doc.profileId,
         country,
         intlKind: doc.kind,

@@ -533,6 +533,12 @@ const zh: Messages = {
             stamp: { name: '印章', desc: '粗红边；正式盖章感' },
             fiscal: { name: '财税', desc: '海军蓝财税风格；接近官方 DANFE 表单' },
             brand: { name: '品牌', desc: '紫蓝 edXdocu 渐变；带品牌的客户 PDF' },
+            'danfe-classic': { name: 'DANFE 经典', desc: 'MOC 参考顺序：撕边在上，开票方 · DANFE · 访问密钥' },
+            'danfe-compact': { name: 'DANFE 紧凑', desc: '更密排版；长发票单页显示' },
+            'danfe-landscape': { name: 'DANFE 横向', desc: '横向宽页 — 产品列与条码空间更大' },
+            'danfe-canhoto-end': { name: '撕边在底', desc: '收货撕边移至页末，便于单独裁切' },
+            'danfe-chave-first': { name: '密钥优先', desc: '条码与访问密钥在左；公司块在右' },
+            'danfe-brand': { name: '品牌 DANFE', desc: '品牌色带与紫色 DANFE 区块' },
         },
         samplesNote: '示例遵循 EN 16931 / Peppol 结构；金额和增值税明细按规则计算。',
         samples: {

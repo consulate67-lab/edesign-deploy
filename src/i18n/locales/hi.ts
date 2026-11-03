@@ -533,6 +533,12 @@ const hi: Messages = {
             stamp: { name: 'स्टैम्प', desc: 'मोटी लाल बॉर्डर; आधिकारिक मुहर वाला भाव' },
             fiscal: { name: 'राजकोषीय', desc: 'नेवी राजकोषीय शैली; आधिकारिक DANFE के निकट' },
             brand: { name: 'ब्रांड', desc: 'बैंगनी-नीला edXdocu ग्रेडिएंट; ब्रांडेड ग्राहक PDF' },
+            'danfe-classic': { name: 'DANFE क्लासिक', desc: 'MOC संदर्भ क्रम: ऊपर स्टब, emitente · DANFE · एक्सेस कुंजी' },
+            'danfe-compact': { name: 'DANFE कॉम्पैक्ट', desc: 'सघन टाइप; लंबी चालान एक पृष्ठ पर' },
+            'danfe-landscape': { name: 'DANFE लैंडस्केप', desc: 'चौड़ा क्षैतिज पृष्ठ — उत्पाद कॉलम और बारकोड के लिए अधिक स्थान' },
+            'danfe-canhoto-end': { name: 'स्टब नीचे', desc: 'रसीद स्टब पृष्ठ के अंत में; अलग कट प्रिंट' },
+            'danfe-chave-first': { name: 'कुंजी पहले', desc: 'बारकोड और कुंजी बाईं ओर; कंपनी ब्लॉक दाईं ओर' },
+            'danfe-brand': { name: 'ब्रांडेड DANFE', desc: 'ब्रांड बैंड और बैंगनी DANFE ब्लॉक' },
         },
         samplesNote: 'नमूने EN 16931 / Peppol संरचना का पालन करते हैं; राशियाँ और वैट विवरण नियमों के अनुसार गणना किए जाते हैं।',
         samples: {

@@ -533,6 +533,12 @@ const en: Messages = {
             stamp: { name: 'Stamp', desc: 'Thick red border; official stamped feel' },
             fiscal: { name: 'Fiscal', desc: 'Navy fiscal style; close to official DANFE forms' },
             brand: { name: 'Brand', desc: 'Purple-blue edXdocu gradient; branded customer PDF' },
+            'danfe-classic': { name: 'DANFE classic', desc: 'MOC reference order: tear-off stub on top, emitente · DANFE · access key' },
+            'danfe-compact': { name: 'DANFE compact', desc: 'Tighter type and rows; long invoices on one page (optional CBS/IBS columns hidden)' },
+            'danfe-landscape': { name: 'DANFE landscape', desc: 'Wide landscape page — more room for product columns and barcode' },
+            'danfe-canhoto-end': { name: 'Stub at bottom', desc: 'Receipt stub moved to the end of the page for separate tear-off printing' },
+            'danfe-chave-first': { name: 'Key first', desc: 'Barcode and access key on the left; company block on the right' },
+            'danfe-brand': { name: 'Branded DANFE', desc: 'Brand colour band and violet DANFE block — customer-facing marked PDF' },
         },
         samplesNote: 'Samples follow the EN 16931 / Peppol structure; amounts and VAT breakdown are calculated by the rules.',
         samples: {

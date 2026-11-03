@@ -1,0 +1,24 @@
+Assunto: Parceria — DANFE / NFS-e com a marca do cliente (sem emitir NF)
+
+Olá,
+
+Sou Selim, da edXdocu (https://www.edxdocu.com/?lang=pt).
+
+Não competimos com emissão nem com conversor XML→PDF gratuito.
+Entregamos a camada que falta: **layout visual de DANFE / DANFSe / DACTE com a marca do cliente**, alinhado ao MOC e à Reforma Tributária (NT 2026.010 — IBS/CBS).
+
+Proposta para parceiros (contador / provedor / ERP):
+• Demo grátis: enviem 1 XML → devolvemos 5 layouts marcados em até 48h
+• Comissão / revenda: 30% sobre créditos de design dos clientes indicados
+• Vocês continuam emitindo a NF; nós só personalizamos o auxiliar impresso / PDF
+
+Não pedimos certificado digital, não conectamos à SEFAZ e não emitimos nota.
+O XML pode ficar no navegador do cliente (LGPD).
+
+Resposta rápida: “quero demo” + 1 XML de NF-e de teste.
+
+Obrigado,
+Selim Yılmaz
+edXdocu · https://www.edxdocu.com/?lang=pt
+WhatsApp: +90 533 666 01 25
+destek@edxdocu.com

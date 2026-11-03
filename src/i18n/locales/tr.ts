@@ -534,6 +534,12 @@ const tr = {
             stamp: { name: 'Kaşe', desc: 'Kalın kırmızı kenar; resmi ve onaylı belge hissi' },
             fiscal: { name: 'Mali', desc: 'Lacivert maliye stili; DANFE / resmi formlara yakın' },
             brand: { name: 'Marka', desc: 'Mor-mavi edXdocu gradyanı; markalı müşteri PDF’i' },
+            'danfe-classic': { name: 'DANFE klasik', desc: 'MOC referans sırası: canhoto üstte, emitente · DANFE · erişim anahtarı' },
+            'danfe-compact': { name: 'DANFE kompakt', desc: 'Sıkı yazı ve satırlar; uzun faturalar tek sayfada (CBS/IBS sütunları gizlenebilir)' },
+            'danfe-landscape': { name: 'DANFE yatay', desc: 'Geniş yatay sayfa — ürün sütunları ve barkod için daha fazla alan' },
+            'danfe-canhoto-end': { name: 'Canhoto sonda', desc: 'Teslim stub’u sayfa sonunda; ayrı kesim baskısı için' },
+            'danfe-chave-first': { name: 'Anahtar önce', desc: 'Barkod ve erişim anahtarı solda; firma bloğu sağda' },
+            'danfe-brand': { name: 'Markalı DANFE', desc: 'Marka şeridi ve mor DANFE kutusu — müşteriye markalı PDF' },
         },
         samplesNote: 'Örnekler EN 16931 / Peppol yapısında derlendi; tutarlar ve KDV dökümü kurallara göre hesaplandı.',
         samples: {
