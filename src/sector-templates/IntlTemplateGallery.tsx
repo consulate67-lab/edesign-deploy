@@ -46,10 +46,12 @@ const Thumb: React.FC<{ html: string | null; accent: string }> = ({ html, accent
 /**
  * TR dışı ülkeler: belge türüne göre filtre + 25 tasarım kartı.
  * Türkçe sektör galerisinin uluslararası karşılığı.
+ * countryCode verilirse (dil→pazar) store'daki ülke yerine o kullanılır.
  */
-export const IntlTemplateGallery: React.FC<{ onUse: UseHandler }> = ({ onUse }) => {
+export const IntlTemplateGallery: React.FC<{ onUse: UseHandler; countryCode?: CountryCode }> = ({ onUse, countryCode }) => {
     const { t, locale } = useLocaleT();
-    const country = (useCountry() ?? 'BR') as CountryCode;
+    const storeCountry = (useCountry() ?? 'BR') as CountryCode;
+    const country = countryCode ?? storeCountry;
     const docs = useMemo(() => countryDocuments(country), [country]);
     const [kind, setKind] = useState<IntlDocKind | ''>('');
     const [busyId, setBusyId] = useState<string | null>(null);

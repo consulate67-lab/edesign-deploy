@@ -8,8 +8,10 @@ import { TemplateGallery } from './sector-templates/TemplateGallery';
 import { IntlTemplateGallery } from './sector-templates/IntlTemplateGallery';
 import { theme, techBackground, gradientTextStyle } from './theme';
 import { useLocaleT } from './i18n';
+import { languageCountry } from './i18n/region';
 import { LanguageSwitcher } from './i18n/LanguageSwitcher';
 import { useCountry } from './store/uiStore';
+import type { CountryCode } from './international/registry/countryProfiles';
 
 interface SelectionProps {
     onSelect: (moduleId: string, template: string, moduleName: string, customContent?: string, themeColor?: string) => void;
@@ -30,8 +32,13 @@ interface SelectionUser {
 }
 
 export const Selection: React.FC<SelectionProps> = ({ onLogout, onSelectXsltEditor }) => {
-    const { t } = useLocaleT();
-    const isTurkey = (useCountry() ?? 'TR') === 'TR';
+    const { t, locale } = useLocaleT();
+    const storedCountry = useCountry() ?? 'TR';
+    // Türkçe dışı dil + ülke hâlâ TR ise dilin pazarı (ru→RU, zh→CN, es→ES, pt→BR) kullanılır.
+    const galleryCountry = (locale !== 'tr' && storedCountry === 'TR'
+        ? languageCountry(locale)
+        : storedCountry) as CountryCode;
+    const isTurkey = galleryCountry === 'TR';
     const [showProfileModal, setShowProfileModal] = useState(false);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [userInfo, setUserInfo] = useState<SelectionUser | null>(null);
@@ -376,7 +383,7 @@ export const Selection: React.FC<SelectionProps> = ({ onLogout, onSelectXsltEdit
                                 </div>
                                 {isTurkey
                                     ? <TemplateGallery onUse={onSelectXsltEditor} />
-                                    : <IntlTemplateGallery onUse={onSelectXsltEditor ?? (() => undefined)} />}
+                                    : <IntlTemplateGallery countryCode={galleryCountry} onUse={onSelectXsltEditor ?? (() => undefined)} />}
                             </>
                         )}
                     </>

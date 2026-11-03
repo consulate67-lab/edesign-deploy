@@ -10,7 +10,8 @@ import hi from './locales/hi';
 import ru from './locales/ru';
 import pt from './locales/pt';
 import { LOCALES, useUiStore, type Locale } from '../store/uiStore';
-import { countryLocale, detectCountry } from './region';
+import { countryLocale, detectCountry, languageCountry } from './region';
+
 
 const isLocale = (lng: string | null | undefined): lng is Locale => !!lng && (LOCALES as string[]).includes(lng);
 
@@ -51,14 +52,21 @@ const brazilMarketUrl = (): boolean => {
 const isCrawler = typeof navigator !== 'undefined' && /bot\b|bot\/|crawl|spider|slurp|mediapartners|google-inspectiontool|facebookexternalhit/i.test(navigator.userAgent);
 
 // İlk giriş: ülke bölgeden bulunur, arayüz o ülkenin dilinde açılır; desteklenmeyen dil → İngilizce.
+// ?lang=ru / ?lang=zh / ?lang=es / ?lang=pt gibi açık dil adresi o dilin pazar ülkesini seçer.
 const initialCountry = (() => {
     const { country, setCountry } = useUiStore.getState();
     if (brazilMarketUrl()) {
         setCountry('BR');
         return 'BR';
     }
+    const fromUrl = urlLocale();
+    if (fromUrl) {
+        const mapped = languageCountry(fromUrl);
+        setCountry(mapped);
+        return mapped;
+    }
     if (country) return country;
-    if (isCrawler && !urlLocale()) {
+    if (isCrawler) {
         setCountry('TR');
         return 'TR';
     }
@@ -94,6 +102,15 @@ void i18n
         initAsync: false,
     });
 
+// Kayıtlı dil Türkçe değilken ülke hâlâ TR kaldıysa (eski oturum) dilin pazarına çek.
+{
+    const saved = savedLocale();
+    const { country, setCountry } = useUiStore.getState();
+    if (saved && saved !== 'tr' && (!country || country === 'TR') && !brazilMarketUrl()) {
+        setCountry(languageCountry(saved));
+    }
+}
+
 /** Etkin arayüz dili; desteklenmeyen bir değer gelirse 'en'. */
 export const currentLocale = (): Locale => {
     const lng = i18n.resolvedLanguage ?? i18n.language;
@@ -107,10 +124,11 @@ export const useLocaleT = () => {
     return { t, locale: isLocale(lng) ? lng : 'en' as Locale };
 };
 
-/** Kullanıcının açıkça seçtiği dil; sonraki girişlerde bölge tespitinin önüne geçer. */
+/** Kullanıcının açıkça seçtiği dil; sonraki girişlerde bölge tespitinin önüne geçer. Ülke de dilin pazarına çekilir (ru→RU, pt→BR, …). */
 export const chooseLanguage = (lng: Locale) => {
     try { localStorage.setItem(LOCALE_KEY, lng); } catch { /* gizli mod */ }
     void i18n.changeLanguage(lng);
+    useUiStore.getState().setCountry(languageCountry(lng));
 };
 
 const SITE_URL = 'https://www.edxdocu.com/';

@@ -100,3 +100,12 @@ export const detectCountry = (): CountryCode | null => {
 /** Ülkenin arayüz dili; desteklenmeyen dil ya da bilinmeyen ülke için 'en'. */
 export const countryLocale = (country: CountryCode | null | undefined): Locale =>
     (country && findCountry(country)?.uiLanguage) || 'en';
+
+/**
+ * Arayüz dilinin birincil pazarı (hazır şablon / belge türü ülkesi).
+ * tr→TR, ru→RU, zh→CN, es→ES, pt→BR, …
+ */
+export const languageCountry = (lng: Locale): CountryCode =>
+    (({
+        tr: 'TR', en: 'GB', de: 'DE', fr: 'FR', es: 'ES', zh: 'CN', hi: 'IN', ru: 'RU', pt: 'BR',
+    }) as Record<Locale, CountryCode>)[lng] ?? 'GB';
