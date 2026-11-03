@@ -9,10 +9,12 @@ import {
 import { PaymentModal } from './PaymentModal';
 import { theme, techBackground, gradientTextStyle } from './theme';
 import { HeroPreview } from './landing/HeroPreview';
-import { INTL_SHOWCASE_DOCS, intlPreviewSources } from './landing/intlShowcase';
+import { intlPreviewSourcesForCountry, showcaseAtStep } from './landing/intlShowcase';
+import { countryName } from './international/registry/countryProfiles';
 import { useLocaleT } from './i18n';
 import { LanguageSwitcher } from './i18n/LanguageSwitcher';
 import { useCountry } from './store/uiStore';
+import type { IntlDocKind } from './international/docText/types';
 import { TutorialGrid } from './help/Tutorials';
 import { SocialLinks } from './landing/SocialLinks';
 import { activateBrazilMarket, brazilVariant, isBrazilMarket, type BrazilVariant } from './landing/brazilMarket';
@@ -182,14 +184,33 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
             const items = t('landing.faq.items', { returnObjects: true, ...priceVars });
             return Array.isArray(items) ? items as { q: string; a: string }[] : [];
         })();
+    const kindLabel = useCallback(
+        (kind: IntlDocKind) => t(`intl.kinds.${kind}`),
+        [t],
+    );
+    // step ile ülke→belge sırası; chip’lerde yalnız aktif ülkenin türleri.
+    const [step, setStep] = useState(0);
+    const showcase = useMemo(() => {
+        if (brMarket || locale === 'tr') return null;
+        return showcaseAtStep(step, locale, country, kindLabel);
+    }, [brMarket, locale, country, kindLabel, step]);
     const docTypes = useMemo<LandingDoc[]>(() => {
         if (brMarket) return BR_LANDING_DOCS.map(d => ({ ...d }));
         if (locale === 'tr') return DOC_TYPES;
-        return INTL_SHOWCASE_DOCS.map(d => ({ ...d, label: t(`intl.kinds.${d.id}`) }));
-    }, [brMarket, locale, t]);
+        return (showcase?.docs ?? []).map(d => ({
+            label: d.label, code: d.code, id: d.id, a: d.a,
+        }));
+    }, [brMarket, locale, showcase]);
     const previewSources = useCallback(
-        (kind: string) => (locale === 'tr' ? [] : intlPreviewSources(kind, locale, brMarket ? 'BR' : country, (name) => t('hero.countrySample', { country: name }))),
-        [locale, country, brMarket, t],
+        (kind: string) => {
+            if (locale === 'tr') return [];
+            const code = showcase?.country ?? (brMarket ? 'BR' : country) ?? 'GB';
+            return intlPreviewSourcesForCountry(
+                kind, locale, code,
+                (name) => t('hero.countrySample', { country: name }),
+            );
+        },
+        [locale, country, brMarket, showcase, t],
     );
     const [openSss, setOpenSss] = useState<string | null>(null);
     const [legalModal, setLegalModal] = useState<LegalId | null>(() => {
@@ -215,18 +236,19 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
         };
     }, []);
     const [buyPlan, setBuyPlan] = useState<PlanId | null>(null);
-    // step: kaçıncı dönüş; belge türü step % tür sayısı, aynı türün kaçıncı gelişi (sıradaki şablon / ülke) step / tür sayısı.
-    const [step, setStep] = useState(0);
     const [previewHover, setPreviewHover] = useState(false);
     useEffect(() => {
         if (previewHover || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
-        const t = window.setInterval(() => setStep(n => n + 1), ROTATE_MS);
-        return () => window.clearInterval(t);
+        const timer = window.setInterval(() => setStep(n => n + 1), ROTATE_MS);
+        return () => window.clearInterval(timer);
     }, [previewHover]);
-    const docIdx = step % docTypes.length;
-    const activeDoc = docTypes[docIdx];
-    const nextDoc = docTypes[(docIdx + 1) % docTypes.length];
-    const round = Math.floor(step / docTypes.length);
+    const docIdx = showcase ? showcase.docIdx : (docTypes.length ? step % docTypes.length : 0);
+    const activeDoc = showcase?.active ?? docTypes[docIdx] ?? DOC_TYPES[0];
+    const nextDoc = showcase?.next ?? docTypes[(docIdx + 1) % Math.max(docTypes.length, 1)] ?? DOC_TYPES[0];
+    const round = showcase ? 0 : Math.floor(step / Math.max(docTypes.length, 1));
+    const docsCountryLabel = showcase && locale !== 'tr' && !brMarket
+        ? countryName(showcase.country, locale)
+        : null;
 
     const handleBuyPlan = (plan: PackagePlan) => {
         // Satın alma yalnızca üyeler için — giriş yoksa giriş ekranına.
@@ -771,13 +793,17 @@ export const Landing: React.FC<LandingProps> = ({ onRegister, onLogin }) => {
             >
                 <SectionTitle
                     eyebrow={brMarket ? brazilCopy.docs.eyebrow : t('landing.docs.eyebrow')}
-                    title={brMarket ? brazilCopy.docs.title : t('landing.docs.title')}
+                    title={brMarket
+                        ? brazilCopy.docs.title
+                        : docsCountryLabel
+                            ? `${t('landing.docs.title')} · ${docsCountryLabel}`
+                            : t('landing.docs.title')}
                 />
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
                     {docTypes.map((dt) => (
                         <button
                             type="button"
-                            key={dt.code}
+                            key={`${showcase?.country ?? 'tr'}-${dt.id}-${dt.code}`}
                             onClick={onRegister}
                             className="ld-card"
                             style={{
