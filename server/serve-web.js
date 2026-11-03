@@ -39,10 +39,19 @@ export const mountWebApp = (app) => {
         },
     }));
 
-    // SPA / hash router: varlık dışı GET isteklerinde index.html
+    // SPA / hash router: varlık dışı GET isteklerinde index.html.
+    // /rehber/ gibi klasörlerde index.html varsa onu sun (index:false yüzünden static vermez).
+    const rootResolved = path.resolve(webRoot);
     app.get(/^(?!\/api(?:\/|$)|\/ws(?:\/|$)).*/, (req, res, next) => {
         if (req.method !== 'GET' && req.method !== 'HEAD') return next();
         if (path.extname(req.path)) return next();
+        const rel = decodeURIComponent(req.path).replace(/^\/+|\/+$/g, '');
+        if (rel && !rel.includes('..')) {
+            const dirIndex = path.resolve(rootResolved, rel, 'index.html');
+            if (dirIndex.startsWith(rootResolved + path.sep) && existsSync(dirIndex)) {
+                return res.sendFile(dirIndex, (err) => { if (err) next(err); });
+            }
+        }
         res.sendFile(path.join(webRoot, 'index.html'), (err) => {
             if (err) next(err);
         });
