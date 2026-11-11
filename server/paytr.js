@@ -6,6 +6,7 @@
 //  3) /status/:oid: Ödeme penceresi sonucu buradan izler.
 
 import { createHmac, timingSafeEqual } from 'node:crypto';
+import { markDiscountUsed, resolveDiscount } from './discount-codes.js';
 import { buildInvoiceDraft, istanbulDate, parseBilling } from '../shared/invoice-billing.js';
 
 const MERCHANT_ID = process.env.PAYTR_MERCHANT_ID || '';
@@ -53,6 +54,24 @@ export function registerPaytrRoutes(app, { db, authenticateToken, packages, fron
         res.json({ billing: row?.billing_profile ?? null });
     });
 
+    /** Ödeme formunda kod doğrulama; tutarı düşürmez, yalnızca önizleme döner. */
+    app.post('/api/payment/discount/check', authenticateToken, async (req, res) => {
+        const planId = req.body?.plan;
+        const plan = packages[planId];
+        if (!plan) return res.status(400).json({ error: 'Geçersiz paket.' });
+        const saleCurrency = Object.hasOwn(PAYTR_CURRENCY, req.body?.currency) ? req.body.currency : 'TRY';
+        const listPrice = Number(plan.prices?.[saleCurrency] ?? plan.price);
+        const disc = await resolveDiscount(db, { code: req.body?.code, amount: listPrice });
+        if (disc.error) return res.status(400).json({ error: disc.error });
+        res.json({
+            code: disc.code,
+            percent: disc.percent,
+            currency: saleCurrency,
+            originalAmount: disc.originalAmount,
+            amount: disc.amount,
+        });
+    });
+
     app.post('/api/payment/paytr/checkout', authenticateToken, async (req, res) => {
         const planId = req.body?.plan;
         const plan = packages[planId];
@@ -67,13 +86,28 @@ export function registerPaytrRoutes(app, { db, authenticateToken, packages, fron
 
         const merchantOid = `ED${user.id}${planId.toUpperCase()}${Date.now()}`;
         const saleCurrency = Object.hasOwn(PAYTR_CURRENCY, req.body?.currency) ? req.body.currency : 'TRY';
-        const amount = Number(plan.prices?.[saleCurrency] ?? plan.price);
-        if (!(amount > 0)) return res.status(400).json({ error: 'Geçersiz paket fiyatı.' });
+        const listPrice = Number(plan.prices?.[saleCurrency] ?? plan.price);
+        if (!(listPrice > 0)) return res.status(400).json({ error: 'Geçersiz paket fiyatı.' });
+
+        let amount = listPrice;
+        let discountCode = null;
+        let discountPercent = null;
+        if (req.body?.discountCode) {
+            const disc = await resolveDiscount(db, { code: req.body.discountCode, amount: listPrice });
+            if (disc.error) return res.status(400).json({ error: disc.error });
+            amount = disc.amount;
+            discountCode = disc.code;
+            discountPercent = disc.percent;
+        }
+
         const paymentAmount = String(Math.round(amount * 100));
         const email = clip(user.username, 100);
         const userIp = clientIp(req);
+        const basketLabel = discountPercent
+            ? `${plan.name} Paketi (${plan.credits} tasarım hakkı, %${discountPercent} indirim)`
+            : `${plan.name} Paketi (${plan.credits} tasarım hakkı)`;
         const basket = Buffer.from(JSON.stringify([
-            [`${plan.name} Paketi (${plan.credits} tasarım hakkı)`, amount.toFixed(2), 1],
+            [basketLabel, amount.toFixed(2), 1],
         ])).toString('base64');
         const noInstallment = '0';
         const maxInstallment = '0';
@@ -117,9 +151,9 @@ export function registerPaytrRoutes(app, { db, authenticateToken, packages, fron
                 return res.status(502).json({ error: `Ödeme başlatılamadı: ${data.reason || 'PayTR yanıt vermedi'}` });
             }
             await db.run(
-                `INSERT INTO payments (user_id, plan_id, conversation_id, token, amount, currency, status, billing)
-                 VALUES (?, ?, ?, ?, ?, ?, 'pending', ?::jsonb)`,
-                [user.id, planId, merchantOid, data.token, amount, saleCurrency, JSON.stringify(billing)]
+                `INSERT INTO payments (user_id, plan_id, conversation_id, token, amount, currency, status, billing, discount_code, discount_percent)
+                 VALUES (?, ?, ?, ?, ?, ?, 'pending', ?::jsonb, ?, ?)`,
+                [user.id, planId, merchantOid, data.token, amount, saleCurrency, JSON.stringify(billing), discountCode, discountPercent]
             );
             await db.run(
                 `UPDATE users
@@ -189,7 +223,8 @@ export function registerPaytrRoutes(app, { db, authenticateToken, packages, fron
                     [payment.id, invoiceStatus, invoiceDraft ? JSON.stringify(invoiceDraft) : null]
                 );
                 await client.query('UPDATE users SET credits = credits + $1 WHERE id = $2', [plan.credits, payment.user_id]);
-                console.log(`[paytr] ödeme başarılı user=${payment.user_id} oid=${oid} +${plan.credits} hak fatura=${invoiceStatus || 'yok'} test=${req.body.test_mode}`);
+                if (payment.discount_code) await markDiscountUsed(client, payment.discount_code);
+                console.log(`[paytr] ödeme başarılı user=${payment.user_id} oid=${oid} +${plan.credits} hak fatura=${invoiceStatus || 'yok'} indirim=${payment.discount_code || '-'} test=${req.body.test_mode}`);
             } else {
                 await client.query(`UPDATE payments SET status = 'failed', completed_at = NOW() WHERE id = $1`, [payment.id]);
                 console.warn(`[paytr] ödeme başarısız oid=${oid} kod=${req.body.failed_reason_code} ${req.body.failed_reason_msg || ''}`);

@@ -7,6 +7,7 @@
  * duraklatır ve sunucu yeniden başlasa da kaldığı yerden devam eder.
  */
 import { createHmac, timingSafeEqual } from 'node:crypto';
+import { insertDiscountCode } from './discount-codes.js';
 import { EMAIL_PATTERN } from './email-verify.js';
 import {
     banEmail,
@@ -110,14 +111,18 @@ const isRecipientError = (message) => {
 
 const escapeHtml = (s) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-/** {{UNSUBSCRIBE_URL}}, {{AD}} ve {{EMAIL}} alıcıya göre doldurulur. */
-const personalize = ({ subject, html, text }, { email, name }, { secret, website }) => {
+/** {{UNSUBSCRIBE_URL}}, {{AD}}, {{EMAIL}}, {{DISCOUNT_CODE}}, {{DISCOUNT_PERCENT}} alıcıya göre doldurulur. */
+const personalize = ({ subject, html, text }, { email, name, discount_code, discount_percent }, { secret, website }) => {
     const token = unsubToken(secret, email);
     const pageUrl = `${website}/?unsub=${token}`;
+    const code = discount_code || '';
+    const percent = discount_percent != null ? String(discount_percent) : '';
     const fill = (s, esc) => s
         .replaceAll('{{UNSUBSCRIBE_URL}}', pageUrl)
         .replaceAll('{{AD}}', esc(name || ''))
-        .replaceAll('{{EMAIL}}', esc(email));
+        .replaceAll('{{EMAIL}}', esc(email))
+        .replaceAll('{{DISCOUNT_CODE}}', esc(code))
+        .replaceAll('{{DISCOUNT_PERCENT}}', esc(percent));
     const api = publicApiBase();
     const headers = {
         'List-Unsubscribe': api
@@ -149,7 +154,8 @@ const CAMPAIGN_SELECT = `
            COUNT(r.id) FILTER (WHERE r.status = 'pending')::int AS pending,
            COUNT(r.id) FILTER (WHERE r.status = 'sent')::int AS sent,
            COUNT(r.id) FILTER (WHERE r.status = 'failed')::int AS failed,
-           COUNT(r.id) FILTER (WHERE r.status = 'skipped')::int AS skipped
+           COUNT(r.id) FILTER (WHERE r.status = 'skipped')::int AS skipped,
+           COUNT(r.id) FILTER (WHERE r.discount_code IS NOT NULL)::int AS discount_codes
       FROM mail_campaigns c
       LEFT JOIN mail_campaign_recipients r ON r.campaign_id = c.id`;
 
@@ -297,6 +303,13 @@ export const registerCampaignRoutes = (app, { db, requireAdmin, secret, website 
         if (seen.size === 0) return res.status(400).json({ error: 'Listede geçerli e-posta adresi yok.' });
         if (seen.size > MAX_RECIPIENTS) return res.status(400).json({ error: `Bir gönderimde en fazla ${MAX_RECIPIENTS.toLocaleString('tr-TR')} alıcı olabilir.` });
         const skipPrevious = req.body?.skipPrevious !== false;
+        const discountPercentRaw = req.body?.discountPercent;
+        const discountPercent = discountPercentRaw == null || discountPercentRaw === ''
+            ? null
+            : Number(discountPercentRaw);
+        if (discountPercent != null && (!Number.isInteger(discountPercent) || discountPercent < 1 || discountPercent > 90)) {
+            return res.status(400).json({ error: 'İndirim oranı 1–90 arasında tam sayı olmalı.' });
+        }
 
         const client = await db.pool.connect();
         try {
@@ -322,8 +335,35 @@ export const registerCampaignRoutes = (app, { db, requireAdmin, secret, website 
                  ON CONFLICT DO NOTHING`,
                 [id, [...seen.keys()], [...seen.values()], skipPrevious]
             );
+
+            if (discountPercent != null) {
+                const expiresAt = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000);
+                const { rows: targets } = await client.query(
+                    `SELECT id, email, name FROM mail_campaign_recipients
+                      WHERE campaign_id = $1 AND status = 'pending' ORDER BY id`,
+                    [id]
+                );
+                for (const r of targets) {
+                    const code = await insertDiscountCode(client, {
+                        percent: discountPercent,
+                        email: r.email,
+                        name: r.name,
+                        tag: 'bayi',
+                        maxUses: 1,
+                        expiresAt,
+                        campaignId: id,
+                        createdBy: req.admin?.id ?? null,
+                        prefix: `BAYI${discountPercent}`,
+                    });
+                    await client.query(
+                        `UPDATE mail_campaign_recipients SET discount_code = $1 WHERE id = $2`,
+                        [code, r.id]
+                    );
+                }
+            }
+
             await client.query('COMMIT');
-            console.log(`[campaigns] ${req.admin?.username}: gönderim #${id} oluşturuldu (${seen.size} alıcı)`);
+            console.log(`[campaigns] ${req.admin?.username}: gönderim #${id} oluşturuldu (${seen.size} alıcı${discountPercent != null ? `, %${discountPercent} kod` : ''})`);
             res.status(201).json(await getCampaign(id));
         } catch (e) {
             await client.query('ROLLBACK').catch(() => undefined);
@@ -339,13 +379,62 @@ export const registerCampaignRoutes = (app, { db, requireAdmin, secret, website 
         const to = normalizeEmail(req.body?.to);
         if (!to) return res.status(400).json({ error: 'Test için geçerli bir e-posta adresi yazın.' });
         if (!mailConfigured()) return res.status(503).json({ error: 'Sunucuda e-posta gönderimi yapılandırılmamış.' });
+        const discountPercentRaw = req.body?.discountPercent;
+        const discountPercent = discountPercentRaw == null || discountPercentRaw === ''
+            ? null
+            : Number(discountPercentRaw);
+        if (discountPercent != null && (!Number.isInteger(discountPercent) || discountPercent < 1 || discountPercent > 90)) {
+            return res.status(400).json({ error: 'İndirim oranı 1–90 arasında tam sayı olmalı.' });
+        }
         try {
-            const mail = personalize(content, { email: to, name: 'Test' }, { secret, website: site });
+            let discount_code = '';
+            let discount_percent = discountPercent;
+            if (discountPercent != null) {
+                const client = await db.pool.connect();
+                try {
+                    discount_code = await insertDiscountCode(client, {
+                        percent: discountPercent,
+                        email: to,
+                        name: 'Test',
+                        tag: 'bayi-test',
+                        maxUses: 1,
+                        expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+                        createdBy: req.admin?.id ?? null,
+                        prefix: `BAYI${discountPercent}`,
+                    });
+                } finally {
+                    client.release();
+                }
+            }
+            const mail = personalize(content, { email: to, name: 'Test', discount_code, discount_percent }, { secret, website: site });
             await sendMail({ ...mail, subject: `[TEST] ${mail.subject}` });
-            res.json({ sent: true });
+            res.json({ sent: true, discountCode: discount_code || undefined });
         } catch (e) {
             res.status(502).json({ error: `Test e-postası gönderilemedi: ${e.message}` });
         }
+    });
+
+    app.get('/api/admin/campaigns/:id/discount-codes', requireAdmin, async (req, res) => {
+        const id = parseId(req.params.id);
+        if (!id) return res.status(400).json({ error: 'Geçersiz gönderim.' });
+        const rows = await db.all(
+            `SELECT r.email, r.name, r.discount_code AS code, d.percent, d.used_count, d.max_uses, d.expires_at
+               FROM mail_campaign_recipients r
+               LEFT JOIN discount_codes d ON d.code = r.discount_code
+              WHERE r.campaign_id = ? AND r.discount_code IS NOT NULL
+              ORDER BY r.id`,
+            [id]
+        );
+        if (!rows.length) return res.status(404).json({ error: 'Bu gönderimde indirim kodu yok.' });
+        const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+        const lines = [
+            'email,name,code,percent,used_count,max_uses,expires_at',
+            ...rows.map(r => [r.email, r.name, r.code, r.percent ?? '', r.used_count ?? '', r.max_uses ?? '', r.expires_at ?? '']
+                .map(esc).join(',')),
+        ];
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+        res.setHeader('Content-Disposition', `attachment; filename="kampanya-${id}-indirim-kodlari.csv"`);
+        res.send(`\uFEFF${lines.join('\n')}`);
     });
 
     const transition = (from, to, extra = '') => async (req, res) => {
@@ -426,8 +515,12 @@ export const registerCampaignRoutes = (app, { db, requireAdmin, secret, website 
                 if ((recent?.n ?? 0) >= limit) return;
             }
             const r = await db.get(
-                `SELECT r.id, r.email, r.name, (u.email IS NOT NULL) AS unsubscribed
-                   FROM mail_campaign_recipients r LEFT JOIN mail_unsubscribes u ON u.email = r.email
+                `SELECT r.id, r.email, r.name, r.discount_code,
+                        d.percent AS discount_percent,
+                        (u.email IS NOT NULL) AS unsubscribed
+                   FROM mail_campaign_recipients r
+                   LEFT JOIN mail_unsubscribes u ON u.email = r.email
+                   LEFT JOIN discount_codes d ON d.code = r.discount_code
                   WHERE r.campaign_id = ? AND r.status = 'pending' ORDER BY r.id LIMIT 1`,
                 [c.id]
             );

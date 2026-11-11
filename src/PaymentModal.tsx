@@ -33,7 +33,7 @@ type Step =
     | { step: 'packages' }
     | { step: 'billing'; plan: PackagePlan }
     | { step: 'starting'; plan: PackagePlan }
-    | { step: 'paying'; plan: PackagePlan; oid: string; iframeUrl: string; testMode: boolean; confirming: boolean }
+    | { step: 'paying'; plan: PackagePlan; oid: string; iframeUrl: string; testMode: boolean; confirming: boolean; paidAmount?: number }
     | { step: 'done'; plan: PackagePlan; credits: number | null }
     | { step: 'failed'; plan: PackagePlan; message: string };
 
@@ -54,9 +54,14 @@ const resizeFrame = () => {
     document.head.appendChild(s);
 };
 
-const requestPayment = async (plan: PackagePlan, billing: BillingForm, currency: PriceCurrency): Promise<Step> => {
+const requestPayment = async (
+    plan: PackagePlan,
+    billing: BillingForm,
+    currency: PriceCurrency,
+    discountCode?: string,
+): Promise<Step> => {
     try {
-        const r = await api.paytrCheckout(plan.id, billing, currency);
+        const r = await api.paytrCheckout(plan.id, billing, currency, discountCode);
         return { step: 'paying', plan, oid: r.merchantOid, iframeUrl: r.iframeUrl, testMode: r.testMode, confirming: false };
     } catch (err) {
         return { step: 'failed', plan, message: err instanceof Error ? err.message : i18n.t('payment.startFailed') };
@@ -82,6 +87,12 @@ const PaymentDialog: React.FC<Omit<PaymentModalProps, 'isOpen'>> = ({ onClose, o
     const price = (plan: PackagePlan) => formatPrice(plan.prices[currency], currency, locale);
     const [billing, setBilling] = useState<BillingForm>(EMPTY_BILLING);
     const [billingError, setBillingError] = useState<string | null>(null);
+    const [discountInput, setDiscountInput] = useState('');
+    const [discountBusy, setDiscountBusy] = useState(false);
+    const [discountError, setDiscountError] = useState<string | null>(null);
+    const [appliedDiscount, setAppliedDiscount] = useState<{
+        code: string; percent: number; originalAmount: number; amount: number;
+    } | null>(null);
 
     useEffect(() => {
         let alive = true;
@@ -107,8 +118,37 @@ const PaymentDialog: React.FC<Omit<PaymentModalProps, 'isOpen'>> = ({ onClose, o
 
     const openBilling = (plan: PackagePlan) => {
         setBillingError(null);
+        setDiscountError(null);
+        setDiscountInput('');
+        setAppliedDiscount(null);
         setLockedCurrency(liveCurrency);
         setState({ step: 'billing', plan });
+    };
+
+    const applyDiscount = async (plan: PackagePlan) => {
+        const code = discountInput.trim();
+        if (!code) {
+            setDiscountError(t('payment.discountEmpty'));
+            return;
+        }
+        setDiscountBusy(true);
+        setDiscountError(null);
+        try {
+            const r = await api.discountCheck(code, plan.id, currency);
+            setAppliedDiscount({ code: r.code, percent: r.percent, originalAmount: r.originalAmount, amount: r.amount });
+            setDiscountInput(r.code);
+        } catch (err) {
+            setAppliedDiscount(null);
+            setDiscountError(err instanceof Error ? err.message : t('payment.discountInvalid'));
+        } finally {
+            setDiscountBusy(false);
+        }
+    };
+
+    const clearDiscount = () => {
+        setAppliedDiscount(null);
+        setDiscountError(null);
+        setDiscountInput('');
     };
 
     const startPayment = (plan: PackagePlan) => {
@@ -121,8 +161,17 @@ const PaymentDialog: React.FC<Omit<PaymentModalProps, 'isOpen'>> = ({ onClose, o
         if (!('billing' in parsed) || !parsed.billing) return;
         setBillingError(null);
         setState({ step: 'starting', plan });
-        void requestPayment(plan, parsed.billing, currency).then(setState);
+        const paidAmount = appliedDiscount?.amount;
+        void requestPayment(plan, parsed.billing, currency, appliedDiscount?.code).then(next => {
+            setState(next.step === 'paying' && paidAmount != null ? { ...next, paidAmount } : next);
+        });
     };
+
+    const billedPrice = (plan: PackagePlan) => (
+        appliedDiscount
+            ? formatPrice(appliedDiscount.amount, currency, locale)
+            : price(plan)
+    );
 
     const paying = state.step === 'paying' ? state : null;
     const oid = paying?.oid;
@@ -132,6 +181,8 @@ const PaymentDialog: React.FC<Omit<PaymentModalProps, 'isOpen'>> = ({ onClose, o
     useEffect(() => { onSuccessRef.current = onSuccess; }, [onSuccess]);
     const currencyRef = useRef(currency);
     useEffect(() => { currencyRef.current = currency; }, [currency]);
+    const paidAmountRef = useRef<number | undefined>(undefined);
+    useEffect(() => { paidAmountRef.current = paying?.paidAmount; }, [paying?.paidAmount]);
 
     useEffect(() => {
         if (!oid || !payingPlan) return;
@@ -146,7 +197,7 @@ const PaymentDialog: React.FC<Omit<PaymentModalProps, 'isOpen'>> = ({ onClose, o
                     setState({ step: 'done', plan: payingPlan, credits: r.credits });
                     trackPurchase({
                         transactionId: oid,
-                        value: payingPlan.prices[currencyRef.current],
+                        value: paidAmountRef.current ?? payingPlan.prices[currencyRef.current],
                         currency: currencyRef.current,
                         itemId: payingPlan.id,
                         itemName: payingPlan.name,
@@ -322,7 +373,16 @@ const PaymentDialog: React.FC<Omit<PaymentModalProps, 'isOpen'>> = ({ onClose, o
                         <div>
                             <h2 style={{ color: theme.text, fontSize: '1.35rem', fontWeight: 800, margin: 0 }}>{t('payment.billingTitle')}</h2>
                             <p style={{ color: theme.textMuted, fontSize: '0.88rem', margin: '0.35rem 0 0' }}>
-                                {t('payment.billingSub', { plan: state.plan.name, price: price(state.plan) })}
+                                {t('payment.billingSub', { plan: state.plan.name, price: billedPrice(state.plan) })}
+                                {appliedDiscount && (
+                                    <span style={{ display: 'block', marginTop: 4, color: theme.green, fontWeight: 700 }}>
+                                        {t('payment.discountApplied', {
+                                            percent: appliedDiscount.percent,
+                                            from: formatPrice(appliedDiscount.originalAmount, currency, locale),
+                                            to: formatPrice(appliedDiscount.amount, currency, locale),
+                                        })}
+                                    </span>
+                                )}
                             </p>
                         </div>
                         <div className="pm-bill-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
@@ -369,6 +429,46 @@ const PaymentDialog: React.FC<Omit<PaymentModalProps, 'isOpen'>> = ({ onClose, o
                             <input data-billing-address value={billing.address} onChange={e => setBilling(b => ({ ...b, address: e.target.value }))}
                                 placeholder={t('payment.addressPh')} style={fieldStyle} />
                         </label>
+                        <div>
+                            <label style={{ display: 'flex', flexDirection: 'column', gap: 6, color: theme.textMuted, fontSize: '0.78rem', fontWeight: 700 }}>
+                                {t('payment.discountLabel')}
+                                <div style={{ display: 'flex', gap: 8 }}>
+                                    <input
+                                        data-billing-discount
+                                        value={discountInput}
+                                        onChange={e => {
+                                            setDiscountInput(e.target.value.toUpperCase());
+                                            setDiscountError(null);
+                                            if (appliedDiscount) setAppliedDiscount(null);
+                                        }}
+                                        placeholder={t('payment.discountPh')}
+                                        autoComplete="off"
+                                        style={{ ...fieldStyle, flex: 1, fontFamily: 'ui-monospace, Consolas, monospace', letterSpacing: '0.04em' }}
+                                    />
+                                    {appliedDiscount ? (
+                                        <button type="button" onClick={clearDiscount} style={{
+                                            padding: '0 0.9rem', borderRadius: '0.7rem', border: `1px solid ${theme.border}`,
+                                            background: theme.surfaceAlt, color: theme.textMuted, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+                                        }}>
+                                            {t('payment.discountClear')}
+                                        </button>
+                                    ) : (
+                                        <button type="button" disabled={discountBusy || !discountInput.trim()} onClick={() => void applyDiscount(state.plan)} style={{
+                                            padding: '0 0.9rem', borderRadius: '0.7rem', border: 'none',
+                                            background: theme.primarySoft, color: theme.primary, fontWeight: 700,
+                                            cursor: discountBusy || !discountInput.trim() ? 'default' : 'pointer', fontFamily: 'inherit', opacity: discountBusy || !discountInput.trim() ? 0.6 : 1,
+                                        }}>
+                                            {discountBusy ? t('payment.discountChecking') : t('payment.discountApply')}
+                                        </button>
+                                    )}
+                                </div>
+                            </label>
+                            {discountError && (
+                                <div data-discount-error style={{ marginTop: 6, padding: '0.6rem 0.75rem', borderRadius: '0.7rem', background: theme.redSoft, color: theme.redText, fontSize: '0.82rem' }}>
+                                    {discountError}
+                                </div>
+                            )}
+                        </div>
                         {billingError && (
                             <div data-billing-error style={{ padding: '0.7rem 0.8rem', borderRadius: '0.7rem', background: theme.redSoft, color: theme.redText, fontSize: '0.85rem' }}>
                                 {billingError}
@@ -378,7 +478,7 @@ const PaymentDialog: React.FC<Omit<PaymentModalProps, 'isOpen'>> = ({ onClose, o
                             marginTop: '0.2rem', padding: '0.8rem', borderRadius: '0.7rem', border: 'none', cursor: 'pointer',
                             background: theme.gradient, color: 'white', fontWeight: 800, fontFamily: 'inherit', boxShadow: theme.shadowBrand,
                         }}>
-                            {t('payment.submit', { price: price(state.plan) })}
+                            {t('payment.submit', { price: billedPrice(state.plan) })}
                         </button>
                         <p style={{ margin: 0, fontSize: '0.75rem', color: theme.textSubtle, lineHeight: 1.45 }}>
                             {t('payment.billingNote')}

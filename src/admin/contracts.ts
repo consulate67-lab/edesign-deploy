@@ -494,6 +494,8 @@ export interface MailCampaign {
     sent: number;
     failed: number;
     skipped: number;
+    /** Alıcı başına üretilmiş indirim kodu sayısı (yoksa 0). */
+    discount_codes?: number;
 }
 
 export interface MailCampaignList {
@@ -545,6 +547,8 @@ export interface MailCampaignInput extends MailContent {
     ratePerHour: number;
     recipients: { email: string; name: string }[];
     skipPrevious: boolean;
+    /** Verilirse her bekleyen alıcı için tek kullanımlık indirim kodu üretilir. */
+    discountPercent?: number;
 }
 
 /** facebook / instagram Meta API ile yayınlanır; diğerleri elle paylaşılıp işaretlenir. */

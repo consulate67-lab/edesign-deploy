@@ -484,10 +484,24 @@ export const api = {
         plan: 'one' | 'basic' | 'pro',
         billing: { partyType: 'company' | 'sole'; title: string; taxId: string; taxOffice: string; city: string; address: string },
         currency: 'TRY' | 'EUR' | 'GBP' = 'TRY',
+        discountCode?: string,
     ): Promise<{ merchantOid: string; iframeUrl: string; testMode: boolean }> =>
         api.request('/payment/paytr/checkout', {
             method: 'POST',
-            body: JSON.stringify({ plan, billing, currency, returnUrl: window.location.origin + window.location.pathname }),
+            body: JSON.stringify({
+                plan, billing, currency,
+                discountCode: discountCode || undefined,
+                returnUrl: window.location.origin + window.location.pathname,
+            }),
+        }),
+    discountCheck: (
+        code: string,
+        plan: 'one' | 'basic' | 'pro',
+        currency: 'TRY' | 'EUR' | 'GBP' = 'TRY',
+    ): Promise<{ code: string; percent: number; currency: string; originalAmount: number; amount: number }> =>
+        api.request('/payment/discount/check', {
+            method: 'POST',
+            body: JSON.stringify({ code, plan, currency }),
         }),
     paytrStatus: (merchantOid: string): Promise<{ status: 'pending' | 'success' | 'failed'; credits: number | null }> =>
         api.request(`/payment/paytr/status/${encodeURIComponent(merchantOid)}`),

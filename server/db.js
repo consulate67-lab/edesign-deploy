@@ -1,5 +1,6 @@
 import pg from 'pg';
 import { createCampaignSchema } from './campaigns.js';
+import { createDiscountSchema } from './discount-codes.js';
 import { RETENTION_INTERVAL } from './design-retention.js';
 import { createGibRevisionsSchema } from './gib-revisions.js';
 import { createSiteConfigSchema } from './site-config.js';
@@ -262,6 +263,7 @@ export const initDb = async () => {
 
         await createSupportSchema(probe);
         await createCampaignSchema(probe);
+        await createDiscountSchema(probe);
         await createSiteConfigSchema(probe);
         await createSocialSchema(probe);
         await createWebmailSchema(probe);

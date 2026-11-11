@@ -12,6 +12,8 @@ import trOtobusHtml from '../../../../marketing/email-otobus.html?raw';
 import trOtobusText from '../../../../marketing/email-otobus.txt?raw';
 import trAcenteHtml from '../../../../marketing/email-acente.html?raw';
 import trAcenteText from '../../../../marketing/email-acente.txt?raw';
+import trBayiHtml from '../../../../marketing/email-bayi.html?raw';
+import trBayiText from '../../../../marketing/email-bayi.txt?raw';
 import enHtml from '../../../../marketing/email-tanitim-en.html?raw';
 import enText from '../../../../marketing/email-tanitim-en.txt?raw';
 import enUsHtml from '../../../../marketing/email-tanitim-en-us.html?raw';
@@ -61,6 +63,11 @@ export const BROCHURES: Record<BrochureId, MailContent> = {
         subject: 'Müşterinize kestiğiniz fatura acentenizin yüzü olsun',
         html: trAcenteHtml,
         text: trAcenteText,
+    },
+    'tr-bayi': {
+        subject: 'Yazılım bayilerine özel %20 indirim · e-Fatura görünüm tasarımı',
+        html: trBayiHtml,
+        text: trBayiText,
     },
     en: { subject: subjects.en, html: enHtml, text: enText },
     'en-us': { subject: subjects['en-us'], html: enUsHtml, text: enUsText },

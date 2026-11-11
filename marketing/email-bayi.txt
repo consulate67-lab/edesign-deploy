@@ -1,0 +1,37 @@
+edXdocu
+
+YAZILIM BAYİLERİNE ÖZEL
+MÜŞTERİNİZİN FATURASI SİZİN ÇÖZÜMÜNÜZÜ GÖSTERSİN
+
+e-Fatura / e-Arşiv görünümünü XSLT bilmeden tasarlayın; entegratöre hazır dosyayı dakikalar içinde indirin.
+Bayi paketlerinde size özel %{{DISCOUNT_PERCENT}} indirim kodunuz hazır.
+
+www.edxdocu.com
+https://www.edxdocu.com/?utm_source=email&utm_medium=email&utm_campaign=bayi&utm_content=hero
+
+
+SIZE ÖZEL İNDİRİM KODU
+{{DISCOUNT_CODE}}
+Ödeme sayfasında bu kodu girin · %{{DISCOUNT_PERCENT}} indirim · tek kullanımlık
+
+
+BAYİ İÇİN NEDEN?
+Müşteri deneyimi — Logo ve kaşe yerinde. Müşteriniz e-Fatura / e-Arşiv çıktısını kendi markasıyla görür.
+Entegrasyon — Onaylanan XSLT fatura entegratörüne yüklenir. GİB UBL-TR uyumlu; abonelik yok.
+
+
+NASIL KULLANILIR?
+1. Üye olun: www.edxdocu.com üzerinden ücretsiz hesap açın.
+2. Paketi seçin: ödeme adımında fatura bilgilerinizi girin.
+3. İndirim kodunu uygulayın: {{DISCOUNT_CODE}} — tutar otomatik %{{DISCOUNT_PERCENT}} düşer.
+
+
+Bayi indiriminiz hazır. Kurulum yok, abonelik yok.
+https://www.edxdocu.com/?utm_source=email&utm_medium=email&utm_campaign=bayi&utm_content=final
+
+--
+edXdocu
+www.edxdocu.com
+
+Bu bilgilendirme, yazılım bayiliği / e-belge çözümleri faaliyetinizle ilgili olabileceği düşüncesiyle gönderilmiştir.
+Bir daha almak istemiyorsanız tek tıkla listeden çıkın: {{UNSUBSCRIBE_URL}}

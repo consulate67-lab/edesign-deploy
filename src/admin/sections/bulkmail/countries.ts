@@ -1,7 +1,7 @@
 import { countryProfiles, type UiLanguage } from '../../../international/registry/countryProfiles';
 
 /** Broşür sürümü: site dili, ya da aynı dilde ülkesinin resmî formatını öne çıkaran sürüm. */
-export type BrochureId = UiLanguage | 'en-in' | 'en-us' | 'tr-firma' | 'tr-musavir' | 'tr-avukat' | 'tr-otobus' | 'tr-acente';
+export type BrochureId = UiLanguage | 'en-in' | 'en-us' | 'tr-firma' | 'tr-musavir' | 'tr-avukat' | 'tr-otobus' | 'tr-acente' | 'tr-bayi';
 
 export const BROCHURE_OPTIONS: { id: BrochureId; label: string }[] = [
     { id: 'tr', label: 'Türkçe' },
@@ -10,6 +10,7 @@ export const BROCHURE_OPTIONS: { id: BrochureId; label: string }[] = [
     { id: 'tr-avukat', label: 'Türkçe · avukat' },
     { id: 'tr-otobus', label: 'Türkçe · otobüs firması' },
     { id: 'tr-acente', label: 'Türkçe · sigorta acentesi' },
+    { id: 'tr-bayi', label: 'Türkçe · yazılım bayisi' },
     { id: 'en', label: 'İngilizce · Avrupa' },
     { id: 'en-us', label: 'İngilizce · ABD' },
     { id: 'en-in', label: 'İngilizce · Hindistan' },
@@ -27,6 +28,7 @@ export const brochureLabel = (id: BrochureId) => BROCHURE_OPTIONS.find(l => l.id
 /** Listenin başlığından sektör broşürü. E-posta adreslerinin içine bakılmaz. */
 export const sectorFromList = (text: string): BrochureId | null => {
     const head = foldCountry(text.slice(0, 4000));
+    if (/yazilim bayi|e fatura yazilim|efatura yazilim|bayi\w* yazilim|yazilim\w* bayi|entegrator bayi/.test(head)) return 'tr-bayi';
     if (/mali musavir|smmm|yeminli mali/.test(head)) return 'tr-musavir';
     if (/\bavukat\b|hukuk burosu/.test(head)) return 'tr-avukat';
     if (/otobus|e bilet|ebilet|yolcu listesi/.test(head)) return 'tr-otobus';
@@ -34,12 +36,18 @@ export const sectorFromList = (text: string): BrochureId | null => {
     return null;
 };
 
+/** Bayi broşüründe alıcı başına %20 indirim kodu üretilir. */
+export const brochureDiscountPercent = (id: BrochureId): number | undefined => (
+    id === 'tr-bayi' ? 20 : undefined
+);
+
 export const sectorCampaignName = (id: BrochureId) => (
     id === 'tr-musavir' ? 'Mali müşavir'
         : id === 'tr-avukat' ? 'Avukat'
             : id === 'tr-otobus' ? 'Otobüs firması'
                 : id === 'tr-acente' ? 'Sigorta acentesi'
-                    : ''
+                    : id === 'tr-bayi' ? 'Yazılım bayisi'
+                        : ''
 );
 
 /** Karşılaştırma anahtarı: küçük harf, Türkçe ve aksanlı harfler sadeleşir, noktalama atılır. */

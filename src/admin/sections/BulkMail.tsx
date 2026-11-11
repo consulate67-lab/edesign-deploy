@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Ban, Eye, Mail, Pause, Play, RefreshCw, RotateCcw, Search, Send, Trash2, Upload, XCircle } from 'lucide-react';
+import { Ban, Download, Eye, Mail, Pause, Play, RefreshCw, RotateCcw, Search, Send, Trash2, Upload, XCircle } from 'lucide-react';
 import { useUiStore } from '../../store/uiStore';
 import { adminApi } from '../adminApi';
 import type { CampaignStatus, MailBannedEntry, MailCampaign, MailCampaignDetail, MailCampaignList, MailContent } from '../contracts';
 import { C, btn, errorText, fmtDateTime, fmtNumber, inputStyle, labelStyle } from '../format';
 import { Badge, Card, Empty, ErrorBox, Modal, SectionHeader, Spinner } from '../ui';
-import { BROCHURE_OPTIONS, brochureForCountry, brochureLabel, foldCountry, sectorCampaignName, sectorFromList, type BrochureId, type CountryStatus } from './bulkmail/countries';
+import { BROCHURE_OPTIONS, brochureDiscountPercent, brochureForCountry, brochureLabel, foldCountry, sectorCampaignName, sectorFromList, type BrochureId, type CountryStatus } from './bulkmail/countries';
 import { isPersonal, parseRecipients, rowsToTsv, type Recipient } from './bulkmail/recipients';
 import { BROCHURES } from './bulkmail/templates';
 
@@ -273,8 +273,14 @@ export const BulkMail: React.FC = () => {
     const sendTest = async () => {
         setSendingTest(true);
         try {
-            await adminApi.testCampaign({ ...content, subject: content.subject.trim() }, testTo.trim());
-            pushToast({ kind: 'success', title: 'Test e-postası gönderildi', description: `${testTo.trim()} adresinin gelen kutusunu (ve spam klasörünü) kontrol edin.`, ttl: 7000 });
+            const discountPercent = brochureDiscountPercent(activeId);
+            const r = await adminApi.testCampaign(
+                { ...content, subject: content.subject.trim() },
+                testTo.trim(),
+                discountPercent ? { discountPercent } : undefined,
+            );
+            const codeNote = r.discountCode ? ` İndirim kodu: ${r.discountCode}` : '';
+            pushToast({ kind: 'success', title: 'Test e-postası gönderildi', description: `${testTo.trim()} adresinin gelen kutusunu (ve spam klasörünü) kontrol edin.${codeNote}`, ttl: 9000 });
         } catch (e) {
             pushToast({ kind: 'error', title: 'Test gönderilemedi', description: errorText(e), ttl: 9000 });
         } finally {
@@ -283,7 +289,10 @@ export const BulkMail: React.FC = () => {
     };
 
     const start = async () => {
-        const summary = groups.map(g => `• ${brochureLabel(g.brochure)}: ${fmtNumber(g.recipients.length)} alıcı — "${contents[g.brochure].subject.trim()}"`).join('\n');
+        const summary = groups.map(g => {
+            const disc = brochureDiscountPercent(g.brochure);
+            return `• ${brochureLabel(g.brochure)}: ${fmtNumber(g.recipients.length)} alıcı — "${contents[g.brochure].subject.trim()}"${disc ? ` · %${disc} kod` : ''}`;
+        }).join('\n');
         const skipped = skippedCount ? `\n\nDesteklenmeyen ülkelerdeki ${fmtNumber(skippedCount)} alıcıya gönderilmeyecek.` : '';
         if (!window.confirm(`${fmtNumber(totalRecipients)} alıcıya gönderim başlatılsın mı?\n\n${summary}${skipped}\n\nSaatte ${perHour} e-posta ile yaklaşık ${fmtHours(totalRecipients, perHour)} sürer. Broşürler sırayla gönderilir.`)) return;
         setStarting(true);
@@ -294,11 +303,21 @@ export const BulkMail: React.FC = () => {
                 const created = await adminApi.createCampaign({
                     name: campaignName(g.brochure), subject: c.subject.trim(), html: c.html, text: c.text, ratePerHour: perHour,
                     recipients: g.recipients.map(({ email, name: n }) => ({ email, name: n })), skipPrevious,
+                    discountPercent: brochureDiscountPercent(g.brochure),
                 });
                 await adminApi.startCampaign(created.id);
+                if ((created.discount_codes ?? 0) > 0) {
+                    try { await adminApi.downloadCampaignDiscountCodes(created.id); } catch { /* CSV isteğe bağlı */ }
+                }
                 started.push(g.brochure);
             }
-            pushToast({ kind: 'success', title: 'Gönderim başladı', description: `${groups.length > 1 ? `${groups.length} broşür için ayrı gönderim oluşturuldu. ` : ''}E-postalar arka planda sırayla gidiyor; bu sayfayı kapatabilirsiniz.`, ttl: 8000 });
+            const hadCodes = groups.some(g => brochureDiscountPercent(g.brochure));
+            pushToast({
+                kind: 'success',
+                title: 'Gönderim başladı',
+                description: `${groups.length > 1 ? `${groups.length} broşür için ayrı gönderim oluşturuldu. ` : ''}E-postalar arka planda sırayla gidiyor${hadCodes ? '; indirim kodları CSV olarak indirildi' : ''}. Bu sayfayı kapatabilirsiniz.`,
+                ttl: 8000,
+            });
             setListText('');
             setListSource('');
             setOverrides({});
@@ -639,6 +658,12 @@ export const BulkMail: React.FC = () => {
                                                         <button type="button" disabled={busy} style={btn('secondary', true)} onClick={() => void act(c, 'retry')}><RotateCcw size={13} /> Hatalıları yeniden dene</button>
                                                     )}
                                                     {c.failed > 0 && <button type="button" style={btn('ghost', true)} onClick={() => void openDetail(c)}>Hatalar</button>}
+                                                    {(c.discount_codes ?? 0) > 0 && (
+                                                        <button type="button" style={btn('ghost', true)} title="İndirim kodları CSV"
+                                                            onClick={() => void adminApi.downloadCampaignDiscountCodes(c.id).catch(e => pushToast({ kind: 'error', title: 'CSV indirilemedi', description: errorText(e), ttl: 7000 }))}>
+                                                            <Download size={13} /> Kodlar
+                                                        </button>
+                                                    )}
                                                     {(c.status === 'sending' || c.status === 'paused' || c.status === 'draft') && (
                                                         <button type="button" disabled={busy} style={btn('danger', true)} onClick={() => void act(c, 'cancel')}><XCircle size={13} /> İptal</button>
                                                     )}

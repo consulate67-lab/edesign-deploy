@@ -167,14 +167,34 @@ export const adminApi = {
         request<{ success: true }>(`/admin/campaigns/banned/${encodeURIComponent(email)}`, { method: 'DELETE' }),
     scanBannedFromInbox: () =>
         request<MailBannedScanResult>('/admin/campaigns/banned/scan', { method: 'POST', timeoutMs: 90000 }),
-    testCampaign: (content: MailContent, to: string) =>
-        request<{ sent: true }>('/admin/campaigns/test', { method: 'POST', body: { ...content, to } }),
+    testCampaign: (content: MailContent, to: string, opts?: { discountPercent?: number }) =>
+        request<{ sent: true; discountCode?: string }>('/admin/campaigns/test', {
+            method: 'POST',
+            body: { ...content, to, discountPercent: opts?.discountPercent },
+        }),
     startCampaign: (id: number) =>
         request<MailCampaign>(`/admin/campaigns/${id}/start`, { method: 'POST', body: { consentConfirmed: true } }),
     pauseCampaign: (id: number) => request<MailCampaign>(`/admin/campaigns/${id}/pause`, { method: 'POST' }),
     cancelCampaign: (id: number) => request<MailCampaign>(`/admin/campaigns/${id}/cancel`, { method: 'POST' }),
     retryCampaignFailures: (id: number) => request<MailCampaign>(`/admin/campaigns/${id}/retry-failed`, { method: 'POST' }),
     deleteCampaign: (id: number) => request<{ success: true }>(`/admin/campaigns/${id}`, { method: 'DELETE' }),
+    downloadCampaignDiscountCodes: async (id: number) => {
+        const token = adminSession.getToken();
+        const res = await fetch(`${API_URL}/admin/campaigns/${id}/discount-codes`, {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            throw new AdminApiError((data as { error?: string }).error || 'İndirim kodları indirilemedi.', res.status);
+        }
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `kampanya-${id}-indirim-kodlari.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+    },
 
     socialStatus: () => request<SocialStatus>('/admin/social/status'),
     connectMeta: (input: SocialMetaConnectInput) =>
