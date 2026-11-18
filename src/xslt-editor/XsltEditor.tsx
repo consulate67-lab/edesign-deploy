@@ -38,7 +38,7 @@ import {
 } from 'lucide-react';
 import { karekodSnippet, hasQrLibrary } from './karekod';
 import {
-    barcodeSnippet, barcodeContent, barcodeAttrs, readBarcode, defaultBarcode, ensureBarcodeLibrary,
+    barcodeSnippet, barcodeContent, barcodeAttrs, readBarcode, defaultBarcode, ensureBarcodeLibrary, hasBarcodeLibrary,
     BARCODE_FORMATS, type BarcodeModel,
 } from './barcode';
 import {
@@ -182,7 +182,10 @@ function refreshObjectContents(xslt: string, catalog: CatalogField[], lang: DocL
         }
         if (content !== null) next = replaceElementContent(next, tag, content);
     }
-    return ensureDecimalFormat(next);
+    next = ensureDecimalFormat(next);
+    // Eski gömülü JsBarcode CDATA'sı bozuksa güvenli kopyayla değiştir.
+    if (next.includes('data-obj-kind="barcode"') || hasBarcodeLibrary(next)) next = ensureBarcodeLibrary(next);
+    return next;
 }
 
 /** Yer seçme modunda eklenecek şey: katalog alanı ya da pay çubuğu. */

@@ -5,9 +5,24 @@
  *
  * GİB karekodundan ayrıdır: karekod sabit JSON payload; barkod alan bağlanır.
  */
-import BARCODE_LIB from './vendor/jsbarcode.min.js?raw';
+import BARCODE_LIB_RAW from './vendor/jsbarcode.min.js?raw';
 import { fieldXPath, type CatalogField } from './fieldCatalog';
 import { QR_SCRIPT_LOOKUP } from './utils/legacyViewerCompat';
+
+/**
+ * JsBarcode CODE128 tablosunda `\0`…`\u001F` gibi kontrol karakterleri geçiyor.
+ * Bunlar XML 1.0'da (CDATA içinde bile) yasak; XSLT parse “CData section not finished”
+ * verir. Karakterleri JS `\u00XX` kaçışına çevirince hem XML hem çalışma zamanı aynı kalır.
+ */
+const BARCODE_LIB = (() => {
+    let out = '';
+    for (let i = 0; i < BARCODE_LIB_RAW.length; i++) {
+        const c = BARCODE_LIB_RAW.charCodeAt(i);
+        const illegal = (c >= 0 && c <= 8) || c === 0x0b || c === 0x0c || (c >= 0x0e && c <= 0x1f);
+        out += illegal ? `\\u${c.toString(16).padStart(4, '0')}` : BARCODE_LIB_RAW[i];
+    }
+    return out;
+})();
 
 /** JsBarcode.all.min.js'in desteklediği biçimler. */
 export const BARCODE_FORMATS = [
@@ -141,11 +156,16 @@ export function barcodeContent(m: BarcodeModel, catalog: CatalogField[], inLine:
         + `<script type="text/javascript"><![CDATA[${RENDER_JS}]]></script>`;
 }
 
-/** İlk barkod eklenirken kütüphaneyi XSLT'ye bir kez gömer. */
+/**
+ * Barkod kütüphanesini XSLT'ye gömer.
+ * Daha önce gömülmüş (ve eski sürümde CDATA'yı bozan) kopyayı güvenli sürümle değiştirir.
+ */
 export function ensureBarcodeLibrary(xslt: string): string {
-    if (hasBarcodeLibrary(xslt)) return xslt;
     const tag = `<script type="text/javascript"><![CDATA[${LIB_MARK}${BARCODE_LIB}]]></script>`;
-    if (/<\/body>/i.test(xslt)) return xslt.replace(/<\/body>/i, `${tag}</body>`);
+    // Fonksiyon replacer: kütüphanedeki `$` dizileri String.replace özel kalıplarına düşmesin.
+    const existing = /<script\b[^>]*>[\s\S]*?\/\*edx-jsbarcode\*\/[\s\S]*?<\/script>/i;
+    if (existing.test(xslt)) return xslt.replace(existing, () => tag);
+    if (/<\/body>/i.test(xslt)) return xslt.replace(/<\/body>/i, () => `${tag}</body>`);
     return `${xslt}${tag}`;
 }
 
