@@ -59,7 +59,7 @@ export interface BarcodeModel {
     displayValue: boolean;
     /** Çubuk yüksekliği (px). */
     height: number;
-    /** Modül genişliği (px). */
+    /** Modül genişliği (px); kolon dar ise otomatik küçülür. */
     moduleWidth: number;
 }
 
@@ -67,9 +67,12 @@ export const DEFAULT_BARCODE: BarcodeModel = {
     format: 'CODE128',
     field: '',
     displayValue: true,
-    height: 48,
-    moduleWidth: 1.6,
+    height: 40,
+    moduleWidth: 1.4,
 };
+
+export const BARCODE_HEIGHT_MIN = 12;
+export const BARCODE_HEIGHT_MAX = 120;
 
 const LIB_MARK = '/*edx-jsbarcode*/';
 export const hasBarcodeLibrary = (xslt: string) => xslt.includes(LIB_MARK);
@@ -88,8 +91,8 @@ export function readBarcode(el: Element): BarcodeModel {
         format: oneOf(el.getAttribute('data-barcode-format'), BARCODE_FORMATS, 'CODE128'),
         field: el.getAttribute('data-barcode-field') || '',
         displayValue: el.getAttribute('data-barcode-displayvalue') !== '0',
-        height: clamp(num('height', 48), 20, 120),
-        moduleWidth: clamp(num('width', 1.6), 0.8, 4),
+        height: clamp(num('height', 40), BARCODE_HEIGHT_MIN, BARCODE_HEIGHT_MAX),
+        moduleWidth: clamp(num('width', 1.4), 0.6, 4),
     };
 }
 
@@ -133,45 +136,67 @@ export function defaultBarcode(catalog: CatalogField[], inLine: boolean): Barcod
 }
 
 /**
- * IE / gömülü görüntüleyicide currentScript olmayabilir.
- * Kutuyu SVG olarak JsBarcode ile doldurur; hatalı değerde sessizce geçer.
+ * Kütüphane <head>/<body> başında; hücre içi betik ondan önce çalışabilir.
+ * JsBarcode gelene kadar bekler, çizer, sonra kolon genişliğine sığdırır.
  */
-const RENDER_JS = `(function(){${QR_SCRIPT_LOOKUP}if(!b||typeof JsBarcode==='undefined')return;`
+const RENDER_JS = `(function(){${QR_SCRIPT_LOOKUP}if(!b)return;`
     + "var t=b.querySelector('[data-barcode-box]'),d=b.querySelector('[data-barcode-value]');"
     + "if(!t||!d||t.getAttribute('data-barcode-drawn'))return;"
-    + "var text=(d.textContent||'').replace(/\\s+/g,' ').trim();if(!text)return;"
-    + "try{JsBarcode(t,text,{format:b.getAttribute('data-barcode-format')||'CODE128',"
+    + "var tries=0;"
+    + "function fit(){"
+    + "var cell=b.parentElement,maxW=0;"
+    + "while(cell&&(!maxW||maxW<8)){maxW=cell.clientWidth||0;if(/^(TD|TH|DIV|TD)$/i.test(cell.tagName))break;cell=cell.parentElement;}"
+    + "if(!maxW)maxW=b.clientWidth||0;"
+    + "if(maxW<8)return;"
+    + "t.style.maxWidth='100%';t.style.width='100%';t.style.height='auto';t.style.display='block';"
+    + "try{if(!t.getAttribute('viewBox')&&t.getBBox){var bb=t.getBBox();if(bb.width>0&&bb.height>0)t.setAttribute('viewBox',[bb.x,bb.y,bb.width,bb.height].join(' '));}"
+    + "t.setAttribute('preserveAspectRatio','xMidYMid meet');"
+    + "t.removeAttribute('width');t.removeAttribute('height');}catch(e){}"
+    + "b.style.maxWidth='100%';b.style.width='100%';b.style.boxSizing='border-box';"
+    + "}"
+    + "function draw(){"
+    + "if(typeof JsBarcode==='undefined'){if(++tries<80)return setTimeout(draw,25);return;}"
+    + "var text=(d.textContent||'').replace(/\\s+/g,' ').trim();"
+    + "if(!text){t.setAttribute('data-barcode-empty','1');t.style.minHeight=(parseInt(b.getAttribute('data-barcode-height'),10)||40)+'px';t.style.width='100%';return;}"
+    + "try{"
+    + "var h=parseInt(b.getAttribute('data-barcode-height'),10)||40;"
+    + "var w=parseFloat(b.getAttribute('data-barcode-width'));if(!(w>0))w=1.4;"
+    + "JsBarcode(t,text,{format:b.getAttribute('data-barcode-format')||'CODE128',"
     + "displayValue:b.getAttribute('data-barcode-displayvalue')!=='0',"
-    + "height:parseInt(b.getAttribute('data-barcode-height'),10)||48,"
-    + "width:parseFloat(b.getAttribute('data-barcode-width'))||1.6,"
-    + "margin:4,fontSize:12,textMargin:2,background:'#ffffff',lineColor:'#000000'});"
-    + "t.setAttribute('data-barcode-drawn','1');}catch(e){}})();";
+    + "height:h,width:w,margin:2,fontSize:Math.max(8,Math.min(14,Math.round(h*0.28))),"
+    + "textMargin:1,background:'#ffffff',lineColor:'#000000',xmlDocument:t.ownerDocument});"
+    + "t.setAttribute('data-barcode-drawn','1');fit();"
+    + "}catch(e){t.setAttribute('data-barcode-error','1');}"
+    + "}"
+    + "if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',draw);else draw();"
+    + "})();";
 
 export function barcodeContent(m: BarcodeModel, catalog: CatalogField[], inLine: boolean): string | null {
     const f = catalog.find(x => x.key === m.field);
     if (!f) return null;
     const xp = fieldXPath(f, inLine);
-    return '<svg data-barcode-box="" xmlns="http://www.w3.org/2000/svg"><xsl:text> </xsl:text></svg>'
+    return '<svg data-barcode-box="" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;width:100%;height:auto;display:block"><xsl:text> </xsl:text></svg>'
         + `<span data-barcode-value="" style="display:none"><xsl:value-of select="${xp}"/></span>`
         + `<script type="text/javascript"><![CDATA[${RENDER_JS}]]></script>`;
 }
 
 /**
- * Barkod kütüphanesini XSLT'ye gömer.
- * Daha önce gömülmüş (ve eski sürümde CDATA'yı bozan) kopyayı güvenli sürümle değiştirir.
+ * Barkod kütüphanesini XSLT'ye gömer (<head> veya <body> başı).
+ * Daha önce gömülmüş bozuk kopyayı güvenli sürümle değiştirir.
  */
 export function ensureBarcodeLibrary(xslt: string): string {
     const tag = `<script type="text/javascript"><![CDATA[${LIB_MARK}${BARCODE_LIB}]]></script>`;
-    // Fonksiyon replacer: kütüphanedeki `$` dizileri String.replace özel kalıplarına düşmesin.
     const existing = /<script\b[^>]*>[\s\S]*?\/\*edx-jsbarcode\*\/[\s\S]*?<\/script>/i;
     if (existing.test(xslt)) return xslt.replace(existing, () => tag);
+    if (/<\/head>/i.test(xslt)) return xslt.replace(/<\/head>/i, () => `${tag}</head>`);
+    if (/<body\b[^>]*>/i.test(xslt)) return xslt.replace(/<body\b[^>]*>/i, (open) => `${open}${tag}`);
     if (/<\/body>/i.test(xslt)) return xslt.replace(/<\/body>/i, () => `${tag}</body>`);
-    return `${xslt}${tag}`;
+    return `${tag}${xslt}`;
 }
 
 export function barcodeSnippet(id: string, m: BarcodeModel, catalog: CatalogField[], inLine: boolean): string | null {
     const inner = barcodeContent(m, catalog, inLine);
     if (!inner) return null;
     const attrs = barcodeAttrs(m).map(([k, v]) => `${k}="${v}"`).join(' ');
-    return `<div data-xslt-obj="${id}" data-obj-kind="barcode" ${attrs} style="display:inline-block;max-width:100%;line-height:0">${inner}</div>`;
+    return `<div data-xslt-obj="${id}" data-obj-kind="barcode" ${attrs} style="display:block;max-width:100%;width:100%;line-height:0;box-sizing:border-box">${inner}</div>`;
 }

@@ -367,8 +367,8 @@ const editor = {
         displayValue: 'Altında metni göster',
         height: 'Yükseklik (px)',
         moduleWidth: 'Çubuk kalınlığı',
-        inlineNote: 'Barkod satır tablosunun içinde: her kalemde seçilen alanın o satırdaki değeri çizilir.',
-        note: 'Barkod değeri seçtiğiniz XML alanından gelir. Satır (kalem) tablosuna eklediğinizde her satır kendi kodunu çizer. GİB karekodundan farklıdır; karekod resmi içerik üretir.',
+        inlineNote: 'Barkod satır tablosunun içinde: her kalemde seçilen alanın o satırdaki değeri çizilir; genişlik kolona sığacak şekilde küçülür.',
+        note: 'Barkod değeri seçtiğiniz XML alanından gelir. Satır tablosunda her satır kendi kodunu çizer ve kolon genişliğine sığacak şekilde ölçeklenir. Alan boşsa barkod çizilmez — örnek veride dolu bir alan (ör. Satıcı stok kodu) seçin. GİB karekodundan ayrıdır.',
         formats: {
             CODE128: 'Code 128 (otomatik)',
             CODE128A: 'Code 128 A',

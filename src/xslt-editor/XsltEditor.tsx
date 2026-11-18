@@ -39,7 +39,7 @@ import {
 import { karekodSnippet, hasQrLibrary } from './karekod';
 import {
     barcodeSnippet, barcodeContent, barcodeAttrs, readBarcode, defaultBarcode, ensureBarcodeLibrary, hasBarcodeLibrary,
-    BARCODE_FORMATS, type BarcodeModel,
+    BARCODE_FORMATS, BARCODE_HEIGHT_MIN, BARCODE_HEIGHT_MAX, type BarcodeModel,
 } from './barcode';
 import {
     chartSnippet, chartContent, chartAttrs, readChart, defaultChart, shareBarChart, renderChartHtml,
@@ -1392,10 +1392,10 @@ const BarcodeEditor: React.FC<{
                     <input
                         type="number"
                         data-barcode-height
-                        min={20}
-                        max={120}
+                        min={BARCODE_HEIGHT_MIN}
+                        max={BARCODE_HEIGHT_MAX}
                         value={model.height}
-                        onChange={(e) => update({ height: Number(e.target.value) || 48 })}
+                        onChange={(e) => update({ height: Number(e.target.value) || 40 })}
                         style={fieldInputStyle}
                     />
                 </div>
@@ -1404,11 +1404,11 @@ const BarcodeEditor: React.FC<{
                     <input
                         type="number"
                         data-barcode-width
-                        min={0.8}
+                        min={0.6}
                         max={4}
                         step={0.1}
                         value={model.moduleWidth}
-                        onChange={(e) => update({ moduleWidth: Number(e.target.value) || 1.6 })}
+                        onChange={(e) => update({ moduleWidth: Number(e.target.value) || 1.4 })}
                         style={fieldInputStyle}
                     />
                 </div>
@@ -2945,10 +2945,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const handleBarcodeChange = useCallback((m: BarcodeModel) => {
         const content = barcodeContent(m, catalogRef.current, selectedObjInLine());
         if (content === null) return;
-        for (const [attr, value] of barcodeAttrs(m)) handleAttrChange(attr, value);
-        const f = catalogRef.current.find(x => x.key === m.field);
-        handleContentChange(content, f ? evaluateField(xmlDocRef.current, f) : undefined);
-    }, [selectedObjInLine, handleAttrChange, handleContentChange]);
+        // Önizleme DOM'unu textContent ile silme: XSLT flush sonrası tam yenilenir.
+        for (const [attr, value] of barcodeAttrs(m)) {
+            selectedObjectRef.current?.element?.setAttribute(attr, value);
+            pendingAttrRef.current[attr] = value;
+        }
+        pendingContentRef.current = content;
+        scheduleSourceFlush();
+    }, [selectedObjInLine, scheduleSourceFlush]);
 
     const handleFieldChange = useCallback((key: string) => {
         const f = catalogRef.current.find(x => x.key === key);

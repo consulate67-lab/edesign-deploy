@@ -369,8 +369,8 @@ const editor: typeof tr = {
         displayValue: 'Show text underneath',
         height: 'Height (px)',
         moduleWidth: 'Bar thickness',
-        inlineNote: 'Barcode is inside the line table: each item draws the selected field\'s value for that row.',
-        note: 'The barcode value comes from the XML field you pick. In a line (item) table each row draws its own code. This is separate from the GİB QR code, which builds the official payload.',
+        inlineNote: 'Barcode is inside the line table: each item draws that row\'s field value and scales to the column width.',
+        note: 'The barcode value comes from the XML field you pick. In a line table each row draws its own code and scales to fit the column. If the field is empty nothing is drawn — pick a field that has a value in the sample data (e.g. seller item ID). Separate from the GİB QR code.',
         formats: {
             CODE128: 'Code 128 (auto)',
             CODE128A: 'Code 128 A',
