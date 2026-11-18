@@ -34,9 +34,13 @@ import {
     ArrowLeft, Save, Download, FileCode2,
     AlertCircle, AlertTriangle, Eye, RefreshCw, CheckCircle2, Sparkles, Search, ZoomIn, ZoomOut,
     PanelLeftClose, PanelLeftOpen, X, Lock, Undo2, Redo2,
-    Image as ImageIcon, Type, Table2, TextCursorInput, Calculator, Plus, Columns3, Wallpaper, QrCode, BarChart3, ChartNoAxesGantt,
+    Image as ImageIcon, Type, Table2, TextCursorInput, Calculator, Plus, Columns3, Wallpaper, QrCode, Barcode, BarChart3, ChartNoAxesGantt,
 } from 'lucide-react';
 import { karekodSnippet, hasQrLibrary } from './karekod';
+import {
+    barcodeSnippet, barcodeContent, barcodeAttrs, readBarcode, defaultBarcode, ensureBarcodeLibrary,
+    BARCODE_FORMATS, type BarcodeModel,
+} from './barcode';
 import {
     chartSnippet, chartContent, chartAttrs, readChart, defaultChart, shareBarChart, renderChartHtml,
     BAR_HEIGHT_MIN, BAR_HEIGHT_MAX, CHART_TYPES, CHART_SOURCES, CHART_SHOWS, CHART_PALETTES, type ChartModel, type ChartPalette,
@@ -157,7 +161,7 @@ const decodeAttr = (v: string) => v
  * `ids` verilmezse tüm formül objeleri yenilenir.
  */
 function refreshObjectContents(xslt: string, catalog: CatalogField[], lang: DocLanguage, ids?: string[]): string {
-    const targets = ids ?? [...xslt.matchAll(/<(?:span|div)\b[^>]*\bdata-obj-kind="(?:formula|chart)"[^>]*>/g)]
+    const targets = ids ?? [...xslt.matchAll(/<(?:span|div)\b[^>]*\bdata-obj-kind="(?:formula|chart|barcode)"[^>]*>/g)]
         .map(m => m[0].match(/\bdata-xslt-obj="([^"]+)"/)?.[1])
         .filter((x): x is string => !!x);
     let next = xslt;
@@ -171,6 +175,7 @@ function refreshObjectContents(xslt: string, catalog: CatalogField[], lang: DocL
         let content: string | null = null;
         if (kind === 'formula') content = formulaContent(readFormula(el), catalog, inLine, lang);
         else if (kind === 'chart') content = chartContent(id, readChart(el), catalog, inLine, lang);
+        else if (kind === 'barcode') content = barcodeContent(readBarcode(el), catalog, inLine);
         else if (kind === 'field') {
             const f = catalog.find(x => x.key === el.getAttribute('data-field'));
             if (f) content = fieldContent(f, inLine, lang, readFieldTransform(el));
@@ -1325,6 +1330,90 @@ const ChartFormula: React.FC<{
     );
 };
 
+/** Barkod objesi: tür, değer alanı, boyut. */
+const BarcodeEditor: React.FC<{
+    el: HTMLElement;
+    catalog: CatalogField[];
+    xmlDoc: Document | null;
+    inLine: boolean;
+    onChange: (m: BarcodeModel) => void;
+}> = ({ el, catalog, xmlDoc, inLine, onChange }) => {
+    const { t } = useLocaleT();
+    const [model, setModel] = useState<BarcodeModel>(() => readBarcode(el));
+    const modelRef = useRef(model);
+    const update = (patch: Partial<BarcodeModel>) => {
+        const next = { ...modelRef.current, ...patch };
+        modelRef.current = next;
+        setModel(next);
+        onChange(next);
+    };
+    return (
+        <div data-barcode-editor>
+            {inLine && (
+                <div data-barcode-inline-note style={{ marginBottom: '10px', fontSize: '11px', lineHeight: 1.45, color: '#2563eb' }}>
+                    {t('editor.barcode.inlineNote')}
+                </div>
+            )}
+            <label style={fieldLabelStyle}>{t('editor.barcode.format')}</label>
+            <select
+                data-barcode-format
+                value={model.format}
+                onChange={(e) => update({ format: e.target.value as BarcodeModel['format'] })}
+                style={{ ...fieldInputStyle, marginBottom: '10px' }}
+            >
+                {BARCODE_FORMATS.map(f => (
+                    <option key={f} value={f}>{t(`editor.barcode.formats.${f}`)}</option>
+                ))}
+            </select>
+            <label style={fieldLabelStyle}>{t('editor.barcode.field')}</label>
+            <select
+                data-barcode-field
+                value={model.field}
+                onChange={(e) => update({ field: e.target.value })}
+                style={{ ...fieldInputStyle, marginBottom: '10px' }}
+            >
+                <CatalogOptions fields={catalog} xmlDoc={xmlDoc} />
+            </select>
+            <label style={{ ...fieldLabelStyle, display: 'flex', alignItems: 'center', gap: 8, textTransform: 'none', letterSpacing: 0, fontSize: '12px', fontWeight: 600, color: '#334155' }}>
+                <input
+                    type="checkbox"
+                    data-barcode-displayvalue
+                    checked={model.displayValue}
+                    onChange={(e) => update({ displayValue: e.target.checked })}
+                />
+                {t('editor.barcode.displayValue')}
+            </label>
+            <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                <div style={{ flex: 1 }}>
+                    <label style={fieldLabelStyle}>{t('editor.barcode.height')}</label>
+                    <input
+                        type="number"
+                        data-barcode-height
+                        min={20}
+                        max={120}
+                        value={model.height}
+                        onChange={(e) => update({ height: Number(e.target.value) || 48 })}
+                        style={fieldInputStyle}
+                    />
+                </div>
+                <div style={{ flex: 1 }}>
+                    <label style={fieldLabelStyle}>{t('editor.barcode.moduleWidth')}</label>
+                    <input
+                        type="number"
+                        data-barcode-width
+                        min={0.8}
+                        max={4}
+                        step={0.1}
+                        value={model.moduleWidth}
+                        onChange={(e) => update({ moduleWidth: Number(e.target.value) || 1.6 })}
+                        style={fieldInputStyle}
+                    />
+                </div>
+            </div>
+        </div>
+    );
+};
+
 /** Grafik objesi: tür, veri kaynağı (belge satırları / elle satırlar), renkler ve gösterim. */
 const ChartEditor: React.FC<{
     el: HTMLElement;
@@ -2430,9 +2519,21 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         return true;
     }, [insertSnippet]);
 
-    const insertObject = useCallback((type: XsltInsertType | 'formula' | 'karekod' | 'chart', target: InsertTarget | null) => {
+    const insertObject = useCallback((type: XsltInsertType | 'formula' | 'karekod' | 'barcode' | 'chart', target: InsertTarget | null) => {
         if (type === 'karekod') {
             insertSnippet((id) => karekodSnippet(id, !hasQrLibrary(xsltContentRef.current)), target, 'karekod');
+            return;
+        }
+        if (type === 'barcode') {
+            const cat = catalogRef.current;
+            const ok = insertSnippet((id, inLine) => barcodeSnippet(id, defaultBarcode(cat, inLine), cat, inLine), target, 'barkod');
+            if (ok) {
+                const withLib = ensureBarcodeLibrary(xsltContentRef.current);
+                if (withLib !== xsltContentRef.current) {
+                    xsltContentRef.current = withLib;
+                    setXsltContent(withLib);
+                }
+            }
             return;
         }
         if (type === 'chart') {
@@ -2486,7 +2587,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
      * kalem satırına alan / satır formülü / boş hücre, başlığa kolon adı.
      * Seçim satır tablosunda değilse false.
      */
-    const insertColumn = useCallback((what: 'field' | 'formula' | 'chart' | 'empty', key?: string): boolean => {
+    const insertColumn = useCallback((what: 'field' | 'formula' | 'chart' | 'barcode' | 'empty', key?: string): boolean => {
         const xslt = xsltContentRef.current;
         const ctx = findLineTableCell(selectedObjectRef.current?.element ?? null, xslt);
         if (!ctx) return false;
@@ -2507,6 +2608,12 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 ?? DEFAULT_FORMULA.a;
             header = dt('editor.doc.computed');
             line = formulaSnippet(id, { ...DEFAULT_FORMULA, a, label: '', suffix: '' }, cat, true, lang);
+        } else if (what === 'barcode') {
+            const m = defaultBarcode(cat, true);
+            if (!m.field) return false;
+            header = docCatalogRef.current.find(x => x.key === m.field)?.label ?? i18n.t('editor.insert.barcode');
+            line = barcodeSnippet(id, m, cat, true) ?? '';
+            if (!line) return false;
         } else if (what === 'chart') {
             const m = defaultChart(cat);
             if (!cat.some(f => f.key === m.value && isLineField(f))) return false;
@@ -2518,6 +2625,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             : kind === 'header' ? `<span style="font-weight:bold;"><xsl:text>${escapeXmlText(header)}</xsl:text></span>` : '');
         if (!updated) return false;
         if (line.includes('format-number(')) updated = ensureDecimalFormat(updated);
+        if (what === 'barcode') updated = ensureBarcodeLibrary(updated);
         if (line) pendingSelectRef.current = { kind: 'obj', id };
         xsltContentRef.current = updated;
         setXsltContent(updated);
@@ -2830,6 +2938,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         for (const [attr, value] of chartAttrs(m)) handleAttrChange(attr, value);
         handleContentChange(content, undefined, previewHtml);
     }, [objInLine, handleAttrChange, handleContentChange]);
+
+    const handleBarcodeChange = useCallback((m: BarcodeModel) => {
+        const content = barcodeContent(m, catalogRef.current, selectedObjInLine());
+        if (content === null) return;
+        for (const [attr, value] of barcodeAttrs(m)) handleAttrChange(attr, value);
+        const f = catalogRef.current.find(x => x.key === m.field);
+        handleContentChange(content, f ? evaluateField(xmlDocRef.current, f) : undefined);
+    }, [selectedObjInLine, handleAttrChange, handleContentChange]);
 
     const handleFieldChange = useCallback((key: string) => {
         const f = catalogRef.current.find(x => x.key === key);
@@ -3634,7 +3750,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             if (!e.relatedTarget) markDropTarget(null);
         };
         const dropHandler = (e: DragEvent) => {
-            const type = e.dataTransfer?.getData('text/x-xslt-element') as XsltInsertType | 'formula' | 'karekod' | 'chart' | 'sharebar' | '';
+            const type = e.dataTransfer?.getData('text/x-xslt-element') as XsltInsertType | 'formula' | 'karekod' | 'barcode' | 'chart' | 'sharebar' | '';
             const fieldKey = e.dataTransfer?.getData('text/x-xslt-field') ?? '';
             const bindIndex = e.dataTransfer?.getData('text/x-xslt-bind') ?? '';
             markDropTarget(null);
@@ -4849,6 +4965,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             { type: 'formula', label: t('editor.insert.formula'), Icon: Calculator, color: '#db2777' },
                             { type: 'input', label: t('editor.insert.input'), Icon: TextCursorInput, color: '#dc2626' },
                             { type: 'karekod', label: t('editor.insert.qr'), Icon: QrCode, color: '#2563eb' },
+                            { type: 'barcode', label: t('editor.insert.barcode'), Icon: Barcode, color: '#7c3aed' },
                             { type: 'chart', label: t('editor.insert.chart'), Icon: BarChart3, color: '#0d9488' },
                             { type: 'sharebar', label: t('editor.insert.shareBar'), Icon: ChartNoAxesGantt, color: '#0891b2' },
                         ] as const).map(({ type, label, Icon, color }) => (
@@ -4866,7 +4983,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                         setPlacing({ key: '', label, kind: 'sharebar' });
                                         return;
                                     }
-                                    if ((type === 'formula' || type === 'chart') && insertMode === 'after' && insertColumn(type)) return;
+                                    if ((type === 'formula' || type === 'chart' || type === 'barcode') && insertMode === 'after' && insertColumn(type)) return;
                                     insertObject(type, insertMode === 'end'
                                         ? null
                                         : resolveInsertTarget(selectedObjectRef.current?.element ?? null, insertMode));
@@ -5295,6 +5412,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         const isFormula = objKind === 'formula';
                         const isField = objKind === 'field';
                         const isKarekod = objKind === 'karekod';
+                        const isBarcode = objKind === 'barcode';
                         const isChart = objKind === 'chart';
                         const isCell = tag === 'td' || tag === 'th';
                         const isLiteral = sel.locator?.kind === 'el';
@@ -5307,7 +5425,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         const kindDisplay = kind === 'dropdown' ? t('editor.panel.kind.dynamic')
                             : kind === 'static' ? t('editor.panel.kind.static')
                             : kind === 'element' ? t('editor.panel.kind.element')
-                            : isObj ? `${t('editor.panel.kind.object')} · ${isFormula ? t('editor.insert.formula') : isField ? t('editor.panel.kind.field') : isKarekod ? t('editor.insert.qr') : isChart ? t('editor.insert.chart') : isImg ? t('editor.insert.image') : isTable ? t('editor.insert.table') : isInput ? t('editor.insert.input') : t('editor.insert.text')}`
+                            : isObj ? `${t('editor.panel.kind.object')} · ${isFormula ? t('editor.insert.formula') : isField ? t('editor.panel.kind.field') : isKarekod ? t('editor.insert.qr') : isBarcode ? t('editor.insert.barcode') : isChart ? t('editor.insert.chart') : isImg ? t('editor.insert.image') : isTable ? t('editor.insert.table') : isInput ? t('editor.insert.input') : t('editor.insert.text')}`
                             : isImg ? t('editor.insert.image')
                             : isLine ? t('editor.panel.kind.line')
                             : isCell ? t('editor.panel.kind.cell')
@@ -5653,6 +5771,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                         </>
                                     )}
 
+                                    {isObj && el && isBarcode && (
+                                        <>
+                                            {sectionTitle(t('editor.insert.barcode'), '#7c3aed')}
+                                            <BarcodeEditor key={fieldKey('barcode')} el={el} catalog={catalog} xmlDoc={xmlDoc} inLine={sel.locator?.kind === 'obj' ? objInLine(sel.locator.id) : false} onChange={handleBarcodeChange} />
+                                            {noteBox(t('editor.barcode.note'), 'info')}
+                                        </>
+                                    )}
+
                                     {isObj && el && isChart && sel.locator?.kind === 'obj' && (
                                         <>
                                             {sectionTitle(t('editor.insert.chart'), '#0d9488')}
@@ -5661,7 +5787,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                         </>
                                     )}
 
-                                    {isObj && el && !isImg && !isInput && !isTable && !isFormula && !isField && !isKarekod && !isChart && (
+                                    {isObj && el && !isImg && !isInput && !isTable && !isFormula && !isField && !isKarekod && !isBarcode && !isChart && (
                                         <>
                                             {sectionTitle(t('editor.panel.textContent'), '#059669')}
                                             <FieldTextArea key={fieldKey('text')} label={t('editor.insert.text')} currentValue={el.innerText} onChange={(v) => handleContentChange(textToMarkup(v))} />
