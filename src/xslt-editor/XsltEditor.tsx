@@ -1344,6 +1344,11 @@ const BarcodeEditor: React.FC<{
     const { t } = useLocaleT();
     const [model, setModel] = useState<BarcodeModel>(() => readBarcode(el));
     const modelRef = useRef(model);
+    const sample = useMemo(() => {
+        const f = catalog.find(x => x.key === model.field);
+        if (!f || !xmlDoc) return '';
+        try { return evaluateField(xmlDoc, f); } catch { return ''; }
+    }, [catalog, model.field, xmlDoc]);
     const update = (patch: Partial<BarcodeModel>) => {
         const next = { ...modelRef.current, ...patch };
         modelRef.current = next;
@@ -1373,10 +1378,15 @@ const BarcodeEditor: React.FC<{
                 data-barcode-field
                 value={model.field}
                 onChange={(e) => update({ field: e.target.value })}
-                style={{ ...fieldInputStyle, marginBottom: '10px' }}
+                style={{ ...fieldInputStyle, marginBottom: '4px' }}
             >
                 <CatalogOptions fields={catalog} xmlDoc={xmlDoc} />
             </select>
+            <div data-barcode-sample style={{ fontSize: '10px', lineHeight: 1.4, marginBottom: '10px', color: sample ? '#64748b' : '#b45309' }}>
+                {sample
+                    ? t('editor.barcode.sample', { value: sample.length > 80 ? `${sample.slice(0, 77)}…` : sample })
+                    : t('editor.barcode.emptySample')}
+            </div>
             <label style={{ ...fieldLabelStyle, display: 'flex', alignItems: 'center', gap: 8, textTransform: 'none', letterSpacing: 0, fontSize: '12px', fontWeight: 600, color: '#334155' }}>
                 <input
                     type="checkbox"

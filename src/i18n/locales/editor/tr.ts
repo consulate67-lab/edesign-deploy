@@ -368,7 +368,9 @@ const editor = {
         height: 'Yükseklik (px)',
         moduleWidth: 'Çubuk kalınlığı',
         inlineNote: 'Barkod satır tablosunun içinde: her kalemde seçilen alanın o satırdaki değeri çizilir; genişlik kolona sığacak şekilde küçülür.',
-        note: 'Barkod değeri seçtiğiniz XML alanından gelir. Satır tablosunda her satır kendi kodunu çizer ve kolon genişliğine sığacak şekilde ölçeklenir. Alan boşsa barkod çizilmez — örnek veride dolu bir alan (ör. Satıcı stok kodu) seçin. GİB karekodundan ayrıdır.',
+        sample: 'Örnek değer: {{value}}',
+        emptySample: 'Bu alan örnek XML’de boş — barkod çizilmez. Dolu bir alan seçin veya XML’e değer ekleyin.',
+        note: 'Barkod, seçtiğiniz alandan gelir. Türkçe harfler (ç/ğ/ş/ı/ö/ü) çizim için ASCII’ye çevrilir. EAN/UPC gibi türler yalnız rakam kabul eder. Satırda her kalem kendi kodunu çizer ve kolona sığar. GİB karekodundan ayrıdır.',
         formats: {
             CODE128: 'Code 128 (otomatik)',
             CODE128A: 'Code 128 A',

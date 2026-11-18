@@ -71,7 +71,7 @@ export const DEFAULT_BARCODE: BarcodeModel = {
     moduleWidth: 1.4,
 };
 
-export const BARCODE_HEIGHT_MIN = 12;
+export const BARCODE_HEIGHT_MIN = 10;
 export const BARCODE_HEIGHT_MAX = 120;
 
 const LIB_MARK = '/*edx-jsbarcode*/';
@@ -138,6 +138,9 @@ export function defaultBarcode(catalog: CatalogField[], inLine: boolean): Barcod
 /**
  * Kütüphane <head>/<body> başında; hücre içi betik ondan önce çalışabilir.
  * JsBarcode gelene kadar bekler, çizer, sonra kolon genişliğine sığdırır.
+ *
+ * CODE128/39 yalnızca ASCII; Türkçe ürün adları geçersiz sayılır.
+ * Bu yüzden çizim öncesi ASCII'ye sadeleştirilir (ç→c, ğ→g …).
  */
 const RENDER_JS = `(function(){${QR_SCRIPT_LOOKUP}if(!b)return;`
     + "var t=b.querySelector('[data-barcode-box]'),d=b.querySelector('[data-barcode-value]');"
@@ -145,7 +148,7 @@ const RENDER_JS = `(function(){${QR_SCRIPT_LOOKUP}if(!b)return;`
     + "var tries=0;"
     + "function fit(){"
     + "var cell=b.parentElement,maxW=0;"
-    + "while(cell&&(!maxW||maxW<8)){maxW=cell.clientWidth||0;if(/^(TD|TH|DIV|TD)$/i.test(cell.tagName))break;cell=cell.parentElement;}"
+    + "while(cell&&(!maxW||maxW<8)){maxW=cell.clientWidth||0;if(/^(TD|TH|DIV)$/i.test(cell.tagName))break;cell=cell.parentElement;}"
     + "if(!maxW)maxW=b.clientWidth||0;"
     + "if(maxW<8)return;"
     + "t.style.maxWidth='100%';t.style.width='100%';t.style.height='auto';t.style.display='block';"
@@ -154,19 +157,47 @@ const RENDER_JS = `(function(){${QR_SCRIPT_LOOKUP}if(!b)return;`
     + "t.removeAttribute('width');t.removeAttribute('height');}catch(e){}"
     + "b.style.maxWidth='100%';b.style.width='100%';b.style.boxSizing='border-box';"
     + "}"
+    + "function showMsg(msg){"
+    + "t.setAttribute('data-barcode-drawn','1');"
+    + "while(t.firstChild)t.removeChild(t.firstChild);"
+    + "t.removeAttribute('viewBox');t.setAttribute('width','100%');t.setAttribute('height','28');"
+    + "var te=t.ownerDocument.createElementNS('http://www.w3.org/2000/svg','text');"
+    + "te.setAttribute('x','4');te.setAttribute('y','18');te.setAttribute('fill','#b45309');"
+    + "te.setAttribute('font-size','10');te.setAttribute('font-family','Arial,sans-serif');"
+    + "te.appendChild(t.ownerDocument.createTextNode(msg));t.appendChild(te);"
+    + "b.style.minHeight='28px';"
+    + "}"
+    + "function ascii(raw,format){"
+    + "var map={'\\u011f':'g','\\u00fc':'u','\\u015f':'s','\\u0131':'i','\\u00f6':'o','\\u00e7':'c',"
+    + "'\\u011e':'G','\\u00dc':'U','\\u015e':'S','\\u0130':'I','\\u00d6':'O','\\u00c7':'C'};"
+    + "var s=String(raw||'').replace(/[\\u011f\\u00fc\\u015f\\u0131\\u00f6\\u00e7\\u011e\\u00dc\\u015e\\u0130\\u00d6\\u00c7]/g,function(c){return map[c]||c;});"
+    + "s=s.replace(/\\s+/g,' ').trim();"
+    + "var f=(format||'CODE128').toUpperCase();"
+    + "if(/^EAN|^UPC|^ITF|^MSI|^PHARMA/.test(f))s=s.replace(/\\D/g,'');"
+    + "else if(f==='CODE39')s=s.toUpperCase().replace(/[^0-9A-Z\\-. $\\/+%]/g,'');"
+    + "else if(f==='CODABAR')s=s.toUpperCase().replace(/[^0-9A-D\\-$:\\.\\/+]/g,'');"
+    + "else s=s.replace(/[^\\x20-\\x7E]/g,'');"
+    + "if(s.length>48)s=s.slice(0,48);"
+    + "return s.trim();"
+    + "}"
     + "function draw(){"
     + "if(typeof JsBarcode==='undefined'){if(++tries<80)return setTimeout(draw,25);return;}"
-    + "var text=(d.textContent||'').replace(/\\s+/g,' ').trim();"
-    + "if(!text){t.setAttribute('data-barcode-empty','1');t.style.minHeight=(parseInt(b.getAttribute('data-barcode-height'),10)||40)+'px';t.style.width='100%';return;}"
+    + "var raw=(d.textContent||'').replace(/\\s+/g,' ').trim();"
+    + "if(!raw){showMsg('deger yok');return;}"
+    + "var format=b.getAttribute('data-barcode-format')||'CODE128';"
+    + "var text=ascii(raw,format);"
+    + "if(!text){showMsg('barkoda uygun degil');return;}"
     + "try{"
     + "var h=parseInt(b.getAttribute('data-barcode-height'),10)||40;"
     + "var w=parseFloat(b.getAttribute('data-barcode-width'));if(!(w>0))w=1.4;"
-    + "JsBarcode(t,text,{format:b.getAttribute('data-barcode-format')||'CODE128',"
+    + "var label=raw.length>40?raw.slice(0,37)+'...':raw;"
+    + "JsBarcode(t,text,{format:format,"
     + "displayValue:b.getAttribute('data-barcode-displayvalue')!=='0',"
+    + "text:label,"
     + "height:h,width:w,margin:2,fontSize:Math.max(8,Math.min(14,Math.round(h*0.28))),"
     + "textMargin:1,background:'#ffffff',lineColor:'#000000',xmlDocument:t.ownerDocument});"
     + "t.setAttribute('data-barcode-drawn','1');fit();"
-    + "}catch(e){t.setAttribute('data-barcode-error','1');}"
+    + "}catch(e){showMsg('kodlanamadi');}"
     + "}"
     + "if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',draw);else draw();"
     + "})();";

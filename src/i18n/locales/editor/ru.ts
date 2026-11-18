@@ -407,6 +407,8 @@ const editor: typeof tr = {
         height: 'Height (px)',
         moduleWidth: 'Bar thickness',
         inlineNote: 'Barcode is inside the line table: each item draws the selected field value for that row.',
+        sample: 'Sample value: {{value}}',
+        emptySample: 'This field is empty in the sample XML — nothing is drawn. Pick a field that has a value, or add one to the XML.',
         note: 'The barcode value comes from the XML field you pick. In a line table each row draws its own code.',
         formats: {
             CODE128: 'Code 128 (auto)',
