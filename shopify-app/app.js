@@ -5,10 +5,12 @@
     shop: (qs.get('shop') || sessionStorage.getItem('edx_shopify_shop') || '').toLowerCase(),
     country: (qs.get('country') || sessionStorage.getItem('edx_shopify_country') || 'TR').toUpperCase(),
     docType: (qs.get('doc_type') || sessionStorage.getItem('edx_shopify_doc') || '').toLowerCase(),
+    sector: (qs.get('sector') || sessionStorage.getItem('edx_shopify_sector') || '').toLowerCase(),
     templates: [],
     selected: null,
     previewHtml: '',
     previewBusy: false,
+    previewWarning: '',
     bootstrap: null,
     docTypes: [
       { id: '', label: 'Tümü' },
@@ -25,6 +27,11 @@
       { code: 'CN', label: 'Çin (CN)' },
       { code: 'RU', label: 'Rusya (RU)' },
     ],
+    sectors: [],
+    orders: [],
+    orderId: sessionStorage.getItem('edx_shopify_order') || '',
+    ordersWarning: '',
+    downloadApproved: false,
     form: {
       company_name: '',
       accent: '#1e3a8a',
@@ -68,7 +75,7 @@
         if (token) return { Authorization: `Bearer ${token}` };
       }
     } catch {
-      /* App Bridge yoksa (dışarıdan açılış) sessiz geç */
+      /* App Bridge yoksa sessiz geç */
     }
     return {};
   }
@@ -82,7 +89,6 @@
       m.content = apiKey;
       document.head.appendChild(m);
     }
-    // index.html CDN script yüklediyse bekle; yoksa ekle
     if (!window.shopify) {
       await new Promise((resolve) => {
         const existing = document.querySelector('script[src*="shopifycloud/app-bridge"]');
@@ -101,7 +107,6 @@
         document.head.appendChild(s);
       });
     }
-    // Session token hazır olsun
     for (let i = 0; i < 20 && !(window.shopify && typeof window.shopify.idToken === 'function'); i += 1) {
       await new Promise((r) => setTimeout(r, 50));
     }
@@ -121,7 +126,6 @@
     });
     let auth = await idTokenHeader();
     let res = await doFetch(auth);
-    // App Bridge: 401 + retry header → taze token ile bir kez dene
     if (res.status === 401 && res.headers.get('X-Shopify-Retry-Invalid-Session-Request') === '1') {
       auth = await idTokenHeader();
       if (auth.Authorization) res = await doFetch(auth);
@@ -136,6 +140,10 @@
     return res;
   }
 
+  function tplApi(id, suffix) {
+    return `/api/shopify/ui/templates/${encodeURIComponent(String(id))}${suffix || ''}`;
+  }
+
   function setStep(step) {
     state.step = step;
     render();
@@ -145,13 +153,17 @@
     return `$${((cents || 0) / 100).toFixed(2)}`;
   }
 
+  function docTypeLabel(id) {
+    return ({ fatura: 'e-Fatura', arsiv: 'e-Arşiv', irsaliye: 'e-İrsaliye' })[id] || id || '';
+  }
+
   function renderSteps() {
     const order = ['intro', 'catalog', 'customize', 'download'];
     const labels = {
       intro: ['1. Başla', 'Nasıl kullanılır'],
       catalog: ['2. Şablon', 'Tasarım seçin'],
       customize: ['3. Özelleştir', 'Logo / renk / unvan'],
-      download: ['4. İndir', 'Satın al ve XSLT al'],
+      download: ['4. İndir', 'Test → onay → XSLT'],
     };
     const idx = order.indexOf(state.step);
     return order.map((key, i) => {
@@ -162,15 +174,51 @@
     }).join('');
   }
 
+  function countryOptionsHtml() {
+    const opts = state.countries?.length ? state.countries : [];
+    return [
+      '<option value="">Tümü</option>',
+      ...opts.map((c) => {
+        const code = typeof c === 'string' ? c : c.code;
+        const label = typeof c === 'string' ? c : (c.label || c.code);
+        return `<option value="${escapeHtml(code)}">${escapeHtml(label)}</option>`;
+      }),
+    ].join('');
+  }
+
+  function sectorOptionsHtml() {
+    return [
+      '<option value="">Tüm sektörler</option>',
+      ...(state.sectors || []).map((s) => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.label || s.id)}</option>`),
+    ].join('');
+  }
+
+  function orderOptionsHtml() {
+    return [
+      '<option value="">Örnek XML (sipariş yok)</option>',
+      ...(state.orders || []).map((o) => {
+        const label = `${o.name || o.id} · ${o.total || ''} ${o.currency || ''} · ${o.customer || ''}`.trim();
+        return `<option value="${escapeHtml(o.id)}">${escapeHtml(label)}</option>`;
+      }),
+    ].join('');
+  }
+
+  function previewStageHtml() {
+    if (!state.selected) {
+      return '<div class="preview-placeholder">Soldan şablon seçin. İsterseniz üstten Shopify siparişi seçerek kalemleri önizleyin.</div>';
+    }
+    if (state.previewBusy) return '<div class="preview-placeholder">Önizleme hazırlanıyor…</div>';
+    return `<iframe class="preview-frame" title="Şablon önizleme" srcdoc="${escapeHtml(state.previewHtml || '<p style=padding:16px;font-family:sans-serif>Önizleme yok</p>')}"></iframe>`;
+  }
+
   function renderIntro() {
     const how = state.bootstrap?.how_to || [];
     return `
       <section class="panel">
         <h2>Hazır e-fatura şablonları</h2>
         <p class="lead">
-          Shopify mağazanız için hazır XSLT tasarım seçin, markanızı uygulayın ve dosyayı indirip
-          kendi e-fatura entegratörünüze yükleyin. Bu uygulama siparişleri otomatik göndermez;
-          tasarım dosyası üretir.
+          Shopify mağazanız için hazır XSLT tasarım seçin, siparişinizle önizleyin, markanızı uygulayın.
+          Önce test indirin; onayladıktan sonra gerçek dosyayı alın.
         </p>
         <div class="howto">
           ${how.map((h, i) => `
@@ -191,30 +239,15 @@
     `;
   }
 
-  function countryOptionsHtml() {
-    const opts = state.countries?.length ? state.countries : [];
-    return [
-      '<option value="">Tümü</option>',
-      ...opts.map((c) => {
-        const code = typeof c === 'string' ? c : c.code;
-        const label = typeof c === 'string' ? c : (c.label || c.code);
-        return `<option value="${escapeHtml(code)}">${escapeHtml(label)}</option>`;
-      }),
-    ].join('');
-  }
-
-  function docTypeLabel(id) {
-    return ({ fatura: 'e-Fatura', arsiv: 'e-Arşiv', irsaliye: 'e-İrsaliye' })[id] || id || '';
-  }
-
   function renderCatalog() {
+    const showSector = !state.country || state.country === 'TR';
     const cards = state.templates.length
       ? state.templates.map((t) => {
           const sel = String(state.selected?.id) === String(t.id);
           return `
           <article class="card ${sel ? 'selected' : ''}" data-id="${escapeHtml(String(t.id))}">
             <h3>${escapeHtml(t.name)}</h3>
-            <div class="meta">${escapeHtml(docTypeLabel(t.doc_type_id || t.module_id))} · ${escapeHtml(t.sector || t.module_id || '')}</div>
+            <div class="meta">${escapeHtml(docTypeLabel(t.doc_type_id || t.module_id))} · ${escapeHtml(t.sector_label || t.sector || '')}</div>
             <div class="meta clamp">${escapeHtml(t.description || 'Hazır fatura / irsaliye XSLT şablonu.')}</div>
             <div class="card-foot">
               <div class="price">${priceLabel(t.price_cents)}</div>
@@ -222,42 +255,39 @@
             </div>
           </article>`;
         }).join('')
-      : `<div class="empty">Bu filtre için şablon yok. Belge tipi veya ülkeyi değiştirin.</div>`;
+      : `<div class="empty">Bu filtre için şablon yok. Sektör veya belge tipini değiştirin.</div>`;
 
     const tabs = (state.docTypes || []).map((d) => `
       <button type="button" class="tab ${state.docType === d.id ? 'active' : ''}" data-doc="${escapeHtml(d.id)}">${escapeHtml(d.label)}</button>
     `).join('');
 
-    const previewTitle = state.selected
-      ? escapeHtml(state.selected.name)
-      : 'Önizleme';
-    const previewBody = !state.selected
-      ? '<div class="preview-placeholder">Soldan bir şablon seçin; örnek XML ile önizleme burada açılır.</div>'
-      : state.previewBusy
-        ? '<div class="preview-placeholder">Önizleme hazırlanıyor…</div>'
-        : `<iframe class="preview-frame" title="Şablon önizleme" srcdoc="${escapeHtml(state.previewHtml || '<p style=padding:16px;font-family:sans-serif>Önizleme yok</p>')}"></iframe>`;
+    const warn = (state.previewWarning || state.ordersWarning)
+      ? `<div class="preview-warn">${escapeHtml(state.previewWarning || state.ordersWarning)}</div>` : '';
 
     return `
       <section class="panel catalog-panel">
         <h2>Şablon vitrini</h2>
-        <p class="lead">e-Fatura, e-Arşiv ve e-İrsaliye hazır şablonları. Seçtiğiniz belgenin örneği sağda görünür.</p>
+        <p class="lead">Türkiye e-Fatura / e-Arşiv / e-İrsaliye. Sektör ve sipariş seçerek sağda önizleyin.</p>
         <div class="toolbar">
           <label class="field">Ülke
             <select id="country">${countryOptionsHtml()}</select>
           </label>
-          <div class="tabs" id="doc-tabs">${tabs}</div>
+          ${showSector ? `<label class="field">Sektör<select id="sector">${sectorOptionsHtml()}</select></label>` : ''}
+          <label class="field grow">Sipariş (önizleme)
+            <select id="order-pick">${orderOptionsHtml()}</select>
+          </label>
           <button type="button" class="ghost" id="btn-reload">Yenile</button>
         </div>
+        <div class="tabs" id="doc-tabs">${tabs}</div>
         <div class="catalog-split">
-          <div class="catalog-list">
-            <div class="grid grid-compact">${cards}</div>
-          </div>
+          <div class="catalog-list"><div class="grid grid-compact">${cards}</div></div>
           <aside class="catalog-preview">
             <div class="preview-head">
-              <strong>${previewTitle}</strong>
+              <strong>${state.selected ? escapeHtml(state.selected.name) : 'Önizleme'}</strong>
               ${state.selected ? `<span class="meta">${escapeHtml(docTypeLabel(state.selected.doc_type_id || state.selected.module_id))}</span>` : ''}
             </div>
-            <div class="preview-stage" id="preview-stage">${previewBody}</div>
+            ${warn}
+            <div class="preview-stage" id="preview-stage">${previewStageHtml()}</div>
           </aside>
         </div>
         <div class="footer-actions">
@@ -270,72 +300,53 @@
     `;
   }
 
-  async function loadPreview(template) {
-    if (!template) {
-      state.previewHtml = '';
-      state.previewBusy = false;
-      return;
-    }
-    state.previewBusy = true;
-    try {
-      const id = encodeURIComponent(String(template.id));
-      const data = await api(`/api/shopify/ui/templates/${id}/preview-source`);
-      if (!data.xslt) throw new Error('XSLT yok');
-      const parser = new DOMParser();
-      const xsltDoc = parser.parseFromString(data.xslt, 'text/xml');
-      const xmlDoc = parser.parseFromString(data.xml || '<?xml version="1.0"?><Invoice/>', 'text/xml');
-      if (xsltDoc.querySelector('parsererror')) throw new Error('XSLT ayrıştırılamadı');
-      if (xmlDoc.querySelector('parsererror')) throw new Error('Örnek XML ayrıştırılamadı');
-      if (!window.XSLTProcessor) throw new Error('Tarayıcı XSLT desteklemiyor');
-      const proc = new XSLTProcessor();
-      proc.importStylesheet(xsltDoc);
-      const out = proc.transformToDocument(xmlDoc);
-      const html = new XMLSerializer().serializeToString(out);
-      state.previewHtml = html.includes('<html')
-        ? html
-        : `<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{margin:12px;font-family:Segoe UI,sans-serif;background:#fff;color:#111}</style></head><body>${html}</body></html>`;
-    } catch (e) {
-      state.previewHtml = `<!DOCTYPE html><html><body style="font-family:sans-serif;padding:16px;color:#b91c1c">Önizleme alınamadı: ${escapeHtml(e.message)}</body></html>`;
-    } finally {
-      state.previewBusy = false;
-    }
-  }
-
   function renderCustomize() {
     const t = state.selected;
     if (!t) {
       return `<section class="panel"><p class="lead">Önce bir şablon seçin.</p>
         <button type="button" id="btn-back-catalog">Vitrine dön</button></section>`;
     }
+    const warn = state.previewWarning
+      ? `<div class="preview-warn">${escapeHtml(state.previewWarning)}</div>` : '';
     return `
-      <section class="panel">
-        <h2>${escapeHtml(t.name)}</h2>
-        <p class="lead">Bu tasarım için marka bilgilerinizi girin. İsterseniz sonra edXdocu’da detaylı düzenleme yapabilirsiniz.</p>
-        <div class="form-grid">
-          <label class="field span2">Şirket / unvan
-            <input id="company" placeholder="Örn. Sarp Soft Ltd." value="${escapeHtml(state.form.company_name)}" />
-          </label>
-          <label class="field">Accent rengi
-            <input id="accent" type="color" value="${escapeHtml(state.form.accent || '#1e3a8a')}" />
-          </label>
-          <label class="field">Logo URL (opsiyonel)
-            <input id="logo_url" placeholder="https://..." value="${escapeHtml(state.form.logo_url)}" />
-          </label>
-          <label class="field span2">veya logo dosyası yükle
-            <input id="logo_file" type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" />
-          </label>
-        </div>
-        <div class="preview-box" id="logo-preview">
-          Logo seçerseniz burada önizlenir. Marka, XSLT indirmede şablona işlenir.
-        </div>
-        <div class="footer-actions">
-          <button type="button" class="ghost" id="btn-back-catalog2">Geri</button>
-          <div class="right">
-            <a href="${escapeHtml(t.design_url)}" target="_blank" rel="noopener">
-              <button type="button" class="ghost">Tam editörde aç</button>
-            </a>
-            <button type="button" id="btn-to-download">Satın al / indir</button>
+      <section class="panel catalog-panel">
+        <h2>Özelleştir · ${escapeHtml(t.name)}</h2>
+        <p class="lead">Marka bilgilerinizi girin; sağda canlı önizleme. İsterseniz tam editörde açın.</p>
+        <div class="catalog-split">
+          <div>
+            <div class="form-grid">
+              <label class="field span2">Şirket / unvan
+                <input id="company" placeholder="Örn. Sarp Soft Ltd." value="${escapeHtml(state.form.company_name)}" />
+              </label>
+              <label class="field">Accent rengi
+                <input id="accent" type="color" value="${escapeHtml(state.form.accent || '#1e3a8a')}" />
+              </label>
+              <label class="field">Logo URL
+                <input id="logo_url" placeholder="https://..." value="${escapeHtml(state.form.logo_url)}" />
+              </label>
+              <label class="field span2">veya logo dosyası
+                <input id="logo_file" type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" />
+              </label>
+              <label class="field span2">Sipariş (önizleme)
+                <select id="order-pick">${orderOptionsHtml()}</select>
+              </label>
+            </div>
+            <div class="preview-box" id="logo-preview">Logo seçerseniz burada görünür.</div>
+            <div class="footer-actions" style="margin-top:14px">
+              <button type="button" class="ghost" id="btn-back-catalog2">Geri</button>
+              <div class="right">
+                <a href="${escapeHtml(t.design_url || 'https://www.edxdocu.com/')}" target="_blank" rel="noopener">
+                  <button type="button" class="ghost">Tam editörde aç</button>
+                </a>
+                <button type="button" id="btn-to-download">İndirmeye geç</button>
+              </div>
+            </div>
           </div>
+          <aside class="catalog-preview">
+            <div class="preview-head"><strong>Canlı önizleme</strong></div>
+            ${warn}
+            <div class="preview-stage" id="preview-stage">${previewStageHtml()}</div>
+          </aside>
         </div>
       </section>
     `;
@@ -349,11 +360,12 @@
     }
     const free = state.bootstrap?.free_download;
     const billingOn = state.bootstrap?.billing_enabled;
+    const approved = state.downloadApproved;
     return `
       <section class="panel">
-        <h2>Satın al ve indir</h2>
+        <h2>Test → onay → indir</h2>
         <p class="lead">
-          Seçilen tasarım: <strong>${escapeHtml(t.name)}</strong> ·
+          <strong>${escapeHtml(t.name)}</strong> ·
           <span class="price">${priceLabel(t.price_cents)}</span>
           ${free ? ' · Geliştirme: indirme açık' : ''}
           ${billingOn ? ' · Shopify Billing' : ' · Stub / test satın alma'}
@@ -361,114 +373,95 @@
         </p>
         <div class="howto" style="margin-bottom:16px">
           <article>
-            <div class="n">A</div>
-            <h3>${billingOn ? 'Shopify ile öde' : 'Satın alma'}</h3>
-            <p>${billingOn
-      ? 'Shopify onay ekranına yönlendirilirsiniz; onaydan sonra şablon hakkı açılır.'
-      : 'Test/stub modunda hak anında açılır. Canlı satış için Public app + Billing gerekir.'}</p>
+            <div class="n">1</div>
+            <h3>Test indir</h3>
+            <p>Watermark’lı örnek XSLT. Satın alma gerekmez; üretimde kullanmayın.</p>
           </article>
           <article>
-            <div class="n">B</div>
-            <h3>XSLT indir</h3>
-            <p>Ham veya markalı dosyayı indirip entegratörünüze yükleyin.</p>
+            <div class="n">2</div>
+            <h3>Onayla</h3>
+            <p>Önizleme ve test dosyasını kontrol ettikten sonra onay kutusunu işaretleyin.</p>
+          </article>
+          <article>
+            <div class="n">3</div>
+            <h3>Gerçek indir</h3>
+            <p>${billingOn ? 'Shopify ile ödeyin, ardından ham veya markalı XSLT alın.' : 'Onay sonrası hak açılır; dosyayı indirin.'}</p>
           </article>
         </div>
+        <label class="approve-row">
+          <input type="checkbox" id="approve-dl" ${approved ? 'checked' : ''} />
+          Önizlemeyi ve test indirmeyi kontrol ettim; gerçek indirmeyi onaylıyorum.
+        </label>
         <div class="footer-actions">
           <button type="button" class="ghost" id="btn-back-customize">Geri</button>
           <div class="right">
-            <button type="button" class="ghost" id="btn-purchase">${billingOn ? 'Satın al (Shopify)' : 'Satın al (test)'}</button>
-            <button type="button" class="ghost" id="btn-dl-raw">XSLT indir</button>
-            <button type="button" id="btn-dl-brand">Markalı indir</button>
+            <button type="button" class="ghost" id="btn-dl-test">Test indir</button>
+            <button type="button" class="ghost" id="btn-purchase" ${approved ? '' : 'disabled'}>${billingOn ? 'Satın al (Shopify)' : 'Satın al (test)'}</button>
+            <button type="button" class="ghost" id="btn-dl-raw" ${approved ? '' : 'disabled'}>XSLT indir</button>
+            <button type="button" id="btn-dl-brand" ${approved ? '' : 'disabled'}>Markalı indir</button>
           </div>
         </div>
       </section>
     `;
   }
 
-  function bindCommon() {
-    $('btn-start')?.addEventListener('click', async () => {
-      setStep('catalog');
-      await loadTemplates();
-    });
-    $('btn-back-intro')?.addEventListener('click', () => setStep('intro'));
-    $('btn-back-catalog')?.addEventListener('click', () => setStep('catalog'));
-    $('btn-back-catalog2')?.addEventListener('click', () => setStep('catalog'));
-    $('btn-back-catalog3')?.addEventListener('click', () => setStep('catalog'));
-    $('btn-back-customize')?.addEventListener('click', () => setStep('customize'));
-    $('btn-to-customize')?.addEventListener('click', () => {
-      if (!state.selected) return showMsg('Önce bir şablon seçin.', 'err');
-      setStep('customize');
-    });
-    $('btn-to-download')?.addEventListener('click', () => {
-      readCustomizeForm();
-      setStep('download');
-    });
-
-    const country = $('country');
-    if (country) {
-      country.value = state.country || '';
-      country.addEventListener('change', async () => {
-        state.country = (country.value || '').toUpperCase();
-        if (state.country) sessionStorage.setItem('edx_shopify_country', state.country);
-        else sessionStorage.removeItem('edx_shopify_country');
-        await loadTemplates();
-      });
+  async function loadOrders() {
+    if (!state.shop) {
+      state.orders = [];
+      return;
     }
-    $('btn-reload')?.addEventListener('click', () => loadTemplates());
-
-    document.querySelectorAll('[data-doc]').forEach((btn) => {
-      btn.addEventListener('click', async () => {
-        state.docType = btn.getAttribute('data-doc') || '';
-        if (state.docType) sessionStorage.setItem('edx_shopify_doc', state.docType);
-        else sessionStorage.removeItem('edx_shopify_doc');
-        await loadTemplates();
-      });
-    });
-
-    document.querySelectorAll('[data-pick]').forEach((btn) => {
-      btn.addEventListener('click', async () => {
-        const id = btn.getAttribute('data-pick');
-        state.selected = state.templates.find((t) => String(t.id) === String(id)) || null;
-        state.purchased = false;
-        if (state.selected?.accent && /^#/.test(state.selected.accent)) {
-          state.form.accent = state.selected.accent;
-        }
-        render();
-        if (state.step === 'catalog' && state.selected) {
-          await loadPreview(state.selected);
-          const stage = $('preview-stage');
-          if (stage) {
-            stage.innerHTML = `<iframe class="preview-frame" title="Şablon önizleme" srcdoc="${escapeHtml(state.previewHtml)}"></iframe>`;
-          }
-        }
-      });
-    });
-
-    $('company')?.addEventListener('input', (e) => { state.form.company_name = e.target.value; });
-    $('accent')?.addEventListener('input', (e) => { state.form.accent = e.target.value; });
-    $('logo_url')?.addEventListener('input', (e) => {
-      state.form.logo_url = e.target.value;
-      state.form.logo_data = '';
-      updateLogoPreview();
-    });
-    $('logo_file')?.addEventListener('change', async (e) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
-      if (file.size > 400_000) {
-        showMsg('Logo 400 KB’dan küçük olmalı.', 'err');
-        return;
+    try {
+      const data = await api('/api/shopify/ui/orders');
+      state.orders = data.orders || [];
+      state.ordersWarning = data.warning || '';
+      if (state.orderId && !state.orders.some((o) => o.id === state.orderId)) {
+        state.orderId = '';
+        sessionStorage.removeItem('edx_shopify_order');
       }
-      const dataUrl = await readFileAsDataUrl(file);
-      state.form.logo_data = dataUrl;
-      state.form.logo_url = '';
-      const urlInput = $('logo_url');
-      if (urlInput) urlInput.value = '';
-      updateLogoPreview();
-    });
+    } catch (e) {
+      state.orders = [];
+      state.ordersWarning = e.message || 'Siparişler alınamadı.';
+    }
+  }
 
-    $('btn-purchase')?.addEventListener('click', () => purchase());
-    $('btn-dl-raw')?.addEventListener('click', () => downloadRaw());
-    $('btn-dl-brand')?.addEventListener('click', () => downloadBrand());
+  async function loadPreview(template) {
+    if (!template) {
+      state.previewHtml = '';
+      state.previewBusy = false;
+      state.previewWarning = '';
+      return;
+    }
+    state.previewBusy = true;
+    state.previewWarning = '';
+    try {
+      const q = state.orderId ? `?order_id=${encodeURIComponent(state.orderId)}` : '';
+      const data = await api(tplApi(template.id, `/preview-source${q}`));
+      if (!data.xslt) throw new Error('XSLT yok');
+      if (data.order_warning) state.previewWarning = data.order_warning;
+      const parser = new DOMParser();
+      const xsltDoc = parser.parseFromString(data.xslt, 'text/xml');
+      const xmlDoc = parser.parseFromString(data.xml || '<?xml version="1.0"?><Invoice/>', 'text/xml');
+      if (xsltDoc.querySelector('parsererror')) throw new Error('XSLT ayrıştırılamadı');
+      if (xmlDoc.querySelector('parsererror')) throw new Error('XML ayrıştırılamadı');
+      if (!window.XSLTProcessor) throw new Error('Tarayıcı XSLT desteklemiyor');
+      const proc = new XSLTProcessor();
+      proc.importStylesheet(xsltDoc);
+      const out = proc.transformToDocument(xmlDoc);
+      let html = new XMLSerializer().serializeToString(out);
+      if (!html.includes('<html')) {
+        html = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{margin:12px;font-family:Segoe UI,sans-serif;background:#fff;color:#111}</style></head><body>${html}</body></html>`;
+      }
+      state.previewHtml = html;
+    } catch (e) {
+      state.previewHtml = `<!DOCTYPE html><html><body style="font-family:sans-serif;padding:16px;color:#b91c1c">Önizleme alınamadı: ${escapeHtml(e.message)}</body></html>`;
+    } finally {
+      state.previewBusy = false;
+    }
+  }
+
+  function refreshPreviewStage() {
+    const stage = $('preview-stage');
+    if (stage) stage.innerHTML = previewStageHtml();
   }
 
   function readCustomizeForm() {
@@ -482,7 +475,7 @@
     if (!box) return;
     const src = state.form.logo_data || state.form.logo_url;
     if (!src) {
-      box.innerHTML = 'Logo seçerseniz burada önizlenir. Marka, XSLT indirmede şablona işlenir.';
+      box.innerHTML = 'Logo seçerseniz burada görünür.';
       return;
     }
     box.innerHTML = `Önizleme:<br/><img alt="logo" src="${escapeHtml(src)}" />`;
@@ -503,8 +496,12 @@
 
   async function purchase() {
     if (!state.selected) return;
+    if (!state.downloadApproved) {
+      showMsg('Önce testi onaylayın.', 'err');
+      return;
+    }
     if (!state.shop) {
-      showMsg('Mağaza bilgisi yok. Uygulamayı Shopify içinden açın veya ?shop=magaza.myshopify.com ekleyin.', 'err');
+      showMsg('Mağaza bilgisi yok. Uygulamayı Shopify içinden açın.', 'err');
       return;
     }
     try {
@@ -521,7 +518,6 @@
       if (r.confirmation_url) {
         showMsg('Shopify ödeme onayına yönlendiriliyorsunuz…', 'ok');
         const target = r.confirmation_url;
-        // Embedded app: üst frame’e çık
         if (window.top && window.top !== window) window.top.location.href = target;
         else location.href = target;
         return;
@@ -533,44 +529,17 @@
     }
   }
 
-  async function confirmBillingReturn() {
-    const billing = qs.get('billing');
-    const galleryId = Number(qs.get('gallery_id') || 0);
-    if (billing !== 'return' || !galleryId) return;
-    try {
-      showMsg('Ödeme doğrulanıyor…');
-      const chargeGid = qs.get('charge_id') || qs.get('charge_gid') || '';
-      const q = new URLSearchParams({
-        shop: state.shop || '',
-        gallery_id: String(galleryId),
-      });
-      if (chargeGid) q.set('charge_gid', chargeGid.startsWith('gid://') ? chargeGid : `gid://shopify/AppPurchaseOneTime/${chargeGid}`);
-      const r = await api(`/api/shopify/ui/billing/confirm?${q.toString()}`);
-      state.purchased = true;
-      state.selected = state.selected || { id: galleryId, name: `Şablon #${galleryId}`, price_cents: 0 };
-      if (!state.selected.id) state.selected.id = galleryId;
-      setStep('download');
-      showMsg('Ödeme onaylandı; XSLT indirebilirsiniz.', 'ok');
-      // URL temizle
-      const clean = new URL(location.href);
-      clean.searchParams.delete('billing');
-      clean.searchParams.delete('gallery_id');
-      clean.searchParams.delete('charge_id');
-      clean.searchParams.delete('charge_gid');
-      history.replaceState({}, '', clean.toString());
-      void r;
-    } catch (e) {
-      setStep('download');
-      showMsg(e.message, 'err');
-    }
-  }
-
-  async function downloadRaw() {
+  async function downloadFile(mode) {
     if (!state.selected) return;
+    if (mode !== 'test' && !state.downloadApproved) {
+      showMsg('Önce testi onaylayın.', 'err');
+      return;
+    }
     try {
-      showMsg('İndiriliyor…');
+      showMsg(mode === 'test' ? 'Test dosyası indiriliyor…' : 'İndiriliyor…');
       const url = new URL(tplApi(state.selected.id, '/download'), location.origin);
       if (state.shop) url.searchParams.set('shop', state.shop);
+      if (mode === 'test') url.searchParams.set('mode', 'test');
       const auth = await idTokenHeader();
       const res = await fetch(url.toString(), { headers: { ...shopHeaders(), ...auth } });
       if (!res.ok) {
@@ -578,8 +547,9 @@
         throw new Error(j.error || res.statusText);
       }
       const blob = await res.blob();
-      triggerDownload(blob, `${state.selected.name || 'template'}.xslt`);
-      showMsg('İndirme başladı.', 'ok');
+      const suffix = mode === 'test' ? '-test.xslt' : '.xslt';
+      triggerDownload(blob, `${state.selected.name || 'template'}${suffix}`);
+      showMsg(mode === 'test' ? 'Test indirme başladı (watermark’lı).' : 'İndirme başladı.', 'ok');
     } catch (e) {
       showMsg(e.message, 'err');
     }
@@ -587,6 +557,10 @@
 
   async function downloadBrand() {
     if (!state.selected) return;
+    if (!state.downloadApproved) {
+      showMsg('Önce testi onaylayın.', 'err');
+      return;
+    }
     readCustomizeForm();
     try {
       showMsg('Markalı XSLT hazırlanıyor…');
@@ -601,7 +575,7 @@
       });
       const blob = new Blob([data.xslt], { type: 'application/xslt+xml' });
       triggerDownload(blob, data.filename || 'branded.xslt');
-      showMsg('Markalı dosya indirildi. İsterseniz tam editör: ' + (data.design_url || ''), 'ok');
+      showMsg('Markalı dosya indirildi.', 'ok');
     } catch (e) {
       showMsg(e.message, 'err');
     }
@@ -621,29 +595,167 @@
       const params = new URLSearchParams();
       if (state.country) params.set('country', state.country);
       if (state.docType) params.set('doc_type', state.docType);
+      if (state.sector && (!state.country || state.country === 'TR')) params.set('sector', state.sector);
       const q = params.toString() ? `?${params}` : '';
-      const data = await api('/api/shopify/ui/templates' + q);
+      const data = await api(`/api/shopify/ui/templates${q}`);
       state.templates = data.templates || [];
       if (Array.isArray(data.doc_types) && data.doc_types.length) state.docTypes = data.doc_types;
+      if (Array.isArray(data.sectors)) state.sectors = data.sectors;
+      if (Array.isArray(data.countries) && data.countries.length) state.countries = data.countries;
       if (state.selected) {
         state.selected = state.templates.find((t) => String(t.id) === String(state.selected.id)) || null;
       }
       showMsg(state.templates.length ? `${state.templates.length} şablon` : 'Katalog boş.', state.templates.length ? '' : 'err');
       render();
-      if (state.step === 'catalog' && state.selected) {
+      if ((state.step === 'catalog' || state.step === 'customize') && state.selected) {
         await loadPreview(state.selected);
-        const stage = $('preview-stage');
-        if (stage && state.previewHtml) {
-          stage.innerHTML = `<iframe class="preview-frame" title="Şablon önizleme" srcdoc="${escapeHtml(state.previewHtml)}"></iframe>`;
-        }
+        refreshPreviewStage();
       }
     } catch (e) {
       showMsg(e.message, 'err');
     }
   }
 
-  function tplApi(id, suffix) {
-    return `/api/shopify/ui/templates/${encodeURIComponent(String(id))}${suffix || ''}`;
+  async function confirmBillingReturn() {
+    const chargeId = qs.get('charge_id') || qs.get('charge_gid');
+    const galleryId = qs.get('gallery_id');
+    if (!chargeId || !galleryId) return;
+    try {
+      setStep('download');
+      showMsg('Ödeme onaylanıyor…');
+      const r = await api(`/api/shopify/ui/billing/confirm?charge_id=${encodeURIComponent(chargeId)}&gallery_id=${encodeURIComponent(galleryId)}`);
+      if (r.ok) {
+        state.purchased = true;
+        state.downloadApproved = true;
+        showMsg('Ödeme onaylandı; indirebilirsiniz.', 'ok');
+      }
+    } catch (e) {
+      setStep('download');
+      showMsg(e.message, 'err');
+    }
+  }
+
+  function bindCommon() {
+    $('btn-start')?.addEventListener('click', async () => {
+      setStep('catalog');
+      await loadOrders();
+      await loadTemplates();
+    });
+    $('btn-back-intro')?.addEventListener('click', () => setStep('intro'));
+    $('btn-back-catalog')?.addEventListener('click', () => setStep('catalog'));
+    $('btn-back-catalog2')?.addEventListener('click', () => setStep('catalog'));
+    $('btn-back-catalog3')?.addEventListener('click', () => setStep('catalog'));
+    $('btn-back-customize')?.addEventListener('click', () => setStep('customize'));
+    $('btn-to-customize')?.addEventListener('click', async () => {
+      if (!state.selected) return showMsg('Önce bir şablon seçin.', 'err');
+      setStep('customize');
+      await loadPreview(state.selected);
+      refreshPreviewStage();
+      updateLogoPreview();
+    });
+    $('btn-to-download')?.addEventListener('click', () => {
+      readCustomizeForm();
+      setStep('download');
+    });
+
+    const country = $('country');
+    if (country) {
+      country.value = state.country || '';
+      country.addEventListener('change', async () => {
+        state.country = (country.value || '').toUpperCase();
+        if (state.country) sessionStorage.setItem('edx_shopify_country', state.country);
+        else sessionStorage.removeItem('edx_shopify_country');
+        if (state.country && state.country !== 'TR') {
+          state.sector = '';
+          sessionStorage.removeItem('edx_shopify_sector');
+        }
+        await loadTemplates();
+      });
+    }
+
+    const sector = $('sector');
+    if (sector) {
+      sector.value = state.sector || '';
+      sector.addEventListener('change', async () => {
+        state.sector = (sector.value || '').toLowerCase();
+        if (state.sector) sessionStorage.setItem('edx_shopify_sector', state.sector);
+        else sessionStorage.removeItem('edx_shopify_sector');
+        await loadTemplates();
+      });
+    }
+
+    const orderPick = $('order-pick');
+    if (orderPick) {
+      orderPick.value = state.orderId || '';
+      orderPick.addEventListener('change', async () => {
+        state.orderId = orderPick.value || '';
+        if (state.orderId) sessionStorage.setItem('edx_shopify_order', state.orderId);
+        else sessionStorage.removeItem('edx_shopify_order');
+        if (state.selected) {
+          await loadPreview(state.selected);
+          refreshPreviewStage();
+        }
+      });
+    }
+
+    $('btn-reload')?.addEventListener('click', async () => {
+      await loadOrders();
+      await loadTemplates();
+    });
+
+    document.querySelectorAll('[data-doc]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        state.docType = btn.getAttribute('data-doc') || '';
+        if (state.docType) sessionStorage.setItem('edx_shopify_doc', state.docType);
+        else sessionStorage.removeItem('edx_shopify_doc');
+        await loadTemplates();
+      });
+    });
+
+    document.querySelectorAll('[data-pick]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const id = btn.getAttribute('data-pick');
+        state.selected = state.templates.find((t) => String(t.id) === String(id)) || null;
+        state.purchased = false;
+        state.downloadApproved = false;
+        if (state.selected?.accent && /^#/.test(state.selected.accent)) {
+          state.form.accent = state.selected.accent;
+        }
+        render();
+        if (state.selected) {
+          await loadPreview(state.selected);
+          refreshPreviewStage();
+        }
+      });
+    });
+
+    $('company')?.addEventListener('input', (e) => { state.form.company_name = e.target.value; });
+    $('accent')?.addEventListener('input', (e) => { state.form.accent = e.target.value; });
+    $('logo_url')?.addEventListener('input', (e) => {
+      state.form.logo_url = e.target.value;
+      state.form.logo_data = '';
+      updateLogoPreview();
+    });
+    $('logo_file')?.addEventListener('change', async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      try {
+        state.form.logo_data = await readFileAsDataUrl(file);
+        state.form.logo_url = '';
+        updateLogoPreview();
+      } catch (err) {
+        showMsg(err.message, 'err');
+      }
+    });
+
+    $('approve-dl')?.addEventListener('change', (e) => {
+      state.downloadApproved = Boolean(e.target.checked);
+      render();
+    });
+    $('btn-dl-test')?.addEventListener('click', () => downloadFile('test'));
+    $('btn-purchase')?.addEventListener('click', () => purchase());
+    $('btn-dl-raw')?.addEventListener('click', () => downloadFile('live'));
+    $('btn-dl-brand')?.addEventListener('click', () => downloadBrand());
   }
 
   function render() {
@@ -665,7 +777,6 @@
   async function boot() {
     try {
       if (state.shop) sessionStorage.setItem('edx_shopify_shop', state.shop);
-      // Meta’daki API key ile App Bridge’i önce hazırla (CDN script zaten index’te).
       const metaKey = document.querySelector('meta[name="shopify-api-key"]')?.content?.trim();
       if (metaKey) await ensureAppBridge(metaKey);
 
@@ -674,6 +785,7 @@
       if (Array.isArray(state.bootstrap.countries) && state.bootstrap.countries.length) {
         state.countries = state.bootstrap.countries;
       }
+      if (Array.isArray(state.bootstrap.sectors)) state.sectors = state.bootstrap.sectors;
       if (state.bootstrap.api_key && state.bootstrap.api_key !== metaKey) {
         await ensureAppBridge(state.bootstrap.api_key);
         try {
@@ -682,15 +794,16 @@
           if (Array.isArray(state.bootstrap.countries) && state.bootstrap.countries.length) {
             state.countries = state.bootstrap.countries;
           }
+          if (Array.isArray(state.bootstrap.sectors)) state.sectors = state.bootstrap.sectors;
         } catch {
-          /* soft bootstrap — UI yine açılsın */
+          /* soft */
         }
       }
       render();
       await confirmBillingReturn();
     } catch (e) {
       $('main').innerHTML = `<section class="panel"><p class="lead">Başlatılamadı: ${escapeHtml(e.message)}</p>
-        <p class="lead" style="font-size:14px;opacity:.8">Uygulamayı Shopify Admin içinden (Apps → EdXDocu) açın ve sayfayı yenileyin.</p></section>`;
+        <p class="lead" style="font-size:14px;opacity:.8">Uygulamayı Shopify Admin içinden (Apps → EdXDocu) açın ve yenileyin.</p></section>`;
       showMsg(e.message, 'err');
     }
   }

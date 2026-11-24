@@ -1,11 +1,23 @@
-# Referans — Partner Dashboard / Shopify CLI ile senkronize edilebilir.
-# App URL: https://www.edxdocu.com/shopify
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-name = "EdXDocu"
+name = "EdxDocu"
+client_id = "5ad41d4a5af653bf74968d8318cd7eb5"
+application_url = "https://shopify.dev/apps/default-app-home"
+embedded = true
 
 [webhooks]
-api_version = "2025-01"
+api_version = "2027-01"
 
-[[webhooks.subscriptions]]
-compliance_topics = ["customers/data_request", "customers/redact", "shop/redact"]
-uri = "https://www.edxdocu.com/api/shopify/webhooks/compliance"
+  [[webhooks.subscriptions]]
+  uri = "https://www.edxdocu.com/api/shopify/webhooks/compliance"
+  compliance_topics = [ "customers/data_request", "customers/redact", "shop/redact" ]
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "read_orders"
+
+[auth]
+redirect_urls = [ "https://shopify.dev/apps/default-app-home/api/auth" ]
+
+[build]
+automatically_update_urls_on_dev = true

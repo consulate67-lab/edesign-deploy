@@ -5,6 +5,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { TR_SECTORS, sectorLabel } from './shopify-sectors.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
@@ -305,6 +306,7 @@ export function serializeHazirItem(entry, { website, priceCents = 1499 }) {
         doc_type_id: entry.doc_type_id,
         module_id: entry.module_id,
         sector: entry.sector,
+        sector_label: sectorLabel(entry.sector),
         category: entry.category,
         accent: entry.accent,
         tags: entry.tags || [],
@@ -318,4 +320,10 @@ export function serializeHazirItem(entry, { website, priceCents = 1499 }) {
         preview_url: `/api/shopify/ui/templates/${encodeURIComponent(entry.id)}/preview-source`,
         file_backed: true,
     };
+}
+
+/** Katalogda kullanılan sektörler (yalnız index’te görünenler). */
+export function listHazirSectors() {
+    const used = new Set(getHazirTrIndex().map((t) => t.sector).filter(Boolean));
+    return TR_SECTORS.filter((s) => used.has(s.id));
 }

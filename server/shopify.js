@@ -30,10 +30,17 @@ import {
 import {
     findHazirEntry,
     getHazirTrIndex,
+    listHazirSectors,
     loadHazirFiles,
     materializeHazirTemplate,
     serializeHazirItem,
 } from './shopify-hazir-catalog.js';
+import {
+    applyTestWatermark,
+    getShopifyOrder,
+    listShopifyOrders,
+    orderToUblInvoiceXml,
+} from './shopify-order-ubl.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const APP_DIR = path.join(__dirname, '..', 'shopify-app');
@@ -497,6 +504,7 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
             session_ready: sessionReady,
             require_session: requireSession,
             countries: SHOPIFY_COUNTRY_OPTIONS,
+            sectors: listHazirSectors(),
             steps: ['intro', 'catalog', 'customize', 'download'],
             how_to: [
                 {
@@ -529,7 +537,7 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
         return parseId(raw);
     }
 
-    async function listTemplates({ country, moduleId, docType }) {
+    async function listTemplates({ country, moduleId, docType, sector }) {
         await ensureCatalog();
         let sql = catalogSelect;
         const params = [];
@@ -545,6 +553,10 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
             params.push(docType);
             sql += ` AND g.doc_type_id = $${params.length}`;
         }
+        if (sector && (!country || country === 'TR')) {
+            params.push(sector);
+            sql += ` AND g.sector = $${params.length}`;
+        }
         sql += ' ORDER BY g.updated_at DESC';
         const { rows } = await db.pool.query(sql, params);
         const dbItems = rows.map((r) => serializeCatalogItem(r, { website: site }));
@@ -556,6 +568,7 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
         let hazir = getHazirTrIndex();
         if (docType) hazir = hazir.filter((h) => h.doc_type_id === docType);
         if (moduleId) hazir = hazir.filter((h) => h.module_id === moduleId);
+        if (sector) hazir = hazir.filter((h) => h.sector === sector);
         const hazirItems = hazir.map((h) => serializeHazirItem(h, {
             website: site,
             priceCents: DEFAULT_PRICE_CENTS,
@@ -581,13 +594,16 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
             const country = optionalText(req.query.country, 8)?.toUpperCase();
             const moduleId = optionalText(req.query.module_id, 64);
             const docType = optionalText(req.query.doc_type, 32)?.toLowerCase();
-            const templates = await listTemplates({ country, moduleId, docType });
+            const sector = optionalText(req.query.sector, 64)?.toLowerCase();
+            const templates = await listTemplates({ country, moduleId, docType, sector });
             res.json({
                 templates,
                 shop: uiShop(req),
                 country: country || null,
                 doc_type: docType || null,
+                sector: sector || null,
                 countries: SHOPIFY_COUNTRY_OPTIONS,
+                sectors: (!country || country === 'TR') ? listHazirSectors() : [],
                 doc_types: [
                     { id: '', label: 'Tümü' },
                     { id: 'fatura', label: 'e-Fatura' },
@@ -600,34 +616,86 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
         }
     });
 
-    app.get('/api/shopify/ui/templates/:id/preview-source', optionalShopifyIdToken, async (req, res) => {
+    app.get('/api/shopify/ui/orders', optionalShopifyIdToken, async (req, res) => {
+        const shop = uiShop(req);
+        if (!shop) return res.status(400).json({ error: 'shop gerekli.', orders: [] });
         try {
-            const raw = decodeURIComponent(String(req.params.id || ''));
-            if (raw.startsWith('hazir:')) {
-                const entry = findHazirEntry(raw);
-                const files = loadHazirFiles(entry);
-                if (!files?.xslt) return res.status(404).json({ error: 'Önizleme kaynağı bulunamadı.' });
-                return res.json({
-                    id: entry.id,
-                    name: entry.name,
-                    module_id: entry.module_id,
-                    doc_type_id: entry.doc_type_id,
-                    xslt: files.xslt,
-                    xml: files.xml,
-                });
-            }
+            const token = await ensureOfflineToken(req, shop);
+            const orders = await listShopifyOrders({ shop, accessToken: token, first: 30 });
+            res.json({ orders, shop });
+        } catch (e) {
+            console.warn('[shopify] orders list:', e.message || e);
+            res.json({
+                orders: [],
+                shop,
+                warning: e.message || 'Siparişler alınamadı. read_orders yetkisi ve yeniden kurulum gerekebilir.',
+            });
+        }
+    });
+
+    async function resolvePreviewPayload(req) {
+        const raw = decodeURIComponent(String(req.params.id || ''));
+        let xslt = '';
+        let xml = '';
+        let meta = {};
+        if (raw.startsWith('hazir:')) {
+            const entry = findHazirEntry(raw);
+            const files = loadHazirFiles(entry);
+            if (!files?.xslt) return null;
+            xslt = files.xslt;
+            xml = files.xml || '';
+            meta = {
+                id: entry.id,
+                name: entry.name,
+                module_id: entry.module_id,
+                doc_type_id: entry.doc_type_id,
+            };
+        } else {
             const id = parseId(raw);
-            if (!id) return res.status(400).json({ error: 'Geçersiz şablon id.' });
-            const full = await db.get('SELECT id, name, module_id, doc_type_id, xslt, xml FROM gallery_designs WHERE id = ?', [id]);
-            if (!full?.xslt) return res.status(404).json({ error: 'Önizleme kaynağı bulunamadı.' });
-            return res.json({
+            if (!id) return null;
+            const full = await db.get(
+                'SELECT id, name, module_id, doc_type_id, xslt, xml FROM gallery_designs WHERE id = ?',
+                [id]
+            );
+            if (!full?.xslt) return null;
+            xslt = full.xslt;
+            xml = full.xml || '';
+            meta = {
                 id: full.id,
                 name: full.name,
                 module_id: full.module_id,
                 doc_type_id: full.doc_type_id,
-                xslt: full.xslt,
-                xml: full.xml || '',
-            });
+            };
+        }
+
+        const orderId = optionalText(req.query.order_id, 128);
+        let orderWarning = null;
+        if (orderId) {
+            const shop = uiShop(req);
+            try {
+                if (!shop) throw new Error('shop gerekli');
+                const token = await ensureOfflineToken(req, shop);
+                const order = await getShopifyOrder({ shop, accessToken: token, orderId });
+                if (!order) throw new Error('Sipariş bulunamadı');
+                const shopRow = await db.get('SELECT shop_domain FROM shopify_shops WHERE shop_domain = ?', [shop]);
+                xml = orderToUblInvoiceXml(order, {
+                    supplierName: shop?.replace('.myshopify.com', '') || 'Shopify Mağaza',
+                });
+                meta.order_id = order.id;
+                meta.order_name = order.name;
+                void shopRow;
+            } catch (e) {
+                orderWarning = e.message || 'Sipariş XML üretilemedi; örnek XML kullanıldı.';
+            }
+        }
+        return { ...meta, xslt, xml, order_warning: orderWarning };
+    }
+
+    app.get('/api/shopify/ui/templates/:id/preview-source', optionalShopifyIdToken, async (req, res) => {
+        try {
+            const payload = await resolvePreviewPayload(req);
+            if (!payload?.xslt) return res.status(404).json({ error: 'Önizleme kaynağı bulunamadı.' });
+            return res.json(payload);
         } catch (e) {
             res.status(500).json({ error: e.message || 'Önizleme alınamadı.' });
         }
@@ -793,7 +861,11 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
         res.json({ entitled: ok, shop, gallery_id: id, free_download: freeDownload });
     });
 
-    app.get('/api/shopify/ui/templates/:id/download', requireUiSession, async (req, res) => {
+    app.get('/api/shopify/ui/templates/:id/download', (req, res, next) => {
+        const testMode = String(req.query.mode || '').toLowerCase() === 'test';
+        return (testMode ? optionalShopifyIdToken : requireUiSession)(req, res, next);
+    }, async (req, res) => {
+        const testMode = String(req.query.mode || '').toLowerCase() === 'test';
         const id = await resolveGalleryId(req.params.id);
         if (!id) return res.status(400).json({ error: 'Geçersiz şablon id.' });
         req.shopDomain = uiShop(req);
@@ -802,18 +874,24 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
         if (!row) return res.status(404).json({ error: 'Şablon bulunamadı veya yayınlı değil.' });
         const full = await db.get('SELECT xslt, name FROM gallery_designs WHERE id = ?', [id]);
         if (!full?.xslt) return res.status(404).json({ error: 'XSLT yok.' });
-        const ok = await assertEntitledUi(req.shopDomain, id);
-        if (!ok) {
-            return res.status(402).json({
-                error: 'Bu şablon için önce satın alma adımını tamamlayın.',
-                price_cents: row.price_cents,
-                currency: 'USD',
-            });
+        if (!testMode) {
+            const ok = await assertEntitledUi(req.shopDomain, id);
+            if (!ok) {
+                return res.status(402).json({
+                    error: 'Bu şablon için önce testi onaylayıp satın alma adımını tamamlayın.',
+                    price_cents: row.price_cents,
+                    currency: 'USD',
+                });
+            }
         }
-        const filename = `${cleanText(full.name, 80) || 'template'}-${id}.xslt`.replace(/[^\w.\-ğüşıöçĞÜŞİÖÇ]+/gi, '_');
+        let body = full.xslt;
+        if (testMode) body = applyTestWatermark(body);
+        const baseName = `${cleanText(full.name, 80) || 'template'}-${id}`.replace(/[^\w.\-ğüşıöçĞÜŞİÖÇ]+/gi, '_');
+        const filename = testMode ? `${baseName}-test.xslt` : `${baseName}.xslt`;
         res.setHeader('Content-Type', 'application/xslt+xml; charset=utf-8');
         res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-        res.send(full.xslt);
+        res.setHeader('X-Edxdocu-Download-Mode', testMode ? 'test' : 'live');
+        res.send(body);
     });
 
     app.post('/api/shopify/ui/templates/:id/brand', requireUiSession, async (req, res) => {
