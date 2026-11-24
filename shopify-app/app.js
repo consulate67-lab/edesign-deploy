@@ -332,8 +332,8 @@
           </div>
         </div>
         ${state.editorBusy
-    ? '<div class="preview-placeholder">Editör yükleniyor…</div>'
-    : `<iframe class="editor-frame" title="edXdocu tasarım editörü" src="${escapeHtml(src)}"></iframe>`}
+    ? '<div class="preview-placeholder">Tasarım editörü yükleniyor…</div>'
+    : `<iframe class="editor-frame" title="edXdocu tasarım editörü" src="${escapeHtml(src || '/shopify/editor/')}"></iframe>`}
       </section>`;
     }
 
@@ -386,19 +386,53 @@
     state.editorUrl = '';
     render();
     try {
-      const data = await api(tplApi(state.selected.id, '/editor-src'));
-      state.editorUrl = data.url || state.selected.design_url || '';
-      if (state.selected && data.gallery_id) {
-        state.selected = { ...state.selected, design_url: state.editorUrl };
+      // Aynı XSLTEditor — /shopify/editor (ana web sitesi değil)
+      const q = state.orderId ? `?order_id=${encodeURIComponent(state.orderId)}` : '';
+      const src = await api(tplApi(state.selected.id, `/preview-source${q}`));
+      let designId;
+      try {
+        const ed = await api(tplApi(state.selected.id, '/editor-src'));
+        designId = ed.gallery_id;
+      } catch {
+        designId = undefined;
       }
+      const boot = {
+        xslt: src.xslt || '',
+        xml: src.xml || '',
+        moduleId: src.module_id || state.selected.module_id || 'fatura',
+        name: src.name || state.selected.name || 'Shopify şablon',
+        designId,
+      };
+      sessionStorage.setItem('edx_shopify_editor', JSON.stringify(boot));
+      state.editorUrl = `/shopify/editor/?t=${Date.now()}`;
     } catch (e) {
-      state.editorUrl = state.selected.design_url || 'https://www.edxdocu.com/?shopify_embed=1';
-      showMsg(e.message || 'Editör URL alınamadı; varsayılan açılıyor.', 'err');
+      showMsg(e.message || 'Editör hazırlanamadı.', 'err');
+      state.fullEditor = false;
     } finally {
       state.editorBusy = false;
       render();
     }
   }
+
+  function onEditorMessage(ev) {
+    if (ev.origin !== location.origin) return;
+    const data = ev.data;
+    if (!data || typeof data !== 'object') return;
+    if (data.type === 'edx-shopify-editor-close') {
+      state.fullEditor = false;
+      state.editorUrl = '';
+      setStep('customize');
+      return;
+    }
+    if (data.type === 'edx-shopify-editor-work' && data.work?.xslt) {
+      try {
+        sessionStorage.setItem('edx_shopify_editor_work', JSON.stringify(data.work));
+      } catch {
+        /* ignore */
+      }
+    }
+  }
+  window.addEventListener('message', onEditorMessage);
 
   function renderDownload() {
     const t = state.selected;

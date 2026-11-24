@@ -36,7 +36,9 @@ ENV VITE_API_URL=/api
 RUN if [ ! -f dist-web/index.html ]; then \
       NODE_OPTIONS=--max-old-space-size=4096 npx vite build --base / --outDir dist-web --emptyOutDir; \
     fi \
- && test -f dist-web/index.html
+ && test -f dist-web/index.html \
+ && NODE_OPTIONS=--max-old-space-size=4096 npm run build:shopify-editor \
+ && test -f shopify-app/editor/index.html
 
 # Railway mounts a volume here for the SQLite database
 # (set in the Railway dashboard: Mount Path = /data)

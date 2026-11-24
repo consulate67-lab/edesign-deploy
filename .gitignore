@@ -52,3 +52,7 @@ malformed_check.txt
 
 # e-fatura mÃ¼kellef listesi ve e-posta keÅŸfi (yerel veri)
 data/
+
+# Shopify gömülü editör build (Docker / npm run build:shopify-editor)
+shopify-app/editor/
+

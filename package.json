@@ -8,6 +8,7 @@
     "dev": "vite",
     "build": "echo 'backend-only deploy, skipping frontend build' && exit 0",
     "build:frontend": "tsc -p tsconfig.app.json && vite build",
+    "build:shopify-editor": "vite build --config vite.shopify.config.ts",
     "gen:xslt-defaults": "node scripts/gen-xslt-defaults.cjs",
     "gen:template-features": "node scripts/gen-template-features.mjs",
     "start": "node server/index.js",
