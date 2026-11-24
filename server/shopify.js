@@ -336,12 +336,9 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
         res.setHeader('Content-Security-Policy', "frame-ancestors https://*.myshopify.com https://admin.shopify.com;");
         res.send(html);
     };
-    // Slash’siz /shopify?… → /shopify/?… (göreli asset yolları için)
-    app.get('/shopify', (req, res) => {
-        const q = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
-        return res.redirect(302, `/shopify/${q}`);
-    });
-    app.get('/shopify/', serveShopifyIndex);
+    // Mutlak /shopify/styles.css + /shopify/app.js kullanıldığı için slash yönlendirmesi gerekmez
+    // (Express non-strict routing /shopify ile /shopify/’yi aynı route’ta birleştirir → redirect döngüsü olur).
+    app.get(['/shopify', '/shopify/'], serveShopifyIndex);
     app.use('/shopify', express.static(APP_DIR, { index: false }));
 
     /** Mandatory compliance webhooks (App Store). Partner’da bu URL’yi kaydet. */
