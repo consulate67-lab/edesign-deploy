@@ -112,7 +112,15 @@ app.use(cors({
     credentials: true,
 }));
 // Tasarımlar gömülü resimlerle (base64) birkaç MB olabilir.
-app.use(express.json({ limit: '15mb' }));
+// Shopify webhook HMAC için ham gövdeyi sakla.
+app.use(express.json({
+    limit: '15mb',
+    verify: (req, _res, buf) => {
+        if (req.originalUrl?.startsWith('/api/shopify/webhooks')) {
+            req.rawBody = Buffer.from(buf);
+        }
+    },
+}));
 app.use(express.urlencoded({ extended: false })); // PayTR bildirimi form-encoded POST eder
 
 let db;

@@ -12,6 +12,7 @@
  *   - Tam: design_url → edxdocu editör (shopify_gallery query)
  */
 import { createHmac, timingSafeEqual } from 'node:crypto';
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
@@ -83,6 +84,28 @@ export async function createShopifySchema(client) {
         )
     `);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_shopify_pending_charges_shop ON shopify_pending_charges (shop_domain)`);
+    await client.query(`
+        CREATE TABLE IF NOT EXISTS shopify_compliance_webhooks (
+            id             SERIAL PRIMARY KEY,
+            topic          TEXT NOT NULL,
+            shop_domain    TEXT,
+            payload        JSONB NOT NULL DEFAULT '{}'::jsonb,
+            created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+    `);
+}
+
+function verifyShopifyWebhookHmac(rawBody, hmacHeader, secret) {
+    if (!secret || !hmacHeader || !rawBody) return false;
+    const digest = createHmac('sha256', secret).update(rawBody).digest('base64');
+    const a = Buffer.from(digest);
+    const b = Buffer.from(String(hmacHeader));
+    if (a.length !== b.length) return false;
+    try {
+        return timingSafeEqual(a, b);
+    } catch {
+        return false;
+    }
 }
 
 const catalogSelect = `
@@ -220,9 +243,13 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
     const site = (website || process.env.FRONTEND_URL || 'https://www.edxdocu.com').replace(/\/?$/, '/');
     const siteOrigin = site.replace(/\/$/, '');
     const { apiKey: shopifyApiKey, apiSecret: shopifyApiSecret } = shopifyClientCreds();
-    /** SHOPIFY_REQUIRE_SESSION=1 iken JWT zorunlu; aksi halde token varsa doğrula, yoksa UI devam eder. */
-    const requireSession = process.env.SHOPIFY_REQUIRE_SESSION === '1';
+    /**
+     * Production + API key/secret varken session token zorunlu (App Store embedded checks).
+     * SHOPIFY_REQUIRE_SESSION=0 ile gevşetilebilir.
+     */
     const sessionReady = Boolean(shopifyApiKey && shopifyApiSecret);
+    const requireSession = process.env.SHOPIFY_REQUIRE_SESSION === '1'
+        || (process.env.SHOPIFY_REQUIRE_SESSION !== '0' && sessionReady && process.env.NODE_ENV === 'production');
 
     async function upsertShopToken(shop, accessToken, scope) {
         await db.run(
@@ -276,9 +303,50 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
         );
     }
 
-    // Gömülü app UI (Partner dashboard App URL → /shopify).
-    // Express 5 path-to-regexp: `/shopify/*` çökertir; yalnız static + index yeterli.
-    app.use('/shopify', express.static(APP_DIR, { index: 'index.html' }));
+    // Gömülü app UI — index.html içine API key enjekte + App Bridge CDN.
+    const indexPath = path.join(APP_DIR, 'index.html');
+    const serveShopifyIndex = (_req, res) => {
+        let html = fs.readFileSync(indexPath, 'utf8');
+        html = html.replace(/%%SHOPIFY_API_KEY%%/g, shopifyApiKey || '');
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.setHeader('Content-Security-Policy', "frame-ancestors https://*.myshopify.com https://admin.shopify.com;");
+        res.send(html);
+    };
+    app.get(['/shopify', '/shopify/'], serveShopifyIndex);
+    app.use('/shopify', express.static(APP_DIR, { index: false }));
+
+    /** Mandatory compliance webhooks (App Store). Partner’da bu URL’yi kaydet. */
+    app.post('/api/shopify/webhooks/compliance', async (req, res) => {
+        const hmac = req.get('X-Shopify-Hmac-Sha256') || '';
+        const raw = req.rawBody;
+        const secretForHmac = shopifyApiSecret || secret;
+        if (!verifyShopifyWebhookHmac(raw, hmac, secretForHmac)) {
+            return res.status(401).send('Invalid HMAC');
+        }
+        const topic = String(req.get('X-Shopify-Topic') || req.query.topic || '').toLowerCase();
+        let payload = req.body;
+        if (Buffer.isBuffer(payload)) {
+            try { payload = JSON.parse(payload.toString('utf8')); } catch { payload = {}; }
+        }
+        const shopDomain = normalizeShop(payload?.shop_domain) || normalizeShop(req.get('X-Shopify-Shop-Domain'));
+        try {
+            await db.run(
+                `INSERT INTO shopify_compliance_webhooks (topic, shop_domain, payload)
+                 VALUES (?, ?, ?::jsonb)`,
+                [topic || 'unknown', shopDomain, JSON.stringify(payload || {})]
+            );
+            if (topic === 'shop/redact' && shopDomain) {
+                await db.run('DELETE FROM shopify_entitlements WHERE shop_domain = ?', [shopDomain]);
+                await db.run('DELETE FROM shopify_pending_charges WHERE shop_domain = ?', [shopDomain]);
+                await db.run('DELETE FROM shopify_shops WHERE shop_domain = ?', [shopDomain]);
+            }
+            // customers/data_request & customers/redact: müşteri PII saklamıyoruz; 200 yeterli.
+            res.status(200).json({ ok: true });
+        } catch (e) {
+            console.error('[shopify] compliance webhook error:', e);
+            res.status(500).json({ error: 'Webhook işlenemedi.' });
+        }
+    });
 
     app.get('/api/shopify/health', (_req, res) => {
         res.json({
@@ -291,6 +359,10 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
             default_price_cents: DEFAULT_PRICE_CENTS,
             design: { light_brand: true, full_editor: true },
             app_bridge: { api_key_configured: Boolean(shopifyApiKey), session_ready: sessionReady, require_session: requireSession },
+            compliance_webhooks: {
+                uri: `${siteOrigin}/api/shopify/webhooks/compliance`,
+                topics: ['customers/data_request', 'customers/redact', 'shop/redact'],
+            },
         });
     });
 

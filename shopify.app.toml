@@ -1,0 +1,11 @@
+# Referans — Partner Dashboard / Shopify CLI ile senkronize edilebilir.
+# App URL: https://www.edxdocu.com/shopify
+
+name = "EdXDocu"
+
+[webhooks]
+api_version = "2025-01"
+
+[[webhooks.subscriptions]]
+compliance_topics = ["customers/data_request", "customers/redact", "shop/redact"]
+uri = "https://www.edxdocu.com/api/shopify/webhooks/compliance"

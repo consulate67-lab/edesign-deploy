@@ -7,13 +7,22 @@ Partner / Dev Dashboard **App URL:** `https://www.edxdocu.com/shopify`
 ## Env
 
 - `SHOPIFY_API_KEY` / `SHOPIFY_CLIENT_ID` — App Bridge (public)
-- `SHOPIFY_API_SECRET` / `SHOPIFY_CLIENT_SECRET` — ID token JWT + token exchange
-- `SHOPIFY_REQUIRE_SESSION=1` — JWT zorunlu
+- `SHOPIFY_API_SECRET` / `SHOPIFY_CLIENT_SECRET` — ID token JWT + token exchange + webhook HMAC
+- `SHOPIFY_REQUIRE_SESSION` — production’da varsayılan açık; `0` ile kapat
 - `SHOPIFY_APP_SECRET` — kanal Bearer API
 - `SHOPIFY_FREE_DOWNLOAD=1` — entitlement’siz indirme
 - `SHOPIFY_BILLING_ENABLED=1` — gerçek Shopify one-time charge (Public app şart)
 - `SHOPIFY_BILLING_TEST=1` — test charge (ücret kesilmez)
 - `SHOPIFY_BILLING_STUB=1` — zorla stub (Billing kapalı)
+
+## Compliance webhooks (App Store zorunlu)
+
+Partner / Dev Dashboard → App → **Versions** veya webhook ayarları:
+
+- URI: `https://www.edxdocu.com/api/shopify/webhooks/compliance`
+- Topics: `customers/data_request`, `customers/redact`, `shop/redact`
+
+HMAC `SHOPIFY_API_SECRET` ile doğrulanır; geçersizse **401**.
 
 ## Akış
 

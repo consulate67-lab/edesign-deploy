@@ -56,30 +56,37 @@
   }
 
   async function ensureAppBridge(apiKey) {
-    if (!apiKey || window.shopify) return;
-    if (!document.querySelector('meta[name="shopify-api-key"]')) {
-      const meta = document.createElement('meta');
-      meta.name = 'shopify-api-key';
-      meta.content = apiKey;
-      document.head.appendChild(meta);
+    const meta = document.querySelector('meta[name="shopify-api-key"]');
+    if (apiKey && meta && !meta.content) meta.content = apiKey;
+    if (apiKey && !meta) {
+      const m = document.createElement('meta');
+      m.name = 'shopify-api-key';
+      m.content = apiKey;
+      document.head.appendChild(m);
     }
-    await new Promise((resolve) => {
-      const existing = document.querySelector('script[data-edx-app-bridge]');
-      if (existing) {
-        existing.addEventListener('load', () => resolve());
-        existing.addEventListener('error', () => resolve());
-        if (window.shopify) resolve();
-        return;
-      }
-      const s = document.createElement('script');
-      s.src = 'https://cdn.shopify.com/shopifycloud/app-bridge.js';
-      s.async = true;
-      s.dataset.edxAppBridge = '1';
-      s.onload = () => resolve();
-      s.onerror = () => resolve();
-      document.head.appendChild(s);
-    });
-    await new Promise((r) => setTimeout(r, 80));
+    // index.html CDN script yüklediyse bekle; yoksa ekle
+    if (!window.shopify) {
+      await new Promise((resolve) => {
+        const existing = document.querySelector('script[src*="shopifycloud/app-bridge"]');
+        if (existing) {
+          if (window.shopify) return resolve();
+          existing.addEventListener('load', () => resolve());
+          existing.addEventListener('error', () => resolve());
+          setTimeout(resolve, 1500);
+          return;
+        }
+        const s = document.createElement('script');
+        s.src = 'https://cdn.shopify.com/shopifycloud/app-bridge.js';
+        s.async = true;
+        s.onload = () => resolve();
+        s.onerror = () => resolve();
+        document.head.appendChild(s);
+      });
+    }
+    // Session token hazır olsun
+    for (let i = 0; i < 20 && !(window.shopify && typeof window.shopify.idToken === 'function'); i += 1) {
+      await new Promise((r) => setTimeout(r, 50));
+    }
   }
 
   async function api(path, opts = {}) {
