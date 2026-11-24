@@ -15,6 +15,7 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
+import jwt from 'jsonwebtoken';
 import { cleanText, optionalText, parseId } from './util.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -22,6 +23,13 @@ const APP_DIR = path.join(__dirname, '..', 'shopify-app');
 
 const DEFAULT_PRICE_CENTS = Number(process.env.SHOPIFY_TEMPLATE_PRICE_CENTS || 1499);
 const HEX_RE = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
+
+/** Partner client ID (tarayıcıya verilebilir) + secret (yalnız sunucu). */
+function shopifyClientCreds() {
+    const apiKey = (process.env.SHOPIFY_API_KEY || process.env.SHOPIFY_CLIENT_ID || '').trim();
+    const apiSecret = (process.env.SHOPIFY_API_SECRET || process.env.SHOPIFY_CLIENT_SECRET || '').trim();
+    return { apiKey, apiSecret };
+}
 
 export async function createShopifySchema(client) {
     await client.query(`
@@ -123,6 +131,14 @@ function requireShopifyChannel(secret) {
     };
 }
 
+function isUsableLogoSrc(src) {
+    if (!src || typeof src !== 'string') return false;
+    if (/^https?:\/\//i.test(src) && src.length < 2000) return true;
+    // Wizard yüklemeleri: data:image/...;base64,...
+    if (/^data:image\/(png|jpe?g|gif|webp|svg\+xml);base64,/i.test(src) && src.length < 600_000) return true;
+    return false;
+}
+
 /** Logo / renk / unvan — hazır şablona hafif marka (tam editör değil). */
 export function applyBrand(xslt, { logoUrl, companyName, accent, previousAccent }) {
     let out = String(xslt || '');
@@ -133,7 +149,7 @@ export function applyBrand(xslt, { logoUrl, companyName, accent, previousAccent 
         // Yaygın varsayılan lacivert tonlarını değiştir (şablonda accent yoksa).
         out = out.replace(/#1e3a8a/gi, accent).replace(/#1e40af/gi, accent);
     }
-    if (logoUrl && /^https?:\/\//i.test(logoUrl) && logoUrl.length < 2000) {
+    if (isUsableLogoSrc(logoUrl)) {
         const safe = logoUrl.replace(/"/g, '&quot;');
         if (/\{\{EDX_LOGO_URL\}\}/.test(out)) {
             out = out.replace(/\{\{EDX_LOGO_URL\}\}/g, safe);
@@ -151,6 +167,12 @@ export function applyBrand(xslt, { logoUrl, companyName, accent, previousAccent 
     if (companyName) {
         const name = companyName.slice(0, 200);
         if (/\{\{EDX_COMPANY\}\}/.test(out)) out = out.replace(/\{\{EDX_COMPANY\}\}/g, name);
+        else if (/data-edx-company/i.test(out)) {
+            out = out.replace(
+                /(<[^>]*data-edx-company[^>]*>)([^<]*)(<\/)/i,
+                `$1${name.replace(/</g, '')}$3`
+            );
+        }
     }
     const stamp = `<!-- edxdocu-shopify-brand:${new Date().toISOString()} -->\n`;
     if (!out.includes('edxdocu-shopify-brand:')) {
@@ -167,6 +189,10 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
         || process.env.NODE_ENV !== 'production';
     const channel = requireShopifyChannel(secret);
     const site = (website || process.env.FRONTEND_URL || 'https://www.edxdocu.com').replace(/\/?$/, '/');
+    const { apiKey: shopifyApiKey, apiSecret: shopifyApiSecret } = shopifyClientCreds();
+    /** SHOPIFY_REQUIRE_SESSION=1 iken JWT zorunlu; aksi halde token varsa doğrula, yoksa UI devam eder. */
+    const requireSession = process.env.SHOPIFY_REQUIRE_SESSION === '1';
+    const sessionReady = Boolean(shopifyApiKey && shopifyApiSecret);
 
     // Gömülü app UI (Partner dashboard App URL → /shopify).
     // Express 5 path-to-regexp: `/shopify/*` çökertir; yalnız static + index yeterli.
@@ -179,8 +205,224 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
             free_download: freeDownload,
             default_price_cents: DEFAULT_PRICE_CENTS,
             design: { light_brand: true, full_editor: true },
+            app_bridge: { api_key_configured: Boolean(shopifyApiKey), session_ready: sessionReady, require_session: requireSession },
         });
     });
+
+    /**
+     * Gömülü Shopify app UI — tarayıcı secret görmez.
+     * Same-origin /api/shopify/ui/* ; opsiyonel App Bridge ID token (JWT) doğrulama.
+     */
+    const uiShop = (req) => normalizeShop(
+        req.shopDomain
+        || req.headers['x-shopify-shop']
+        || req.query.shop
+        || req.body?.shop
+    );
+
+    function optionalShopifyIdToken(req, res, next) {
+        if (!sessionReady) return next();
+        const hdr = String(req.headers.authorization || '');
+        const token = hdr.startsWith('Bearer ') ? hdr.slice(7).trim() : '';
+        if (!token) {
+            if (requireSession) {
+                res.setHeader('X-Shopify-Retry-Invalid-Session-Request', '1');
+                return res.status(401).json({ error: 'Shopify oturum token gerekli.' });
+            }
+            return next();
+        }
+        try {
+            const payload = jwt.verify(token, shopifyApiSecret, {
+                algorithms: ['HS256'],
+                audience: shopifyApiKey,
+            });
+            const issuerHost = new URL(String(payload.iss || '')).hostname;
+            const destHost = new URL(String(payload.dest || '')).hostname;
+            if (!issuerHost || !destHost || issuerHost !== destHost) {
+                throw new Error('iss/dest uyuşmuyor');
+            }
+            req.shopifySession = payload;
+            req.shopDomain = normalizeShop(destHost) || req.shopDomain;
+            return next();
+        } catch {
+            res.setHeader('X-Shopify-Retry-Invalid-Session-Request', '1');
+            return res.status(401).json({ error: 'Geçersiz Shopify oturum token.' });
+        }
+    }
+
+    app.get('/api/shopify/ui/bootstrap', optionalShopifyIdToken, (req, res) => {
+        const shop = uiShop(req);
+        res.json({
+            ok: true,
+            shop,
+            free_download: freeDownload,
+            default_price_cents: DEFAULT_PRICE_CENTS,
+            currency: 'USD',
+            website: site,
+            api_key: shopifyApiKey || null,
+            session_ready: sessionReady,
+            require_session: requireSession,
+            steps: ['intro', 'catalog', 'customize', 'download'],
+            how_to: [
+                {
+                    title: 'Şablon seçin',
+                    body: 'Ülkenize ve belge tipinize uygun hazır e-fatura / irsaliye tasarımını seçin.',
+                },
+                {
+                    title: 'Markanızı uygulayın',
+                    body: 'Logo, unvan ve renk gibi temel bilgileri sihirbazla girin; şablon anında güncellenir.',
+                },
+                {
+                    title: 'İsterseniz detaylı düzenleyin',
+                    body: 'Daha fazla değişiklik için edXdocu tam editörünü açabilirsiniz.',
+                },
+                {
+                    title: 'XSLT indirin',
+                    body: 'Dosyayı indirip kendi e-fatura entegratörünüze yükleyin. Shopify siparişlerini otomatik göndermez.',
+                },
+            ],
+        });
+    });
+
+    async function listTemplates({ country, moduleId }) {
+        let sql = catalogSelect;
+        const params = [];
+        if (country) {
+            params.push(country);
+            sql += ` AND $${params.length} = ANY (l.countries)`;
+        }
+        if (moduleId) {
+            params.push(moduleId);
+            sql += ` AND g.module_id = $${params.length}`;
+        }
+        sql += ' ORDER BY g.updated_at DESC';
+        const { rows } = await db.pool.query(sql, params);
+        return rows.map((r) => serializeCatalogItem(r, { website: site }));
+    }
+
+    app.get('/api/shopify/ui/templates', optionalShopifyIdToken, async (req, res) => {
+        try {
+            const country = optionalText(req.query.country, 8)?.toUpperCase();
+            const moduleId = optionalText(req.query.module_id, 64);
+            const templates = await listTemplates({ country, moduleId });
+            res.json({ templates, shop: uiShop(req) });
+        } catch (e) {
+            res.status(500).json({ error: e.message || 'Katalog alınamadı.' });
+        }
+    });
+
+    app.get('/api/shopify/ui/templates/:id', optionalShopifyIdToken, async (req, res) => {
+        const id = parseId(req.params.id);
+        if (!id) return res.status(400).json({ error: 'Geçersiz şablon id.' });
+        const { rows } = await db.pool.query(`${catalogSelect} AND g.id = $1`, [id]);
+        if (!rows[0]) return res.status(404).json({ error: 'Şablon bulunamadı veya yayınlı değil.' });
+        res.json(serializeCatalogItem(rows[0], { website: site }));
+    });
+
+    app.post('/api/shopify/ui/templates/:id/purchase', optionalShopifyIdToken, async (req, res) => {
+        const id = parseId(req.params.id);
+        if (!id) return res.status(400).json({ error: 'Geçersiz şablon id.' });
+        const shop = uiShop(req);
+        if (!shop) return res.status(400).json({ error: 'Mağaza (shop) gerekli. Shopify içinden açın veya ?shop= ekleyin.' });
+
+        const { rows } = await db.pool.query(`${catalogSelect} AND g.id = $1`, [id]);
+        if (!rows[0]) return res.status(404).json({ error: 'Şablon bulunamadı veya yayınlı değil.' });
+
+        const chargeId = cleanText(req.body?.charge_id, 128) || `ui-${Date.now()}`;
+        await db.run(
+            `INSERT INTO shopify_shops (shop_domain, updated_at) VALUES (?, NOW())
+             ON CONFLICT (shop_domain) DO UPDATE SET updated_at = NOW()`,
+            [shop]
+        );
+        await db.run(
+            `INSERT INTO shopify_entitlements (shop_domain, gallery_id, charge_id)
+             VALUES (?, ?, ?)
+             ON CONFLICT (shop_domain, gallery_id) DO UPDATE SET charge_id = EXCLUDED.charge_id`,
+            [shop, id, chargeId]
+        );
+        res.json({
+            ok: true,
+            shop,
+            gallery_id: id,
+            charge_id: chargeId,
+            download_url: `/api/shopify/ui/templates/${id}/download`,
+            design_url: designUrl(site, id, rows[0].module_id),
+        });
+    });
+
+    app.get('/api/shopify/ui/templates/:id/download', optionalShopifyIdToken, async (req, res) => {
+        const id = parseId(req.params.id);
+        if (!id) return res.status(400).json({ error: 'Geçersiz şablon id.' });
+        req.shopDomain = uiShop(req);
+        const { rows } = await db.pool.query(`${catalogSelect} AND g.id = $1`, [id]);
+        const row = rows[0];
+        if (!row) return res.status(404).json({ error: 'Şablon bulunamadı veya yayınlı değil.' });
+        const full = await db.get('SELECT xslt, name FROM gallery_designs WHERE id = ?', [id]);
+        if (!full?.xslt) return res.status(404).json({ error: 'XSLT yok.' });
+        const ok = await assertEntitledUi(req.shopDomain, id);
+        if (!ok) {
+            return res.status(402).json({
+                error: 'Bu şablon için önce satın alma adımını tamamlayın.',
+                price_cents: row.price_cents,
+                currency: 'USD',
+            });
+        }
+        const filename = `${cleanText(full.name, 80) || 'template'}-${id}.xslt`.replace(/[^\w.\-ğüşıöçĞÜŞİÖÇ]+/gi, '_');
+        res.setHeader('Content-Type', 'application/xslt+xml; charset=utf-8');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.send(full.xslt);
+    });
+
+    app.post('/api/shopify/ui/templates/:id/brand', optionalShopifyIdToken, async (req, res) => {
+        const id = parseId(req.params.id);
+        if (!id) return res.status(400).json({ error: 'Geçersiz şablon id.' });
+        req.shopDomain = uiShop(req);
+        const { rows } = await db.pool.query(`${catalogSelect} AND g.id = $1`, [id]);
+        if (!rows[0]) return res.status(404).json({ error: 'Şablon bulunamadı veya yayınlı değil.' });
+        const ok = await assertEntitledUi(req.shopDomain, id);
+        if (!ok) return res.status(402).json({ error: 'Bu şablon için önce satın alma adımını tamamlayın.' });
+
+        const full = await db.get('SELECT xslt, name, accent FROM gallery_designs WHERE id = ?', [id]);
+        if (!full?.xslt) return res.status(404).json({ error: 'XSLT yok.' });
+
+        const logoUrl = optionalText(req.body?.logo_url, 600_000);
+        const companyName = optionalText(req.body?.company_name, 200);
+        const accent = optionalText(req.body?.accent, 32);
+        if (accent && !HEX_RE.test(accent)) return res.status(400).json({ error: 'accent #RGB veya #RRGGBB olmalı.' });
+        if (logoUrl && !isUsableLogoSrc(logoUrl)) {
+            return res.status(400).json({ error: 'logo_url http(s) veya data:image/... olmalı.' });
+        }
+
+        const xslt = applyBrand(full.xslt, {
+            logoUrl,
+            companyName,
+            accent,
+            previousAccent: full.accent || '',
+        });
+        const filename = `${cleanText(full.name, 80) || 'template'}-${id}-branded.xslt`.replace(/[^\w.\-]+/gi, '_');
+        if (req.query.download === '1' || req.body?.download) {
+            res.setHeader('Content-Type', 'application/xslt+xml; charset=utf-8');
+            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+            return res.send(xslt);
+        }
+        res.json({
+            id,
+            name: full.name,
+            filename,
+            xslt,
+            design_url: designUrl(site, id, rows[0].module_id),
+        });
+    });
+
+    async function assertEntitledUi(shopDomain, galleryId) {
+        if (freeDownload) return true;
+        if (!shopDomain) return false;
+        const row = await db.get(
+            'SELECT id FROM shopify_entitlements WHERE shop_domain = ? AND gallery_id = ?',
+            [shopDomain, galleryId]
+        );
+        return Boolean(row);
+    }
 
     /** Katalog — yayınlanmış Shopify listing'ler */
     app.get('/api/shopify/templates', channel, async (req, res) => {
@@ -266,11 +508,13 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
         const full = await db.get('SELECT xslt, name, accent FROM gallery_designs WHERE id = ?', [id]);
         if (!full?.xslt) return res.status(404).json({ error: 'XSLT yok.' });
 
-        const logoUrl = optionalText(req.body?.logo_url, 2000);
+        const logoUrl = optionalText(req.body?.logo_url, 600_000);
         const companyName = optionalText(req.body?.company_name, 200);
         const accent = optionalText(req.body?.accent, 32);
         if (accent && !HEX_RE.test(accent)) return res.status(400).json({ error: 'accent #RGB veya #RRGGBB olmalı.' });
-        if (logoUrl && !/^https?:\/\//i.test(logoUrl)) return res.status(400).json({ error: 'logo_url http(s) olmalı.' });
+        if (logoUrl && !isUsableLogoSrc(logoUrl)) {
+            return res.status(400).json({ error: 'logo_url http(s) veya data:image/... olmalı.' });
+        }
 
         const xslt = applyBrand(full.xslt, {
             logoUrl,
