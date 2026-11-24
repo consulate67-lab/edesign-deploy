@@ -240,7 +240,7 @@
   }
 
   function renderCatalog() {
-    const showSector = !state.country || state.country === 'TR';
+    const isTR = state.country === 'TR';
     const cards = state.templates.length
       ? state.templates.map((t) => {
           const sel = String(state.selected?.id) === String(t.id);
@@ -255,11 +255,13 @@
             </div>
           </article>`;
         }).join('')
-      : `<div class="empty">Bu filtre için şablon yok. Sektör veya belge tipini değiştirin.</div>`;
+      : `<div class="empty">Bu filtre için şablon yok. Ülke veya filtreleri değiştirin.</div>`;
 
-    const tabs = (state.docTypes || []).map((d) => `
+    const tabs = isTR
+      ? (state.docTypes || []).map((d) => `
       <button type="button" class="tab ${state.docType === d.id ? 'active' : ''}" data-doc="${escapeHtml(d.id)}">${escapeHtml(d.label)}</button>
-    `).join('');
+    `).join('')
+      : '';
 
     const warn = (state.previewWarning || state.ordersWarning)
       ? `<div class="preview-warn">${escapeHtml(state.previewWarning || state.ordersWarning)}</div>` : '';
@@ -267,18 +269,20 @@
     return `
       <section class="panel catalog-panel">
         <h2>Şablon vitrini</h2>
-        <p class="lead">Türkiye e-Fatura / e-Arşiv / e-İrsaliye. Sektör ve sipariş seçerek sağda önizleyin.</p>
+        <p class="lead">${isTR
+    ? 'Türkiye e-Fatura / e-Arşiv / e-İrsaliye. Sektör ve sipariş seçerek sağda önizleyin.'
+    : 'Ülkenize uygun hazır şablonlar. e-Fatura / sektör filtreleri yalnız Türkiye seçiliyken görünür.'}</p>
         <div class="toolbar">
           <label class="field">Ülke
             <select id="country">${countryOptionsHtml()}</select>
           </label>
-          ${showSector ? `<label class="field">Sektör<select id="sector">${sectorOptionsHtml()}</select></label>` : ''}
+          ${isTR ? `<label class="field">Sektör<select id="sector">${sectorOptionsHtml()}</select></label>` : ''}
           <label class="field grow">Sipariş (önizleme)
             <select id="order-pick">${orderOptionsHtml()}</select>
           </label>
           <button type="button" class="ghost" id="btn-reload">Yenile</button>
         </div>
-        <div class="tabs" id="doc-tabs">${tabs}</div>
+        ${isTR ? `<div class="tabs" id="doc-tabs">${tabs}</div>` : ''}
         <div class="catalog-split">
           <div class="catalog-list"><div class="grid grid-compact">${cards}</div></div>
           <aside class="catalog-preview">
@@ -594,8 +598,10 @@
       showMsg('Şablonlar yükleniyor…');
       const params = new URLSearchParams();
       if (state.country) params.set('country', state.country);
-      if (state.docType) params.set('doc_type', state.docType);
-      if (state.sector && (!state.country || state.country === 'TR')) params.set('sector', state.sector);
+      if (state.country === 'TR') {
+        if (state.docType) params.set('doc_type', state.docType);
+        if (state.sector) params.set('sector', state.sector);
+      }
       const q = params.toString() ? `?${params}` : '';
       const data = await api(`/api/shopify/ui/templates${q}`);
       state.templates = data.templates || [];
@@ -665,9 +671,11 @@
         state.country = (country.value || '').toUpperCase();
         if (state.country) sessionStorage.setItem('edx_shopify_country', state.country);
         else sessionStorage.removeItem('edx_shopify_country');
-        if (state.country && state.country !== 'TR') {
+        if (state.country !== 'TR') {
           state.sector = '';
+          state.docType = '';
           sessionStorage.removeItem('edx_shopify_sector');
+          sessionStorage.removeItem('edx_shopify_doc');
         }
         await loadTemplates();
       });
