@@ -3,10 +3,19 @@
   const state = {
     step: 'intro', // intro | catalog | customize | download
     shop: (qs.get('shop') || sessionStorage.getItem('edx_shopify_shop') || '').toLowerCase(),
-    country: (qs.get('country') || sessionStorage.getItem('edx_shopify_country') || '').toUpperCase(),
+    country: (qs.get('country') || sessionStorage.getItem('edx_shopify_country') || 'TR').toUpperCase(),
+    docType: (qs.get('doc_type') || sessionStorage.getItem('edx_shopify_doc') || '').toLowerCase(),
     templates: [],
     selected: null,
+    previewHtml: '',
+    previewBusy: false,
     bootstrap: null,
+    docTypes: [
+      { id: '', label: 'Tümü' },
+      { id: 'fatura', label: 'e-Fatura' },
+      { id: 'arsiv', label: 'e-Arşiv' },
+      { id: 'irsaliye', label: 'e-İrsaliye' },
+    ],
     countries: [
       { code: 'TR', label: 'Türkiye (TR)' },
       { code: 'DE', label: 'Almanya (DE)' },
@@ -194,37 +203,63 @@
     ].join('');
   }
 
+  function docTypeLabel(id) {
+    return ({ fatura: 'e-Fatura', arsiv: 'e-Arşiv', irsaliye: 'e-İrsaliye' })[id] || id || '';
+  }
+
   function renderCatalog() {
     const cards = state.templates.length
       ? state.templates.map((t) => {
-          const countries = (t.countries || []).slice(0, 8);
-          const more = (t.countries || []).length > 8 ? ` +${(t.countries || []).length - 8}` : '';
+          const sel = String(state.selected?.id) === String(t.id);
           return `
-          <article class="card ${state.selected?.id === t.id ? 'selected' : ''}" data-id="${t.id}">
+          <article class="card ${sel ? 'selected' : ''}" data-id="${escapeHtml(String(t.id))}">
             <h3>${escapeHtml(t.name)}</h3>
-            <div class="meta">${escapeHtml(t.module_id || t.doc_type_id || '')} · ${escapeHtml(countries.join(', ') + more)}</div>
-            <div class="meta">${escapeHtml(t.description || 'Hazır fatura / irsaliye XSLT şablonu.')}</div>
-            <div class="price">${priceLabel(t.price_cents)}</div>
-            <div class="actions">
-              <button type="button" data-pick="${t.id}">Bu tasarımı seç</button>
+            <div class="meta">${escapeHtml(docTypeLabel(t.doc_type_id || t.module_id))} · ${escapeHtml(t.sector || t.module_id || '')}</div>
+            <div class="meta clamp">${escapeHtml(t.description || 'Hazır fatura / irsaliye XSLT şablonu.')}</div>
+            <div class="card-foot">
+              <div class="price">${priceLabel(t.price_cents)}</div>
+              <button type="button" data-pick="${escapeHtml(String(t.id))}">${sel ? 'Seçili' : 'Seç'}</button>
             </div>
           </article>`;
         }).join('')
-      : `<div class="empty">Bu ülke için şablon bulunamadı. Ülke filtresini “Tümü” yapın veya başka bir ülke seçin.</div>`;
+      : `<div class="empty">Bu filtre için şablon yok. Belge tipi veya ülkeyi değiştirin.</div>`;
+
+    const tabs = (state.docTypes || []).map((d) => `
+      <button type="button" class="tab ${state.docType === d.id ? 'active' : ''}" data-doc="${escapeHtml(d.id)}">${escapeHtml(d.label)}</button>
+    `).join('');
+
+    const previewTitle = state.selected
+      ? escapeHtml(state.selected.name)
+      : 'Önizleme';
+    const previewBody = !state.selected
+      ? '<div class="preview-placeholder">Soldan bir şablon seçin; örnek XML ile önizleme burada açılır.</div>'
+      : state.previewBusy
+        ? '<div class="preview-placeholder">Önizleme hazırlanıyor…</div>'
+        : `<iframe class="preview-frame" title="Şablon önizleme" srcdoc="${escapeHtml(state.previewHtml || '<p style=padding:16px;font-family:sans-serif>Önizleme yok</p>')}"></iframe>`;
 
     return `
-      <section class="panel">
+      <section class="panel catalog-panel">
         <h2>Şablon vitrini</h2>
-        <p class="lead">Desteklenen ülkelere göre hazır e-fatura / irsaliye şablonları. Ülke seçince yalnızca o ülkenin formatları listelenir.</p>
+        <p class="lead">e-Fatura, e-Arşiv ve e-İrsaliye hazır şablonları. Seçtiğiniz belgenin örneği sağda görünür.</p>
         <div class="toolbar">
           <label class="field">Ülke
-            <select id="country">
-              ${countryOptionsHtml()}
-            </select>
+            <select id="country">${countryOptionsHtml()}</select>
           </label>
+          <div class="tabs" id="doc-tabs">${tabs}</div>
           <button type="button" class="ghost" id="btn-reload">Yenile</button>
         </div>
-        <div class="grid">${cards}</div>
+        <div class="catalog-split">
+          <div class="catalog-list">
+            <div class="grid grid-compact">${cards}</div>
+          </div>
+          <aside class="catalog-preview">
+            <div class="preview-head">
+              <strong>${previewTitle}</strong>
+              ${state.selected ? `<span class="meta">${escapeHtml(docTypeLabel(state.selected.doc_type_id || state.selected.module_id))}</span>` : ''}
+            </div>
+            <div class="preview-stage" id="preview-stage">${previewBody}</div>
+          </aside>
+        </div>
         <div class="footer-actions">
           <button type="button" class="ghost" id="btn-back-intro">Geri</button>
           <div class="right">
@@ -233,6 +268,37 @@
         </div>
       </section>
     `;
+  }
+
+  async function loadPreview(template) {
+    if (!template) {
+      state.previewHtml = '';
+      state.previewBusy = false;
+      return;
+    }
+    state.previewBusy = true;
+    try {
+      const id = encodeURIComponent(String(template.id));
+      const data = await api(`/api/shopify/ui/templates/${id}/preview-source`);
+      if (!data.xslt) throw new Error('XSLT yok');
+      const parser = new DOMParser();
+      const xsltDoc = parser.parseFromString(data.xslt, 'text/xml');
+      const xmlDoc = parser.parseFromString(data.xml || '<?xml version="1.0"?><Invoice/>', 'text/xml');
+      if (xsltDoc.querySelector('parsererror')) throw new Error('XSLT ayrıştırılamadı');
+      if (xmlDoc.querySelector('parsererror')) throw new Error('Örnek XML ayrıştırılamadı');
+      if (!window.XSLTProcessor) throw new Error('Tarayıcı XSLT desteklemiyor');
+      const proc = new XSLTProcessor();
+      proc.importStylesheet(xsltDoc);
+      const out = proc.transformToDocument(xmlDoc);
+      const html = new XMLSerializer().serializeToString(out);
+      state.previewHtml = html.includes('<html')
+        ? html
+        : `<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{margin:12px;font-family:Segoe UI,sans-serif;background:#fff;color:#111}</style></head><body>${html}</body></html>`;
+    } catch (e) {
+      state.previewHtml = `<!DOCTYPE html><html><body style="font-family:sans-serif;padding:16px;color:#b91c1c">Önizleme alınamadı: ${escapeHtml(e.message)}</body></html>`;
+    } finally {
+      state.previewBusy = false;
+    }
   }
 
   function renderCustomize() {
@@ -350,15 +416,31 @@
     }
     $('btn-reload')?.addEventListener('click', () => loadTemplates());
 
+    document.querySelectorAll('[data-doc]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        state.docType = btn.getAttribute('data-doc') || '';
+        if (state.docType) sessionStorage.setItem('edx_shopify_doc', state.docType);
+        else sessionStorage.removeItem('edx_shopify_doc');
+        await loadTemplates();
+      });
+    });
+
     document.querySelectorAll('[data-pick]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const id = Number(btn.getAttribute('data-pick'));
-        state.selected = state.templates.find((t) => t.id === id) || null;
+      btn.addEventListener('click', async () => {
+        const id = btn.getAttribute('data-pick');
+        state.selected = state.templates.find((t) => String(t.id) === String(id)) || null;
         state.purchased = false;
         if (state.selected?.accent && /^#/.test(state.selected.accent)) {
           state.form.accent = state.selected.accent;
         }
         render();
+        if (state.step === 'catalog' && state.selected) {
+          await loadPreview(state.selected);
+          const stage = $('preview-stage');
+          if (stage) {
+            stage.innerHTML = `<iframe class="preview-frame" title="Şablon önizleme" srcdoc="${escapeHtml(state.previewHtml)}"></iframe>`;
+          }
+        }
       });
     });
 
@@ -427,7 +509,7 @@
     }
     try {
       showMsg('Satın alma başlatılıyor…');
-      const r = await api(`/api/shopify/ui/templates/${state.selected.id}/purchase`, {
+      const r = await api(tplApi(state.selected.id, '/purchase'), {
         method: 'POST',
         body: JSON.stringify({ shop: state.shop }),
       });
@@ -487,7 +569,7 @@
     if (!state.selected) return;
     try {
       showMsg('İndiriliyor…');
-      const url = new URL(`/api/shopify/ui/templates/${state.selected.id}/download`, location.origin);
+      const url = new URL(tplApi(state.selected.id, '/download'), location.origin);
       if (state.shop) url.searchParams.set('shop', state.shop);
       const auth = await idTokenHeader();
       const res = await fetch(url.toString(), { headers: { ...shopHeaders(), ...auth } });
@@ -508,7 +590,7 @@
     readCustomizeForm();
     try {
       showMsg('Markalı XSLT hazırlanıyor…');
-      const data = await api(`/api/shopify/ui/templates/${state.selected.id}/brand`, {
+      const data = await api(tplApi(state.selected.id, '/brand'), {
         method: 'POST',
         body: JSON.stringify({
           company_name: state.form.company_name,
@@ -536,17 +618,32 @@
   async function loadTemplates() {
     try {
       showMsg('Şablonlar yükleniyor…');
-      const q = state.country ? `?country=${encodeURIComponent(state.country)}` : '';
+      const params = new URLSearchParams();
+      if (state.country) params.set('country', state.country);
+      if (state.docType) params.set('doc_type', state.docType);
+      const q = params.toString() ? `?${params}` : '';
       const data = await api('/api/shopify/ui/templates' + q);
       state.templates = data.templates || [];
+      if (Array.isArray(data.doc_types) && data.doc_types.length) state.docTypes = data.doc_types;
       if (state.selected) {
-        state.selected = state.templates.find((t) => t.id === state.selected.id) || null;
+        state.selected = state.templates.find((t) => String(t.id) === String(state.selected.id)) || null;
       }
       showMsg(state.templates.length ? `${state.templates.length} şablon` : 'Katalog boş.', state.templates.length ? '' : 'err');
       render();
+      if (state.step === 'catalog' && state.selected) {
+        await loadPreview(state.selected);
+        const stage = $('preview-stage');
+        if (stage && state.previewHtml) {
+          stage.innerHTML = `<iframe class="preview-frame" title="Şablon önizleme" srcdoc="${escapeHtml(state.previewHtml)}"></iframe>`;
+        }
+      }
     } catch (e) {
       showMsg(e.message, 'err');
     }
+  }
+
+  function tplApi(id, suffix) {
+    return `/api/shopify/ui/templates/${encodeURIComponent(String(id))}${suffix || ''}`;
   }
 
   function render() {

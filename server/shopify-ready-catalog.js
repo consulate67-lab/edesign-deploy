@@ -19,30 +19,7 @@ const READY_TAG = 'shopify-ready';
 
 /** @type {Array<{ key: string, name: string, description: string, module_id: string, doc_type_id: string, countries: string[], xsltRel: string, xmlRel?: string, sector?: string, category?: string, accent?: string }>} */
 export const READY_TEMPLATES = [
-    {
-        key: 'tr-efatura',
-        name: 'Türkiye e-Fatura',
-        description: 'GİB UBL-TR e-Fatura hazır XSLT şablonu.',
-        module_id: 'fatura',
-        doc_type_id: 'fatura',
-        countries: ['TR'],
-        xsltRel: 'ebelge/gib/v2/e-Fatura-Sablon.xslt',
-        sector: 'perakende',
-        category: 'ticaret',
-        accent: '#1e3a8a',
-    },
-    {
-        key: 'tr-earsiv',
-        name: 'Türkiye e-Arşiv Fatura',
-        description: 'GİB e-Arşiv fatura görünümü için hazır XSLT.',
-        module_id: 'arsiv',
-        doc_type_id: 'arsiv',
-        countries: ['TR'],
-        xsltRel: 'ebelge/gib/v2/e-Arsiv-Sablon.xslt',
-        sector: 'perakende',
-        category: 'ticaret',
-        accent: '#0f766e',
-    },
+    // TR GİB + hazir sektör şablonları: server/shopify-hazir-catalog.js (dosya indeksi)
     {
         key: 'eu-en16931',
         name: 'EN 16931 / Peppol Invoice',

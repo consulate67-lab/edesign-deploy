@@ -27,6 +27,13 @@ import {
     ensureReadyShopifyCatalog,
     SHOPIFY_COUNTRY_OPTIONS,
 } from './shopify-ready-catalog.js';
+import {
+    findHazirEntry,
+    getHazirTrIndex,
+    loadHazirFiles,
+    materializeHazirTemplate,
+    serializeHazirItem,
+} from './shopify-hazir-catalog.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const APP_DIR = path.join(__dirname, '..', 'shopify-app');
@@ -512,7 +519,17 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
         });
     });
 
-    async function listTemplates({ country, moduleId }) {
+    async function resolveGalleryId(idParam) {
+        const raw = decodeURIComponent(String(idParam || ''));
+        if (raw.startsWith('hazir:')) {
+            const entry = findHazirEntry(raw);
+            if (!entry) return null;
+            return materializeHazirTemplate(db, entry, { priceCents: DEFAULT_PRICE_CENTS });
+        }
+        return parseId(raw);
+    }
+
+    async function listTemplates({ country, moduleId, docType }) {
         await ensureCatalog();
         let sql = catalogSelect;
         const params = [];
@@ -524,9 +541,37 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
             params.push(moduleId);
             sql += ` AND g.module_id = $${params.length}`;
         }
+        if (docType) {
+            params.push(docType);
+            sql += ` AND g.doc_type_id = $${params.length}`;
+        }
         sql += ' ORDER BY g.updated_at DESC';
         const { rows } = await db.pool.query(sql, params);
-        return rows.map((r) => serializeCatalogItem(r, { website: site }));
+        const dbItems = rows.map((r) => serializeCatalogItem(r, { website: site }));
+
+        // TR: dosya tabanlı e-Fatura / e-Arşiv / e-İrsaliye hazır şablonlar
+        const wantHazir = !country || country === 'TR';
+        if (!wantHazir) return dbItems;
+
+        let hazir = getHazirTrIndex();
+        if (docType) hazir = hazir.filter((h) => h.doc_type_id === docType);
+        if (moduleId) hazir = hazir.filter((h) => h.module_id === moduleId);
+        const hazirItems = hazir.map((h) => serializeHazirItem(h, {
+            website: site,
+            priceCents: DEFAULT_PRICE_CENTS,
+        }));
+
+        // DB’deki TR listing’leri hazir ile birleştir; aynı isim+modül tekrarını at
+        const seen = new Set(hazirItems.map((h) => `${h.module_id}::${h.name}`.toLowerCase()));
+        const extra = dbItems.filter((d) => {
+            if (country === 'TR' || !country) {
+                const key = `${d.module_id}::${d.name}`.toLowerCase();
+                if (seen.has(key)) return false;
+                seen.add(key);
+            }
+            return true;
+        });
+        return [...hazirItems, ...extra];
     }
 
     const requireUiSession = shopifyIdToken({ required: requireSession });
@@ -535,20 +580,67 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
         try {
             const country = optionalText(req.query.country, 8)?.toUpperCase();
             const moduleId = optionalText(req.query.module_id, 64);
-            const templates = await listTemplates({ country, moduleId });
+            const docType = optionalText(req.query.doc_type, 32)?.toLowerCase();
+            const templates = await listTemplates({ country, moduleId, docType });
             res.json({
                 templates,
                 shop: uiShop(req),
                 country: country || null,
+                doc_type: docType || null,
                 countries: SHOPIFY_COUNTRY_OPTIONS,
+                doc_types: [
+                    { id: '', label: 'Tümü' },
+                    { id: 'fatura', label: 'e-Fatura' },
+                    { id: 'arsiv', label: 'e-Arşiv' },
+                    { id: 'irsaliye', label: 'e-İrsaliye' },
+                ],
             });
         } catch (e) {
             res.status(500).json({ error: e.message || 'Katalog alınamadı.' });
         }
     });
 
+    app.get('/api/shopify/ui/templates/:id/preview-source', optionalShopifyIdToken, async (req, res) => {
+        try {
+            const raw = decodeURIComponent(String(req.params.id || ''));
+            if (raw.startsWith('hazir:')) {
+                const entry = findHazirEntry(raw);
+                const files = loadHazirFiles(entry);
+                if (!files?.xslt) return res.status(404).json({ error: 'Önizleme kaynağı bulunamadı.' });
+                return res.json({
+                    id: entry.id,
+                    name: entry.name,
+                    module_id: entry.module_id,
+                    doc_type_id: entry.doc_type_id,
+                    xslt: files.xslt,
+                    xml: files.xml,
+                });
+            }
+            const id = parseId(raw);
+            if (!id) return res.status(400).json({ error: 'Geçersiz şablon id.' });
+            const full = await db.get('SELECT id, name, module_id, doc_type_id, xslt, xml FROM gallery_designs WHERE id = ?', [id]);
+            if (!full?.xslt) return res.status(404).json({ error: 'Önizleme kaynağı bulunamadı.' });
+            return res.json({
+                id: full.id,
+                name: full.name,
+                module_id: full.module_id,
+                doc_type_id: full.doc_type_id,
+                xslt: full.xslt,
+                xml: full.xml || '',
+            });
+        } catch (e) {
+            res.status(500).json({ error: e.message || 'Önizleme alınamadı.' });
+        }
+    });
+
     app.get('/api/shopify/ui/templates/:id', optionalShopifyIdToken, async (req, res) => {
-        const id = parseId(req.params.id);
+        const raw = decodeURIComponent(String(req.params.id || ''));
+        if (raw.startsWith('hazir:')) {
+            const entry = findHazirEntry(raw);
+            if (!entry) return res.status(404).json({ error: 'Şablon bulunamadı.' });
+            return res.json(serializeHazirItem(entry, { website: site, priceCents: DEFAULT_PRICE_CENTS }));
+        }
+        const id = parseId(raw);
         if (!id) return res.status(400).json({ error: 'Geçersiz şablon id.' });
         const { rows } = await db.pool.query(`${catalogSelect} AND g.id = $1`, [id]);
         if (!rows[0]) return res.status(404).json({ error: 'Şablon bulunamadı veya yayınlı değil.' });
@@ -556,7 +648,7 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
     });
 
     app.post('/api/shopify/ui/templates/:id/purchase', requireUiSession, async (req, res) => {
-        const id = parseId(req.params.id);
+        const id = await resolveGalleryId(req.params.id);
         if (!id) return res.status(400).json({ error: 'Geçersiz şablon id.' });
         const shop = uiShop(req);
         if (!shop) return res.status(400).json({ error: 'Mağaza (shop) gerekli. Shopify içinden açın veya ?shop= ekleyin.' });
@@ -694,7 +786,7 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
     });
 
     app.get('/api/shopify/ui/templates/:id/entitled', requireUiSession, async (req, res) => {
-        const id = parseId(req.params.id);
+        const id = await resolveGalleryId(req.params.id);
         if (!id) return res.status(400).json({ error: 'Geçersiz şablon id.' });
         const shop = uiShop(req);
         const ok = shop ? await assertEntitledUi(shop, id) : false;
@@ -702,7 +794,7 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
     });
 
     app.get('/api/shopify/ui/templates/:id/download', requireUiSession, async (req, res) => {
-        const id = parseId(req.params.id);
+        const id = await resolveGalleryId(req.params.id);
         if (!id) return res.status(400).json({ error: 'Geçersiz şablon id.' });
         req.shopDomain = uiShop(req);
         const { rows } = await db.pool.query(`${catalogSelect} AND g.id = $1`, [id]);
@@ -725,7 +817,7 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
     });
 
     app.post('/api/shopify/ui/templates/:id/brand', requireUiSession, async (req, res) => {
-        const id = parseId(req.params.id);
+        const id = await resolveGalleryId(req.params.id);
         if (!id) return res.status(400).json({ error: 'Geçersiz şablon id.' });
         req.shopDomain = uiShop(req);
         const { rows } = await db.pool.query(`${catalogSelect} AND g.id = $1`, [id]);
