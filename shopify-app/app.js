@@ -249,19 +249,24 @@
         <button type="button" id="btn-back-catalog3">Vitrine dön</button></section>`;
     }
     const free = state.bootstrap?.free_download;
+    const billingOn = state.bootstrap?.billing_enabled;
     return `
       <section class="panel">
         <h2>Satın al ve indir</h2>
         <p class="lead">
           Seçilen tasarım: <strong>${escapeHtml(t.name)}</strong> ·
           <span class="price">${priceLabel(t.price_cents)}</span>
-          ${free ? ' · Geliştirme modunda indirme açık' : ''}
+          ${free ? ' · Geliştirme: indirme açık' : ''}
+          ${billingOn ? ' · Shopify Billing' : ' · Stub / test satın alma'}
+          ${state.purchased ? ' · <strong>Hak açık</strong>' : ''}
         </p>
         <div class="howto" style="margin-bottom:16px">
           <article>
             <div class="n">A</div>
-            <h3>Satın alma kaydı</h3>
-            <p>Mağaza hakkını açar (Shopify Billing entegrasyonu sonraki aşamada; şimdilik uygulama içi kayıt).</p>
+            <h3>${billingOn ? 'Shopify ile öde' : 'Satın alma'}</h3>
+            <p>${billingOn
+      ? 'Shopify onay ekranına yönlendirilirsiniz; onaydan sonra şablon hakkı açılır.'
+      : 'Test/stub modunda hak anında açılır. Canlı satış için Public app + Billing gerekir.'}</p>
           </article>
           <article>
             <div class="n">B</div>
@@ -272,7 +277,7 @@
         <div class="footer-actions">
           <button type="button" class="ghost" id="btn-back-customize">Geri</button>
           <div class="right">
-            <button type="button" class="ghost" id="btn-purchase">Satın al (kayıt)</button>
+            <button type="button" class="ghost" id="btn-purchase">${billingOn ? 'Satın al (Shopify)' : 'Satın al (test)'}</button>
             <button type="button" class="ghost" id="btn-dl-raw">XSLT indir</button>
             <button type="button" id="btn-dl-brand">Markalı indir</button>
           </div>
@@ -386,14 +391,59 @@
       return;
     }
     try {
-      showMsg('Satın alma kaydı oluşturuluyor…');
+      showMsg('Satın alma başlatılıyor…');
       const r = await api(`/api/shopify/ui/templates/${state.selected.id}/purchase`, {
         method: 'POST',
-        body: JSON.stringify({ shop: state.shop, charge_id: `ui-${Date.now()}` }),
+        body: JSON.stringify({ shop: state.shop }),
       });
+      if (r.already_entitled || r.stub) {
+        state.purchased = true;
+        showMsg(r.already_entitled ? 'Bu şablon için hak zaten açık.' : 'Test hakkı açıldı; indirebilirsiniz.', 'ok');
+        return;
+      }
+      if (r.confirmation_url) {
+        showMsg('Shopify ödeme onayına yönlendiriliyorsunuz…', 'ok');
+        const target = r.confirmation_url;
+        // Embedded app: üst frame’e çık
+        if (window.top && window.top !== window) window.top.location.href = target;
+        else location.href = target;
+        return;
+      }
       state.purchased = true;
-      showMsg(`Hak açıldı. charge=${r.charge_id}`, 'ok');
+      showMsg('Satın alma tamam.', 'ok');
     } catch (e) {
+      showMsg(e.message, 'err');
+    }
+  }
+
+  async function confirmBillingReturn() {
+    const billing = qs.get('billing');
+    const galleryId = Number(qs.get('gallery_id') || 0);
+    if (billing !== 'return' || !galleryId) return;
+    try {
+      showMsg('Ödeme doğrulanıyor…');
+      const chargeGid = qs.get('charge_id') || qs.get('charge_gid') || '';
+      const q = new URLSearchParams({
+        shop: state.shop || '',
+        gallery_id: String(galleryId),
+      });
+      if (chargeGid) q.set('charge_gid', chargeGid.startsWith('gid://') ? chargeGid : `gid://shopify/AppPurchaseOneTime/${chargeGid}`);
+      const r = await api(`/api/shopify/ui/billing/confirm?${q.toString()}`);
+      state.purchased = true;
+      state.selected = state.selected || { id: galleryId, name: `Şablon #${galleryId}`, price_cents: 0 };
+      if (!state.selected.id) state.selected.id = galleryId;
+      setStep('download');
+      showMsg('Ödeme onaylandı; XSLT indirebilirsiniz.', 'ok');
+      // URL temizle
+      const clean = new URL(location.href);
+      clean.searchParams.delete('billing');
+      clean.searchParams.delete('gallery_id');
+      clean.searchParams.delete('charge_id');
+      clean.searchParams.delete('charge_gid');
+      history.replaceState({}, '', clean.toString());
+      void r;
+    } catch (e) {
+      setStep('download');
       showMsg(e.message, 'err');
     }
   }
@@ -497,6 +547,7 @@
         }
       }
       render();
+      await confirmBillingReturn();
     } catch (e) {
       $('main').innerHTML = `<section class="panel"><p class="lead">Başlatılamadı: ${escapeHtml(e.message)}</p></section>`;
       showMsg(e.message, 'err');

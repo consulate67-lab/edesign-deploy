@@ -7,11 +7,24 @@ Partner / Dev Dashboard **App URL:** `https://www.edxdocu.com/shopify`
 ## Env
 
 - `SHOPIFY_API_KEY` / `SHOPIFY_CLIENT_ID` — App Bridge (public)
-- `SHOPIFY_API_SECRET` / `SHOPIFY_CLIENT_SECRET` — ID token JWT doğrulama
-- `SHOPIFY_REQUIRE_SESSION=1` — JWT zorunlu (yoksa token opsiyonel)
+- `SHOPIFY_API_SECRET` / `SHOPIFY_CLIENT_SECRET` — ID token JWT + token exchange
+- `SHOPIFY_REQUIRE_SESSION=1` — JWT zorunlu
 - `SHOPIFY_APP_SECRET` — kanal Bearer API
 - `SHOPIFY_FREE_DOWNLOAD=1` — entitlement’siz indirme
+- `SHOPIFY_BILLING_ENABLED=1` — gerçek Shopify one-time charge (Public app şart)
+- `SHOPIFY_BILLING_TEST=1` — test charge (ücret kesilmez)
+- `SHOPIFY_BILLING_STUB=1` — zorla stub (Billing kapalı)
 
 ## Akış
 
-Intro → katalog → özelleştir → satın al / XSLT indir → tam editör linki
+Intro → katalog → özelleştir → **Satın al (Shopify Billing)** → onay → XSLT indir
+
+## Herkese satmak (Public)
+
+1. **Yeni app** oluştur (Custom dağıtım değiştirilemez) → **Public distribution**
+2. App URL: `https://www.edxdocu.com/shopify` · redirect aynı
+3. Client ID/Secret’ı Railway’e yaz
+4. Production: `SHOPIFY_BILLING_ENABLED=1`, `SHOPIFY_FREE_DOWNLOAD` kapalı; test için `SHOPIFY_BILLING_TEST=1`
+5. App Store listing + inceleme → onay sonrası mağazalar kurar / satın alır
+
+**Not:** Custom distribution Billing API kullanamaz; canlı ücret için Public şart.

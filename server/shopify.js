@@ -17,6 +17,11 @@ import { fileURLToPath } from 'node:url';
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import { cleanText, optionalText, parseId } from './util.js';
+import {
+    createOneTimePurchase,
+    exchangeOfflineToken,
+    getOneTimePurchaseStatus,
+} from './shopify-billing.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const APP_DIR = path.join(__dirname, '..', 'shopify-app');
@@ -47,10 +52,14 @@ export async function createShopifySchema(client) {
             id             SERIAL PRIMARY KEY,
             shop_domain    TEXT NOT NULL UNIQUE,
             edx_user_id    INTEGER REFERENCES users(id) ON DELETE SET NULL,
+            access_token   TEXT,
+            scope          TEXT,
             installed_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
             updated_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
         )
     `);
+    await client.query(`ALTER TABLE shopify_shops ADD COLUMN IF NOT EXISTS access_token TEXT`);
+    await client.query(`ALTER TABLE shopify_shops ADD COLUMN IF NOT EXISTS scope TEXT`);
     await client.query(`
         CREATE TABLE IF NOT EXISTS shopify_entitlements (
             id             SERIAL PRIMARY KEY,
@@ -62,6 +71,18 @@ export async function createShopifySchema(client) {
         )
     `);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_shopify_entitlements_shop ON shopify_entitlements (shop_domain)`);
+    await client.query(`
+        CREATE TABLE IF NOT EXISTS shopify_pending_charges (
+            id             SERIAL PRIMARY KEY,
+            shop_domain    TEXT NOT NULL,
+            gallery_id     INTEGER NOT NULL REFERENCES gallery_designs(id) ON DELETE CASCADE,
+            charge_gid     TEXT NOT NULL UNIQUE,
+            status         TEXT NOT NULL DEFAULT 'PENDING',
+            created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            updated_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_shopify_pending_charges_shop ON shopify_pending_charges (shop_domain)`);
 }
 
 const catalogSelect = `
@@ -187,12 +208,73 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
         || (process.env.NODE_ENV !== 'production' ? 'dev-shopify-secret' : '');
     const freeDownload = process.env.SHOPIFY_FREE_DOWNLOAD === '1'
         || process.env.NODE_ENV !== 'production';
+    /**
+     * Gerçek Shopify Billing: yalnız SHOPIFY_BILLING_ENABLED=1 (Public app).
+     * Custom distribution Billing API kullanamaz — varsayılan stub/test hakkı.
+     */
+    const billingEnabled = process.env.SHOPIFY_BILLING_ENABLED === '1';
+    const billingStub = !billingEnabled || process.env.SHOPIFY_BILLING_STUB === '1';
+    const billingTest = process.env.SHOPIFY_BILLING_TEST === '1'
+        || process.env.NODE_ENV !== 'production';
     const channel = requireShopifyChannel(secret);
     const site = (website || process.env.FRONTEND_URL || 'https://www.edxdocu.com').replace(/\/?$/, '/');
+    const siteOrigin = site.replace(/\/$/, '');
     const { apiKey: shopifyApiKey, apiSecret: shopifyApiSecret } = shopifyClientCreds();
     /** SHOPIFY_REQUIRE_SESSION=1 iken JWT zorunlu; aksi halde token varsa doğrula, yoksa UI devam eder. */
     const requireSession = process.env.SHOPIFY_REQUIRE_SESSION === '1';
     const sessionReady = Boolean(shopifyApiKey && shopifyApiSecret);
+
+    async function upsertShopToken(shop, accessToken, scope) {
+        await db.run(
+            `INSERT INTO shopify_shops (shop_domain, access_token, scope, updated_at)
+             VALUES (?, ?, ?, NOW())
+             ON CONFLICT (shop_domain) DO UPDATE SET
+               access_token = COALESCE(EXCLUDED.access_token, shopify_shops.access_token),
+               scope = COALESCE(EXCLUDED.scope, shopify_shops.scope),
+               updated_at = NOW()`,
+            [shop, accessToken || null, scope || null]
+        );
+    }
+
+    async function getShopAccessToken(shop) {
+        const row = await db.get('SELECT access_token FROM shopify_shops WHERE shop_domain = ?', [shop]);
+        return row?.access_token || null;
+    }
+
+    async function ensureOfflineToken(req, shop) {
+        let token = await getShopAccessToken(shop);
+        if (token) return token;
+        if (!shopifyApiKey || !shopifyApiSecret) {
+            throw new Error('SHOPIFY_API_KEY / SHOPIFY_API_SECRET tanımlı değil.');
+        }
+        const hdr = String(req.headers.authorization || '');
+        const sessionToken = hdr.startsWith('Bearer ') ? hdr.slice(7).trim() : '';
+        if (!sessionToken) {
+            throw new Error('Shopify oturum token gerekli (uygulamayı admin içinden açın).');
+        }
+        const exchanged = await exchangeOfflineToken({
+            shop,
+            sessionToken,
+            apiKey: shopifyApiKey,
+            apiSecret: shopifyApiSecret,
+        });
+        await upsertShopToken(shop, exchanged.accessToken, exchanged.scope);
+        return exchanged.accessToken;
+    }
+
+    async function grantEntitlement(shop, galleryId, chargeId) {
+        await db.run(
+            `INSERT INTO shopify_shops (shop_domain, updated_at) VALUES (?, NOW())
+             ON CONFLICT (shop_domain) DO UPDATE SET updated_at = NOW()`,
+            [shop]
+        );
+        await db.run(
+            `INSERT INTO shopify_entitlements (shop_domain, gallery_id, charge_id)
+             VALUES (?, ?, ?)
+             ON CONFLICT (shop_domain, gallery_id) DO UPDATE SET charge_id = EXCLUDED.charge_id`,
+            [shop, galleryId, chargeId]
+        );
+    }
 
     // Gömülü app UI (Partner dashboard App URL → /shopify).
     // Express 5 path-to-regexp: `/shopify/*` çökertir; yalnız static + index yeterli.
@@ -203,6 +285,9 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
             ok: true,
             channel_configured: Boolean(secret),
             free_download: freeDownload,
+            billing_stub: billingStub,
+            billing_test: billingTest,
+            billing_enabled: billingEnabled && !billingStub,
             default_price_cents: DEFAULT_PRICE_CENTS,
             design: { light_brand: true, full_editor: true },
             app_bridge: { api_key_configured: Boolean(shopifyApiKey), session_ready: sessionReady, require_session: requireSession },
@@ -256,6 +341,9 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
             ok: true,
             shop,
             free_download: freeDownload,
+            billing_stub: billingStub,
+            billing_test: billingTest,
+            billing_enabled: billingEnabled && !billingStub,
             default_price_cents: DEFAULT_PRICE_CENTS,
             currency: 'USD',
             website: site,
@@ -328,26 +416,141 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
         const { rows } = await db.pool.query(`${catalogSelect} AND g.id = $1`, [id]);
         if (!rows[0]) return res.status(404).json({ error: 'Şablon bulunamadı veya yayınlı değil.' });
 
-        const chargeId = cleanText(req.body?.charge_id, 128) || `ui-${Date.now()}`;
-        await db.run(
-            `INSERT INTO shopify_shops (shop_domain, updated_at) VALUES (?, NOW())
-             ON CONFLICT (shop_domain) DO UPDATE SET updated_at = NOW()`,
-            [shop]
-        );
-        await db.run(
-            `INSERT INTO shopify_entitlements (shop_domain, gallery_id, charge_id)
-             VALUES (?, ?, ?)
-             ON CONFLICT (shop_domain, gallery_id) DO UPDATE SET charge_id = EXCLUDED.charge_id`,
-            [shop, id, chargeId]
-        );
-        res.json({
-            ok: true,
-            shop,
-            gallery_id: id,
-            charge_id: chargeId,
-            download_url: `/api/shopify/ui/templates/${id}/download`,
-            design_url: designUrl(site, id, rows[0].module_id),
-        });
+        const already = await assertEntitledUi(shop, id);
+        if (already) {
+            return res.json({
+                ok: true,
+                already_entitled: true,
+                shop,
+                gallery_id: id,
+                download_url: `/api/shopify/ui/templates/${id}/download`,
+                design_url: designUrl(site, id, rows[0].module_id),
+            });
+        }
+
+        // Geliştirme / stub: charge oluşturmadan hak aç
+        if (billingStub || freeDownload) {
+            const chargeId = cleanText(req.body?.charge_id, 128) || `stub-${Date.now()}`;
+            await grantEntitlement(shop, id, chargeId);
+            return res.json({
+                ok: true,
+                stub: true,
+                shop,
+                gallery_id: id,
+                charge_id: chargeId,
+                download_url: `/api/shopify/ui/templates/${id}/download`,
+                design_url: designUrl(site, id, rows[0].module_id),
+            });
+        }
+
+        try {
+            const accessToken = await ensureOfflineToken(req, shop);
+            const amount = ((rows[0].price_cents || DEFAULT_PRICE_CENTS) / 100).toFixed(2);
+            const returnUrl = new URL(`${siteOrigin}/shopify/`);
+            returnUrl.searchParams.set('shop', shop);
+            returnUrl.searchParams.set('billing', 'return');
+            returnUrl.searchParams.set('gallery_id', String(id));
+
+            const purchase = await createOneTimePurchase({
+                shop,
+                accessToken,
+                name: `edXdocu: ${rows[0].name || `template-${id}`}`,
+                amount,
+                currencyCode: 'USD',
+                returnUrl: returnUrl.toString(),
+                test: billingTest,
+            });
+
+            await db.run(
+                `INSERT INTO shopify_pending_charges (shop_domain, gallery_id, charge_gid, status, updated_at)
+                 VALUES (?, ?, ?, ?, NOW())
+                 ON CONFLICT (charge_gid) DO UPDATE SET
+                   status = EXCLUDED.status,
+                   updated_at = NOW()`,
+                [shop, id, purchase.chargeGid, purchase.status || 'PENDING']
+            );
+
+            res.json({
+                ok: true,
+                shop,
+                gallery_id: id,
+                charge_gid: purchase.chargeGid,
+                confirmation_url: purchase.confirmationUrl,
+                test: billingTest,
+            });
+        } catch (e) {
+            const msg = e.message || 'Billing başlatılamadı';
+            const hint = /billing|distribution|public|charge/i.test(msg)
+                ? ' Custom distribution Billing desteklemez; Public app + App Store gerekir.'
+                : '';
+            res.status(502).json({ error: msg + hint, billing_required: true });
+        }
+    });
+
+    /** Merchant charge onayından dönüş — ACTIVE ise entitlement */
+    app.get('/api/shopify/ui/billing/confirm', optionalShopifyIdToken, async (req, res) => {
+        const shop = uiShop(req);
+        const galleryId = parseId(req.query.gallery_id);
+        const chargeGid = cleanText(req.query.charge_gid || req.query.charge_id, 200);
+        if (!shop || !galleryId) {
+            return res.status(400).json({ error: 'shop ve gallery_id gerekli.' });
+        }
+
+        try {
+            let gid = chargeGid;
+            if (!gid) {
+                const pending = await db.get(
+                    `SELECT charge_gid FROM shopify_pending_charges
+                      WHERE shop_domain = ? AND gallery_id = ?
+                      ORDER BY created_at DESC LIMIT 1`,
+                    [shop, galleryId]
+                );
+                gid = pending?.charge_gid;
+            }
+            if (!gid) return res.status(404).json({ error: 'Bekleyen charge bulunamadı.' });
+
+            let token = null;
+            try {
+                token = await ensureOfflineToken(req, shop);
+            } catch {
+                token = await getShopAccessToken(shop);
+            }
+            if (!token) return res.status(401).json({ error: 'Mağaza access token yok; uygulamayı yeniden açın.' });
+
+            const status = await getOneTimePurchaseStatus({ shop, accessToken: token, chargeGid: gid });
+            await db.run(
+                `UPDATE shopify_pending_charges SET status = ?, updated_at = NOW() WHERE charge_gid = ?`,
+                [status.status, gid]
+            );
+
+            if (status.status !== 'ACTIVE') {
+                return res.status(402).json({
+                    error: `Ödeme henüz aktif değil (status=${status.status}).`,
+                    status: status.status,
+                    charge_gid: gid,
+                });
+            }
+
+            await grantEntitlement(shop, galleryId, gid);
+            res.json({
+                ok: true,
+                shop,
+                gallery_id: galleryId,
+                charge_gid: gid,
+                status: status.status,
+                download_url: `/api/shopify/ui/templates/${galleryId}/download`,
+            });
+        } catch (e) {
+            res.status(502).json({ error: e.message || 'Charge doğrulanamadı.' });
+        }
+    });
+
+    app.get('/api/shopify/ui/templates/:id/entitled', optionalShopifyIdToken, async (req, res) => {
+        const id = parseId(req.params.id);
+        if (!id) return res.status(400).json({ error: 'Geçersiz şablon id.' });
+        const shop = uiShop(req);
+        const ok = shop ? await assertEntitledUi(shop, id) : false;
+        res.json({ entitled: ok, shop, gallery_id: id, free_download: freeDownload });
     });
 
     app.get('/api/shopify/ui/templates/:id/download', optionalShopifyIdToken, async (req, res) => {
