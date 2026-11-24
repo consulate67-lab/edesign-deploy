@@ -354,6 +354,15 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
     // Mutlak /shopify/styles.css + /shopify/app.js kullanıldığı için slash yönlendirmesi gerekmez
     // (Express non-strict routing /shopify ile /shopify/’yi aynı route’ta birleştirir → redirect döngüsü olur).
     app.get(['/shopify', '/shopify/'], serveShopifyIndex);
+    // Gömülü XsltEditor (vite → shopify-app/editor); index:false olduğu için açıkça servis et
+    const editorIndex = path.join(APP_DIR, 'editor', 'index.html');
+    app.get(['/shopify/editor', '/shopify/editor/'], (_req, res) => {
+        if (!fs.existsSync(editorIndex)) {
+            return res.status(503).send('Shopify editör build yok. npm run build:shopify-editor');
+        }
+        res.setHeader('Content-Security-Policy', "frame-ancestors https://*.myshopify.com https://admin.shopify.com https://www.edxdocu.com 'self';");
+        res.sendFile(editorIndex);
+    });
     app.use('/shopify', express.static(APP_DIR, { index: false }));
 
     /** Mandatory compliance webhooks (App Store). Partner’da bu URL’yi kaydet. */
