@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="shopify-api-key" content="%%SHOPIFY_API_KEY%%" />
   <title>edXdocu — Hazır fatura şablonları</title>
-  <link rel="stylesheet" href="./styles.css" />
+  <!-- Mutlak yollar: App URL /shopify (slash’siz) olunca ./styles.css kökte 404 oluyordu. -->
+  <base href="/shopify/" />
+  <link rel="stylesheet" href="/shopify/styles.css" />
   <!-- App Store embedded check: App Bridge from Shopify CDN -->
   <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js"></script>
 </head>
@@ -23,6 +25,6 @@
     <div id="msg" class="msg" hidden></div>
     <div id="main"></div>
   </div>
-  <script src="./app.js" defer></script>
+  <script src="/shopify/app.js" defer></script>
 </body>
 </html>
