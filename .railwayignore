@@ -1,12 +1,18 @@
 ﻿node_modules/
 dist/
+dist-web/
 .git/
 .trash-*
 .unpack-*
 .tmp/
 .cursor/
+youtube-manuel/
 # E-posta şablonları Docker build için gerekli; yalnız ağır reel varlıklarını dışla
 marketing/instagram-reel-fatura/
+marketing/linkedin/video-tanitim/
+marketing/videos-15-yonler/
+marketing/google-ads/
+marketing/trendyol/
 data/
 docs/
 e-FaturaPaketi/
@@ -20,8 +26,10 @@ public/videos/egitim/ru/
 public/videos/egitim/zh/
 *.wav
 *.zip
+*.mp4
 *.log
 osb_liste.csv
 .env
 .env.*
+!.env.example
 scripts/_check-ftp-index.mjs

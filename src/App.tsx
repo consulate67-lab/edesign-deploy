@@ -1,6 +1,6 @@
 import React, { Suspense, lazy, useState, useEffect, useCallback } from 'react';
 import './index.css';
-import { api } from './api';
+import { api, API_URL } from './api';
 import { ToastHost } from './store/ToastHost.tsx';
 import { useUiStore } from './store/uiStore';
 import { Landing } from './Landing.tsx';
@@ -204,6 +204,71 @@ const App: React.FC = () => {
         if (api.getToken()) setView('selection');
     }, []);
 
+    // Shopify app → tam tasarım: ?shopify_gallery=ID (giriş yoksa önce auth).
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const raw = params.get('shopify_gallery');
+        if (!raw) return;
+        const galleryId = Number(raw);
+        if (!Number.isInteger(galleryId) || galleryId <= 0) return;
+
+        params.delete('shopify_gallery');
+        params.delete('module');
+        const query = params.toString();
+        window.history.replaceState(null, '', window.location.pathname + (query ? `?${query}` : '') + window.location.hash);
+
+        if (!api.getToken()) {
+            try { sessionStorage.setItem('shopify_gallery_pending', String(galleryId)); } catch { /* ignore */ }
+            setAuthMode('login');
+            setView('auth');
+            useUiStore.getState().pushToast({
+                kind: 'info',
+                title: 'Shopify şablonu',
+                description: 'Tam tasarım için giriş yapın; şablon otomatik açılır.',
+                ttl: 6000,
+            });
+            return;
+        }
+
+        let alive = true;
+        (async () => {
+            try {
+                const rows = await fetch(`${API_URL}/gallery`).then((r) => (r.ok ? r.json() : []));
+                const item = Array.isArray(rows) ? rows.find((d: { id: number }) => d.id === galleryId) : null;
+                if (!alive) return;
+                if (!item?.xslt) {
+                    useUiStore.getState().pushToast({
+                        kind: 'error',
+                        title: 'Şablon bulunamadı',
+                        description: 'Shopify galeri kaydı yayınlı değil veya XSLT eksik.',
+                        ttl: 7000,
+                    });
+                    setView('selection');
+                    return;
+                }
+                setSelectedDoc({
+                    moduleId: item.module_id || 'fatura',
+                    moduleName: item.name || 'Shopify şablon',
+                    template: 'XsltEditor',
+                    customContent: item.xslt,
+                    themeColor: item.accent || '#1e3a8a',
+                    xml: item.xml || undefined,
+                });
+                setView('xslt-editor');
+            } catch {
+                if (alive) {
+                    useUiStore.getState().pushToast({
+                        kind: 'error',
+                        title: 'Şablon yüklenemedi',
+                        description: 'Galeri isteği başarısız.',
+                        ttl: 6000,
+                    });
+                }
+            }
+        })();
+        return () => { alive = false; };
+    }, []);
+
     const handleLogin = () => {
         setAuthMode('login');
         setView('auth');
@@ -228,7 +293,18 @@ const App: React.FC = () => {
     };
 
     const handleAuthSuccess = () => {
-        // Auth component calls this when login/register succeeds
+        let pending: string | null = null;
+        try {
+            pending = sessionStorage.getItem('shopify_gallery_pending');
+            if (pending) sessionStorage.removeItem('shopify_gallery_pending');
+        } catch { /* ignore */ }
+        if (pending && /^\d+$/.test(pending)) {
+            const u = new URL(window.location.href);
+            u.searchParams.set('shopify_gallery', pending);
+            window.history.replaceState(null, '', u.pathname + u.search + u.hash);
+            window.location.reload();
+            return;
+        }
         setView('selection');
     };
 

@@ -20,6 +20,7 @@ import { registerSiteConfigRoutes } from './site-config.js';
 import { registerSocialRoutes } from './social.js';
 import { registerWebmailRoutes } from './webmail.js';
 import { registerIntegratorRoutes } from './integrators/routes.js';
+import { registerShopifyRoutes } from './shopify.js';
 import { attachRealtime, touchLastSeen } from './realtime.js';
 import { mountWebApp, resolveWebRoot } from './serve-web.js';
 import { registerTrafficRoutes } from './traffic.js';
@@ -161,6 +162,11 @@ initDb().then(async _db => {
         authenticateToken,
         requireAdmin,
         secret: EFFECTIVE_SECRET,
+    });
+    registerShopifyRoutes(app, {
+        db,
+        requireAdmin,
+        website: new URL(FRONTEND_URL).origin,
     });
     // İsimtescil/FTP düşse bile arayüz Railway üzerinden ayakta kalsın.
     mountWebApp(app);

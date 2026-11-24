@@ -8,6 +8,7 @@ import { createSocialSchema } from './social.js';
 import { createWebmailSchema } from './webmail.js';
 import { createIntegratorSchema } from './integrators/schema.js';
 import { createTrafficSchema } from './traffic.js';
+import { createShopifySchema } from './shopify.js';
 
 /**
  * Thin adapter that exposes the SQLite-style API (run/get/all) on top of
@@ -270,6 +271,7 @@ export const initDb = async () => {
         await createTrafficSchema(probe);
         await createGibRevisionsSchema(probe);
         await createIntegratorSchema(probe);
+        await createShopifySchema(probe);
         await promoteAdmins(probe);
     } finally {
         probe.release();

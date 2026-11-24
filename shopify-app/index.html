@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>edXdocu — Fatura tasarımı</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #1e293b;
+      --line: #334155;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --ok: #4ade80;
+      --warn: #fbbf24;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: linear-gradient(160deg, #0f172a 0%, #1e293b 50%, #0c4a6e 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    main { max-width: 920px; margin: 0 auto; padding: 28px 20px 64px; }
+    h1 { font-size: 1.45rem; margin: 0 0 6px; letter-spacing: -0.02em; }
+    .sub { color: var(--muted); margin: 0 0 22px; font-size: 0.95rem; line-height: 1.45; }
+    .bar {
+      display: flex; flex-wrap: wrap; gap: 10px; align-items: end;
+      margin-bottom: 18px;
+    }
+    label { display: flex; flex-direction: column; gap: 4px; font-size: 0.75rem; color: var(--muted); }
+    input, select, button {
+      font: inherit; border-radius: 8px; border: 1px solid var(--line);
+      background: var(--panel); color: var(--text); padding: 8px 12px;
+    }
+    button {
+      cursor: pointer; background: var(--accent); color: #0f172a;
+      border: none; font-weight: 600;
+    }
+    button.ghost { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .grid { display: grid; gap: 12px; }
+    .card {
+      background: rgba(30, 41, 59, 0.92);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+    .card h2 { margin: 0 0 4px; font-size: 1.05rem; }
+    .meta { color: var(--muted); font-size: 0.82rem; margin-bottom: 10px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .price { font-weight: 700; color: var(--ok); }
+    .msg { margin: 12px 0; padding: 10px 12px; border-radius: 8px; background: #172554; font-size: 0.9rem; }
+    .msg.err { background: #450a0a; }
+    .brand-row { display: grid; gap: 8px; grid-template-columns: 1fr 1fr; margin-top: 10px; }
+    @media (max-width: 640px) { .brand-row { grid-template-columns: 1fr; } }
+    .hint { font-size: 0.8rem; color: var(--muted); margin-top: 18px; line-height: 1.4; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>edXdocu — Hazır fatura tasarımı</h1>
+    <p class="sub">
+      Ülkenizin e-fatura XSLT şablonunu seçin. Shopify içinde logo ve renk uygulayabilir;
+      tam sürükle-bırak tasarım için edXdocu editörünü açın. Dosyayı kendi entegratörünüze yüklersiniz.
+    </p>
+
+    <div class="bar">
+      <label>API secret
+        <input id="secret" type="password" placeholder="SHOPIFY_APP_SECRET" style="min-width:200px" />
+      </label>
+      <label>Shop domain
+        <input id="shop" type="text" placeholder="magaza.myshopify.com" style="min-width:200px" />
+      </label>
+      <label>Ülke
+        <select id="country">
+          <option value="">Tümü</option>
+          <option value="TR" selected>TR</option>
+          <option value="BR">BR</option>
+        </select>
+      </label>
+      <button type="button" id="load">Şablonları yükle</button>
+    </div>
+
+    <div id="msg" class="msg" hidden></div>
+    <div id="list" class="grid"></div>
+
+    <p class="hint">
+      Partner Dashboard → App URL: <code>/shopify</code> · API: <code>/api/shopify/templates</code><br />
+      Tam tasarım = edXdocu. Hafif marka = logo URL + accent rengi bu ekranda.
+    </p>
+  </main>
+  <script>
+    const qs = new URLSearchParams(location.search);
+    const secretEl = document.getElementById('secret');
+    const shopEl = document.getElementById('shop');
+    const countryEl = document.getElementById('country');
+    const listEl = document.getElementById('list');
+    const msgEl = document.getElementById('msg');
+
+    secretEl.value = sessionStorage.getItem('edx_shopify_secret') || qs.get('secret') || '';
+    shopEl.value = sessionStorage.getItem('edx_shopify_shop') || qs.get('shop') || '';
+
+    function showMsg(text, err) {
+      msgEl.hidden = !text;
+      msgEl.textContent = text || '';
+      msgEl.className = 'msg' + (err ? ' err' : '');
+    }
+
+    function headers() {
+      const h = { 'Authorization': 'Bearer ' + secretEl.value.trim(), 'Accept': 'application/json' };
+      if (shopEl.value.trim()) h['X-Shopify-Shop'] = shopEl.value.trim().toLowerCase();
+      return h;
+    }
+
+    async function api(path, opts = {}) {
+      const res = await fetch(path, {
+        ...opts,
+        headers: { ...headers(), ...(opts.body ? { 'Content-Type': 'application/json' } : {}), ...opts.headers },
+      });
+      const ct = res.headers.get('content-type') || '';
+      if (ct.includes('json')) {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || res.statusText);
+        return data;
+      }
+      if (!res.ok) throw new Error(await res.text() || res.statusText);
+      return res;
+    }
+
+    function card(t) {
+      const el = document.createElement('article');
+      el.className = 'card';
+      const price = ((t.price_cents || 0) / 100).toFixed(2);
+      el.innerHTML = `
+        <h2>${escapeHtml(t.name)}</h2>
+        <div class="meta">${escapeHtml(t.module_id)} · ${escapeHtml((t.countries || []).join(', '))} · <span class="price">$${price}</span></div>
+        <p class="meta">${escapeHtml(t.description || '')}</p>
+        <div class="brand-row">
+          <label>Logo URL<input data-logo placeholder="https://..." /></label>
+          <label>Accent<input data-accent placeholder="#1e3a8a" /></label>
+          <label>Şirket<input data-company placeholder="Unvan" /></label>
+        </div>
+        <div class="actions" style="margin-top:12px">
+          <button type="button" data-act="buy">Satın al (kayıt)</button>
+          <button type="button" data-act="dl" class="ghost">XSLT indir</button>
+          <button type="button" data-act="brand" class="ghost">Markala + indir</button>
+          <a href="${t.design_url}" target="_blank" rel="noopener"><button type="button" class="ghost">Tam tasarım (edXdocu)</button></a>
+        </div>
+      `;
+      el.querySelector('[data-act="buy"]').onclick = async () => {
+        try {
+          showMsg('Kayıt…');
+          const r = await api('/api/shopify/templates/' + t.id + '/purchase', {
+            method: 'POST',
+            body: JSON.stringify({ shop: shopEl.value.trim(), charge_id: 'ui-' + Date.now() }),
+          });
+          showMsg('Satın alma kaydı açıldı. İndirebilirsiniz. charge=' + r.charge_id);
+        } catch (e) { showMsg(e.message, true); }
+      };
+      el.querySelector('[data-act="dl"]').onclick = async () => {
+        try {
+          sessionStorage.setItem('edx_shopify_secret', secretEl.value.trim());
+          sessionStorage.setItem('edx_shopify_shop', shopEl.value.trim());
+          const res = await fetch('/api/shopify/templates/' + t.id + '/download', { headers: headers() });
+          if (!res.ok) {
+            const j = await res.json().catch(() => ({}));
+            throw new Error(j.error || res.statusText);
+          }
+          const blob = await res.blob();
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = (t.name || 'template') + '.xslt';
+          a.click();
+          URL.revokeObjectURL(a.href);
+          showMsg('İndirme başladı.');
+        } catch (e) { showMsg(e.message, true); }
+      };
+      el.querySelector('[data-act="brand"]').onclick = async () => {
+        try {
+          const logo_url = el.querySelector('[data-logo]').value.trim();
+          const accent = el.querySelector('[data-accent]').value.trim();
+          const company_name = el.querySelector('[data-company]').value.trim();
+          const data = await api('/api/shopify/templates/' + t.id + '/brand', {
+            method: 'POST',
+            body: JSON.stringify({ logo_url, accent, company_name, download: false }),
+          });
+          const blob = new Blob([data.xslt], { type: 'application/xslt+xml' });
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = data.filename || 'branded.xslt';
+          a.click();
+          URL.revokeObjectURL(a.href);
+          showMsg('Markalı XSLT indirildi. Tam düzenleme: ' + data.design_url);
+        } catch (e) { showMsg(e.message, true); }
+      };
+      return el;
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    document.getElementById('load').onclick = async () => {
+      try {
+        sessionStorage.setItem('edx_shopify_secret', secretEl.value.trim());
+        sessionStorage.setItem('edx_shopify_shop', shopEl.value.trim());
+        showMsg('Yükleniyor…');
+        const q = countryEl.value ? ('?country=' + encodeURIComponent(countryEl.value)) : '';
+        const data = await api('/api/shopify/templates' + q);
+        listEl.innerHTML = '';
+        if (!data.templates?.length) {
+          showMsg('Katalog boş. Admin panelinden galeri tasarımını Shopify’a yayınlayın: POST /api/admin/shopify/templates/:id/publish');
+          return;
+        }
+        data.templates.forEach((t) => listEl.appendChild(card(t)));
+        showMsg(data.templates.length + ' şablon');
+      } catch (e) { showMsg(e.message, true); }
+    };
+  </script>
+</body>
+</html>
