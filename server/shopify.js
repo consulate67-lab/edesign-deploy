@@ -316,6 +316,15 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
     app.use('/shopify', express.static(APP_DIR, { index: false }));
 
     /** Mandatory compliance webhooks (App Store). Partner’da bu URL’yi kaydet. */
+    // GET: tarayıcı / sağlık kontrolü (Shopify teslimatı POST’tur).
+    app.get('/api/shopify/webhooks/compliance', (_req, res) => {
+        res.status(200).json({
+            ok: true,
+            method: 'POST',
+            topics: ['customers/data_request', 'customers/redact', 'shop/redact'],
+            note: 'Shopify compliance webhooks bu URI’ye POST + HMAC ile gelir.',
+        });
+    });
     app.post('/api/shopify/webhooks/compliance', async (req, res) => {
         const hmac = req.get('X-Shopify-Hmac-Sha256') || '';
         const raw = req.rawBody;
