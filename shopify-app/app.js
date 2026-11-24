@@ -101,8 +101,7 @@
   async function api(path, opts = {}) {
     const url = new URL(path, location.origin);
     if (state.shop && !url.searchParams.get('shop')) url.searchParams.set('shop', state.shop);
-    const auth = await idTokenHeader();
-    const res = await fetch(url.toString(), {
+    const doFetch = async (auth) => fetch(url.toString(), {
       ...opts,
       headers: {
         ...shopHeaders(),
@@ -111,6 +110,13 @@
         ...opts.headers,
       },
     });
+    let auth = await idTokenHeader();
+    let res = await doFetch(auth);
+    // App Bridge: 401 + retry header → taze token ile bir kez dene
+    if (res.status === 401 && res.headers.get('X-Shopify-Retry-Invalid-Session-Request') === '1') {
+      auth = await idTokenHeader();
+      if (auth.Authorization) res = await doFetch(auth);
+    }
     const ct = res.headers.get('content-type') || '';
     if (ct.includes('json')) {
       const data = await res.json().catch(() => ({}));
@@ -562,15 +568,17 @@
   async function boot() {
     try {
       if (state.shop) sessionStorage.setItem('edx_shopify_shop', state.shop);
-      // İlk bootstrap token olmadan (api_key öğrenmek için); sonra App Bridge yüklenir.
+      // Meta’daki API key ile App Bridge’i önce hazırla (CDN script zaten index’te).
+      const metaKey = document.querySelector('meta[name="shopify-api-key"]')?.content?.trim();
+      if (metaKey) await ensureAppBridge(metaKey);
+
       state.bootstrap = await api('/api/shopify/ui/bootstrap');
       if (!state.shop && state.bootstrap.shop) state.shop = state.bootstrap.shop;
       if (Array.isArray(state.bootstrap.countries) && state.bootstrap.countries.length) {
         state.countries = state.bootstrap.countries;
       }
-      if (state.bootstrap.api_key) {
+      if (state.bootstrap.api_key && state.bootstrap.api_key !== metaKey) {
         await ensureAppBridge(state.bootstrap.api_key);
-        // Token ile shop bilgisini tazele (embedded).
         try {
           state.bootstrap = await api('/api/shopify/ui/bootstrap');
           if (!state.shop && state.bootstrap.shop) state.shop = state.bootstrap.shop;
@@ -578,13 +586,14 @@
             state.countries = state.bootstrap.countries;
           }
         } catch {
-          /* require_session kapalıysa sorun değil */
+          /* soft bootstrap — UI yine açılsın */
         }
       }
       render();
       await confirmBillingReturn();
     } catch (e) {
-      $('main').innerHTML = `<section class="panel"><p class="lead">Başlatılamadı: ${escapeHtml(e.message)}</p></section>`;
+      $('main').innerHTML = `<section class="panel"><p class="lead">Başlatılamadı: ${escapeHtml(e.message)}</p>
+        <p class="lead" style="font-size:14px;opacity:.8">Uygulamayı Shopify Admin içinden (Apps → EdXDocu) açın ve sayfayı yenileyin.</p></section>`;
       showMsg(e.message, 'err');
     }
   }

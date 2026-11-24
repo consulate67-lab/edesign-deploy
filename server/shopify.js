@@ -412,37 +412,64 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
         || req.body?.shop
     );
 
-    function optionalShopifyIdToken(req, res, next) {
-        if (!sessionReady) return next();
-        const hdr = String(req.headers.authorization || '');
-        const token = hdr.startsWith('Bearer ') ? hdr.slice(7).trim() : '';
-        if (!token) {
-            if (requireSession) {
-                res.setHeader('X-Shopify-Retry-Invalid-Session-Request', '1');
-                return res.status(401).json({ error: 'Shopify oturum token gerekli.' });
-            }
-            return next();
+    function verifyIdToken(token) {
+        const payload = jwt.verify(token, shopifyApiSecret, {
+            algorithms: ['HS256'],
+            audience: shopifyApiKey,
+            // App Bridge bazen nbf’yi birkaç sn geleceğe koyar
+            clockTolerance: 60,
+        });
+        const iss = String(payload.iss || '');
+        const dest = String(payload.dest || '');
+        const issuerHost = new URL(iss).hostname;
+        const destHost = new URL(dest).hostname;
+        if (!issuerHost || !destHost || issuerHost !== destHost) {
+            const err = new Error('iss/dest uyuşmuyor');
+            err.code = 'ISS_DEST';
+            throw err;
         }
-        try {
-            const payload = jwt.verify(token, shopifyApiSecret, {
-                algorithms: ['HS256'],
-                audience: shopifyApiKey,
-            });
-            const issuerHost = new URL(String(payload.iss || '')).hostname;
-            const destHost = new URL(String(payload.dest || '')).hostname;
-            if (!issuerHost || !destHost || issuerHost !== destHost) {
-                throw new Error('iss/dest uyuşmuyor');
-            }
-            req.shopifySession = payload;
-            req.shopDomain = normalizeShop(destHost) || req.shopDomain;
-            return next();
-        } catch {
-            res.setHeader('X-Shopify-Retry-Invalid-Session-Request', '1');
-            return res.status(401).json({ error: 'Geçersiz Shopify oturum token.' });
-        }
+        return { payload, destHost };
     }
 
-    app.get('/api/shopify/ui/bootstrap', optionalShopifyIdToken, async (req, res) => {
+    /**
+     * @param {{ required?: boolean }} [opts]
+     * required=false: token yok/geçersizse UI yine açılsın (bootstrap / katalog).
+     * required=true: satın alma / indirme için zorunlu.
+     */
+    function shopifyIdToken(opts = {}) {
+        const required = opts.required === true || (opts.required !== false && requireSession);
+        return (req, res, next) => {
+            if (!sessionReady) return next();
+            const hdr = String(req.headers.authorization || '');
+            const token = hdr.startsWith('Bearer ') ? hdr.slice(7).trim() : '';
+            if (!token) {
+                if (required) {
+                    res.setHeader('X-Shopify-Retry-Invalid-Session-Request', '1');
+                    return res.status(401).json({ error: 'Shopify oturum token gerekli.' });
+                }
+                return next();
+            }
+            try {
+                const { payload, destHost } = verifyIdToken(token);
+                req.shopifySession = payload;
+                req.shopDomain = normalizeShop(destHost) || req.shopDomain;
+                return next();
+            } catch (e) {
+                console.warn('[shopify] idToken verify failed:', e?.name || '', e?.message || e);
+                if (required) {
+                    res.setHeader('X-Shopify-Retry-Invalid-Session-Request', '1');
+                    return res.status(401).json({ error: 'Geçersiz Shopify oturum token.' });
+                }
+                // Soft: bozuk/eski token bootstrap’ı düşürmesin
+                return next();
+            }
+        };
+    }
+
+    // Geriye dönük alias
+    const optionalShopifyIdToken = shopifyIdToken({ required: false });
+
+    app.get('/api/shopify/ui/bootstrap', shopifyIdToken({ required: false }), async (req, res) => {
         try {
             await ensureCatalog();
         } catch {
@@ -502,6 +529,8 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
         return rows.map((r) => serializeCatalogItem(r, { website: site }));
     }
 
+    const requireUiSession = shopifyIdToken({ required: requireSession });
+
     app.get('/api/shopify/ui/templates', optionalShopifyIdToken, async (req, res) => {
         try {
             const country = optionalText(req.query.country, 8)?.toUpperCase();
@@ -526,7 +555,7 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
         res.json(serializeCatalogItem(rows[0], { website: site }));
     });
 
-    app.post('/api/shopify/ui/templates/:id/purchase', optionalShopifyIdToken, async (req, res) => {
+    app.post('/api/shopify/ui/templates/:id/purchase', requireUiSession, async (req, res) => {
         const id = parseId(req.params.id);
         if (!id) return res.status(400).json({ error: 'Geçersiz şablon id.' });
         const shop = uiShop(req);
@@ -607,7 +636,7 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
     });
 
     /** Merchant charge onayından dönüş — ACTIVE ise entitlement */
-    app.get('/api/shopify/ui/billing/confirm', optionalShopifyIdToken, async (req, res) => {
+    app.get('/api/shopify/ui/billing/confirm', requireUiSession, async (req, res) => {
         const shop = uiShop(req);
         const galleryId = parseId(req.query.gallery_id);
         const chargeGid = cleanText(req.query.charge_gid || req.query.charge_id, 200);
@@ -664,7 +693,7 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
         }
     });
 
-    app.get('/api/shopify/ui/templates/:id/entitled', optionalShopifyIdToken, async (req, res) => {
+    app.get('/api/shopify/ui/templates/:id/entitled', requireUiSession, async (req, res) => {
         const id = parseId(req.params.id);
         if (!id) return res.status(400).json({ error: 'Geçersiz şablon id.' });
         const shop = uiShop(req);
@@ -672,7 +701,7 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
         res.json({ entitled: ok, shop, gallery_id: id, free_download: freeDownload });
     });
 
-    app.get('/api/shopify/ui/templates/:id/download', optionalShopifyIdToken, async (req, res) => {
+    app.get('/api/shopify/ui/templates/:id/download', requireUiSession, async (req, res) => {
         const id = parseId(req.params.id);
         if (!id) return res.status(400).json({ error: 'Geçersiz şablon id.' });
         req.shopDomain = uiShop(req);
@@ -695,7 +724,7 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
         res.send(full.xslt);
     });
 
-    app.post('/api/shopify/ui/templates/:id/brand', optionalShopifyIdToken, async (req, res) => {
+    app.post('/api/shopify/ui/templates/:id/brand', requireUiSession, async (req, res) => {
         const id = parseId(req.params.id);
         if (!id) return res.status(400).json({ error: 'Geçersiz şablon id.' });
         req.shopDomain = uiShop(req);
