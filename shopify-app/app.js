@@ -3,10 +3,19 @@
   const state = {
     step: 'intro', // intro | catalog | customize | download
     shop: (qs.get('shop') || sessionStorage.getItem('edx_shopify_shop') || '').toLowerCase(),
-    country: qs.get('country') || 'TR',
+    country: (qs.get('country') || sessionStorage.getItem('edx_shopify_country') || '').toUpperCase(),
     templates: [],
     selected: null,
     bootstrap: null,
+    countries: [
+      { code: 'TR', label: 'Türkiye (TR)' },
+      { code: 'DE', label: 'Almanya (DE)' },
+      { code: 'BR', label: 'Brezilya (BR)' },
+      { code: 'US', label: 'ABD (US)' },
+      { code: 'IN', label: 'Hindistan (IN)' },
+      { code: 'CN', label: 'Çin (CN)' },
+      { code: 'RU', label: 'Rusya (RU)' },
+    ],
     form: {
       company_name: '',
       accent: '#1e3a8a',
@@ -167,33 +176,44 @@
     `;
   }
 
+  function countryOptionsHtml() {
+    const opts = state.countries?.length ? state.countries : [];
+    return [
+      '<option value="">Tümü</option>',
+      ...opts.map((c) => {
+        const code = typeof c === 'string' ? c : c.code;
+        const label = typeof c === 'string' ? c : (c.label || c.code);
+        return `<option value="${escapeHtml(code)}">${escapeHtml(label)}</option>`;
+      }),
+    ].join('');
+  }
+
   function renderCatalog() {
     const cards = state.templates.length
-      ? state.templates.map((t) => `
+      ? state.templates.map((t) => {
+          const countries = (t.countries || []).slice(0, 8);
+          const more = (t.countries || []).length > 8 ? ` +${(t.countries || []).length - 8}` : '';
+          return `
           <article class="card ${state.selected?.id === t.id ? 'selected' : ''}" data-id="${t.id}">
             <h3>${escapeHtml(t.name)}</h3>
-            <div class="meta">${escapeHtml(t.module_id || t.doc_type_id || '')} · ${(t.countries || []).join(', ')}</div>
+            <div class="meta">${escapeHtml(t.module_id || t.doc_type_id || '')} · ${escapeHtml(countries.join(', ') + more)}</div>
             <div class="meta">${escapeHtml(t.description || 'Hazır fatura / irsaliye XSLT şablonu.')}</div>
             <div class="price">${priceLabel(t.price_cents)}</div>
             <div class="actions">
               <button type="button" data-pick="${t.id}">Bu tasarımı seç</button>
             </div>
-          </article>
-        `).join('')
-      : `<div class="empty">Henüz yayınlı şablon yok. Admin panelinden bir galeri tasarımını Shopify’a yayınlayın.</div>`;
+          </article>`;
+        }).join('')
+      : `<div class="empty">Bu ülke için şablon bulunamadı. Ülke filtresini “Tümü” yapın veya başka bir ülke seçin.</div>`;
 
     return `
       <section class="panel">
         <h2>Şablon vitrini</h2>
-        <p class="lead">Ülkenize uygun hazır tasarımı seçin. Sonraki adımda logo ve renk uygulayacaksınız.</p>
+        <p class="lead">Desteklenen ülkelere göre hazır e-fatura / irsaliye şablonları. Ülke seçince yalnızca o ülkenin formatları listelenir.</p>
         <div class="toolbar">
           <label class="field">Ülke
             <select id="country">
-              <option value="">Tümü</option>
-              <option value="TR">Türkiye (TR)</option>
-              <option value="BR">Brezilya (BR)</option>
-              <option value="DE">Almanya (DE)</option>
-              <option value="US">ABD (US)</option>
+              ${countryOptionsHtml()}
             </select>
           </label>
           <button type="button" class="ghost" id="btn-reload">Yenile</button>
@@ -314,9 +334,11 @@
 
     const country = $('country');
     if (country) {
-      country.value = state.country;
+      country.value = state.country || '';
       country.addEventListener('change', async () => {
-        state.country = country.value;
+        state.country = (country.value || '').toUpperCase();
+        if (state.country) sessionStorage.setItem('edx_shopify_country', state.country);
+        else sessionStorage.removeItem('edx_shopify_country');
         await loadTemplates();
       });
     }
@@ -543,12 +565,18 @@
       // İlk bootstrap token olmadan (api_key öğrenmek için); sonra App Bridge yüklenir.
       state.bootstrap = await api('/api/shopify/ui/bootstrap');
       if (!state.shop && state.bootstrap.shop) state.shop = state.bootstrap.shop;
+      if (Array.isArray(state.bootstrap.countries) && state.bootstrap.countries.length) {
+        state.countries = state.bootstrap.countries;
+      }
       if (state.bootstrap.api_key) {
         await ensureAppBridge(state.bootstrap.api_key);
         // Token ile shop bilgisini tazele (embedded).
         try {
           state.bootstrap = await api('/api/shopify/ui/bootstrap');
           if (!state.shop && state.bootstrap.shop) state.shop = state.bootstrap.shop;
+          if (Array.isArray(state.bootstrap.countries) && state.bootstrap.countries.length) {
+            state.countries = state.bootstrap.countries;
+          }
         } catch {
           /* require_session kapalıysa sorun değil */
         }

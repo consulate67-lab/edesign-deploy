@@ -23,6 +23,10 @@ import {
     exchangeOfflineToken,
     getOneTimePurchaseStatus,
 } from './shopify-billing.js';
+import {
+    ensureReadyShopifyCatalog,
+    SHOPIFY_COUNTRY_OPTIONS,
+} from './shopify-ready-catalog.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const APP_DIR = path.join(__dirname, '..', 'shopify-app');
@@ -251,6 +255,26 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
     const requireSession = process.env.SHOPIFY_REQUIRE_SESSION === '1'
         || (process.env.SHOPIFY_REQUIRE_SESSION !== '0' && sessionReady && process.env.NODE_ENV === 'production');
 
+    /** Hazır ülke şablonlarını bir kez (veya arada) vitrine yazar. */
+    let catalogReady = null;
+    const ensureCatalog = () => {
+        if (!catalogReady) {
+            catalogReady = ensureReadyShopifyCatalog(db, { priceCents: DEFAULT_PRICE_CENTS })
+                .then((r) => {
+                    console.log(`[shopify] ready catalog: ${r.upserted} listing`);
+                    return r;
+                })
+                .catch((e) => {
+                    catalogReady = null;
+                    console.error('[shopify] ready catalog seed failed:', e.message || e);
+                    throw e;
+                });
+        }
+        return catalogReady;
+    };
+    // Arka planda doldur; ilk katalog isteği de await eder.
+    ensureCatalog().catch(() => {});
+
     async function upsertShopToken(shop, accessToken, scope) {
         await db.run(
             `INSERT INTO shopify_shops (shop_domain, access_token, scope, updated_at)
@@ -416,7 +440,12 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
         }
     }
 
-    app.get('/api/shopify/ui/bootstrap', optionalShopifyIdToken, (req, res) => {
+    app.get('/api/shopify/ui/bootstrap', optionalShopifyIdToken, async (req, res) => {
+        try {
+            await ensureCatalog();
+        } catch {
+            /* katalog seed hata verse de UI açılsın */
+        }
         const shop = uiShop(req);
         res.json({
             ok: true,
@@ -431,6 +460,7 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
             api_key: shopifyApiKey || null,
             session_ready: sessionReady,
             require_session: requireSession,
+            countries: SHOPIFY_COUNTRY_OPTIONS,
             steps: ['intro', 'catalog', 'customize', 'download'],
             how_to: [
                 {
@@ -454,6 +484,7 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
     });
 
     async function listTemplates({ country, moduleId }) {
+        await ensureCatalog();
         let sql = catalogSelect;
         const params = [];
         if (country) {
@@ -474,7 +505,12 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
             const country = optionalText(req.query.country, 8)?.toUpperCase();
             const moduleId = optionalText(req.query.module_id, 64);
             const templates = await listTemplates({ country, moduleId });
-            res.json({ templates, shop: uiShop(req) });
+            res.json({
+                templates,
+                shop: uiShop(req),
+                country: country || null,
+                countries: SHOPIFY_COUNTRY_OPTIONS,
+            });
         } catch (e) {
             res.status(500).json({ error: e.message || 'Katalog alınamadı.' });
         }
