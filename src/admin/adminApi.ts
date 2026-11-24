@@ -1,7 +1,7 @@
 import { API_URL } from '../api';
 import type { SiteConfig } from '../analytics/config';
 import type {
-    AdminIdentity, AdminInvoice, AdminInvoiceList, AdminLoginResponse, AdminSettingsStatus, AdminStats, AdminUserDetail, AdminUserRow,
+    AdminIdentity, AdminInvoice, AdminInvoiceList, AdminLoginResponse, AdminSettingsStatus, AdminStats, AdminUptimeStatus, AdminUserDetail, AdminUserRow,
     AdminVerifyResponse, AiMemoryEntry, AiMemoryInput, AssistantBuiltinEntry, AssistantKbEntry, AssistantKbInput, AssistantLog,
     AssistantLogFilter, AssistantOverview, GalleryDesign, GalleryDesignInput, InvoiceScope, InvoiceUpdateInput, MailBannedEntry,
     OfficialCheckResult, OfficialRevision, OfficialSource,
@@ -153,6 +153,7 @@ export const adminApi = {
 
     settingsStatus: () => request<AdminSettingsStatus>('/admin/settings/status'),
     telegramTest: () => request<{ success: true }>('/admin/settings/telegram-test', { method: 'POST' }),
+    uptimeCheck: () => request<AdminUptimeStatus>('/admin/settings/uptime-check', { method: 'POST' }),
 
     campaigns: () => request<MailCampaignList>('/admin/campaigns'),
     campaign: (id: number) => request<MailCampaignDetail>(`/admin/campaigns/${id}`),

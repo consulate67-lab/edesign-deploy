@@ -3,6 +3,7 @@ import { isOnline, presenceList, presenceOf, sendInvite } from './realtime.js';
 import * as remote from './remote.js';
 import { smsStatus } from './sms.js';
 import * as telegram from './telegram.js';
+import { getUptimeStatus, runUptimeCheck } from './uptime-watch.js';
 import {
     BODY_MAX, TICKET_STATUSES, addMessage, getTicket, listTickets, markRead, serializeTicket, setTicketStatus, withMessages,
 } from './tickets.js';
@@ -428,7 +429,12 @@ export const registerAdminRoutes = (app, { db, requireAdmin, packages = {}, webs
     // ------------------------------------------------------------ ayarlar
 
     app.get('/api/admin/settings/status', requireAdmin, async (_req, res) => {
-        res.json({ telegram: await telegram.getStatus(), sms: smsStatus(), otpChannel: otpChannel() });
+        res.json({
+            telegram: await telegram.getStatus(),
+            sms: smsStatus(),
+            otpChannel: otpChannel(),
+            uptime: getUptimeStatus(),
+        });
     });
 
     app.post('/api/admin/settings/telegram-test', requireAdmin, async (req, res) => {
@@ -441,5 +447,13 @@ export const registerAdminRoutes = (app, { db, requireAdmin, packages = {}, webs
             return res.status(502).json({ error: `Telegram mesajı gönderilemedi: ${e.message}` });
         }
         res.json({ success: true });
+    });
+
+    app.post('/api/admin/settings/uptime-check', requireAdmin, async (_req, res) => {
+        try {
+            res.json(await runUptimeCheck());
+        } catch (e) {
+            res.status(502).json({ error: e.message || 'Canlılık kontrolü başarısız.' });
+        }
     });
 };

@@ -43,6 +43,7 @@
  *     POST /admin/social/posts/:id/mark {platform, done}     → SocialPost (linkedin | x | groups)
  *     GET  /admin/settings/status                            → AdminSettingsStatus
  *     POST /admin/settings/telegram-test                     → {success:true}
+ *     POST /admin/settings/uptime-check                      → AdminUptimeStatus
  *   Kullanıcı (normal oturum token'ı):
  *     POST /support/tickets {subject, message, context?}     → SupportTicket (messages dolu)
  *     GET  /support/tickets                                  → SupportTicket[] (messages dolu)
@@ -333,10 +334,25 @@ export interface AiMemoryEntry extends AiMemoryInput {
     created_at: string;
 }
 
+export interface AdminUptimeStatus {
+    ok: boolean | null;
+    consecutiveFails: number;
+    alertedDown: boolean;
+    lastCheckAt: string | null;
+    lastOkAt: string | null;
+    lastFailAt: string | null;
+    lastError: string | null;
+    probes: Record<string, { ok: boolean; code?: string; detail?: string; status?: number; ms?: number }>;
+    checkMs: number;
+    url: string;
+    failThreshold: number;
+}
+
 export interface AdminSettingsStatus {
     telegram: { configured: boolean; chatConfigured: boolean; polling: boolean; botUsername: string | null };
     sms: { provider: string | null; configured: boolean };
     otpChannel: AdminLoginResponse['channel'];
+    uptime?: AdminUptimeStatus;
 }
 
 export interface PresenceDesign {

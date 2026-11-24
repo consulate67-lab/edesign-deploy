@@ -23,6 +23,7 @@ import { registerIntegratorRoutes } from './integrators/routes.js';
 import { registerShopifyRoutes } from './shopify.js';
 import { attachRealtime, touchLastSeen } from './realtime.js';
 import { mountWebApp, resolveWebRoot } from './serve-web.js';
+import { startUptimeWatch } from './uptime-watch.js';
 import { registerTrafficRoutes } from './traffic.js';
 import { isSupportAllowed, registerSupportRoutes } from './support.js';
 import { createBotHandler } from './telegram-bot.js';
@@ -186,6 +187,7 @@ initDb().then(async _db => {
     });
     await attachRealtime(server, { db, secret: EFFECTIVE_SECRET });
     startPolling(createBotHandler(db));
+    startUptimeWatch();
 });
 
 // Health endpoint used by Railway's healthcheck (and uptime monitors).
