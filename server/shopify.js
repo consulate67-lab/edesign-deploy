@@ -173,8 +173,8 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
     app.get('/shopify', (_req, res) => {
         res.sendFile(path.join(APP_DIR, 'index.html'));
     });
-    app.get('/shopify/*', (req, res, next) => {
-        if (req.path.includes('.')) return next();
+    // Express 5: adı olan wildcard gerekir (`*` tek başına PathError).
+    app.get('/shopify/{*spaPath}', (_req, res) => {
         res.sendFile(path.join(APP_DIR, 'index.html'));
     });
 
