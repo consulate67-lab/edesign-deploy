@@ -168,15 +168,9 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
     const channel = requireShopifyChannel(secret);
     const site = (website || process.env.FRONTEND_URL || 'https://www.edxdocu.com').replace(/\/?$/, '/');
 
-    // Gömülü app UI (Partner dashboard App URL buraya işaret eder).
-    app.use('/shopify', express.static(APP_DIR, { index: 'index.html', fallthrough: true }));
-    app.get('/shopify', (_req, res) => {
-        res.sendFile(path.join(APP_DIR, 'index.html'));
-    });
-    // Express 5: adı olan wildcard gerekir (`*` tek başına PathError).
-    app.get('/shopify/{*spaPath}', (_req, res) => {
-        res.sendFile(path.join(APP_DIR, 'index.html'));
-    });
+    // Gömülü app UI (Partner dashboard App URL → /shopify).
+    // Express 5 path-to-regexp: `/shopify/*` çökertir; yalnız static + index yeterli.
+    app.use('/shopify', express.static(APP_DIR, { index: 'index.html' }));
 
     app.get('/api/shopify/health', (_req, res) => {
         res.json({
