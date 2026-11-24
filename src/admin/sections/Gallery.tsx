@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { AlertTriangle, CheckCircle2, Eye, FileCode2, Images, Pencil, Plus, RefreshCw, Save, Trash2, Upload, XCircle, Bot, Hand } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Eye, FileCode2, Images, Pencil, Plus, RefreshCw, Save, Store, Trash2, Upload, XCircle, Bot, Hand } from 'lucide-react';
 import { useUiStore } from '../../store/uiStore';
 import { CATEGORIES, SECTORS } from '../../sector-templates/types';
 import { WIZARD_DOC_TYPES, type WizardDocType } from '../../wizard/docTypes';
@@ -241,14 +241,96 @@ export const Gallery: React.FC = () => {
     const [form, setForm] = useState<{ initial: GalleryDesignInput; id: number | null } | null>(() => galleryDraft ? { initial: emptyInput(galleryDraft), id: null } : null);
     const [preview, setPreview] = useState<GalleryDesign | null>(null);
     const [busyId, setBusyId] = useState<number | null>(null);
+    const [shopifyMap, setShopifyMap] = useState<Record<number, { price_cents: number; countries: string[]; active: boolean }>>({});
+    const [shopifyModal, setShopifyModal] = useState<GalleryDesign | null>(null);
+    const [shopifyPrice, setShopifyPrice] = useState('14.99');
+    const [shopifyCountries, setShopifyCountries] = useState('TR');
+    const [shopifyBusy, setShopifyBusy] = useState(false);
 
     useEffect(() => { if (galleryDraft) setGalleryDraft(null); }, [galleryDraft, setGalleryDraft]);
 
     useEffect(() => {
         let alive = true;
-        adminApi.gallery().then(r => { if (alive) { setItems(r); setError(null); } }).catch(e => { if (alive) setError(errorText(e)); });
+        Promise.all([adminApi.gallery(), adminApi.shopifyListings().catch(() => [])])
+            .then(([gallery, listings]) => {
+                if (!alive) return;
+                setItems(gallery);
+                setError(null);
+                const map: Record<number, { price_cents: number; countries: string[]; active: boolean }> = {};
+                for (const row of listings) {
+                    map[row.id] = {
+                        price_cents: row.price_cents,
+                        countries: row.countries ?? [],
+                        active: Boolean(row.active),
+                    };
+                }
+                setShopifyMap(map);
+            })
+            .catch(e => { if (alive) setError(errorText(e)); });
         return () => { alive = false; };
     }, [reloadKey]);
+
+    const openShopifyPublish = (d: GalleryDesign) => {
+        const existing = shopifyMap[d.id];
+        const cents = existing?.price_cents ?? 1499;
+        setShopifyPrice((cents / 100).toFixed(2));
+        setShopifyCountries((existing?.countries?.length ? existing.countries : ['TR']).join(', '));
+        setShopifyModal(d);
+    };
+
+    const publishToShopify = async () => {
+        if (!shopifyModal) return;
+        const dollars = Number(String(shopifyPrice).replace(',', '.'));
+        if (!Number.isFinite(dollars) || dollars < 0) {
+            pushToast({ kind: 'error', title: 'Geçersiz fiyat', description: 'Örn. 14.99 yazın.', ttl: 5000 });
+            return;
+        }
+        const priceCents = Math.round(dollars * 100);
+        const countries = shopifyCountries.split(/[,;\s]+/).map(c => c.trim().toUpperCase()).filter(Boolean);
+        if (!countries.length) {
+            pushToast({ kind: 'error', title: 'Ülke gerekli', description: 'En az bir ülke kodu (TR, BR…).', ttl: 5000 });
+            return;
+        }
+        setShopifyBusy(true);
+        try {
+            const res = await adminApi.publishShopifyTemplate(shopifyModal.id, { price_cents: priceCents, countries });
+            setShopifyMap(m => ({
+                ...m,
+                [shopifyModal.id]: {
+                    price_cents: res.listing.price_cents,
+                    countries: res.listing.countries,
+                    active: true,
+                },
+            }));
+            // Shopify listing için galeri de yayında olmalı
+            setItems(list => list && list.map(x => x.id === shopifyModal.id ? { ...x, published: true } : x));
+            pushToast({
+                kind: 'success',
+                title: 'Shopify kataloğuna eklendi',
+                description: `${shopifyModal.name} · $${(res.listing.price_cents / 100).toFixed(2)} · ${res.listing.countries.join(', ')}`,
+                ttl: 6000,
+            });
+            setShopifyModal(null);
+        } catch (e) {
+            pushToast({ kind: 'error', title: 'Shopify yayını başarısız', description: errorText(e), ttl: 7000 });
+        } finally {
+            setShopifyBusy(false);
+        }
+    };
+
+    const unpublishFromShopify = async (d: GalleryDesign) => {
+        if (!window.confirm(`"${d.name}" Shopify kataloğundan kaldırılsın mı?`)) return;
+        setBusyId(d.id);
+        try {
+            await adminApi.unpublishShopifyTemplate(d.id);
+            setShopifyMap(m => ({ ...m, [d.id]: { ...(m[d.id] ?? { price_cents: 1499, countries: ['TR'] }), active: false } }));
+            pushToast({ kind: 'success', title: 'Shopify’dan kaldırıldı', ttl: 4000 });
+        } catch (e) {
+            pushToast({ kind: 'error', title: 'Kaldırılamadı', description: errorText(e), ttl: 6000 });
+        } finally {
+            setBusyId(null);
+        }
+    };
 
     const togglePublished = async (d: GalleryDesign) => {
         setBusyId(d.id);
@@ -289,14 +371,15 @@ export const Gallery: React.FC = () => {
                 <div className="adm-scroll" style={{ overflowX: 'auto' }}>
                     <table className="adm-table" data-admin-gallery-table>
                         <thead>
-                            <tr><th>Ad</th><th>Belge tipi</th><th>Kategori / sektör</th><th>Kaynak</th><th>Yayında</th><th>Güncelleme</th><th style={{ textAlign: 'right' }}>İşlemler</th></tr>
+                            <tr><th>Ad</th><th>Belge tipi</th><th>Kategori / sektör</th><th>Kaynak</th><th>Yayında</th><th>Shopify</th><th>Güncelleme</th><th style={{ textAlign: 'right' }}>İşlemler</th></tr>
                         </thead>
                         <tbody>
-                            {!items && !error && <tr><td colSpan={7}><div style={{ display: 'flex', gap: 8, color: C.muted, padding: 10 }}><Spinner /> Yükleniyor…</div></td></tr>}
-                            {items && items.length === 0 && <tr><td colSpan={7}><Empty>Henüz galeri tasarımı yok. "Yeni tasarım ekle" ile başlayın veya yapay zeka bölümünden yayınlayın.</Empty></td></tr>}
+                            {!items && !error && <tr><td colSpan={8}><div style={{ display: 'flex', gap: 8, color: C.muted, padding: 10 }}><Spinner /> Yükleniyor…</div></td></tr>}
+                            {items && items.length === 0 && <tr><td colSpan={8}><Empty>Henüz galeri tasarımı yok. "Yeni tasarım ekle" ile başlayın veya yapay zeka bölümünden yayınlayın.</Empty></td></tr>}
                             {items?.map(d => {
                                 const doc = docTypeOf(d.doc_type_id);
                                 const sec = sectorOf(d.sector);
+                                const sh = shopifyMap[d.id];
                                 return (
                                     <tr key={d.id} data-admin-gallery-row={d.id}>
                                         <td>
@@ -321,9 +404,26 @@ export const Gallery: React.FC = () => {
                                                 <span style={{ position: 'absolute', top: 3, left: d.published ? 21 : 3, width: 16, height: 16, borderRadius: 999, background: 'white', transition: 'left 0.15s' }} />
                                             </button>
                                         </td>
+                                        <td style={{ fontSize: '0.75rem', whiteSpace: 'nowrap' }}>
+                                            {sh?.active ? (
+                                                <Badge color={C.green}>${(sh.price_cents / 100).toFixed(2)} · {(sh.countries || []).join(',')}</Badge>
+                                            ) : sh ? (
+                                                <Badge color={C.dim}>Kapalı</Badge>
+                                            ) : (
+                                                <span style={{ color: C.dim }}>—</span>
+                                            )}
+                                        </td>
                                         <td style={{ color: C.muted, whiteSpace: 'nowrap' }}>{fmtDate(d.updated_at)}</td>
                                         <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
                                             <div style={{ display: 'inline-flex', gap: 6 }}>
+                                                <button type="button" data-admin-gallery-shopify={d.id} onClick={() => openShopifyPublish(d)} style={btn('secondary', true)} title="Shopify’a yayınla / fiyat">
+                                                    <Store size={13} />
+                                                </button>
+                                                {sh?.active && (
+                                                    <button type="button" disabled={busyId === d.id} onClick={() => void unpublishFromShopify(d)} style={btn('ghost', true)} title="Shopify’dan kaldır">
+                                                        Shopify−
+                                                    </button>
+                                                )}
                                                 <button type="button" data-admin-gallery-preview-btn={d.id} onClick={() => setPreview(d)} style={btn('secondary', true)} title="Önizle"><Eye size={13} /></button>
                                                 <button type="button" data-admin-gallery-edit={d.id} onClick={() => setForm({ initial: toInput(d), id: d.id })} style={btn('secondary', true)} title="Düzenle"><Pencil size={13} /></button>
                                                 <button type="button" data-admin-gallery-delete={d.id} disabled={busyId === d.id} onClick={() => void remove(d)} style={btn('danger', true)} title="Sil"><Trash2 size={13} /></button>
@@ -352,6 +452,50 @@ export const Gallery: React.FC = () => {
                         });
                         setForm(null);
                     }} />
+            )}
+            {shopifyModal && (
+                <Modal
+                    title={<span style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Store size={16} /> Shopify’a yayınla</span>}
+                    onClose={() => !shopifyBusy && setShopifyModal(null)}
+                    width={480}
+                    actions={
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                            <button type="button" disabled={shopifyBusy} onClick={() => setShopifyModal(null)} style={btn('ghost')}>Vazgeç</button>
+                            <button type="button" disabled={shopifyBusy} onClick={() => void publishToShopify()} style={btn('primary')}>
+                                {shopifyBusy ? 'Kaydediliyor…' : 'Yayınla'}
+                            </button>
+                        </div>
+                    }
+                >
+                    <p style={{ margin: '0 0 14px', color: C.muted, fontSize: '0.88rem', lineHeight: 1.45 }}>
+                        <b style={{ color: C.text }}>{shopifyModal.name}</b> Shopify uygulama kataloğunda görünsün.
+                        Fiyat, müşteri “Satın al” deyince Billing’de kesilir (cent olarak saklanır).
+                    </p>
+                    <label style={labelStyle}>
+                        Fiyat (USD)
+                        <input
+                            data-admin-shopify-price
+                            value={shopifyPrice}
+                            onChange={e => setShopifyPrice(e.target.value)}
+                            placeholder="14.99"
+                            style={inputStyle}
+                            inputMode="decimal"
+                        />
+                    </label>
+                    <label style={{ ...labelStyle, marginTop: 12 }}>
+                        Ülkeler (virgülle)
+                        <input
+                            data-admin-shopify-countries
+                            value={shopifyCountries}
+                            onChange={e => setShopifyCountries(e.target.value)}
+                            placeholder="TR, BR, DE"
+                            style={inputStyle}
+                        />
+                    </label>
+                    <p style={{ margin: '12px 0 0', fontSize: '0.78rem', color: C.dim }}>
+                        Örnek: 14.99 → $14.99 · 0 → ücretsiz şablon
+                    </p>
+                </Modal>
             )}
         </div>
     );

@@ -132,6 +132,32 @@ export const adminApi = {
         request<GalleryDesign>(`/admin/gallery/${id}`, { method: 'PUT', body: input }),
     deleteGallery: (id: number) => request<{ success: true }>(`/admin/gallery/${id}`, { method: 'DELETE' }),
 
+    shopifyListings: () =>
+        request<Array<{
+            id: number;
+            name: string;
+            published: boolean;
+            module_id: string;
+            doc_type_id: string;
+            price_cents: number;
+            countries: string[];
+            active: boolean;
+            updated_at: string;
+        }>>('/admin/shopify/templates'),
+    publishShopifyTemplate: (id: number, body: { price_cents: number; countries?: string[] }) =>
+        request<{
+            ok: true;
+            listing: {
+                gallery_id: number;
+                price_cents: number;
+                countries: string[];
+                active: boolean;
+                design_url: string;
+            };
+        }>(`/admin/shopify/templates/${id}/publish`, { method: 'POST', body }),
+    unpublishShopifyTemplate: (id: number) =>
+        request<{ ok: true }>(`/admin/shopify/templates/${id}/unpublish`, { method: 'POST' }),
+
     aiMemory: (docTypeId?: string, limit?: number) =>
         request<AiMemoryEntry[]>(`/admin/ai/memory${qs({ doc_type_id: docTypeId, limit })}`),
     saveAiMemory: (input: AiMemoryInput) => request<AiMemoryEntry>('/admin/ai/memory', { method: 'POST', body: input }),
