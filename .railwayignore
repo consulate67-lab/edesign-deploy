@@ -1,6 +1,7 @@
 ﻿node_modules/
 dist/
-dist-web/
+# dist-web imaja girsin: aksi halde Railway yalnızca API ayağa kalkar, ana sayfa 404 olur.
+# (Vite Railway builder'da OOM olabiliyor; yerelde üretilmiş dist-web tercih edilir.)
 .git/
 .trash-*
 .unpack-*
