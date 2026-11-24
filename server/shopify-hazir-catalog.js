@@ -314,7 +314,7 @@ export function serializeHazirItem(entry, { website, priceCents = 1499 }) {
         price_cents: priceCents,
         currency: 'USD',
         countries: ['TR'],
-        design_url: `${base}/?module=${encodeURIComponent(entry.module_id)}`,
+        design_url: `${base}/?shopify_embed=1&module=${encodeURIComponent(entry.module_id)}`,
         download_url: `/api/shopify/ui/templates/${encodeURIComponent(entry.id)}/download`,
         brand_url: `/api/shopify/ui/templates/${encodeURIComponent(entry.id)}/brand`,
         preview_url: `/api/shopify/ui/templates/${encodeURIComponent(entry.id)}/preview-source`,

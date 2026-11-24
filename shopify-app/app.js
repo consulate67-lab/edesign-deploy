@@ -32,6 +32,9 @@
     orderId: sessionStorage.getItem('edx_shopify_order') || '',
     ordersWarning: '',
     downloadApproved: false,
+    fullEditor: false,
+    editorUrl: '',
+    editorBusy: false,
     form: {
       company_name: '',
       accent: '#1e3a8a',
@@ -312,10 +315,32 @@
     }
     const warn = state.previewWarning
       ? `<div class="preview-warn">${escapeHtml(state.previewWarning)}</div>` : '';
+
+    if (state.fullEditor) {
+      const src = state.editorUrl || t.design_url || '';
+      return `
+      <section class="panel catalog-panel editor-panel">
+        <div class="editor-toolbar">
+          <div>
+            <h2 style="margin:0">Tasarım editörü · ${escapeHtml(t.name)}</h2>
+            <p class="lead" style="margin:6px 0 0">Editör bu ekranda açık. Bitince kapatıp indirmeye geçebilirsiniz.</p>
+          </div>
+          <div class="right editor-actions">
+            <button type="button" class="ghost" id="btn-close-editor">Editörü kapat</button>
+            <button type="button" class="ghost" id="btn-open-editor">Tam editörde aç</button>
+            <button type="button" id="btn-to-download">İndirmeye geç</button>
+          </div>
+        </div>
+        ${state.editorBusy
+    ? '<div class="preview-placeholder">Editör yükleniyor…</div>'
+    : `<iframe class="editor-frame" title="edXdocu tasarım editörü" src="${escapeHtml(src)}"></iframe>`}
+      </section>`;
+    }
+
     return `
       <section class="panel catalog-panel">
         <h2>Özelleştir · ${escapeHtml(t.name)}</h2>
-        <p class="lead">Marka bilgilerinizi girin; sağda canlı önizleme. İsterseniz tam editörde açın.</p>
+        <p class="lead">Marka bilgilerinizi girin; sağda canlı önizleme. Tam editör bu ekranda açılır.</p>
         <div class="catalog-split">
           <div>
             <div class="form-grid">
@@ -339,9 +364,7 @@
             <div class="footer-actions" style="margin-top:14px">
               <button type="button" class="ghost" id="btn-back-catalog2">Geri</button>
               <div class="right">
-                <a href="${escapeHtml(t.design_url || 'https://www.edxdocu.com/')}" target="_blank" rel="noopener">
-                  <button type="button" class="ghost">Tam editörde aç</button>
-                </a>
+                <button type="button" class="ghost" id="btn-open-editor">Tam editörde aç</button>
                 <button type="button" id="btn-to-download">İndirmeye geç</button>
               </div>
             </div>
@@ -354,6 +377,27 @@
         </div>
       </section>
     `;
+  }
+
+  async function openFullEditor() {
+    if (!state.selected) return;
+    state.fullEditor = true;
+    state.editorBusy = true;
+    state.editorUrl = '';
+    render();
+    try {
+      const data = await api(tplApi(state.selected.id, '/editor-src'));
+      state.editorUrl = data.url || state.selected.design_url || '';
+      if (state.selected && data.gallery_id) {
+        state.selected = { ...state.selected, design_url: state.editorUrl };
+      }
+    } catch (e) {
+      state.editorUrl = state.selected.design_url || 'https://www.edxdocu.com/?shopify_embed=1';
+      showMsg(e.message || 'Editör URL alınamadı; varsayılan açılıyor.', 'err');
+    } finally {
+      state.editorBusy = false;
+      render();
+    }
   }
 
   function renderDownload() {
@@ -649,18 +693,32 @@
     });
     $('btn-back-intro')?.addEventListener('click', () => setStep('intro'));
     $('btn-back-catalog')?.addEventListener('click', () => setStep('catalog'));
-    $('btn-back-catalog2')?.addEventListener('click', () => setStep('catalog'));
+    $('btn-back-catalog2')?.addEventListener('click', () => {
+      state.fullEditor = false;
+      setStep('catalog');
+    });
     $('btn-back-catalog3')?.addEventListener('click', () => setStep('catalog'));
-    $('btn-back-customize')?.addEventListener('click', () => setStep('customize'));
+    $('btn-back-customize')?.addEventListener('click', () => {
+      state.fullEditor = false;
+      setStep('customize');
+    });
     $('btn-to-customize')?.addEventListener('click', async () => {
       if (!state.selected) return showMsg('Önce bir şablon seçin.', 'err');
+      state.fullEditor = false;
       setStep('customize');
       await loadPreview(state.selected);
       refreshPreviewStage();
       updateLogoPreview();
     });
+    $('btn-open-editor')?.addEventListener('click', () => openFullEditor());
+    $('btn-close-editor')?.addEventListener('click', () => {
+      state.fullEditor = false;
+      state.editorUrl = '';
+      setStep('customize');
+    });
     $('btn-to-download')?.addEventListener('click', () => {
       readCustomizeForm();
+      state.fullEditor = false;
       setStep('download');
     });
 

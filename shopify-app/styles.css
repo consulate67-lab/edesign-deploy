@@ -415,6 +415,33 @@ button:disabled {
   cursor: not-allowed;
 }
 
+.editor-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: min(78vh, 820px);
+}
+.editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+.editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.editor-frame {
+  width: 100%;
+  flex: 1;
+  min-height: min(68vh, 720px);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+}
+
 @media (max-width: 980px) {
   .catalog-split { grid-template-columns: 1fr; }
   .catalog-list { max-height: 40vh; }

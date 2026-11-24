@@ -42,9 +42,15 @@ export const mountWebApp = (app) => {
     // SPA / hash router: varlık dışı GET isteklerinde index.html.
     // /rehber/ gibi klasörlerde index.html varsa onu sun (index:false yüzünden static vermez).
     const rootResolved = path.resolve(webRoot);
-    app.get(/^(?!\/api(?:\/|$)|\/ws(?:\/|$)).*/, (req, res, next) => {
+    const shopifyFrameAncestors =
+        "frame-ancestors 'self' https://*.myshopify.com https://admin.shopify.com https://www.edxdocu.com";
+    app.get(/^(?!\/api(?:\/|$)|\/ws(?:\/|$)|\/shopify(?:\/|$)).*/, (req, res, next) => {
         if (req.method !== 'GET' && req.method !== 'HEAD') return next();
         if (path.extname(req.path)) return next();
+        // Shopify gömülü app içinden iframe (?shopify_embed=1)
+        if (req.query.shopify_embed === '1' || req.query.shopify_gallery) {
+            res.setHeader('Content-Security-Policy', shopifyFrameAncestors);
+        }
         const rel = decodeURIComponent(req.path).replace(/^\/+|\/+$/g, '');
         if (rel && !rel.includes('..')) {
             const dirIndex = path.resolve(rootResolved, rel, 'index.html');

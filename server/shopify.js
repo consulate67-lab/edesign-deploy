@@ -159,7 +159,8 @@ const serializeCatalogItem = (row, { website }) => ({
 function designUrl(website, galleryId, moduleId) {
     const base = String(website || 'https://www.edxdocu.com').replace(/\/$/, '');
     const u = new URL(base + '/');
-    u.searchParams.set('shopify_gallery', String(galleryId));
+    u.searchParams.set('shopify_embed', '1');
+    if (galleryId) u.searchParams.set('shopify_gallery', String(galleryId));
     if (moduleId) u.searchParams.set('module', moduleId);
     return u.toString();
 }
@@ -698,6 +699,30 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
             return res.json(payload);
         } catch (e) {
             res.status(500).json({ error: e.message || 'Önizleme alınamadı.' });
+        }
+    });
+
+    /** Tam editör iframe URL’si (hazir şablonları galeriye materialize eder). */
+    app.get('/api/shopify/ui/templates/:id/editor-src', optionalShopifyIdToken, async (req, res) => {
+        try {
+            const raw = decodeURIComponent(String(req.params.id || ''));
+            let galleryId = null;
+            let moduleId = null;
+            if (raw.startsWith('hazir:')) {
+                const entry = findHazirEntry(raw);
+                if (!entry) return res.status(404).json({ error: 'Şablon bulunamadı.' });
+                galleryId = await materializeHazirTemplate(db, entry, { priceCents: DEFAULT_PRICE_CENTS });
+                moduleId = entry.module_id;
+            } else {
+                galleryId = parseId(raw);
+                if (!galleryId) return res.status(400).json({ error: 'Geçersiz şablon id.' });
+                const row = await db.get('SELECT module_id FROM gallery_designs WHERE id = ?', [galleryId]);
+                moduleId = row?.module_id || null;
+            }
+            const url = designUrl(site, galleryId, moduleId);
+            res.json({ ok: true, url, gallery_id: galleryId });
+        } catch (e) {
+            res.status(500).json({ error: e.message || 'Editör URL alınamadı.' });
         }
     });
 
