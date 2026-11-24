@@ -45,8 +45,10 @@ class PostgresAdapter {
         }
         try {
             const result = await this.pool.query(finalSql, params);
+            const row0 = result.rows[0] || null;
             return {
-                lastID: result.rows[0]?.id ?? null,
+                // shopify_listings gibi tablolarda PK `id` değil `gallery_id` olabilir
+                lastID: row0?.id ?? row0?.gallery_id ?? null,
                 rowCount: result.rowCount ?? 0,
                 changes: result.rowCount ?? 0,
                 rows: result.rows,

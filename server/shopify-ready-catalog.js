@@ -285,7 +285,8 @@ export async function ensureReadyShopifyCatalog(db, { priceCents = 1499 } = {}) 
                price_cents = COALESCE(shopify_listings.price_cents, EXCLUDED.price_cents),
                countries = EXCLUDED.countries,
                active = TRUE,
-               updated_at = NOW()`,
+               updated_at = NOW()
+             RETURNING gallery_id`,
             [galleryId, priceCents, t.countries]
         );
         upserted += 1;
@@ -303,7 +304,8 @@ export async function ensureReadyShopifyCatalog(db, { priceCents = 1499 } = {}) 
         await db.run(
             `INSERT INTO shopify_listings (gallery_id, price_cents, countries, active, updated_at)
              VALUES (?, ?, ?, TRUE, NOW())
-             ON CONFLICT (gallery_id) DO NOTHING`,
+             ON CONFLICT (gallery_id) DO NOTHING
+             RETURNING gallery_id`,
             [row.id, priceCents, countries]
         );
         upserted += 1;
