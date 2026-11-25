@@ -50,8 +50,9 @@ import {
     ensureDecimalFormat, isInLineContext, isLineField, lineRootXPath, fieldSnippet, fieldContent, fieldEffectiveXPath,
     formulaSnippet, formulaContent, formulaAttrs,
     readFormula, DEFAULT_FORMULA, FORMULA_OPS, evaluateFormula, formulaSumsLines,
-    readFieldTransform, fieldTransformAttrs, evaluateFieldTransform, FIELD_FILTERS, FIELD_EXTRACTS, FIELD_CASES,
-    type CatalogField, type FormulaModel, type FormulaOp, type FieldTransform,
+    readFieldTransform, fieldTransformAttrs, evaluateFieldTransform, readCurrencyDisplay, NO_TRANSFORM,
+    FIELD_FILTERS, FIELD_EXTRACTS, FIELD_CASES,
+    type CatalogField, type FormulaModel, type FormulaOp, type FieldTransform, type CurrencyDisplay,
 } from './fieldCatalog';
 import { transformXmlWithXslt } from '../xsltTransformer';
 import { loadCurrentBaseXslt, syncOfficialBaseIfNeeded } from '../designRevisionSync';
@@ -187,7 +188,12 @@ function refreshObjectContents(xslt: string, catalog: CatalogField[], lang: DocL
         else if (kind === 'barcode') content = barcodeContent(readBarcode(el), catalog, inLine);
         else if (kind === 'field') {
             const f = catalog.find(x => x.key === el.getAttribute('data-field'));
-            if (f) content = fieldContent(f, inLine, lang, readFieldTransform(el), el.getAttribute('data-xpath'));
+            if (f) {
+                content = fieldContent(
+                    f, inLine, lang, readFieldTransform(el), el.getAttribute('data-xpath'),
+                    readCurrencyDisplay(el, f),
+                );
+            }
         }
         if (content !== null) next = replaceElementContent(next, tag, content);
     }
@@ -3166,12 +3172,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         const f = catalogRef.current.find(x => x.key === key);
         if (!f) return;
         const el = selectedObjectRef.current?.element;
-        const tx = el ? readFieldTransform(el) : null;
+        const tx = el ? readFieldTransform(el) : NO_TRANSFORM;
+        const currency = readCurrencyDisplay(el ?? null, f);
+        if (f.format === 'amount' && !el?.getAttribute('data-currency')) handleAttrChange('data-currency', currency);
         handleAttrChange('data-field', key);
         handleAttrChange('data-xpath', ''); // katalog alanına dönünce özel XPath temizlenir
         handleContentChange(
-            fieldContent(f, selectedObjInLine(), docLangRef.current, tx ?? undefined),
-            tx ? evaluateFieldTransform(xmlDocRef.current, f, tx, docLangRef.current) : evaluateField(xmlDocRef.current, f),
+            fieldContent(f, selectedObjInLine(), docLangRef.current, tx, null, currency),
+            evaluateFieldTransform(xmlDocRef.current, f, tx, docLangRef.current, currency),
         );
     }, [selectedObjInLine, handleAttrChange, handleContentChange]);
 
@@ -3181,9 +3189,10 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         if (!f) return;
         for (const [attr, value] of fieldTransformAttrs(tx)) handleAttrChange(attr, value);
         const custom = el?.getAttribute('data-xpath');
+        const currency = readCurrencyDisplay(el ?? null, f);
         handleContentChange(
-            fieldContent(f, selectedObjInLine(), docLangRef.current, tx, custom),
-            evaluateFieldTransform(xmlDocRef.current, f, tx, docLangRef.current),
+            fieldContent(f, selectedObjInLine(), docLangRef.current, tx, custom, currency),
+            evaluateFieldTransform(xmlDocRef.current, f, tx, docLangRef.current, currency),
         );
     }, [selectedObjInLine, handleAttrChange, handleContentChange]);
 
@@ -3194,20 +3203,39 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         if (!f || !el) return;
         const trimmed = xpath.trim();
         const tx = readFieldTransform(el);
+        const currency = readCurrencyDisplay(el, f);
         const defaultXp = fieldEffectiveXPath(f, selectedObjInLine(), tx, docLangRef.current);
         const custom = trimmed && trimmed !== defaultXp ? trimmed : '';
         handleAttrChange('data-xpath', custom);
         handleContentChange(
-            fieldContent(f, selectedObjInLine(), docLangRef.current, tx, custom || null),
-            custom
-                ? (() => {
-                    try {
-                        return xmlDocRef.current?.evaluate(`string(${trimmed})`, xmlDocRef.current, null, XPathResult.STRING_TYPE, null).stringValue.trim() ?? '';
-                    } catch { return ''; }
-                })()
-                : evaluateFieldTransform(xmlDocRef.current, f, tx, docLangRef.current),
+            fieldContent(f, selectedObjInLine(), docLangRef.current, tx, custom || null, currency),
+            evaluateFieldTransform(xmlDocRef.current, f, tx, docLangRef.current, currency),
         );
     }, [selectedObjInLine, handleAttrChange, handleContentChange]);
+
+    const handleFieldCurrencyChange = useCallback((mode: CurrencyDisplay) => {
+        const el = selectedObjectRef.current?.element;
+        const f = catalogRef.current.find(x => x.key === el?.getAttribute('data-field'));
+        if (!f || !el) return;
+        handleAttrChange('data-currency', mode);
+        const tx = readFieldTransform(el);
+        const custom = el.getAttribute('data-xpath');
+        handleContentChange(
+            fieldContent(f, selectedObjInLine(), docLangRef.current, tx, custom, mode),
+            evaluateFieldTransform(xmlDocRef.current, f, tx, docLangRef.current, mode),
+        );
+    }, [selectedObjInLine, handleAttrChange, handleContentChange]);
+
+    /** Tutar alanı seçilince para birimi yoksa varsayılan sembolü uygula (₺ / $ / €…). */
+    useEffect(() => {
+        const el = selectedObject?.element;
+        if (!el || selectedObject?.locator?.kind !== 'obj') return;
+        if (el.getAttribute('data-obj-kind') !== 'field') return;
+        const f = catalogRef.current.find((x) => x.key === el.getAttribute('data-field'));
+        if (!f || f.format !== 'amount') return;
+        if (el.getAttribute('data-currency')) return;
+        handleFieldCurrencyChange('symbol');
+    }, [selectedObject?.id, selectedObject?.element, handleFieldCurrencyChange]);
 
     /** Özet hücredeki çıplak xsl:value-of'u düzenlenebilir alan objesine çevirir. */
     const upgradeSummaryCellToField = useCallback((fieldKey: string) => {
@@ -6440,6 +6468,23 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                     <CatalogOptions fields={catalog} xmlDoc={xmlDoc} />
                                                 </select>
                                                 {noteBox(t('editor.panel.fieldNote', { sample: formatDocNumber(1234.56, 2, docLang) }), 'info')}
+                                                {fObj?.format === 'amount' && (
+                                                    <>
+                                                        <label style={{ ...fieldLabelStyle, marginTop: '10px' }}>{t('editor.panel.currency')}</label>
+                                                        <select
+                                                            key={fieldKey(`currency-${el.getAttribute('data-currency') || 'symbol'}`)}
+                                                            data-field-currency
+                                                            defaultValue={readCurrencyDisplay(el, fObj)}
+                                                            onChange={(e) => handleFieldCurrencyChange(e.target.value as CurrencyDisplay)}
+                                                            style={{ ...fieldInputStyle, marginBottom: '6px' }}
+                                                        >
+                                                            <option value="symbol">{t('editor.panel.currencySymbol')}</option>
+                                                            <option value="code">{t('editor.panel.currencyCode')}</option>
+                                                            <option value="none">{t('editor.panel.currencyNone')}</option>
+                                                        </select>
+                                                        {noteBox(t('editor.panel.currencyNote'), 'info')}
+                                                    </>
+                                                )}
                                                 <label style={{ ...fieldLabelStyle, marginTop: '10px' }}>{t('editor.panel.xpath')}</label>
                                                 <textarea
                                                     key={fieldKey(`field-xpath-${customXp || effectiveXp}`)}

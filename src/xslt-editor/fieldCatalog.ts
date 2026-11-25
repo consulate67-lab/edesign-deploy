@@ -1087,6 +1087,51 @@ export function fieldTransformExpr(f: CatalogField, inLine: boolean, tx: FieldTr
 const isPlainTransform = (tx: FieldTransform) => (tx.filter === 'none' || !tx.filterText) && tx.extract === 'all' && !tx.trim && tx.case === 'none';
 const escapeSelect = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 
+/** Tutar alanında para birimi: sembol (₺), ISO kod (TRY) veya yok. */
+export type CurrencyDisplay = 'symbol' | 'code' | 'none';
+
+const DOC_CURRENCY_XP = `/*/*[local-name()='DocumentCurrencyCode']`;
+const CURRENCY_SYMBOLS: Record<string, string> = {
+    TRY: '₺', TRL: '₺', USD: '$', EUR: '€', GBP: '£', CHF: 'CHF', JPY: '¥', CNY: '¥',
+    RUB: '₽', BRL: 'R$', INR: '₹', AED: 'د.إ', SAR: '﷼',
+};
+
+/** `data-currency` yoksa tutar alanlarında varsayılan: sembol. */
+export function readCurrencyDisplay(el: Element | null, f?: CatalogField | null): CurrencyDisplay {
+    const v = el?.getAttribute('data-currency');
+    if (v === 'symbol' || v === 'code' || v === 'none') return v;
+    return f?.format === 'amount' ? 'symbol' : 'none';
+}
+
+export function currencySymbolOf(code: string): string {
+    const c = code.trim().toUpperCase();
+    return CURRENCY_SYMBOLS[c] || c;
+}
+
+/** Tutar düğümünden veya belge para biriminden kod (önizleme). */
+export function evaluateCurrencyCode(xmlDoc: Document | null, amountXp: string): string {
+    if (!xmlDoc) return '';
+    try {
+        const fromAttr = xmlDoc.evaluate(`string((${amountXp}/@currencyID)[1])`, xmlDoc, null, XPathResult.STRING_TYPE, null).stringValue.trim();
+        if (fromAttr) return fromAttr;
+        return xmlDoc.evaluate(`string((${DOC_CURRENCY_XP})[1])`, xmlDoc, null, XPathResult.STRING_TYPE, null).stringValue.trim();
+    } catch {
+        return '';
+    }
+}
+
+const currencySuffixXslt = (amountXp: string, mode: CurrencyDisplay): string => {
+    if (mode === 'none') return '';
+    const cur = `string((${amountXp}/@currencyID | ${DOC_CURRENCY_XP})[1])`;
+    if (mode === 'code') {
+        return `<xsl:text>&#160;</xsl:text><xsl:value-of select="${cur}"/>`;
+    }
+    const whens = Object.entries(CURRENCY_SYMBOLS)
+        .map(([code, sym]) => `<xsl:when test="${cur}='${code}'">${escapeText(sym)}</xsl:when>`)
+        .join('');
+    return `<xsl:text>&#160;</xsl:text><xsl:choose>${whens}<xsl:otherwise><xsl:value-of select="${cur}"/></xsl:otherwise></xsl:choose>`;
+};
+
 /** Alan objesinin etkin XPath'i (özel `data-xpath` yoksa katalog + dönüşüm). */
 export function fieldEffectiveXPath(
     f: CatalogField,
@@ -1101,44 +1146,70 @@ export function fieldEffectiveXPath(
     return fieldTransformExpr(f, inLine, tx, lang);
 }
 
-/** Veri alanı objesinin içeriği (sayısal alanlar belge dilinin ayraçlarıyla biçimlenir). */
+/** Veri alanı objesinin içeriği (sayısal alanlar belge dilinin ayraçlarıyla biçimlenir; tutarlara para birimi eklenir). */
 export function fieldContent(
     f: CatalogField,
     inLine: boolean,
     lang: DocLanguage = 'tr',
     tx: FieldTransform = NO_TRANSFORM,
     customXPath?: string | null,
+    currency: CurrencyDisplay = f.format === 'amount' ? 'symbol' : 'none',
 ): string {
     const textual = tx.extract !== 'all' || tx.case !== 'none';
     const custom = customXPath?.trim();
-    if (custom) {
-        const xp = escapeSelect(custom);
-        if (f.format === 'amount' && !textual) {
-            return `<xsl:if test="${xp}"><xsl:value-of select="${formatted(`number(${xp})`, 2, lang)}"/></xsl:if>`;
-        }
-        return `<xsl:value-of select="${xp}"/>`;
-    }
+    const customIsFormat = !!custom && /format-number\s*\(/i.test(custom);
+    const nodeXp = escapeSelect(
+        custom && !customIsFormat ? custom : fieldNodeXPath(f, inLine, tx),
+    );
     if (f.format === 'amount' && !textual) {
-        const xp = escapeSelect(fieldNodeXPath(f, inLine, tx));
-        return `<xsl:if test="${xp}"><xsl:value-of select="${formatted(`number(${xp})`, 2, lang)}"/></xsl:if>`;
+        const selectExpr = customIsFormat
+            ? escapeSelect(custom!)
+            : formatted(`number(${nodeXp})`, 2, lang);
+        const suffix = currencySuffixXslt(nodeXp, currency);
+        return `<xsl:if test="${nodeXp}"><xsl:value-of select="${selectExpr}"/>${suffix}</xsl:if>`;
     }
+    if (custom) return `<xsl:value-of select="${escapeSelect(custom)}"/>`;
     if (isPlainTransform(tx)) return `<xsl:value-of select="${fieldXPath(f, inLine)}"/>`;
     return `<xsl:value-of select="${escapeSelect(fieldTransformExpr(f, inLine, tx, lang))}"/>`;
 }
 
-/** Dönüşümlü alanın örnek XML'deki değeri (ilk eşleşme). */
-export function evaluateFieldTransform(xmlDoc: Document | null, f: CatalogField, tx: FieldTransform, lang: DocLanguage = 'tr'): string {
+/** Dönüşümlü alanın örnek XML'deki değeri (ilk eşleşme); tutarlarda para birimi eklenir. */
+export function evaluateFieldTransform(
+    xmlDoc: Document | null,
+    f: CatalogField,
+    tx: FieldTransform,
+    lang: DocLanguage = 'tr',
+    currency: CurrencyDisplay = 'none',
+): string {
     if (!xmlDoc) return '';
-    if (isPlainTransform(tx)) return evaluateField(xmlDoc, f);
+    const textual = tx.extract !== 'all' || tx.case !== 'none';
     try {
+        if (f.format === 'amount' && !textual) {
+            const nodeXp = fieldNodeXPath(f, false, tx);
+            const raw = xmlDoc.evaluate(`string(${nodeXp})`, xmlDoc, null, XPathResult.STRING_TYPE, null).stringValue.trim();
+            const n = Number(String(raw).replace(/\s/g, '').replace(',', '.'));
+            if (!Number.isFinite(n)) return raw;
+            const { decimal, grouping } = DECIMAL_FORMATS[decimalFormatOf(lang)];
+            const [intPart, frac = ''] = n.toFixed(2).split('.');
+            const withGroup = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, grouping === '\u00a0' ? '\u00a0' : grouping);
+            const num = `${withGroup}${decimal}${frac}`;
+            if (currency === 'none') return num;
+            const code = evaluateCurrencyCode(xmlDoc, nodeXp);
+            if (!code) return num;
+            const tail = currency === 'code' ? code : currencySymbolOf(code);
+            return `${num}\u00a0${tail}`;
+        }
+        if (isPlainTransform(tx)) return evaluateField(xmlDoc, f);
         return xmlDoc.evaluate(`string(${fieldTransformExpr(f, false, tx, lang)})`, xmlDoc, null, XPathResult.STRING_TYPE, null).stringValue.trim();
     } catch {
         return '';
     }
 }
 
-export const fieldSnippet = (id: string, f: CatalogField, inLine: boolean, lang: DocLanguage = 'tr') =>
-    `<span data-xslt-obj="${id}" data-obj-kind="field" data-field="${f.key}">${fieldContent(f, inLine, lang)}</span>`;
+export const fieldSnippet = (id: string, f: CatalogField, inLine: boolean, lang: DocLanguage = 'tr') => {
+    const cur = f.format === 'amount' ? ' data-currency="symbol"' : '';
+    return `<span data-xslt-obj="${id}" data-obj-kind="field" data-field="${f.key}"${cur}>${fieldContent(f, inLine, lang)}</span>`;
+};
 
 export type FormulaOp = 'none' | 'percent' | 'mul' | 'div' | 'add' | 'sub';
 export interface FormulaModel {
