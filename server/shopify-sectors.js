@@ -1,3 +1,24 @@
+/**
+ * Shopify vitrini: e-ticaret satışına uygun sektörler (sipariş / kargo / online satış).
+ * Diğer meslek/sektör şablonları ana sitede kalır.
+ */
+export const SHOPIFY_ECOM_SECTOR_IDS = [
+    'eticaret',
+    'perakende',
+    'elektronik',
+    'tekstil',
+    'ayakkabi',
+    'gida',
+    'guzellik',
+    'mobilya',
+    'bilisim',
+    'spor',
+    'eglence',
+    'toptan',
+    'kargo',
+    'lojistik',
+];
+
 /** TR sektör etiketleri — src/sector-templates/types.ts ile uyumlu. */
 export const TR_SECTORS = [
     { id: 'perakende', label: 'Perakende & Mağaza' },
@@ -49,4 +70,14 @@ export const TR_SECTORS = [
 
 export function sectorLabel(id) {
     return TR_SECTORS.find((s) => s.id === id)?.label || id || '';
+}
+
+/** Shopify katalogunda gösterilecek sektör listesi (kullanılanlar ∩ e-ticaret seti). */
+export function listShopifyEcomSectors(usedSectorIds = []) {
+    const used = new Set(usedSectorIds.filter(Boolean));
+    return TR_SECTORS.filter((s) => SHOPIFY_ECOM_SECTOR_IDS.includes(s.id) && used.has(s.id));
+}
+
+export function isShopifyEcomSector(id) {
+    return SHOPIFY_ECOM_SECTOR_IDS.includes(String(id || '').toLowerCase());
 }

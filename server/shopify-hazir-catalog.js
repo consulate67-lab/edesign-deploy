@@ -5,7 +5,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { TR_SECTORS, sectorLabel } from './shopify-sectors.js';
+import {
+    TR_SECTORS,
+    SHOPIFY_ECOM_SECTOR_IDS,
+    listShopifyEcomSectors,
+    sectorLabel,
+} from './shopify-sectors.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
@@ -326,4 +331,92 @@ export function serializeHazirItem(entry, { website, priceCents = 1499 }) {
 export function listHazirSectors() {
     const used = new Set(getHazirTrIndex().map((t) => t.sector).filter(Boolean));
     return TR_SECTORS.filter((s) => used.has(s.id));
+}
+
+const ECOM_BOOST_RE = /e-?ticaret|internet|online|pazaryeri|abonelik|ma[gğ]aza|sipari[sş]|kargo|marketplace|shopify|web\s*sat/i;
+const ECOM_MIN_ETICARET = 24;
+
+/**
+ * Shopify: yalnız e-ticaret sektörleri + eticaret azsa online/perakende şablonlarıyla destekle.
+ */
+export function getShopifyHazirIndex() {
+    const all = getHazirTrIndex();
+    const ecomSet = new Set(SHOPIFY_ECOM_SECTOR_IDS);
+    const base = all.filter((t) => ecomSet.has(t.sector) && TR_DOC_TYPES.has(t.doc_type_id));
+    const eticaret = base.filter((t) => t.sector === 'eticaret');
+    const need = Math.max(0, ECOM_MIN_ETICARET - eticaret.length);
+    if (need <= 0) return base;
+
+    const seenKeys = new Set(eticaret.map((t) => t.key));
+    const boosts = [];
+    for (const t of all) {
+        if (boosts.length >= need) break;
+        if (t.sector === 'eticaret') continue;
+        if (!TR_DOC_TYPES.has(t.doc_type_id)) continue;
+        if (!['fatura', 'arsiv', 'irsaliye'].includes(t.doc_type_id)) continue;
+        if (seenKeys.has(t.key)) continue;
+        const blob = `${t.name} ${t.description || ''} ${t.key}`;
+        const prefer = ECOM_BOOST_RE.test(blob) || ['perakende', 'elektronik', 'tekstil', 'ayakkabi'].includes(t.sector);
+        if (!prefer) continue;
+        seenKeys.add(t.key);
+        boosts.push({
+            ...t,
+            id: `hazir:ecom-${t.key}`,
+            key: `ecom-${t.key}`,
+            sector: 'eticaret',
+            name: /e-?ticaret/i.test(t.name) ? t.name : `${t.name} (e-Ticaret)`,
+            tags: [...(t.tags || []), 'shopify-ecom-boost'],
+            sourceKey: t.key,
+        });
+    }
+    // Hâlâ azsa perakende fatura/arsiv’den doldur
+    if (boosts.length < need) {
+        for (const t of all) {
+            if (boosts.length >= need) break;
+            if (t.sector !== 'perakende') continue;
+            if (!['fatura', 'arsiv'].includes(t.doc_type_id)) continue;
+            if (seenKeys.has(t.key)) continue;
+            seenKeys.add(t.key);
+            boosts.push({
+                ...t,
+                id: `hazir:ecom-${t.key}`,
+                key: `ecom-${t.key}`,
+                sector: 'eticaret',
+                name: `${t.name} (e-Ticaret)`,
+                tags: [...(t.tags || []), 'shopify-ecom-boost'],
+                sourceKey: t.key,
+            });
+        }
+    }
+    return [...base, ...boosts];
+}
+
+export function findShopifyHazirEntry(idOrKey) {
+    const raw = String(idOrKey || '');
+    const key = raw.startsWith('hazir:') ? raw.slice(6) : raw;
+    const shopifyHit = getShopifyHazirIndex().find((t) => t.key === key || t.id === raw);
+    if (shopifyHit) {
+        if (shopifyHit.sourceKey) {
+            const src = findHazirEntry(shopifyHit.sourceKey);
+            if (src) {
+                return {
+                    ...src,
+                    id: shopifyHit.id,
+                    key: shopifyHit.key,
+                    sector: 'eticaret',
+                    name: shopifyHit.name,
+                    tags: shopifyHit.tags,
+                    sourceKey: shopifyHit.sourceKey,
+                };
+            }
+        }
+        return shopifyHit;
+    }
+    return findHazirEntry(idOrKey);
+}
+
+/** Shopify UI sektör filtresi — e-ticaret seti. */
+export function listShopifyCatalogSectors() {
+    const used = getShopifyHazirIndex().map((t) => t.sector);
+    return listShopifyEcomSectors(used);
 }

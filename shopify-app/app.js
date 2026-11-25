@@ -37,10 +37,22 @@
     editorBusy: false,
     form: {
       company_name: '',
+      phone: '',
+      email: '',
+      website: '',
+      address: '',
+      city: '',
+      zip: '',
+      bank_name: '',
+      iban: '',
+      account_name: '',
       accent: '#1e3a8a',
       logo_url: '',
       logo_data: '',
     },
+    shopProfile: null,
+    shopFilled: false,
+    previewTimer: null,
     purchased: false,
   };
 
@@ -340,12 +352,39 @@
     return `
       <section class="panel catalog-panel">
         <h2>Özelleştir · ${escapeHtml(t.name)}</h2>
-        <p class="lead">Marka bilgilerinizi girin; sağda canlı önizleme. Tam editör bu ekranda açılır.</p>
+        <p class="lead">Shopify mağaza kayıtlarınız otomatik gelir; banka/IBAN ekleyin. Sağda canlı önizleme.</p>
         <div class="catalog-split">
           <div>
             <div class="form-grid">
               <label class="field span2">Şirket / unvan
-                <input id="company" placeholder="Örn. Sarp Soft Ltd." value="${escapeHtml(state.form.company_name)}" />
+                <input id="company" placeholder="Shopify mağaza ünvanı" value="${escapeHtml(state.form.company_name)}" />
+              </label>
+              <label class="field">Telefon
+                <input id="phone" placeholder="0850…" value="${escapeHtml(state.form.phone)}" />
+              </label>
+              <label class="field">E-posta
+                <input id="email" type="email" placeholder="info@…" value="${escapeHtml(state.form.email)}" />
+              </label>
+              <label class="field span2">İnternet adresi
+                <input id="website" placeholder="https://…" value="${escapeHtml(state.form.website)}" />
+              </label>
+              <label class="field span2">Adres
+                <input id="address" placeholder="Mahalle / cadde / no" value="${escapeHtml(state.form.address)}" />
+              </label>
+              <label class="field">Şehir
+                <input id="city" value="${escapeHtml(state.form.city)}" />
+              </label>
+              <label class="field">Posta kodu
+                <input id="zip" value="${escapeHtml(state.form.zip)}" />
+              </label>
+              <label class="field">Banka
+                <input id="bank_name" placeholder="Örn. Ziraat Bankası" value="${escapeHtml(state.form.bank_name)}" />
+              </label>
+              <label class="field">Hesap adı
+                <input id="account_name" placeholder="Hesap sahibi" value="${escapeHtml(state.form.account_name)}" />
+              </label>
+              <label class="field span2">IBAN
+                <input id="iban" placeholder="TRxx xxxx …" value="${escapeHtml(state.form.iban)}" />
               </label>
               <label class="field">Accent rengi
                 <input id="accent" type="color" value="${escapeHtml(state.form.accent || '#1e3a8a')}" />
@@ -387,8 +426,8 @@
     render();
     try {
       // Aynı XSLTEditor — /shopify/editor (ana web sitesi değil)
-      const q = state.orderId ? `?order_id=${encodeURIComponent(state.orderId)}` : '';
-      const src = await api(tplApi(state.selected.id, `/preview-source${q}`));
+      readCustomizeForm();
+      const src = await api(tplApi(state.selected.id, `/preview-source${supplierQuery()}`));
       let designId;
       try {
         const ed = await api(tplApi(state.selected.id, '/editor-src'));
@@ -516,10 +555,24 @@
     state.previewBusy = true;
     state.previewWarning = '';
     try {
-      const q = state.orderId ? `?order_id=${encodeURIComponent(state.orderId)}` : '';
-      const data = await api(tplApi(template.id, `/preview-source${q}`));
+      readCustomizeForm();
+      const data = await api(tplApi(template.id, `/preview-source${supplierQuery()}`));
       if (!data.xslt) throw new Error('XSLT yok');
       if (data.order_warning) state.previewWarning = data.order_warning;
+      if (data.shop_profile) {
+        const wasFilled = state.shopFilled;
+        applyShopProfile(data.shop_profile);
+        if (!wasFilled && state.shopFilled && state.step === 'customize' && !state.fullEditor) {
+          const sync = (id, val) => { const el = $(id); if (el && val) el.value = val; };
+          sync('company', state.form.company_name);
+          sync('phone', state.form.phone);
+          sync('email', state.form.email);
+          sync('website', state.form.website);
+          sync('address', state.form.address);
+          sync('city', state.form.city);
+          sync('zip', state.form.zip);
+        }
+      }
       const parser = new DOMParser();
       const xsltDoc = parser.parseFromString(data.xslt, 'text/xml');
       const xmlDoc = parser.parseFromString(data.xml || '<?xml version="1.0"?><Invoice/>', 'text/xml');
@@ -548,8 +601,63 @@
 
   function readCustomizeForm() {
     state.form.company_name = $('company')?.value?.trim() || state.form.company_name;
+    state.form.phone = $('phone')?.value?.trim() || state.form.phone;
+    state.form.email = $('email')?.value?.trim() || state.form.email;
+    state.form.website = $('website')?.value?.trim() || state.form.website;
+    state.form.address = $('address')?.value?.trim() || state.form.address;
+    state.form.city = $('city')?.value?.trim() || state.form.city;
+    state.form.zip = $('zip')?.value?.trim() || state.form.zip;
+    state.form.bank_name = $('bank_name')?.value?.trim() || state.form.bank_name;
+    state.form.account_name = $('account_name')?.value?.trim() || state.form.account_name;
+    state.form.iban = $('iban')?.value?.trim() || state.form.iban;
     state.form.accent = $('accent')?.value || state.form.accent;
     state.form.logo_url = $('logo_url')?.value?.trim() || state.form.logo_url;
+  }
+
+  function applyShopProfile(profile) {
+    if (!profile || state.shopFilled) return;
+    state.shopProfile = profile;
+    if (!state.form.company_name && profile.name) state.form.company_name = profile.name;
+    if (!state.form.phone && profile.phone) state.form.phone = profile.phone;
+    if (!state.form.email && profile.email) state.form.email = profile.email;
+    if (!state.form.website && profile.website) state.form.website = profile.website;
+    if (!state.form.address && profile.address) state.form.address = profile.address;
+    if (!state.form.city && profile.city) state.form.city = profile.city;
+    if (!state.form.zip && profile.zip) state.form.zip = profile.zip;
+    state.shopFilled = true;
+  }
+
+  function supplierQuery() {
+    const p = new URLSearchParams();
+    const f = state.form;
+    const map = {
+      company_name: f.company_name,
+      phone: f.phone,
+      email: f.email,
+      website: f.website,
+      address: f.address,
+      city: f.city,
+      zip: f.zip,
+      bank_name: f.bank_name,
+      account_name: f.account_name,
+      iban: f.iban,
+    };
+    for (const [k, v] of Object.entries(map)) {
+      if (v) p.set(k, v);
+    }
+    if (state.orderId) p.set('order_id', state.orderId);
+    const q = p.toString();
+    return q ? `?${q}` : '';
+  }
+
+  function schedulePreviewRefresh() {
+    if (!state.selected || state.step !== 'customize' || state.fullEditor) return;
+    if (state.previewTimer) clearTimeout(state.previewTimer);
+    state.previewTimer = setTimeout(async () => {
+      readCustomizeForm();
+      await loadPreview(state.selected);
+      refreshPreviewStage();
+    }, 450);
   }
 
   function updateLogoPreview() {
@@ -650,6 +758,13 @@
         method: 'POST',
         body: JSON.stringify({
           company_name: state.form.company_name,
+          phone: state.form.phone,
+          email: state.form.email,
+          website: state.form.website,
+          address: [state.form.address, state.form.city, state.form.zip].filter(Boolean).join(', '),
+          bank_name: state.form.bank_name,
+          account_name: state.form.account_name,
+          iban: state.form.iban,
           accent: state.form.accent,
           logo_url: logoPayload(),
           download: false,
@@ -829,7 +944,22 @@
       });
     });
 
-    $('company')?.addEventListener('input', (e) => { state.form.company_name = e.target.value; });
+    const bindField = (id, key, refresh) => {
+      $(id)?.addEventListener('input', (e) => {
+        state.form[key] = e.target.value;
+        if (refresh) schedulePreviewRefresh();
+      });
+    };
+    bindField('company', 'company_name', true);
+    bindField('phone', 'phone', true);
+    bindField('email', 'email', true);
+    bindField('website', 'website', true);
+    bindField('address', 'address', true);
+    bindField('city', 'city', true);
+    bindField('zip', 'zip', true);
+    bindField('bank_name', 'bank_name', true);
+    bindField('account_name', 'account_name', true);
+    bindField('iban', 'iban', true);
     $('accent')?.addEventListener('input', (e) => { state.form.accent = e.target.value; });
     $('logo_url')?.addEventListener('input', (e) => {
       state.form.logo_url = e.target.value;
@@ -886,6 +1016,7 @@
         state.countries = state.bootstrap.countries;
       }
       if (Array.isArray(state.bootstrap.sectors)) state.sectors = state.bootstrap.sectors;
+      if (state.bootstrap.shop_profile) applyShopProfile(state.bootstrap.shop_profile);
       if (state.bootstrap.api_key && state.bootstrap.api_key !== metaKey) {
         await ensureAppBridge(state.bootstrap.api_key);
         try {
@@ -895,6 +1026,7 @@
             state.countries = state.bootstrap.countries;
           }
           if (Array.isArray(state.bootstrap.sectors)) state.sectors = state.bootstrap.sectors;
+          if (state.bootstrap.shop_profile) applyShopProfile(state.bootstrap.shop_profile);
         } catch {
           /* soft */
         }

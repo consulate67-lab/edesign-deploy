@@ -29,15 +29,18 @@ import {
 } from './shopify-ready-catalog.js';
 import {
     findHazirEntry,
-    getHazirTrIndex,
-    listHazirSectors,
+    findShopifyHazirEntry,
+    getShopifyHazirIndex,
+    listShopifyCatalogSectors,
     loadHazirFiles,
     materializeHazirTemplate,
     serializeHazirItem,
 } from './shopify-hazir-catalog.js';
 import {
+    applySupplierToUblXml,
     applyTestWatermark,
     getShopifyOrder,
+    getShopifyShop,
     listShopifyOrders,
     orderToUblInvoiceXml,
 } from './shopify-order-ubl.js';
@@ -202,8 +205,15 @@ function isUsableLogoSrc(src) {
     return false;
 }
 
-/** Logo / renk / unvan — hazır şablona hafif marka (tam editör değil). */
-export function applyBrand(xslt, { logoUrl, companyName, accent, previousAccent }) {
+function brandEsc(s) {
+    return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/** Logo / renk / unvan / iletişim / banka — hazır şablona hafif marka (tam editör değil). */
+export function applyBrand(xslt, {
+    logoUrl, companyName, accent, previousAccent,
+    phone, email, website, address, bankName, iban, accountName,
+}) {
     let out = String(xslt || '');
     if (previousAccent && accent && previousAccent !== accent && HEX_RE.test(previousAccent) && HEX_RE.test(accent)) {
         const esc = previousAccent.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -237,12 +247,58 @@ export function applyBrand(xslt, { logoUrl, companyName, accent, previousAccent 
             );
         }
     }
+    const placeholders = {
+        '{{EDX_PHONE}}': phone,
+        '{{EDX_EMAIL}}': email,
+        '{{EDX_WEBSITE}}': website,
+        '{{EDX_ADDRESS}}': address,
+        '{{EDX_BANK}}': bankName,
+        '{{EDX_IBAN}}': iban,
+        '{{EDX_ACCOUNT}}': accountName,
+    };
+    for (const [token, val] of Object.entries(placeholders)) {
+        if (val && out.includes(token)) out = out.split(token).join(String(val).slice(0, 300));
+    }
+    if (iban || bankName || accountName) {
+        const lines = [
+            bankName ? `Banka: ${brandEsc(bankName)}` : '',
+            accountName ? `Hesap: ${brandEsc(accountName)}` : '',
+            iban ? `IBAN: ${brandEsc(iban)}` : '',
+        ].filter(Boolean).join('<br/>');
+        if (lines && !/data-edx-bank/i.test(out)) {
+            const tag = `<div data-edx-bank="1" style="margin:10px 0;padding:8px 10px;border:1px solid #e2e8f0;border-radius:8px;font:12px/1.45 Segoe UI,sans-serif;color:#0f172a">${lines}</div>`;
+            if (/<\/body>/i.test(out)) out = out.replace(/<\/body>/i, `${tag}</body>`);
+            else out += tag;
+        }
+    }
     const stamp = `<!-- edxdocu-shopify-brand:${new Date().toISOString()} -->\n`;
     if (!out.includes('edxdocu-shopify-brand:')) {
         const decl = out.match(/^\uFEFF?\s*<\?xml[^?]*\?>[ \t]*\r?\n?/);
         out = decl ? out.slice(0, decl[0].length) + stamp + out.slice(decl[0].length) : stamp + out;
     }
     return out;
+}
+
+function supplierFromRequest(req, shopProfile = null) {
+    const q = req.query || {};
+    const b = req.body || {};
+    const pick = (key, max) => optionalText(b[key] ?? q[key], max);
+    const base = shopProfile || {};
+    return {
+        name: pick('company_name', 200) || base.name || '',
+        email: pick('email', 200) || base.email || '',
+        phone: pick('phone', 64) || base.phone || '',
+        website: pick('website', 300) || base.website || '',
+        address: pick('address', 300) || base.address || '',
+        city: pick('city', 120) || base.city || '',
+        province: pick('province', 120) || base.province || '',
+        zip: pick('zip', 32) || base.zip || '',
+        country: pick('country_name', 80) || base.country || 'Türkiye',
+        country_code: pick('country_code', 8) || base.country_code || 'TR',
+        bank_name: pick('bank_name', 120) || '',
+        iban: pick('iban', 34) || '',
+        account_name: pick('account_name', 200) || '',
+    };
 }
 
 export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
@@ -500,9 +556,22 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
             /* katalog seed hata verse de UI açılsın */
         }
         const shop = uiShop(req);
+        let shopProfile = null;
+        let shopWarning = null;
+        if (shop) {
+            try {
+                const token = await ensureOfflineToken(req, shop);
+                shopProfile = await getShopifyShop({ shop, accessToken: token });
+            } catch (e) {
+                shopWarning = e.message || 'Mağaza bilgisi alınamadı.';
+                console.warn('[shopify] shop profile:', shopWarning);
+            }
+        }
         res.json({
             ok: true,
             shop,
+            shop_profile: shopProfile,
+            shop_warning: shopWarning,
             free_download: freeDownload,
             billing_stub: billingStub,
             billing_test: billingTest,
@@ -514,20 +583,20 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
             session_ready: sessionReady,
             require_session: requireSession,
             countries: SHOPIFY_COUNTRY_OPTIONS,
-            sectors: listHazirSectors(),
+            sectors: listShopifyCatalogSectors(),
             steps: ['intro', 'catalog', 'customize', 'download'],
             how_to: [
                 {
                     title: 'Şablon seçin',
-                    body: 'Ülkenize ve belge tipinize uygun hazır e-fatura / irsaliye tasarımını seçin.',
+                    body: 'E-ticaret sektörüne uygun hazır e-fatura / irsaliye tasarımını seçin.',
                 },
                 {
                     title: 'Markanızı uygulayın',
-                    body: 'Logo, unvan ve renk gibi temel bilgileri sihirbazla girin; şablon anında güncellenir.',
+                    body: 'Shopify mağaza bilgileriniz (ünvan, telefon, e-posta, adres) otomatik gelir; banka/IBAN ekleyebilirsiniz.',
                 },
                 {
                     title: 'İsterseniz detaylı düzenleyin',
-                    body: 'Daha fazla değişiklik için edXdocu tam editörünü açabilirsiniz.',
+                    body: 'Daha fazla değişiklik için edXdocu tam editörünü bu panelde açabilirsiniz.',
                 },
                 {
                     title: 'XSLT indirin',
@@ -537,10 +606,26 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
         });
     });
 
+    app.get('/api/shopify/ui/shop', optionalShopifyIdToken, async (req, res) => {
+        const shop = uiShop(req);
+        if (!shop) return res.status(400).json({ error: 'shop gerekli.', shop_profile: null });
+        try {
+            const token = await ensureOfflineToken(req, shop);
+            const shopProfile = await getShopifyShop({ shop, accessToken: token });
+            res.json({ shop, shop_profile: shopProfile });
+        } catch (e) {
+            res.json({
+                shop,
+                shop_profile: null,
+                warning: e.message || 'Mağaza bilgisi alınamadı.',
+            });
+        }
+    });
+
     async function resolveGalleryId(idParam) {
         const raw = decodeURIComponent(String(idParam || ''));
         if (raw.startsWith('hazir:')) {
-            const entry = findHazirEntry(raw);
+            const entry = findShopifyHazirEntry(raw) || findHazirEntry(raw);
             if (!entry) return null;
             return materializeHazirTemplate(db, entry, { priceCents: DEFAULT_PRICE_CENTS });
         }
@@ -569,13 +654,16 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
         }
         sql += ' ORDER BY g.updated_at DESC';
         const { rows } = await db.pool.query(sql, params);
-        const dbItems = rows.map((r) => serializeCatalogItem(r, { website: site }));
+        let dbItems = rows.map((r) => serializeCatalogItem(r, { website: site }));
 
-        // TR: dosya tabanlı e-Fatura / e-Arşiv / e-İrsaliye hazır şablonlar
+        // TR: dosya tabanlı e-Fatura / e-Arşiv / e-İrsaliye — Shopify’da e-ticaret seti
         const wantHazir = !country || country === 'TR';
         if (!wantHazir) return dbItems;
 
-        let hazir = getHazirTrIndex();
+        const ecomSet = new Set(listShopifyCatalogSectors().map((s) => s.id));
+        dbItems = dbItems.filter((d) => !d.sector || ecomSet.has(d.sector));
+
+        let hazir = getShopifyHazirIndex();
         if (docType) hazir = hazir.filter((h) => h.doc_type_id === docType);
         if (moduleId) hazir = hazir.filter((h) => h.module_id === moduleId);
         if (sector) hazir = hazir.filter((h) => h.sector === sector);
@@ -613,7 +701,7 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
                 doc_type: docType || null,
                 sector: sector || null,
                 countries: SHOPIFY_COUNTRY_OPTIONS,
-                sectors: (!country || country === 'TR') ? listHazirSectors() : [],
+                sectors: (!country || country === 'TR') ? listShopifyCatalogSectors() : [],
                 doc_types: [
                     { id: '', label: 'Tümü' },
                     { id: 'fatura', label: 'e-Fatura' },
@@ -643,13 +731,25 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
         }
     });
 
+    async function resolveShopProfile(req) {
+        const shop = uiShop(req);
+        if (!shop) return null;
+        try {
+            const token = await ensureOfflineToken(req, shop);
+            return await getShopifyShop({ shop, accessToken: token });
+        } catch (e) {
+            console.warn('[shopify] shop profile:', e.message || e);
+            return null;
+        }
+    }
+
     async function resolvePreviewPayload(req) {
         const raw = decodeURIComponent(String(req.params.id || ''));
         let xslt = '';
         let xml = '';
         let meta = {};
         if (raw.startsWith('hazir:')) {
-            const entry = findHazirEntry(raw);
+            const entry = findShopifyHazirEntry(raw) || findHazirEntry(raw);
             const files = loadHazirFiles(entry);
             if (!files?.xslt) return null;
             xslt = files.xslt;
@@ -678,6 +778,10 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
             };
         }
 
+        const shopProfile = await resolveShopProfile(req);
+        const supplier = supplierFromRequest(req, shopProfile);
+        meta.shop_profile = shopProfile;
+
         const orderId = optionalText(req.query.order_id, 128);
         let orderWarning = null;
         if (orderId) {
@@ -687,18 +791,17 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
                 const token = await ensureOfflineToken(req, shop);
                 const order = await getShopifyOrder({ shop, accessToken: token, orderId });
                 if (!order) throw new Error('Sipariş bulunamadı');
-                const shopRow = await db.get('SELECT shop_domain FROM shopify_shops WHERE shop_domain = ?', [shop]);
-                xml = orderToUblInvoiceXml(order, {
-                    supplierName: shop?.replace('.myshopify.com', '') || 'Shopify Mağaza',
-                });
+                xml = orderToUblInvoiceXml(order, supplier);
                 meta.order_id = order.id;
                 meta.order_name = order.name;
-                void shopRow;
             } catch (e) {
                 orderWarning = e.message || 'Sipariş XML üretilemedi; örnek XML kullanıldı.';
+                xml = applySupplierToUblXml(xml, supplier);
             }
+        } else {
+            xml = applySupplierToUblXml(xml, supplier);
         }
-        return { ...meta, xslt, xml, order_warning: orderWarning };
+        return { ...meta, xslt, xml, order_warning: orderWarning, supplier };
     }
 
     app.get('/api/shopify/ui/templates/:id/preview-source', optionalShopifyIdToken, async (req, res) => {
@@ -718,7 +821,7 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
             let galleryId = null;
             let moduleId = null;
             if (raw.startsWith('hazir:')) {
-                const entry = findHazirEntry(raw);
+                const entry = findShopifyHazirEntry(raw) || findHazirEntry(raw);
                 if (!entry) return res.status(404).json({ error: 'Şablon bulunamadı.' });
                 galleryId = await materializeHazirTemplate(db, entry, { priceCents: DEFAULT_PRICE_CENTS });
                 moduleId = entry.module_id;
@@ -738,7 +841,7 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
     app.get('/api/shopify/ui/templates/:id', optionalShopifyIdToken, async (req, res) => {
         const raw = decodeURIComponent(String(req.params.id || ''));
         if (raw.startsWith('hazir:')) {
-            const entry = findHazirEntry(raw);
+            const entry = findShopifyHazirEntry(raw) || findHazirEntry(raw);
             if (!entry) return res.status(404).json({ error: 'Şablon bulunamadı.' });
             return res.json(serializeHazirItem(entry, { website: site, priceCents: DEFAULT_PRICE_CENTS }));
         }
@@ -943,6 +1046,13 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
         const logoUrl = optionalText(req.body?.logo_url, 600_000);
         const companyName = optionalText(req.body?.company_name, 200);
         const accent = optionalText(req.body?.accent, 32);
+        const phone = optionalText(req.body?.phone, 64);
+        const email = optionalText(req.body?.email, 200);
+        const website = optionalText(req.body?.website, 300);
+        const address = optionalText(req.body?.address, 300);
+        const bankName = optionalText(req.body?.bank_name, 120);
+        const iban = optionalText(req.body?.iban, 34);
+        const accountName = optionalText(req.body?.account_name, 200);
         if (accent && !HEX_RE.test(accent)) return res.status(400).json({ error: 'accent #RGB veya #RRGGBB olmalı.' });
         if (logoUrl && !isUsableLogoSrc(logoUrl)) {
             return res.status(400).json({ error: 'logo_url http(s) veya data:image/... olmalı.' });
@@ -953,6 +1063,13 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
             companyName,
             accent,
             previousAccent: full.accent || '',
+            phone,
+            email,
+            website,
+            address,
+            bankName,
+            iban,
+            accountName,
         });
         const filename = `${cleanText(full.name, 80) || 'template'}-${id}-branded.xslt`.replace(/[^\w.\-]+/gi, '_');
         if (req.query.download === '1' || req.body?.download) {
@@ -1076,6 +1193,13 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
             companyName,
             accent,
             previousAccent: full.accent || '',
+            phone: optionalText(req.body?.phone, 64),
+            email: optionalText(req.body?.email, 200),
+            website: optionalText(req.body?.website, 300),
+            address: optionalText(req.body?.address, 300),
+            bankName: optionalText(req.body?.bank_name, 120),
+            iban: optionalText(req.body?.iban, 34),
+            accountName: optionalText(req.body?.account_name, 200),
         });
         const filename = `${cleanText(full.name, 80) || 'template'}-${id}-branded.xslt`.replace(/[^\w.\-]+/gi, '_');
         if (req.query.download === '1' || req.body?.download) {
