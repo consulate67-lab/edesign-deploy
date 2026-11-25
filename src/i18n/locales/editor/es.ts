@@ -174,12 +174,13 @@ const editor: typeof tr = {
         add: 'Añadir al diseño',
     },
     bands: {
-        master: 'Master (cabecera)',
-        detail: 'Detalle (líneas)',
-        footer: 'Pie de página (totales)',
+        master: 'Zona superior',
+        detail: 'Zona media',
+        footer: 'Zona inferior',
         toggle: 'Bandas',
-        toggleHint: 'Mostrar/ocultar bandas de diseño (no se escriben en XSLT; solo ayuda)',
-        catalogHint: 'Campos agrupados por Master · Detalle · Pie. Arrastre las líneas en la vista previa.',
+        toggleHint: 'Mostrar/ocultar bandas. Al arrastrar se mueven los objetos de debajo.',
+        catalogHint: 'Las bandas solo ayudan al diseño; cualquier campo puede ir en cualquier banda.',
+        shifted: '{{count}} objeto(s) reposicionado(s) con la banda.',
     },
     preview: {
         unknownError: 'Error de renderizado desconocido',

@@ -174,12 +174,13 @@ const editor: typeof tr = {
         add: 'Zum Design hinzufügen',
     },
     bands: {
-        master: 'Master (Kopf)',
-        detail: 'Detail (Zeilen)',
-        footer: 'Seitenende (Summen)',
+        master: 'Oberer Bereich',
+        detail: 'Mittlerer Bereich',
+        footer: 'Unterer Bereich',
         toggle: 'Bänder',
-        toggleHint: 'Design-Bänder ein-/ausblenden (nicht in XSLT; nur Designhilfe)',
-        catalogHint: 'Felder nach Master · Detail · Seitenende gruppiert. Ziehen Sie die Linien in der Vorschau.',
+        toggleHint: 'Design-Bänder ein-/ausblenden. Ziehen verschiebt darunter liegende Objekte.',
+        catalogHint: 'Bänder sind nur Layout-Hilfe; jedes Feld kann in jedes Band.',
+        shifted: '{{count}} Objekt(e) mit dem Band verschoben.',
     },
     preview: {
         unknownError: 'Unbekannter Darstellungsfehler',

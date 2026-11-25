@@ -174,12 +174,13 @@ const editor: typeof tr = {
         add: 'Adicionar ao design',
     },
     bands: {
-        master: 'Master (cabeçalho)',
-        detail: 'Detalhe (linhas)',
-        footer: 'Rodapé (totais)',
+        master: 'Área superior',
+        detail: 'Área média',
+        footer: 'Área inferior',
         toggle: 'Faixas',
-        toggleHint: 'Mostrar/ocultar faixas de design (não gravadas no XSLT; só ajuda)',
-        catalogHint: 'Campos agrupados por Master · Detalhe · Rodapé. Arraste as linhas na pré-visualização.',
+        toggleHint: 'Mostrar/ocultar faixas. Arrastar move os objetos abaixo.',
+        catalogHint: 'Faixas são só ajuda de layout; qualquer campo pode ir em qualquer faixa.',
+        shifted: '{{count}} objeto(s) reposicionado(s) com a faixa.',
     },
     preview: {
         unknownError: 'Erro de renderização desconhecido',

@@ -172,12 +172,13 @@ const editor = {
         add: 'Tasarıma ekle',
     },
     bands: {
-        master: 'Master (üst)',
-        detail: 'Detay (satırlar)',
-        footer: 'Sayfa sonu (toplamlar)',
+        master: 'Üst alan',
+        detail: 'Orta alan',
+        footer: 'Alt alan',
         toggle: 'Bantlar',
-        toggleHint: 'Tasarım bantlarını göster/gizle (XSLT’ye yazılmaz; yalnız tasarım yardımcısı)',
-        catalogHint: 'Alanlar Master · Detay · Sayfa sonu bantlarına göre gruplanır. Önizlemedeki çizgileri sürükleyerek bant yüksekliğini ayarlayın.',
+        toggleHint: 'Tasarım bantlarını göster/gizle. Sınırı sürükleyince alttaki nesneler birlikte kayar (XSLT’ye yalnızca konum yazılır).',
+        catalogHint: 'Bantlar yalnızca yerleştirme yardımcısıdır; herhangi bir alan herhangi bir banda konabilir.',
+        shifted: '{{count}} nesne bant kaydırmasıyla konumlandı.',
     },
     preview: {
         unknownError: 'Bilinmeyen render hatası',

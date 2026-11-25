@@ -174,12 +174,13 @@ const editor: typeof tr = {
         add: '添加到设计',
     },
     bands: {
-        master: 'Master（页眉）',
-        detail: 'Detail（行项目）',
-        footer: '页脚（合计）',
+        master: '上区',
+        detail: '中区',
+        footer: '下区',
         toggle: '分区',
-        toggleHint: '显示/隐藏设计分区（不写入 XSLT，仅辅助设计）',
-        catalogHint: '字段按 Master · Detail · 页脚分组。拖动预览中的分隔线调整高度。',
+        toggleHint: '显示/隐藏设计分区。拖动分隔线时下方对象一起移动。',
+        catalogHint: '分区仅辅助排版；任何字段可放在任何分区。',
+        shifted: '已随分区移动 {{count}} 个对象。',
     },
     preview: {
         unknownError: '未知渲染错误',

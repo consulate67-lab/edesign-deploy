@@ -174,12 +174,13 @@ const editor: typeof tr = {
         add: 'Add to design',
     },
     bands: {
-        master: 'Master (header)',
-        detail: 'Detail (lines)',
-        footer: 'Page footer (totals)',
+        master: 'Top band',
+        detail: 'Middle band',
+        footer: 'Bottom band',
         toggle: 'Bands',
-        toggleHint: 'Show/hide design bands (not written to XSLT; design aid only)',
-        catalogHint: 'Fields are grouped by Master · Detail · Page footer. Drag the preview lines to resize bands.',
+        toggleHint: 'Show/hide design bands. Dragging a divider moves objects below it (only positions are written to XSLT).',
+        catalogHint: 'Bands are layout aids only; any field can be placed in any band.',
+        shifted: '{{count}} object(s) repositioned with the band.',
     },
     preview: {
         unknownError: 'Unknown render error',

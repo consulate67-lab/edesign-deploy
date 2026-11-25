@@ -174,12 +174,13 @@ const editor: typeof tr = {
         add: 'Ajouter au modèle',
     },
     bands: {
-        master: 'Master (en-tête)',
-        detail: 'Détail (lignes)',
-        footer: 'Bas de page (totaux)',
+        master: 'Zone haute',
+        detail: 'Zone milieu',
+        footer: 'Zone basse',
         toggle: 'Bandes',
-        toggleHint: 'Afficher/masquer les bandes de conception (non écrites en XSLT ; aide seule)',
-        catalogHint: 'Champs groupés par Master · Détail · Bas de page. Faites glisser les lignes dans l’aperçu.',
+        toggleHint: 'Afficher/masquer les bandes. Faire glisser déplace les objets en dessous.',
+        catalogHint: 'Les bandes aident seulement au placement ; tout champ peut aller dans toute bande.',
+        shifted: '{{count}} objet(s) repositionné(s) avec la bande.',
     },
     preview: {
         unknownError: 'Erreur de rendu inconnue',
