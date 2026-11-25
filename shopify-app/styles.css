@@ -235,6 +235,38 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 .form-grid .span2 { grid-column: 1 / -1; }
 
+.banks-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(15, 26, 43, 0.55);
+}
+.banks-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--text);
+  font-size: 0.85rem;
+}
+.bank-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--line);
+}
+.bank-row .span2 { grid-column: 1 / -1; }
+.bank-row .bank-remove {
+  grid-column: 1 / -1;
+  justify-self: start;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+}
+
 .preview-box {
   margin-top: 14px;
   border: 1px dashed var(--line);

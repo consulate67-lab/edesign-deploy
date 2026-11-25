@@ -279,11 +279,31 @@ export function applyBrand(xslt, {
     return out;
 }
 
+function parseBanksParam(raw) {
+    if (Array.isArray(raw)) return raw;
+    if (typeof raw === 'string' && raw.trim()) {
+        try {
+            const parsed = JSON.parse(raw);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch {
+            return [];
+        }
+    }
+    return [];
+}
+
 function supplierFromRequest(req, shopProfile = null) {
     const q = req.query || {};
     const b = req.body || {};
     const pick = (key, max) => optionalText(b[key] ?? q[key], max);
     const base = shopProfile || {};
+    const banks = parseBanksParam(b.banks ?? q.banks);
+    const bankName = pick('bank_name', 120) || '';
+    const iban = pick('iban', 34) || '';
+    const accountName = pick('account_name', 200) || '';
+    if (!banks.length && (bankName || iban || accountName)) {
+        banks.push({ bank_name: bankName, iban, account_name: accountName });
+    }
     return {
         name: pick('company_name', 200) || base.name || '',
         email: pick('email', 200) || base.email || '',
@@ -295,9 +315,10 @@ function supplierFromRequest(req, shopProfile = null) {
         zip: pick('zip', 32) || base.zip || '',
         country: pick('country_name', 80) || base.country || 'Türkiye',
         country_code: pick('country_code', 8) || base.country_code || 'TR',
-        bank_name: pick('bank_name', 120) || '',
-        iban: pick('iban', 34) || '',
-        account_name: pick('account_name', 200) || '',
+        bank_name: banks[0]?.bank_name || bankName || '',
+        iban: banks[0]?.iban || iban || '',
+        account_name: banks[0]?.account_name || accountName || '',
+        banks,
     };
 }
 
@@ -363,15 +384,17 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
         return row?.access_token || null;
     }
 
-    async function ensureOfflineToken(req, shop) {
-        let token = await getShopAccessToken(shop);
-        if (token) return token;
-        if (!shopifyApiKey || !shopifyApiSecret) {
-            throw new Error('SHOPIFY_API_KEY / SHOPIFY_API_SECRET tanımlı değil.');
-        }
+    async function ensureOfflineToken(req, shop, { refresh = false } = {}) {
+        let token = refresh ? null : await getShopAccessToken(shop);
         const hdr = String(req.headers.authorization || '');
         const sessionToken = hdr.startsWith('Bearer ') ? hdr.slice(7).trim() : '';
+        if (token && !refresh) return token;
+        if (!shopifyApiKey || !shopifyApiSecret) {
+            if (token) return token;
+            throw new Error('SHOPIFY_API_KEY / SHOPIFY_API_SECRET tanımlı değil.');
+        }
         if (!sessionToken) {
+            if (token) return token;
             throw new Error('Shopify oturum token gerekli (uygulamayı admin içinden açın).');
         }
         const exchanged = await exchangeOfflineToken({
@@ -610,15 +633,34 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
         const shop = uiShop(req);
         if (!shop) return res.status(400).json({ error: 'shop gerekli.', shop_profile: null });
         try {
-            const token = await ensureOfflineToken(req, shop);
-            const shopProfile = await getShopifyShop({ shop, accessToken: token });
+            let shopProfile = null;
+            try {
+                const token = await ensureOfflineToken(req, shop);
+                shopProfile = await getShopifyShop({ shop, accessToken: token });
+            } catch {
+                const token = await ensureOfflineToken(req, shop, { refresh: true });
+                shopProfile = await getShopifyShop({ shop, accessToken: token });
+            }
             res.json({ shop, shop_profile: shopProfile });
         } catch (e) {
             res.json({
                 shop,
                 shop_profile: null,
-                warning: e.message || 'Mağaza bilgisi alınamadı.',
+                warning: e.message || 'Mağaza bilgisi alınamadı. Uygulamayı Admin’den yeniden açın.',
             });
+        }
+    });
+
+    app.post('/api/shopify/ui/patch-xml', optionalShopifyIdToken, async (req, res) => {
+        try {
+            const shopProfile = await resolveShopProfile(req);
+            const supplier = supplierFromRequest(req, shopProfile);
+            const xmlIn = String(req.body?.xml || '');
+            if (!xmlIn) return res.status(400).json({ error: 'xml gerekli.' });
+            const xml = applySupplierToUblXml(xmlIn, supplier);
+            res.json({ xml, supplier, shop_profile: shopProfile });
+        } catch (e) {
+            res.status(500).json({ error: e.message || 'XML güncellenemedi.' });
         }
     });
 
@@ -734,12 +776,19 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
     async function resolveShopProfile(req) {
         const shop = uiShop(req);
         if (!shop) return null;
+        const tryOnce = async (refresh) => {
+            const token = await ensureOfflineToken(req, shop, { refresh });
+            return getShopifyShop({ shop, accessToken: token });
+        };
         try {
-            const token = await ensureOfflineToken(req, shop);
-            return await getShopifyShop({ shop, accessToken: token });
-        } catch (e) {
-            console.warn('[shopify] shop profile:', e.message || e);
-            return null;
+            return await tryOnce(false);
+        } catch (e1) {
+            try {
+                return await tryOnce(true);
+            } catch (e2) {
+                console.warn('[shopify] shop profile:', e2.message || e1.message || e2);
+                return null;
+            }
         }
     }
 

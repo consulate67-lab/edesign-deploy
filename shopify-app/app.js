@@ -43,15 +43,16 @@
       address: '',
       city: '',
       zip: '',
-      bank_name: '',
-      iban: '',
-      account_name: '',
+      banks: [{ bank_name: '', account_name: '', iban: '' }],
       accent: '#1e3a8a',
       logo_url: '',
       logo_data: '',
     },
     shopProfile: null,
     shopFilled: false,
+    shopWarning: '',
+    workingXslt: null,
+    workingXml: null,
     previewTimer: null,
     purchased: false,
   };
@@ -352,7 +353,8 @@
     return `
       <section class="panel catalog-panel">
         <h2>Özelleştir · ${escapeHtml(t.name)}</h2>
-        <p class="lead">Shopify mağaza kayıtlarınız otomatik gelir; banka/IBAN ekleyin. Sağda canlı önizleme.</p>
+        <p class="lead">Shopify mağaza bilgileriniz API’den doldurulur; banka hesaplarını ekleyin. Değişiklikler sağdaki önizlemeye ve editöre taşınır.</p>
+        ${state.shopWarning ? `<div class="preview-warn">${escapeHtml(state.shopWarning)}</div>` : ''}
         <div class="catalog-split">
           <div>
             <div class="form-grid">
@@ -377,15 +379,13 @@
               <label class="field">Posta kodu
                 <input id="zip" value="${escapeHtml(state.form.zip)}" />
               </label>
-              <label class="field">Banka
-                <input id="bank_name" placeholder="Örn. Ziraat Bankası" value="${escapeHtml(state.form.bank_name)}" />
-              </label>
-              <label class="field">Hesap adı
-                <input id="account_name" placeholder="Hesap sahibi" value="${escapeHtml(state.form.account_name)}" />
-              </label>
-              <label class="field span2">IBAN
-                <input id="iban" placeholder="TRxx xxxx …" value="${escapeHtml(state.form.iban)}" />
-              </label>
+              <div class="span2 banks-block">
+                <div class="banks-head">
+                  <strong>Banka hesapları</strong>
+                  <button type="button" class="ghost" id="btn-add-bank">+ Hesap ekle</button>
+                </div>
+                ${banksFormHtml()}
+              </div>
               <label class="field">Accent rengi
                 <input id="accent" type="color" value="${escapeHtml(state.form.accent || '#1e3a8a')}" />
               </label>
@@ -418,6 +418,26 @@
     `;
   }
 
+  function banksFormHtml() {
+    const banks = Array.isArray(state.form.banks) && state.form.banks.length
+      ? state.form.banks
+      : [{ bank_name: '', account_name: '', iban: '' }];
+    return banks.map((b, i) => `
+      <div class="bank-row" data-bank-idx="${i}">
+        <label class="field">Banka
+          <input data-bank-field="bank_name" data-bank-idx="${i}" placeholder="Örn. Ziraat" value="${escapeHtml(b.bank_name || '')}" />
+        </label>
+        <label class="field">Hesap adı
+          <input data-bank-field="account_name" data-bank-idx="${i}" placeholder="Hesap sahibi" value="${escapeHtml(b.account_name || '')}" />
+        </label>
+        <label class="field span2">IBAN
+          <input data-bank-field="iban" data-bank-idx="${i}" placeholder="TRxx …" value="${escapeHtml(b.iban || '')}" />
+        </label>
+        ${banks.length > 1 ? `<button type="button" class="ghost bank-remove" data-bank-remove="${i}">Kaldır</button>` : ''}
+      </div>
+    `).join('');
+  }
+
   async function openFullEditor() {
     if (!state.selected) return;
     state.fullEditor = true;
@@ -425,9 +445,21 @@
     state.editorUrl = '';
     render();
     try {
-      // Aynı XSLTEditor — /shopify/editor (ana web sitesi değil)
       readCustomizeForm();
+      await loadShopProfile();
       const src = await api(tplApi(state.selected.id, `/preview-source${supplierQuery()}`));
+      let xml = state.workingXml || src.xml || '';
+      if (state.workingXml) {
+        try {
+          const patched = await api('/api/shopify/ui/patch-xml', {
+            method: 'POST',
+            body: JSON.stringify({ xml: state.workingXml, ...supplierPayload() }),
+          });
+          xml = patched.xml || xml;
+        } catch {
+          /* keep working xml */
+        }
+      }
       let designId;
       try {
         const ed = await api(tplApi(state.selected.id, '/editor-src'));
@@ -436,8 +468,8 @@
         designId = undefined;
       }
       const boot = {
-        xslt: src.xslt || '',
-        xml: src.xml || '',
+        xslt: state.workingXslt || src.xslt || '',
+        xml,
         moduleId: src.module_id || state.selected.module_id || 'fatura',
         name: src.name || state.selected.name || 'Shopify şablon',
         designId,
@@ -453,14 +485,32 @@
     }
   }
 
+  async function closeEditorAndSync() {
+    let work = null;
+    try {
+      work = JSON.parse(sessionStorage.getItem('edx_shopify_editor_work') || 'null');
+    } catch {
+      work = null;
+    }
+    state.fullEditor = false;
+    state.editorUrl = '';
+    if (work?.xslt) {
+      state.workingXslt = work.xslt;
+      if (work.xml) state.workingXml = work.xml;
+    }
+    setStep('customize');
+    if (state.selected) {
+      await loadPreview(state.selected);
+      refreshPreviewStage();
+    }
+  }
+
   function onEditorMessage(ev) {
     if (ev.origin !== location.origin) return;
     const data = ev.data;
     if (!data || typeof data !== 'object') return;
     if (data.type === 'edx-shopify-editor-close') {
-      state.fullEditor = false;
-      state.editorUrl = '';
-      setStep('customize');
+      closeEditorAndSync();
       return;
     }
     if (data.type === 'edx-shopify-editor-work' && data.work?.xslt) {
@@ -469,6 +519,8 @@
       } catch {
         /* ignore */
       }
+      state.workingXslt = data.work.xslt;
+      if (data.work.xml) state.workingXml = data.work.xml;
     }
   }
   window.addEventListener('message', onEditorMessage);
@@ -545,6 +597,23 @@
     }
   }
 
+  function transformPreview(xslt, xml) {
+    const parser = new DOMParser();
+    const xsltDoc = parser.parseFromString(xslt, 'text/xml');
+    const xmlDoc = parser.parseFromString(xml || '<?xml version="1.0"?><Invoice/>', 'text/xml');
+    if (xsltDoc.querySelector('parsererror')) throw new Error('XSLT ayrıştırılamadı');
+    if (xmlDoc.querySelector('parsererror')) throw new Error('XML ayrıştırılamadı');
+    if (!window.XSLTProcessor) throw new Error('Tarayıcı XSLT desteklemiyor');
+    const proc = new XSLTProcessor();
+    proc.importStylesheet(xsltDoc);
+    const out = proc.transformToDocument(xmlDoc);
+    let html = new XMLSerializer().serializeToString(out);
+    if (!html.includes('<html')) {
+      html = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{margin:12px;font-family:Segoe UI,sans-serif;background:#fff;color:#111}</style></head><body>${html}</body></html>`;
+    }
+    return html;
+  }
+
   async function loadPreview(template) {
     if (!template) {
       state.previewHtml = '';
@@ -557,36 +626,24 @@
     try {
       readCustomizeForm();
       const data = await api(tplApi(template.id, `/preview-source${supplierQuery()}`));
-      if (!data.xslt) throw new Error('XSLT yok');
+      if (!data.xslt && !state.workingXslt) throw new Error('XSLT yok');
       if (data.order_warning) state.previewWarning = data.order_warning;
-      if (data.shop_profile) {
-        const wasFilled = state.shopFilled;
-        applyShopProfile(data.shop_profile);
-        if (!wasFilled && state.shopFilled && state.step === 'customize' && !state.fullEditor) {
-          const sync = (id, val) => { const el = $(id); if (el && val) el.value = val; };
-          sync('company', state.form.company_name);
-          sync('phone', state.form.phone);
-          sync('email', state.form.email);
-          sync('website', state.form.website);
-          sync('address', state.form.address);
-          sync('city', state.form.city);
-          sync('zip', state.form.zip);
+      if (data.shop_profile) applyShopProfile(data.shop_profile);
+
+      let xslt = state.workingXslt || data.xslt;
+      let xml = data.xml || '';
+      if (state.workingXml) {
+        try {
+          const patched = await api('/api/shopify/ui/patch-xml', {
+            method: 'POST',
+            body: JSON.stringify({ xml: state.workingXml, ...supplierPayload() }),
+          });
+          xml = patched.xml || state.workingXml;
+        } catch {
+          xml = state.workingXml;
         }
       }
-      const parser = new DOMParser();
-      const xsltDoc = parser.parseFromString(data.xslt, 'text/xml');
-      const xmlDoc = parser.parseFromString(data.xml || '<?xml version="1.0"?><Invoice/>', 'text/xml');
-      if (xsltDoc.querySelector('parsererror')) throw new Error('XSLT ayrıştırılamadı');
-      if (xmlDoc.querySelector('parsererror')) throw new Error('XML ayrıştırılamadı');
-      if (!window.XSLTProcessor) throw new Error('Tarayıcı XSLT desteklemiyor');
-      const proc = new XSLTProcessor();
-      proc.importStylesheet(xsltDoc);
-      const out = proc.transformToDocument(xmlDoc);
-      let html = new XMLSerializer().serializeToString(out);
-      if (!html.includes('<html')) {
-        html = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{margin:12px;font-family:Segoe UI,sans-serif;background:#fff;color:#111}</style></head><body>${html}</body></html>`;
-      }
-      state.previewHtml = html;
+      state.previewHtml = transformPreview(xslt, xml);
     } catch (e) {
       state.previewHtml = `<!DOCTYPE html><html><body style="font-family:sans-serif;padding:16px;color:#b91c1c">Önizleme alınamadı: ${escapeHtml(e.message)}</body></html>`;
     } finally {
@@ -607,30 +664,65 @@
     state.form.address = $('address')?.value?.trim() || state.form.address;
     state.form.city = $('city')?.value?.trim() || state.form.city;
     state.form.zip = $('zip')?.value?.trim() || state.form.zip;
-    state.form.bank_name = $('bank_name')?.value?.trim() || state.form.bank_name;
-    state.form.account_name = $('account_name')?.value?.trim() || state.form.account_name;
-    state.form.iban = $('iban')?.value?.trim() || state.form.iban;
     state.form.accent = $('accent')?.value || state.form.accent;
     state.form.logo_url = $('logo_url')?.value?.trim() || state.form.logo_url;
+    const banks = [];
+    document.querySelectorAll('[data-bank-idx].bank-row, .bank-row[data-bank-idx]').forEach((row) => {
+      const idx = Number(row.getAttribute('data-bank-idx'));
+      const get = (field) => row.querySelector(`[data-bank-field="${field}"]`)?.value?.trim() || '';
+      banks[idx] = {
+        bank_name: get('bank_name'),
+        account_name: get('account_name'),
+        iban: get('iban'),
+      };
+    });
+    if (banks.length) {
+      state.form.banks = banks.filter(Boolean);
+    }
+    if (!state.form.banks?.length) {
+      state.form.banks = [{ bank_name: '', account_name: '', iban: '' }];
+    }
   }
 
-  function applyShopProfile(profile) {
-    if (!profile || state.shopFilled) return;
+  function applyShopProfile(profile, force = false) {
+    if (!profile) return;
     state.shopProfile = profile;
-    if (!state.form.company_name && profile.name) state.form.company_name = profile.name;
-    if (!state.form.phone && profile.phone) state.form.phone = profile.phone;
-    if (!state.form.email && profile.email) state.form.email = profile.email;
-    if (!state.form.website && profile.website) state.form.website = profile.website;
-    if (!state.form.address && profile.address) state.form.address = profile.address;
-    if (!state.form.city && profile.city) state.form.city = profile.city;
-    if (!state.form.zip && profile.zip) state.form.zip = profile.zip;
+    if (state.shopFilled && !force) return;
+    // Boş alanları Shopify’dan doldur; kullanıcının yazdığını ezme
+    const set = (key, val) => {
+      if (!val) return;
+      if (!String(state.form[key] || '').trim()) state.form[key] = val;
+    };
+    set('company_name', profile.name || profile.shop_name);
+    set('phone', profile.phone);
+    set('email', profile.email);
+    set('website', profile.website);
+    set('address', profile.address);
+    set('city', profile.city);
+    set('zip', profile.zip);
     state.shopFilled = true;
+    try {
+      sessionStorage.setItem('edx_shopify_profile', JSON.stringify(profile));
+    } catch {
+      /* ignore */
+    }
   }
 
-  function supplierQuery() {
-    const p = new URLSearchParams();
+  function syncFormInputsFromState() {
+    const sync = (id, val) => { const el = $(id); if (el && val != null) el.value = val; };
+    sync('company', state.form.company_name);
+    sync('phone', state.form.phone);
+    sync('email', state.form.email);
+    sync('website', state.form.website);
+    sync('address', state.form.address);
+    sync('city', state.form.city);
+    sync('zip', state.form.zip);
+  }
+
+  function supplierPayload() {
     const f = state.form;
-    const map = {
+    const banks = (f.banks || []).filter((b) => b.bank_name || b.iban || b.account_name);
+    return {
       company_name: f.company_name,
       phone: f.phone,
       email: f.email,
@@ -638,16 +730,43 @@
       address: f.address,
       city: f.city,
       zip: f.zip,
-      bank_name: f.bank_name,
-      account_name: f.account_name,
-      iban: f.iban,
+      banks,
+      bank_name: banks[0]?.bank_name || '',
+      account_name: banks[0]?.account_name || '',
+      iban: banks[0]?.iban || '',
     };
-    for (const [k, v] of Object.entries(map)) {
+  }
+
+  function supplierQuery() {
+    const p = new URLSearchParams();
+    const payload = supplierPayload();
+    for (const [k, v] of Object.entries(payload)) {
+      if (k === 'banks') {
+        if (Array.isArray(v) && v.length) p.set('banks', JSON.stringify(v));
+        continue;
+      }
       if (v) p.set(k, v);
     }
     if (state.orderId) p.set('order_id', state.orderId);
     const q = p.toString();
     return q ? `?${q}` : '';
+  }
+
+  async function loadShopProfile(force = false) {
+    if (!state.shop) return null;
+    if (state.shopProfile && state.shopFilled && !force) return state.shopProfile;
+    try {
+      const data = await api('/api/shopify/ui/shop');
+      if (data.shop_profile) {
+        applyShopProfile(data.shop_profile, force);
+        state.shopWarning = '';
+        return data.shop_profile;
+      }
+      state.shopWarning = data.warning || 'Mağaza bilgisi alınamadı.';
+    } catch (e) {
+      state.shopWarning = e.message || 'Mağaza bilgisi alınamadı.';
+    }
+    return null;
   }
 
   function schedulePreviewRefresh() {
@@ -754,17 +873,12 @@
     readCustomizeForm();
     try {
       showMsg('Markalı XSLT hazırlanıyor…');
+      const payload = supplierPayload();
       const data = await api(tplApi(state.selected.id, '/brand'), {
         method: 'POST',
         body: JSON.stringify({
-          company_name: state.form.company_name,
-          phone: state.form.phone,
-          email: state.form.email,
-          website: state.form.website,
-          address: [state.form.address, state.form.city, state.form.zip].filter(Boolean).join(', '),
-          bank_name: state.form.bank_name,
-          account_name: state.form.account_name,
-          iban: state.form.iban,
+          ...payload,
+          address: [payload.address, state.form.city, state.form.zip].filter(Boolean).join(', '),
           accent: state.form.accent,
           logo_url: logoPayload(),
           download: false,
@@ -854,17 +968,19 @@
     $('btn-to-customize')?.addEventListener('click', async () => {
       if (!state.selected) return showMsg('Önce bir şablon seçin.', 'err');
       state.fullEditor = false;
+      showMsg('Mağaza bilgileri yükleniyor…');
+      await loadShopProfile(true);
       setStep('customize');
+      syncFormInputsFromState();
       await loadPreview(state.selected);
       refreshPreviewStage();
       updateLogoPreview();
+      if (state.form.company_name) showMsg(`Mağaza: ${state.form.company_name}`, 'ok');
+      else if (state.shopWarning) showMsg(state.shopWarning, 'err');
+      else showMsg('');
     });
     $('btn-open-editor')?.addEventListener('click', () => openFullEditor());
-    $('btn-close-editor')?.addEventListener('click', () => {
-      state.fullEditor = false;
-      state.editorUrl = '';
-      setStep('customize');
-    });
+    $('btn-close-editor')?.addEventListener('click', () => closeEditorAndSync());
     $('btn-to-download')?.addEventListener('click', () => {
       readCustomizeForm();
       state.fullEditor = false;
@@ -933,6 +1049,13 @@
         state.selected = state.templates.find((t) => String(t.id) === String(id)) || null;
         state.purchased = false;
         state.downloadApproved = false;
+        state.workingXslt = null;
+        state.workingXml = null;
+        try {
+          sessionStorage.removeItem('edx_shopify_editor_work');
+        } catch {
+          /* ignore */
+        }
         if (state.selected?.accent && /^#/.test(state.selected.accent)) {
           state.form.accent = state.selected.accent;
         }
@@ -957,9 +1080,28 @@
     bindField('address', 'address', true);
     bindField('city', 'city', true);
     bindField('zip', 'zip', true);
-    bindField('bank_name', 'bank_name', true);
-    bindField('account_name', 'account_name', true);
-    bindField('iban', 'iban', true);
+    document.querySelectorAll('[data-bank-field]').forEach((inp) => {
+      inp.addEventListener('input', () => {
+        readCustomizeForm();
+        schedulePreviewRefresh();
+      });
+    });
+    $('btn-add-bank')?.addEventListener('click', () => {
+      readCustomizeForm();
+      state.form.banks.push({ bank_name: '', account_name: '', iban: '' });
+      render();
+      updateLogoPreview();
+    });
+    document.querySelectorAll('[data-bank-remove]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        readCustomizeForm();
+        const idx = Number(btn.getAttribute('data-bank-remove'));
+        state.form.banks.splice(idx, 1);
+        if (!state.form.banks.length) state.form.banks = [{ bank_name: '', account_name: '', iban: '' }];
+        render();
+        schedulePreviewRefresh();
+      });
+    });
     $('accent')?.addEventListener('input', (e) => { state.form.accent = e.target.value; });
     $('logo_url')?.addEventListener('input', (e) => {
       state.form.logo_url = e.target.value;
@@ -1029,6 +1171,16 @@
           if (state.bootstrap.shop_profile) applyShopProfile(state.bootstrap.shop_profile);
         } catch {
           /* soft */
+        }
+      }
+      // App Bridge hazır olduktan sonra mağaza profilini yeniden çek (ilk bootstrap token’sız kalabilir)
+      await loadShopProfile(true);
+      if (!state.shopProfile) {
+        try {
+          const cached = JSON.parse(sessionStorage.getItem('edx_shopify_profile') || 'null');
+          if (cached) applyShopProfile(cached, true);
+        } catch {
+          /* ignore */
         }
       }
       render();

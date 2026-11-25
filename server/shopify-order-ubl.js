@@ -2,7 +2,7 @@
  * Shopify sipariş → basit UBL-TR Invoice XML (önizleme için).
  * Mağaza (Shop) bilgisi → satıcı (AccountingSupplierParty) + banka (PaymentMeans).
  */
-import { adminGraphql } from './shopify-billing.js';
+import { adminGraphql, shopifyHost, SHOPIFY_API_VERSION } from './shopify-billing.js';
 
 const SHOP_QUERY = `
 query EdxShop {
@@ -106,33 +106,79 @@ function gidToOrderId(gid) {
     return s;
 }
 
+async function fetchShopRest({ shop, accessToken }) {
+    const host = shopifyHost(shop);
+    const res = await fetch(`https://${host}/admin/api/${SHOPIFY_API_VERSION}/shop.json`, {
+        headers: {
+            'X-Shopify-Access-Token': accessToken,
+            Accept: 'application/json',
+        },
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok || !json?.shop) {
+        throw new Error(json?.errors || `Shop REST HTTP ${res.status}`);
+    }
+    return json.shop;
+}
+
+function pickNonEmpty(...vals) {
+    for (const v of vals) {
+        const s = String(v ?? '').trim();
+        if (s) return s;
+    }
+    return '';
+}
+
 /**
  * Shopify Admin Shop → önizleme / form için satıcı profili.
+ * GraphQL + REST birleşik (REST’te telefon/adres çoğu mağazada daha dolu).
  * Banka Shopify’da yok; UI’dan gelir.
  */
 export async function getShopifyShop({ shop, accessToken }) {
-    const data = await adminGraphql({ shop, accessToken, query: SHOP_QUERY });
-    const s = data?.shop;
-    if (!s) return null;
-    const addr = s.billingAddress || {};
-    const website = s.primaryDomain?.url
-        || (s.primaryDomain?.host ? `https://${s.primaryDomain.host}` : '')
-        || (s.myshopifyDomain ? `https://${s.myshopifyDomain}` : '');
-    const company = addr.company || s.name || '';
-    const street = [addr.address1, addr.address2].filter(Boolean).join(' ').trim();
+    let gql = null;
+    let rest = null;
+    let lastErr = null;
+    try {
+        const data = await adminGraphql({ shop, accessToken, query: SHOP_QUERY });
+        gql = data?.shop || null;
+    } catch (e) {
+        lastErr = e;
+    }
+    try {
+        rest = await fetchShopRest({ shop, accessToken });
+    } catch (e) {
+        lastErr = e;
+    }
+    if (!gql && !rest) {
+        throw lastErr || new Error('Mağaza bilgisi alınamadı.');
+    }
+    const addr = gql?.billingAddress || {};
+    const website = pickNonEmpty(
+        gql?.primaryDomain?.url,
+        gql?.primaryDomain?.host ? `https://${gql.primaryDomain.host}` : '',
+        rest?.domain ? `https://${rest.domain}` : '',
+        rest?.myshopify_domain ? `https://${rest.myshopify_domain}` : '',
+        gql?.myshopifyDomain ? `https://${gql.myshopifyDomain}` : '',
+    );
+    const name = pickNonEmpty(addr.company, rest?.name, gql?.name);
+    const street = pickNonEmpty(
+        [addr.address1, addr.address2].filter(Boolean).join(' ').trim(),
+        [rest?.address1, rest?.address2].filter(Boolean).join(' ').trim(),
+    );
     return {
-        name: company || s.name || '',
-        shop_name: s.name || '',
-        email: s.contactEmail || s.email || '',
-        phone: addr.phone || '',
+        name,
+        shop_name: pickNonEmpty(gql?.name, rest?.name),
+        email: pickNonEmpty(gql?.contactEmail, gql?.email, rest?.customer_email, rest?.email),
+        phone: pickNonEmpty(addr.phone, rest?.phone),
         website,
         address: street,
-        city: addr.city || '',
-        province: addr.province || '',
-        zip: addr.zip || '',
-        country: addr.country || 'Türkiye',
-        country_code: addr.countryCodeV2 || 'TR',
-        myshopify_domain: s.myshopifyDomain || shop || '',
+        city: pickNonEmpty(addr.city, rest?.city),
+        province: pickNonEmpty(addr.province, rest?.province),
+        zip: pickNonEmpty(addr.zip, rest?.zip),
+        country: pickNonEmpty(addr.country, rest?.country_name, rest?.country, 'Türkiye'),
+        country_code: (pickNonEmpty(addr.countryCodeV2, rest?.country_code) || 'TR').slice(0, 2).toUpperCase(),
+        myshopify_domain: pickNonEmpty(gql?.myshopifyDomain, rest?.myshopify_domain, shop),
+        shop_owner: pickNonEmpty(rest?.shop_owner),
     };
 }
 
@@ -167,7 +213,34 @@ export async function getShopifyOrder({ shop, accessToken, orderId }) {
     return data?.order || null;
 }
 
+function normalizeBank(raw = {}) {
+    return {
+        bank_name: String(raw.bank_name || raw.bank || '').slice(0, 120),
+        iban: String(raw.iban || '').replace(/\s+/g, '').toUpperCase().slice(0, 34),
+        account_name: String(raw.account_name || raw.account || '').slice(0, 200),
+    };
+}
+
+function normalizeBanks(raw = {}) {
+    let list = [];
+    if (Array.isArray(raw.banks)) list = raw.banks;
+    else if (typeof raw.banks === 'string' && raw.banks.trim()) {
+        try {
+            const parsed = JSON.parse(raw.banks);
+            if (Array.isArray(parsed)) list = parsed;
+        } catch {
+            list = [];
+        }
+    }
+    if (!list.length && (raw.iban || raw.bank_name || raw.account_name)) {
+        list = [{ bank_name: raw.bank_name, iban: raw.iban, account_name: raw.account_name }];
+    }
+    return list.map(normalizeBank).filter((b) => b.iban || b.bank_name || b.account_name).slice(0, 8);
+}
+
 function normalizeSupplier(raw = {}) {
+    const banks = normalizeBanks(raw);
+    const first = banks[0] || {};
     return {
         name: String(raw.name || raw.company_name || raw.supplierName || '').slice(0, 200),
         email: String(raw.email || '').slice(0, 200),
@@ -179,14 +252,15 @@ function normalizeSupplier(raw = {}) {
         zip: String(raw.zip || '').slice(0, 32),
         country: String(raw.country || 'Türkiye').slice(0, 80),
         country_code: String(raw.country_code || 'TR').slice(0, 8),
-        bank_name: String(raw.bank_name || '').slice(0, 120),
-        iban: String(raw.iban || '').replace(/\s+/g, '').toUpperCase().slice(0, 34),
-        account_name: String(raw.account_name || '').slice(0, 200),
+        bank_name: first.bank_name || '',
+        iban: first.iban || '',
+        account_name: first.account_name || '',
+        banks,
     };
 }
 
-function paymentMeansXml(supplier, currency = 'TRY') {
-    const s = normalizeSupplier(supplier);
+function paymentMeansXml(bank, currency = 'TRY') {
+    const s = normalizeBank(bank);
     if (!s.iban && !s.bank_name && !s.account_name) return '';
     const noteParts = [s.bank_name, s.account_name].filter(Boolean);
     return `
@@ -200,6 +274,11 @@ function paymentMeansXml(supplier, currency = 'TRY') {
       ${s.bank_name ? `<cac:FinancialInstitutionBranch><cac:FinancialInstitution><cbc:Name>${esc(s.bank_name)}</cbc:Name></cac:FinancialInstitution></cac:FinancialInstitutionBranch>` : ''}
     </cac:PayeeFinancialAccount>
   </cac:PaymentMeans>`;
+}
+
+function paymentMeansListXml(supplier, currency = 'TRY') {
+    const s = normalizeSupplier(supplier);
+    return s.banks.map((b) => paymentMeansXml(b, currency)).filter(Boolean).join('\n');
 }
 
 function supplierPartyXml(supplier) {
@@ -240,7 +319,8 @@ function replaceCbcInBlock(block, tag, value) {
  */
 export function applySupplierToUblXml(xml, supplier = {}) {
     const s = normalizeSupplier(supplier);
-    if (!xml || (!s.name && !s.email && !s.phone && !s.website && !s.address && !s.iban && !s.bank_name)) {
+    const hasBank = s.banks.length > 0;
+    if (!xml || (!s.name && !s.email && !s.phone && !s.website && !s.address && !hasBank)) {
         return xml || '';
     }
     let out = String(xml);
@@ -262,7 +342,6 @@ export function applySupplierToUblXml(xml, supplier = {}) {
             if (s.address) block = replaceCbcInBlock(block, 'StreetName', s.address);
             if (s.city) block = replaceCbcInBlock(block, 'CityName', s.city);
             if (s.zip) block = replaceCbcInBlock(block, 'PostalZone', s.zip);
-            // Country IdentificationCode + Name inside PostalAddress/Country only
             block = block.replace(
                 /(<cac:PostalAddress\b[\s\S]*?<cac:Country\b[\s\S]*?<cbc:IdentificationCode\b[^>]*>)([\s\S]*?)(<\/cbc:IdentificationCode>)/i,
                 (m0, a, _b, c) => (s.country_code ? `${a}${esc(s.country_code)}${c}` : m0)
@@ -288,10 +367,10 @@ export function applySupplierToUblXml(xml, supplier = {}) {
         }
     );
 
-    if (s.iban || s.bank_name || s.account_name) {
-        const pay = paymentMeansXml(s).trim();
+    if (hasBank) {
+        const pay = paymentMeansListXml(s).trim();
         if (/<cac:PaymentMeans\b/i.test(out)) {
-            out = out.replace(/<cac:PaymentMeans\b[\s\S]*?<\/cac:PaymentMeans>/i, pay);
+            out = out.replace(/(?:\s*<cac:PaymentMeans\b[\s\S]*?<\/cac:PaymentMeans>)+/i, `\n${pay}`);
         } else if (/<cac:TaxTotal\b/i.test(out)) {
             out = out.replace(/<cac:TaxTotal\b/i, `${pay}\n  <cac:TaxTotal`);
         } else {
@@ -388,7 +467,7 @@ export function orderToUblInvoiceXml(order, supplier = {}) {
       </cac:Contact>` : ''}
     </cac:Party>
   </cac:AccountingCustomerParty>
-  ${paymentMeansXml(s, total.currency)}
+  ${paymentMeansListXml(s, total.currency)}
   <cac:TaxTotal>
     <cbc:TaxAmount currencyID="${esc(tax.currency)}">${esc(tax.amount)}</cbc:TaxAmount>
   </cac:TaxTotal>

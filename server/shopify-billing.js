@@ -2,9 +2,10 @@
  * Shopify one-time Billing + offline token exchange.
  * Public app + Admin access token gerekir; Custom distribution Billing API kullanamaz.
  */
-const API_VERSION = process.env.SHOPIFY_API_VERSION || '2025-01';
+export const SHOPIFY_API_VERSION = process.env.SHOPIFY_API_VERSION || '2025-01';
+const API_VERSION = SHOPIFY_API_VERSION;
 
-function shopifyHost(shopDomain) {
+export function shopifyHost(shopDomain) {
     const s = String(shopDomain || '').toLowerCase().replace(/^https?:\/\//, '');
     if (s.includes('.myshopify.com')) return s.split('/')[0];
     return `${s.replace(/\/$/, '')}.myshopify.com`;
