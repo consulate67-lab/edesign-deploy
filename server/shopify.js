@@ -384,27 +384,62 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
         return row?.access_token || null;
     }
 
+    async function clearShopAccessToken(shop) {
+        if (!shop) return;
+        await db.run(
+            `UPDATE shopify_shops SET access_token = NULL, scope = NULL, updated_at = NOW() WHERE shop_domain = ?`,
+            [shop]
+        );
+    }
+
+    function shopInstallUrl(shop) {
+        if (!shopifyApiKey || !shop) return null;
+        // Custom / Partner app kurulum — Client ID değişince eski kurulum geçersiz kalır
+        return `https://admin.shopify.com/oauth/install_custom_app?client_id=${encodeURIComponent(shopifyApiKey)}&shop=${encodeURIComponent(shop)}`;
+    }
+
+    function humanizeShopifyAuthError(msg, shop) {
+        const raw = String(msg || '');
+        if (/not installed/i.test(raw)) {
+            return 'Uygulama bu Client ID ile mağazaya kurulu değil. Client ID değiştiyse eski EdXDocu’yu kaldırıp Partner’daki güncel uygulamayı yeniden yükleyin.';
+        }
+        if (/invalid.*session|session token/i.test(raw)) {
+            return 'Shopify oturumu geçersiz. Uygulamayı Admin → Apps → EdXDocu üzerinden yeniden açın.';
+        }
+        return raw || 'Shopify kimlik doğrulama hatası.';
+    }
+
     async function ensureOfflineToken(req, shop, { refresh = false } = {}) {
-        let token = refresh ? null : await getShopAccessToken(shop);
         const hdr = String(req.headers.authorization || '');
         const sessionToken = hdr.startsWith('Bearer ') ? hdr.slice(7).trim() : '';
-        if (token && !refresh) return token;
+        const cached = refresh ? null : await getShopAccessToken(shop);
+
+        // Oturum varken her zaman token exchange dene — DB’de eski app’ten kalmış token olabilir
+        if (sessionToken && shopifyApiKey && shopifyApiSecret) {
+            try {
+                const exchanged = await exchangeOfflineToken({
+                    shop,
+                    sessionToken,
+                    apiKey: shopifyApiKey,
+                    apiSecret: shopifyApiSecret,
+                });
+                await upsertShopToken(shop, exchanged.accessToken, exchanged.scope);
+                return exchanged.accessToken;
+            } catch (e) {
+                const msg = String(e.message || e);
+                if (/not installed/i.test(msg)) {
+                    await clearShopAccessToken(shop);
+                }
+                if (cached && !/not installed/i.test(msg)) return cached;
+                throw new Error(humanizeShopifyAuthError(msg, shop));
+            }
+        }
+
+        if (cached) return cached;
         if (!shopifyApiKey || !shopifyApiSecret) {
-            if (token) return token;
             throw new Error('SHOPIFY_API_KEY / SHOPIFY_API_SECRET tanımlı değil.');
         }
-        if (!sessionToken) {
-            if (token) return token;
-            throw new Error('Shopify oturum token gerekli (uygulamayı admin içinden açın).');
-        }
-        const exchanged = await exchangeOfflineToken({
-            shop,
-            sessionToken,
-            apiKey: shopifyApiKey,
-            apiSecret: shopifyApiSecret,
-        });
-        await upsertShopToken(shop, exchanged.accessToken, exchanged.scope);
-        return exchanged.accessToken;
+        throw new Error('Shopify oturum token gerekli (uygulamayı admin içinden açın).');
     }
 
     async function grantEntitlement(shop, galleryId, chargeId) {
@@ -590,11 +625,14 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
                 console.warn('[shopify] shop profile:', shopWarning);
             }
         }
+        const needsReinstall = /kurulu değil|not installed/i.test(String(shopWarning || ''));
         res.json({
             ok: true,
             shop,
             shop_profile: shopProfile,
             shop_warning: shopWarning,
+            needs_reinstall: needsReinstall,
+            install_url: shop ? shopInstallUrl(shop) : null,
             free_download: freeDownload,
             billing_stub: billingStub,
             billing_test: billingTest,
@@ -643,10 +681,13 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
             }
             res.json({ shop, shop_profile: shopProfile });
         } catch (e) {
+            const warning = humanizeShopifyAuthError(e.message || e, shop);
             res.json({
                 shop,
                 shop_profile: null,
-                warning: e.message || 'Mağaza bilgisi alınamadı. Uygulamayı Admin’den yeniden açın.',
+                warning,
+                needs_reinstall: /kurulu değil|not installed/i.test(warning),
+                install_url: shopInstallUrl(shop),
             });
         }
     });

@@ -229,6 +229,8 @@
 
   function renderIntro() {
     const how = state.bootstrap?.how_to || [];
+    const reinstall = state.bootstrap?.needs_reinstall || /kurulu değil|not installed/i.test(state.shopWarning || state.bootstrap?.shop_warning || '');
+    const installUrl = state.bootstrap?.install_url || '';
     return `
       <section class="panel">
         <h2>Hazır e-fatura şablonları</h2>
@@ -236,6 +238,14 @@
           Shopify mağazanız için hazır XSLT tasarım seçin, siparişinizle önizleyin, markanızı uygulayın.
           Önce test indirin; onayladıktan sonra gerçek dosyayı alın.
         </p>
+        ${reinstall ? `
+          <div class="preview-warn" style="margin-bottom:14px">
+            <strong>Yeniden kurulum gerekli.</strong>
+            Client ID güncellendi; Admin’de görünen eski kurulum bu anahtarla eşleşmiyor.
+            Eski EdXDocu’yu kaldırıp güncel uygulamayı yükleyin${state.shop ? ` (${escapeHtml(state.shop)})` : ''}.
+            ${installUrl ? `<div style="margin-top:10px"><a class="install-link" href="${escapeHtml(installUrl)}" target="_top" rel="noopener">Güncel uygulamayı yükle</a></div>` : ''}
+          </div>
+        ` : ''}
         <div class="howto">
           ${how.map((h, i) => `
             <article>
