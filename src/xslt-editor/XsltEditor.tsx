@@ -68,6 +68,10 @@ import {
 import { xpathPaths, xmlFieldName, xsltVariables, resolveVariablePath } from './utils/xpathNames';
 import { placementOfBinding, placementOfElement, wrapCellContent, TABLE_PARTS } from './utils/placement';
 import { findLineTableCell, addColumnAfterCell, editColumn, countHiddenColumnCells, showHiddenColumns, type ColumnAction } from './utils/tableColumns';
+import {
+    findSummaryTableContext, addEmptyRowAfter, duplicateRowAfter, removeSummaryRow, countSiblingRows,
+    elevateCellTargetToRow, isValidRowDropTarget,
+} from './utils/tableRows';
 import { BG_FITS, readPageBackground, writePageBackground, imageFileToDataUrl, type PageBackground } from './utils/pageBackground';
 import { addTestWatermark, stripTestWatermark, stripLeadingBom } from './utils/testWatermark';
 import { downloadFieldGuide, withFieldGuide } from './utils/fieldGuide';
@@ -191,7 +195,11 @@ function refreshObjectContents(xslt: string, catalog: CatalogField[], lang: DocL
 /** Yer seçme modunda eklenecek şey: katalog alanı ya da pay çubuğu. */
 interface PlacingItem { key: string; label: string; kind?: 'sharebar' }
 
-function resolveInsertTarget(start: Element | null, mode: 'auto' | InsertPosition): InsertTarget | null {
+function resolveInsertTarget(
+    start: Element | null,
+    mode: 'auto' | InsertPosition,
+    opts?: { rowMove?: boolean },
+): InsertTarget | null {
     let el = start?.closest<HTMLElement>('[data-xsrc]') ?? null;
     if (!el) return null;
     const obj = el.closest<HTMLElement>('[data-xslt-obj]');
@@ -202,7 +210,30 @@ function resolveInsertTarget(start: Element | null, mode: 'auto' | InsertPositio
     } else {
         const tag = el.tagName.toLowerCase();
         if (tag === 'html' || tag === 'body' || tag === 'head') return null;
-        if (TABLE_PARTS.has(tag)) {
+        if (opts?.rowMove) {
+            // Alt toplam satırı taşıma: hedef tr (veya hücrenin satırı) / tablo gövdesi.
+            if (tag === 'td' || tag === 'th') {
+                const row = el.closest<HTMLElement>('tr[data-xsrc]');
+                if (row) { el = row; position = 'after'; }
+                else {
+                    el = el.closest<HTMLElement>('table[data-xsrc]');
+                    if (!el) return null;
+                    position = 'inside';
+                }
+            } else if (tag === 'tr') {
+                position = 'after';
+            } else if (tag === 'table' || tag === 'tbody' || tag === 'thead' || tag === 'tfoot') {
+                position = mode === 'inside' || mode === 'auto' ? 'inside' : 'after';
+            } else if (TABLE_PARTS.has(tag)) {
+                el = el.closest<HTMLElement>('table[data-xsrc]');
+                if (!el) return null;
+                position = 'inside';
+            } else if (mode === 'auto') {
+                position = CONTAINER_TAGS.has(tag) ? 'inside' : 'after';
+            } else {
+                position = VOID_TAGS.has(tag) ? 'after' : mode;
+            }
+        } else if (TABLE_PARTS.has(tag)) {
             el = el.closest<HTMLElement>('table[data-xsrc]');
             if (!el) return null;
             position = 'after';
@@ -212,7 +243,7 @@ function resolveInsertTarget(start: Element | null, mode: 'auto' | InsertPositio
             position = VOID_TAGS.has(tag) ? 'after' : mode;
         }
         // Hücrenin "altı" satırın içi olur (geçersiz HTML) — tablonun altına konur.
-        if (position === 'after' && (tag === 'td' || tag === 'th')) {
+        if (!opts?.rowMove && position === 'after' && (tag === 'td' || tag === 'th')) {
             el = el.closest<HTMLElement>('table[data-xsrc]');
             if (!el) return null;
         }
@@ -2717,6 +2748,10 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         () => findLineTableCell(selectedObject?.element ?? null, xsltContent),
         [selectedObject, xsltContent],
     );
+    const selectedSummaryCtx = useMemo(
+        () => findSummaryTableContext(selectedObject?.element ?? null, xsltContent),
+        [selectedObject, xsltContent],
+    );
 
     const moveObject = useCallback((id: string, target: InsertTarget | null) => {
         const xslt = xsltContentRef.current;
@@ -2803,7 +2838,19 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             setSaveMessage(`⚠ ${p.reason ?? i18n.t('editor.move.elementFixed')}`);
             return;
         }
+        const isRow = p.tag.name.toLowerCase() === 'tr';
+        if (isRow && !tag) {
+            setSaveMessage(`⚠ ${i18n.t('editor.rows.keepInTable')}`);
+            return;
+        }
         const position = target?.position ?? 'after';
+        if (isRow && tag) {
+            tag = elevateCellTargetToRow(xslt, tag);
+            if (!isValidRowDropTarget(xslt, tag, position)) {
+                setSaveMessage(`⚠ ${i18n.t('editor.rows.dropHint')}`);
+                return;
+            }
+        }
         const at = tag ? insertOffset(xslt, tag, position) : documentEndOffset(xslt);
         if (at < 0) return;
         if (isInLineContext(xslt, at)) {
@@ -2826,8 +2873,32 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         if (!tag) pendingPreviewScrollRef.current = Number.MAX_SAFE_INTEGER;
         xsltContentRef.current = moved.xslt;
         setXsltContent(moved.xslt);
-        setSaveMessage(`↕ ${i18n.t('editor.move.elementMoved')}`);
+        setSaveMessage(`↕ ${isRow ? i18n.t('editor.rows.moved') : i18n.t('editor.move.elementMoved')}`);
         console.log(`[XSLTEditor] Öğe taşındı: <${p.tag.name}> → ${tag ? `<${tag.name}> ${position === 'inside' ? 'içine' : 'altına'}` : 'sayfa sonu'}`);
+    }, [flushSourceEdits]);
+
+    const isMovingRow = useCallback((loc: PreviewLocator | null) => {
+        if (!loc || loc.kind !== 'el') return false;
+        const tag = findLiteralTagByOrdinal(xsltContentRef.current, loc.ordinal);
+        return tag?.name.toLowerCase() === 'tr';
+    }, []);
+
+    const applySummaryRowEdit = useCallback((fn: (xslt: string, rowTag: SourceTag) => string | null) => {
+        flushSourceEdits();
+        const ctx = findSummaryTableContext(selectedObjectRef.current?.element ?? null, xsltContentRef.current);
+        if (!ctx) {
+            setSaveMessage(`⚠ ${i18n.t('editor.rows.needSummary')}`);
+            return;
+        }
+        const next = fn(xsltContentRef.current, ctx.rowTag);
+        if (!next) {
+            setSaveMessage(`⚠ ${i18n.t('editor.rows.editFailed')}`);
+            return;
+        }
+        if (next === xsltContentRef.current) return;
+        xsltContentRef.current = next;
+        setXsltContent(next);
+        setSaveMessage(`✓ ${i18n.t('editor.rows.updated')}`);
     }, [flushSourceEdits]);
 
     /** Veri alanının değerini kendi <span>'ına alır; hücreden / etiketinden bağımsız taşınabilir olur. */
@@ -3433,7 +3504,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             e.preventDefault();
             e.stopPropagation();
             setMoving(null);
-            moveTo(movingLoc, resolveInsertTarget(target, 'auto'));
+            moveTo(movingLoc, resolveInsertTarget(target, 'auto', { rowMove: isMovingRow(movingLoc) }));
             return;
         }
         const placingItem = placingRef.current;
@@ -3532,7 +3603,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         }
         openSelection(binding, indexedEl, locator);
         console.log(`[XSLTEditor] Preview click → ${indexedEl.tagName} render-index=${renderIndex ?? '(yok — sadece stil paneli)'}`);
-    }, [openSelection, moveTo, bindPlacement, placeChosen]);
+    }, [openSelection, moveTo, bindPlacement, placeChosen, isMovingRow]);
 
     /**
      * iframe yüklendiğinde:
@@ -3781,7 +3852,11 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             else moveBinding(Number(bindIndex), target);
         };
         const moveOverHandler = (e: MouseEvent) => {
-            if (movingRef.current || placingRef.current) markDropTarget(resolveInsertTarget(e.target as Element, 'auto'));
+            if (movingRef.current || placingRef.current) {
+                const loc = movingRef.current;
+                const rowMove = !!(loc && loc.kind === 'el' && findLiteralTagByOrdinal(xsltContentRef.current, loc.ordinal)?.name.toLowerCase() === 'tr');
+                markDropTarget(resolveInsertTarget(e.target as Element, 'auto', { rowMove }));
+            }
         };
         // Eklenen objeler (ve seçili resim) önizlemede sürüklenerek konumlandırılır.
         type DragState = {
@@ -5597,6 +5672,60 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                 </button>
                                             </div>
                                             {noteBox(t('editor.panel.column.note'), 'info')}
+                                        </div>
+                                    )}
+                                    {selectedSummaryCtx && el && !design.paid && (
+                                        <div data-summary-row-actions>
+                                            {sectionTitle(t('editor.rows.title'), '#0f766e')}
+                                            {noteBox(t('editor.rows.note'), 'info')}
+                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px' }}>
+                                                <button
+                                                    type="button"
+                                                    data-row-add
+                                                    onClick={() => applySummaryRowEdit(addEmptyRowAfter)}
+                                                    title={t('editor.rows.addHint')}
+                                                    style={{ flex: '1 1 40%', padding: '6px 8px', background: 'rgba(15, 118, 110, 0.12)', border: '1px solid rgba(15, 118, 110, 0.4)', borderRadius: '4px', color: '#0f766e', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+                                                >
+                                                    + {t('editor.rows.add')}
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    data-row-dup
+                                                    onClick={() => applySummaryRowEdit(duplicateRowAfter)}
+                                                    title={t('editor.rows.dupHint')}
+                                                    style={{ flex: '1 1 40%', padding: '6px 8px', background: 'rgba(15, 118, 110, 0.12)', border: '1px solid rgba(15, 118, 110, 0.4)', borderRadius: '4px', color: '#0f766e', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+                                                >
+                                                    ⧉ {t('editor.rows.dup')}
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    data-row-move
+                                                    disabled={tag !== 'tr' && !selectedSummaryCtx.row.hasAttribute('data-xsrc')}
+                                                    onClick={() => {
+                                                        const row = selectedSummaryCtx.row;
+                                                        const ordinal = Number(row.getAttribute('data-xsrc'));
+                                                        if (Number.isNaN(ordinal)) return;
+                                                        const same = Array.from(row.ownerDocument.querySelectorAll(`[data-xsrc="${ordinal}"]`));
+                                                        openSelection(null, row, { kind: 'el', ordinal, nth: Math.max(0, same.indexOf(row)) });
+                                                        flushSourceEdits();
+                                                        setMoving({ kind: 'el', ordinal, nth: Math.max(0, same.indexOf(row)) });
+                                                    }}
+                                                    title={t('editor.rows.moveHint')}
+                                                    style={{ flex: '1 1 40%', padding: '6px 8px', background: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(16, 185, 129, 0.45)', borderRadius: '4px', color: '#059669', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+                                                >
+                                                    ↕ {t('editor.rows.move')}
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    data-row-remove
+                                                    disabled={countSiblingRows(xsltContent, selectedSummaryCtx.rowTag) <= 1}
+                                                    onClick={() => applySummaryRowEdit(removeSummaryRow)}
+                                                    title={t('editor.rows.removeHint')}
+                                                    style={{ flex: '1 1 40%', padding: '6px 8px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.35)', borderRadius: '4px', color: '#dc2626', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', opacity: countSiblingRows(xsltContent, selectedSummaryCtx.rowTag) <= 1 ? 0.45 : 1 }}
+                                                >
+                                                    🗑 {t('editor.rows.remove')}
+                                                </button>
+                                            </div>
                                         </div>
                                     )}
                                     {kind === 'dropdown' && b && (

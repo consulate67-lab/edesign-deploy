@@ -57,6 +57,13 @@ export function placementOfElement(xslt: string, ordinal: number): BindPlacement
         const detach = content && xslt.slice(content.start, content.end).trim() && !isInLineContext(xslt, tag.start) ? 'cell' : null;
         return { tag, movable: false, detach, reason: i18n.t('editor.place.cell') };
     }
+    // Özet / alt toplam satırları: kalem for-each dışında serbestçe sıralanabilir.
+    if (name === 'tr') {
+        if (isInLineContext(xslt, tag.start)) {
+            return { tag, movable: false, detach: null, reason: i18n.t('editor.place.lineElement') };
+        }
+        return { tag, movable: true, detach: null, reason: null };
+    }
     if (UNMOVABLE_TAGS.has(name)) {
         return { tag, movable: false, detach: null, reason: i18n.t('editor.place.fixed') };
     }
