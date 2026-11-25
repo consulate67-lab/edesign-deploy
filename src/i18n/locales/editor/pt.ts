@@ -182,6 +182,7 @@ const editor: typeof tr = {
         catalogHint: 'Faixas são só ajuda de layout; qualquer campo pode ir em qualquer faixa.',
         shifted: '{{count}} objeto(s) reposicionado(s) com a faixa.',
         noneBelow: 'No objects below the divider to shift.',
+        cleanedTransforms: 'Broken band-shift transforms were cleaned.',
     },
     preview: {
         unknownError: 'Erro de renderização desconhecido',

@@ -182,6 +182,7 @@ const editor: typeof tr = {
         catalogHint: 'Les bandes aident seulement au placement ; tout champ peut aller dans toute bande.',
         shifted: '{{count}} objet(s) repositionné(s) avec la bande.',
         noneBelow: 'No objects below the divider to shift.',
+        cleanedTransforms: 'Broken band-shift transforms were cleaned.',
     },
     preview: {
         unknownError: 'Erreur de rendu inconnue',

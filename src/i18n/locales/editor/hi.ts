@@ -182,6 +182,7 @@ const editor: typeof tr = {
         catalogHint: 'बैंड केवल लेआउट सहायता हैं; कोई भी फ़ील्ड किसी भी बैंड में जा सकती है।',
         shifted: 'बैंड के साथ {{count}} ऑब्जेक्ट स्थानांतरित।',
         noneBelow: 'No objects below the divider to shift.',
+        cleanedTransforms: 'Broken band-shift transforms were cleaned.',
     },
     preview: {
         unknownError: 'अज्ञात रेंडर त्रुटि',

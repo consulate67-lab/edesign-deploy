@@ -182,6 +182,7 @@ const editor: typeof tr = {
         catalogHint: 'Полосы — только помощь по размещению; любое поле в любой полосе.',
         shifted: '{{count}} объект(ов) сдвинуто вместе с полосой.',
         noneBelow: 'No objects below the divider to shift.',
+        cleanedTransforms: 'Broken band-shift transforms were cleaned.',
     },
     preview: {
         unknownError: 'Неизвестная ошибка отрисовки',

@@ -1,17 +1,27 @@
 /**
- * Tasarım-zamanı sayfa bantları (üst / orta / alt).
- * Yalnız editör önizlemesinde görünür; XSLT'ye yazılmaz.
- * Çizgi tutamacı Pointer Capture ile sürülür; altındaki kökler translateY/top ile kayar.
+ * Tasarım-zamanı sayfa bantları — FastReport benzeri model.
+ *
+ * Bant çizgileri YALNIZ editör yardımcısıdır; XSLT çıktısına yazılmaz.
+ * Sınır oranları (masterEnd / detailEnd) tasarım kimliğine göre localStorage’da
+ * sistemsel tutulur.
+ *
+ * Bant sınırı sürüklenince:
+ *  - Mutlak (absolute/fixed) objeler top ile kayar
+ *  - Çizginin tamamen altında kalan bütün tablolar/div’ler margin-top ile kayar
+ *  - tr/td/th/tbody ASLA kaydırılmaz (kolon hizasını bozar)
  */
 
 export type DesignBandId = 'master' | 'detail' | 'footer';
 
+/** Sistemsel bant sınırları (sayfa yüksekliği oranı, 0–1). */
 export type DesignBandLayout = {
+    version: 1;
     masterEnd: number;
     detailEnd: number;
 };
 
 export const DEFAULT_BAND_LAYOUT: DesignBandLayout = {
+    version: 1,
     masterEnd: 0.38,
     detailEnd: 0.72,
 };
@@ -26,20 +36,22 @@ export const clampBandLayout = (layout: DesignBandLayout): DesignBandLayout => {
         detailEnd = 1 - MIN_BAND;
         masterEnd = Math.min(masterEnd, detailEnd - MIN_BAND);
     }
-    return { masterEnd, detailEnd };
+    return { version: 1, masterEnd, detailEnd };
 };
 
 export const BAND_ORDER: DesignBandId[] = ['master', 'detail', 'footer'];
 
 const storageKey = (designId?: number | string | null) =>
-    `edxdocu:design-bands:${designId ?? 'draft'}`;
+    `edxdocu:design-bands:v1:${designId ?? 'draft'}`;
 
 export function loadBandLayout(designId?: number | string | null): DesignBandLayout {
     try {
-        const raw = localStorage.getItem(storageKey(designId));
+        const raw = localStorage.getItem(storageKey(designId))
+            ?? localStorage.getItem(`edxdocu:design-bands:${designId ?? 'draft'}`);
         if (!raw) return { ...DEFAULT_BAND_LAYOUT };
         const parsed = JSON.parse(raw) as Partial<DesignBandLayout>;
         return clampBandLayout({
+            version: 1,
             masterEnd: Number(parsed.masterEnd) || DEFAULT_BAND_LAYOUT.masterEnd,
             detailEnd: Number(parsed.detailEnd) || DEFAULT_BAND_LAYOUT.detailEnd,
         });
@@ -60,7 +72,7 @@ export const BAND_OVERLAY_ID = '__xslt-design-bands';
 
 export type BandShiftSnapshot = {
     el: HTMLElement;
-    kind: 'absolute' | 'transform';
+    kind: 'absolute' | 'margin';
     base: number;
     left: number;
     clientTop: number;
@@ -68,11 +80,8 @@ export type BandShiftSnapshot = {
 
 export type BandOverlayHandlers = {
     getLayout: () => DesignBandLayout;
-    /** Sürükleme sırasında (React state yazmadan) layout ref güncellemesi. */
     setLayoutLive: (layout: DesignBandLayout) => void;
-    /** Bırakınca: React state + XSLT commit. */
     onDragEnd: (layout: DesignBandLayout, snaps: BandShiftSnapshot[]) => void;
-    /** CSS px / ekran px oranı (zoom). */
     scaleOf: (el: HTMLElement) => number;
 };
 
@@ -80,6 +89,9 @@ const SKIP_TAGS = new Set([
     'script', 'style', 'link', 'meta', 'br', 'hr', 'col', 'colgroup',
     'head', 'title', 'noscript', 'html', 'body',
 ]);
+
+/** Tablo içi — bunlara asla tek tek kaydırma uygulanmaz. */
+const TABLE_PARTS = new Set(['tr', 'td', 'th', 'thead', 'tbody', 'tfoot']);
 
 const isPageSizedWrapper = (el: HTMLElement, page: HTMLElement) => {
     if (el === page) return true;
@@ -91,49 +103,85 @@ const isPageSizedWrapper = (el: HTMLElement, page: HTMLElement) => {
         && er.top <= pr.top + 12;
 };
 
-const readTranslateY = (el: HTMLElement): number => {
-    const t = el.style.transform || '';
-    const m = t.match(/translateY\(\s*(-?[\d.]+)px\s*\)/);
-    return m ? (parseFloat(m[1]) || 0) : 0;
-};
+/**
+ * Önceki hatalı sürümlerin tr/td üzerine yazdığı translateY’yi temizler
+ * (önizleme DOM’u; XSLT ayrı temizlenir).
+ */
+export function stripBrokenBandTransforms(root: ParentNode): number {
+    let n = 0;
+    root.querySelectorAll<HTMLElement>('tr, td, th, thead, tbody, tfoot, table, div, span, p, img').forEach((el) => {
+        const t = el.style.transform || '';
+        if (!/translateY\s*\(/i.test(t)) return;
+        el.style.transform = t.replace(/translateY\s*\([^)]*\)\s*/gi, '').trim();
+        if (!el.style.transform) el.style.removeProperty('transform');
+        n += 1;
+    });
+    return n;
+}
 
-/** Çizginin altında başlayan kök öğeler (tablo satırları dahil). */
+/** XSLT kaynağından band-kaydırma translateY stillerini siler. */
+export function stripBandTranslateYFromXslt(xslt: string): string {
+    return xslt.replace(/\bstyle\s*=\s*("([^"]*)"|'([^']*)')/gi, (full, _q, dq, sq) => {
+        const style = dq ?? sq ?? '';
+        if (!/translateY\s*\(/i.test(style)) return full;
+        let next = style
+            .replace(/(?:^|;)\s*transform\s*:\s*translateY\([^)]*\)\s*/gi, ';')
+            .replace(/transform\s*:\s*([^;]*translateY\([^)]*\)[^;]*)/gi, (_m: string, val: string) => {
+                const cleaned = String(val).replace(/translateY\s*\([^)]*\)\s*/gi, '').trim();
+                return cleaned ? `transform:${cleaned}` : '';
+            })
+            .replace(/;;+/g, ';')
+            .replace(/^\s*;\s*|\s*;\s*$/g, '')
+            .trim();
+        const quote = full.includes("'") && !dq ? "'" : '"';
+        return next ? `style=${quote}${next}${quote}` : '';
+    });
+}
+
+/**
+ * FastReport mantığı: çizginin altındaki taşınabilir kökler.
+ * - absolute/fixed objeler
+ * - bütünüyle altta kalan table / blok div (margin ile)
+ * - tablo parçaları (tr/td…) hariç
+ */
 export function collectElementsBelowBand(root: HTMLElement, edgeClientY: number): HTMLElement[] {
+    const view = root.ownerDocument.defaultView;
     const found: HTMLElement[] = [];
-    const consider = (el: HTMLElement) => {
+
+    const tryAdd = (el: HTMLElement) => {
         if (el.id === BAND_OVERLAY_ID || el.closest(`#${BAND_OVERLAY_ID}`)) return;
-        if (SKIP_TAGS.has(el.tagName.toLowerCase())) return;
+        if (el === root || isPageSizedWrapper(el, root)) return;
+        const tag = el.tagName.toLowerCase();
+        if (SKIP_TAGS.has(tag) || TABLE_PARTS.has(tag)) return;
         const r = el.getBoundingClientRect();
         if (r.width < 1 || r.height < 1) return;
-        if (r.top >= edgeClientY - 0.5) found.push(el);
+        if (r.top < edgeClientY - 0.5) return;
+
+        const pos = el.style.position || view?.getComputedStyle(el).position || '';
+        const absolute = pos === 'absolute' || pos === 'fixed';
+        if (absolute) {
+            found.push(el);
+            return;
+        }
+        // Akış: yalnız bağımsız blok / tablo (iç satır değil)
+        if (tag === 'table' || tag === 'div' || tag === 'section' || tag === 'article' || tag === 'p' || tag === 'img') {
+            found.push(el);
+        }
     };
 
-    const walk = (node: Element) => {
-        if (!(node instanceof HTMLElement)) return;
-        if (node.id === BAND_OVERLAY_ID || node.closest(`#${BAND_OVERLAY_ID}`)) return;
-        const tag = node.tagName.toLowerCase();
-        if (SKIP_TAGS.has(tag)) return;
-        if (isPageSizedWrapper(node, root)) {
-            Array.from(node.children).forEach(walk);
-            return;
-        }
-        const r = node.getBoundingClientRect();
-        if (r.width < 1 || r.height < 1) {
-            Array.from(node.children).forEach(walk);
-            return;
-        }
-        if (r.top >= edgeClientY - 0.5) {
-            found.push(node);
-            return;
-        }
-        Array.from(node.children).forEach(walk);
-    };
-    walk(root);
+    // 1) Tasarım objeleri (mutlak konum)
+    root.querySelectorAll<HTMLElement>('[data-xslt-obj]').forEach(tryAdd);
 
-    // Ek güvence: tasarım objeleri / xsrc / satırlar
-    root.querySelectorAll<HTMLElement>('[data-xslt-obj], [data-xsrc], [data-render-index], tr, table, img').forEach(consider);
+    // 2) Mutlak konumlu diğerleri
+    root.querySelectorAll<HTMLElement>('*').forEach((el) => {
+        const pos = el.style.position || view?.getComputedStyle(el).position || '';
+        if (pos === 'absolute' || pos === 'fixed') tryAdd(el);
+    });
 
-    const uniq = [...new Set(found)].filter((el) => el !== root && !isPageSizedWrapper(el, root));
+    // 3) Çizginin tamamen altında kalan tablolar / bloklar
+    root.querySelectorAll<HTMLElement>('table, div[data-xsrc], section[data-xsrc]').forEach(tryAdd);
+
+    const uniq = [...new Set(found)];
     return uniq.filter((el) => !uniq.some((o) => o !== el && o.contains(el)));
 }
 
@@ -144,11 +192,14 @@ export function snapshotBandShiftTargets(root: HTMLElement, edgeClientY: number)
         const r = el.getBoundingClientRect();
         const pos = el.style.position || view?.getComputedStyle(el).position || '';
         if (pos === 'absolute' || pos === 'fixed') {
+            // Kalan hatalı translateY’yi yok say
+            el.style.transform = (el.style.transform || '').replace(/translateY\s*\([^)]*\)\s*/gi, '').trim();
             const top = parseFloat(el.style.top || '') || parseFloat(view?.getComputedStyle(el).top || '') || 0;
             const left = parseFloat(el.style.left || '') || parseFloat(view?.getComputedStyle(el).left || '') || 0;
             out.push({ el, kind: 'absolute', base: top, left, clientTop: r.top });
         } else {
-            out.push({ el, kind: 'transform', base: readTranslateY(el), left: 0, clientTop: r.top });
+            const mt = parseFloat(el.style.marginTop || '') || parseFloat(view?.getComputedStyle(el).marginTop || '') || 0;
+            out.push({ el, kind: 'margin', base: mt, left: 0, clientTop: r.top });
         }
     }
     return out;
@@ -168,12 +219,8 @@ export function applyBandShiftDelta(
                 s.el.style.left = `${s.left}px`;
             }
             s.el.style.top = `${next}px`;
-            // Eski translate kalmasın
-            s.el.style.transform = (s.el.style.transform || '').replace(/translateY\(\s*-?[\d.]+px\s*\)\s*/g, '').trim();
         } else {
-            const rest = (s.el.style.transform || '').replace(/translateY\(\s*-?[\d.]+px\s*\)\s*/g, '').trim();
-            const ty = `translateY(${next}px)`;
-            s.el.style.transform = rest ? `${rest} ${ty}` : ty;
+            s.el.style.marginTop = `${Math.max(0, next)}px`;
         }
     }
 }
@@ -195,8 +242,7 @@ const finishDrag = () => {
     const d = activeDrag;
     activeDrag = null;
     if (!d || !boundHandlers) return;
-    const layout = boundHandlers.getLayout();
-    boundHandlers.onDragEnd(layout, d.snaps);
+    boundHandlers.onDragEnd(boundHandlers.getLayout(), d.snaps);
 };
 
 const onHandlePointerMove = (e: PointerEvent) => {
@@ -206,26 +252,18 @@ const onHandlePointerMove = (e: PointerEvent) => {
     const cur = boundHandlers.getLayout();
     const draft = clampBandLayout(
         activeDrag.edge === 'masterEnd'
-            ? { masterEnd: raw, detailEnd: cur.detailEnd }
-            : { masterEnd: cur.masterEnd, detailEnd: raw },
+            ? { version: 1, masterEnd: raw, detailEnd: cur.detailEnd }
+            : { version: 1, masterEnd: cur.masterEnd, detailEnd: raw },
     );
     const ratio = activeDrag.edge === 'masterEnd' ? draft.masterEnd : draft.detailEnd;
     const deltaClient = (ratio - activeDrag.startRatio) * activeDrag.pageH;
     applyBandShiftDelta(activeDrag.snaps, deltaClient, boundHandlers.scaleOf);
     boundHandlers.setLayoutLive(draft);
-    // Tutamacı canlı güncelle
     activeDrag.handle.style.top = `${(ratio * 100).toFixed(3)}%`;
     const bandEl = activeDrag.handle.ownerDocument.getElementById(BAND_OVERLAY_ID);
     if (bandEl) {
         const layers = bandEl.querySelector('[data-band-layers]') as HTMLElement | null;
         if (layers) {
-            // Bant boyamalarını güncelle
-            const labels = {
-                master: layers.querySelector('[data-band="master"] span')?.textContent || '',
-                detail: layers.querySelector('[data-band="detail"] span')?.textContent || '',
-                footer: layers.querySelector('[data-band="footer"] span')?.textContent || '',
-            };
-            void labels;
             const master = layers.querySelector('[data-band="master"]') as HTMLElement | null;
             const detail = layers.querySelector('[data-band="detail"]') as HTMLElement | null;
             const footer = layers.querySelector('[data-band="footer"]') as HTMLElement | null;
@@ -262,9 +300,6 @@ const onHandlePointerUp = (e: PointerEvent) => {
     finishDrag();
 };
 
-/**
- * Sayfa üzerine bant katmanı çizer ve tutamaçlara pointer sürüklemeyi bağlar.
- */
 export function syncDesignBandOverlay(
     page: HTMLElement | null,
     layout: DesignBandLayout,
@@ -317,7 +352,6 @@ export function syncDesignBandOverlay(
         root.appendChild(handleLayer);
     }
 
-    // Sürükleme sırasında katmanları yeniden yazma (tutamacı kaçırmayalım)
     if (!activeDrag) {
         bandLayer.innerHTML = '';
         const bands: { id: DesignBandId; top: number; height: number; color: string }[] = [
@@ -420,7 +454,7 @@ export function syncDesignBandOverlay(
                     : boundHandlers.getLayout().detailEnd;
                 const edgeY = pr.top + startRatio * pr.height;
                 let snaps = snapshotBandShiftTargets(pageEl, edgeY);
-                if (!snaps.length && doc.body) {
+                if (!snaps.length && doc.body && doc.body !== pageEl) {
                     snaps = snapshotBandShiftTargets(doc.body, edgeY);
                 }
                 activeDrag = {

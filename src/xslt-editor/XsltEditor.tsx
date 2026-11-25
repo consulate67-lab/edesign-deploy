@@ -92,7 +92,8 @@ import { numberStyleOf, type DocLanguage, type NumberStyle } from '../internatio
 import { docT, documentLanguage } from './docLanguage';
 import { buildCatalog } from './catalogI18n';
 import {
-    loadBandLayout, saveBandLayout, syncDesignBandOverlay,
+    loadBandLayout, saveBandLayout, stripBandTranslateYFromXslt, stripBrokenBandTransforms,
+    syncDesignBandOverlay,
     type BandShiftSnapshot, type DesignBandId, type DesignBandLayout,
 } from './designBands';
 
@@ -4263,8 +4264,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         }
         const deltaOf = (s: BandShiftSnapshot) => {
             if (s.kind === 'absolute') return (parseFloat(s.el.style.top) || 0) - s.base;
-            const m = (s.el.style.transform || '').match(/translateY\(\s*(-?[\d.]+)px\s*\)/);
-            return (m ? parseFloat(m[1]) : 0) - s.base;
+            return (parseFloat(s.el.style.marginTop) || 0) - s.base;
         };
         if (!snaps.some((s) => Math.abs(deltaOf(s)) > 0.5)) return;
         flushSourceEdits();
@@ -4285,16 +4285,17 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         let next = xsltContentRef.current;
         const before = next;
         for (const s of snaps) {
-            if (s.kind !== 'transform') continue;
+            if (s.kind !== 'margin') continue;
             const loc = locatorOfBandEl(s.el);
             if (!loc) continue;
             const tag = resolveSourceTag(next, loc);
             if (!tag) continue;
-            const m = (s.el.style.transform || '').match(/translateY\(\s*(-?[\d.]+)px\s*\)/);
-            const ty = m ? parseFloat(m[1]) : 0;
-            next = setTagStyleProperty(next, tag, 'transform', ty ? `translateY(${ty}px)` : '');
+            const mt = `${Math.max(0, parseFloat(s.el.style.marginTop) || 0)}px`;
+            next = setTagStyleProperty(next, tag, 'margin-top', mt);
             moved += 1;
         }
+        // Eski hatalı translateY kalıntılarını XSLT’den temizle
+        next = stripBandTranslateYFromXslt(next);
         if (next !== before) {
             xsltContentRef.current = next;
             editKeyRef.current = `band-shift:${Date.now()}`;
@@ -4303,8 +4304,6 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         if (moved > 0) {
             setSaveMessage(`↕ ${i18n.t('editor.bands.shifted', { count: moved })}`);
             setPositionRev((r) => r + 1);
-        } else if (snaps.length) {
-            setSaveMessage(`↕ ${i18n.t('editor.bands.shifted', { count: snaps.length })}`);
         }
     }, [design.id, initialDesignId, flushSourceEdits, locatorOfBandEl, commitPosition, resolveSourceTag]);
 
@@ -4411,6 +4410,19 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             // hemen uygula (titreme olmasın), auto-fit açıksa 350ms sonra
             // (measureHeight 300ms + 50ms pay) genişliğe göre yeniden sığdır.
             applyPreviewZoom(previewZoomRef.current);
+            // Eski bant kaydırmasının tr/td translateY kalıntıları kolon hizasını bozar — temizle.
+            {
+                const nDom = stripBrokenBandTransforms(doc);
+                const cleaned = stripBandTranslateYFromXslt(xsltContentRef.current);
+                if (cleaned !== xsltContentRef.current) {
+                    xsltContentRef.current = cleaned;
+                    editKeyRef.current = `band-cleanup:${Date.now()}`;
+                    setXsltContent(cleaned);
+                    setSaveMessage(`🧹 ${i18n.t('editor.bands.cleanedTransforms')}`);
+                } else if (nDom > 0) {
+                    setSaveMessage(`🧹 ${i18n.t('editor.bands.cleanedTransforms')}`);
+                }
+            }
             refreshBandOverlay();
             // Örnek XML'de değeri olmayan alan objesi önizlemede kesikli kutuyla gösterilir (yalnız editörde).
             doc.querySelectorAll<HTMLElement>('[data-obj-kind="field"]').forEach(n => {

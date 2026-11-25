@@ -182,6 +182,7 @@ const editor: typeof tr = {
         catalogHint: 'Las bandas solo ayudan al diseño; cualquier campo puede ir en cualquier banda.',
         shifted: '{{count}} objeto(s) reposicionado(s) con la banda.',
         noneBelow: 'No objects below the divider to shift.',
+        cleanedTransforms: 'Broken band-shift transforms were cleaned.',
     },
     preview: {
         unknownError: 'Error de renderizado desconocido',

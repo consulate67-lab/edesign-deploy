@@ -182,6 +182,7 @@ const editor: typeof tr = {
         catalogHint: 'Bänder sind nur Layout-Hilfe; jedes Feld kann in jedes Band.',
         shifted: '{{count}} Objekt(e) mit dem Band verschoben.',
         noneBelow: 'No objects below the divider to shift.',
+        cleanedTransforms: 'Broken band-shift transforms were cleaned.',
     },
     preview: {
         unknownError: 'Unbekannter Darstellungsfehler',

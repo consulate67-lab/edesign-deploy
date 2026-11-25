@@ -182,6 +182,7 @@ const editor: typeof tr = {
         catalogHint: '分区仅辅助排版；任何字段可放在任何分区。',
         shifted: '已随分区移动 {{count}} 个对象。',
         noneBelow: 'No objects below the divider to shift.',
+        cleanedTransforms: 'Broken band-shift transforms were cleaned.',
     },
     preview: {
         unknownError: '未知渲染错误',
