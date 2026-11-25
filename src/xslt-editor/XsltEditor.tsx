@@ -50,7 +50,8 @@ import {
     ensureDecimalFormat, isInLineContext, isLineField, lineRootXPath, fieldSnippet, fieldContent, fieldEffectiveXPath,
     formulaSnippet, formulaContent, formulaAttrs,
     readFormula, DEFAULT_FORMULA, FORMULA_OPS, evaluateFormula, formulaSumsLines,
-    readFieldTransform, fieldTransformAttrs, evaluateFieldTransform, readCurrencyDisplay, NO_TRANSFORM,
+    readFieldTransform, fieldTransformAttrs, evaluateFieldTransform, readCurrencyDisplay, readNumberDecimals,
+    currencySymbolOf, evaluateCurrencyCode, NO_TRANSFORM,
     FIELD_FILTERS, FIELD_EXTRACTS, FIELD_CASES,
     type CatalogField, type FormulaModel, type FormulaOp, type FieldTransform, type CurrencyDisplay,
 } from './fieldCatalog';
@@ -192,6 +193,7 @@ function refreshObjectContents(xslt: string, catalog: CatalogField[], lang: DocL
                 content = fieldContent(
                     f, inLine, lang, readFieldTransform(el), el.getAttribute('data-xpath'),
                     readCurrencyDisplay(el, f),
+                    readNumberDecimals(el, f),
                 );
             }
         }
@@ -1367,7 +1369,14 @@ const formatDocNumber = (n: number, decimals: number, lang: DocLanguage) =>
 /** Formülün örnek XML ile hesaplanan önizleme metni (satır içinde ilk satırın değerleriyle). */
 function formulaPreviewText(m: FormulaModel, catalog: CatalogField[], xmlDoc: Document | null, inLine: boolean, lang: DocLanguage): string {
     const r = evaluateFormula(xmlDoc, m, catalog, inLine);
-    return `${m.label}${Number.isFinite(r) ? formatDocNumber(r, m.decimals, lang) : ''}${m.suffix}`;
+    let num = Number.isFinite(r) ? formatDocNumber(r, m.decimals, lang) : '';
+    if (num && m.currency && m.currency !== 'none') {
+        const code = evaluateCurrencyCode(xmlDoc, `/*/*[local-name()='DocumentCurrencyCode']`)
+            || evaluateCurrencyCode(xmlDoc, `/*/*[local-name()='LegalMonetaryTotal']/*[local-name()='PayableAmount']`)
+            || '';
+        if (code) num = `${num}\u00a0${m.currency === 'code' ? code : currencySymbolOf(code)}`;
+    }
+    return `${m.label}${num}${m.suffix}`;
 }
 
 const FormulaEditor: React.FC<{
@@ -1438,9 +1447,21 @@ const FormulaEditor: React.FC<{
                         onChange={(e) => update({ decimals: Math.min(4, Math.max(0, Number(e.target.value) || 0)) })} style={fieldInputStyle} />
                 </div>
                 <div style={{ flex: 1 }}>
-                    <FieldText label={t('editor.formula.suffix')} currentValue={model.suffix} placeholder={t('editor.formula.suffixPlaceholder')} onChange={(v) => update({ suffix: v })} />
+                    <label style={fieldLabelStyle}>{t('editor.panel.currency')}</label>
+                    <select
+                        data-formula-currency
+                        value={model.currency || 'none'}
+                        onChange={(e) => update({ currency: e.target.value as CurrencyDisplay })}
+                        style={fieldInputStyle}
+                    >
+                        <option value="symbol">{t('editor.panel.currencySymbol')}</option>
+                        <option value="code">{t('editor.panel.currencyCode')}</option>
+                        <option value="none">{t('editor.panel.currencyNone')}</option>
+                    </select>
                 </div>
             </div>
+            <FieldText label={t('editor.formula.suffix')} currentValue={model.suffix} placeholder={t('editor.formula.suffixPlaceholder')} onChange={(v) => update({ suffix: v })} />
+            <div style={{ fontSize: '10px', color: '#6b7690', margin: '-4px 0 10px', lineHeight: 1.4 }}>{t('editor.panel.currencyNote')}</div>
             {sums && (
                 <div data-formula-sum-note style={{ marginBottom: '8px', fontSize: '11px', lineHeight: 1.45, color: productOfSums ? '#c2410c' : '#2563eb' }}>
                     {productOfSums ? t('editor.formula.sumProduct') : t('editor.formula.sumNote')}
@@ -3292,12 +3313,16 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         const el = selectedObjectRef.current?.element;
         const tx = el ? readFieldTransform(el) : NO_TRANSFORM;
         const currency = readCurrencyDisplay(el ?? null, f);
+        const decimals = readNumberDecimals(el ?? null, f);
         if (f.format === 'amount' && !el?.getAttribute('data-currency')) handleAttrChange('data-currency', currency);
+        if ((f.format === 'amount' || f.format === 'number') && !el?.getAttribute('data-decimals')) {
+            handleAttrChange('data-decimals', String(decimals));
+        }
         handleAttrChange('data-field', key);
         handleAttrChange('data-xpath', ''); // katalog alanına dönünce özel XPath temizlenir
         handleContentChange(
-            fieldContent(f, selectedObjInLine(), docLangRef.current, tx, null, currency),
-            evaluateFieldTransform(xmlDocRef.current, f, tx, docLangRef.current, currency),
+            fieldContent(f, selectedObjInLine(), docLangRef.current, tx, null, currency, decimals),
+            evaluateFieldTransform(xmlDocRef.current, f, tx, docLangRef.current, currency, decimals),
         );
     }, [selectedObjInLine, handleAttrChange, handleContentChange]);
 
@@ -3308,9 +3333,10 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         for (const [attr, value] of fieldTransformAttrs(tx)) handleAttrChange(attr, value);
         const custom = el?.getAttribute('data-xpath');
         const currency = readCurrencyDisplay(el ?? null, f);
+        const decimals = readNumberDecimals(el ?? null, f);
         handleContentChange(
-            fieldContent(f, selectedObjInLine(), docLangRef.current, tx, custom, currency),
-            evaluateFieldTransform(xmlDocRef.current, f, tx, docLangRef.current, currency),
+            fieldContent(f, selectedObjInLine(), docLangRef.current, tx, custom, currency, decimals),
+            evaluateFieldTransform(xmlDocRef.current, f, tx, docLangRef.current, currency, decimals),
         );
     }, [selectedObjInLine, handleAttrChange, handleContentChange]);
 
@@ -3322,27 +3348,41 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         const trimmed = xpath.trim();
         const tx = readFieldTransform(el);
         const currency = readCurrencyDisplay(el, f);
+        const decimals = readNumberDecimals(el, f);
         const defaultXp = fieldEffectiveXPath(f, selectedObjInLine(), tx, docLangRef.current);
         const custom = trimmed && trimmed !== defaultXp ? trimmed : '';
         handleAttrChange('data-xpath', custom);
         handleContentChange(
-            fieldContent(f, selectedObjInLine(), docLangRef.current, tx, custom || null, currency),
-            evaluateFieldTransform(xmlDocRef.current, f, tx, docLangRef.current, currency),
+            fieldContent(f, selectedObjInLine(), docLangRef.current, tx, custom || null, currency, decimals),
+            evaluateFieldTransform(xmlDocRef.current, f, tx, docLangRef.current, currency, decimals),
         );
     }, [selectedObjInLine, handleAttrChange, handleContentChange]);
+
+    const rebuildFieldContent = useCallback((el: HTMLElement, f: CatalogField, currency: CurrencyDisplay, decimals: number) => {
+        const tx = readFieldTransform(el);
+        const custom = el.getAttribute('data-xpath');
+        handleContentChange(
+            fieldContent(f, selectedObjInLine(), docLangRef.current, tx, custom, currency, decimals),
+            evaluateFieldTransform(xmlDocRef.current, f, tx, docLangRef.current, currency, decimals),
+        );
+    }, [selectedObjInLine, handleContentChange]);
 
     const handleFieldCurrencyChange = useCallback((mode: CurrencyDisplay) => {
         const el = selectedObjectRef.current?.element;
         const f = catalogRef.current.find(x => x.key === el?.getAttribute('data-field'));
         if (!f || !el) return;
         handleAttrChange('data-currency', mode);
-        const tx = readFieldTransform(el);
-        const custom = el.getAttribute('data-xpath');
-        handleContentChange(
-            fieldContent(f, selectedObjInLine(), docLangRef.current, tx, custom, mode),
-            evaluateFieldTransform(xmlDocRef.current, f, tx, docLangRef.current, mode),
-        );
-    }, [selectedObjInLine, handleAttrChange, handleContentChange]);
+        rebuildFieldContent(el, f, mode, readNumberDecimals(el, f));
+    }, [handleAttrChange, rebuildFieldContent]);
+
+    const handleFieldDecimalsChange = useCallback((decimals: number) => {
+        const el = selectedObjectRef.current?.element;
+        const f = catalogRef.current.find(x => x.key === el?.getAttribute('data-field'));
+        if (!f || !el) return;
+        const dec = Math.min(4, Math.max(0, decimals));
+        handleAttrChange('data-decimals', String(dec));
+        rebuildFieldContent(el, f, readCurrencyDisplay(el, f), dec);
+    }, [handleAttrChange, rebuildFieldContent]);
 
     /** Tutar alanı seçilince para birimi yoksa varsayılan sembolü uygula (₺ / $ / €…). */
     useEffect(() => {
@@ -6660,21 +6700,39 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                     <CatalogOptions fields={catalog} xmlDoc={xmlDoc} />
                                                 </select>
                                                 {noteBox(t('editor.panel.fieldNote', { sample: formatDocNumber(1234.56, 2, docLang) }), 'info')}
-                                                {fObj?.format === 'amount' && (
+                                                {fObj && (fObj.format === 'amount' || fObj.format === 'number') && (
                                                     <>
-                                                        <label style={{ ...fieldLabelStyle, marginTop: '10px' }}>{t('editor.panel.currency')}</label>
-                                                        <select
-                                                            key={fieldKey(`currency-${el.getAttribute('data-currency') || 'symbol'}`)}
-                                                            data-field-currency
-                                                            defaultValue={readCurrencyDisplay(el, fObj)}
-                                                            onChange={(e) => handleFieldCurrencyChange(e.target.value as CurrencyDisplay)}
-                                                            style={{ ...fieldInputStyle, marginBottom: '6px' }}
-                                                        >
-                                                            <option value="symbol">{t('editor.panel.currencySymbol')}</option>
-                                                            <option value="code">{t('editor.panel.currencyCode')}</option>
-                                                            <option value="none">{t('editor.panel.currencyNone')}</option>
-                                                        </select>
-                                                        {noteBox(t('editor.panel.currencyNote'), 'info')}
+                                                        {sectionTitle(t('editor.panel.numberFormat'), '#0f766e')}
+                                                        <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
+                                                            <div style={{ width: '90px' }}>
+                                                                <label style={fieldLabelStyle}>{t('editor.formula.decimals')}</label>
+                                                                <input
+                                                                    key={fieldKey(`decimals-${el.getAttribute('data-decimals') ?? ''}`)}
+                                                                    data-field-decimals
+                                                                    type="number"
+                                                                    min={0}
+                                                                    max={4}
+                                                                    defaultValue={readNumberDecimals(el, fObj)}
+                                                                    onChange={(e) => handleFieldDecimalsChange(Number(e.target.value))}
+                                                                    style={fieldInputStyle}
+                                                                />
+                                                            </div>
+                                                            <div style={{ flex: 1 }}>
+                                                                <label style={fieldLabelStyle}>{t('editor.panel.currency')}</label>
+                                                                <select
+                                                                    key={fieldKey(`currency-${el.getAttribute('data-currency') || 'symbol'}`)}
+                                                                    data-field-currency
+                                                                    defaultValue={readCurrencyDisplay(el, fObj)}
+                                                                    onChange={(e) => handleFieldCurrencyChange(e.target.value as CurrencyDisplay)}
+                                                                    style={fieldInputStyle}
+                                                                >
+                                                                    <option value="symbol">{t('editor.panel.currencySymbol')}</option>
+                                                                    <option value="code">{t('editor.panel.currencyCode')}</option>
+                                                                    <option value="none">{t('editor.panel.currencyNone')}</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        {noteBox(t('editor.panel.numberFormatNote', { sample: formatDocNumber(1234.56, readNumberDecimals(el, fObj), docLang) }), 'info')}
                                                     </>
                                                 )}
                                                 <label style={{ ...fieldLabelStyle, marginTop: '10px' }}>{t('editor.panel.xpath')}</label>

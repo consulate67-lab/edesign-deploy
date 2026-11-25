@@ -244,6 +244,8 @@ const editor: typeof tr = {
         currencyCode: 'Code (TRY, USD, EUR…)',
         currencyNone: 'Hide',
         currencyNote: 'Taken from DocumentCurrencyCode or the amount currencyID; you do not need to type it into the format/XPath.',
+        numberFormat: 'Number format',
+        numberFormatNote: 'Decimal places and currency. Example: {{sample}}. Separators follow the document language.',
         qrSize: '尺寸（宽 = 高）',
         qrNote: 'GİB 二维码标准（v1.2）的内容由文档生成：发票和 e-Arşiv 包含税号、场景、类型、日期、编号、UUID、金额和增值税税率；发货单包含发货日期/时间、承运人税号和车牌号。二维码应位于文档的右上角。尺寸更改会在预览刷新时生效。',
         position: '位置',

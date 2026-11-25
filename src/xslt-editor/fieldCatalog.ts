@@ -1120,17 +1120,37 @@ export function evaluateCurrencyCode(xmlDoc: Document | null, amountXp: string):
     }
 }
 
+const currencyChooseXslt = (curExpr: string, mode: CurrencyDisplay): string => {
+    if (mode === 'none') return '';
+    if (mode === 'code') {
+        return `<xsl:text>&#160;</xsl:text><xsl:value-of select="${curExpr}"/>`;
+    }
+    const whens = Object.entries(CURRENCY_SYMBOLS)
+        .map(([code, sym]) => `<xsl:when test="${curExpr}='${code}'">${escapeText(sym)}</xsl:when>`)
+        .join('');
+    return `<xsl:text>&#160;</xsl:text><xsl:choose>${whens}<xsl:otherwise><xsl:value-of select="${curExpr}"/></xsl:otherwise></xsl:choose>`;
+};
+
 const currencySuffixXslt = (amountXp: string, mode: CurrencyDisplay): string => {
     if (mode === 'none') return '';
     const cur = `string((${amountXp}/@currencyID | ${DOC_CURRENCY_XP})[1])`;
-    if (mode === 'code') {
-        return `<xsl:text>&#160;</xsl:text><xsl:value-of select="${cur}"/>`;
-    }
-    const whens = Object.entries(CURRENCY_SYMBOLS)
-        .map(([code, sym]) => `<xsl:when test="${cur}='${code}'">${escapeText(sym)}</xsl:when>`)
-        .join('');
-    return `<xsl:text>&#160;</xsl:text><xsl:choose>${whens}<xsl:otherwise><xsl:value-of select="${cur}"/></xsl:otherwise></xsl:choose>`;
+    return currencyChooseXslt(cur, mode);
 };
+
+/** Formül / genel sayı: belgedeki DocumentCurrencyCode. */
+export const currencySuffixFromDoc = (mode: CurrencyDisplay): string => {
+    if (mode === 'none') return '';
+    return currencyChooseXslt(`string((${DOC_CURRENCY_XP})[1])`, mode);
+};
+
+/** Ondalık basamak: `data-decimals` yoksa tutar 2, sayı 0. */
+export function readNumberDecimals(el: Element | null, f?: CatalogField | null): number {
+    const raw = el?.getAttribute('data-decimals');
+    if (raw !== null && raw !== undefined && String(raw).trim() !== '') {
+        return Math.min(4, Math.max(0, Number(raw) || 0));
+    }
+    return f?.format === 'amount' ? 2 : f?.format === 'number' ? 0 : 2;
+}
 
 /** Alan objesinin etkin XPath'i (özel `data-xpath` yoksa katalog + dönüşüm). */
 export function fieldEffectiveXPath(
@@ -1146,7 +1166,7 @@ export function fieldEffectiveXPath(
     return fieldTransformExpr(f, inLine, tx, lang);
 }
 
-/** Veri alanı objesinin içeriği (sayısal alanlar belge dilinin ayraçlarıyla biçimlenir; tutarlara para birimi eklenir). */
+/** Veri alanı objesinin içeriği (sayısal alanlar belge dilinin ayraçlarıyla biçimlenir; tutar/sayıya para birimi eklenebilir). */
 export function fieldContent(
     f: CatalogField,
     inLine: boolean,
@@ -1154,6 +1174,7 @@ export function fieldContent(
     tx: FieldTransform = NO_TRANSFORM,
     customXPath?: string | null,
     currency: CurrencyDisplay = f.format === 'amount' ? 'symbol' : 'none',
+    decimals?: number,
 ): string {
     const textual = tx.extract !== 'all' || tx.case !== 'none';
     const custom = customXPath?.trim();
@@ -1161,10 +1182,12 @@ export function fieldContent(
     const nodeXp = escapeSelect(
         custom && !customIsFormat ? custom : fieldNodeXPath(f, inLine, tx),
     );
-    if (f.format === 'amount' && !textual) {
+    const isNumeric = f.format === 'amount' || f.format === 'number';
+    if (isNumeric && !textual) {
+        const dec = decimals ?? (f.format === 'amount' ? 2 : 0);
         const selectExpr = customIsFormat
             ? escapeSelect(custom!)
-            : formatted(`number(${nodeXp})`, 2, lang);
+            : formatted(`number(${nodeXp})`, dec, lang);
         const suffix = currencySuffixXslt(nodeXp, currency);
         return `<xsl:if test="${nodeXp}"><xsl:value-of select="${selectExpr}"/>${suffix}</xsl:if>`;
     }
@@ -1173,26 +1196,28 @@ export function fieldContent(
     return `<xsl:value-of select="${escapeSelect(fieldTransformExpr(f, inLine, tx, lang))}"/>`;
 }
 
-/** Dönüşümlü alanın örnek XML'deki değeri (ilk eşleşme); tutarlarda para birimi eklenir. */
+/** Dönüşümlü alanın örnek XML'deki değeri (ilk eşleşme); sayısal alanlarda biçim + para birimi. */
 export function evaluateFieldTransform(
     xmlDoc: Document | null,
     f: CatalogField,
     tx: FieldTransform,
     lang: DocLanguage = 'tr',
     currency: CurrencyDisplay = 'none',
+    decimals?: number,
 ): string {
     if (!xmlDoc) return '';
     const textual = tx.extract !== 'all' || tx.case !== 'none';
     try {
-        if (f.format === 'amount' && !textual) {
+        if ((f.format === 'amount' || f.format === 'number') && !textual) {
             const nodeXp = fieldNodeXPath(f, false, tx);
             const raw = xmlDoc.evaluate(`string(${nodeXp})`, xmlDoc, null, XPathResult.STRING_TYPE, null).stringValue.trim();
             const n = Number(String(raw).replace(/\s/g, '').replace(',', '.'));
             if (!Number.isFinite(n)) return raw;
+            const dec = decimals ?? (f.format === 'amount' ? 2 : 0);
             const { decimal, grouping } = DECIMAL_FORMATS[decimalFormatOf(lang)];
-            const [intPart, frac = ''] = n.toFixed(2).split('.');
+            const [intPart, frac = ''] = n.toFixed(dec).split('.');
             const withGroup = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, grouping === '\u00a0' ? '\u00a0' : grouping);
-            const num = `${withGroup}${decimal}${frac}`;
+            const num = dec > 0 ? `${withGroup}${decimal}${frac}` : withGroup;
             if (currency === 'none') return num;
             const code = evaluateCurrencyCode(xmlDoc, nodeXp);
             if (!code) return num;
@@ -1208,7 +1233,10 @@ export function evaluateFieldTransform(
 
 export const fieldSnippet = (id: string, f: CatalogField, inLine: boolean, lang: DocLanguage = 'tr') => {
     const cur = f.format === 'amount' ? ' data-currency="symbol"' : '';
-    return `<span data-xslt-obj="${id}" data-obj-kind="field" data-field="${f.key}"${cur}>${fieldContent(f, inLine, lang)}</span>`;
+    const dec = f.format === 'amount' || f.format === 'number'
+        ? ` data-decimals="${f.format === 'amount' ? 2 : 0}"`
+        : '';
+    return `<span data-xslt-obj="${id}" data-obj-kind="field" data-field="${f.key}"${cur}${dec}>${fieldContent(f, inLine, lang)}</span>`;
 };
 
 export type FormulaOp = 'none' | 'percent' | 'mul' | 'div' | 'add' | 'sub';
@@ -1221,6 +1249,8 @@ export interface FormulaModel {
     decimals: number;
     label: string;
     suffix: string;
+    /** Belge para birimi (DocumentCurrencyCode) sembol/kod. */
+    currency: CurrencyDisplay;
 }
 
 /** İşlemler; görünen adları `editor.formula.ops.<id>` (arayüz dili). */
@@ -1241,11 +1271,13 @@ export const DEFAULT_FORMULA: FormulaModel = {
     decimals: 2,
     label: '',
     suffix: '',
+    currency: 'symbol',
 };
 
 export function readFormula(el: Element): FormulaModel {
     const get = (n: string) => el.getAttribute(`data-formula-${n}`);
     const op = get('op') as FormulaOp | null;
+    const cur = get('currency');
     return {
         a: get('a') ?? DEFAULT_FORMULA.a,
         op: op && FORMULA_OPS.some(o => o.id === op) ? op : DEFAULT_FORMULA.op,
@@ -1253,6 +1285,7 @@ export function readFormula(el: Element): FormulaModel {
         decimals: Math.min(4, Math.max(0, Number(get('decimals') ?? 2) || 0)),
         label: get('label') ?? '',
         suffix: get('suffix') ?? '',
+        currency: cur === 'symbol' || cur === 'code' || cur === 'none' ? cur : 'none',
     };
 }
 
@@ -1263,6 +1296,7 @@ export const formulaAttrs = (m: FormulaModel): [string, string][] => [
     ['data-formula-decimals', String(m.decimals)],
     ['data-formula-label', m.label],
     ['data-formula-suffix', m.suffix],
+    ['data-formula-currency', m.currency === 'none' ? '' : m.currency],
 ];
 
 /**
@@ -1338,7 +1372,8 @@ export function evaluateFormula(xmlDoc: Document | null, m: FormulaModel, catalo
 export function formulaContent(m: FormulaModel, catalog: CatalogField[], inLine: boolean, lang: DocLanguage = 'tr'): string | null {
     const fx = formulaExpression(m, catalog, inLine);
     if (!fx) return null;
-    return `${escapeText(m.label)}<xsl:if test="string(${fx.a}) != 'NaN'"><xsl:value-of select="${formatted(fx.expr, m.decimals, lang)}"/></xsl:if>${escapeText(m.suffix)}`;
+    const cur = currencySuffixFromDoc(m.currency ?? 'none');
+    return `${escapeText(m.label)}<xsl:if test="string(${fx.a}) != 'NaN'"><xsl:value-of select="${formatted(fx.expr, m.decimals, lang)}"/>${cur}</xsl:if>${escapeText(m.suffix)}`;
 }
 
 export function formulaSnippet(id: string, m: FormulaModel, catalog: CatalogField[], inLine: boolean, lang: DocLanguage = 'tr'): string {

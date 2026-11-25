@@ -244,6 +244,8 @@ const editor: typeof tr = {
         currencyCode: 'Code (TRY, USD, EUR…)',
         currencyNone: 'Hide',
         currencyNote: 'Taken from DocumentCurrencyCode or the amount currencyID; you do not need to type it into the format/XPath.',
+        numberFormat: 'Number format',
+        numberFormatNote: 'Decimal places and currency. Example: {{sample}}. Separators follow the document language.',
         qrSize: 'Размер (ширина = высота)',
         qrNote: 'Содержимое по стандарту QR-кода GİB (v1.2) формируется из документа: для счетов и e-Arşiv — налоговый номер, сценарий, тип, дата, номер, UUID, суммы и ставки НДС; для накладных — дата/время отгрузки, налоговый номер перевозчика и госномер. QR-код должен находиться в правом верхнем углу документа. Изменение размера применяется при обновлении предпросмотра.',
         position: 'Позиция',

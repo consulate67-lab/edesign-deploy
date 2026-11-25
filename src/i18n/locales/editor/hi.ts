@@ -244,6 +244,8 @@ const editor: typeof tr = {
         currencyCode: 'Code (TRY, USD, EUR…)',
         currencyNone: 'Hide',
         currencyNote: 'Taken from DocumentCurrencyCode or the amount currencyID; you do not need to type it into the format/XPath.',
+        numberFormat: 'Number format',
+        numberFormatNote: 'Decimal places and currency. Example: {{sample}}. Separators follow the document language.',
         qrSize: 'आकार (चौड़ाई = ऊँचाई)',
         qrNote: 'GİB QR कोड मानक (v1.2) की सामग्री डॉक्यूमेंट से बनाई जाती है: इनवॉइस और e-Arşiv के लिए टैक्स ID, परिदृश्य, प्रकार, तारीख, नंबर, UUID, राशियाँ और VAT दरें; डिस्पैच एडवाइस के लिए शिपमेंट की तारीख/समय, कैरियर की टैक्स ID और प्लेट नंबर। QR कोड डॉक्यूमेंट के ऊपरी-दाएँ कोने में होना चाहिए। आकार में बदलाव प्रीव्यू रीफ़्रेश होने पर लागू होते हैं।',
         position: 'पोज़िशन',

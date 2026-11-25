@@ -244,6 +244,8 @@ const editor: typeof tr = {
         currencyCode: 'Code (TRY, USD, EUR…)',
         currencyNone: 'Hide',
         currencyNote: 'Taken from DocumentCurrencyCode or the amount currencyID; you do not need to type it into the format/XPath.',
+        numberFormat: 'Number format',
+        numberFormatNote: 'Decimal places and currency. Example: {{sample}}. Separators follow the document language.',
         qrSize: 'Taille (largeur = hauteur)',
         qrNote: 'Le contenu selon la norme QR Code GİB (v1.2) est généré à partir du document : pour les factures et l’e-Archive, identifiant fiscal, scénario, type, date, numéro, UUID, montants et taux de TVA ; pour les bons de livraison, date/heure d’expédition, identifiant du transporteur et immatriculation. Le QR code doit figurer en haut à droite du document. Les changements de taille s’appliquent après actualisation de l’aperçu.',
         position: 'Position',

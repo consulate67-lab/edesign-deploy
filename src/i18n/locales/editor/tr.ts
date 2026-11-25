@@ -242,6 +242,8 @@ const editor = {
         currencyCode: 'Kod (TRY, USD, EUR…)',
         currencyNone: 'Gösterme',
         currencyNote: 'Belgedeki DocumentCurrencyCode veya tutarın currencyID özniteliğinden gelir; format satırına elle yazmanız gerekmez.',
+        numberFormat: 'Sayı formatı',
+        numberFormatNote: 'Ondalık basamak ve para birimi. Örnek: {{sample}}. Ayraçlar belge diline göredir.',
         qrSize: 'Boyut (genişlik = yükseklik)',
         qrNote: 'GİB Karekod Standardı (v1.2) içeriği belgeden otomatik üretilir: fatura ve e-Arşivde VKN/TCKN, senaryo, tip, tarih, no, ETTN, tutarlar ve KDV oranları; irsaliyede sevk tarihi/saati, taşıyıcı VKN ve plaka. Karekod belgenin sağ üst köşesinde yer almalıdır. Boyut değişikliği önizleme yenilenince uygulanır.',
         position: 'Konum',

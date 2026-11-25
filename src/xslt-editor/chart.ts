@@ -261,7 +261,7 @@ function legendItem(c: Ctx, label: string, v: string, total: string, color: stri
 const more = (count: string, limit: number) =>
     `<xsl:if test="${count} &gt; ${limit}"><div style="font-size:10px;color:#94a3b8;margin:2px 0 0 0">+<xsl:value-of select="${count} - ${limit}"/></div></xsl:if>`;
 
-const asFormula = (a: string, op: FormulaOp, b: string): FormulaModel => ({ a, op, b, decimals: 0, label: '', suffix: '' });
+const asFormula = (a: string, op: FormulaOp, b: string): FormulaModel => ({ a, op, b, decimals: 0, label: '', suffix: '', currency: 'none' });
 
 /** node-set uzantısıyla (exsl, yoksa msxsl) hesaplanan değişken; ikisi de yoksa 0. */
 const nodeSetVar = (name: string, expr: (fn: string) => string) =>
