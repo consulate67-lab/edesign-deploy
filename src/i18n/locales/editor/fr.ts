@@ -67,6 +67,8 @@ const editor: typeof tr = {
     position: {
         label: 'Positionnement',
         reanchored: '{{count}} objet(s) en position libre ancré(s) à la page de la facture ; ils apparaissent désormais au même endroit de la page dans chaque visionneuse et à l\'impression.',
+        cellFlowRestored: '{{count}} champ(s) décalé(s) dans des cellules de tableau ont été remis dans le flux de ligne.',
+        cellLocked: 'Les champs dans les cellules de tableau restent dans le flux de ligne ; le positionnement absolu casse l’alignement des totaux.',
         static: 'Normal (dans le flux)',
         relative: 'Décalé',
         absolute: 'Fixe sur la page',
@@ -525,6 +527,7 @@ const editor: typeof tr = {
         moveHint: 'Start move mode for all selected objects',
         clear: 'Clear multi',
         done: 'Objects aligned.',
+        skipTable: 'Les champs dans les cellules de tableau ne peuvent pas être alignés ; ils restent dans le flux de ligne.',
     },
     rows: {
         title: 'Subtotal / summary row',

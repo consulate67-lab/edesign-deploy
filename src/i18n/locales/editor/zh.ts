@@ -67,6 +67,8 @@ const editor: typeof tr = {
     position: {
         label: '定位',
         reanchored: '已将 {{count}} 个自由定位的对象固定到发票页面；现在它们在所有查看器和打印中都显示在页面的相同位置。',
+        cellFlowRestored: '已将表格单元格中 {{count}} 个错位字段恢复为行内流式布局。',
+        cellLocked: '表格单元格中的字段保持行内流式布局；绝对定位会破坏汇总金额对齐。',
         static: '常规（随页面排版）',
         relative: '相对原位置偏移',
         absolute: '固定在页面上',
@@ -525,6 +527,7 @@ const editor: typeof tr = {
         moveHint: 'Start move mode for all selected objects',
         clear: 'Clear multi',
         done: 'Objects aligned.',
+        skipTable: '表格单元格中的字段无法对齐；它们保持行内流式布局。',
     },
     rows: {
         title: 'Subtotal / summary row',

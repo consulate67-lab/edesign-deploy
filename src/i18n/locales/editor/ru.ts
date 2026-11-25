@@ -67,6 +67,8 @@ const editor: typeof tr = {
     position: {
         label: 'Позиционирование',
         reanchored: 'Свободно размещённые объекты ({{count}}) закреплены на странице счёта; теперь они отображаются в одном и том же месте страницы в любой программе просмотра и при печати.',
+        cellFlowRestored: '{{count}} смещённых полей в ячейках таблицы возвращены в поток строки.',
+        cellLocked: 'Поля в ячейках таблицы остаются в потоке строки; абсолютное позиционирование ломает выравнивание итогов.',
         static: 'Обычное (в потоке страницы)',
         relative: 'Смещение от исходного места',
         absolute: 'Фиксированное на странице',
@@ -525,6 +527,7 @@ const editor: typeof tr = {
         moveHint: 'Start move mode for all selected objects',
         clear: 'Clear multi',
         done: 'Objects aligned.',
+        skipTable: 'Поля в ячейках таблицы нельзя выровнять; они остаются в потоке строки.',
     },
     rows: {
         title: 'Subtotal / summary row',

@@ -67,6 +67,8 @@ const editor: typeof tr = {
     position: {
         label: 'Posicionamiento',
         reanchored: '{{count}} objeto(s) con posición libre anclado(s) a la página de la factura; ahora aparecen en el mismo lugar de la página en cualquier visor y al imprimir.',
+        cellFlowRestored: 'Se devolvió(ieron) {{count}} campo(s) desplazado(s) en celdas de tabla al flujo de fila.',
+        cellLocked: 'Los campos en celdas de tabla permanecen en el flujo de fila; el posicionamiento absoluto rompe la alineación de totales.',
         static: 'Normal (en el flujo de la página)',
         relative: 'Desplazado',
         absolute: 'Fijo en la página',
@@ -525,6 +527,7 @@ const editor: typeof tr = {
         moveHint: 'Start move mode for all selected objects',
         clear: 'Clear multi',
         done: 'Objects aligned.',
+        skipTable: 'Los campos en celdas de tabla no se pueden alinear; permanecen en el flujo de fila.',
     },
     rows: {
         title: 'Subtotal / summary row',

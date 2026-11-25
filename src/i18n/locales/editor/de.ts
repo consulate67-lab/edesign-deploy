@@ -67,6 +67,8 @@ const editor: typeof tr = {
     position: {
         label: 'Positionierung',
         reanchored: '{{count}} frei positionierte(s) Objekt(e) an der Rechnungsseite verankert; sie erscheinen jetzt in jedem Viewer und im Druck an derselben Stelle der Seite.',
+        cellFlowRestored: '{{count}} verschobene(s) Feld(er) in Tabellenzellen wurden wieder in den Zeilenfluss gesetzt.',
+        cellLocked: 'Felder in Tabellenzellen bleiben im Zeilenfluss; absolute Positionierung zerstört die Ausrichtung der Summen.',
         static: 'Normal (im Seitenfluss)',
         relative: 'Versetzt',
         absolute: 'Fest auf der Seite',
@@ -525,6 +527,7 @@ const editor: typeof tr = {
         moveHint: 'Start move mode for all selected objects',
         clear: 'Clear multi',
         done: 'Objects aligned.',
+        skipTable: 'Felder in Tabellenzellen können nicht ausgerichtet werden; sie bleiben im Zeilenfluss.',
     },
     rows: {
         title: 'Subtotal / summary row',

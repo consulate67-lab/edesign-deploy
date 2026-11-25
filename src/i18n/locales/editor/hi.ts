@@ -67,6 +67,8 @@ const editor: typeof tr = {
     position: {
         label: 'पोज़िशनिंग',
         reanchored: '{{count}} स्वतंत्र रूप से पोज़िशन किए गए ऑब्जेक्ट इनवॉइस पेज पर पिन कर दिए गए; अब वे हर व्यूअर और प्रिंट में पेज पर एक ही जगह दिखते हैं।',
+        cellFlowRestored: 'तालिका सेल में {{count}} खिसके फ़ील्ड को पंक्ति फ़्लो में वापस लाया गया।',
+        cellLocked: 'तालिका सेल के फ़ील्ड पंक्ति फ़्लो में रहते हैं; निरपेक्ष पोज़िशनिंग सारांश कुल संरेखण तोड़ देती है।',
         static: 'सामान्य (पेज फ़्लो में)',
         relative: 'अपनी जगह से खिसका हुआ',
         absolute: 'पेज पर स्थिर',
@@ -525,6 +527,7 @@ const editor: typeof tr = {
         moveHint: 'Start move mode for all selected objects',
         clear: 'Clear multi',
         done: 'Objects aligned.',
+        skipTable: 'तालिका सेल के फ़ील्ड संरेखित नहीं किए जा सकते; वे पंक्ति फ़्लो में रहते हैं।',
     },
     rows: {
         title: 'Subtotal / summary row',

@@ -67,6 +67,8 @@ const editor: typeof tr = {
     position: {
         label: 'Positioning',
         reanchored: '{{count}} freely positioned object(s) pinned to the invoice page; they now appear at the same place on the page in every viewer and in print.',
+        cellFlowRestored: '{{count}} shifted field(s) in table cells were returned to row flow.',
+        cellLocked: 'Fields in table cells stay in row flow; absolute positioning breaks summary total alignment.',
         static: 'Normal (in page flow)',
         relative: 'Offset from place',
         absolute: 'Fixed on page',
@@ -525,6 +527,7 @@ const editor: typeof tr = {
         moveHint: 'Start move mode for all selected objects',
         clear: 'Clear multi',
         done: 'Objects aligned.',
+        skipTable: 'Fields in table cells cannot be aligned; they stay in row flow.',
     },
     rows: {
         title: 'Subtotal / summary row',

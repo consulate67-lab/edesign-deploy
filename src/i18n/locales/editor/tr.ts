@@ -65,6 +65,8 @@ const editor = {
     position: {
         label: 'Konumlandırma',
         reanchored: '{{count}} serbest konumlu obje fatura sayfasına sabitlendi; artık her görüntüleyicide ve baskıda sayfadaki aynı yerde görünür.',
+        cellFlowRestored: '{{count}} tablo hücresindeki kaymış alan tekrar satır akışına alındı.',
+        cellLocked: 'Tablo hücresindeki alanlar satır akışında kalır; mutlak konum özet tutar hizasını bozar.',
         static: 'Normal (sayfa akışında)',
         relative: 'Yerinden kaydır',
         absolute: 'Sayfada sabit konum',
@@ -523,6 +525,7 @@ const editor = {
         moveHint: 'Seçili nesneleri birlikte taşıma moduna alır',
         clear: 'Seçimi azalt',
         done: 'Nesneler hizalandı.',
+        skipTable: 'Tablo hücresindeki alanlar hizalanamaz; satır akışında kalırlar.',
     },
     rows: {
         title: 'Alt toplam / özet satırı',
