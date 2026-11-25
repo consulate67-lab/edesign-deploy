@@ -392,10 +392,10 @@ export function registerShopifyRoutes(app, { db, requireAdmin, website }) {
         );
     }
 
-    function shopInstallUrl(shop) {
-        if (!shopifyApiKey || !shop) return null;
-        // Custom / Partner app kurulum — Client ID değişince eski kurulum geçersiz kalır
-        return `https://admin.shopify.com/oauth/install_custom_app?client_id=${encodeURIComponent(shopifyApiKey)}&shop=${encodeURIComponent(shop)}`;
+    function shopInstallUrl(_shop) {
+        // İmzasız install_custom_app linki Shopify’da “geçersiz” olur.
+        // Geçerli link yalnız Dev Dashboard → Distribution → Generate link ile üretilir.
+        return null;
     }
 
     function humanizeShopifyAuthError(msg, shop) {

@@ -241,9 +241,12 @@
         ${reinstall ? `
           <div class="preview-warn" style="margin-bottom:14px">
             <strong>Yeniden kurulum gerekli.</strong>
-            Client ID güncellendi; Admin’de görünen eski kurulum bu anahtarla eşleşmiyor.
-            Eski EdXDocu’yu kaldırıp güncel uygulamayı yükleyin${state.shop ? ` (${escapeHtml(state.shop)})` : ''}.
-            ${installUrl ? `<div style="margin-top:10px"><a class="install-link" href="${escapeHtml(installUrl)}" target="_top" rel="noopener">Güncel uygulamayı yükle</a></div>` : ''}
+            Client ID değiştiyse eski kurulum geçersizdir.
+            Dev Dashboard → EdXDocu → <em>Distribution / Dağıtım</em> → Custom → mağaza domain’ini yazıp
+            <em>Generate link</em> ile yeni imzalı yükleme bağlantısı oluşturun
+            ${state.shop ? ` (mağaza: <code>${escapeHtml(state.shop)}</code>)` : ''}.
+            Eski / imzasız linkler “geçersiz” hatası verir (~7 günde de süresi dolar).
+            ${installUrl ? `<div style="margin-top:10px"><a class="install-link" href="${escapeHtml(installUrl)}" target="_top" rel="noopener">Yükleme sayfası</a></div>` : ''}
           </div>
         ` : ''}
         <div class="howto">
