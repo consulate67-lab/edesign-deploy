@@ -1,4 +1,4 @@
-import type { Messages } from './tr';
+﻿import type { Messages } from './tr';
 import editor from './editor/fr';
 import gallery from './gallery/fr';
 import tutorials from './tutorials/fr';
@@ -283,7 +283,7 @@ const fr: Messages = {
         revisionAppliedToast: 'Le modèle officiel a été mis à jour automatiquement selon la nouvelle publication.',
         continue: 'Continuer',
         completedTitle: 'Conceptions terminées',
-        completedNote: 'Les conceptions validées ne peuvent plus être modifiées ; vous pouvez les prévisualiser et les retélécharger gratuitement jusqu’à leur date de suppression. Conservez le fichier téléchargé ; il continue de fonctionner après la suppression.',
+        completedNote: 'You can preview and download for free until the deletion date. To keep editing, download the XSLT and re-upload it via My own XSLT.',
         search: 'Rechercher une conception ou un type de document',
         count: '{{shown}} / {{total}} conceptions',
         colDesign: 'Conception',
@@ -395,6 +395,7 @@ const fr: Messages = {
         xsltFileHint: '.xslt ou .xsl · 5 Mo max.',
         testNote: 'Ceci est un fichier de TEST. La mention TEST a été retirée dans l’éditeur ; vous pouvez reprendre là où vous vous étiez arrêté. À la fin, « Valider » vous donne le fichier sans mention TEST ; après validation, la conception ne peut plus être modifiée.',
         approvedFile: 'Ce fichier est une conception validée (achetée) et ne peut plus être modifié. Vous pouvez le retélécharger depuis « Conceptions terminées » jusqu’à sa date de suppression.',
+        approvedAsDraft: 'Approved file opened as an editable draft (approval key removed). You can save and approve again.',
         tooLarge: 'Le fichier est trop volumineux (5 Mo max.) : {{size}} Mo',
         xsltLoadFailed: 'Le XSLT n’a pas pu être chargé',
         xmlTitle: 'Quelles données afficher dans la conception ?',

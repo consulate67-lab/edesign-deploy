@@ -1,4 +1,4 @@
-import type { Messages } from './tr';
+﻿import type { Messages } from './tr';
 import editor from './editor/pt';
 import gallery from './gallery/pt';
 import tutorials from './tutorials/pt';
@@ -283,7 +283,7 @@ const pt: Messages = {
         revisionAppliedToast: 'O modelo oficial foi atualizado automaticamente para a nova publicação.',
         continue: 'Continuar',
         completedTitle: 'Designs concluídos',
-        completedNote: 'Designs aprovados não podem ser alterados; você pode visualizá-los e baixá-los novamente de graça até a data de exclusão. Guarde o arquivo baixado; ele continua funcionando depois que o design é excluído.',
+        completedNote: 'You can preview and download for free until the deletion date. To keep editing, download the XSLT and re-upload it via My own XSLT.',
         search: 'Pesquisar designs ou tipos de documento',
         count: '{{shown}} / {{total}} designs',
         colDesign: 'Design',
@@ -395,6 +395,7 @@ const pt: Messages = {
         xsltFileHint: '.xslt ou .xsl · até 5 MB',
         testNote: 'Este é um arquivo de TESTE. A marca TESTE foi removida no editor, então você pode continuar de onde parou. Ao terminar, "Aprovar" entrega o arquivo sem a marca TESTE; após a aprovação, o design não pode mais ser alterado.',
         approvedFile: 'Este arquivo é um design aprovado (comprado) e não pode ser editado novamente. Você pode baixá-lo de novo em "Designs concluídos" até a data de exclusão.',
+        approvedAsDraft: 'Approved file opened as an editable draft (approval key removed). You can save and approve again.',
         tooLarge: 'O arquivo é grande demais (máx. 5 MB): {{size}} MB',
         xsltLoadFailed: 'Não foi possível carregar o XSLT',
         xmlTitle: 'Quais dados o design deve mostrar?',

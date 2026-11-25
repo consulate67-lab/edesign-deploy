@@ -1,4 +1,4 @@
-import type { Messages } from './tr';
+﻿import type { Messages } from './tr';
 import editor from './editor/ru';
 import gallery from './gallery/ru';
 import tutorials from './tutorials/ru';
@@ -283,7 +283,7 @@ const ru: Messages = {
         revisionAppliedToast: 'Официальный шаблон автоматически обновлён по новой публикации.',
         continue: 'Продолжить',
         completedTitle: 'Завершённые дизайны',
-        completedNote: 'Утверждённые дизайны нельзя изменить; до даты удаления их можно бесплатно просматривать и скачивать повторно. Сохраните скачанный файл: он продолжит работать и после удаления дизайна.',
+        completedNote: 'You can preview and download for free until the deletion date. To keep editing, download the XSLT and re-upload it via My own XSLT.',
         search: 'Поиск по дизайнам или типам документов',
         count: 'Дизайнов: {{shown}} / {{total}}',
         colDesign: 'Дизайн',
@@ -395,6 +395,7 @@ const ru: Messages = {
         xsltFileHint: '.xslt или .xsl · до 5 МБ',
         testNote: 'Это ТЕСТОВЫЙ файл. Отметка TEST была удалена в редакторе, поэтому вы можете продолжить с того места, где остановились. По завершении кнопка «Утвердить» даст вам файл без отметки TEST; после утверждения дизайн изменить нельзя.',
         approvedFile: 'Этот файл — утверждённый (оплаченный) дизайн, повторно редактировать его нельзя. Скачать его снова можно в разделе «Завершённые дизайны» до даты удаления.',
+        approvedAsDraft: 'Approved file opened as an editable draft (approval key removed). You can save and approve again.',
         tooLarge: 'Файл слишком большой (макс. 5 МБ): {{size}} МБ',
         xsltLoadFailed: 'Не удалось загрузить XSLT',
         xmlTitle: 'Какие данные должен показывать дизайн?',

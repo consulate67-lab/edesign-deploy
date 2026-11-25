@@ -1,4 +1,4 @@
-import type { Messages } from './tr';
+﻿import type { Messages } from './tr';
 import editor from './editor/zh';
 import gallery from './gallery/zh';
 import tutorials from './tutorials/zh';
@@ -283,7 +283,7 @@ const zh: Messages = {
         revisionAppliedToast: '官方模板已根据新发布自动更新。',
         continue: '继续',
         completedTitle: '已完成的设计',
-        completedNote: '已审批的设计无法更改；在删除日期之前，您可以免费再次预览和下载。请保存已下载的文件；设计删除后该文件仍可继续使用。',
+        completedNote: 'You can preview and download for free until the deletion date. To keep editing, download the XSLT and re-upload it via My own XSLT.',
         search: '搜索设计或单据类型',
         count: '{{shown}} / {{total}} 个设计',
         colDesign: '设计',
@@ -395,6 +395,7 @@ const zh: Messages = {
         xsltFileHint: '.xslt 或 .xsl · 最大 5 MB',
         testNote: '这是一个测试文件。编辑器中已移除“测试”标记，您可以从上次中断处继续。完成后，点击“审批”即可获得不带“测试”标记的文件；审批后设计将无法更改。',
         approvedFile: '此文件是已审批（已购买）的设计，无法再次编辑。在删除日期之前，您可以在“已完成的设计”中再次下载。',
+        approvedAsDraft: 'Approved file opened as an editable draft (approval key removed). You can save and approve again.',
         tooLarge: '文件过大（最大 5 MB）：{{size}} MB',
         xsltLoadFailed: '无法加载 XSLT',
         xmlTitle: '设计应显示哪些数据？',

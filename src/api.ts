@@ -53,8 +53,11 @@ export interface SavedDesign {
 /** server/index.js embedDesignKey ile aynı biçim. */
 export const DESIGN_KEY_RE = /edesign-key:([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i;
 export const designKeyOf = (xslt: string | null | undefined) => xslt?.match(DESIGN_KEY_RE)?.[1] ?? null;
+/** Onay yorumunu kaldırır; dosya yeniden düzenlenebilir taslak olarak açılabilir. */
+export const stripDesignKey = (xslt: string) =>
+    xslt.replace(/^(?:\uFEFF|\u00EF\u00BB\u00BF)+/, '').replace(/<!--\s*edesign-key:[^>]*?-->[ \t]*\r?\n?/gi, '');
 const embedDesignKey = (xslt: string, key: string) => {
-    const clean = xslt.replace(/^(?:\uFEFF|\u00EF\u00BB\u00BF)+/, '').replace(/<!--\s*edesign-key:[^>]*?-->[ \t]*\r?\n?/gi, '');
+    const clean = stripDesignKey(xslt);
     const comment = `<!-- edesign-key:${key} | Onaylanmis tasarim. Tasarimcida tekrar duzenlenemez. Tasarimlar olusturulduktan 7 gun sonra hesaptan silinir; bu dosyayi saklayin. -->\n`;
     const decl = clean.match(/^\uFEFF?\s*<\?xml[^?]*\?>[ \t]*\r?\n?/);
     return decl ? clean.slice(0, decl[0].length) + comment + clean.slice(decl[0].length) : comment + clean;

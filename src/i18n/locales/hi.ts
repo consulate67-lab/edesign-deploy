@@ -1,4 +1,4 @@
-import type { Messages } from './tr';
+﻿import type { Messages } from './tr';
 import editor from './editor/hi';
 import gallery from './gallery/hi';
 import tutorials from './tutorials/hi';
@@ -283,7 +283,7 @@ const hi: Messages = {
         revisionAppliedToast: 'आधिकारिक टेम्पलेट नए प्रकाशन के अनुसार अपने आप अपडेट हो गया।',
         continue: 'जारी रखें',
         completedTitle: 'पूर्ण डिज़ाइन',
-        completedNote: 'स्वीकृत डिज़ाइन बदले नहीं जा सकते; हटाए जाने की तारीख तक आप इन्हें मुफ़्त में फिर से प्रीव्यू और डाउनलोड कर सकते हैं। डाउनलोड की गई फ़ाइल सँभालकर रखें; डिज़ाइन हटने के बाद भी वह काम करती रहेगी।',
+        completedNote: 'You can preview and download for free until the deletion date. To keep editing, download the XSLT and re-upload it via My own XSLT.',
         search: 'डिज़ाइन या दस्तावेज़ प्रकार खोजें',
         count: '{{shown}} / {{total}} डिज़ाइन',
         colDesign: 'डिज़ाइन',
@@ -395,6 +395,7 @@ const hi: Messages = {
         xsltFileHint: '.xslt या .xsl · अधिकतम 5 MB',
         testNote: 'यह एक TEST फ़ाइल है। एडिटर में TEST चिह्न हटा दिया गया है, इसलिए आप वहीं से जारी रख सकते हैं जहाँ छोड़ा था। काम पूरा होने पर "स्वीकृत करें" से आपको TEST चिह्न के बिना फ़ाइल मिलती है; स्वीकृति के बाद डिज़ाइन बदला नहीं जा सकता।',
         approvedFile: 'यह फ़ाइल एक स्वीकृत (खरीदा गया) डिज़ाइन है और इसे फिर से संपादित नहीं किया जा सकता। हटाए जाने की तारीख तक आप इसे "पूर्ण डिज़ाइन" से फिर से डाउनलोड कर सकते हैं।',
+        approvedAsDraft: 'Approved file opened as an editable draft (approval key removed). You can save and approve again.',
         tooLarge: 'फ़ाइल बहुत बड़ी है (अधिकतम 5 MB): {{size}} MB',
         xsltLoadFailed: 'XSLT लोड नहीं हो सकी',
         xmlTitle: 'डिज़ाइन में कौन-सा डेटा दिखाना है?',

@@ -10,7 +10,7 @@ import {
     type DocLanguage, type DocumentFamily,
 } from '../international';
 import { validateXslt, validateXml, stripBom, type ValidationResult } from './validate';
-import { designKeyOf } from '../api';
+import { designKeyOf, stripDesignKey } from '../api';
 import { hasTestWatermark, stripTestWatermark } from '../xslt-editor/utils/testWatermark';
 import { stripFieldGuide } from '../xslt-editor/utils/fieldGuideMarker';
 import { hasLicenseLock } from '../../shared/license-lock.js';
@@ -56,12 +56,16 @@ const readFile = (file: File): Promise<string> => new Promise((resolve, reject) 
     reader.readAsText(file);
 });
 
-/** Yüklenen dosyanın uygunluk sonucu; onaylanmış (satın alınmış) XSLT tekrar açılamaz. */
-const checkFile = (text: string, kind: 'xslt' | 'xml', docType: WizardDocType, sampleXml: string | null, xslt: string | null): ValidationResult => {
-    if (kind === 'xslt' && (!!designKeyOf(text) || hasLicenseLock(text))) {
-        return { ok: false, info: [], checks: [{ level: 'error', text: i18n.t('wizard.approvedFile') }] };
+/** Yüklenen dosyanın uygunluk sonucu. Onaylı XSLT engellenmez; anahtar temizlenip taslak olarak açılır. */
+const checkFile = (text: string, kind: 'xslt' | 'xml', docType: WizardDocType, sampleXml: string | null, xslt: string | null, opts?: { wasApproved?: boolean }): ValidationResult => {
+    const base = kind === 'xslt' ? validateXslt(text, docType, sampleXml) : validateXml(text, docType, xslt);
+    if (kind === 'xslt' && opts?.wasApproved && base.ok) {
+        return {
+            ...base,
+            checks: [...base.checks, { level: 'warn' as const, text: i18n.t('wizard.approvedAsDraft') }],
+        };
     }
-    return kind === 'xslt' ? validateXslt(text, docType, sampleXml) : validateXml(text, docType, xslt);
+    return base;
 };
 
 const CheckList: React.FC<{ result: ValidationResult }> = ({ result }) => (
@@ -369,9 +373,16 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void; onDis
         try {
             const raw = await readFile(file);
             const wasTest = kind === 'xslt' && hasTestWatermark(raw);
-            const text = kind === 'xslt' ? stripFieldGuide(wasTest ? stripTestWatermark(raw) : raw) : raw;
+            let text = kind === 'xslt' ? stripFieldGuide(wasTest ? stripTestWatermark(raw) : raw) : raw;
+            const wasApproved = kind === 'xslt' && (!!designKeyOf(text) || hasLicenseLock(text));
+            if (kind === 'xslt') text = stripDesignKey(text);
             if (kind === 'xslt') setOwnXsltWasTest(wasTest);
-            const loaded = { name: file.name, size: file.size, text, result: checkFile(text, kind, docType, sampleXml, xsltText) };
+            const loaded = {
+                name: file.name,
+                size: file.size,
+                text,
+                result: checkFile(text, kind, docType, sampleXml, xsltText, { wasApproved }),
+            };
             if (kind === 'xslt') setOwnXslt(loaded); else setOwnXml(loaded);
         } catch (e) {
             setError(e instanceof Error ? e.message : String(e));

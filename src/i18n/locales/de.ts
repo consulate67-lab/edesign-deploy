@@ -1,4 +1,4 @@
-import type { Messages } from './tr';
+﻿import type { Messages } from './tr';
 import editor from './editor/de';
 import gallery from './gallery/de';
 import tutorials from './tutorials/de';
@@ -283,7 +283,7 @@ const de: Messages = {
         revisionAppliedToast: 'Die offizielle Vorlage wurde automatisch auf die neue Veröffentlichung aktualisiert.',
         continue: 'Weiter',
         completedTitle: 'Abgeschlossene Designs',
-        completedNote: 'Freigegebene Designs können nicht geändert werden; bis zum Löschdatum können Sie sie kostenlos ansehen und erneut herunterladen. Bewahren Sie die heruntergeladene Datei auf; sie funktioniert auch nach dem Löschen weiter.',
+        completedNote: 'You can preview and download for free until the deletion date. To keep editing, download the XSLT and re-upload it via My own XSLT.',
         search: 'Designs oder Belegarten suchen',
         count: '{{shown}} / {{total}} Designs',
         colDesign: 'Design',
@@ -395,6 +395,7 @@ const de: Messages = {
         xsltFileHint: '.xslt oder .xsl · max. 5 MB',
         testNote: 'Dies ist eine TEST-Datei. Der TEST-Vermerk wurde im Editor entfernt; Sie können dort weitermachen, wo Sie aufgehört haben. Mit „Freigeben“ erhalten Sie die Datei ohne TEST-Vermerk; danach kann das Design nicht mehr geändert werden.',
         approvedFile: 'Diese Datei ist ein freigegebenes (gekauftes) Design und kann nicht erneut bearbeitet werden. Bis zum Löschdatum können Sie sie unter „Abgeschlossene Designs“ erneut herunterladen.',
+        approvedAsDraft: 'Approved file opened as an editable draft (approval key removed). You can save and approve again.',
         tooLarge: 'Die Datei ist zu groß (max. 5 MB): {{size}} MB',
         xsltLoadFailed: 'Das XSLT konnte nicht geladen werden',
         xmlTitle: 'Welche Daten soll das Design zeigen?',
