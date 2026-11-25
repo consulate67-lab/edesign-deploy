@@ -234,6 +234,7 @@ const editor: typeof tr = {
             inCell: 'La valeur est dans une cellule. Faites-la glisser dans l’aperçu ou placez-la ailleurs avec ↕ Déplacer ; elle est détachée automatiquement et la cellule reste en place.',
             detachHint: 'Place la valeur dans son propre bloc (<span>) ; la cellule et les libellés voisins restent en place',
             detachCell: 'Détacher de la cellule (rendre déplaçable)',
+            cellPortable: 'Les libellés et champs de données de cette cellule sont déplaçables. Sélectionnez ci-dessous puis ↕ Déplacer ; la cellule reste.',
             detachValue: 'Détacher la valeur seulement',
             valueNote: 'Le champ se déplace actuellement avec les autres textes de son bloc. Détachez-le d’abord pour ne déplacer que la valeur.',
         },

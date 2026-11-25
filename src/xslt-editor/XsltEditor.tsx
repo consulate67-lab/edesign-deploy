@@ -3588,21 +3588,36 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
 
     const applyConfiguredSummaryRow = useCallback((slots?: RowSlot[]) => {
         const useSlots = slots ?? rowSlotsRef.current;
+        if (!useSlots.some((s) => (s.kind === 'text' ? s.text.trim() : !!s.fieldKey))) return;
         let nextId = (() => {
             let max = 0;
             for (const m of xsltContentRef.current.matchAll(/data-xslt-obj="obj-(\d+)"/g)) max = Math.max(max, Number(m[1]));
             return max + 1;
         })();
+        const escapeLabel = (s: string) => s
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        let firstObjId: string | null = null;
         const cells: SummaryCellSpec[] = useSlots.map((s) => {
-            if (s.kind === 'text') return { kind: 'text', text: s.text };
+            if (s.kind === 'text') {
+                // Etiket de data-xslt-obj olsun → hücrede taşınabilir (detach gerekmez)
+                const id = `obj-${nextId++}`;
+                if (!firstObjId) firstObjId = id;
+                const text = s.text.trim() ? escapeLabel(s.text) : '&#160;';
+                return { kind: 'field', content: `<span data-xslt-obj="${id}" data-obj-kind="text">${text}</span>` };
+            }
             const f = catalogRef.current.find((c) => c.key === s.fieldKey);
-            if (!f) return { kind: 'text', text: '' };
+            if (!f) {
+                const id = `obj-${nextId++}`;
+                if (!firstObjId) firstObjId = id;
+                return { kind: 'field', content: `<span data-xslt-obj="${id}" data-obj-kind="text">&#160;</span>` };
+            }
             const id = `obj-${nextId++}`;
+            if (!firstObjId) firstObjId = id;
             // Diğer eklenen objeler gibi data-obj-kind=field → XPath / gösterilen alan paneli
             return { kind: 'field', content: fieldSnippet(id, f, false, docLangRef.current) };
         });
-        if (!cells.some((c) => (c.kind === 'text' ? c.text.trim() : c.content))) return;
         applySummaryRowEdit((xslt, tag) => addConfiguredRowAfter(xslt, tag, cells));
+        if (firstObjId) pendingSelectRef.current = { kind: 'obj', id: firstObjId };
         setRowSlots(emptyRowSlots());
         setRowComposerOpen(false);
     }, [applySummaryRowEdit, emptyRowSlots]);
@@ -6798,29 +6813,75 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                         </>
                                     )}
 
-                                    {(sel.locator?.kind === 'bind' || isLiteral) && el && selectedBindPlacement && !design.paid && (selectedBindPlacement.detach || !selectedBindPlacement.movable) && (
-                                        <div data-bind-move-status>
-                                            {sectionTitle(t('editor.panel.move.title'), '#059669')}
-                                            {!selectedBindPlacement.movable && (selectedBindPlacement.detach === 'cell'
-                                                ? noteBox(t('editor.panel.move.inCell'), 'info')
-                                                : noteBox(selectedBindPlacement.reason, 'warn'))}
-                                            {selectedBindPlacement.detach && (
-                                                <button
-                                                    type="button"
-                                                    data-bind-detach
-                                                    onClick={() => {
-                                                        if (sel.locator?.kind === 'bind') detachBinding(sel.locator.index);
-                                                        else if (sel.locator?.kind === 'el') detachCell(sel.locator.ordinal);
-                                                    }}
-                                                    title={t('editor.panel.move.detachHint')}
-                                                    style={{ width: '100%', marginTop: '8px', padding: '7px 10px', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.45)', borderRadius: '4px', color: '#059669', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
-                                                >
-                                                    ✂ {selectedBindPlacement.detach === 'cell' ? t('editor.panel.move.detachCell') : t('editor.panel.move.detachValue')}
-                                                </button>
-                                            )}
-                                            {selectedBindPlacement.detach === 'value' && noteBox(t('editor.panel.move.valueNote'), 'info')}
-                                        </div>
-                                    )}
+                                    {(sel.locator?.kind === 'bind' || isLiteral) && el && selectedBindPlacement && !design.paid && (selectedBindPlacement.detach || !selectedBindPlacement.movable) && (() => {
+                                        const portableKids = Array.from(el.querySelectorAll<HTMLElement>('[data-xslt-obj]'))
+                                            .filter((n) => n !== el);
+                                        const hasPortable = portableKids.length > 0;
+                                        return (
+                                            <div data-bind-move-status>
+                                                {sectionTitle(t('editor.panel.move.title'), '#059669')}
+                                                {hasPortable ? (
+                                                    noteBox(t('editor.panel.move.cellPortable'), 'info')
+                                                ) : !selectedBindPlacement.movable && (selectedBindPlacement.detach === 'cell'
+                                                    ? noteBox(t('editor.panel.move.inCell'), 'info')
+                                                    : noteBox(selectedBindPlacement.reason, 'warn'))}
+                                                {hasPortable && portableKids.map((kid) => {
+                                                    const id = kid.getAttribute('data-xslt-obj') || '';
+                                                    const kidKind = kid.getAttribute('data-obj-kind');
+                                                    const key = kid.getAttribute('data-field') || '';
+                                                    const fObj = key ? catalog.find((c) => c.key === key) : null;
+                                                    const label = kidKind === 'field'
+                                                        ? (fObj?.label ?? key.split('/').pop() ?? key)
+                                                        : ((kid.textContent || '').trim().slice(0, 40) || t('editor.insert.text'));
+                                                    if (!id) return null;
+                                                    return (
+                                                        <button
+                                                            key={id}
+                                                            type="button"
+                                                            data-move-cell-child
+                                                            onClick={() => {
+                                                                flushSourceEdits();
+                                                                openSelection(null, kid, { kind: 'obj', id });
+                                                                setMoving({ kind: 'obj', id });
+                                                            }}
+                                                            style={{ width: '100%', marginTop: '6px', padding: '7px 10px', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.45)', borderRadius: '4px', color: '#059669', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}
+                                                        >
+                                                            ↕ {t('editor.panel.move.button')} · {label}
+                                                        </button>
+                                                    );
+                                                })}
+                                                {selectedBindPlacement.detach && !hasPortable && (
+                                                    <button
+                                                        type="button"
+                                                        data-bind-detach
+                                                        onClick={() => {
+                                                            if (sel.locator?.kind === 'bind') detachBinding(sel.locator.index);
+                                                            else if (sel.locator?.kind === 'el') detachCell(sel.locator.ordinal);
+                                                        }}
+                                                        title={t('editor.panel.move.detachHint')}
+                                                        style={{ width: '100%', marginTop: '8px', padding: '7px 10px', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.45)', borderRadius: '4px', color: '#059669', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+                                                    >
+                                                        ✂ {selectedBindPlacement.detach === 'cell' ? t('editor.panel.move.detachCell') : t('editor.panel.move.detachValue')}
+                                                    </button>
+                                                )}
+                                                {selectedBindPlacement.detach && hasPortable && (
+                                                    <button
+                                                        type="button"
+                                                        data-bind-detach
+                                                        onClick={() => {
+                                                            if (sel.locator?.kind === 'bind') detachBinding(sel.locator.index);
+                                                            else if (sel.locator?.kind === 'el') detachCell(sel.locator.ordinal);
+                                                        }}
+                                                        title={t('editor.panel.move.detachHint')}
+                                                        style={{ width: '100%', marginTop: '8px', padding: '7px 10px', background: 'rgba(16, 185, 129, 0.08)', border: '1px dashed rgba(16, 185, 129, 0.35)', borderRadius: '4px', color: '#059669', fontSize: '10px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+                                                    >
+                                                        ✂ {selectedBindPlacement.detach === 'cell' ? t('editor.panel.move.detachCell') : t('editor.panel.move.detachValue')}
+                                                    </button>
+                                                )}
+                                                {selectedBindPlacement.detach === 'value' && !hasPortable && noteBox(t('editor.panel.move.valueNote'), 'info')}
+                                            </div>
+                                        );
+                                    })()}
 
                                     {kind !== 'element' && el && (() => {
                                         const all = [el, ...Array.from(el.querySelectorAll<HTMLElement>('[data-render-indexes]'))]
@@ -6828,17 +6889,67 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                             .filter((n, i, list) => Number.isInteger(n) && n !== bindingIndex && list.indexOf(n) === i && !!xsltInstrumented.bindings[n]);
                                         const dynamic = all.filter(i => (xsltInstrumented.bindings[i].kind || 'dropdown') === 'dropdown');
                                         const inner = (kind === 'dropdown' ? dynamic : [...dynamic, ...all.filter(i => !dynamic.includes(i))]).slice(0, 15);
-                                        if (kind === 'dropdown' && !dynamic.length) return null;
+                                        // Satır ekle ile konan alan objeleri örnek XML'de yoksa BIND basılmaz;
+                                        // data-field üzerinden yine de VERİ ALANI listesinde göster.
+                                        const fieldObjs = Array.from(el.querySelectorAll<HTMLElement>('[data-obj-kind="field"][data-field]'))
+                                            .filter((n) => n !== el || !isField);
+                                        const listedKeys = new Set(fieldObjs.map((n) => n.getAttribute('data-field') || ''));
+                                        // Binding zaten listelenen alanla aynıysa tekrar etme (xpath ucu ≈ key)
+                                        const bindOnly = inner.filter((i) => {
+                                            const ib = xsltInstrumented.bindings[i];
+                                            if (!ib || ib.kind === 'static') return true;
+                                            const xml = bindingInfo.get(ib)?.xml || '';
+                                            return ![...listedKeys].some((k) => k && (xml === k || ib.xpath.includes(k) || k.endsWith(xml)));
+                                        });
+                                        if (kind === 'dropdown' && !dynamic.length && !fieldObjs.length) return null;
+                                        const totalFields = fieldObjs.length + bindOnly.filter((i) => (xsltInstrumented.bindings[i]?.kind || 'dropdown') === 'dropdown').length;
+                                        if (kind === 'dropdown' && !totalFields) return null;
+                                        // Seçili öğe zaten alan objesi ise kendi paneli var; yalnız iç/kardeş alanlar kalsın
+                                        if (isField && !fieldObjs.length && !bindOnly.length) return null;
                                         return (
                                             <div data-contained-fields>
-                                                {sectionTitle(kind === 'dropdown' ? t('editor.panel.otherFields', { count: dynamic.length })
-                                                    : dynamic.length ? `${t('editor.panel.xmlField')} · ${t('editor.panel.fieldsHere', { count: dynamic.length })}` : t('editor.panel.xmlField'), '#4f46e5')}
-                                                {!dynamic.length && (
+                                                {sectionTitle(kind === 'dropdown' ? t('editor.panel.otherFields', { count: Math.max(dynamic.length, fieldObjs.length) })
+                                                    : totalFields ? `${t('editor.panel.xmlField')} · ${t('editor.panel.fieldsHere', { count: totalFields })}` : t('editor.panel.xmlField'), '#4f46e5')}
+                                                {!totalFields && !fieldObjs.length && (
                                                     <div data-no-xml-field style={{ fontSize: '11px', color: '#5b6680', marginBottom: '6px' }}>
                                                         {kind === 'static' ? t('editor.panel.staticNote') : t('editor.panel.noXmlNote')}
                                                     </div>
                                                 )}
-                                                {inner.map(i => {
+                                                {fieldObjs.map((obj) => {
+                                                    const id = obj.getAttribute('data-xslt-obj') || '';
+                                                    const key = obj.getAttribute('data-field') || '';
+                                                    const fObj = catalog.find((c) => c.key === key);
+                                                    const label = fObj?.label ?? key.split('/').pop() ?? key;
+                                                    return (
+                                                        <button
+                                                            key={`obj-${id || key}`}
+                                                            type="button"
+                                                            onClick={() => openSelection(null, obj, { kind: 'obj', id })}
+                                                            title={key}
+                                                            style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width: '100%', marginBottom: '3px', padding: '5px 8px', background: '#f3f5ff', border: '1px solid #D9DEF0', borderRadius: '4px', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}
+                                                        >
+                                                            <span style={{ fontSize: '11px', color: '#1e293b', fontWeight: 600 }}>{label}</span>
+                                                            <span style={{ fontSize: '9px', color: '#0284c7', fontFamily: 'monospace', wordBreak: 'break-all' }}>XML: {key}</span>
+                                                            {!design.paid && id && (
+                                                                <span
+                                                                    role="button"
+                                                                    tabIndex={0}
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        flushSourceEdits();
+                                                                        openSelection(null, obj, { kind: 'obj', id });
+                                                                        setMoving({ kind: 'obj', id });
+                                                                    }}
+                                                                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); flushSourceEdits(); openSelection(null, obj, { kind: 'obj', id }); setMoving({ kind: 'obj', id }); } }}
+                                                                    style={{ marginTop: '4px', fontSize: '10px', fontWeight: 700, color: '#059669' }}
+                                                                >
+                                                                    ↕ {t('editor.panel.move.button')}
+                                                                </span>
+                                                            )}
+                                                        </button>
+                                                    );
+                                                })}
+                                                {bindOnly.map(i => {
                                                     const ib = xsltInstrumented.bindings[i];
                                                     if (!ib) return null;
                                                     const ii = bindingInfo.get(ib);

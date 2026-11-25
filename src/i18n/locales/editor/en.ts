@@ -234,6 +234,7 @@ const editor: typeof tr = {
             inCell: 'The value is in a table cell. Drag it in the preview or put it elsewhere with ↕ Move; the value is detached from the cell automatically and the cell stays in place.',
             detachHint: 'Puts the value in its own box (<span>); the cell and the labels next to it stay in place',
             detachCell: 'Detach from cell (make movable)',
+            cellPortable: 'Labels and data fields in this cell are movable. Select one below and use ↕ Move; the cell stays in place.',
             detachValue: 'Detach the value only',
             valueNote: 'The field currently moves together with the other text in its box. Detach it first to move only the value.',
         },

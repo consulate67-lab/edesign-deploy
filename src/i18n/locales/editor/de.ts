@@ -234,6 +234,7 @@ const editor: typeof tr = {
             inCell: 'Der Wert steht in einer Tabellenzelle. Ziehen Sie ihn in der Vorschau oder setzen Sie ihn mit ↕ Verschieben woandershin; der Wert wird automatisch aus der Zelle gelöst, die Zelle bleibt bestehen.',
             detachHint: 'Legt den Wert in ein eigenes Feld (<span>); die Zelle und die Beschriftungen daneben bleiben an ihrem Platz',
             detachCell: 'Aus Zelle lösen (verschiebbar machen)',
+            cellPortable: 'Beschriftungen und Datenfelder in dieser Zelle sind verschiebbar. Unten auswählen und ↕ Verschieben nutzen; die Zelle bleibt.',
             detachValue: 'Nur den Wert lösen',
             valueNote: 'Das Feld wird derzeit zusammen mit dem übrigen Text seines Feldes verschoben. Lösen Sie es zuerst, um nur den Wert zu verschieben.',
         },

@@ -232,6 +232,7 @@ const editor = {
             inCell: 'Veri bir tablo hücresinde. Değeri önizlemede sürükleyip bırakabilir ya da ↕ Taşı ile başka yere koyabilirsiniz; değer hücreden otomatik ayrılır, hücre yerinde kalır.',
             detachHint: 'Değeri kendi kutusuna (<span>) alır; hücre ve yanındaki etiketler yerinde kalır',
             detachCell: 'Hücreden ayır (taşınabilir yap)',
+            cellPortable: 'Bu hücredeki etiket ve veri alanları taşınabilir. Aşağıdan seçip ↕ Taşı ile taşıyın; hücre yerinde kalır.',
             detachValue: 'Sadece değeri ayır',
             valueNote: 'Şu an alan, bulunduğu kutudaki diğer yazılarla birlikte taşınır. Yalnızca değeri taşımak için önce ayırın.',
         },

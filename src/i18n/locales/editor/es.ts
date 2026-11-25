@@ -234,6 +234,7 @@ const editor: typeof tr = {
             inCell: 'El valor está en una celda. Arrástrelo en la vista previa o colóquelo en otro lugar con ↕ Mover; el valor se separa de la celda automáticamente y la celda permanece.',
             detachHint: 'Coloca el valor en su propio bloque (<span>); la celda y las etiquetas junto a ella permanecen',
             detachCell: 'Separar de la celda (hacer movible)',
+            cellPortable: 'Las etiquetas y campos de datos de esta celda son movibles. Seleccione abajo y use ↕ Mover; la celda permanece.',
             detachValue: 'Separar solo el valor',
             valueNote: 'Ahora el campo se mueve junto con el resto del texto de su bloque. Sepárelo primero para mover solo el valor.',
         },
