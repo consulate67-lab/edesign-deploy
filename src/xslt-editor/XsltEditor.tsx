@@ -1125,10 +1125,19 @@ function needsPageAnchor(el: HTMLElement): boolean {
     return page.contains(el) && el.ownerDocument.defaultView?.getComputedStyle(page).position === 'static';
 }
 
-/** Tablo hücresi (td/th) içindekiler; absolute alınırsa satır hizası kayar. */
+/** Tablo hücresi (td/th) içinde mi? */
 function inTableCellFlow(el: HTMLElement): boolean {
-    const cell = el.closest('td, th');
-    return !!cell;
+    return !!el.closest('td, th');
+}
+
+/** Absolute öğe hücrede ama konumu hücreye göre değil (body/sayfa) → gösterimde kayma. */
+function absoluteEscapedFromCell(el: HTMLElement): boolean {
+    const cell = el.closest('td, th') as HTMLElement | null;
+    if (!cell || cell === el) return false;
+    if (el.style.position !== 'absolute' && el.style.position !== 'fixed') return false;
+    const op = el.offsetParent as HTMLElement | null;
+    if (!op) return true;
+    return op !== cell && !cell.contains(op);
 }
 
 /**
@@ -1137,7 +1146,6 @@ function inTableCellFlow(el: HTMLElement): boolean {
  * ölçü bozulmasın diye pinAbsolute ve taşıma öncesi çağrılır.
  */
 function freezeRenderedSize(el: HTMLElement): { width: string; height: string; boxSizing: string } | null {
-    if (inTableCellFlow(el)) return null;
     const w = el.offsetWidth;
     const h = el.offsetHeight;
     if (w <= 0 || h <= 0) return null;
@@ -1152,22 +1160,33 @@ function freezeRenderedSize(el: HTMLElement): { width: string; height: string; b
 }
 
 /**
- * Öğeyi bulunduğu yerde mutlak konuma sabitler (zıplamadan). Koordinatlar
- * sayfa kutusuna göredir: sayfa önizlemede position:relative olur; sayfanın
- * dışındaki obje sayfanın içine alınır (`data-xslt-pin-into`, XSLT'de de
- * taşınır). Sayfa kutusu yoksa body'ye göre.
- * Tablo hücresi içindeki öğelerde no-op (özet tutar kaymasını önler).
+ * Öğeyi bulunduğu yerde mutlak konuma sabitler (zıplamadan).
+ * Tablo hücresindeyse konuma hücreye göre (hücre position:relative) — sayfaya
+ * göre absolute satır kaymasına yol açmaz; tasarımda serbest taşıma kalır.
+ * Aksi halde sayfa kutusuna / body'ye göredir.
  */
 function pinAbsolute(el: HTMLElement): { left: number; top: number } {
-    if (inTableCellFlow(el)) {
-        return { left: parseFloat(el.style.left) || 0, top: parseFloat(el.style.top) || 0 };
-    }
     const doc = el.ownerDocument;
     const body = doc.body;
-    if (body && doc.defaultView?.getComputedStyle(body).position === 'static') body.style.position = 'relative';
     const before = el.getBoundingClientRect();
-    // Absolute'a geçmeden önce görsel kutuyu kilitle — aksi halde ölçü değişir.
     freezeRenderedSize(el);
+
+    const cell = el.closest('td, th') as HTMLElement | null;
+    if (cell && cell !== el) {
+        if (doc.defaultView?.getComputedStyle(cell).position === 'static') cell.style.position = 'relative';
+        el.style.position = 'absolute';
+        el.style.left = '0px';
+        el.style.top = '0px';
+        const origin = el.getBoundingClientRect();
+        const scale = clientScale(el);
+        const left = (before.left - origin.left) / scale;
+        const top = (before.top - origin.top) / scale;
+        el.style.left = `${left}px`;
+        el.style.top = `${top}px`;
+        return { left, top };
+    }
+
+    if (body && doc.defaultView?.getComputedStyle(body).position === 'static') body.style.position = 'relative';
     const page = pageRootOf(doc);
     if (page && page !== el && !el.contains(page)) {
         if (outsidePage(el, page)) {
@@ -1203,13 +1222,6 @@ const PositionEditor: React.FC<{
         setText({ x: String(pxToUnit(p.x, u)), y: String(pxToUnit(p.y, u)) });
     };
     const changeMode = (next: PositionMode) => {
-        // Tablo hücresinde absolute/relative satır hizasını bozar (özet tutar kayması).
-        if (next !== 'static' && inTableCellFlow(el)) {
-            setMode('static');
-            show({ x: 0, y: 0 }, unit);
-            onCommit('static', '', '');
-            return;
-        }
         setMode(next);
         if (next === 'static') {
             show({ x: 0, y: 0 }, unit);
@@ -1220,7 +1232,7 @@ const PositionEditor: React.FC<{
         show(p, unit);
         onCommit(next, formatLength(p.x, unit), formatLength(p.y, unit));
     };
-    const cellLocked = inTableCellFlow(el);
+    const inCell = inTableCellFlow(el);
     const changeUnit = (next: PositionUnit) => {
         setUnit(next);
         show(pos, next);
@@ -1240,15 +1252,12 @@ const PositionEditor: React.FC<{
     return (
         <div data-position-editor>
             <label style={fieldLabelStyle}>{t('editor.position.label')}</label>
-            <select data-position-mode value={cellLocked ? 'static' : mode} onChange={(e) => changeMode(e.target.value as PositionMode)} style={{ ...fieldInputStyle, marginBottom: '10px' }} disabled={cellLocked}>
+            <select data-position-mode value={mode} onChange={(e) => changeMode(e.target.value as PositionMode)} style={{ ...fieldInputStyle, marginBottom: '10px' }}>
                 <option value="static">{t('editor.position.static')}</option>
                 <option value="relative">{t('editor.position.relative')}</option>
                 <option value="absolute">{t('editor.position.absolute')}</option>
             </select>
-            {cellLocked && (
-                <div style={{ fontSize: '10px', color: '#6b7690', lineHeight: 1.5, marginBottom: '6px' }}>{t('editor.position.cellLocked')}</div>
-            )}
-            {!cellLocked && mode !== 'static' && (
+            {mode !== 'static' && (
                 <div style={{ display: 'flex', gap: '6px', marginBottom: '10px' }}>
                     {(['x', 'y'] as const).map(axis => (
                         <div key={axis} style={{ flex: 1 }}>
@@ -1271,9 +1280,9 @@ const PositionEditor: React.FC<{
                     </div>
                 </div>
             )}
-            {!cellLocked && (
-                <div style={{ fontSize: '10px', color: '#6b7690', lineHeight: 1.5, marginBottom: '6px' }}>{hint}</div>
-            )}
+            <div style={{ fontSize: '10px', color: '#6b7690', lineHeight: 1.5, marginBottom: '6px' }}>
+                {inCell && mode === 'absolute' ? t('editor.position.hint.absoluteInCell') : hint}
+            </div>
         </div>
     );
 };
@@ -3132,9 +3141,16 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         const pinInto = el.getAttribute('data-xslt-pin-into');
         el.removeAttribute('data-xslt-pin-into');
         if (mode === 'absolute') {
-            if (body) makeRelative(body, 'body');
+            // Hücre içi absolute: konumu hücreye kilitle (sayfa absolute → kayma).
+            const cell = el.closest('td, th') as HTMLElement | null;
+            if (cell && cell !== el) {
+                if (!cell.style.position || cell.style.position === 'static') cell.style.position = 'relative';
+                makeRelative(cell);
+            } else if (body) {
+                makeRelative(body, 'body');
+            }
             const anchor = el.offsetParent as HTMLElement | null;
-            if (anchor && anchor !== body && anchor.tagName.toLowerCase() !== 'html') makeRelative(anchor);
+            if (anchor && anchor !== body && anchor !== cell && anchor.tagName.toLowerCase() !== 'html') makeRelative(anchor);
             if (pinInto && locator.kind === 'obj') {
                 const src = findObjTag(next, locator.id);
                 const pageTag = findLiteralTagByOrdinal(next, Number(pinInto));
@@ -3355,11 +3371,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 const el = findPreviewElement(loc);
                 return el ? { loc, el } : null;
             })
-            .filter((x): x is { loc: PreviewLocator; el: HTMLElement } => !!x && !inTableCellFlow(x.el));
-        if (items.length < 2) {
-            setSaveMessage(`⚠ ${i18n.t('editor.align.skipTable')}`);
-            return;
-        }
+            .filter((x): x is { loc: PreviewLocator; el: HTMLElement } => !!x);
+        if (items.length < 2) return;
         for (const it of items) {
             freezeRenderedSize(it.el);
             const mode = readPositionMode(it.el);
@@ -4104,14 +4117,16 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 const key = n.getAttribute('data-field') ?? '';
                 n.setAttribute('data-empty-label', catalogRef.current.find(f => f.key === key)?.label ?? key.split('/').pop() ?? '');
             });
-            // Tablo hücresinde absolute kalan objeler akışa döner (özet tutar kayması).
+            // Hücrede olup sayfaya göre absolute kalanlar → hücreye yeniden sabitlenir (kayma önlemi; taşıma korunur).
             {
-                const stuck = Array.from(doc.querySelectorAll<HTMLElement>('[data-xslt-obj]'))
-                    .filter(n => inTableCellFlow(n) && (n.style.position === 'absolute' || n.style.position === 'fixed'));
-                for (const n of stuck) {
-                    commitPosition(n, { kind: 'obj', id: n.getAttribute('data-xslt-obj') ?? '' }, 'static', '', '');
+                const escaped = Array.from(doc.querySelectorAll<HTMLElement>('[data-xslt-obj]'))
+                    .filter((n) => absoluteEscapedFromCell(n));
+                for (const n of escaped) {
+                    const unit = parseLength(n.style.left || '').unit;
+                    const p = pinAbsolute(n);
+                    commitPosition(n, { kind: 'obj', id: n.getAttribute('data-xslt-obj') ?? '' }, 'absolute', formatLength(p.left, unit), formatLength(p.top, unit));
                 }
-                if (stuck.length) setSaveMessage(`↩ ${i18n.t('editor.position.cellFlowRestored', { count: stuck.length })}`);
+                if (escaped.length) setSaveMessage(`📌 ${i18n.t('editor.position.cellReanchored', { count: escaped.length })}`);
             }
             // Sayfaya göre değil body'ye göre konumlanmış objeler (eski sürüm) sayfaya sabitlenir.
             if (!designPaidRef.current) {
@@ -4314,8 +4329,6 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             let el: HTMLElement | null = null;
             let locator: PreviewLocator | null = null;
             if (obj) {
-                // Tablo hücresindeki alan objeleri sürüklenince absolute olup satır hizasını bozar.
-                if (inTableCellFlow(obj)) return;
                 el = obj;
                 locator = { kind: 'obj', id: obj.getAttribute('data-xslt-obj') || '' };
             } else if (sel?.element && sel.locator?.kind === 'img' && sel.element.contains(target)) {
@@ -4341,7 +4354,6 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 return;
             }
             if (!el || !locator) return;
-            if (inTableCellFlow(el)) return;
             e.preventDefault();
             drag = { el, locator, sx: e.clientX, sy: e.clientY, started: false, mode: 'absolute', unit: 'px', left: 0, top: 0, scale: 1 };
         };
@@ -4381,14 +4393,10 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                     return;
                 }
                 const el = drag.el;
-                if (inTableCellFlow(el)) {
-                    drag = null;
-                    return;
-                }
                 drag.started = true;
                 drag.unit = parseLength(el.style.left || '').unit;
                 drag.mode = readPositionMode(el);
-                if (drag.mode === 'static' || (drag.mode === 'absolute' && needsPageAnchor(el))) {
+                if (drag.mode === 'static' || (drag.mode === 'absolute' && (needsPageAnchor(el) || absoluteEscapedFromCell(el)))) {
                     pinAbsolute(el);
                     drag.mode = 'absolute';
                 }
@@ -4403,10 +4411,10 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                     for (const loc of multi) {
                         if (sameLocator(loc, drag.locator)) continue;
                         const cel = findPreviewElement(loc);
-                        if (!cel || cel === el || inTableCellFlow(cel)) continue;
+                        if (!cel || cel === el) continue;
                         freezeRenderedSize(cel);
                         const cMode = readPositionMode(cel);
-                        if (cMode !== 'absolute' || needsPageAnchor(cel)) pinAbsolute(cel);
+                        if (cMode !== 'absolute' || needsPageAnchor(cel) || absoluteEscapedFromCell(cel)) pinAbsolute(cel);
                         const ccs = doc.defaultView?.getComputedStyle(cel);
                         companions.push({
                             el: cel,

@@ -66,6 +66,7 @@ const editor = {
         label: 'Konumlandırma',
         reanchored: '{{count}} serbest konumlu obje fatura sayfasına sabitlendi; artık her görüntüleyicide ve baskıda sayfadaki aynı yerde görünür.',
         cellFlowRestored: '{{count}} tablo hücresindeki kaymış alan tekrar satır akışına alındı.',
+        cellReanchored: '{{count}} alan hücrenin içine yeniden sabitlendi (gösterim kayması önlendi; konum korundu).',
         cellLocked: 'Tablo hücresindeki alanlar satır akışında kalır; mutlak konum özet tutar hizasını bozar.',
         static: 'Normal (sayfa akışında)',
         relative: 'Yerinden kaydır',
@@ -75,6 +76,7 @@ const editor = {
         unit: 'Birim',
         hint: {
             absolute: 'Sayfanın sol üst köşesine göre konum. Önizlemede objeyi sürükleyerek de taşıyabilirsiniz.',
+            absoluteInCell: 'Konum bu tablo hücresine göredir; sürükleyerek hücre içinde istediğiniz yere koyabilirsiniz. Nihai gösterimde satır kayması olmaz.',
             relative: 'Obje yerini korur, X/Y kadar kaydırılarak gösterilir. Sürükleyerek de kaydırabilirsiniz.',
             static: 'Obje sayfa akışında durur. Önizlemede sürüklerseniz "Sayfada sabit" konuma geçer.',
         },

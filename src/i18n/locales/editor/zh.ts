@@ -68,6 +68,7 @@ const editor: typeof tr = {
         label: '定位',
         reanchored: '已将 {{count}} 个自由定位的对象固定到发票页面；现在它们在所有查看器和打印中都显示在页面的相同位置。',
         cellFlowRestored: '已将表格单元格中 {{count}} 个错位字段恢复为行内流式布局。',
+        cellReanchored: '{{count}} field(s) were re-pinned inside their table cell (display shift prevented; position kept)',
         cellLocked: '表格单元格中的字段保持行内流式布局；绝对定位会破坏汇总金额对齐。',
         static: '常规（随页面排版）',
         relative: '相对原位置偏移',
@@ -77,6 +78,7 @@ const editor: typeof tr = {
         unit: '单位',
         hint: {
             absolute: '相对于页面左上角定位。您也可以在预览中拖动该对象。',
+            absoluteInCell: 'Position is relative to this table cell; drag to place it where you want inside the cell. Final display will not shift rows.',
             relative: '对象保持原位置，并按 X/Y 偏移显示。您也可以拖动它。',
             static: '对象保持在页面排版流中。在预览中拖动它会将其切换为“固定在页面上”。',
         },

@@ -68,6 +68,7 @@ const editor: typeof tr = {
         label: 'Positionierung',
         reanchored: '{{count}} frei positionierte(s) Objekt(e) an der Rechnungsseite verankert; sie erscheinen jetzt in jedem Viewer und im Druck an derselben Stelle der Seite.',
         cellFlowRestored: '{{count}} verschobene(s) Feld(er) in Tabellenzellen wurden wieder in den Zeilenfluss gesetzt.',
+        cellReanchored: '{{count}} field(s) were re-pinned inside their table cell (display shift prevented; position kept)',
         cellLocked: 'Felder in Tabellenzellen bleiben im Zeilenfluss; absolute Positionierung zerstört die Ausrichtung der Summen.',
         static: 'Normal (im Seitenfluss)',
         relative: 'Versetzt',
@@ -77,6 +78,7 @@ const editor: typeof tr = {
         unit: 'Einheit',
         hint: {
             absolute: 'Position relativ zur linken oberen Ecke der Seite. Sie können das Objekt auch in der Vorschau ziehen.',
+            absoluteInCell: 'Position is relative to this table cell; drag to place it where you want inside the cell. Final display will not shift rows.',
             relative: 'Das Objekt behält seinen Platz und wird um X/Y versetzt angezeigt. Sie können es auch ziehen.',
             static: 'Das Objekt bleibt im Seitenfluss. Wenn Sie es in der Vorschau ziehen, wechselt es zu „Fest auf der Seite“.',
         },

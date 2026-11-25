@@ -68,6 +68,7 @@ const editor: typeof tr = {
         label: 'पोज़िशनिंग',
         reanchored: '{{count}} स्वतंत्र रूप से पोज़िशन किए गए ऑब्जेक्ट इनवॉइस पेज पर पिन कर दिए गए; अब वे हर व्यूअर और प्रिंट में पेज पर एक ही जगह दिखते हैं।',
         cellFlowRestored: 'तालिका सेल में {{count}} खिसके फ़ील्ड को पंक्ति फ़्लो में वापस लाया गया।',
+        cellReanchored: '{{count}} field(s) were re-pinned inside their table cell (display shift prevented; position kept)',
         cellLocked: 'तालिका सेल के फ़ील्ड पंक्ति फ़्लो में रहते हैं; निरपेक्ष पोज़िशनिंग सारांश कुल संरेखण तोड़ देती है।',
         static: 'सामान्य (पेज फ़्लो में)',
         relative: 'अपनी जगह से खिसका हुआ',
@@ -77,6 +78,7 @@ const editor: typeof tr = {
         unit: 'इकाई',
         hint: {
             absolute: 'पेज के ऊपरी-बाएँ कोने के सापेक्ष पोज़िशन। आप प्रीव्यू में ऑब्जेक्ट को ड्रैग भी कर सकते हैं।',
+            absoluteInCell: 'Position is relative to this table cell; drag to place it where you want inside the cell. Final display will not shift rows.',
             relative: 'ऑब्जेक्ट अपनी जगह बनाए रखता है और X/Y जितना खिसका हुआ दिखता है। आप इसे ड्रैग भी कर सकते हैं।',
             static: 'ऑब्जेक्ट पेज फ़्लो में रहता है। प्रीव्यू में इसे ड्रैग करने पर यह "पेज पर स्थिर" में बदल जाता है।',
         },

@@ -68,6 +68,7 @@ const editor: typeof tr = {
         label: 'Positionnement',
         reanchored: '{{count}} objet(s) en position libre ancré(s) à la page de la facture ; ils apparaissent désormais au même endroit de la page dans chaque visionneuse et à l\'impression.',
         cellFlowRestored: '{{count}} champ(s) décalé(s) dans des cellules de tableau ont été remis dans le flux de ligne.',
+        cellReanchored: '{{count}} field(s) were re-pinned inside their table cell (display shift prevented; position kept)',
         cellLocked: 'Les champs dans les cellules de tableau restent dans le flux de ligne ; le positionnement absolu casse l’alignement des totaux.',
         static: 'Normal (dans le flux)',
         relative: 'Décalé',
@@ -77,6 +78,7 @@ const editor: typeof tr = {
         unit: 'Unité',
         hint: {
             absolute: 'Position par rapport au coin supérieur gauche de la page. Vous pouvez aussi faire glisser l’objet dans l’aperçu.',
+            absoluteInCell: 'Position is relative to this table cell; drag to place it where you want inside the cell. Final display will not shift rows.',
             relative: 'L’objet garde sa place et s’affiche décalé de X/Y. Vous pouvez aussi le faire glisser.',
             static: 'L’objet reste dans le flux de la page. Le faire glisser dans l’aperçu le passe en « Fixe sur la page ».',
         },

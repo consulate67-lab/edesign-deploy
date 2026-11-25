@@ -68,6 +68,7 @@ const editor: typeof tr = {
         label: 'Posicionamento',
         reanchored: '{{count}} objeto(s) com posicionamento livre foram fixados na página da fatura; agora aparecem no mesmo lugar da página em todos os visualizadores e na impressão.',
         cellFlowRestored: '{{count}} campo(s) deslocado(s) em células de tabela voltaram ao fluxo da linha.',
+        cellReanchored: '{{count}} field(s) were re-pinned inside their table cell (display shift prevented; position kept)',
         cellLocked: 'Campos em células de tabela permanecem no fluxo da linha; posicionamento absoluto quebra o alinhamento dos totais.',
         static: 'Normal (no fluxo da página)',
         relative: 'Deslocado do lugar',
@@ -77,6 +78,7 @@ const editor: typeof tr = {
         unit: 'Unidade',
         hint: {
             absolute: 'Posição relativa ao canto superior esquerdo da página. Você também pode arrastar o objeto na visualização.',
+            absoluteInCell: 'Position is relative to this table cell; drag to place it where you want inside the cell. Final display will not shift rows.',
             relative: 'O objeto mantém seu lugar e é exibido deslocado por X/Y. Você também pode arrastá-lo.',
             static: 'O objeto permanece no fluxo da página. Arrastá-lo na visualização o muda para "Fixo na página".',
         },

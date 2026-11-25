@@ -68,6 +68,7 @@ const editor: typeof tr = {
         label: 'Позиционирование',
         reanchored: 'Свободно размещённые объекты ({{count}}) закреплены на странице счёта; теперь они отображаются в одном и том же месте страницы в любой программе просмотра и при печати.',
         cellFlowRestored: '{{count}} смещённых полей в ячейках таблицы возвращены в поток строки.',
+        cellReanchored: '{{count}} field(s) were re-pinned inside their table cell (display shift prevented; position kept)',
         cellLocked: 'Поля в ячейках таблицы остаются в потоке строки; абсолютное позиционирование ломает выравнивание итогов.',
         static: 'Обычное (в потоке страницы)',
         relative: 'Смещение от исходного места',
@@ -77,6 +78,7 @@ const editor: typeof tr = {
         unit: 'Единица',
         hint: {
             absolute: 'Положение относительно левого верхнего угла страницы. Объект также можно перетащить в предпросмотре.',
+            absoluteInCell: 'Position is relative to this table cell; drag to place it where you want inside the cell. Final display will not shift rows.',
             relative: 'Объект сохраняет своё место и отображается со смещением на X/Y. Его также можно перетащить.',
             static: 'Объект остаётся в потоке страницы. При перетаскивании в предпросмотре он переключается в режим «Фиксированное на странице».',
         },

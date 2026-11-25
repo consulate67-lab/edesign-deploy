@@ -68,6 +68,7 @@ const editor: typeof tr = {
         label: 'Positioning',
         reanchored: '{{count}} freely positioned object(s) pinned to the invoice page; they now appear at the same place on the page in every viewer and in print.',
         cellFlowRestored: '{{count}} shifted field(s) in table cells were returned to row flow.',
+        cellReanchored: '{{count}} field(s) were re-pinned inside their table cell (display shift prevented; position kept).',
         cellLocked: 'Fields in table cells stay in row flow; absolute positioning breaks summary total alignment.',
         static: 'Normal (in page flow)',
         relative: 'Offset from place',
@@ -77,6 +78,7 @@ const editor: typeof tr = {
         unit: 'Unit',
         hint: {
             absolute: 'Position relative to the top-left corner of the page. You can also drag the object in the preview.',
+            absoluteInCell: 'Position is relative to this table cell; drag to place it where you want inside the cell. Final display will not shift rows.',
             relative: 'The object keeps its place and is shown shifted by X/Y. You can also drag it.',
             static: 'The object stays in the page flow. Dragging it in the preview switches it to "Fixed on page".',
         },
