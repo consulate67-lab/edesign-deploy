@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 name = "EdXDocu"
-client_id = "0ae9f421020b01bf5eeca0cb3cfe7857"
+client_id = "7db5905116a9ecef5aaee75cc0641f3e"
 application_url = "https://www.edxdocu.com/shopify"
 embedded = true
 
