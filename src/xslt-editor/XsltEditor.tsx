@@ -4545,14 +4545,20 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             const bd = bandDrag;
             bandDrag = null;
             if (!bd) return;
-            saveBandLayout(bandLayoutRef.current, design.id ?? initialDesignId);
-            if (!bd.snaps.length) return;
-            const styleNow = (s: BandShiftSnapshot) => {
-                if (s.kind === 'absolute') return parseFloat(s.el.style.top) || 0;
-                if (s.kind === 'padding') return parseFloat(s.el.style.paddingTop) || 0;
-                return parseFloat(s.el.style.marginTop) || 0;
+            const layout = bandLayoutRef.current;
+            saveBandLayout(layout, design.id ?? initialDesignId);
+            setBandLayout(layout);
+            if (!bd.snaps.length) {
+                setSaveMessage(`⚠ ${i18n.t('editor.bands.noneBelow')}`);
+                return;
+            }
+            const deltaOf = (s: BandShiftSnapshot) => {
+                if (s.kind === 'absolute') return (parseFloat(s.el.style.top) || 0) - s.base;
+                const t = s.el.style.transform || '';
+                const m = t.match(/translateY\(\s*(-?[\d.]+)px\s*\)/);
+                return (m ? parseFloat(m[1]) : 0) - s.base;
             };
-            const changed = bd.snaps.some((s) => Math.abs(styleNow(s) - s.base) > 0.5);
+            const changed = bd.snaps.some((s) => Math.abs(deltaOf(s)) > 0.5);
             if (!changed) return;
             flushSourceEdits();
             let moved = 0;
@@ -4568,14 +4574,15 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             let next = xsltContentRef.current;
             const before = next;
             for (const s of bd.snaps) {
-                if (s.kind === 'absolute') continue;
+                if (s.kind !== 'transform') continue;
                 const loc = locatorOfBandEl(s.el);
                 if (!loc) continue;
-                const prop = s.kind === 'padding' ? 'padding-top' : 'margin-top';
-                const val = `${styleNow(s)}px`;
                 const tag = resolveSourceTag(next, loc);
                 if (!tag) continue;
-                next = setTagStyleProperty(next, tag, prop, val);
+                const m = (s.el.style.transform || '').match(/translateY\(\s*(-?[\d.]+)px\s*\)/);
+                const ty = m ? parseFloat(m[1]) : 0;
+                // Tablo satırı dahil her yerde transform kalıcı yazılır (margin tr’de işlemez).
+                next = setTagStyleProperty(next, tag, 'transform', ty ? `translateY(${ty}px)` : '');
                 moved += 1;
             }
             if (next !== before) {
@@ -4640,6 +4647,15 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             startRatio,
                             snaps: snapshotBandShiftTargets(page, edgeY),
                         };
+                        // İmleç iframe dışına çıksa da sürükleme devam etsin.
+                        const onWinMove = (ev: MouseEvent) => mouseMoveHandler(ev);
+                        const onWinUp = () => {
+                            window.removeEventListener('mousemove', onWinMove, true);
+                            window.removeEventListener('mouseup', onWinUp, true);
+                            endBandDrag();
+                        };
+                        window.addEventListener('mousemove', onWinMove, true);
+                        window.addEventListener('mouseup', onWinUp, true);
                         return;
                     }
                 }
@@ -4683,14 +4699,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 const raw = (e.clientY - bandDrag.pageTop) / bandDrag.pageH;
                 const draft = clampBandLayout(
                     bandDrag.edge === 'masterEnd'
-                        ? { ...bandLayoutRef.current, masterEnd: raw }
-                        : { ...bandLayoutRef.current, detailEnd: raw },
+                        ? { masterEnd: raw, detailEnd: bandLayoutRef.current.detailEnd }
+                        : { masterEnd: bandLayoutRef.current.masterEnd, detailEnd: raw },
                 );
                 const ratio = bandDrag.edge === 'masterEnd' ? draft.masterEnd : draft.detailEnd;
                 const deltaClient = (ratio - bandDrag.startRatio) * bandDrag.pageH;
                 applyBandShiftDelta(bandDrag.snaps, deltaClient, clientScale);
                 bandLayoutRef.current = draft;
-                setBandLayout(draft);
+                // React state’i her karede güncelleme — sürükleme bitince yazılır.
                 syncDesignBandOverlay(pageRootOf(doc) || body, draft, bandLabels(), true);
                 e.preventDefault();
                 return;

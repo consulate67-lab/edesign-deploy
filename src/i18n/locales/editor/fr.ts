@@ -181,6 +181,7 @@ const editor: typeof tr = {
         toggleHint: 'Afficher/masquer les bandes. Faire glisser déplace les objets en dessous.',
         catalogHint: 'Les bandes aident seulement au placement ; tout champ peut aller dans toute bande.',
         shifted: '{{count}} objet(s) repositionné(s) avec la bande.',
+        noneBelow: 'No objects below the divider to shift.',
     },
     preview: {
         unknownError: 'Erreur de rendu inconnue',

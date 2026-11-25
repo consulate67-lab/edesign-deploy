@@ -181,6 +181,7 @@ const editor: typeof tr = {
         toggleHint: 'Show/hide design bands. Dragging a divider moves objects below it (only positions are written to XSLT).',
         catalogHint: 'Bands are layout aids only; any field can be placed in any band.',
         shifted: '{{count}} object(s) repositioned with the band.',
+        noneBelow: 'No objects below the divider to shift; place the line above them and try again.',
     },
     preview: {
         unknownError: 'Unknown render error',

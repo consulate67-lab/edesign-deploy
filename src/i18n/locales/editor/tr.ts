@@ -179,6 +179,7 @@ const editor = {
         toggleHint: 'Tasarım bantlarını göster/gizle. Sınırı sürükleyince alttaki nesneler birlikte kayar (XSLT’ye yalnızca konum yazılır).',
         catalogHint: 'Bantlar yalnızca yerleştirme yardımcısıdır; herhangi bir alan herhangi bir banda konabilir.',
         shifted: '{{count}} nesne bant kaydırmasıyla konumlandı.',
+        noneBelow: 'Çizginin altında kaydırılacak nesne bulunamadı; çizgiyi nesnelerin üstüne getirip tekrar deneyin.',
     },
     preview: {
         unknownError: 'Bilinmeyen render hatası',

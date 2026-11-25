@@ -181,6 +181,7 @@ const editor: typeof tr = {
         toggleHint: 'Design-Bänder ein-/ausblenden. Ziehen verschiebt darunter liegende Objekte.',
         catalogHint: 'Bänder sind nur Layout-Hilfe; jedes Feld kann in jedes Band.',
         shifted: '{{count}} Objekt(e) mit dem Band verschoben.',
+        noneBelow: 'No objects below the divider to shift.',
     },
     preview: {
         unknownError: 'Unbekannter Darstellungsfehler',

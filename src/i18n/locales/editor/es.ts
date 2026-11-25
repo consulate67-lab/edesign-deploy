@@ -181,6 +181,7 @@ const editor: typeof tr = {
         toggleHint: 'Mostrar/ocultar bandas. Al arrastrar se mueven los objetos de debajo.',
         catalogHint: 'Las bandas solo ayudan al diseño; cualquier campo puede ir en cualquier banda.',
         shifted: '{{count}} objeto(s) reposicionado(s) con la banda.',
+        noneBelow: 'No objects below the divider to shift.',
     },
     preview: {
         unknownError: 'Error de renderizado desconocido',

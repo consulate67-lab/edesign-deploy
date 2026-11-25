@@ -181,6 +181,7 @@ const editor: typeof tr = {
         toggleHint: '显示/隐藏设计分区。拖动分隔线时下方对象一起移动。',
         catalogHint: '分区仅辅助排版；任何字段可放在任何分区。',
         shifted: '已随分区移动 {{count}} 个对象。',
+        noneBelow: 'No objects below the divider to shift.',
     },
     preview: {
         unknownError: '未知渲染错误',

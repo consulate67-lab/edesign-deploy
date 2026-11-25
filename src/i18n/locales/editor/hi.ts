@@ -181,6 +181,7 @@ const editor: typeof tr = {
         toggleHint: 'डिज़ाइन बैंड दिखाएँ/छिपाएँ। खींचने पर नीचे की वस्तुएँ साथ चलती हैं।',
         catalogHint: 'बैंड केवल लेआउट सहायता हैं; कोई भी फ़ील्ड किसी भी बैंड में जा सकती है।',
         shifted: 'बैंड के साथ {{count}} ऑब्जेक्ट स्थानांतरित।',
+        noneBelow: 'No objects below the divider to shift.',
     },
     preview: {
         unknownError: 'अज्ञात रेंडर त्रुटि',

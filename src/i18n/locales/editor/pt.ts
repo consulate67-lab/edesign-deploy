@@ -181,6 +181,7 @@ const editor: typeof tr = {
         toggleHint: 'Mostrar/ocultar faixas. Arrastar move os objetos abaixo.',
         catalogHint: 'Faixas são só ajuda de layout; qualquer campo pode ir em qualquer faixa.',
         shifted: '{{count}} objeto(s) reposicionado(s) com a faixa.',
+        noneBelow: 'No objects below the divider to shift.',
     },
     preview: {
         unknownError: 'Erro de renderização desconhecido',
