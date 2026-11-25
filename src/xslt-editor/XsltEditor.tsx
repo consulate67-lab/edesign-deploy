@@ -96,6 +96,7 @@ import {
     syncDesignBandOverlay,
     type BandShiftSnapshot, type DesignBandId, type DesignBandLayout,
 } from './designBands';
+import { syncA4PageGuide } from './pageGuide';
 
 /** Satır formülü kolonunun varsayılan alanı (ilk bulunan). */
 const LINE_FORMULA_KEYS = ['Invoice/InvoiceLine/LineExtensionAmount', 'DespatchAdvice/DespatchLine/DeliveredQuantity', 'ReceiptAdvice/ReceiptLine/ReceivedQuantity', 'CreditNote/CreditNoteLine/LineExtensionAmount', 'eBilet/bilet/tutar', 'eYolcuListesi/yolcuListesi/koltukListesi/koltuk/tutar'];
@@ -4223,7 +4224,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 + '[data-empty-label]{display:inline-block;min-width:40px;min-height:12px;padding:0 4px;outline:1px dashed #a78bfa;outline-offset:1px;background-color:rgba(167,139,250,0.10);vertical-align:middle;}'
                 + '[data-empty-label]::before{content:attr(data-empty-label);font:italic 9px/12px system-ui,sans-serif;color:#7c3aed;letter-spacing:0;text-transform:none;}'
                 + 'html[data-xslt-placing] *{cursor:crosshair !important;}'
-                + '#__xslt-design-bands{user-select:none;-webkit-user-select:none;}';
+                + '#__xslt-design-bands,#__xslt-a4-guide{user-select:none;-webkit-user-select:none;}'
+                + '#__xslt-a4-guide{pointer-events:none !important;}';
             doc.head.appendChild(style);
         }
         doc.documentElement.style.setProperty('zoom', String(zoom));
@@ -4310,8 +4312,11 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const refreshBandOverlay = useCallback(() => {
         const doc = iframeRef.current?.contentDocument;
         if (!doc?.body) return;
+        const page = pageRootOf(doc) || doc.body;
+        // A4 rehberi her zaman (yazdırma sınırı tasarımda görünsün); bantlar ayrı aç/kapa.
+        syncA4PageGuide(page, true);
         syncDesignBandOverlay(
-            pageRootOf(doc) || doc.body,
+            page,
             bandLayoutRef.current,
             bandLabels(),
             bandsVisibleRef.current,

@@ -150,6 +150,7 @@ export function collectElementsBelowBand(root: HTMLElement, edgeClientY: number)
 
     const tryAdd = (el: HTMLElement) => {
         if (el.id === BAND_OVERLAY_ID || el.closest(`#${BAND_OVERLAY_ID}`)) return;
+        if (el.id === '__xslt-a4-guide' || el.closest('#__xslt-a4-guide')) return;
         if (el === root || isPageSizedWrapper(el, root)) return;
         const tag = el.tagName.toLowerCase();
         if (SKIP_TAGS.has(tag) || TABLE_PARTS.has(tag)) return;

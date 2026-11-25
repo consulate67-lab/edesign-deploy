@@ -243,11 +243,30 @@ export interface DeliveryReport {
 }
 
 /**
+ * Yazdırma / PDF motorları için A4 @page kuralı yoksa ekler.
+ * height sabitlemez (çok satırlı fatura sayfa kırarak uzayabilir); yalnız kağıt boyutu.
+ */
+export function ensurePrintPageRules(xslt: string): string {
+    if (/@page\s*\{[^}]*\bsize\s*:/i.test(xslt)) return xslt;
+    const rule = '\n@page { size: A4; margin: 10mm; }\n';
+    const styleOpen = xslt.match(/<style\b[^>]*>/i);
+    if (styleOpen && styleOpen.index != null) {
+        const at = styleOpen.index + styleOpen[0].length;
+        return xslt.slice(0, at) + rule + xslt.slice(at);
+    }
+    const headEnd = xslt.search(/<\/head>/i);
+    if (headEnd >= 0) {
+        return `${xslt.slice(0, headEnd)}<style type="text/css">${rule}</style>${xslt.slice(headEnd)}`;
+    }
+    return xslt;
+}
+
+/**
  * İndirilecek son dosya: çevrimiçi mühür çıkarılır, girinti sıkıştırılır, viewport eklenir; alan rehberi
  * yalnız 150 KB sınırını aşmıyorsa dosyaya gömülür.
  */
 export function finalizeDelivery(xslt: string, addGuide?: (x: string) => string): { content: string; report: DeliveryReport } {
-    const base = ensureViewportMeta(compactXslt(stripOnlineSeal(xslt)));
+    const base = ensurePrintPageRules(ensureViewportMeta(compactXslt(stripOnlineSeal(xslt))));
     let content = base;
     let guideDropped = false;
     if (addGuide) {
