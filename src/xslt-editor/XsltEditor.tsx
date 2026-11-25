@@ -92,8 +92,7 @@ import { numberStyleOf, type DocLanguage, type NumberStyle } from '../internatio
 import { docT, documentLanguage } from './docLanguage';
 import { buildCatalog } from './catalogI18n';
 import {
-    applyBandShiftDelta, clampBandLayout, loadBandLayout, saveBandLayout, snapshotBandShiftTargets,
-    syncDesignBandOverlay,
+    loadBandLayout, saveBandLayout, syncDesignBandOverlay,
     type BandShiftSnapshot, type DesignBandId, type DesignBandLayout,
 } from './designBands';
 
@@ -4235,11 +4234,96 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         footer: i18n.t('editor.bands.footer'),
     }), []);
 
+    const locatorOfBandEl = useCallback((el: HTMLElement): PreviewLocator | null => {
+        const doc = el.ownerDocument;
+        const objId = el.getAttribute('data-xslt-obj');
+        if (objId) return { kind: 'obj', id: objId };
+        const ri = el.getAttribute('data-render-index');
+        if (ri != null && ri !== '' && !Number.isNaN(Number(ri))) return { kind: 'bind', index: Number(ri) };
+        let node: HTMLElement | null = el;
+        while (node && node !== doc.body) {
+            const xsrc = node.getAttribute('data-xsrc');
+            if (xsrc != null && xsrc !== '' && !Number.isNaN(Number(xsrc))) {
+                const same = doc.querySelectorAll(`[data-xsrc="${xsrc}"]`);
+                const nth = Math.max(0, Array.from(same).indexOf(node));
+                return { kind: 'el', ordinal: Number(xsrc), nth };
+            }
+            node = node.parentElement;
+        }
+        return null;
+    }, []);
+
+    const commitBandShift = useCallback((layout: DesignBandLayout, snaps: BandShiftSnapshot[]) => {
+        bandLayoutRef.current = layout;
+        saveBandLayout(layout, design.id ?? initialDesignId);
+        setBandLayout(layout);
+        if (!snaps.length) {
+            setSaveMessage(`⚠ ${i18n.t('editor.bands.noneBelow')}`);
+            return;
+        }
+        const deltaOf = (s: BandShiftSnapshot) => {
+            if (s.kind === 'absolute') return (parseFloat(s.el.style.top) || 0) - s.base;
+            const m = (s.el.style.transform || '').match(/translateY\(\s*(-?[\d.]+)px\s*\)/);
+            return (m ? parseFloat(m[1]) : 0) - s.base;
+        };
+        if (!snaps.some((s) => Math.abs(deltaOf(s)) > 0.5)) return;
+        flushSourceEdits();
+        let moved = 0;
+        for (const s of snaps) {
+            if (s.kind !== 'absolute') continue;
+            const loc = locatorOfBandEl(s.el);
+            if (!loc) continue;
+            commitPosition(
+                s.el,
+                loc,
+                'absolute',
+                formatLength(parseFloat(s.el.style.left) || s.left, 'px'),
+                formatLength(parseFloat(s.el.style.top) || s.base, 'px'),
+            );
+            moved += 1;
+        }
+        let next = xsltContentRef.current;
+        const before = next;
+        for (const s of snaps) {
+            if (s.kind !== 'transform') continue;
+            const loc = locatorOfBandEl(s.el);
+            if (!loc) continue;
+            const tag = resolveSourceTag(next, loc);
+            if (!tag) continue;
+            const m = (s.el.style.transform || '').match(/translateY\(\s*(-?[\d.]+)px\s*\)/);
+            const ty = m ? parseFloat(m[1]) : 0;
+            next = setTagStyleProperty(next, tag, 'transform', ty ? `translateY(${ty}px)` : '');
+            moved += 1;
+        }
+        if (next !== before) {
+            xsltContentRef.current = next;
+            editKeyRef.current = `band-shift:${Date.now()}`;
+            setXsltContent(next);
+        }
+        if (moved > 0) {
+            setSaveMessage(`↕ ${i18n.t('editor.bands.shifted', { count: moved })}`);
+            setPositionRev((r) => r + 1);
+        } else if (snaps.length) {
+            setSaveMessage(`↕ ${i18n.t('editor.bands.shifted', { count: snaps.length })}`);
+        }
+    }, [design.id, initialDesignId, flushSourceEdits, locatorOfBandEl, commitPosition, resolveSourceTag]);
+
     const refreshBandOverlay = useCallback(() => {
         const doc = iframeRef.current?.contentDocument;
         if (!doc?.body) return;
-        syncDesignBandOverlay(pageRootOf(doc) || doc.body, bandLayoutRef.current, bandLabels(), bandsVisibleRef.current);
-    }, [bandLabels]);
+        syncDesignBandOverlay(
+            pageRootOf(doc) || doc.body,
+            bandLayoutRef.current,
+            bandLabels(),
+            bandsVisibleRef.current,
+            {
+                getLayout: () => bandLayoutRef.current,
+                setLayoutLive: (layout) => { bandLayoutRef.current = layout; },
+                onDragEnd: commitBandShift,
+                scaleOf: clientScale,
+            },
+        );
+    }, [bandLabels, commitBandShift]);
 
     const fitZoomToContainer = useCallback(() => {
         // Genişliğe sığdır: fatura önizleme alanını yatayda doldurur, dikeyde
@@ -4327,7 +4411,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             // hemen uygula (titreme olmasın), auto-fit açıksa 350ms sonra
             // (measureHeight 300ms + 50ms pay) genişliğe göre yeniden sığdır.
             applyPreviewZoom(previewZoomRef.current);
-            syncDesignBandOverlay(pageRootOf(doc) || doc.body, bandLayoutRef.current, bandLabels(), bandsVisibleRef.current);
+            refreshBandOverlay();
             // Örnek XML'de değeri olmayan alan objesi önizlemede kesikli kutuyla gösterilir (yalnız editörde).
             doc.querySelectorAll<HTMLElement>('[data-obj-kind="field"]').forEach(n => {
                 if ((n.textContent ?? '').trim() || n.querySelector('img')) return;
@@ -4401,7 +4485,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         };
 
         bindListener();
-    }, [handleIframeBodyClick, fitZoomToContainer, applyPreviewZoom, findPreviewElement, openSelection, commitPosition, bandLabels]);
+    }, [handleIframeBodyClick, fitZoomToContainer, applyPreviewZoom, findPreviewElement, openSelection, commitPosition, refreshBandOverlay]);
 
     /**
      * iframe onLoad → handleIframeLoad. previewHtml değiştiğinde iframe
@@ -4475,31 +4559,6 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             companions?: DragCompanion[];
         };
         let drag: DragState | null = null;
-        type BandDrag = {
-            edge: 'masterEnd' | 'detailEnd';
-            pageTop: number;
-            pageH: number;
-            startRatio: number;
-            snaps: BandShiftSnapshot[];
-        };
-        let bandDrag: BandDrag | null = null;
-        const locatorOfBandEl = (el: HTMLElement): PreviewLocator | null => {
-            const objId = el.getAttribute('data-xslt-obj');
-            if (objId) return { kind: 'obj', id: objId };
-            const ri = el.getAttribute('data-render-index');
-            if (ri != null && ri !== '' && !Number.isNaN(Number(ri))) return { kind: 'bind', index: Number(ri) };
-            let node: HTMLElement | null = el;
-            while (node && node !== doc.body) {
-                const xsrc = node.getAttribute('data-xsrc');
-                if (xsrc != null && xsrc !== '' && !Number.isNaN(Number(xsrc))) {
-                    const same = doc.querySelectorAll(`[data-xsrc="${xsrc}"]`);
-                    const nth = Math.max(0, Array.from(same).indexOf(node));
-                    return { kind: 'el', ordinal: Number(xsrc), nth };
-                }
-                node = node.parentElement;
-            }
-            return null;
-        };
         const dropDetached = (d: DragState & { source: HTMLElement }) => {
             const ghost = d.el;
             const probe = doc.createElement('span');
@@ -4541,62 +4600,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             setXsltContent(next);
             setSaveMessage(`↕ ${i18n.t('editor.move.detachedMoved')}`);
         };
-        const endBandDrag = () => {
-            const bd = bandDrag;
-            bandDrag = null;
-            if (!bd) return;
-            const layout = bandLayoutRef.current;
-            saveBandLayout(layout, design.id ?? initialDesignId);
-            setBandLayout(layout);
-            if (!bd.snaps.length) {
-                setSaveMessage(`⚠ ${i18n.t('editor.bands.noneBelow')}`);
-                return;
-            }
-            const deltaOf = (s: BandShiftSnapshot) => {
-                if (s.kind === 'absolute') return (parseFloat(s.el.style.top) || 0) - s.base;
-                const t = s.el.style.transform || '';
-                const m = t.match(/translateY\(\s*(-?[\d.]+)px\s*\)/);
-                return (m ? parseFloat(m[1]) : 0) - s.base;
-            };
-            const changed = bd.snaps.some((s) => Math.abs(deltaOf(s)) > 0.5);
-            if (!changed) return;
-            flushSourceEdits();
-            let moved = 0;
-            for (const s of bd.snaps) {
-                if (s.kind !== 'absolute') continue;
-                const loc = locatorOfBandEl(s.el);
-                if (!loc) continue;
-                const left = formatLength(parseFloat(s.el.style.left) || s.left, 'px');
-                const top = formatLength(parseFloat(s.el.style.top) || s.base, 'px');
-                commitPosition(s.el, loc, 'absolute', left, top);
-                moved += 1;
-            }
-            let next = xsltContentRef.current;
-            const before = next;
-            for (const s of bd.snaps) {
-                if (s.kind !== 'transform') continue;
-                const loc = locatorOfBandEl(s.el);
-                if (!loc) continue;
-                const tag = resolveSourceTag(next, loc);
-                if (!tag) continue;
-                const m = (s.el.style.transform || '').match(/translateY\(\s*(-?[\d.]+)px\s*\)/);
-                const ty = m ? parseFloat(m[1]) : 0;
-                // Tablo satırı dahil her yerde transform kalıcı yazılır (margin tr’de işlemez).
-                next = setTagStyleProperty(next, tag, 'transform', ty ? `translateY(${ty}px)` : '');
-                moved += 1;
-            }
-            if (next !== before) {
-                xsltContentRef.current = next;
-                editKeyRef.current = `band-shift:${Date.now()}`;
-                setXsltContent(next);
-            }
-            if (moved > 0) {
-                setSaveMessage(`↕ ${i18n.t('editor.bands.shifted', { count: moved })}`);
-                setPositionRev(r => r + 1);
-            }
-        };
         const endDrag = () => {
-            if (bandDrag) { endBandDrag(); return; }
             const d = drag;
             drag = null;
             if (!d?.started) return;
@@ -4627,39 +4631,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         const mouseDownHandler = (e: MouseEvent) => {
             if (e.button !== 0 || movingRef.current || placingRef.current) return;
             const target = e.target as HTMLElement;
-            const handle = target.closest?.('[data-band-handle]') as HTMLElement | null;
-            if (handle && bandsVisibleRef.current) {
-                const edge = handle.getAttribute('data-band-handle') as 'masterEnd' | 'detailEnd' | null;
-                const page = pageRootOf(doc) || body;
-                if (edge && page) {
-                    const pr = page.getBoundingClientRect();
-                    if (pr.height > 0) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        const startRatio = edge === 'masterEnd'
-                            ? bandLayoutRef.current.masterEnd
-                            : bandLayoutRef.current.detailEnd;
-                        const edgeY = pr.top + startRatio * pr.height;
-                        bandDrag = {
-                            edge,
-                            pageTop: pr.top,
-                            pageH: pr.height,
-                            startRatio,
-                            snaps: snapshotBandShiftTargets(page, edgeY),
-                        };
-                        // İmleç iframe dışına çıksa da sürükleme devam etsin.
-                        const onWinMove = (ev: MouseEvent) => mouseMoveHandler(ev);
-                        const onWinUp = () => {
-                            window.removeEventListener('mousemove', onWinMove, true);
-                            window.removeEventListener('mouseup', onWinUp, true);
-                            endBandDrag();
-                        };
-                        window.addEventListener('mousemove', onWinMove, true);
-                        window.addEventListener('mouseup', onWinUp, true);
-                        return;
-                    }
-                }
-            }
+            // Bant tutamacı kendi pointerdown’ını kullanır (Pointer Capture).
+            if (target.closest?.('[data-band-handle]')) return;
             const obj = target.closest?.('[data-xslt-obj]') as HTMLElement | null;
             const sel = selectedObjectRef.current;
             let el: HTMLElement | null = null;
@@ -4694,23 +4667,6 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             drag = { el, locator, sx: e.clientX, sy: e.clientY, started: false, mode: 'absolute', unit: 'px', left: 0, top: 0, scale: 1 };
         };
         const mouseMoveHandler = (e: MouseEvent) => {
-            if (bandDrag) {
-                if ((e.buttons & 1) === 0) { endBandDrag(); return; }
-                const raw = (e.clientY - bandDrag.pageTop) / bandDrag.pageH;
-                const draft = clampBandLayout(
-                    bandDrag.edge === 'masterEnd'
-                        ? { masterEnd: raw, detailEnd: bandLayoutRef.current.detailEnd }
-                        : { masterEnd: bandLayoutRef.current.masterEnd, detailEnd: raw },
-                );
-                const ratio = bandDrag.edge === 'masterEnd' ? draft.masterEnd : draft.detailEnd;
-                const deltaClient = (ratio - bandDrag.startRatio) * bandDrag.pageH;
-                applyBandShiftDelta(bandDrag.snaps, deltaClient, clientScale);
-                bandLayoutRef.current = draft;
-                // React state’i her karede güncelleme — sürükleme bitince yazılır.
-                syncDesignBandOverlay(pageRootOf(doc) || body, draft, bandLabels(), true);
-                e.preventDefault();
-                return;
-            }
             if (!drag) return;
             if ((e.buttons & 1) === 0) { endDrag(); return; }
             const dx = e.clientX - drag.sx;
@@ -4812,7 +4768,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             doc.removeEventListener('mouseup', endDrag);
             doc.removeEventListener('keydown', handleUndoRedoKey);
         };
-    }, [previewHtml, iframeLoadCount, handleIframeBodyClick, insertObject, insertShareBar, insertField, moveBinding, bindPlacement, commitPosition, openSelection, handleUndoRedoKey, design.paid, design.id, initialDesignId, findPreviewElement, sameLocator, bandLabels, flushSourceEdits, resolveSourceTag]);
+    }, [previewHtml, iframeLoadCount, handleIframeBodyClick, insertObject, insertShareBar, insertField, moveBinding, bindPlacement, commitPosition, openSelection, handleUndoRedoKey, design.paid, findPreviewElement, sameLocator]);
 
     // Taşıma modu bitince önizlemedeki hedef işareti kaldırılır.
     useEffect(() => {
