@@ -67,7 +67,10 @@ import {
 } from './utils/xsltStyleEdit';
 import { xpathPaths, xmlFieldName, xsltVariables, resolveVariablePath } from './utils/xpathNames';
 import { placementOfBinding, placementOfElement, wrapCellContent, TABLE_PARTS } from './utils/placement';
-import { findLineTableCell, addColumnAfterCell, editColumn, countHiddenColumnCells, showHiddenColumns, type ColumnAction } from './utils/tableColumns';
+import {
+    findLineTableCell, addColumnAfterCell, editColumn, countHiddenColumnCells, showHiddenColumns,
+    setElementHiddenInXslt, isHiddenOpenTag, type ColumnAction,
+} from './utils/tableColumns';
 import {
     findSummaryTableContext, addEmptyRowAfter, duplicateRowAfter, removeSummaryRow, countSiblingRows,
     elevateCellTargetToRow, isValidRowDropTarget,
@@ -6158,7 +6161,28 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                         <button
                                             onClick={() => {
                                                 if (isColumnCell) { applyColumnEdit('hide'); return; }
-                                                el.style.display = el.style.display === 'none' ? '' : 'none';
+                                                flushSourceEdits();
+                                                const locator = sel.locator;
+                                                const tag = resolveSourceTag(xsltContentRef.current, locator);
+                                                if (!tag || design.paid) {
+                                                    // Kaynak yoksa yalnız önizleme; taşıma sonrası geri gelebilir.
+                                                    el.style.display = el.style.display === 'none' ? '' : 'none';
+                                                    closeSelection();
+                                                    if (!tag) setSaveMessage(`⚠ ${t('editor.panel.notPersisted')}`);
+                                                    return;
+                                                }
+                                                const open = xsltContentRef.current.slice(tag.start, tag.end);
+                                                const hide = !isHiddenOpenTag(open);
+                                                const next = setElementHiddenInXslt(xsltContentRef.current, tag, hide);
+                                                if (next === xsltContentRef.current) {
+                                                    el.style.display = hide ? 'none' : '';
+                                                    closeSelection();
+                                                    return;
+                                                }
+                                                xsltContentRef.current = next;
+                                                setXsltContent(next);
+                                                setSaveStatus('idle');
+                                                setSaveMessage(hide ? `👁 ${t('editor.panel.hiddenPersisted')}` : `👁 ${t('editor.panel.shownPersisted')}`);
                                                 closeSelection();
                                             }}
                                             title={isColumnCell ? t('editor.panel.hideColumnHint') : t('editor.panel.hideHint')}

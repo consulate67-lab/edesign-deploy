@@ -390,12 +390,38 @@ export function editColumn(xslt: string, { cell, table }: LineTableCell, action:
     return { ok: true, xslt: ops.reduce((s, op) => op.apply(s), xslt), cells: removeOrds.size };
 }
 
-/** "Kolonu gizle" ile gizlenen hücre sayısı. */
+/** "Kolonu gizle" / öğe gizle ile işaretlenen etiket sayısı. */
 export function countHiddenColumnCells(xslt: string): number {
     return (xslt.match(new RegExp(`\\s${HIDDEN_ATTR}\\s*=`, 'g')) ?? []).length;
 }
 
-/** Gizlenen kolonları geri açar (display:none ve daraltılan colspan geri alınır). */
+/** Açılış etiketinde gizlilik işareti veya display:none var mı? */
+export function isHiddenOpenTag(tagText: string): boolean {
+    if (attrValue(tagText, HIDDEN_ATTR) !== null) return true;
+    const style = tagText.match(/\sstyle\s*=\s*(["'])([\s\S]*?)\1/i)?.[2] ?? '';
+    return /(^|;)\s*display\s*:\s*none\s*(;|$)/i.test(style);
+}
+
+/**
+ * Tek öğeyi XSLT'de gizler / gösterir (taşıma sonrası önizleme yenilense de kalır).
+ * Kolon gizlemeden farklı: yalnız verilen etiket.
+ */
+export function setElementHiddenInXslt(xslt: string, tag: SourceTag, hidden: boolean): string {
+    const open = xslt.slice(tag.start, tag.end);
+    if (!open.startsWith('<') || open.startsWith('</')) return xslt;
+    return rewriteOpenTag(xslt, tag, (t) => {
+        if (hidden) {
+            const styled = setTagStyleProperty(t, wholeTag(t), 'display', 'none');
+            return attrValue(styled, HIDDEN_ATTR) === null
+                ? setTagAttribute(styled, wholeTag(styled), HIDDEN_ATTR, 'oge')
+                : styled;
+        }
+        const next = removeAttr(setTagStyleProperty(t, wholeTag(t), 'display', ''), HIDDEN_ATTR);
+        return next.replace(/\sstyle\s*=\s*(["'])\s*\1/, '');
+    });
+}
+
+/** Gizlenen kolon / öğeleri geri açar (display:none ve daraltılan colspan geri alınır). */
 export function showHiddenColumns(xslt: string): string {
     const re = new RegExp(XML_TAG_RE_SOURCE, 'g');
     return xslt.replace(re, (all: string, close?: string, name?: string) => {
