@@ -428,6 +428,58 @@ const FieldText: React.FC<{ label: string; currentValue: string; onChange: (v: s
         </div>
     );
 };
+
+/** 0–1 saydamlık: kaydırıcı + sayı; virgül ondalık da kabul edilir. */
+const parseOpacity = (raw: string): number | null => {
+    const n = Number(String(raw).trim().replace(',', '.'));
+    return Number.isFinite(n) ? Math.min(1, Math.max(0, n)) : null;
+};
+const FieldOpacity: React.FC<{ label: string; currentValue: string; onChange: (v: string) => void }> = ({ label, currentValue, onChange }) => {
+    const initial = parseOpacity(currentValue) ?? 1;
+    const [num, setNum] = useState(initial);
+    const [text, setText] = useState(String(initial));
+    const commit = (n: number) => {
+        const v = Math.round(n * 100) / 100;
+        setNum(v);
+        setText(String(v));
+        onChange(v >= 1 ? '' : String(v));
+    };
+    return (
+        <div style={{ marginBottom: '10px' }} data-opacity-field>
+            <label style={fieldLabelStyle}>{label}</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <input
+                    type="range"
+                    min={0}
+                    max={1}
+                    step={0.05}
+                    value={num}
+                    onChange={(e) => commit(Number(e.target.value))}
+                    style={{ flex: 1, accentColor: '#db2777' }}
+                    aria-label={label}
+                />
+                <input
+                    type="text"
+                    inputMode="decimal"
+                    value={text}
+                    onChange={(e) => {
+                        const raw = e.target.value;
+                        setText(raw);
+                        const n = parseOpacity(raw);
+                        if (n === null) return;
+                        setNum(n);
+                        onChange(n >= 1 ? '' : String(n));
+                    }}
+                    onBlur={() => {
+                        const n = parseOpacity(text) ?? 1;
+                        commit(n);
+                    }}
+                    style={{ ...fieldInputStyle, width: '56px', flexShrink: 0, textAlign: 'center', padding: '6px 4px' }}
+                />
+            </div>
+        </div>
+    );
+};
 /** Ölçü alanı: yalnızca sayı yazılırsa px kabul edilir (mm, %, auto da yazılabilir). */
 const FieldLength: React.FC<{ label: string; currentValue: string; placeholder?: string; onChange: (v: string) => void; attr?: string }> = ({ label, currentValue, placeholder, onChange, attr }) => {
     const [value, setValue] = useState(currentValue);
@@ -2621,7 +2673,16 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const handleStyleChange = useCallback((prop: string, value: string) => {
         const sel = selectedObjectRef.current;
         if (!sel) return;
-        const v = value.trim();
+        let v = value.trim();
+        if (prop === 'opacity') {
+            if (!v) {
+                v = '';
+            } else {
+                const n = Number(v.replace(',', '.'));
+                v = Number.isFinite(n) ? String(Math.min(1, Math.max(0, Math.round(n * 100) / 100))) : '';
+                if (v === '1') v = '';
+            }
+        }
         if (sel.element) {
             if (v) sel.element.style.setProperty(prop, v);
             else sel.element.style.removeProperty(prop);
@@ -6720,7 +6781,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                 />
                                                 <div style={grid}>
                                                     <FieldText key={fieldKey('border-radius')} label={t('editor.panel.radius')} currentValue={cs.borderRadius === '0px' ? '' : cs.borderRadius} placeholder="0px" onChange={(v) => handleStyleChange('border-radius', v)} />
-                                                    <FieldText key={fieldKey('opacity')} label={t('editor.panel.opacity')} currentValue={cs.opacity === '1' ? '' : cs.opacity} placeholder="1" onChange={(v) => handleStyleChange('opacity', v)} />
+                                                    <FieldOpacity key={fieldKey('opacity')} label={t('editor.panel.opacity')} currentValue={cs.opacity || '1'} onChange={(v) => handleStyleChange('opacity', v)} />
                                                 </div>
                                                 <FieldChoice
                                                     key={fieldKey('box-shadow')}
