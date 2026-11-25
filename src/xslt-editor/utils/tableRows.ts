@@ -85,6 +85,44 @@ export function addEmptyRowAfter(xslt: string, rowTag: SourceTag): string | null
     return insertAtTag(xslt, rowTag, `${indent}${markup}`, 'after');
 }
 
+/** Özet satır hücresi: sabit etiket veya katalog alanı. */
+export type SummaryCellSpec =
+    | { kind: 'text'; text: string }
+    | { kind: 'field'; content: string };
+
+const rowIndent = (xslt: string, rowTag: SourceTag) => {
+    const lineStart = xslt.lastIndexOf('\n', rowTag.start - 1) + 1;
+    const lead = xslt.slice(lineStart, rowTag.start);
+    return /^\s*$/.test(lead) ? `\n${lead}` : '\n';
+};
+
+/**
+ * Referans satırın hücre stillerini kullanarak alta yapılandırılmış satır ekler.
+ * `cells` sırası = kolon sırası (etiket / alan).
+ */
+export function addConfiguredRowAfter(xslt: string, rowTag: SourceTag, cells: SummaryCellSpec[]): string | null {
+    if (!cells.length) return null;
+    const { children } = childElements(xslt, rowTag);
+    const refCells = children.filter((c) => /^t[dh]$/i.test(c.name));
+    const opens = refCells.map((c) => xslt.slice(c.start, c.end).replace(/\/>$/, '>'));
+    const fallbackOpen = opens[0] || '<td>';
+    const tagName = (opens[0]?.match(/^<\/?([A-Za-z]+)/)?.[1] || 'td').toLowerCase();
+    const close = tagName === 'th' ? '</th>' : '</td>';
+    const escape = (s: string) => s
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const inner = cells.map((cell, i) => {
+        const open = opens[Math.min(i, Math.max(0, opens.length - 1))] || fallbackOpen;
+        if (cell.kind === 'text') {
+            const text = cell.text.trim() ? escape(cell.text) : '&#160;';
+            return `${open}${text}${close}`;
+        }
+        return `${open}${cell.content || '&#160;'}${close}`;
+    }).join('');
+    const rowOpen = xslt.slice(rowTag.start, rowTag.end);
+    const markup = `${rowOpen}${inner}</tr>`;
+    return insertAtTag(xslt, rowTag, `${rowIndent(xslt, rowTag)}${markup}`, 'after');
+}
+
 /** Seçili satırı (XSLT içeriğiyle) alta kopyalar. */
 export function duplicateRowAfter(xslt: string, rowTag: SourceTag): string | null {
     const { start, end } = rowSourceRange(xslt, rowTag);

@@ -73,8 +73,9 @@ import {
 } from './utils/tableColumns';
 import {
     findSummaryTableContext, addEmptyRowAfter, duplicateRowAfter, removeSummaryRow, countSiblingRows,
-    elevateCellTargetToRow, isValidRowDropTarget,
+    elevateCellTargetToRow, isValidRowDropTarget, addConfiguredRowAfter, type SummaryCellSpec,
 } from './utils/tableRows';
+import { computeAlignDeltas, type AlignKind } from './utils/alignSelection';
 import { BG_FITS, readPageBackground, writePageBackground, imageFileToDataUrl, type PageBackground } from './utils/pageBackground';
 import { addTestWatermark, stripTestWatermark, stripLeadingBom } from './utils/testWatermark';
 import { downloadFieldGuide, withFieldGuide } from './utils/fieldGuide';
@@ -1817,7 +1818,29 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         locator: PreviewLocator | null;
     } | null;
     const [selectedObject, setSelectedObject] = useState<SelectedObject>(null);
+    /** Ctrl/Cmd+tık ile biriken seçimler (hizalama / toplu taşıma). */
+    const [multiLocators, setMultiLocators] = useState<PreviewLocator[]>([]);
+    const multiLocatorsRef = useRef(multiLocators);
+    multiLocatorsRef.current = multiLocators;
+    const [movingMulti, setMovingMulti] = useState<PreviewLocator[] | null>(null);
+    const movingMultiRef = useRef(movingMulti);
+    movingMultiRef.current = movingMulti;
+    type RowSlot = { id: number; kind: 'text' | 'field'; text: string; fieldKey: string };
+    const [rowComposerOpen, setRowComposerOpen] = useState(false);
+    const rowSlotIdRef = useRef(2);
+    const [rowSlots, setRowSlots] = useState<RowSlot[]>([
+        { id: 1, kind: 'text', text: '', fieldKey: '' },
+        { id: 2, kind: 'field', text: '', fieldKey: '' },
+    ]);
     const selectionIdRef = useRef(0);
+    const sameLocator = useCallback((a: PreviewLocator, b: PreviewLocator) => {
+        if (a.kind !== b.kind) return false;
+        if (a.kind === 'bind' && b.kind === 'bind') return a.index === b.index;
+        if (a.kind === 'obj' && b.kind === 'obj') return a.id === b.id;
+        if (a.kind === 'el' && b.kind === 'el') return a.ordinal === b.ordinal && a.nth === b.nth;
+        if (a.kind === 'img' && b.kind === 'img') return a.src === b.src && a.ordinal === b.ordinal;
+        return false;
+    }, []);
     const pendingStyleRef = useRef<Record<string, string>>({});
     const pendingAttrRef = useRef<Record<string, string>>({});
     const pendingContentRef = useRef<string | null>(null);
@@ -2416,16 +2439,6 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         [selectedObject, xsltContent, xsltInstrumented.bindings],
     );
 
-    /** Seçili öğe önizlemede turuncu çerçeveyle işaretlenir; taşınabilir veri alanı sürükleme imleci alır. */
-    useEffect(() => {
-        const doc = iframeRef.current?.contentDocument;
-        if (!doc) return;
-        doc.querySelectorAll('[data-xslt-selected]').forEach(n => n.removeAttribute('data-xslt-selected'));
-        doc.querySelectorAll('[data-xslt-movable]').forEach(n => n.removeAttribute('data-xslt-movable'));
-        selectedObject?.element?.setAttribute('data-xslt-selected', 'true');
-        if (selectedBindPlacement?.movable || selectedBindPlacement?.detach === 'cell') selectedObject?.element?.setAttribute('data-xslt-movable', '');
-    }, [selectedObject, selectedBindPlacement]);
-
     const findPreviewElement = useCallback((locator: PreviewLocator | null): HTMLElement | null => {
         const doc = iframeRef.current?.contentDocument;
         if (!doc || !locator) return null;
@@ -2442,6 +2455,20 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         const imgs = Array.from(doc.querySelectorAll('img')).filter(img => img.getAttribute('src') === locator.src);
         return imgs[locator.ordinal] ?? null;
     }, []);
+
+    /** Seçili öğe önizlemede turuncu çerçeveyle işaretlenir; çoklu seçim mor; taşınabilir veri alanı sürükleme imleci alır. */
+    useEffect(() => {
+        const doc = iframeRef.current?.contentDocument;
+        if (!doc) return;
+        doc.querySelectorAll('[data-xslt-selected]').forEach(n => n.removeAttribute('data-xslt-selected'));
+        doc.querySelectorAll('[data-xslt-multi]').forEach(n => n.removeAttribute('data-xslt-multi'));
+        doc.querySelectorAll('[data-xslt-movable]').forEach(n => n.removeAttribute('data-xslt-movable'));
+        for (const loc of multiLocators) {
+            findPreviewElement(loc)?.setAttribute('data-xslt-multi', '');
+        }
+        selectedObject?.element?.setAttribute('data-xslt-selected', 'true');
+        if (selectedBindPlacement?.movable || selectedBindPlacement?.detach === 'cell') selectedObject?.element?.setAttribute('data-xslt-movable', '');
+    }, [selectedObject, selectedBindPlacement, multiLocators, findPreviewElement]);
 
     const resolveSourceTag = useCallback((xslt: string, locator: PreviewLocator | null): SourceTag | null => {
         if (!locator) return null;
@@ -3129,8 +3156,19 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         handleContentChange(fieldContent(f, selectedObjInLine(), docLangRef.current, tx), evaluateFieldTransform(xmlDocRef.current, f, tx, docLangRef.current));
     }, [selectedObjInLine, handleAttrChange, handleContentChange]);
 
-    const openSelection = useCallback((binding: XsltBinding | null, element: HTMLElement | null, locator: PreviewLocator | null) => {
+    const openSelection = useCallback((binding: XsltBinding | null, element: HTMLElement | null, locator: PreviewLocator | null, additive = false) => {
         flushSourceEdits();
+        if (!additive) {
+            setMultiLocators(locator ? [locator] : []);
+        } else if (locator) {
+            setMultiLocators((prev) => {
+                const primary = selectedObjectRef.current?.locator;
+                let base = prev.length ? [...prev] : (primary ? [primary] : []);
+                if (primary && !base.some((p) => sameLocator(p, primary))) base = [primary, ...base];
+                if (base.some((p) => sameLocator(p, locator))) return base.filter((p) => !sameLocator(p, locator));
+                return [...base, locator];
+            });
+        }
         selectionIdRef.current += 1;
         setSelectedObject({ id: selectionIdRef.current, binding, element, locator });
         let draftValue = '';
@@ -3149,12 +3187,50 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         const draft: Record<string, string> = { value: draftValue };
         if (attrName) draft['__attr__'] = attrName;
         setPropertyDraft(draft);
-    }, [flushSourceEdits]);
+    }, [flushSourceEdits, sameLocator]);
 
     const closeSelection = useCallback(() => {
         flushSourceEdits();
         setSelectedObject(null);
+        setMultiLocators([]);
+        setMovingMulti(null);
+        setRowComposerOpen(false);
     }, [flushSourceEdits]);
+
+    const applyAlign = useCallback((kind: AlignKind) => {
+        flushSourceEdits();
+        const locs = multiLocatorsRef.current;
+        if (locs.length < 2) return;
+        const items = locs
+            .map((loc) => {
+                const el = findPreviewElement(loc);
+                return el ? { loc, el } : null;
+            })
+            .filter((x): x is { loc: PreviewLocator; el: HTMLElement } => !!x);
+        if (items.length < 2) return;
+        for (const it of items) {
+            freezeRenderedSize(it.el);
+            const mode = readPositionMode(it.el);
+            if (mode !== 'absolute' || needsPageAnchor(it.el)) pinAbsolute(it.el);
+        }
+        const deltas = computeAlignDeltas(items.map((i) => i.el), kind);
+        for (let i = 0; i < deltas.length; i++) {
+            const { el, left, top } = deltas[i];
+            commitPosition(el, items[i].loc, 'absolute', `${left}px`, `${top}px`);
+        }
+        setSaveMessage(`⊞ ${i18n.t('editor.align.done')}`);
+    }, [flushSourceEdits, findPreviewElement, commitPosition]);
+
+    const applyConfiguredSummaryRow = useCallback(() => {
+        const cells: SummaryCellSpec[] = rowSlots.map((s) => {
+            if (s.kind === 'text') return { kind: 'text', text: s.text };
+            const f = catalogRef.current.find((c) => c.key === s.fieldKey);
+            return { kind: 'field', content: f ? fieldContent(f, false, docLangRef.current) : '&#160;' };
+        });
+        if (!cells.length) return;
+        applySummaryRowEdit((xslt, tag) => addConfiguredRowAfter(xslt, tag, cells));
+        setRowComposerOpen(false);
+    }, [rowSlots, applySummaryRowEdit]);
 
     useEffect(() => {
         const doc = iframeRef.current?.contentDocument;
@@ -3179,8 +3255,10 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         if (!selectedObject) return;
         const onKey = (e: KeyboardEvent) => {
             if (e.key === 'Escape') {
-                if (movingRef.current) setMoving(null);
-                else closeSelection();
+                if (movingRef.current) {
+                    setMoving(null);
+                    setMovingMulti(null);
+                } else closeSelection();
                 e.stopPropagation();
             }
         };
@@ -3249,6 +3327,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         h.key = null;
         // Seçim / taşıma eski dokümana ait olabilir; geri yüklenen tasarım temiz açılır.
         setMoving(null);
+        setMovingMulti(null);
+        setMultiLocators([]);
         pendingBindRangeRef.current = null;
         selectedObjectRef.current = null;
         setSelectedObject(null);
@@ -3577,8 +3657,28 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         if (movingLoc) {
             e.preventDefault();
             e.stopPropagation();
+            const group = movingMultiRef.current;
             setMoving(null);
-            moveTo(movingLoc, resolveInsertTarget(target, 'auto', { rowMove: isMovingRow(movingLoc) }));
+            setMovingMulti(null);
+            const rowMove = isMovingRow(movingLoc) || !!(group?.some((l) => isMovingRow(l)));
+            const drop = resolveInsertTarget(target, 'auto', { rowMove });
+            if (group && group.length > 1) {
+                const withEl = group
+                    .map((loc) => {
+                        const el = findPreviewElement(loc);
+                        return el ? { loc, el } : null;
+                    })
+                    .filter((x): x is { loc: PreviewLocator; el: HTMLElement } => !!x);
+                withEl.sort((a, b) => {
+                    const p = a.el.compareDocumentPosition(b.el);
+                    if (p & Node.DOCUMENT_POSITION_FOLLOWING) return -1;
+                    if (p & Node.DOCUMENT_POSITION_PRECEDING) return 1;
+                    return 0;
+                });
+                for (const item of [...withEl].reverse()) moveTo(item.loc, drop);
+            } else {
+                moveTo(movingLoc, drop);
+            }
             return;
         }
         const placingItem = placingRef.current;
@@ -3642,6 +3742,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         }
         e.preventDefault();
         e.stopPropagation();
+        const additive = !!(e as MouseEvent).ctrlKey || !!(e as MouseEvent).metaKey;
         // renderIndex yukarıda parent/child taramasıyla doldurulmuş olabilir;
         // seçimin XSLT karşılığı yalnızca öğenin kendi annotation'ından çözülür.
         const ownIndex = indexedEl.getAttribute('data-render-index');
@@ -3649,7 +3750,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         let locator: PreviewLocator | null = null;
         let binding: XsltBinding | null = null;
         if (objEl) {
-            openSelection(null, objEl, { kind: 'obj', id: objEl.getAttribute('data-xslt-obj') || '' });
+            openSelection(null, objEl, { kind: 'obj', id: objEl.getAttribute('data-xslt-obj') || '' }, additive);
             return;
         }
         // İsimli şablondaki değer (tarih, birim, kod...) her çağrıda ayrı yerde basılır;
@@ -3671,13 +3772,13 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             if (srcEl && Number.isInteger(ordinal)) {
                 const same = Array.from(srcEl.ownerDocument.querySelectorAll(`[data-xsrc="${ordinal}"]`));
                 locator = { kind: 'el', ordinal, nth: Math.max(0, same.indexOf(srcEl)) };
-                openSelection(null, srcEl, locator);
+                openSelection(null, srcEl, locator, additive);
                 return;
             }
         }
-        openSelection(binding, indexedEl, locator);
+        openSelection(binding, indexedEl, locator, additive);
         console.log(`[XSLTEditor] Preview click → ${indexedEl.tagName} render-index=${renderIndex ?? '(yok — sadece stil paneli)'}`);
-    }, [openSelection, moveTo, bindPlacement, placeChosen, isMovingRow]);
+    }, [openSelection, moveTo, bindPlacement, placeChosen, isMovingRow, findPreviewElement]);
 
     /**
      * iframe yüklendiğinde:
@@ -3713,6 +3814,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             style.id = '__xslt-preview-layout';
             style.textContent = 'body{margin-left:auto !important;margin-right:auto !important;}'
                 + '[data-xslt-selected]{outline:2px solid #f59e0b !important;outline-offset:2px;}'
+                + '[data-xslt-multi]{outline:2px solid #6366f1 !important;outline-offset:2px;}'
+                + '[data-xslt-selected][data-xslt-multi]{outline:2px solid #f59e0b !important;outline-offset:2px;}'
                 + '[data-xslt-obj],img[data-xslt-selected],[data-xslt-movable]{cursor:move !important;}[data-xslt-obj]:hover{outline:2px dashed #6366f1;outline-offset:2px;}'
                 + '[data-xslt-dragging]{opacity:0.85;outline:2px solid #10b981 !important;}'
                 + '[data-xslt-drop=inside]{outline:2px dashed #10b981 !important;outline-offset:-2px;background-color:rgba(16,185,129,0.08) !important;}'
@@ -3933,11 +4036,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             }
         };
         // Eklenen objeler (ve seçili resim) önizlemede sürüklenerek konumlandırılır.
+        type DragCompanion = { el: HTMLElement; locator: PreviewLocator; left: number; top: number };
         type DragState = {
             el: HTMLElement; locator: PreviewLocator; sx: number; sy: number; started: boolean;
             mode: PositionMode; unit: PositionUnit; left: number; top: number; scale: number;
             /** Hücredeki veri: önizlemede kopyası sürüklenir, bırakınca değer hücreden ayrılıp oraya sabitlenir. */
             source?: HTMLElement;
+            /** Çoklu seçimde birlikte taşınan diğer öğeler. */
+            companions?: DragCompanion[];
         };
         let drag: DragState | null = null;
         const dropDetached = (d: DragState & { source: HTMLElement }) => {
@@ -3994,6 +4100,12 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             const left = formatLength(parseFloat(d.el.style.left) || 0, d.unit);
             const top = formatLength(parseFloat(d.el.style.top) || 0, d.unit);
             commitPosition(d.el, d.locator, d.mode, left, top);
+            for (const c of d.companions || []) {
+                const cLeft = formatLength(parseFloat(c.el.style.left) || 0, d.unit);
+                const cTop = formatLength(parseFloat(c.el.style.top) || 0, d.unit);
+                commitPosition(c.el, c.locator, 'absolute', cLeft, cTop);
+                c.el.removeAttribute('data-xslt-dragging');
+            }
             if (selectedObjectRef.current?.element !== d.el) openSelection(null, d.el, d.locator);
             setPositionRev(r => r + 1);
         };
@@ -4081,10 +4193,35 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 drag.top = parseFloat(cs?.top || '') || 0;
                 drag.scale = clientScale(el);
                 el.setAttribute('data-xslt-dragging', '');
+                const multi = multiLocatorsRef.current;
+                if (multi.length > 1 && drag.locator) {
+                    const companions: DragCompanion[] = [];
+                    for (const loc of multi) {
+                        if (sameLocator(loc, drag.locator)) continue;
+                        const cel = findPreviewElement(loc);
+                        if (!cel || cel === el) continue;
+                        freezeRenderedSize(cel);
+                        const cMode = readPositionMode(cel);
+                        if (cMode !== 'absolute' || needsPageAnchor(cel)) pinAbsolute(cel);
+                        const ccs = doc.defaultView?.getComputedStyle(cel);
+                        companions.push({
+                            el: cel,
+                            locator: loc,
+                            left: parseFloat(ccs?.left || '') || 0,
+                            top: parseFloat(ccs?.top || '') || 0,
+                        });
+                        cel.setAttribute('data-xslt-dragging', '');
+                    }
+                    drag.companions = companions;
+                }
             }
             e.preventDefault();
             drag.el.style.left = `${drag.left + dx / drag.scale}px`;
             drag.el.style.top = `${drag.top + dy / drag.scale}px`;
+            for (const c of drag.companions || []) {
+                c.el.style.left = `${c.left + dx / drag.scale}px`;
+                c.el.style.top = `${c.top + dy / drag.scale}px`;
+            }
         };
         body.addEventListener('dragover', dragOverHandler);
         body.addEventListener('dragleave', dragLeaveHandler);
@@ -4110,7 +4247,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             doc.removeEventListener('mouseup', endDrag);
             doc.removeEventListener('keydown', handleUndoRedoKey);
         };
-    }, [previewHtml, iframeLoadCount, handleIframeBodyClick, insertObject, insertShareBar, insertField, moveBinding, bindPlacement, commitPosition, openSelection, handleUndoRedoKey, design.paid]);
+    }, [previewHtml, iframeLoadCount, handleIframeBodyClick, insertObject, insertShareBar, insertField, moveBinding, bindPlacement, commitPosition, openSelection, handleUndoRedoKey, design.paid, findPreviewElement, sameLocator]);
 
     // Taşıma modu bitince önizlemedeki hedef işareti kaldırılır.
     useEffect(() => {
@@ -5437,19 +5574,87 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                             }}
                         >
                             <span style={{ flex: 1 }}>
-                                ↕ {t('editor.move.banner')}
+                                ↕ {movingMulti && movingMulti.length > 1
+                                    ? t('editor.move.bannerMulti', { count: movingMulti.length })
+                                    : t('editor.move.banner')}
                             </span>
                             <button
-                                onClick={() => { const loc = moving; setMoving(null); moveTo(loc, null); }}
+                                onClick={() => {
+                                    const loc = moving;
+                                    const group = movingMulti;
+                                    setMoving(null);
+                                    setMovingMulti(null);
+                                    if (group && group.length > 1) {
+                                        for (const item of [...group].reverse()) moveTo(item, null);
+                                    } else {
+                                        moveTo(loc, null);
+                                    }
+                                }}
                                 style={{ padding: '4px 8px', background: 'transparent', border: '1px solid rgba(16, 185, 129, 0.5)', borderRadius: '4px', color: '#059669', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
                             >
                                 {t('editor.move.toEnd')}
                             </button>
                             <button
-                                onClick={() => setMoving(null)}
+                                onClick={() => { setMoving(null); setMovingMulti(null); }}
                                 style={{ padding: '4px 8px', background: 'transparent', border: '1px solid #D9DEF0', borderRadius: '4px', color: '#5b6680', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
                             >
                                 {t('editor.common.cancelAction')}
+                            </button>
+                        </div>
+                    )}
+
+                    {!moving && multiLocators.length > 1 && (
+                        <div
+                            data-align-banner
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap',
+                                padding: '8px 12px', background: 'rgba(99, 102, 241, 0.10)',
+                                borderBottom: '1px solid rgba(99, 102, 241, 0.35)',
+                                color: '#4338ca', fontSize: '11px',
+                            }}
+                        >
+                            <span style={{ fontWeight: 700, marginRight: '4px' }}>
+                                ⊞ {t('editor.align.title', { count: multiLocators.length })}
+                            </span>
+                            {([
+                                ['left', 'editor.align.left'],
+                                ['center', 'editor.align.center'],
+                                ['right', 'editor.align.right'],
+                                ['top', 'editor.align.top'],
+                                ['middle', 'editor.align.middle'],
+                                ['bottom', 'editor.align.bottom'],
+                            ] as const).map(([kind, key]) => (
+                                <button
+                                    key={kind}
+                                    type="button"
+                                    data-align={kind}
+                                    onClick={() => applyAlign(kind)}
+                                    title={t(key)}
+                                    style={{ padding: '3px 8px', background: '#fff', border: '1px solid rgba(99, 102, 241, 0.45)', borderRadius: '4px', color: '#4338ca', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
+                                >
+                                    {t(key)}
+                                </button>
+                            ))}
+                            <button
+                                type="button"
+                                data-multi-move
+                                onClick={() => {
+                                    flushSourceEdits();
+                                    const primary = selectedObject?.locator ?? multiLocators[0];
+                                    setMoving(primary);
+                                    setMovingMulti(multiLocators);
+                                }}
+                                title={t('editor.align.moveHint')}
+                                style={{ padding: '3px 8px', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.45)', borderRadius: '4px', color: '#059669', fontSize: '10px', fontWeight: 700, cursor: 'pointer', marginLeft: 'auto' }}
+                            >
+                                ↕ {t('editor.align.move')}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setMultiLocators(selectedObject?.locator ? [selectedObject.locator] : [])}
+                                style={{ padding: '3px 8px', background: 'transparent', border: '1px solid #D9DEF0', borderRadius: '4px', color: '#5b6680', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
+                            >
+                                {t('editor.align.clear')}
                             </button>
                         </div>
                     )}
@@ -5766,11 +5971,20 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                 <button
                                                     type="button"
                                                     data-row-add
-                                                    onClick={() => applySummaryRowEdit(addEmptyRowAfter)}
+                                                    onClick={() => setRowComposerOpen((o) => !o)}
                                                     title={t('editor.rows.addHint')}
-                                                    style={{ flex: '1 1 40%', padding: '6px 8px', background: 'rgba(15, 118, 110, 0.12)', border: '1px solid rgba(15, 118, 110, 0.4)', borderRadius: '4px', color: '#0f766e', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+                                                    style={{ flex: '1 1 40%', padding: '6px 8px', background: rowComposerOpen ? 'rgba(15, 118, 110, 0.22)' : 'rgba(15, 118, 110, 0.12)', border: '1px solid rgba(15, 118, 110, 0.4)', borderRadius: '4px', color: '#0f766e', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
                                                 >
                                                     + {t('editor.rows.add')}
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    data-row-blank
+                                                    onClick={() => applySummaryRowEdit(addEmptyRowAfter)}
+                                                    title={t('editor.rows.blankHint')}
+                                                    style={{ flex: '1 1 40%', padding: '6px 8px', background: 'rgba(15, 118, 110, 0.08)', border: '1px solid rgba(15, 118, 110, 0.3)', borderRadius: '4px', color: '#0f766e', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+                                                >
+                                                    + {t('editor.rows.blank')}
                                                 </button>
                                                 <button
                                                     type="button"
@@ -5810,6 +6024,130 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                     🗑 {t('editor.rows.remove')}
                                                 </button>
                                             </div>
+                                            {rowComposerOpen && (() => {
+                                                const totals = catalog.filter((f) => !isLineField(f)
+                                                    && /LegalMonetaryTotal|TaxTotal|WithholdingTaxTotal|AllowanceCharge|PayableRounding/i.test(f.path));
+                                                const others = catalog.filter((f) => !isLineField(f) && !totals.some((tf) => tf.key === f.key));
+                                                return (
+                                                    <div
+                                                        data-row-composer
+                                                        style={{ marginTop: '10px', padding: '10px', background: '#f0fdfa', border: '1px solid rgba(15, 118, 110, 0.25)', borderRadius: '6px' }}
+                                                    >
+                                                        <div style={{ fontSize: '11px', fontWeight: 700, color: '#0f766e', marginBottom: '6px' }}>
+                                                            {t('editor.rows.composerTitle')}
+                                                        </div>
+                                                        <div style={{ fontSize: '10px', color: '#5b6680', marginBottom: '8px' }}>
+                                                            {t('editor.rows.composerHint')}
+                                                        </div>
+                                                        {rowSlots.map((slot, idx) => (
+                                                            <div
+                                                                key={slot.id}
+                                                                data-row-slot={idx}
+                                                                style={{ display: 'grid', gridTemplateColumns: '28px 72px 1fr auto', gap: '4px', alignItems: 'center', marginBottom: '6px' }}
+                                                            >
+                                                                <span style={{ fontSize: '10px', fontWeight: 700, color: '#0f766e' }}>{idx + 1}.</span>
+                                                                <select
+                                                                    value={slot.kind}
+                                                                    onChange={(e) => {
+                                                                        const kind = e.target.value as 'text' | 'field';
+                                                                        setRowSlots((prev) => prev.map((s) => s.id === slot.id ? { ...s, kind } : s));
+                                                                    }}
+                                                                    style={{ fontSize: '10px', padding: '4px', border: '1px solid #D9DEF0', borderRadius: '4px' }}
+                                                                >
+                                                                    <option value="text">{t('editor.rows.slotText')}</option>
+                                                                    <option value="field">{t('editor.rows.slotField')}</option>
+                                                                </select>
+                                                                {slot.kind === 'text' ? (
+                                                                    <input
+                                                                        type="text"
+                                                                        value={slot.text}
+                                                                        placeholder={t('editor.rows.slotTextPh')}
+                                                                        onChange={(e) => setRowSlots((prev) => prev.map((s) => s.id === slot.id ? { ...s, text: e.target.value } : s))}
+                                                                        style={{ fontSize: '11px', padding: '4px 6px', border: '1px solid #D9DEF0', borderRadius: '4px' }}
+                                                                    />
+                                                                ) : (
+                                                                    <select
+                                                                        value={slot.fieldKey}
+                                                                        onChange={(e) => setRowSlots((prev) => prev.map((s) => s.id === slot.id ? { ...s, fieldKey: e.target.value } : s))}
+                                                                        style={{ fontSize: '10px', padding: '4px', border: '1px solid #D9DEF0', borderRadius: '4px' }}
+                                                                    >
+                                                                        <option value="">{t('editor.rows.pickField')}</option>
+                                                                        <optgroup label={t('editor.rows.totalsGroup')}>
+                                                                            {totals.map((f) => (
+                                                                                <option key={f.key} value={f.key}>{f.label}</option>
+                                                                            ))}
+                                                                        </optgroup>
+                                                                        <optgroup label={t('editor.rows.allFieldsGroup')}>
+                                                                            {others.map((f) => (
+                                                                                <option key={f.key} value={f.key}>{f.label}</option>
+                                                                            ))}
+                                                                        </optgroup>
+                                                                    </select>
+                                                                )}
+                                                                <div style={{ display: 'flex', gap: '2px' }}>
+                                                                    <button
+                                                                        type="button"
+                                                                        disabled={idx === 0}
+                                                                        onClick={() => setRowSlots((prev) => {
+                                                                            if (idx === 0) return prev;
+                                                                            const next = [...prev];
+                                                                            [next[idx - 1], next[idx]] = [next[idx], next[idx - 1]];
+                                                                            return next;
+                                                                        })}
+                                                                        title={t('editor.rows.moveUp')}
+                                                                        style={{ padding: '2px 5px', fontSize: '10px', cursor: idx === 0 ? 'default' : 'pointer', opacity: idx === 0 ? 0.4 : 1, border: '1px solid #D9DEF0', borderRadius: '3px', background: '#fff' }}
+                                                                    >
+                                                                        ↑
+                                                                    </button>
+                                                                    <button
+                                                                        type="button"
+                                                                        disabled={idx === rowSlots.length - 1}
+                                                                        onClick={() => setRowSlots((prev) => {
+                                                                            if (idx >= prev.length - 1) return prev;
+                                                                            const next = [...prev];
+                                                                            [next[idx], next[idx + 1]] = [next[idx + 1], next[idx]];
+                                                                            return next;
+                                                                        })}
+                                                                        title={t('editor.rows.moveDown')}
+                                                                        style={{ padding: '2px 5px', fontSize: '10px', cursor: idx === rowSlots.length - 1 ? 'default' : 'pointer', opacity: idx === rowSlots.length - 1 ? 0.4 : 1, border: '1px solid #D9DEF0', borderRadius: '3px', background: '#fff' }}
+                                                                    >
+                                                                        ↓
+                                                                    </button>
+                                                                    <button
+                                                                        type="button"
+                                                                        disabled={rowSlots.length <= 1}
+                                                                        onClick={() => setRowSlots((prev) => prev.filter((s) => s.id !== slot.id))}
+                                                                        title={t('editor.rows.removeSlot')}
+                                                                        style={{ padding: '2px 5px', fontSize: '10px', cursor: rowSlots.length <= 1 ? 'default' : 'pointer', opacity: rowSlots.length <= 1 ? 0.4 : 1, border: '1px solid rgba(239,68,68,0.35)', borderRadius: '3px', background: '#fff', color: '#dc2626' }}
+                                                                    >
+                                                                        ×
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                        <div style={{ display: 'flex', gap: '6px', marginTop: '8px' }}>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    rowSlotIdRef.current += 1;
+                                                                    setRowSlots((prev) => [...prev, { id: rowSlotIdRef.current, kind: 'field', text: '', fieldKey: '' }]);
+                                                                }}
+                                                                style={{ flex: 1, padding: '5px 8px', fontSize: '10px', fontWeight: 700, border: '1px dashed rgba(15,118,110,0.45)', borderRadius: '4px', background: '#fff', color: '#0f766e', cursor: 'pointer' }}
+                                                            >
+                                                                + {t('editor.rows.addSlot')}
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                data-row-composer-apply
+                                                                onClick={applyConfiguredSummaryRow}
+                                                                style={{ flex: 1, padding: '5px 8px', fontSize: '10px', fontWeight: 700, border: '1px solid rgba(15,118,110,0.5)', borderRadius: '4px', background: 'rgba(15,118,110,0.15)', color: '#0f766e', cursor: 'pointer' }}
+                                                            >
+                                                                ✓ {t('editor.rows.applyComposer')}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })()}
                                         </div>
                                     )}
                                     {kind === 'dropdown' && b && (
@@ -6275,12 +6613,20 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     )}
                                     {((isObj && canPersist && sel.locator?.kind === 'obj') || (sel.locator?.kind === 'bind' && !!el && (!!selectedBindPlacement?.movable || selectedBindPlacement?.detach === 'cell') && !design.paid) || (elMovable && canPersist)) && (
                                         <button
-                                            onClick={() => { flushSourceEdits(); setMoving(sel.locator); }}
-                                            title={isObj ? t('editor.panel.moveObject') : isLiteral ? t('editor.panel.moveElement') : t('editor.panel.moveField')}
+                                            onClick={() => {
+                                                flushSourceEdits();
+                                                setMoving(sel.locator);
+                                                setMovingMulti(multiLocators.length > 1 ? multiLocators : null);
+                                            }}
+                                            title={multiLocators.length > 1
+                                                ? t('editor.align.moveHint')
+                                                : (isObj ? t('editor.panel.moveObject') : isLiteral ? t('editor.panel.moveElement') : t('editor.panel.moveField'))}
                                             data-move-object
                                             style={{ flex: 1, padding: '6px 8px', background: moving ? 'rgba(16, 185, 129, 0.3)' : 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.4)', borderRadius: '4px', color: '#059669', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
                                         >
-                                            ↕ {t('editor.panel.move.button')}
+                                            ↕ {multiLocators.length > 1
+                                                ? t('editor.align.moveCount', { count: multiLocators.length })
+                                                : t('editor.panel.move.button')}
                                         </button>
                                     )}
                                     {removable && (
