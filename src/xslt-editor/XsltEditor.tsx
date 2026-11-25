@@ -47,7 +47,8 @@ import {
 } from './chart';
 import {
     detectInXslt, xsltLocalNameSet, bindingLabel, contextPathResolver, evaluateField,
-    ensureDecimalFormat, isInLineContext, isLineField, lineRootXPath, fieldSnippet, fieldContent, formulaSnippet, formulaContent, formulaAttrs,
+    ensureDecimalFormat, isInLineContext, isLineField, lineRootXPath, fieldSnippet, fieldContent, fieldEffectiveXPath,
+    formulaSnippet, formulaContent, formulaAttrs,
     readFormula, DEFAULT_FORMULA, FORMULA_OPS, evaluateFormula, formulaSumsLines,
     readFieldTransform, fieldTransformAttrs, evaluateFieldTransform, FIELD_FILTERS, FIELD_EXTRACTS, FIELD_CASES,
     type CatalogField, type FormulaModel, type FormulaOp, type FieldTransform,
@@ -186,7 +187,7 @@ function refreshObjectContents(xslt: string, catalog: CatalogField[], lang: DocL
         else if (kind === 'barcode') content = barcodeContent(readBarcode(el), catalog, inLine);
         else if (kind === 'field') {
             const f = catalog.find(x => x.key === el.getAttribute('data-field'));
-            if (f) content = fieldContent(f, inLine, lang, readFieldTransform(el));
+            if (f) content = fieldContent(f, inLine, lang, readFieldTransform(el), el.getAttribute('data-xpath'));
         }
         if (content !== null) next = replaceElementContent(next, tag, content);
     }
@@ -3142,6 +3143,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         const el = selectedObjectRef.current?.element;
         const tx = el ? readFieldTransform(el) : null;
         handleAttrChange('data-field', key);
+        handleAttrChange('data-xpath', ''); // katalog alanına dönünce özel XPath temizlenir
         handleContentChange(
             fieldContent(f, selectedObjInLine(), docLangRef.current, tx ?? undefined),
             tx ? evaluateFieldTransform(xmlDocRef.current, f, tx, docLangRef.current) : evaluateField(xmlDocRef.current, f),
@@ -3153,8 +3155,61 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         const f = catalogRef.current.find(x => x.key === el?.getAttribute('data-field'));
         if (!f) return;
         for (const [attr, value] of fieldTransformAttrs(tx)) handleAttrChange(attr, value);
-        handleContentChange(fieldContent(f, selectedObjInLine(), docLangRef.current, tx), evaluateFieldTransform(xmlDocRef.current, f, tx, docLangRef.current));
+        const custom = el?.getAttribute('data-xpath');
+        handleContentChange(
+            fieldContent(f, selectedObjInLine(), docLangRef.current, tx, custom),
+            evaluateFieldTransform(xmlDocRef.current, f, tx, docLangRef.current),
+        );
     }, [selectedObjInLine, handleAttrChange, handleContentChange]);
+
+    /** Alan objesinde XPath ifadesini elle ayarla (özet / toplam hücreleri dahil). */
+    const handleFieldXPathChange = useCallback((xpath: string) => {
+        const el = selectedObjectRef.current?.element;
+        const f = catalogRef.current.find(x => x.key === el?.getAttribute('data-field'));
+        if (!f || !el) return;
+        const trimmed = xpath.trim();
+        const tx = readFieldTransform(el);
+        const defaultXp = fieldEffectiveXPath(f, selectedObjInLine(), tx, docLangRef.current);
+        const custom = trimmed && trimmed !== defaultXp ? trimmed : '';
+        handleAttrChange('data-xpath', custom);
+        handleContentChange(
+            fieldContent(f, selectedObjInLine(), docLangRef.current, tx, custom || null),
+            custom
+                ? (() => {
+                    try {
+                        return xmlDocRef.current?.evaluate(`string(${trimmed})`, xmlDocRef.current, null, XPathResult.STRING_TYPE, null).stringValue.trim() ?? '';
+                    } catch { return ''; }
+                })()
+                : evaluateFieldTransform(xmlDocRef.current, f, tx, docLangRef.current),
+        );
+    }, [selectedObjInLine, handleAttrChange, handleContentChange]);
+
+    /** Özet hücredeki çıplak xsl:value-of'u düzenlenebilir alan objesine çevirir. */
+    const upgradeSummaryCellToField = useCallback((fieldKey: string) => {
+        flushSourceEdits();
+        const ctx = findSummaryTableContext(selectedObjectRef.current?.element ?? null, xsltContentRef.current);
+        const cell = ctx?.cell;
+        if (!cell) {
+            setSaveMessage(`⚠ ${i18n.t('editor.rows.needSummary')}`);
+            return;
+        }
+        const f = catalogRef.current.find((c) => c.key === fieldKey);
+        if (!f) return;
+        const ord = Number(cell.getAttribute('data-xsrc'));
+        if (Number.isNaN(ord)) return;
+        let xslt = xsltContentRef.current;
+        const cellTag = findLiteralTagByOrdinal(xslt, ord);
+        if (!cellTag) return;
+        const range = findElementContentRange(xslt, cellTag);
+        if (!range) return;
+        const id = nextXsltObjId(xslt);
+        const snippet = fieldSnippet(id, f, false, docLangRef.current);
+        xslt = `${xslt.slice(0, range.start)}${snippet}${xslt.slice(range.end)}`;
+        pendingSelectRef.current = { kind: 'obj', id };
+        xsltContentRef.current = xslt;
+        setXsltContent(xslt);
+        setSaveMessage(`✓ ${i18n.t('editor.rows.fieldUpgraded')}`);
+    }, [flushSourceEdits]);
 
     const openSelection = useCallback((binding: XsltBinding | null, element: HTMLElement | null, locator: PreviewLocator | null, additive = false) => {
         flushSourceEdits();
@@ -3222,10 +3277,18 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     }, [flushSourceEdits, findPreviewElement, commitPosition]);
 
     const applyConfiguredSummaryRow = useCallback(() => {
+        let nextId = (() => {
+            let max = 0;
+            for (const m of xsltContentRef.current.matchAll(/data-xslt-obj="obj-(\d+)"/g)) max = Math.max(max, Number(m[1]));
+            return max + 1;
+        })();
         const cells: SummaryCellSpec[] = rowSlots.map((s) => {
             if (s.kind === 'text') return { kind: 'text', text: s.text };
             const f = catalogRef.current.find((c) => c.key === s.fieldKey);
-            return { kind: 'field', content: f ? fieldContent(f, false, docLangRef.current) : '&#160;' };
+            if (!f) return { kind: 'text', text: '' };
+            const id = `obj-${nextId++}`;
+            // Diğer eklenen objeler gibi data-obj-kind=field → XPath / gösterilen alan paneli
+            return { kind: 'field', content: fieldSnippet(id, f, false, docLangRef.current) };
         });
         if (!cells.length) return;
         applySummaryRowEdit((xslt, tag) => addConfiguredRowAfter(xslt, tag, cells));
@@ -6148,6 +6211,25 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                     </div>
                                                 );
                                             })()}
+                                            {selectedSummaryCtx.cell && !isField && !selectedSummaryCtx.cell.querySelector('[data-obj-kind="field"]') && (
+                                                <div data-summary-field-upgrade style={{ marginTop: '12px' }}>
+                                                    {sectionTitle(t('editor.rows.upgradeTitle'), '#0284c7')}
+                                                    {noteBox(t('editor.rows.upgradeHint'), 'info')}
+                                                    <label style={fieldLabelStyle}>{t('editor.panel.shownField')}</label>
+                                                    <select
+                                                        data-summary-upgrade-field
+                                                        defaultValue=""
+                                                        onChange={(e) => {
+                                                            const key = e.target.value;
+                                                            if (key) upgradeSummaryCellToField(key);
+                                                        }}
+                                                        style={{ ...fieldInputStyle, marginBottom: '6px' }}
+                                                    >
+                                                        <option value="">{t('editor.rows.pickField')}</option>
+                                                        <CatalogOptions fields={catalog.filter((f) => !isLineField(f))} xmlDoc={xmlDoc} />
+                                                    </select>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                     {kind === 'dropdown' && b && (
@@ -6311,25 +6393,51 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                         </>
                                     )}
 
-                                    {isObj && el && isField && (
-                                        <>
-                                            {sectionTitle(t('editor.panel.kind.field'), '#0284c7')}
-                                            <label style={fieldLabelStyle}>{t('editor.panel.shownField')}</label>
-                                            <select
-                                                key={fieldKey('field')}
-                                                data-field-select
-                                                defaultValue={el.getAttribute('data-field') ?? ''}
-                                                onChange={(e) => handleFieldChange(e.target.value)}
-                                                style={{ ...fieldInputStyle, marginBottom: '10px' }}
-                                            >
-                                                <CatalogOptions fields={catalog} xmlDoc={xmlDoc} />
-                                            </select>
-                                            {noteBox(t('editor.panel.fieldNote', { sample: formatDocNumber(1234.56, 2, docLang) }), 'info')}
-                                            {sectionTitle(t('editor.fieldTx.title'), '#4f46e5')}
-                                            <FieldTransformEditor key={fieldKey('field-tx')} el={el} catalog={catalog} xmlDoc={xmlDoc} docLang={docLang} onChange={handleFieldTransformChange} />
-                                            {noteBox(t('editor.fieldTx.hint'), 'info')}
-                                        </>
-                                    )}
+                                    {isObj && el && isField && (() => {
+                                        const fieldKeyAttr = el.getAttribute('data-field') ?? '';
+                                        const fObj = catalog.find((x) => x.key === fieldKeyAttr);
+                                        const tx = readFieldTransform(el);
+                                        const customXp = el.getAttribute('data-xpath') || '';
+                                        const effectiveXp = fObj
+                                            ? fieldEffectiveXPath(fObj, selectedObjInLine(), tx, docLang, customXp)
+                                            : customXp;
+                                        return (
+                                            <>
+                                                {sectionTitle(t('editor.panel.kind.field'), '#0284c7')}
+                                                <label style={fieldLabelStyle}>{t('editor.panel.shownField')}</label>
+                                                <select
+                                                    key={fieldKey('field')}
+                                                    data-field-select
+                                                    defaultValue={fieldKeyAttr}
+                                                    onChange={(e) => handleFieldChange(e.target.value)}
+                                                    style={{ ...fieldInputStyle, marginBottom: '10px' }}
+                                                >
+                                                    <CatalogOptions fields={catalog} xmlDoc={xmlDoc} />
+                                                </select>
+                                                {noteBox(t('editor.panel.fieldNote', { sample: formatDocNumber(1234.56, 2, docLang) }), 'info')}
+                                                <label style={{ ...fieldLabelStyle, marginTop: '10px' }}>{t('editor.panel.xpath')}</label>
+                                                <textarea
+                                                    key={fieldKey(`field-xpath-${customXp || effectiveXp}`)}
+                                                    data-field-xpath
+                                                    defaultValue={effectiveXp}
+                                                    onBlur={(e) => handleFieldXPathChange(e.target.value)}
+                                                    spellCheck={false}
+                                                    title={t('editor.panel.xpathEditHint')}
+                                                    style={{
+                                                        boxSizing: 'border-box', width: '100%', minHeight: '56px', maxHeight: '160px',
+                                                        padding: '8px 10px', background: '#f3f5ff',
+                                                        border: '1px solid #D9DEF0', borderRadius: '4px',
+                                                        color: '#1e293b', fontSize: '11px', fontFamily: 'monospace',
+                                                        resize: 'vertical', outline: 'none', marginBottom: '8px',
+                                                    }}
+                                                />
+                                                {noteBox(t('editor.panel.xpathEditNote'), 'info')}
+                                                {sectionTitle(t('editor.fieldTx.title'), '#4f46e5')}
+                                                <FieldTransformEditor key={fieldKey('field-tx')} el={el} catalog={catalog} xmlDoc={xmlDoc} docLang={docLang} onChange={handleFieldTransformChange} />
+                                                {noteBox(t('editor.fieldTx.hint'), 'info')}
+                                            </>
+                                        );
+                                    })()}
 
                                     {isObj && el && isKarekod && (
                                         <>

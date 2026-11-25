@@ -208,6 +208,8 @@ const editor: typeof tr = {
         fieldName: 'Nome do campo',
         xmlName: 'Campo XML',
         xpath: 'Expressão XPath',
+        xpathEditHint: 'Edit the XPath; it is saved when the field loses focus',
+        xpathEditNote: 'You can enter a custom XPath. Choosing another field above resets XPath to the catalog path.',
         previewValue: 'Valor na visualização:',
         empty: '(vazio)',
         xmlLocked: 'O valor vem do XML; sua origem não pode ser alterada. Você pode mudar o lugar dele arrastando, com os campos de Posição ou com ↕ Mover, e a aparência abaixo.',
@@ -551,6 +553,9 @@ const editor: typeof tr = {
         needSummary: 'Select a row or cell in a summary / subtotal table.',
         editFailed: 'Could not apply the row action (cannot delete the last row, or source missing).',
         updated: 'Summary row updated.',
+        upgradeTitle: 'Convert cell to a data field object',
+        upgradeHint: 'Instead of a fixed template XPath, you get the same shown-field and editable XPath controls as other inserted objects.',
+        fieldUpgraded: 'Cell converted to a data field object; XPath can now be configured.',
     },
     columnError: {
         noCell: 'A célula selecionada não foi encontrada na tabela.',

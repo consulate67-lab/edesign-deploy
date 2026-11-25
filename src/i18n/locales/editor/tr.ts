@@ -206,6 +206,8 @@ const editor = {
         fieldName: 'Alan adı',
         xmlName: 'XML alanı',
         xpath: 'XPath ifadesi',
+        xpathEditHint: 'XPath\'i düzenleyin; odaktan çıkınca kaydedilir',
+        xpathEditNote: 'Özel XPath yazabilirsiniz. Yukarıdan başka alan seçerseniz XPath katalog yoluna döner.',
         previewValue: 'Önizlemedeki değer:',
         empty: '(boş)',
         xmlLocked: 'Veri XML\'den gelir; bu alanın kaynağı değiştirilemez. Yerini sürükleyerek, Konum alanlarıyla veya ↕ Taşı ile; görünümünü aşağıdan değiştirebilirsiniz.',
@@ -549,6 +551,9 @@ const editor = {
         needSummary: 'Özet / alt toplam tablosundan bir satır veya hücre seçin.',
         editFailed: 'Satır işlemi uygulanamadı (tek satır silinemez veya kaynak bulunamadı).',
         updated: 'Özet satırı güncellendi.',
+        upgradeTitle: 'Hücreyi veri alanı objesine çevir',
+        upgradeHint: 'Şablondaki sabit XPath yerine, diğer eklenen objeler gibi gösterilen alan ve XPath düzenlenebilir olur.',
+        fieldUpgraded: 'Hücre veri alanı objesine çevrildi; XPath artık ayarlanabilir.',
     },
     columnError: {
         noCell: 'Seçili hücre tabloda bulunamadı.',

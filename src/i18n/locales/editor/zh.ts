@@ -208,6 +208,8 @@ const editor: typeof tr = {
         fieldName: '字段名称',
         xmlName: 'XML 字段',
         xpath: 'XPath 表达式',
+        xpathEditHint: 'Edit the XPath; it is saved when the field loses focus',
+        xpathEditNote: 'You can enter a custom XPath. Choosing another field above resets XPath to the catalog path.',
         previewValue: '预览中的值：',
         empty: '（空）',
         xmlLocked: '该值来自 XML，其来源无法更改。您可以通过拖动、使用“位置”字段或 ↕ 移动来更改其位置，并在下方更改其外观。',
@@ -551,6 +553,9 @@ const editor: typeof tr = {
         needSummary: 'Select a row or cell in a summary / subtotal table.',
         editFailed: 'Could not apply the row action (cannot delete the last row, or source missing).',
         updated: 'Summary row updated.',
+        upgradeTitle: 'Convert cell to a data field object',
+        upgradeHint: 'Instead of a fixed template XPath, you get the same shown-field and editable XPath controls as other inserted objects.',
+        fieldUpgraded: 'Cell converted to a data field object; XPath can now be configured.',
     },
     columnError: {
         noCell: '在表格中未找到所选单元格。',

@@ -1087,9 +1087,37 @@ export function fieldTransformExpr(f: CatalogField, inLine: boolean, tx: FieldTr
 const isPlainTransform = (tx: FieldTransform) => (tx.filter === 'none' || !tx.filterText) && tx.extract === 'all' && !tx.trim && tx.case === 'none';
 const escapeSelect = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 
+/** Alan objesinin etkin XPath'i (özel `data-xpath` yoksa katalog + dönüşüm). */
+export function fieldEffectiveXPath(
+    f: CatalogField,
+    inLine: boolean,
+    tx: FieldTransform = NO_TRANSFORM,
+    lang: DocLanguage = 'tr',
+    customXPath?: string | null,
+): string {
+    const custom = customXPath?.trim();
+    if (custom) return custom;
+    if (isPlainTransform(tx)) return fieldXPath(f, inLine);
+    return fieldTransformExpr(f, inLine, tx, lang);
+}
+
 /** Veri alanı objesinin içeriği (sayısal alanlar belge dilinin ayraçlarıyla biçimlenir). */
-export function fieldContent(f: CatalogField, inLine: boolean, lang: DocLanguage = 'tr', tx: FieldTransform = NO_TRANSFORM): string {
+export function fieldContent(
+    f: CatalogField,
+    inLine: boolean,
+    lang: DocLanguage = 'tr',
+    tx: FieldTransform = NO_TRANSFORM,
+    customXPath?: string | null,
+): string {
     const textual = tx.extract !== 'all' || tx.case !== 'none';
+    const custom = customXPath?.trim();
+    if (custom) {
+        const xp = escapeSelect(custom);
+        if (f.format === 'amount' && !textual) {
+            return `<xsl:if test="${xp}"><xsl:value-of select="${formatted(`number(${xp})`, 2, lang)}"/></xsl:if>`;
+        }
+        return `<xsl:value-of select="${xp}"/>`;
+    }
     if (f.format === 'amount' && !textual) {
         const xp = escapeSelect(fieldNodeXPath(f, inLine, tx));
         return `<xsl:if test="${xp}"><xsl:value-of select="${formatted(`number(${xp})`, 2, lang)}"/></xsl:if>`;
