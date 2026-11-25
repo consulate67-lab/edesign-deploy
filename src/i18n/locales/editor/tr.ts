@@ -25,7 +25,7 @@ const editor = {
         chars_one: '{{n}} karakter',
         chars_other: '{{n}} karakter',
         notBase64: 'Bu resim base64 değil (harici adres).',
-        pasteBase64: 'Base64 değerini (iVBORw0KGgo…) ya da data:image/...;base64,… yapıştırın',
+        pasteBase64: 'Base64 değerini yapıştırın (PNG: iVBORw…, JPEG: /9j/… veya 9j/…) ya da data:image/...;base64,…',
         label: 'Resim',
         fromXml: 'Bu resim belgenin XML\'inden geliyor (ör. EmbeddedDocumentBinaryObject); her belgede değişir, burada değiştirilemez.',
         none: 'Henüz resim seçilmedi',

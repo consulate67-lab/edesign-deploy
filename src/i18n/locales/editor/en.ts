@@ -27,7 +27,7 @@ const editor: typeof tr = {
         chars_one: '{{n}} character',
         chars_other: '{{n}} characters',
         notBase64: 'This image is not base64 (external URL).',
-        pasteBase64: 'Paste the base64 value (iVBORw0KGgo…) or data:image/...;base64,…',
+        pasteBase64: 'Paste the base64 value (PNG: iVBORw…, JPEG: /9j/… or 9j/…) or data:image/...;base64,…',
         label: 'Image',
         fromXml: 'This image comes from the document XML (e.g. EmbeddedDocumentBinaryObject); it changes per document and cannot be edited here.',
         none: 'No image selected yet',

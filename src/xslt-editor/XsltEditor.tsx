@@ -464,8 +464,9 @@ const isImagePlaceholder = (src: string) => src.startsWith('data:image/svg+xml,%
  * üretilir. Harici adres (URL) isteyenler için ayrıca metin alanı vardır.
  */
 const BASE64_MIME_PREFIXES: [string, string][] = [
-    ['iVBOR', 'image/png'], ['/9j/', 'image/jpeg'], ['R0lGOD', 'image/gif'], ['UklGR', 'image/webp'],
-    ['PHN2Zy', 'image/svg+xml'], ['PD94', 'image/svg+xml'], ['Qk', 'image/bmp'],
+    ['iVBOR', 'image/png'], ['/9j/', 'image/jpeg'], ['9j/', 'image/jpeg'],
+    ['R0lGOD', 'image/gif'], ['UklGR', 'image/webp'],
+    ['PHN2Zy', 'image/svg+xml'], ['PD94bW', 'image/svg+xml'], ['Qk0', 'image/bmp'], ['Qk1', 'image/bmp'],
 ];
 const utf8ToBase64 = (text: string) => {
     let bin = '';
@@ -483,13 +484,37 @@ const base64Part = (src: string) => {
         return null;
     }
 };
+/** İlk baytlardan MIME (önek eşleşmezse / URL-safe base64). */
+const sniffBase64ImageMime = (data: string): string | null => {
+    try {
+        const head = atob(data.slice(0, 64));
+        const b = (i: number) => head.charCodeAt(i);
+        if (b(0) === 0xff && b(1) === 0xd8 && b(2) === 0xff) return 'image/jpeg';
+        if (b(0) === 0x89 && b(1) === 0x50 && b(2) === 0x4e && b(3) === 0x47) return 'image/png';
+        if (b(0) === 0x47 && b(1) === 0x49 && b(2) === 0x46) return 'image/gif';
+        if (b(0) === 0x52 && b(1) === 0x49 && b(2) === 0x46 && b(3) === 0x46 && b(8) === 0x57 && b(9) === 0x45 && b(10) === 0x42 && b(11) === 0x50) return 'image/webp';
+        if (b(0) === 0x42 && b(1) === 0x4d) return 'image/bmp';
+        if (head.includes('<svg') || head.includes('<?xml')) return 'image/svg+xml';
+    } catch { /* ignore */ }
+    return null;
+};
 /** Yapıştırılan saf base64 ya da data URL → data URL; tür ilk baytlardan bulunur. */
 const base64ToDataUrl = (raw: string): string | null => {
-    const v = raw.trim();
+    let v = raw.trim().replace(/^["']|["']$/g, '');
+    // "base64,...." veya yalnızca gövde; data: öneki base64Part ile çözülür.
+    if (/^base64,/i.test(v)) v = v.slice(7);
     const part = v.startsWith('data:') ? base64Part(v) : null;
-    const data = (part ? part.data : v).replace(/\s+/g, '');
+    let data = (part ? part.data : v).replace(/\s+/g, '');
+    // JPEG: bazı kopyalamalar baştaki "/" işaretini düşürür → "9j/4AAQ..."
+    if (data.startsWith('9j/')) data = `/${data}`;
+    // URL-safe base64 → standart
+    data = data.replace(/-/g, '+').replace(/_/g, '/');
+    if (data.length % 4 === 1) return null;
+    while (data.length % 4 !== 0) data += '=';
     if (!data || !/^[A-Za-z0-9+/]+=*$/.test(data)) return null;
-    const mime = part?.mime ?? BASE64_MIME_PREFIXES.find(([p]) => data.startsWith(p))?.[1];
+    const mime = (part?.mime?.startsWith('image/') ? part.mime : null)
+        ?? BASE64_MIME_PREFIXES.find(([p]) => data.startsWith(p))?.[1]
+        ?? sniffBase64ImageMime(data);
     return mime ? `data:${mime};base64,${data}` : null;
 };
 
