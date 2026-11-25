@@ -1,7 +1,7 @@
 /**
  * Tasarım-zamanı sayfa bantları (üst / orta / alt).
  * Yalnız editör önizlemesinde görünür; XSLT'ye yazılmaz.
- * Bant sınırı sürüklenince alttaki mutlak/statik kök öğeler birlikte kayar.
+ * Bant sınırı sürüklenince çizginin altındaki tüm kök nesneler birlikte kayar.
  */
 
 export type DesignBandId = 'master' | 'detail' | 'footer';
@@ -63,34 +63,91 @@ export const BAND_OVERLAY_ID = '__xslt-design-bands';
 
 export type BandShiftSnapshot = {
     el: HTMLElement;
-    kind: 'absolute' | 'margin';
-    /** Sürükleme başındaki style.top (absolute) veya style.marginTop (margin). */
+    /** absolute: top; margin: marginTop; padding: paddingTop (tbody/tfoot). */
+    kind: 'absolute' | 'margin' | 'padding';
+    /** Sürükleme başındaki ilgili stil değeri (px). */
     base: number;
     left: number;
     clientTop: number;
 };
 
-/** Bant overlay dışındaki, sayfadaki taşınabilir kök öğeler. */
-export function collectBandShiftCandidates(page: HTMLElement): HTMLElement[] {
+const INLINE_TAGS = new Set(['span', 'a', 'b', 'i', 'em', 'strong', 'font', 'label', 'u', 's', 'small', 'sup', 'sub']);
+
+/** Sayfa boyutu kadar büyük sarmalayıcılar (içerik değil, kaydırma kökü olmamalı). */
+const isPageSizedWrapper = (el: HTMLElement, page: HTMLElement) => {
+    if (el === page) return true;
+    const pr = page.getBoundingClientRect();
+    const er = el.getBoundingClientRect();
+    if (pr.height < 40 || pr.width < 40) return false;
+    return er.width >= pr.width * 0.92
+        && er.height >= pr.height * 0.65
+        && er.top <= pr.top + 12;
+};
+
+/** Satır/hücre → tbody/tfoot (veya tablo); thead üstte kalır, gövde kayar. */
+const promoteTablePart = (el: HTMLElement): HTMLElement => {
+    const tag = el.tagName.toLowerCase();
+    if (tag === 'td' || tag === 'th' || tag === 'tr') {
+        const section = el.closest('tbody, tfoot') as HTMLElement | null;
+        if (section) return section;
+        const table = el.closest('table') as HTMLElement | null;
+        if (table) return table;
+    }
+    if (tag === 'thead') {
+        const table = el.closest('table') as HTMLElement | null;
+        if (table) return table;
+    }
+    return el;
+};
+
+/**
+ * Bant çizgisinin altında kalan taşınabilir öğeler.
+ * Önce Y’ye göre filtre, sonra kök seçimi — sayfa kökü her şeyi yutmasın.
+ */
+export function collectElementsBelowBand(page: HTMLElement, edgeClientY: number): HTMLElement[] {
     const doc = page.ownerDocument;
     const view = doc.defaultView;
-    const all = Array.from(page.querySelectorAll<HTMLElement>('[data-xslt-obj], [data-xsrc], [data-render-index]'));
-    const hit = all.filter((el) => {
-        if (el.id === BAND_OVERLAY_ID || el.closest(`#${BAND_OVERLAY_ID}`)) return false;
-        // İç içe: üstte zaten aday olan bir ebeveyn varsa çocuğu atla (çift kaydırma olmasın).
+    const raw = Array.from(page.querySelectorAll<HTMLElement>('[data-xslt-obj], [data-xsrc], [data-render-index], table, tbody, tfoot'));
+    const below: HTMLElement[] = [];
+    const seen = new Set<HTMLElement>();
+    for (const start of raw) {
+        let el = start;
+        if (el.id === BAND_OVERLAY_ID || el.closest(`#${BAND_OVERLAY_ID}`)) continue;
+        el = promoteTablePart(el);
+        if (seen.has(el) || !page.contains(el)) continue;
+        if (isPageSizedWrapper(el, page)) continue;
+        const r = el.getBoundingClientRect();
+        if (r.height < 1 || r.width < 1) continue;
+        // Çizginin üstünde başlayanlar kaymaz.
+        if (r.top < edgeClientY - 1) continue;
+
         const pos = el.style.position || view?.getComputedStyle(el).position || '';
         const absolute = pos === 'absolute' || pos === 'fixed';
-        // Statik akış: yalnızca blok benzeri data-xsrc (tablo, div…) — satır içi span kaymasın.
         if (!absolute) {
-            if (!el.hasAttribute('data-xsrc')) return false;
             const display = view?.getComputedStyle(el).display || '';
-            if (display === 'inline' || display === 'inline-block' || display === 'contents') return false;
-            const tag = el.tagName.toLowerCase();
-            if (['span', 'a', 'b', 'i', 'em', 'strong', 'font', 'label'].includes(tag)) return false;
+            if (display === 'inline' || display === 'contents') continue;
+            if (INLINE_TAGS.has(el.tagName.toLowerCase())) continue;
         }
-        return true;
+        seen.add(el);
+        below.push(el);
+    }
+
+    // Aynı alt-ağaçta yalnız en dış öğeyi tut (çift kaydırma yok).
+    const roots = below.filter((el) => !below.some((other) => other !== el && other.contains(el)));
+
+    // Akış (margin) öğelerinde yalnızca en üsttekine margin ver;
+    // kardeşlere de margin vermek ikinciyi 2× kaydırır.
+    const abs = roots.filter((el) => {
+        const pos = el.style.position || view?.getComputedStyle(el).position || '';
+        return pos === 'absolute' || pos === 'fixed';
     });
-    return hit.filter((el) => !hit.some((other) => other !== el && other.contains(el)));
+    const flow = roots
+        .filter((el) => !abs.includes(el))
+        .sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top);
+
+    const out = [...abs];
+    if (flow[0]) out.push(flow[0]);
+    return out;
 }
 
 export function snapshotBandShiftTargets(
@@ -99,14 +156,18 @@ export function snapshotBandShiftTargets(
 ): BandShiftSnapshot[] {
     const view = page.ownerDocument.defaultView;
     const out: BandShiftSnapshot[] = [];
-    for (const el of collectBandShiftCandidates(page)) {
+    for (const el of collectElementsBelowBand(page, edgeClientY)) {
         const r = el.getBoundingClientRect();
-        if (r.top < edgeClientY - 1) continue;
         const pos = el.style.position || view?.getComputedStyle(el).position || '';
+        const tag = el.tagName.toLowerCase();
         if (pos === 'absolute' || pos === 'fixed') {
             const top = parseFloat(el.style.top || '') || parseFloat(view?.getComputedStyle(el).top || '') || 0;
             const left = parseFloat(el.style.left || '') || parseFloat(view?.getComputedStyle(el).left || '') || 0;
             out.push({ el, kind: 'absolute', base: top, left, clientTop: r.top });
+        } else if (tag === 'tbody' || tag === 'tfoot' || tag === 'thead') {
+            // margin tbody'de etkisiz; padding-top satırları iter.
+            const pt = parseFloat(el.style.paddingTop || '') || parseFloat(view?.getComputedStyle(el).paddingTop || '') || 0;
+            out.push({ el, kind: 'padding', base: pt, left: 0, clientTop: r.top });
         } else {
             const mt = parseFloat(el.style.marginTop || '') || parseFloat(view?.getComputedStyle(el).marginTop || '') || 0;
             out.push({ el, kind: 'margin', base: mt, left: 0, clientTop: r.top });
@@ -121,7 +182,6 @@ export function applyBandShiftDelta(
     deltaClientPx: number,
     scaleOf: (el: HTMLElement) => number,
 ): void {
-    if (Math.abs(deltaClientPx) < 0.25) return;
     for (const s of snaps) {
         const scale = scaleOf(s.el) || 1;
         const next = s.base + deltaClientPx / scale;
@@ -131,8 +191,10 @@ export function applyBandShiftDelta(
                 s.el.style.left = `${s.left}px`;
             }
             s.el.style.top = `${next}px`;
+        } else if (s.kind === 'padding') {
+            s.el.style.paddingTop = `${Math.max(0, next)}px`;
         } else {
-            s.el.style.marginTop = `${next}px`;
+            s.el.style.marginTop = `${Math.max(0, next)}px`;
         }
     }
 }
@@ -228,8 +290,8 @@ export function syncDesignBandOverlay(
             `top:${(ratio * 100).toFixed(3)}%`,
             'left:0',
             'right:0',
-            'height:10px',
-            'margin-top:-5px',
+            'height:14px',
+            'margin-top:-7px',
             'cursor:row-resize',
             'pointer-events:auto',
             'z-index:2',
@@ -240,7 +302,7 @@ export function syncDesignBandOverlay(
             'position:absolute',
             'left:0',
             'right:0',
-            'top:4px',
+            'top:6px',
             'height:2px',
             'background:#0ea5e9',
             'box-shadow:0 0 0 1px rgba(255,255,255,0.7)',
@@ -250,9 +312,9 @@ export function syncDesignBandOverlay(
         grip.style.cssText = [
             'position:absolute',
             'left:50%',
-            'top:0',
+            'top:2px',
             'transform:translateX(-50%)',
-            'width:36px',
+            'width:40px',
             'height:10px',
             'border-radius:5px',
             'background:#0ea5e9',

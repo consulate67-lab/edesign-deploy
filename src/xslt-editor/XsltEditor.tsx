@@ -93,7 +93,8 @@ import { docT, documentLanguage } from './docLanguage';
 import { buildCatalog } from './catalogI18n';
 import {
     applyBandShiftDelta, clampBandLayout, loadBandLayout, saveBandLayout, snapshotBandShiftTargets,
-    syncDesignBandOverlay, type BandShiftSnapshot, type DesignBandId, type DesignBandLayout,
+    syncDesignBandOverlay,
+    type BandShiftSnapshot, type DesignBandId, type DesignBandLayout,
 } from './designBands';
 
 /** Satır formülü kolonunun varsayılan alanı (ilk bulunan). */
@@ -4487,11 +4488,15 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             if (objId) return { kind: 'obj', id: objId };
             const ri = el.getAttribute('data-render-index');
             if (ri != null && ri !== '' && !Number.isNaN(Number(ri))) return { kind: 'bind', index: Number(ri) };
-            const xsrc = el.getAttribute('data-xsrc');
-            if (xsrc != null && xsrc !== '' && !Number.isNaN(Number(xsrc))) {
-                const same = doc.querySelectorAll(`[data-xsrc="${xsrc}"]`);
-                const nth = Math.max(0, Array.from(same).indexOf(el));
-                return { kind: 'el', ordinal: Number(xsrc), nth };
+            let node: HTMLElement | null = el;
+            while (node && node !== doc.body) {
+                const xsrc = node.getAttribute('data-xsrc');
+                if (xsrc != null && xsrc !== '' && !Number.isNaN(Number(xsrc))) {
+                    const same = doc.querySelectorAll(`[data-xsrc="${xsrc}"]`);
+                    const nth = Math.max(0, Array.from(same).indexOf(node));
+                    return { kind: 'el', ordinal: Number(xsrc), nth };
+                }
+                node = node.parentElement;
             }
             return null;
         };
@@ -4542,11 +4547,12 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             if (!bd) return;
             saveBandLayout(bandLayoutRef.current, design.id ?? initialDesignId);
             if (!bd.snaps.length) return;
-            // Sürükleme sonucu stil değişmediyse yazma.
-            const changed = bd.snaps.some((s) => {
-                if (s.kind === 'absolute') return Math.abs((parseFloat(s.el.style.top) || 0) - s.base) > 0.5;
-                return Math.abs((parseFloat(s.el.style.marginTop) || 0) - s.base) > 0.5;
-            });
+            const styleNow = (s: BandShiftSnapshot) => {
+                if (s.kind === 'absolute') return parseFloat(s.el.style.top) || 0;
+                if (s.kind === 'padding') return parseFloat(s.el.style.paddingTop) || 0;
+                return parseFloat(s.el.style.marginTop) || 0;
+            };
+            const changed = bd.snaps.some((s) => Math.abs(styleNow(s) - s.base) > 0.5);
             if (!changed) return;
             flushSourceEdits();
             let moved = 0;
@@ -4562,13 +4568,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             let next = xsltContentRef.current;
             const before = next;
             for (const s of bd.snaps) {
-                if (s.kind !== 'margin') continue;
+                if (s.kind === 'absolute') continue;
                 const loc = locatorOfBandEl(s.el);
                 if (!loc) continue;
-                const mt = `${parseFloat(s.el.style.marginTop) || 0}px`;
+                const prop = s.kind === 'padding' ? 'padding-top' : 'margin-top';
+                const val = `${styleNow(s)}px`;
                 const tag = resolveSourceTag(next, loc);
                 if (!tag) continue;
-                next = setTagStyleProperty(next, tag, 'margin-top', mt);
+                next = setTagStyleProperty(next, tag, prop, val);
                 moved += 1;
             }
             if (next !== before) {
