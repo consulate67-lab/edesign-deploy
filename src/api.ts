@@ -50,12 +50,18 @@ export interface SavedDesign {
     expires_at?: string | null;
 }
 
-/** server/index.js embedDesignKey ile aynı biçim. */
-export const DESIGN_KEY_RE = /edesign-key:([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i;
+/** server/index.js embedDesignKey ile aynı biçim. İki nokta sonrası boşluk da kabul edilir. */
+export const DESIGN_KEY_RE = /edesign-key:\s*([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i;
 export const designKeyOf = (xslt: string | null | undefined) => xslt?.match(DESIGN_KEY_RE)?.[1] ?? null;
+/** Dosyada onay anahtarı veya lisans kilidi yorumu var mı (boşluklu biçimler dahil). */
+export const looksApprovedXslt = (xslt: string | null | undefined) =>
+    !!xslt && (/edesign-key\s*:/i.test(xslt) || /Onaylanm[ıi][şs]\s+tasar[ıi]m/i.test(xslt));
 /** Onay yorumunu kaldırır; dosya yeniden düzenlenebilir taslak olarak açılabilir. */
 export const stripDesignKey = (xslt: string) =>
-    xslt.replace(/^(?:\uFEFF|\u00EF\u00BB\u00BF)+/, '').replace(/<!--\s*edesign-key:[^>]*?-->[ \t]*\r?\n?/gi, '');
+    xslt
+        .replace(/^(?:\uFEFF|\u00EF\u00BB\u00BF)+/, '')
+        .replace(/<!--\s*edesign-key:[^>]*?-->[ \t]*\r?\n?/gi, '')
+        .replace(/<!--[^\n>]*Onaylanm[ıi][şs]\s+tasar[ıi]m[^\n>]*-->[ \t]*\r?\n?/gi, '');
 const embedDesignKey = (xslt: string, key: string) => {
     const clean = stripDesignKey(xslt);
     const comment = `<!-- edesign-key:${key} | Onaylanmis tasarim. Tasarimcida tekrar duzenlenemez. Tasarimlar olusturulduktan 7 gun sonra hesaptan silinir; bu dosyayi saklayin. -->\n`;

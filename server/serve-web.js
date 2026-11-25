@@ -58,6 +58,8 @@ export const mountWebApp = (app) => {
                 return res.sendFile(dirIndex, (err) => { if (err) next(err); });
             }
         }
+        // SPA giriş dosyası asla uzun süre cache'lenmesin; aksi halde eski JS chunk kalır.
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
         res.sendFile(path.join(webRoot, 'index.html'), (err) => {
             if (err) next(err);
         });

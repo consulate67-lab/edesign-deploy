@@ -680,7 +680,7 @@ app.delete('/api/designs/:id', authenticateToken, async (req, res) => {
 
 // Onaylanan XSLT'ye yazılan tasarım anahtarı. Onaylı tasarım kilitlidir:
 // anahtarlı dosya editöre alınmaz, yalnızca saklanan hali tekrar indirilir.
-const DESIGN_KEY_RE = /edesign-key:([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i;
+const DESIGN_KEY_RE = /edesign-key:\s*([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i;
 const DESIGN_KEY_COMMENT_RE = /<!--\s*edesign-key:[^>]*?-->[ \t]*\r?\n?/gi;
 const embedDesignKey = (xslt, key) => {
     const clean = xslt.replace(/^(?:\uFEFF|\u00EF\u00BB\u00BF)+/, '').replace(DESIGN_KEY_COMMENT_RE, '');

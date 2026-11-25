@@ -10,7 +10,7 @@ import {
     type DocLanguage, type DocumentFamily,
 } from '../international';
 import { validateXslt, validateXml, stripBom, type ValidationResult } from './validate';
-import { designKeyOf, stripDesignKey } from '../api';
+import { looksApprovedXslt, stripDesignKey } from '../api';
 import { hasTestWatermark, stripTestWatermark } from '../xslt-editor/utils/testWatermark';
 import { stripFieldGuide } from '../xslt-editor/utils/fieldGuideMarker';
 import { hasLicenseLock } from '../../shared/license-lock.js';
@@ -374,7 +374,8 @@ export const DesignWizard: React.FC<{ onFinish: (r: WizardResult) => void; onDis
             const raw = await readFile(file);
             const wasTest = kind === 'xslt' && hasTestWatermark(raw);
             let text = kind === 'xslt' ? stripFieldGuide(wasTest ? stripTestWatermark(raw) : raw) : raw;
-            const wasApproved = kind === 'xslt' && (!!designKeyOf(text) || hasLicenseLock(text));
+            // Onay yorumu (boşluklu edesign-key dahil) veya lisans kilidi → taslak olarak aç.
+            const wasApproved = kind === 'xslt' && (looksApprovedXslt(text) || hasLicenseLock(text));
             if (kind === 'xslt') text = stripDesignKey(text);
             if (kind === 'xslt') setOwnXsltWasTest(wasTest);
             const loaded = {
