@@ -1093,6 +1093,25 @@ function needsPageAnchor(el: HTMLElement): boolean {
 }
 
 /**
+ * Akıştan / ebeveynden gelen görsel genişlik-yüksekliği px olarak kilitler.
+ * position:absolute sonrası shrink-to-fit veya % genişlik yeniden hesaplanıp
+ * ölçü bozulmasın diye pinAbsolute ve taşıma öncesi çağrılır.
+ */
+function freezeRenderedSize(el: HTMLElement): { width: string; height: string; boxSizing: string } | null {
+    const w = el.offsetWidth;
+    const h = el.offsetHeight;
+    if (w <= 0 || h <= 0) return null;
+    const width = `${Math.round(w)}px`;
+    const height = `${Math.round(h)}px`;
+    const boxSizing = 'border-box';
+    el.style.boxSizing = boxSizing;
+    el.style.width = width;
+    el.style.height = height;
+    el.setAttribute('data-xslt-size-frozen', '1');
+    return { width, height, boxSizing };
+}
+
+/**
  * Öğeyi bulunduğu yerde mutlak konuma sabitler (zıplamadan). Koordinatlar
  * sayfa kutusuna göredir: sayfa önizlemede position:relative olur; sayfanın
  * dışındaki obje sayfanın içine alınır (`data-xslt-pin-into`, XSLT'de de
@@ -1103,6 +1122,8 @@ function pinAbsolute(el: HTMLElement): { left: number; top: number } {
     const body = doc.body;
     if (body && doc.defaultView?.getComputedStyle(body).position === 'static') body.style.position = 'relative';
     const before = el.getBoundingClientRect();
+    // Absolute'a geçmeden önce görsel kutuyu kilitle — aksi halde ölçü değişir.
+    freezeRenderedSize(el);
     const page = pageRootOf(doc);
     if (page && page !== el && !el.contains(page)) {
         if (outsidePage(el, page)) {
@@ -2756,9 +2777,28 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         [selectedObject, xsltContent],
     );
 
+    /** Taşınacak öğenin önizlemedeki kutusunu XSLT stilinde px olarak sabitler. */
+    const freezeSelectedSizeIntoXslt = useCallback((xslt: string, tag: SourceTag): string => {
+        const sel = selectedObjectRef.current;
+        const el = sel?.element;
+        if (!el) return xslt;
+        const frozen = freezeRenderedSize(el);
+        if (!frozen) return xslt;
+        let next = setTagStyleProperty(xslt, tag, 'box-sizing', frozen.boxSizing);
+        let open = resolveSourceTag(next, sel?.locator ?? null);
+        if (!open) return next;
+        next = setTagStyleProperty(next, open, 'width', frozen.width);
+        open = resolveSourceTag(next, sel?.locator ?? null);
+        if (!open) return next;
+        return setTagStyleProperty(next, open, 'height', frozen.height);
+    }, [resolveSourceTag]);
+
     const moveObject = useCallback((id: string, target: InsertTarget | null) => {
-        const xslt = xsltContentRef.current;
-        const src = findObjTag(xslt, id);
+        let xslt = xsltContentRef.current;
+        let src = findObjTag(xslt, id);
+        if (!src) return;
+        xslt = freezeSelectedSizeIntoXslt(xslt, src);
+        src = findObjTag(xslt, id);
         if (!src) return;
         const tag = target ? findLiteralTagByOrdinal(xslt, target.ordinal) : null;
         if (target && !tag) return;
@@ -2770,7 +2810,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         pendingSelectRef.current = { kind: 'obj', id };
         xsltContentRef.current = updated;
         setXsltContent(updated);
-    }, []);
+    }, [freezeSelectedSizeIntoXslt]);
 
     /**
      * XML'den gelen veri alanını (kapsayıcı etiketiyle) hedefin altına /
@@ -2796,6 +2836,16 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             setSaveMessage(`⚠ ${p.reason ?? i18n.t('editor.move.fieldFixed')}`);
             return;
         }
+        xslt = freezeSelectedSizeIntoXslt(xslt, p.tag);
+        p = bindPlacement(xslt, index);
+        if (!p.movable || !p.tag) {
+            setSaveMessage(`⚠ ${p.reason ?? i18n.t('editor.move.fieldFixed')}`);
+            return;
+        }
+        if (tag) {
+            const shifted = findLiteralTagByOrdinal(xslt, target!.ordinal);
+            if (shifted) tag = shifted;
+        }
         const position = target?.position ?? 'after';
         const at = tag ? insertOffset(xslt, tag, position) : documentEndOffset(xslt);
         if (at < 0) return;
@@ -2819,7 +2869,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         setXsltContent(moved.xslt);
         setSaveMessage(`↕ ${i18n.t('editor.move.fieldMoved')}`);
         console.log(`[XSLTEditor] Veri alanı taşındı: B${index + 1} <${p.tag.name}> → ${tag ? `<${tag.name}> ${position === 'inside' ? 'içine' : 'altına'}` : 'sayfa sonu'}`);
-    }, [bindPlacement]);
+    }, [bindPlacement, freezeSelectedSizeIntoXslt]);
 
     /** Önizlemede seçilen literal öğeyi (metin kutusu, çizgi, tablo...) içindekilerle birlikte taşır. */
     const moveLiteral = useCallback((ordinal: number, target: InsertTarget | null) => {
@@ -2840,6 +2890,18 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         if (!p.movable || !p.tag) {
             setSaveMessage(`⚠ ${p.reason ?? i18n.t('editor.move.elementFixed')}`);
             return;
+        }
+        if (p.tag.name.toLowerCase() !== 'tr') {
+            xslt = freezeSelectedSizeIntoXslt(xslt, p.tag);
+            p = placementOfElement(xslt, ordinal);
+            if (!p.movable || !p.tag) {
+                setSaveMessage(`⚠ ${p.reason ?? i18n.t('editor.move.elementFixed')}`);
+                return;
+            }
+            if (tag && target) {
+                const shifted = findLiteralTagByOrdinal(xslt, target.ordinal);
+                if (shifted) tag = shifted;
+            }
         }
         const isRow = p.tag.name.toLowerCase() === 'tr';
         if (isRow && !tag) {
@@ -2878,7 +2940,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         setXsltContent(moved.xslt);
         setSaveMessage(`↕ ${isRow ? i18n.t('editor.rows.moved') : i18n.t('editor.move.elementMoved')}`);
         console.log(`[XSLTEditor] Öğe taşındı: <${p.tag.name}> → ${tag ? `<${tag.name}> ${position === 'inside' ? 'içine' : 'altına'}` : 'sayfa sonu'}`);
-    }, [flushSourceEdits]);
+    }, [flushSourceEdits, freezeSelectedSizeIntoXslt]);
 
     const isMovingRow = useCallback((loc: PreviewLocator | null) => {
         if (!loc || loc.kind !== 'el') return false;
@@ -2946,6 +3008,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             ['left', mode === 'static' ? '' : left],
             ['top', mode === 'static' ? '' : top],
         ];
+        // pinAbsolute ile kilitlenen ölçüleri XSLT'ye de yaz (yeniden çizimde kaybolmasın).
+        const sizeFrozen = el.getAttribute('data-xslt-size-frozen') === '1';
+        if (mode === 'absolute' && sizeFrozen) {
+            if (el.style.boxSizing) values.push(['box-sizing', el.style.boxSizing]);
+            if (el.style.width) values.push(['width', el.style.width]);
+            if (el.style.height) values.push(['height', el.style.height]);
+        }
+        if (mode === 'static') el.removeAttribute('data-xslt-size-frozen');
         for (const [prop, v] of values) {
             if (v) el.style.setProperty(prop, v);
             else el.style.removeProperty(prop);
@@ -2977,6 +3047,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             if (!tag) return;
             next = setTagStyleProperty(next, tag, prop, v);
         }
+        if (sizeFrozen) el.removeAttribute('data-xslt-size-frozen');
         if (next === xsltContentRef.current) return;
         xsltContentRef.current = next;
         setXsltContent(next);
@@ -3889,7 +3960,17 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             if (d.locator.kind !== 'bind') return;
             const index = d.locator.index;
             flushSourceEditsRef.current();
-            let next = wrapBindingValue(xsltContentRef.current, bindingsRef.current, index, `position:absolute;left:${left}px;top:${top}px`)?.xslt;
+            const srcBox = d.source;
+            const size = freezeRenderedSize(srcBox);
+            const sizeCss = size
+                ? `box-sizing:${size.boxSizing};width:${size.width};height:${size.height};`
+                : '';
+            let next = wrapBindingValue(
+                xsltContentRef.current,
+                bindingsRef.current,
+                index,
+                `position:absolute;left:${left}px;top:${top}px;${sizeCss}`,
+            )?.xslt;
             if (!next) return;
             const bodyTag = body.hasAttribute('data-xsrc') ? findLiteralTagByOrdinal(next, Number(body.getAttribute('data-xsrc'))) : null;
             if (bodyTag && bodyTag.name.toLowerCase() === 'body' && !/position\s*:/.test(next.slice(bodyTag.start, bodyTag.end))) {
