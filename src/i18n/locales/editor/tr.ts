@@ -171,6 +171,14 @@ const editor = {
         usedTitle: 'Şablonda kullanılıyor',
         add: 'Tasarıma ekle',
     },
+    bands: {
+        master: 'Master (üst)',
+        detail: 'Detay (satırlar)',
+        footer: 'Sayfa sonu (toplamlar)',
+        toggle: 'Bantlar',
+        toggleHint: 'Tasarım bantlarını göster/gizle (XSLT’ye yazılmaz; yalnız tasarım yardımcısı)',
+        catalogHint: 'Alanlar Master · Detay · Sayfa sonu bantlarına göre gruplanır. Önizlemedeki çizgileri sürükleyerek bant yüksekliğini ayarlayın.',
+    },
     preview: {
         unknownError: 'Bilinmeyen render hatası',
         title: 'Canlı Önizleme',
@@ -514,6 +522,7 @@ const editor = {
         bannerMulti: 'Toplu taşıma ({{count}} nesne): önizlemede hedefe tıklayın. Esc ile iptal.',
         toEnd: 'Sayfa sonuna',
         detachedMoved: 'Veri alanı hücreden ayrılıp bırakılan yere taşındı; Konum alanlarından ince ayar yapabilirsiniz.',
+        pushedDown: '{{count}} nesne çakışmayı önlemek için aşağı kaydırıldı.',
         detached: 'Alan ayrıldı; artık sürükleyerek, Konum alanlarıyla veya ↕ Taşı ile yerini değiştirebilirsiniz.',
     },
     align: {

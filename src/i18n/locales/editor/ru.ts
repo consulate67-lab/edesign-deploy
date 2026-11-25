@@ -173,6 +173,14 @@ const editor: typeof tr = {
         usedTitle: 'Используется в шаблоне',
         add: 'Добавить в макет',
     },
+    bands: {
+        master: 'Master (шапка)',
+        detail: 'Detail (строки)',
+        footer: 'Подвал (итоги)',
+        toggle: 'Полосы',
+        toggleHint: 'Показать/скрыть полосы дизайна (не пишутся в XSLT; только подсказка)',
+        catalogHint: 'Поля сгруппированы: Master · Detail · Подвал. Перетащите линии в предпросмотре.',
+    },
     preview: {
         unknownError: 'Неизвестная ошибка отрисовки',
         title: 'Живой предпросмотр',
@@ -516,6 +524,7 @@ const editor: typeof tr = {
         bannerMulti: 'Bulk move ({{count}} objects): click the target in the preview. Esc to cancel.',
         toEnd: 'В конец страницы',
         detachedMoved: 'Поле данных отделено от ячейки и перемещено в точку сброса; точно настройте положение полями «Позиция».',
+        pushedDown: '{{count}} объект(ов) сдвинуто вниз во избежание наложения.',
         detached: 'Поле отделено; теперь его можно перемещать перетаскиванием, полями «Позиция» или кнопкой ↕ Переместить.',
     },
     align: {

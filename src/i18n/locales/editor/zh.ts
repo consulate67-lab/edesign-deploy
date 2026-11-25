@@ -173,6 +173,14 @@ const editor: typeof tr = {
         usedTitle: '已在模板中使用',
         add: '添加到设计',
     },
+    bands: {
+        master: 'Master（页眉）',
+        detail: 'Detail（行项目）',
+        footer: '页脚（合计）',
+        toggle: '分区',
+        toggleHint: '显示/隐藏设计分区（不写入 XSLT，仅辅助设计）',
+        catalogHint: '字段按 Master · Detail · 页脚分组。拖动预览中的分隔线调整高度。',
+    },
     preview: {
         unknownError: '未知渲染错误',
         title: '实时预览',
@@ -516,6 +524,7 @@ const editor: typeof tr = {
         bannerMulti: 'Bulk move ({{count}} objects): click the target in the preview. Esc to cancel.',
         toEnd: '移至页面末尾',
         detachedMoved: '数据字段已从单元格中分离并移动到放置位置；可使用“位置”字段进行微调。',
+        pushedDown: '已将 {{count}} 个对象下移以避免重叠。',
         detached: '字段已分离；现在您可以通过拖动、使用“位置”字段或 ↕ 移动来移动它。',
     },
     align: {

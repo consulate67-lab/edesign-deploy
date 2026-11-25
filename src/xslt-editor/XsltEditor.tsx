@@ -91,6 +91,10 @@ import i18n, { useLocaleT } from '../i18n';
 import { numberStyleOf, type DocLanguage, type NumberStyle } from '../international/registry/docLanguages';
 import { docT, documentLanguage } from './docLanguage';
 import { buildCatalog } from './catalogI18n';
+import {
+    BAND_ORDER, catalogBandOf, clampBandLayout, loadBandLayout, saveBandLayout, syncDesignBandOverlay,
+    type DesignBandId, type DesignBandLayout,
+} from './designBands';
 
 /** Satır formülü kolonunun varsayılan alanı (ilk bulunan). */
 const LINE_FORMULA_KEYS = ['Invoice/InvoiceLine/LineExtensionAmount', 'DespatchAdvice/DespatchLine/DeliveredQuantity', 'ReceiptAdvice/ReceiptLine/ReceivedQuantity', 'CreditNote/CreditNoteLine/LineExtensionAmount', 'eBilet/bilet/tutar', 'eYolcuListesi/yolcuListesi/koltukListesi/koltuk/tutar'];
@@ -1259,6 +1263,87 @@ function pinAbsolute(el: HTMLElement): { left: number; top: number } {
     el.style.left = `${left}px`;
     el.style.top = `${top}px`;
     return { left, top };
+}
+
+const rectsHOverlap = (a: DOMRect, b: DOMRect, minPx = 16) =>
+    Math.min(a.right, b.right) - Math.max(a.left, b.left) >= minPx;
+
+const rectsVOverlap = (a: DOMRect, b: DOMRect) =>
+    a.top < b.bottom - 1 && a.bottom > b.top + 1;
+
+const unionClientRects = (rects: DOMRect[]): DOMRect | null => {
+    if (!rects.length) return null;
+    let left = rects[0].left, top = rects[0].top, right = rects[0].right, bottom = rects[0].bottom;
+    for (let i = 1; i < rects.length; i++) {
+        left = Math.min(left, rects[i].left);
+        top = Math.min(top, rects[i].top);
+        right = Math.max(right, rects[i].right);
+        bottom = Math.max(bottom, rects[i].bottom);
+    }
+    return new DOMRect(left, top, right - left, bottom - top);
+};
+
+/**
+ * Taşınan mutlak konumlu grup başka objelerin üstüne binmesin diye
+ * çakışan (ve gerekirse zincirleme) objeleri grubun altına kaydırır.
+ */
+function pushOverlappingAbsoluteDown(
+    moved: HTMLElement[],
+    commit: (el: HTMLElement, locator: { kind: 'obj'; id: string }, mode: PositionMode, left: string, top: string) => void,
+): number {
+    if (!moved.length) return 0;
+    const doc = moved[0].ownerDocument;
+    const exclude = new Set(moved);
+    const cell = moved[0].closest('td, th') as HTMLElement | null;
+    const sameCell = !!cell && moved.every((m) => cell.contains(m));
+    const root: ParentNode = sameCell && cell ? cell : (pageRootOf(doc) || doc.body);
+    const candidates = Array.from(root.querySelectorAll<HTMLElement>('[data-xslt-obj]'))
+        .filter((el) => {
+            if (exclude.has(el)) return false;
+            const pos = el.style.position || doc.defaultView?.getComputedStyle(el).position || '';
+            return pos === 'absolute' || pos === 'fixed';
+        })
+        .sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top);
+
+    const occupied: DOMRect[] = [];
+    const seed = unionClientRects(moved.map((m) => m.getBoundingClientRect()));
+    if (seed) occupied.push(seed);
+
+    const gap = 6;
+    let pushed = 0;
+    for (const el of candidates) {
+        let r = el.getBoundingClientRect();
+        let did = false;
+        let guard = 0;
+        while (guard++ < 12) {
+            let hit: DOMRect | null = null;
+            for (const block of occupied) {
+                if (rectsHOverlap(r, block) && rectsVOverlap(r, block)) {
+                    hit = block;
+                    break;
+                }
+            }
+            if (!hit) break;
+            const id = el.getAttribute('data-xslt-obj');
+            if (!id) break;
+            if (el.style.position !== 'absolute') pinAbsolute(el);
+            const scale = clientScale(el) || 1;
+            const curTop = parseFloat(el.style.top) || 0;
+            const leftPx = parseFloat(el.style.left) || 0;
+            const deltaClient = hit.bottom + gap - r.top;
+            if (deltaClient <= 0.5) break;
+            const newTop = curTop + deltaClient / scale;
+            el.style.top = `${newTop}px`;
+            commit(el, { kind: 'obj', id }, 'absolute', formatLength(leftPx, 'px'), formatLength(newTop, 'px'));
+            r = el.getBoundingClientRect();
+            did = true;
+        }
+        if (did) {
+            occupied.push(r);
+            pushed += 1;
+        }
+    }
+    return pushed;
 }
 
 const PositionEditor: React.FC<{
@@ -2546,16 +2631,42 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         const names = xsltLocalNameSet(xsltContent);
         return catalog.map(f => ({ f, inXslt: detectInXslt(names, xsltContent, f), value: evaluateField(xmlDoc, f) }));
     }, [catalog, xsltContent, xmlDoc]);
-    const filteredCatalog = useMemo(() => {
+    const filteredCatalogByBand = useMemo(() => {
         const q = xsltSearch.trim().toLocaleLowerCase(locale);
-        const groups = new Map<string, typeof catalogStatus>();
+        type Status = (typeof catalogStatus)[number];
+        const byBand = new Map<DesignBandId, Map<string, Status[]>>();
+        for (const id of BAND_ORDER) byBand.set(id, new Map<string, Status[]>());
         for (const s of catalogStatus) {
             if (q && !`${s.f.label} ${s.f.category} ${s.f.path}`.toLocaleLowerCase(locale).includes(q)) continue;
-            groups.set(s.f.category, [...(groups.get(s.f.category) ?? []), s]);
+            const band = catalogBandOf(s.f);
+            const cats = byBand.get(band)!;
+            cats.set(s.f.category, [...(cats.get(s.f.category) ?? []), s]);
         }
-        return [...groups];
+        return BAND_ORDER.map((band) => {
+            const catMap = byBand.get(band) ?? new Map<string, Status[]>();
+            const categories: [string, Status[]][] = Array.from(catMap.entries());
+            return {
+                band,
+                categories,
+                count: categories.reduce((n, [, items]) => n + items.length, 0),
+                used: categories.reduce((n, [, items]) => n + items.filter((i) => i.inXslt).length, 0),
+            };
+        });
     }, [catalogStatus, xsltSearch, locale]);
     const [catalogOpen, setCatalogOpen] = useState<Record<string, boolean>>({});
+    const [bandOpen, setBandOpen] = useState<Record<DesignBandId, boolean>>({ master: true, detail: true, footer: true });
+    const [bandsVisible, setBandsVisible] = useState(true);
+    const bandsVisibleRef = useRef(bandsVisible);
+    bandsVisibleRef.current = bandsVisible;
+    const [bandLayout, setBandLayout] = useState<DesignBandLayout>(() => loadBandLayout(initialDesignId));
+    const bandLayoutRef = useRef(bandLayout);
+    bandLayoutRef.current = bandLayout;
+    useEffect(() => {
+        setBandLayout(loadBandLayout(design.id ?? initialDesignId));
+    }, [design.id, initialDesignId]);
+    useEffect(() => {
+        saveBandLayout(bandLayout, design.id ?? initialDesignId);
+    }, [bandLayout, design.id, initialDesignId]);
 
     /**
      * Monaco editor'a snippet yapıştır.
@@ -4124,11 +4235,24 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 + '[data-xslt-drop=after]{box-shadow:0 3px 0 0 #10b981 !important;}'
                 + '[data-empty-label]{display:inline-block;min-width:40px;min-height:12px;padding:0 4px;outline:1px dashed #a78bfa;outline-offset:1px;background-color:rgba(167,139,250,0.10);vertical-align:middle;}'
                 + '[data-empty-label]::before{content:attr(data-empty-label);font:italic 9px/12px system-ui,sans-serif;color:#7c3aed;letter-spacing:0;text-transform:none;}'
-                + 'html[data-xslt-placing] *{cursor:crosshair !important;}';
+                + 'html[data-xslt-placing] *{cursor:crosshair !important;}'
+                + '#__xslt-design-bands{user-select:none;-webkit-user-select:none;}';
             doc.head.appendChild(style);
         }
         doc.documentElement.style.setProperty('zoom', String(zoom));
     }, []);
+
+    const bandLabels = useCallback((): Record<DesignBandId, string> => ({
+        master: i18n.t('editor.bands.master'),
+        detail: i18n.t('editor.bands.detail'),
+        footer: i18n.t('editor.bands.footer'),
+    }), []);
+
+    const refreshBandOverlay = useCallback(() => {
+        const doc = iframeRef.current?.contentDocument;
+        if (!doc?.body) return;
+        syncDesignBandOverlay(pageRootOf(doc) || doc.body, bandLayoutRef.current, bandLabels(), bandsVisibleRef.current);
+    }, [bandLabels]);
 
     const fitZoomToContainer = useCallback(() => {
         // Genişliğe sığdır: fatura önizleme alanını yatayda doldurur, dikeyde
@@ -4156,6 +4280,10 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     useEffect(() => {
         applyPreviewZoom(previewZoom);
     }, [previewZoom, applyPreviewZoom]);
+
+    useEffect(() => {
+        refreshBandOverlay();
+    }, [bandLayout, bandsVisible, previewHtml, iframeLoadCount, refreshBandOverlay]);
 
     useEffect(() => {
         const container = previewContainerRef.current;
@@ -4212,6 +4340,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             // hemen uygula (titreme olmasın), auto-fit açıksa 350ms sonra
             // (measureHeight 300ms + 50ms pay) genişliğe göre yeniden sığdır.
             applyPreviewZoom(previewZoomRef.current);
+            syncDesignBandOverlay(pageRootOf(doc) || doc.body, bandLayoutRef.current, bandLabels(), bandsVisibleRef.current);
             // Örnek XML'de değeri olmayan alan objesi önizlemede kesikli kutuyla gösterilir (yalnız editörde).
             doc.querySelectorAll<HTMLElement>('[data-obj-kind="field"]').forEach(n => {
                 if ((n.textContent ?? '').trim() || n.querySelector('img')) return;
@@ -4285,7 +4414,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         };
 
         bindListener();
-    }, [handleIframeBodyClick, fitZoomToContainer, applyPreviewZoom, findPreviewElement, openSelection, commitPosition]);
+    }, [handleIframeBodyClick, fitZoomToContainer, applyPreviewZoom, findPreviewElement, openSelection, commitPosition, bandLabels]);
 
     /**
      * iframe onLoad → handleIframeLoad. previewHtml değiştiğinde iframe
@@ -4359,6 +4488,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             companions?: DragCompanion[];
         };
         let drag: DragState | null = null;
+        type BandDrag = { edge: 'masterEnd' | 'detailEnd'; pageTop: number; pageH: number };
+        let bandDrag: BandDrag | null = null;
         const dropDetached = (d: DragState & { source: HTMLElement }) => {
             const ghost = d.el;
             const probe = doc.createElement('span');
@@ -4400,7 +4531,13 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             setXsltContent(next);
             setSaveMessage(`↕ ${i18n.t('editor.move.detachedMoved')}`);
         };
+        const endBandDrag = () => {
+            if (!bandDrag) return;
+            bandDrag = null;
+            saveBandLayout(bandLayoutRef.current, design.id ?? initialDesignId);
+        };
         const endDrag = () => {
+            if (bandDrag) { endBandDrag(); return; }
             const d = drag;
             drag = null;
             if (!d?.started) return;
@@ -4413,11 +4550,17 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             const left = formatLength(parseFloat(d.el.style.left) || 0, d.unit);
             const top = formatLength(parseFloat(d.el.style.top) || 0, d.unit);
             commitPosition(d.el, d.locator, d.mode, left, top);
+            const movedEls: HTMLElement[] = [d.el];
             for (const c of d.companions || []) {
                 const cLeft = formatLength(parseFloat(c.el.style.left) || 0, d.unit);
                 const cTop = formatLength(parseFloat(c.el.style.top) || 0, d.unit);
                 commitPosition(c.el, c.locator, 'absolute', cLeft, cTop);
                 c.el.removeAttribute('data-xslt-dragging');
+                movedEls.push(c.el);
+            }
+            const pushed = pushOverlappingAbsoluteDown(movedEls, commitPosition);
+            if (pushed > 0) {
+                setSaveMessage(`↕ ${i18n.t('editor.move.pushedDown', { count: pushed })}`);
             }
             if (selectedObjectRef.current?.element !== d.el) openSelection(null, d.el, d.locator);
             setPositionRev(r => r + 1);
@@ -4425,6 +4568,20 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         const mouseDownHandler = (e: MouseEvent) => {
             if (e.button !== 0 || movingRef.current || placingRef.current) return;
             const target = e.target as HTMLElement;
+            const handle = target.closest?.('[data-band-handle]') as HTMLElement | null;
+            if (handle && bandsVisibleRef.current) {
+                const edge = handle.getAttribute('data-band-handle') as 'masterEnd' | 'detailEnd' | null;
+                const page = pageRootOf(doc) || body;
+                if (edge && page) {
+                    const pr = page.getBoundingClientRect();
+                    if (pr.height > 0) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        bandDrag = { edge, pageTop: pr.top, pageH: pr.height };
+                        return;
+                    }
+                }
+            }
             const obj = target.closest?.('[data-xslt-obj]') as HTMLElement | null;
             const sel = selectedObjectRef.current;
             let el: HTMLElement | null = null;
@@ -4459,6 +4616,20 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             drag = { el, locator, sx: e.clientX, sy: e.clientY, started: false, mode: 'absolute', unit: 'px', left: 0, top: 0, scale: 1 };
         };
         const mouseMoveHandler = (e: MouseEvent) => {
+            if (bandDrag) {
+                if ((e.buttons & 1) === 0) { endBandDrag(); return; }
+                const ratio = Math.min(0.95, Math.max(0.05, (e.clientY - bandDrag.pageTop) / bandDrag.pageH));
+                const next = clampBandLayout(
+                    bandDrag.edge === 'masterEnd'
+                        ? { ...bandLayoutRef.current, masterEnd: ratio }
+                        : { ...bandLayoutRef.current, detailEnd: ratio },
+                );
+                bandLayoutRef.current = next;
+                setBandLayout(next);
+                syncDesignBandOverlay(pageRootOf(doc) || body, next, bandLabels(), true);
+                e.preventDefault();
+                return;
+            }
             if (!drag) return;
             if ((e.buttons & 1) === 0) { endDrag(); return; }
             const dx = e.clientX - drag.sx;
@@ -4560,7 +4731,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             doc.removeEventListener('mouseup', endDrag);
             doc.removeEventListener('keydown', handleUndoRedoKey);
         };
-    }, [previewHtml, iframeLoadCount, handleIframeBodyClick, insertObject, insertShareBar, insertField, moveBinding, bindPlacement, commitPosition, openSelection, handleUndoRedoKey, design.paid, findPreviewElement, sameLocator]);
+    }, [previewHtml, iframeLoadCount, handleIframeBodyClick, insertObject, insertShareBar, insertField, moveBinding, bindPlacement, commitPosition, openSelection, handleUndoRedoKey, design.paid, design.id, initialDesignId, findPreviewElement, sameLocator, bandLabels]);
 
     // Taşıma modu bitince önizlemedeki hedef işareti kaldırılır.
     useEffect(() => {
@@ -5351,80 +5522,109 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                     ? <>＋ {t('editor.rows.catalogPickHint')}</>
                                     : <>✓ {t('editor.catalog.used')} · <b style={{ color: '#0284c7' }}>+</b> {t('editor.catalog.help')}</>}
                             </div>
-                            {filteredCatalog.map(([category, items]) => {
-                                const open = catalogOpen[category] ?? !!xsltSearch.trim();
+                            <div style={{ fontSize: '9px', color: '#64748b', margin: '0 2px 8px', lineHeight: 1.35 }}>
+                                {t('editor.bands.catalogHint')}
+                            </div>
+                            {filteredCatalogByBand.map(({ band, categories, count, used }) => {
+                                if (!count && !xsltSearch.trim()) return null;
+                                const bandExpanded = bandOpen[band] ?? true;
+                                const bandColor = band === 'master' ? '#0284c7' : band === 'detail' ? '#059669' : '#d97706';
+                                const bandBg = band === 'master' ? 'rgba(14,165,233,0.12)' : band === 'detail' ? 'rgba(16,185,129,0.12)' : 'rgba(245,158,11,0.14)';
                                 return (
-                                    <div key={category} style={{ marginBottom: '4px' }}>
+                                    <div key={band} data-catalog-band={band} style={{ marginBottom: '8px' }}>
                                         <button
-                                            data-catalog-category={category}
-                                            onClick={() => setCatalogOpen(prev => ({ ...prev, [category]: !open }))}
+                                            type="button"
+                                            onClick={() => setBandOpen((prev) => ({ ...prev, [band]: !bandExpanded }))}
                                             style={{
-                                                width: '100%', display: 'flex', alignItems: 'center', gap: '6px', padding: '5px 8px',
-                                                background: '#eef2ff', border: '1px solid #dbe1f7', borderRadius: '4px',
-                                                color: '#334155', fontSize: '11px', fontWeight: 600, cursor: 'pointer', textAlign: 'left',
+                                                width: '100%', display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 8px',
+                                                background: bandBg, border: `1px solid ${bandColor}55`, borderRadius: '4px',
+                                                color: bandColor, fontSize: '11px', fontWeight: 700, cursor: 'pointer', textAlign: 'left',
+                                                textTransform: 'uppercase', letterSpacing: '0.3px',
                                             }}
                                         >
-                                            <span style={{ fontSize: '9px', color: '#6b7690' }}>{open ? '▼' : '▶'}</span>
-                                            <span>{category}</span>
-                                            <span style={{ marginLeft: 'auto', fontSize: '9px', color: '#6b7690' }}>
-                                                {items.filter(s => s.inXslt).length}/{items.length}
+                                            <span style={{ fontSize: '9px' }}>{bandExpanded ? '▼' : '▶'}</span>
+                                            <span>{t(`editor.bands.${band}`)}</span>
+                                            <span style={{ marginLeft: 'auto', fontSize: '9px', fontWeight: 600, opacity: 0.85 }}>
+                                                {used}/{count}
                                             </span>
                                         </button>
-                                        {open && items.map(({ f, inXslt, value }) => {
-                                            const existing = inXslt
-                                                ? xsltInstrumented.bindings.find(b => (b.kind || 'dropdown') === 'dropdown' && bindingLabels.get(b) === f.label)
-                                                : undefined;
-                                            const insertHere = () => {
-                                                // Özet satır bestecisi açıksa alan doğrudan satır kolonlarına eklenir.
-                                                if (rowComposerOpenRef.current && !isLineField(f)) {
-                                                    addCatalogFieldToRowComposer(f.key);
-                                                    return;
-                                                }
-                                                if (isLineField(f) && insertMode === 'after' && insertColumn('field', f.key)) return;
-                                                setMoving(null);
-                                                setPlacing({ key: f.key, label: f.label });
-                                            };
+                                        {bandExpanded && categories.map(([category, items]) => {
+                                            const open = catalogOpen[category] ?? !!xsltSearch.trim();
                                             return (
-                                                <div
-                                                    key={f.key}
-                                                    data-catalog-field={f.key}
-                                                    data-in-xslt={String(inXslt)}
-                                                    draggable
-                                                    onDragStart={(e) => {
-                                                        e.dataTransfer.setData('text/x-xslt-field', f.key);
-                                                        e.dataTransfer.effectAllowed = 'copy';
-                                                    }}
-                                                    onClick={() => (existing ? handleBindingClick(existing) : insertHere())}
-                                                    title={`${f.label}\n${f.path.replace(/\//g, ' › ')}${isLineField(f) ? `\n${t('editor.catalog.lineField')}` : ''}\n${existing ? t('editor.catalog.goTo') : t('editor.catalog.insertAt')}`}
-                                                    style={{
-                                                        display: 'flex', alignItems: 'center', gap: '6px', margin: '2px 0 2px 8px', padding: '4px 6px 4px 8px',
-                                                        background: '#f3f5ff', border: '1px solid #D9DEF0',
-                                                        borderLeft: `3px solid ${inXslt ? '#10b981' : '#D9DEF0'}`, borderRadius: '3px', cursor: 'grab',
-                                                    }}
-                                                    onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(14, 165, 233, 0.15)'; }}
-                                                    onMouseLeave={(e) => { e.currentTarget.style.background = '#f3f5ff'; }}
-                                                >
-                                                    <span style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
-                                                        <span style={{ display: 'block', fontSize: '11px', color: '#1e293b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                            {f.label}
-                                                        </span>
-                                                        <span style={{ display: 'block', fontSize: '9px', color: value ? '#5b6680' : '#5B6680', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                            {value || t('editor.catalog.noSample')}
-                                                        </span>
-                                                    </span>
-                                                    {inXslt && <span title={t('editor.catalog.usedTitle')} style={{ color: '#10b981', fontSize: '12px', fontWeight: 700 }}>✓</span>}
+                                                <div key={`${band}:${category}`} style={{ margin: '4px 0 4px 4px' }}>
                                                     <button
-                                                        data-catalog-insert={f.key}
-                                                        title={t('editor.catalog.add')}
-                                                        onClick={(e) => { e.stopPropagation(); insertHere(); }}
+                                                        data-catalog-category={category}
+                                                        onClick={() => setCatalogOpen(prev => ({ ...prev, [category]: !open }))}
                                                         style={{
-                                                            display: 'flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px', padding: 0,
-                                                            background: 'rgba(14, 165, 233, 0.18)', border: '1px solid rgba(56, 189, 248, 0.4)', borderRadius: '4px',
-                                                            color: '#0284c7', cursor: 'pointer', flexShrink: 0,
+                                                            width: '100%', display: 'flex', alignItems: 'center', gap: '6px', padding: '5px 8px',
+                                                            background: '#eef2ff', border: '1px solid #dbe1f7', borderRadius: '4px',
+                                                            color: '#334155', fontSize: '11px', fontWeight: 600, cursor: 'pointer', textAlign: 'left',
                                                         }}
                                                     >
-                                                        <Plus size={12} />
+                                                        <span style={{ fontSize: '9px', color: '#6b7690' }}>{open ? '▼' : '▶'}</span>
+                                                        <span>{category}</span>
+                                                        <span style={{ marginLeft: 'auto', fontSize: '9px', color: '#6b7690' }}>
+                                                            {items.filter(s => s.inXslt).length}/{items.length}
+                                                        </span>
                                                     </button>
+                                                    {open && items.map(({ f, inXslt, value }) => {
+                                                        const existing = inXslt
+                                                            ? xsltInstrumented.bindings.find(b => (b.kind || 'dropdown') === 'dropdown' && bindingLabels.get(b) === f.label)
+                                                            : undefined;
+                                                        const insertHere = () => {
+                                                            if (rowComposerOpenRef.current && !isLineField(f)) {
+                                                                addCatalogFieldToRowComposer(f.key);
+                                                                return;
+                                                            }
+                                                            if (isLineField(f) && insertMode === 'after' && insertColumn('field', f.key)) return;
+                                                            setMoving(null);
+                                                            setPlacing({ key: f.key, label: f.label });
+                                                        };
+                                                        return (
+                                                            <div
+                                                                key={f.key}
+                                                                data-catalog-field={f.key}
+                                                                data-catalog-band={band}
+                                                                data-in-xslt={String(inXslt)}
+                                                                draggable
+                                                                onDragStart={(e) => {
+                                                                    e.dataTransfer.setData('text/x-xslt-field', f.key);
+                                                                    e.dataTransfer.effectAllowed = 'copy';
+                                                                }}
+                                                                onClick={() => (existing ? handleBindingClick(existing) : insertHere())}
+                                                                title={`${f.label}\n${f.path.replace(/\//g, ' › ')}${isLineField(f) ? `\n${t('editor.catalog.lineField')}` : ''}\n${existing ? t('editor.catalog.goTo') : t('editor.catalog.insertAt')}`}
+                                                                style={{
+                                                                    display: 'flex', alignItems: 'center', gap: '6px', margin: '2px 0 2px 8px', padding: '4px 6px 4px 8px',
+                                                                    background: '#f3f5ff', border: '1px solid #D9DEF0',
+                                                                    borderLeft: `3px solid ${inXslt ? '#10b981' : '#D9DEF0'}`, borderRadius: '3px', cursor: 'grab',
+                                                                }}
+                                                                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(14, 165, 233, 0.15)'; }}
+                                                                onMouseLeave={(e) => { e.currentTarget.style.background = '#f3f5ff'; }}
+                                                            >
+                                                                <span style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+                                                                    <span style={{ display: 'block', fontSize: '11px', color: '#1e293b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                                        {f.label}
+                                                                    </span>
+                                                                    <span style={{ display: 'block', fontSize: '9px', color: value ? '#5b6680' : '#5B6680', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                                        {value || t('editor.catalog.noSample')}
+                                                                    </span>
+                                                                </span>
+                                                                {inXslt && <span title={t('editor.catalog.usedTitle')} style={{ color: '#10b981', fontSize: '12px', fontWeight: 700 }}>✓</span>}
+                                                                <button
+                                                                    data-catalog-insert={f.key}
+                                                                    title={t('editor.catalog.add')}
+                                                                    onClick={(e) => { e.stopPropagation(); insertHere(); }}
+                                                                    style={{
+                                                                        display: 'flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px', padding: 0,
+                                                                        background: 'rgba(14, 165, 233, 0.18)', border: '1px solid rgba(56, 189, 248, 0.4)', borderRadius: '4px',
+                                                                        color: '#0284c7', cursor: 'pointer', flexShrink: 0,
+                                                                    }}
+                                                                >
+                                                                    <Plus size={12} />
+                                                                </button>
+                                                            </div>
+                                                        );
+                                                    })}
                                                 </div>
                                             );
                                         })}
@@ -5545,6 +5745,27 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 onMouseLeave={(e) => e.currentTarget.style.color = '#5b6680'}
                             >
                                 <ZoomIn size={11} />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setBandsVisible((v) => !v)}
+                                title={t('editor.bands.toggleHint')}
+                                style={{
+                                    padding: '1px 5px',
+                                    background: bandsVisible ? 'rgba(14, 165, 233, 0.18)' : 'transparent',
+                                    border: bandsVisible ? '1px solid rgba(14, 165, 233, 0.45)' : '1px solid transparent',
+                                    borderRadius: '3px',
+                                    color: bandsVisible ? '#0284c7' : '#5b6680',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '3px',
+                                    fontSize: '10px',
+                                    fontWeight: 600,
+                                }}
+                            >
+                                <ChartNoAxesGantt size={11} />
+                                {t('editor.bands.toggle')}
                             </button>
                             <button
                                 onClick={() => {

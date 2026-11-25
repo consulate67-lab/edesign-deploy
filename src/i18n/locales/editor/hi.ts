@@ -173,6 +173,14 @@ const editor: typeof tr = {
         usedTitle: 'टेम्पलेट में उपयोग किया गया',
         add: 'डिज़ाइन में जोड़ें',
     },
+    bands: {
+        master: 'Master (हेडर)',
+        detail: 'Detail (पंक्तियाँ)',
+        footer: 'फ़ुटर (योग)',
+        toggle: 'बैंड',
+        toggleHint: 'डिज़ाइन बैंड दिखाएँ/छिपाएँ (XSLT में नहीं लिखा जाता; केवल सहायता)',
+        catalogHint: 'फ़ील्ड Master · Detail · फ़ुटर के अनुसार समूहित। पूर्वावलोकन में रेखाएँ खींचें।',
+    },
     preview: {
         unknownError: 'अज्ञात रेंडर त्रुटि',
         title: 'लाइव प्रीव्यू',
@@ -516,6 +524,7 @@ const editor: typeof tr = {
         bannerMulti: 'Bulk move ({{count}} objects): click the target in the preview. Esc to cancel.',
         toEnd: 'पेज के अंत में',
         detachedMoved: 'डेटा फ़ील्ड को सेल से अलग करके ड्रॉप की गई जगह पर मूव किया गया; पोज़िशन फ़ील्ड से इसे बारीकी से ठीक करें।',
+        pushedDown: 'ओवरलैप से बचने के लिए {{count}} ऑब्जेक्ट नीचे खिसकाए गए।',
         detached: 'फ़ील्ड अलग किया गया; अब आप इसे ड्रैग करके, पोज़िशन फ़ील्ड से या ↕ मूव से मूव कर सकते हैं।',
     },
     align: {

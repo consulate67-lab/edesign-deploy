@@ -173,6 +173,14 @@ const editor: typeof tr = {
         usedTitle: 'Used in the template',
         add: 'Add to design',
     },
+    bands: {
+        master: 'Master (header)',
+        detail: 'Detail (lines)',
+        footer: 'Page footer (totals)',
+        toggle: 'Bands',
+        toggleHint: 'Show/hide design bands (not written to XSLT; design aid only)',
+        catalogHint: 'Fields are grouped by Master · Detail · Page footer. Drag the preview lines to resize bands.',
+    },
     preview: {
         unknownError: 'Unknown render error',
         title: 'Live Preview',
@@ -516,6 +524,7 @@ const editor: typeof tr = {
         bannerMulti: 'Bulk move ({{count}} objects): click the target in the preview. Esc to cancel.',
         toEnd: 'To end of page',
         detachedMoved: 'The data field was detached from the cell and moved to the drop position; fine-tune it with the Position fields.',
+        pushedDown: '{{count}} object(s) shifted down to avoid overlap.',
         detached: 'Field detached; you can now move it by dragging, with the Position fields or ↕ Move.',
     },
     align: {

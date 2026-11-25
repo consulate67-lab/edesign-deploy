@@ -173,6 +173,14 @@ const editor: typeof tr = {
         usedTitle: 'Usado en la plantilla',
         add: 'Añadir al diseño',
     },
+    bands: {
+        master: 'Master (cabecera)',
+        detail: 'Detalle (líneas)',
+        footer: 'Pie de página (totales)',
+        toggle: 'Bandas',
+        toggleHint: 'Mostrar/ocultar bandas de diseño (no se escriben en XSLT; solo ayuda)',
+        catalogHint: 'Campos agrupados por Master · Detalle · Pie. Arrastre las líneas en la vista previa.',
+    },
     preview: {
         unknownError: 'Error de renderizado desconocido',
         title: 'Vista previa en directo',
@@ -516,6 +524,7 @@ const editor: typeof tr = {
         bannerMulti: 'Bulk move ({{count}} objects): click the target in the preview. Esc to cancel.',
         toEnd: 'Al final de la página',
         detachedMoved: 'El campo se separó de la celda y se movió al lugar donde lo soltó; ajústelo con los campos de Posición.',
+        pushedDown: '{{count}} objeto(s) desplazado(s) hacia abajo para evitar solapamiento.',
         detached: 'Campo separado; ahora puede moverlo arrastrando, con los campos de Posición o ↕ Mover.',
     },
     align: {

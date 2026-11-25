@@ -173,6 +173,14 @@ const editor: typeof tr = {
         usedTitle: 'In der Vorlage verwendet',
         add: 'Zum Design hinzufügen',
     },
+    bands: {
+        master: 'Master (Kopf)',
+        detail: 'Detail (Zeilen)',
+        footer: 'Seitenende (Summen)',
+        toggle: 'Bänder',
+        toggleHint: 'Design-Bänder ein-/ausblenden (nicht in XSLT; nur Designhilfe)',
+        catalogHint: 'Felder nach Master · Detail · Seitenende gruppiert. Ziehen Sie die Linien in der Vorschau.',
+    },
     preview: {
         unknownError: 'Unbekannter Darstellungsfehler',
         title: 'Live-Vorschau',
@@ -516,6 +524,7 @@ const editor: typeof tr = {
         bannerMulti: 'Bulk move ({{count}} objects): click the target in the preview. Esc to cancel.',
         toEnd: 'Ans Seitenende',
         detachedMoved: 'Das Datenfeld wurde aus der Zelle gelöst und an die Ablagestelle verschoben; Feinabstimmung über die Positionsfelder.',
+        pushedDown: '{{count}} Objekt(e) nach unten verschoben, um Überlappung zu vermeiden.',
         detached: 'Feld gelöst; Sie können es jetzt durch Ziehen, mit den Positionsfeldern oder ↕ Verschieben versetzen.',
     },
     align: {

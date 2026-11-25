@@ -173,6 +173,14 @@ const editor: typeof tr = {
         usedTitle: 'Usado no modelo',
         add: 'Adicionar ao design',
     },
+    bands: {
+        master: 'Master (cabeçalho)',
+        detail: 'Detalhe (linhas)',
+        footer: 'Rodapé (totais)',
+        toggle: 'Faixas',
+        toggleHint: 'Mostrar/ocultar faixas de design (não gravadas no XSLT; só ajuda)',
+        catalogHint: 'Campos agrupados por Master · Detalhe · Rodapé. Arraste as linhas na pré-visualização.',
+    },
     preview: {
         unknownError: 'Erro de renderização desconhecido',
         title: 'Visualização ao vivo',
@@ -516,6 +524,7 @@ const editor: typeof tr = {
         bannerMulti: 'Bulk move ({{count}} objects): click the target in the preview. Esc to cancel.',
         toEnd: 'Para o final da página',
         detachedMoved: 'O campo de dados foi separado da célula e movido para a posição onde foi solto; ajuste-o com os campos de Posição.',
+        pushedDown: '{{count}} objeto(s) deslocado(s) para baixo para evitar sobreposição.',
         detached: 'Campo separado; agora você pode movê-lo arrastando, com os campos de Posição ou com ↕ Mover.',
     },
     align: {

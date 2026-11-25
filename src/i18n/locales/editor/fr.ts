@@ -173,6 +173,14 @@ const editor: typeof tr = {
         usedTitle: 'Utilisé dans le modèle',
         add: 'Ajouter au modèle',
     },
+    bands: {
+        master: 'Master (en-tête)',
+        detail: 'Détail (lignes)',
+        footer: 'Bas de page (totaux)',
+        toggle: 'Bandes',
+        toggleHint: 'Afficher/masquer les bandes de conception (non écrites en XSLT ; aide seule)',
+        catalogHint: 'Champs groupés par Master · Détail · Bas de page. Faites glisser les lignes dans l’aperçu.',
+    },
     preview: {
         unknownError: 'Erreur de rendu inconnue',
         title: 'Aperçu en direct',
@@ -516,6 +524,7 @@ const editor: typeof tr = {
         bannerMulti: 'Bulk move ({{count}} objects): click the target in the preview. Esc to cancel.',
         toEnd: 'En fin de page',
         detachedMoved: 'Le champ a été détaché de la cellule et déplacé à l’endroit du dépôt ; ajustez-le avec les champs Position.',
+        pushedDown: '{{count}} objet(s) déplacé(s) vers le bas pour éviter le chevauchement.',
         detached: 'Champ détaché ; vous pouvez maintenant le déplacer par glisser-déposer, avec les champs Position ou ↕ Déplacer.',
     },
     align: {
