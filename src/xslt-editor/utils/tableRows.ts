@@ -123,6 +123,36 @@ export function addConfiguredRowAfter(xslt: string, rowTag: SourceTag, cells: Su
     return insertAtTag(xslt, rowTag, `${rowIndent(xslt, rowTag)}${markup}`, 'after');
 }
 
+/**
+ * Özet satırını kardeş tr'ler arasında bir adım yukarı (−1) veya aşağı (+1) taşır.
+ * Uçtaysa null.
+ */
+export function moveSummaryRowBy(xslt: string, rowTag: SourceTag, delta: -1 | 1): string | null {
+    const parent = findParentTag(xslt, rowTag.start);
+    if (!parent) return null;
+    const rows = childElements(xslt, parent).children.filter((c) => c.name.toLowerCase() === 'tr');
+    const idx = rows.findIndex((r) => r.start === rowTag.start);
+    if (idx < 0) return null;
+    const targetIdx = idx + delta;
+    if (targetIdx < 0 || targetIdx >= rows.length) return null;
+    const { start, end } = rowSourceRange(xslt, rowTag);
+    let snipStart = start;
+    const lineStart = xslt.lastIndexOf('\n', start - 1) + 1;
+    if (lineStart < start && /^\s*$/.test(xslt.slice(lineStart, start))) snipStart = lineStart;
+    const snippet = xslt.slice(snipStart, end);
+    const without = xslt.slice(0, snipStart) + xslt.slice(end);
+    // parent.start değişmedi (içerik parent açılışından sonra silindi).
+    const rows2 = childElements(without, parent).children.filter((c) => c.name.toLowerCase() === 'tr');
+    const anchorIdx = delta < 0 ? targetIdx : targetIdx - 1;
+    const anchor = rows2[anchorIdx];
+    if (!anchor) return null;
+    if (delta < 0) {
+        return without.slice(0, anchor.start) + snippet + without.slice(anchor.start);
+    }
+    const anchorEnd = elementEnd(without, anchor);
+    return without.slice(0, anchorEnd) + snippet + without.slice(anchorEnd);
+}
+
 /** Seçili satırı (XSLT içeriğiyle) alta kopyalar. */
 export function duplicateRowAfter(xslt: string, rowTag: SourceTag): string | null {
     const { start, end } = rowSourceRange(xslt, rowTag);

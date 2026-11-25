@@ -538,6 +538,8 @@ const editor: typeof tr = {
         blankHint: 'Inserts an empty row below this one (cell styles kept)',
         composerTitle: 'New row: fields and order',
         composerHint: 'Left-to-right column order. Pick a label or a totals field; use ↑↓ to reorder.',
+        catalogPickHint: 'Pick a field for the summary row — + adds it here',
+        fieldAdded: '«{{label}}» added to row columns',
         slotText: 'Label',
         slotField: 'Field',
         slotTextPh: 'e.g. Amount Due',

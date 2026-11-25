@@ -75,7 +75,7 @@ import {
 } from './utils/tableColumns';
 import {
     findSummaryTableContext, addEmptyRowAfter, duplicateRowAfter, removeSummaryRow, countSiblingRows,
-    elevateCellTargetToRow, isValidRowDropTarget, addConfiguredRowAfter, type SummaryCellSpec,
+    elevateCellTargetToRow, isValidRowDropTarget, addConfiguredRowAfter, moveSummaryRowBy, type SummaryCellSpec,
 } from './utils/tableRows';
 import { computeAlignDeltas, type AlignKind } from './utils/alignSelection';
 import { BG_FITS, readPageBackground, writePageBackground, imageFileToDataUrl, type PageBackground } from './utils/pageBackground';
@@ -1883,11 +1883,22 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     movingMultiRef.current = movingMulti;
     type RowSlot = { id: number; kind: 'text' | 'field'; text: string; fieldKey: string };
     const [rowComposerOpen, setRowComposerOpen] = useState(false);
+    const rowComposerOpenRef = useRef(false);
+    rowComposerOpenRef.current = rowComposerOpen;
     const rowSlotIdRef = useRef(2);
-    const [rowSlots, setRowSlots] = useState<RowSlot[]>([
+    const emptyRowSlots = useCallback((): RowSlot[] => {
+        rowSlotIdRef.current = 2;
+        return [
+            { id: 1, kind: 'text', text: '', fieldKey: '' },
+            { id: 2, kind: 'field', text: '', fieldKey: '' },
+        ];
+    }, []);
+    const [rowSlots, setRowSlots] = useState<RowSlot[]>(() => [
         { id: 1, kind: 'text', text: '', fieldKey: '' },
         { id: 2, kind: 'field', text: '', fieldKey: '' },
     ]);
+    const rowSlotsRef = useRef(rowSlots);
+    rowSlotsRef.current = rowSlots;
     const selectionIdRef = useRef(0);
     const sameLocator = useCallback((a: PreviewLocator, b: PreviewLocator) => {
         if (a.kind !== b.kind) return false;
@@ -3362,13 +3373,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         setSaveMessage(`⊞ ${i18n.t('editor.align.done')}`);
     }, [flushSourceEdits, findPreviewElement, commitPosition]);
 
-    const applyConfiguredSummaryRow = useCallback(() => {
+    const applyConfiguredSummaryRow = useCallback((slots?: RowSlot[]) => {
+        const useSlots = slots ?? rowSlotsRef.current;
         let nextId = (() => {
             let max = 0;
             for (const m of xsltContentRef.current.matchAll(/data-xslt-obj="obj-(\d+)"/g)) max = Math.max(max, Number(m[1]));
             return max + 1;
         })();
-        const cells: SummaryCellSpec[] = rowSlots.map((s) => {
+        const cells: SummaryCellSpec[] = useSlots.map((s) => {
             if (s.kind === 'text') return { kind: 'text', text: s.text };
             const f = catalogRef.current.find((c) => c.key === s.fieldKey);
             if (!f) return { kind: 'text', text: '' };
@@ -3376,10 +3388,37 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             // Diğer eklenen objeler gibi data-obj-kind=field → XPath / gösterilen alan paneli
             return { kind: 'field', content: fieldSnippet(id, f, false, docLangRef.current) };
         });
-        if (!cells.length) return;
+        if (!cells.some((c) => (c.kind === 'text' ? c.text.trim() : c.content))) return;
         applySummaryRowEdit((xslt, tag) => addConfiguredRowAfter(xslt, tag, cells));
+        setRowSlots(emptyRowSlots());
         setRowComposerOpen(false);
-    }, [rowSlots, applySummaryRowEdit]);
+    }, [applySummaryRowEdit, emptyRowSlots]);
+
+    /** Satır bestecisi açıkken soldaki katalog alanını satır kolonlarına ekler. */
+    const addCatalogFieldToRowComposer = useCallback((key: string) => {
+        const f = catalogRef.current.find((c) => c.key === key);
+        if (!f) return;
+        const label = docCatalogRef.current.find((c) => c.key === key)?.label ?? f.label;
+        setRowSlots((prev) => {
+            const emptyField = prev.find((s) => s.kind === 'field' && !s.fieldKey);
+            const emptyText = prev.find((s) => s.kind === 'text' && !s.text.trim());
+            if (emptyField || emptyText) {
+                return prev.map((s) => {
+                    if (emptyText && s.id === emptyText.id) return { ...s, text: label };
+                    if (emptyField && s.id === emptyField.id) return { ...s, fieldKey: key };
+                    return s;
+                });
+            }
+            rowSlotIdRef.current += 2;
+            return [
+                ...prev,
+                { id: rowSlotIdRef.current - 1, kind: 'text', text: label, fieldKey: '' },
+                { id: rowSlotIdRef.current, kind: 'field', text: '', fieldKey: key },
+            ];
+        });
+        setRowComposerOpen(true);
+        setSaveMessage(`＋ ${i18n.t('editor.rows.fieldAdded', { label })}`);
+    }, []);
 
     useEffect(() => {
         const doc = iframeRef.current?.contentDocument;
@@ -5187,8 +5226,10 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                         <div data-field-catalog style={{ order: -1, marginBottom: '8px', flexShrink: 0 }}>
                             <div style={{
                                 display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 8px',
-                                background: 'rgba(14, 165, 233, 0.16)', border: '1px solid rgba(56, 189, 248, 0.35)', borderRadius: '4px',
-                                color: '#0284c7', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.4px',
+                                background: rowComposerOpen ? 'rgba(15, 118, 110, 0.18)' : 'rgba(14, 165, 233, 0.16)',
+                                border: rowComposerOpen ? '1px solid rgba(15, 118, 110, 0.45)' : '1px solid rgba(56, 189, 248, 0.35)',
+                                borderRadius: '4px',
+                                color: rowComposerOpen ? '#0f766e' : '#0284c7', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.4px',
                             }}>
                                 <span>{t('editor.catalog.title')}</span>
                                 <span style={{ marginLeft: 'auto', padding: '1px 5px', background: '#ffffff', borderRadius: '3px', fontSize: '9px' }}
@@ -5197,7 +5238,9 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 </span>
                             </div>
                             <div style={{ fontSize: '9px', color: '#6b7690', margin: '4px 2px 6px', lineHeight: 1.4 }}>
-                                ✓ {t('editor.catalog.used')} · <b style={{ color: '#0284c7' }}>+</b> {t('editor.catalog.help')}
+                                {rowComposerOpen
+                                    ? <>＋ {t('editor.rows.catalogPickHint')}</>
+                                    : <>✓ {t('editor.catalog.used')} · <b style={{ color: '#0284c7' }}>+</b> {t('editor.catalog.help')}</>}
                             </div>
                             {filteredCatalog.map(([category, items]) => {
                                 const open = catalogOpen[category] ?? !!xsltSearch.trim();
@@ -5223,6 +5266,11 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                 ? xsltInstrumented.bindings.find(b => (b.kind || 'dropdown') === 'dropdown' && bindingLabels.get(b) === f.label)
                                                 : undefined;
                                             const insertHere = () => {
+                                                // Özet satır bestecisi açıksa alan doğrudan satır kolonlarına eklenir.
+                                                if (rowComposerOpenRef.current && !isLineField(f)) {
+                                                    addCatalogFieldToRowComposer(f.key);
+                                                    return;
+                                                }
                                                 if (isLineField(f) && insertMode === 'after' && insertColumn('field', f.key)) return;
                                                 setMoving(null);
                                                 setPlacing({ key: f.key, label: f.label });
@@ -6136,7 +6184,12 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                 <button
                                                     type="button"
                                                     data-row-add
-                                                    onClick={() => setRowComposerOpen((o) => !o)}
+                                                    onClick={() => setRowComposerOpen((o) => {
+                                                        if (o) return false;
+                                                        setRowSlots(emptyRowSlots());
+                                                        setPlacing(null);
+                                                        return true;
+                                                    })}
                                                     title={t('editor.rows.addHint')}
                                                     style={{ flex: '1 1 40%', padding: '6px 8px', background: rowComposerOpen ? 'rgba(15, 118, 110, 0.22)' : 'rgba(15, 118, 110, 0.12)', border: '1px solid rgba(15, 118, 110, 0.4)', borderRadius: '4px', color: '#0f766e', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
                                                 >
@@ -6159,6 +6212,24 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                     style={{ flex: '1 1 40%', padding: '6px 8px', background: 'rgba(15, 118, 110, 0.12)', border: '1px solid rgba(15, 118, 110, 0.4)', borderRadius: '4px', color: '#0f766e', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
                                                 >
                                                     ⧉ {t('editor.rows.dup')}
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    data-row-up
+                                                    onClick={() => applySummaryRowEdit((xslt, tag) => moveSummaryRowBy(xslt, tag, -1))}
+                                                    title={t('editor.rows.moveUp')}
+                                                    style={{ flex: '1 1 18%', padding: '6px 8px', background: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(16, 185, 129, 0.45)', borderRadius: '4px', color: '#059669', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+                                                >
+                                                    ↑
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    data-row-down
+                                                    onClick={() => applySummaryRowEdit((xslt, tag) => moveSummaryRowBy(xslt, tag, 1))}
+                                                    title={t('editor.rows.moveDown')}
+                                                    style={{ flex: '1 1 18%', padding: '6px 8px', background: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(16, 185, 129, 0.45)', borderRadius: '4px', color: '#059669', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+                                                >
+                                                    ↓
                                                 </button>
                                                 <button
                                                     type="button"
@@ -6201,7 +6272,10 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                         <div style={{ fontSize: '11px', fontWeight: 700, color: '#0f766e', marginBottom: '6px' }}>
                                                             {t('editor.rows.composerTitle')}
                                                         </div>
-                                                        <div style={{ fontSize: '10px', color: '#5b6680', marginBottom: '8px' }}>
+                                                        <div style={{
+                                                            fontSize: '10px', color: '#0f766e', marginBottom: '8px', lineHeight: 1.45,
+                                                            padding: '6px 8px', background: 'rgba(14, 165, 233, 0.12)', border: '1px solid rgba(56, 189, 248, 0.35)', borderRadius: '4px',
+                                                        }}>
                                                             {t('editor.rows.composerHint')}
                                                         </div>
                                                         {rowSlots.map((slot, idx) => (
@@ -6304,7 +6378,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                             <button
                                                                 type="button"
                                                                 data-row-composer-apply
-                                                                onClick={applyConfiguredSummaryRow}
+                                                                onClick={() => applyConfiguredSummaryRow()}
                                                                 style={{ flex: 1, padding: '5px 8px', fontSize: '10px', fontWeight: 700, border: '1px solid rgba(15,118,110,0.5)', borderRadius: '4px', background: 'rgba(15,118,110,0.15)', color: '#0f766e', cursor: 'pointer' }}
                                                             >
                                                                 ✓ {t('editor.rows.applyComposer')}
