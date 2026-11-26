@@ -2334,6 +2334,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     // alır. Onaylı tasarım kilitlidir: düzenlenemez, yalnızca tekrar indirilir.
     // ------------------------------------------------------------------------
     const flushSourceEditsRef = useRef<() => void>(() => {});
+    const persistLiveLayoutToXsltRef = useRef<() => void>(() => {});
     const [design, setDesign] = useState<{ id?: number; key?: string; paid: boolean; paidAt?: string | null; name?: string; taxId?: string | null }>(
         { id: initialDesignId, paid: false }
     );
@@ -2395,6 +2396,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const handleSave = useCallback(async () => {
         if (design.paid) return;
         flushSourceEditsRef.current();
+        // Önizlemedeki güncel konum/ölçüleri XSLT’ye işle — kayıt sonrası kayma olmasın
+        persistLiveLayoutToXsltRef.current?.();
         const content = xsltContentRef.current;
         setSaveStatus('saving');
         setSaveMessage(i18n.t('editor.save.saving'));
@@ -2446,6 +2449,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
     const syncSavedDesign = useCallback(async (): Promise<boolean> => {
         if (!design.id || design.paid) return true;
         try {
+            persistLiveLayoutToXsltRef.current?.();
             await api.updateDesign(design.id, { xslt_content: xsltContentRef.current, xml_content: xmlContent });
             return true;
         } catch (err) {
@@ -4271,7 +4275,60 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         return null;
     }, []);
 
+    /** Önizlemedeki gerçek konum/ölçüleri tek seferde XSLT’ye yazar (kayıt/indirme öncesi). */
+    const persistLiveLayoutToXslt = useCallback(() => {
+        flushSourceEdits();
+        const doc = iframeRef.current?.contentDocument;
+        if (!doc?.body) return;
+        let next = stripBandTranslateYFromXslt(xsltContentRef.current);
+        const props = [
+            'position', 'left', 'top', 'right', 'bottom',
+            'width', 'height', 'box-sizing',
+            'margin-top', 'margin-left', 'margin-right', 'margin-bottom',
+            'z-index',
+        ] as const;
+        const writeEl = (el: HTMLElement, locator: PreviewLocator) => {
+            for (const prop of props) {
+                const v = el.style.getPropertyValue(prop);
+                if (!v) continue;
+                const tag = resolveSourceTag(next, locator);
+                if (!tag) return;
+                next = setTagStyleProperty(next, tag, prop, v);
+            }
+            if ((el.style.position === 'absolute' || el.style.position === 'fixed')) {
+                const cell = el.closest('td, th') as HTMLElement | null;
+                if (cell && cell !== el && cell.hasAttribute('data-xsrc')) {
+                    const cellTag = findLiteralTagByOrdinal(next, Number(cell.getAttribute('data-xsrc')));
+                    if (cellTag && !/\bposition\s*:/.test(next.slice(cellTag.start, cellTag.end))) {
+                        next = setTagStyleProperty(next, cellTag, 'position', 'relative');
+                    }
+                }
+            }
+        };
+        for (const el of Array.from(doc.querySelectorAll<HTMLElement>('[data-xslt-obj]'))) {
+            const id = el.getAttribute('data-xslt-obj');
+            if (id) writeEl(el, { kind: 'obj', id });
+        }
+        // Serbest absolute (obj kimliği olmayan) literal’ler
+        for (const el of Array.from(doc.querySelectorAll<HTMLElement>('[data-xsrc]'))) {
+            if (el.hasAttribute('data-xslt-obj')) continue;
+            const pos = el.style.position;
+            if (pos !== 'absolute' && pos !== 'fixed') continue;
+            if (el.closest('td, th') === el) continue;
+            const ordinal = Number(el.getAttribute('data-xsrc'));
+            if (!Number.isInteger(ordinal)) continue;
+            const same = doc.querySelectorAll(`[data-xsrc="${ordinal}"]`);
+            writeEl(el, { kind: 'el', ordinal, nth: Math.max(0, Array.from(same).indexOf(el)) });
+        }
+        if (next !== xsltContentRef.current) {
+            xsltContentRef.current = next;
+            editKeyRef.current = `persist-layout:${Date.now()}`;
+            setXsltContent(next);
+        }
+    }, [flushSourceEdits, resolveSourceTag]);
+
     const commitBandShift = useCallback((layout: DesignBandLayout, snaps: BandShiftSnapshot[]) => {
+        // Bant oranları yalnız localStorage (XSLT’ye bant yazılmaz)
         bandLayoutRef.current = layout;
         saveBandLayout(layout, design.id ?? initialDesignId);
         setBandLayout(layout);
@@ -4279,41 +4336,30 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             setSaveMessage(`⚠ ${i18n.t('editor.bands.noneBelow')}`);
             return;
         }
-        const deltaOf = (s: BandShiftSnapshot) => {
-            if (s.kind === 'absolute') return (parseFloat(s.el.style.top) || 0) - s.base;
-            return (parseFloat(s.el.style.marginTop) || 0) - s.base;
-        };
+        const deltaOf = (s: BandShiftSnapshot) => (parseFloat(s.el.style.top) || 0) - s.base;
         if (!snaps.some((s) => Math.abs(deltaOf(s)) > 0.5)) return;
         flushSourceEdits();
+        // Tek XSLT yazımı — her objede setXsltContent yapmak yeniden çizimde kayma üretir
+        let next = stripBandTranslateYFromXslt(xsltContentRef.current);
         let moved = 0;
         for (const s of snaps) {
-            if (s.kind !== 'absolute') continue;
             const loc = locatorOfBandEl(s.el);
             if (!loc) continue;
-            commitPosition(
-                s.el,
-                loc,
-                'absolute',
-                formatLength(parseFloat(s.el.style.left) || s.left, 'px'),
-                formatLength(parseFloat(s.el.style.top) || s.base, 'px'),
-            );
+            const left = formatLength(parseFloat(s.el.style.left) || s.left, 'px');
+            const top = formatLength(parseFloat(s.el.style.top) || s.base, 'px');
+            if (s.el.style.position !== 'absolute' && s.el.style.position !== 'fixed') {
+                s.el.style.position = 'absolute';
+            }
+            s.el.style.left = left;
+            s.el.style.top = top;
+            for (const [prop, v] of [['position', 'absolute'], ['left', left], ['top', top]] as const) {
+                const tag = resolveSourceTag(next, loc);
+                if (!tag) break;
+                next = setTagStyleProperty(next, tag, prop, v);
+            }
             moved += 1;
         }
-        let next = xsltContentRef.current;
-        const before = next;
-        for (const s of snaps) {
-            if (s.kind !== 'margin') continue;
-            const loc = locatorOfBandEl(s.el);
-            if (!loc) continue;
-            const tag = resolveSourceTag(next, loc);
-            if (!tag) continue;
-            const mt = `${Math.max(0, parseFloat(s.el.style.marginTop) || 0)}px`;
-            next = setTagStyleProperty(next, tag, 'margin-top', mt);
-            moved += 1;
-        }
-        // Eski hatalı translateY kalıntılarını XSLT’den temizle
-        next = stripBandTranslateYFromXslt(next);
-        if (next !== before) {
+        if (next !== xsltContentRef.current) {
             xsltContentRef.current = next;
             editKeyRef.current = `band-shift:${Date.now()}`;
             setXsltContent(next);
@@ -4322,7 +4368,9 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             setSaveMessage(`↕ ${i18n.t('editor.bands.shifted', { count: moved })}`);
             setPositionRev((r) => r + 1);
         }
-    }, [design.id, initialDesignId, flushSourceEdits, locatorOfBandEl, commitPosition, resolveSourceTag]);
+    }, [design.id, initialDesignId, flushSourceEdits, locatorOfBandEl, resolveSourceTag]);
+
+    persistLiveLayoutToXsltRef.current = persistLiveLayoutToXslt;
 
     const refreshBandOverlay = useCallback(() => {
         const doc = iframeRef.current?.contentDocument;
@@ -4430,15 +4478,55 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             // hemen uygula (titreme olmasın), auto-fit açıksa 350ms sonra
             // (measureHeight 300ms + 50ms pay) genişliğe göre yeniden sığdır.
             applyPreviewZoom(previewZoomRef.current);
-            // Eski bant kaydırmasının tr/td translateY kalıntıları kolon hizasını bozar — temizle.
+            // Eski bant translateY + kaçmış absolute’leri TEK XSLT yazımında düzelt
+            // (her objede setXsltContent → yeniden çizim üst üste binmeye yol açıyordu).
             {
                 const nDom = stripBrokenBandTransforms(doc);
-                const cleaned = stripBandTranslateYFromXslt(xsltContentRef.current);
-                if (cleaned !== xsltContentRef.current) {
-                    xsltContentRef.current = cleaned;
-                    editKeyRef.current = `band-cleanup:${Date.now()}`;
-                    setXsltContent(cleaned);
-                    setSaveMessage(`🧹 ${i18n.t('editor.bands.cleanedTransforms')}`);
+                let next = stripBandTranslateYFromXslt(xsltContentRef.current);
+                const writePos = (el: HTMLElement, id: string, left: string, top: string) => {
+                    const loc: PreviewLocator = { kind: 'obj', id };
+                    for (const [prop, v] of [['position', 'absolute'], ['left', left], ['top', top]] as const) {
+                        const tag = resolveSourceTag(next, loc);
+                        if (!tag) return;
+                        next = setTagStyleProperty(next, tag, prop, v);
+                    }
+                    const cell = el.closest('td, th') as HTMLElement | null;
+                    if (cell && cell !== el && cell.hasAttribute('data-xsrc')) {
+                        const cellTag = findLiteralTagByOrdinal(next, Number(cell.getAttribute('data-xsrc')));
+                        if (cellTag && !/\bposition\s*:/.test(next.slice(cellTag.start, cellTag.end))) {
+                            next = setTagStyleProperty(next, cellTag, 'position', 'relative');
+                        }
+                    }
+                };
+                const escaped = Array.from(doc.querySelectorAll<HTMLElement>('[data-xslt-obj]'))
+                    .filter((n) => absoluteEscapedFromCell(n));
+                for (const n of escaped) {
+                    const id = n.getAttribute('data-xslt-obj') ?? '';
+                    if (!id) continue;
+                    const unit = parseLength(n.style.left || '').unit;
+                    const p = pinAbsolute(n);
+                    writePos(n, id, formatLength(p.left, unit), formatLength(p.top, unit));
+                }
+                let strayCount = 0;
+                if (!designPaidRef.current) {
+                    const stray = Array.from(doc.querySelectorAll<HTMLElement>('[data-xslt-obj]'))
+                        .filter(n => n.style.position === 'absolute' && needsPageAnchor(n) && !inTableCellFlow(n));
+                    for (const n of stray) {
+                        const id = n.getAttribute('data-xslt-obj') ?? '';
+                        if (!id) continue;
+                        const unit = parseLength(n.style.left || '').unit;
+                        const p = pinAbsolute(n);
+                        writePos(n, id, formatLength(p.left, unit), formatLength(p.top, unit));
+                        strayCount += 1;
+                    }
+                }
+                if (next !== xsltContentRef.current) {
+                    xsltContentRef.current = next;
+                    editKeyRef.current = `layout-fix:${Date.now()}`;
+                    setXsltContent(next);
+                    if (escaped.length) setSaveMessage(`📌 ${i18n.t('editor.position.cellReanchored', { count: escaped.length })}`);
+                    else if (strayCount) setSaveMessage(`📌 ${i18n.t('editor.position.reanchored', { count: strayCount })}`);
+                    else if (nDom > 0) setSaveMessage(`🧹 ${i18n.t('editor.bands.cleanedTransforms')}`);
                 } else if (nDom > 0) {
                     setSaveMessage(`🧹 ${i18n.t('editor.bands.cleanedTransforms')}`);
                 }
@@ -4450,28 +4538,6 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                 const key = n.getAttribute('data-field') ?? '';
                 n.setAttribute('data-empty-label', catalogRef.current.find(f => f.key === key)?.label ?? key.split('/').pop() ?? '');
             });
-            // Hücrede olup sayfaya göre absolute kalanlar → hücreye yeniden sabitlenir (kayma önlemi; taşıma korunur).
-            {
-                const escaped = Array.from(doc.querySelectorAll<HTMLElement>('[data-xslt-obj]'))
-                    .filter((n) => absoluteEscapedFromCell(n));
-                for (const n of escaped) {
-                    const unit = parseLength(n.style.left || '').unit;
-                    const p = pinAbsolute(n);
-                    commitPosition(n, { kind: 'obj', id: n.getAttribute('data-xslt-obj') ?? '' }, 'absolute', formatLength(p.left, unit), formatLength(p.top, unit));
-                }
-                if (escaped.length) setSaveMessage(`📌 ${i18n.t('editor.position.cellReanchored', { count: escaped.length })}`);
-            }
-            // Sayfaya göre değil body'ye göre konumlanmış objeler (eski sürüm) sayfaya sabitlenir.
-            if (!designPaidRef.current) {
-                const stray = Array.from(doc.querySelectorAll<HTMLElement>('[data-xslt-obj]'))
-                    .filter(n => n.style.position === 'absolute' && needsPageAnchor(n) && !inTableCellFlow(n));
-                for (const n of stray) {
-                    const unit = parseLength(n.style.left || '').unit;
-                    const p = pinAbsolute(n);
-                    commitPosition(n, { kind: 'obj', id: n.getAttribute('data-xslt-obj') ?? '' }, 'absolute', formatLength(p.left, unit), formatLength(p.top, unit));
-                }
-                if (stray.length) setSaveMessage(`📌 ${i18n.t('editor.position.reanchored', { count: stray.length })}`);
-            }
             if (placingRef.current) doc.documentElement.setAttribute('data-xslt-placing', '');
             // Yeniden render sonrası seçili öğeyi yeni dokümanda tekrar bul
             // ve önceki kaydırma konumuna dön.
@@ -4517,7 +4583,7 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         };
 
         bindListener();
-    }, [handleIframeBodyClick, fitZoomToContainer, applyPreviewZoom, findPreviewElement, openSelection, commitPosition, refreshBandOverlay]);
+    }, [handleIframeBodyClick, fitZoomToContainer, applyPreviewZoom, findPreviewElement, openSelection, resolveSourceTag, refreshBandOverlay]);
 
     /**
      * iframe onLoad → handleIframeLoad. previewHtml değiştiğinde iframe

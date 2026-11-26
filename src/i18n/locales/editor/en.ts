@@ -181,7 +181,7 @@ const editor: typeof tr = {
         toggleHint: 'FastReport-like design bands (aid only). Boundaries are stored in the browser; lines are not written to XSLT. The A4 frame is always visible.',
         catalogHint: 'Band lines are design aids. Dragging shifts only free (absolute) objects and whole tables—not rows. The dashed A4 box shows the print page boundary.',
         shifted: '{{count}} object(s) shifted to the band boundary.',
-        noneBelow: 'No free objects/tables below the divider. Table rows are not shifted individually (column alignment preserved).',
+        noneBelow: 'No free (outside-cell) objects below the divider. Tables and in-cell fields are not shifted by bands; their positions are kept on save.',
         cleanedTransforms: 'Broken band-shift (translateY) leftovers were cleaned; column alignment should recover.',
     },
     preview: {

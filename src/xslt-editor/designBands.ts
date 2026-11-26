@@ -1,14 +1,14 @@
 /**
  * Tasarım-zamanı sayfa bantları — FastReport benzeri model.
  *
- * Bant çizgileri YALNIZ editör yardımcısıdır; XSLT çıktısına yazılmaz.
+ * Bant çizgileri / isimleri YALNIZ editör yardımcısıdır; XSLT’ye yazılmaz.
  * Sınır oranları (masterEnd / detailEnd) tasarım kimliğine göre localStorage’da
- * sistemsel tutulur.
+ * tutulur (son konum / kayma referansı).
  *
- * Bant sınırı sürüklenince:
- *  - Mutlak (absolute/fixed) objeler top ile kayar
- *  - Çizginin tamamen altında kalan bütün tablolar/div’ler margin-top ile kayar
- *  - tr/td/th/tbody ASLA kaydırılmaz (kolon hizasını bozar)
+ * Bant sınırı sürüklenince yalnızca hücre DIŞINDAKI serbest absolute/fixed
+ * objelerin top değeri kayar; bu konumlar XSLT’ye gerçek CSS olarak yazılır.
+ * Tablo / satır / hücre / akış blokları kaydırılmaz (margin-top yok) —
+ * kayıt sonrası üst üste binme ve kolon kaymasını önlemek için.
  */
 
 export type DesignBandId = 'master' | 'detail' | 'footer';
@@ -124,7 +124,7 @@ export function stripBandTranslateYFromXslt(xslt: string): string {
     return xslt.replace(/\bstyle\s*=\s*("([^"]*)"|'([^']*)')/gi, (full, _q, dq, sq) => {
         const style = dq ?? sq ?? '';
         if (!/translateY\s*\(/i.test(style)) return full;
-        let next = style
+        const next = style
             .replace(/(?:^|;)\s*transform\s*:\s*translateY\([^)]*\)\s*/gi, ';')
             .replace(/transform\s*:\s*([^;]*translateY\([^)]*\)[^;]*)/gi, (_m: string, val: string) => {
                 const cleaned = String(val).replace(/translateY\s*\([^)]*\)\s*/gi, '').trim();
@@ -139,10 +139,8 @@ export function stripBandTranslateYFromXslt(xslt: string): string {
 }
 
 /**
- * FastReport mantığı: çizginin altındaki taşınabilir kökler.
- * - absolute/fixed objeler
- * - bütünüyle altta kalan table / blok div (margin ile)
- * - tablo parçaları (tr/td…) hariç
+ * Çizginin altındaki serbest (hücre dışı) absolute/fixed kökler.
+ * Tablo parçaları ve hücre içi objeler hariç — kayıt sonrası kaymayı önler.
  */
 export function collectElementsBelowBand(root: HTMLElement, edgeClientY: number): HTMLElement[] {
     const view = root.ownerDocument.defaultView;
@@ -154,33 +152,21 @@ export function collectElementsBelowBand(root: HTMLElement, edgeClientY: number)
         if (el === root || isPageSizedWrapper(el, root)) return;
         const tag = el.tagName.toLowerCase();
         if (SKIP_TAGS.has(tag) || TABLE_PARTS.has(tag)) return;
+        // Hücre içi absolute → bant kaydırmaz (hücreye yeniden sabitleme üst üste biner)
+        if (el.closest('td, th')) return;
         const r = el.getBoundingClientRect();
         if (r.width < 1 || r.height < 1) return;
         if (r.top < edgeClientY - 0.5) return;
 
         const pos = el.style.position || view?.getComputedStyle(el).position || '';
-        const absolute = pos === 'absolute' || pos === 'fixed';
-        if (absolute) {
-            found.push(el);
-            return;
-        }
-        // Akış: yalnız bağımsız blok / tablo (iç satır değil)
-        if (tag === 'table' || tag === 'div' || tag === 'section' || tag === 'article' || tag === 'p' || tag === 'img') {
-            found.push(el);
-        }
+        if (pos === 'absolute' || pos === 'fixed') found.push(el);
     };
 
-    // 1) Tasarım objeleri (mutlak konum)
     root.querySelectorAll<HTMLElement>('[data-xslt-obj]').forEach(tryAdd);
-
-    // 2) Mutlak konumlu diğerleri
     root.querySelectorAll<HTMLElement>('*').forEach((el) => {
         const pos = el.style.position || view?.getComputedStyle(el).position || '';
         if (pos === 'absolute' || pos === 'fixed') tryAdd(el);
     });
-
-    // 3) Çizginin tamamen altında kalan tablolar / bloklar
-    root.querySelectorAll<HTMLElement>('table, div[data-xsrc], section[data-xsrc]').forEach(tryAdd);
 
     const uniq = [...new Set(found)];
     return uniq.filter((el) => !uniq.some((o) => o !== el && o.contains(el)));
@@ -191,17 +177,12 @@ export function snapshotBandShiftTargets(root: HTMLElement, edgeClientY: number)
     const out: BandShiftSnapshot[] = [];
     for (const el of collectElementsBelowBand(root, edgeClientY)) {
         const r = el.getBoundingClientRect();
-        const pos = el.style.position || view?.getComputedStyle(el).position || '';
-        if (pos === 'absolute' || pos === 'fixed') {
-            // Kalan hatalı translateY’yi yok say
-            el.style.transform = (el.style.transform || '').replace(/translateY\s*\([^)]*\)\s*/gi, '').trim();
-            const top = parseFloat(el.style.top || '') || parseFloat(view?.getComputedStyle(el).top || '') || 0;
-            const left = parseFloat(el.style.left || '') || parseFloat(view?.getComputedStyle(el).left || '') || 0;
-            out.push({ el, kind: 'absolute', base: top, left, clientTop: r.top });
-        } else {
-            const mt = parseFloat(el.style.marginTop || '') || parseFloat(view?.getComputedStyle(el).marginTop || '') || 0;
-            out.push({ el, kind: 'margin', base: mt, left: 0, clientTop: r.top });
-        }
+        // Kalan hatalı translateY’yi yok say
+        el.style.transform = (el.style.transform || '').replace(/translateY\s*\([^)]*\)\s*/gi, '').trim();
+        if (!el.style.transform) el.style.removeProperty('transform');
+        const top = parseFloat(el.style.top || '') || parseFloat(view?.getComputedStyle(el).top || '') || 0;
+        const left = parseFloat(el.style.left || '') || parseFloat(view?.getComputedStyle(el).left || '') || 0;
+        out.push({ el, kind: 'absolute', base: top, left, clientTop: r.top });
     }
     return out;
 }
@@ -214,15 +195,11 @@ export function applyBandShiftDelta(
     for (const s of snaps) {
         const scale = scaleOf(s.el) || 1;
         const next = s.base + deltaClientPx / scale;
-        if (s.kind === 'absolute') {
-            if (s.el.style.position !== 'absolute' && s.el.style.position !== 'fixed') {
-                s.el.style.position = 'absolute';
-                s.el.style.left = `${s.left}px`;
-            }
-            s.el.style.top = `${next}px`;
-        } else {
-            s.el.style.marginTop = `${Math.max(0, next)}px`;
+        if (s.el.style.position !== 'absolute' && s.el.style.position !== 'fixed') {
+            s.el.style.position = 'absolute';
+            s.el.style.left = `${s.left}px`;
         }
+        s.el.style.top = `${next}px`;
     }
 }
 

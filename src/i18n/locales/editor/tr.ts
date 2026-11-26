@@ -179,7 +179,7 @@ const editor = {
         toggleHint: 'FastReport benzeri tasarım bantları (yalnız yardımcı). Sınır değerleri tarayıcıda saklanır; XSLT’ye çizgi yazılmaz. A4 çerçevesi her zaman görünür.',
         catalogHint: 'Bant çizgileri işlem kolaylaştırıcıdır. Sürükleyince yalnız serbest (mutlak) objeler ve bütün tablolar kayar; satır/hücre hizası bozulmaz. Kesikli A4 kutusu yazdırma sayfa sınırını gösterir.',
         shifted: '{{count}} nesne bant sınırına göre kaydırıldı.',
-        noneBelow: 'Çizginin altında kaydırılacak serbest nesne/tablo yok. Tablo satırları tek tek kaydırılmaz (kolon hizası korunur).',
+        noneBelow: 'Çizginin altında kaydırılacak serbest (hücre dışı) nesne yok. Tablo ve hücre içi alanlar bantla kaydırılmaz; konumları kayitte korunur.',
         cleanedTransforms: 'Bozuk bant kaydırma (translateY) kalıntıları temizlendi; kolon hizası düzeltilmeli.',
     },
     preview: {
