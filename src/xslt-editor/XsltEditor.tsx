@@ -271,7 +271,7 @@ function resolveInsertTarget(
     return Number.isNaN(ordinal) ? null : { el, ordinal, position };
 }
 import { api, designKeyOf } from '../api';
-import { licenseIdKind } from '../../shared/license-lock.js';
+import { hasLicenseLock, licenseIdKind, stripLicenseLock } from '../../shared/license-lock.js';
 import { PaymentModal } from '../PaymentModal';
 import { XSLT_ELEMENTS, UBL_XPATHS, lintXslt } from './xsltSchema';
 
@@ -2219,7 +2219,11 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         };
         const run = async () => {
             if (initialXslt && moduleId === initialModuleId) {
-                const userXslt = stripFieldGuide(stripLeadingBom(stripTestWatermark(initialXslt)));
+                let userXslt = stripFieldGuide(stripLeadingBom(stripTestWatermark(initialXslt)));
+                // Anahtarsız taslakta eski onay kilidi kalsın → düzenle+onay engellenmesin
+                if (hasLicenseLock(userXslt) && !designKeyOf(userXslt)) {
+                    userXslt = stripLicenseLock(userXslt);
+                }
                 if (designKeyOf(userXslt)) {
                     if (!cancelled) load(userXslt);
                     return;
@@ -2365,6 +2369,14 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             if (cancelled || !d) return;
             if (!d.paid) {
                 setDesign(prev => ({ ...prev, id: d.id, name: d.name }));
+                // Kayıtlı taslakta kalmış lisans kilidi → temizle (yeniden onaylanabilir)
+                if (hasLicenseLock(xsltContentRef.current)) {
+                    const clean = stripLicenseLock(xsltContentRef.current);
+                    if (clean !== xsltContentRef.current) {
+                        xsltContentRef.current = clean;
+                        setXsltContent(clean);
+                    }
+                }
                 return;
             }
             setDesign({ id: d.id, key: d.design_key ?? undefined, paid: true, paidAt: d.paid_at, name: d.name, taxId: d.license_tax_id });

@@ -20,6 +20,126 @@ const TERMS_PER_VARIABLE = 30;
 
 export const hasLicenseLock = (xslt) => typeof xslt === 'string' && xslt.includes(TABLE);
 
+/** Lisans filigranındaki gömülü PNG'nin ayırt edici parçası (TEST_WATERMARK_PNG). */
+const WATERMARK_MARK = 'AAAAHZFUPAAAAMFBMVEXcJib';
+const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/**
+ * Önceki onayın lisans kilidini kaldırır; dosya yeniden düzenlenip yeni VKN/TCKN
+ * ile onaylanabilir. Korunan içerik (logo/IBAN) değişkenlerden geri yazılır.
+ * Bant / tasarım stillerine dokunulmaz.
+ */
+export function stripLicenseLock(xslt) {
+    if (typeof xslt !== 'string' || !xslt.includes(TABLE)) return xslt;
+    const root = xslt.match(/<([\w.-]+):(?:stylesheet|transform)\b/);
+    const p = root?.[1] || 'xsl';
+    const varTag = `${p}:variable`;
+    const ifTag = `${p}:if`;
+    const valueOfTag = `${p}:value-of`;
+
+    const attrVal = (attrs, key) => {
+        const m = attrs.match(new RegExp(`\\b${key}\\s*=\\s*("([^"]*)"|'([^']*)')`, 'i'));
+        return m ? (m[2] ?? m[3] ?? '') : '';
+    };
+    const vars = [];
+    const varRe = new RegExp(`<${escapeRe(varTag)}\\b([^>]*?)(?:/>|>([\\s\\S]*?)</${escapeRe(varTag)}>)`, 'g');
+    for (let m; (m = varRe.exec(xslt));) {
+        const attrs = m[1] || '';
+        const body = m[2];
+        const name = attrVal(attrs, 'name');
+        if (!name) continue;
+        const select = attrVal(attrs, 'select');
+        vars.push({ name, select, body: body ?? null, full: m[0] });
+    }
+
+    const lockVars = new Set();
+    for (const v of vars) {
+        if (v.select.includes(TABLE) || (v.body && v.body.includes(TABLE))) lockVars.add(v.name);
+    }
+    if (!lockVars.size) {
+        // TABLE metin olarak duruyor ama değişken eşleşmedi — yine de filigranı temizle
+        return stripLicenseWatermarkAndSeal(xslt, p);
+    }
+
+    let grew = true;
+    while (grew) {
+        grew = false;
+        // İleri: select/body içinde $kilitVar geçen değişkenler
+        for (const v of vars) {
+            if (lockVars.has(v.name)) continue;
+            for (const lv of lockVars) {
+                if (v.select.includes(`$${lv}`) || (v.body && v.body.includes(`$${lv}`))) {
+                    lockVars.add(v.name);
+                    grew = true;
+                    break;
+                }
+            }
+        }
+        // Geri: kilitli select/body'nin referans verdiği diğer değişkenler (ör. idVar)
+        for (const v of vars) {
+            if (!lockVars.has(v.name)) continue;
+            const text = `${v.select}\n${v.body || ''}`;
+            for (const other of vars) {
+                if (lockVars.has(other.name)) continue;
+                if (text.includes(`$${other.name}`)) {
+                    lockVars.add(other.name);
+                    grew = true;
+                }
+            }
+        }
+    }
+
+    let out = xslt;
+    // Korunan gövdeyi value-of / AVT yerlerine geri koy
+    for (const v of vars) {
+        if (!lockVars.has(v.name) || v.body == null) continue;
+        const content = v.body;
+        out = out.replace(
+            new RegExp(`<${escapeRe(valueOfTag)}\\b[^>]*\\bselect\\s*=\\s*["']\\$${escapeRe(v.name)}["'][^>]*/>`, 'g'),
+            () => content,
+        );
+        out = out.replace(new RegExp(`\\{\\$${escapeRe(v.name)}\\}`, 'g'), () => content);
+    }
+
+    // Lisans değişkenlerini sil
+    for (const v of vars) {
+        if (!lockVars.has(v.name)) continue;
+        out = out.split(v.full).join('');
+    }
+
+    out = stripLicenseWatermarkAndSeal(out, p);
+    // Artık TABLE kalmamalı; kalırsa kaba temizle
+    if (out.includes(TABLE)) {
+        out = out.replace(new RegExp(`<${escapeRe(varTag)}\\b[^>]*${escapeRe(TABLE)}[^>]*/>`, 'g'), '');
+        out = out.replace(TABLE, '');
+    }
+    return out.replace(/\n{3,}/g, '\n\n');
+}
+
+function stripLicenseWatermarkAndSeal(xslt, p) {
+    let out = xslt;
+    // not($ok) filigranı + gömülü TEST PNG
+    out = out.replace(
+        new RegExp(`<${escapeRe(p)}:if\\b[^>]*>[\\s\\S]*?${escapeRe(WATERMARK_MARK)}[\\s\\S]*?</${escapeRe(p)}:if>`, 'g'),
+        '',
+    );
+    // concat('TE','ST') IE metni ile kalan if
+    out = out.replace(
+        new RegExp(`<${escapeRe(p)}:if\\b[^>]*>[\\s\\S]*?concat\\('TE','ST'\\)[\\s\\S]*?</${escapeRe(p)}:if>`, 'g'),
+        '',
+    );
+    // Çevrimiçi mühür (url(...{taxId}))
+    out = out.replace(
+        new RegExp(
+            `<${escapeRe(p)}:element name="style">[\\s\\S]*?@media print\\{[\\s\\S]*?</${escapeRe(p)}:element>`
+            + `<${escapeRe(p)}:element name="div">[\\s\\S]*?url\\([\\s\\S]*?</${escapeRe(p)}:element>`,
+            'g',
+        ),
+        '',
+    );
+    return out;
+}
+
 export const normalizeTaxId = (value) => String(value ?? '').replace(/\D+/g, '');
 
 const isValidVkn = (v) => {

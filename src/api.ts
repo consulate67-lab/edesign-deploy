@@ -402,11 +402,12 @@ export const api = {
             localStorage.setItem('mock_designs', JSON.stringify([again, ...designs.filter(d => d.id !== again.id)]));
             return { success: true, charged: false, credits: user.credits, design: again };
         }
-        const { applyLicenseLock, hasLicenseLock, isValidLicenseId, normalizeLicenseId, withIssuerTaxId } = await import('../shared/license-lock.js');
+        const { applyLicenseLock, hasLicenseLock, isValidLicenseId, normalizeLicenseId, stripLicenseLock, withIssuerTaxId } = await import('../shared/license-lock.js');
         const taxId = normalizeLicenseId(payload.license_tax_id);
         if (!isValidLicenseId(taxId)) throw new Error('Tasarımın kullanılacağı geçerli bir VKN (10 hane), TCKN (11 hane), ülke önekli KDV numarası (ör. IE1234567T) ya da ulusal vergi numarası (ör. US123456789, RU7701234567, GSTIN, USCC, CNPJ) girin.');
-        if (hasLicenseLock(payload.xslt_content)) throw new Error('Bu dosya başka bir lisansa kilitli; tekrar onaylanamaz.');
-        const locked = applyLicenseLock(payload.xslt_content, taxId);
+        const unlocked = hasLicenseLock(payload.xslt_content) ? stripLicenseLock(payload.xslt_content) : payload.xslt_content;
+        if (hasLicenseLock(unlocked)) throw new Error('Bu dosyadaki eski lisans kilidi temizlenemedi; destek ile iletişime geçin.');
+        const locked = applyLicenseLock(unlocked, taxId);
         const baseXml = payload.xml_content ?? existing?.xml_content ?? null;
         let charged = false;
         if (user.role !== 'admin') {

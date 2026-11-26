@@ -8,3 +8,5 @@ export declare const licenseIdKind: (id: unknown) => 'VAT' | 'VKN' | 'TCKN' | 'E
 export declare function withIssuerTaxId(xml: string, taxId: string): string;
 /** sealUrls: çevrimiçi doğrulama adresleri; belgedeki VKN/TCKN `{taxId}` yerine yazılır. */
 export declare function applyLicenseLock(xslt: string, taxId: string, options?: { sealUrls?: string[] }): string;
+/** Önceki onay kilidini kaldırır; taslak yeniden onaylanabilir. */
+export declare function stripLicenseLock(xslt: string): string;

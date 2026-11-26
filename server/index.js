@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { initDb } from './db.js';
 import { DESIGN_RETENTION_DAYS, PURGE_PAID_DESIGN_SQL, startDesignRetention } from './design-retention.js';
-import { applyLicenseLock, hasLicenseLock, isValidLicenseId, isValidTaxId, normalizeLicenseId, withIssuerTaxId } from '../shared/license-lock.js';
+import { applyLicenseLock, hasLicenseLock, isValidLicenseId, isValidTaxId, normalizeLicenseId, stripLicenseLock, withIssuerTaxId } from '../shared/license-lock.js';
 import { TEST_WATERMARK_PNG } from '../shared/test-watermark-png.js';
 import { createRequireAdmin, registerAdminAuthRoutes } from './admin-auth.js';
 import { registerAdminRoutes } from './admin.js';
@@ -757,14 +757,16 @@ app.post('/api/designs/export', authenticateToken, async (req, res) => {
             await client.query('ROLLBACK');
             return res.status(400).json({ error: 'Tasarimin kullanilacagi gecerli bir VKN (10 hane), TCKN (11 hane), ulke onekli KDV numarasi (or. IE1234567T) ya da ulusal vergi numarasi (or. US123456789, RU7701234567, GSTIN, USCC, CNPJ) girin.' });
         }
-        if (hasLicenseLock(xslt_content)) {
+        // Önceki onaydan kalan kilit varsa temizle — düzenlenmiş taslak yeniden onaylanabilir (1 hak).
+        const unlocked = hasLicenseLock(xslt_content) ? stripLicenseLock(xslt_content) : xslt_content;
+        if (hasLicenseLock(unlocked)) {
             await client.query('ROLLBACK');
-            return res.status(400).json({ error: 'Bu dosya baska bir lisansa kilitli; tekrar onaylanamaz.' });
+            return res.status(400).json({ error: 'Bu dosyadaki eski lisans kilidi temizlenemedi; destek ile iletisime gecin.' });
         }
         const licenseToken = existing?.license_token || randomBytes(16).toString('hex');
         let lockedXslt;
         try {
-            lockedXslt = applyLicenseLock(xslt_content, taxId);
+            lockedXslt = applyLicenseLock(unlocked, taxId);
         } catch (e) {
             await client.query('ROLLBACK');
             return res.status(400).json({ error: `Lisans kilidi eklenemedi: ${e.message}` });
