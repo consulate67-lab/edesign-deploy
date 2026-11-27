@@ -548,6 +548,10 @@ const editor: typeof tr = {
         clear: 'Clear multi',
         done: 'Objects aligned.',
         skipTable: 'Fields in table cells cannot be aligned; they stay in row flow.',
+        groupTitle: 'Group align',
+        groupHint: 'Multi-select portable fields in this cluster/cell and use the same align package.',
+        selectGroup: 'Select all ({{count}})',
+        groupTooFew: 'At least 2 portable fields are needed to align.',
     },
     rows: {
         title: 'Subtotal / summary row',

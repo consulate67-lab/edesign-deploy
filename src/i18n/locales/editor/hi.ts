@@ -548,6 +548,10 @@ const editor: typeof tr = {
         clear: 'Clear multi',
         done: 'Objects aligned.',
         skipTable: 'तालिका सेल के फ़ील्ड संरेखित नहीं किए जा सकते; वे पंक्ति फ़्लो में रहते हैं।',
+        groupTitle: 'समूह संरेखण',
+        groupHint: 'इस क्लस्टर/सेल के पोर्टेबल फ़ील्ड को एक साथ चुनें और वही संरेखण पैकेज उपयोग करें।',
+        selectGroup: 'सभी चुनें ({{count}})',
+        groupTooFew: 'संरेखित करने के लिए कम से कम 2 पोर्टेबल फ़ील्ड चाहिए।',
     },
     rows: {
         title: 'Subtotal / summary row',

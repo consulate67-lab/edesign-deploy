@@ -546,6 +546,10 @@ const editor = {
         clear: 'Seçimi azalt',
         done: 'Nesneler hizalandı.',
         skipTable: 'Tablo hücresindeki alanlar hizalanamaz; satır akışında kalırlar.',
+        groupTitle: 'Grup hizalama',
+        groupHint: 'Bu küme/hücredeki taşınabilir alanları toplu seçip aynı hizalama paketini kullanın.',
+        selectGroup: 'Toplu seç ({{count}})',
+        groupTooFew: 'Hizalamak için en az 2 taşınabilir alan gerekir.',
     },
     rows: {
         title: 'Alt toplam / özet satırı',

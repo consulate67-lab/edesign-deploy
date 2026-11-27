@@ -548,6 +548,10 @@ const editor: typeof tr = {
         clear: 'Clear multi',
         done: 'Objects aligned.',
         skipTable: 'Felder in Tabellenzellen können nicht ausgerichtet werden; sie bleiben im Zeilenfluss.',
+        groupTitle: 'Gruppenausrichtung',
+        groupHint: 'Wählbare Felder in diesem Cluster/dieser Zelle mehrfach auswählen und dasselbe Ausrichtungspaket nutzen.',
+        selectGroup: 'Alle auswählen ({{count}})',
+        groupTooFew: 'Zum Ausrichten sind mindestens 2 verschiebbare Felder nötig.',
     },
     rows: {
         title: 'Subtotal / summary row',

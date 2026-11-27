@@ -548,6 +548,10 @@ const editor: typeof tr = {
         clear: 'Clear multi',
         done: 'Objects aligned.',
         skipTable: 'Поля в ячейках таблицы нельзя выровнять; они остаются в потоке строки.',
+        groupTitle: 'Выравнивание группы',
+        groupHint: 'Выберите сразу переносимые поля в этом кластере/ячейке и используйте тот же пакет выравнивания.',
+        selectGroup: 'Выбрать все ({{count}})',
+        groupTooFew: 'Для выравнивания нужно не меньше 2 переносимых полей.',
     },
     rows: {
         title: 'Subtotal / summary row',

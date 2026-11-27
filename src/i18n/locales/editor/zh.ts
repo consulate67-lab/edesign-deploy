@@ -548,6 +548,10 @@ const editor: typeof tr = {
         clear: 'Clear multi',
         done: 'Objects aligned.',
         skipTable: '表格单元格中的字段无法对齐；它们保持行内流式布局。',
+        groupTitle: '组对齐',
+        groupHint: '批量选中此分组/单元格中的可移动字段，并使用同一对齐工具包。',
+        selectGroup: '全选 ({{count}})',
+        groupTooFew: '对齐至少需要 2 个可移动字段。',
     },
     rows: {
         title: 'Subtotal / summary row',

@@ -548,6 +548,10 @@ const editor: typeof tr = {
         clear: 'Clear multi',
         done: 'Objects aligned.',
         skipTable: 'Les champs dans les cellules de tableau ne peuvent pas être alignés ; ils restent dans le flux de ligne.',
+        groupTitle: 'Alignement de groupe',
+        groupHint: 'Sélectionnez en masse les champs portables de ce groupe/cette cellule et utilisez le même paquet d’alignement.',
+        selectGroup: 'Tout sélectionner ({{count}})',
+        groupTooFew: 'Au moins 2 champs portables sont nécessaires pour aligner.',
     },
     rows: {
         title: 'Subtotal / summary row',

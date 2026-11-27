@@ -3591,6 +3591,33 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         setRowComposerOpen(false);
     }, [flushSourceEdits]);
 
+    /** Küme / hücre içindeki taşınabilir kök objeler (iç içe olanlar elenir). */
+    const collectPortableGroup = useCallback((root: HTMLElement): { el: HTMLElement; loc: PreviewLocator }[] => {
+        const objs = Array.from(root.querySelectorAll<HTMLElement>('[data-xslt-obj]'))
+            .filter((n) => n !== root && !!n.getAttribute('data-xslt-obj'));
+        const roots = objs.filter((n) => !objs.some((o) => o !== n && o.contains(n)));
+        return roots.map((n) => ({
+            el: n,
+            loc: { kind: 'obj' as const, id: n.getAttribute('data-xslt-obj') || '' },
+        })).filter((x) => !!x.loc.id);
+    }, []);
+
+    /** Gruptaki alanları toplu seçime alır → üstteki hizalama paketi açılır. */
+    const selectGroupForAlign = useCallback((root: HTMLElement) => {
+        const group = collectPortableGroup(root);
+        if (group.length < 2) {
+            setSaveMessage(`⚠ ${i18n.t('editor.align.groupTooFew')}`);
+            return;
+        }
+        flushSourceEdits();
+        const locs = group.map((g) => g.loc);
+        // Önce birincil seçim, sonra multi — openSelection multi’yi tek elemana indirir
+        openSelection(null, group[0].el, group[0].loc);
+        multiLocatorsRef.current = locs; // applyAlign hemen okuyabilsin
+        setMultiLocators(locs);
+        setSaveMessage(`⊞ ${i18n.t('editor.align.title', { count: group.length })}`);
+    }, [collectPortableGroup, flushSourceEdits, openSelection]);
+
     const applyAlign = useCallback((kind: AlignKind) => {
         flushSourceEdits();
         const locs = multiLocatorsRef.current;
@@ -3602,18 +3629,64 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
             })
             .filter((x): x is { loc: PreviewLocator; el: HTMLElement } => !!x);
         if (items.length < 2) return;
-        for (const it of items) {
+        // Kalem satırı (for-each) içindeki alanlar akışta kalır — hizalanmaz
+        const usable = items.filter((it) => {
+            const tag = resolveSourceTag(xsltContentRef.current, it.loc);
+            return !(tag && isInLineContext(xsltContentRef.current, tag.start));
+        });
+        if (usable.length < 2) {
+            setSaveMessage(`⚠ ${i18n.t('editor.align.skipTable')}`);
+            return;
+        }
+        for (const it of usable) {
             freezeRenderedSize(it.el);
             const mode = readPositionMode(it.el);
-            if (mode !== 'absolute' || needsPageAnchor(it.el)) pinAbsolute(it.el);
+            if (mode !== 'absolute' || needsPageAnchor(it.el) || absoluteEscapedFromCell(it.el)) pinAbsolute(it.el);
         }
-        const deltas = computeAlignDeltas(items.map((i) => i.el), kind);
+        const deltas = computeAlignDeltas(usable.map((i) => i.el), kind);
+        // Tek XSLT yazımı — her objede setXsltContent kayma üretir
+        let next = xsltContentRef.current;
         for (let i = 0; i < deltas.length; i++) {
             const { el, left, top } = deltas[i];
-            commitPosition(el, items[i].loc, 'absolute', `${left}px`, `${top}px`);
+            const loc = usable[i].loc;
+            const leftS = `${left}px`;
+            const topS = `${top}px`;
+            el.style.position = 'absolute';
+            el.style.left = leftS;
+            el.style.top = topS;
+            const cell = el.closest('td, th') as HTMLElement | null;
+            if (cell && cell !== el && cell.hasAttribute('data-xsrc')) {
+                const cellTag = findLiteralTagByOrdinal(next, Number(cell.getAttribute('data-xsrc')));
+                if (cellTag && !/\bposition\s*:/.test(next.slice(cellTag.start, cellTag.end))) {
+                    next = setTagStyleProperty(next, cellTag, 'position', 'relative');
+                }
+            }
+            const frozen = el.getAttribute('data-xslt-size-frozen') === '1';
+            const props: [string, string][] = [
+                ['position', 'absolute'],
+                ['left', leftS],
+                ['top', topS],
+            ];
+            if (frozen) {
+                if (el.style.boxSizing) props.push(['box-sizing', el.style.boxSizing]);
+                if (el.style.width) props.push(['width', el.style.width]);
+                if (el.style.height) props.push(['height', el.style.height]);
+            }
+            for (const [prop, v] of props) {
+                const tag = resolveSourceTag(next, loc);
+                if (!tag) break;
+                next = setTagStyleProperty(next, tag, prop, v);
+            }
+            el.removeAttribute('data-xslt-size-frozen');
+        }
+        if (next !== xsltContentRef.current) {
+            xsltContentRef.current = next;
+            editKeyRef.current = `align:${Date.now()}`;
+            setXsltContent(next);
         }
         setSaveMessage(`⊞ ${i18n.t('editor.align.done')}`);
-    }, [flushSourceEdits, findPreviewElement, commitPosition]);
+        setPositionRev((r) => r + 1);
+    }, [flushSourceEdits, findPreviewElement, resolveSourceTag]);
 
     const applyConfiguredSummaryRow = useCallback((slots?: RowSlot[]) => {
         const useSlots = slots ?? rowSlotsRef.current;
@@ -6904,72 +6977,117 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                         </>
                                     )}
 
-                                    {(sel.locator?.kind === 'bind' || isLiteral) && el && selectedBindPlacement && !design.paid && (selectedBindPlacement.detach || !selectedBindPlacement.movable) && (() => {
-                                        const portableKids = Array.from(el.querySelectorAll<HTMLElement>('[data-xslt-obj]'))
-                                            .filter((n) => n !== el);
-                                        const hasPortable = portableKids.length > 0;
+                                    {el && !design.paid && (() => {
+                                        const group = collectPortableGroup(el);
+                                        const showMoveStatus = (sel.locator?.kind === 'bind' || isLiteral) && selectedBindPlacement
+                                            && (selectedBindPlacement.detach || !selectedBindPlacement.movable);
+                                        const showGroupAlign = group.length >= 2;
+                                        if (!showMoveStatus && !showGroupAlign) return null;
+                                        const alignKinds = [
+                                            ['left', 'editor.align.left'],
+                                            ['center', 'editor.align.center'],
+                                            ['right', 'editor.align.right'],
+                                            ['top', 'editor.align.top'],
+                                            ['middle', 'editor.align.middle'],
+                                            ['bottom', 'editor.align.bottom'],
+                                        ] as const;
                                         return (
                                             <div data-bind-move-status>
-                                                {sectionTitle(t('editor.panel.move.title'), '#059669')}
-                                                {hasPortable ? (
-                                                    noteBox(t('editor.panel.move.cellPortable'), 'info')
-                                                ) : !selectedBindPlacement.movable && (selectedBindPlacement.detach === 'cell'
-                                                    ? noteBox(t('editor.panel.move.inCell'), 'info')
-                                                    : noteBox(selectedBindPlacement.reason, 'warn'))}
-                                                {hasPortable && portableKids.map((kid) => {
-                                                    const id = kid.getAttribute('data-xslt-obj') || '';
-                                                    const kidKind = kid.getAttribute('data-obj-kind');
-                                                    const key = kid.getAttribute('data-field') || '';
-                                                    const fObj = key ? catalog.find((c) => c.key === key) : null;
-                                                    const label = kidKind === 'field'
-                                                        ? (fObj?.label ?? key.split('/').pop() ?? key)
-                                                        : ((kid.textContent || '').trim().slice(0, 40) || t('editor.insert.text'));
-                                                    if (!id) return null;
-                                                    return (
+                                                {showMoveStatus && (
+                                                    <>
+                                                        {sectionTitle(t('editor.panel.move.title'), '#059669')}
+                                                        {group.length > 0 ? (
+                                                            noteBox(t('editor.panel.move.cellPortable'), 'info')
+                                                        ) : selectedBindPlacement && !selectedBindPlacement.movable && (selectedBindPlacement.detach === 'cell'
+                                                            ? noteBox(t('editor.panel.move.inCell'), 'info')
+                                                            : noteBox(selectedBindPlacement.reason, 'warn'))}
+                                                        {group.map(({ el: kid, loc }) => {
+                                                            const id = loc.kind === 'obj' ? loc.id : '';
+                                                            const kidKind = kid.getAttribute('data-obj-kind');
+                                                            const key = kid.getAttribute('data-field') || '';
+                                                            const fObj = key ? catalog.find((c) => c.key === key) : null;
+                                                            const label = kidKind === 'field'
+                                                                ? (fObj?.label ?? key.split('/').pop() ?? key)
+                                                                : ((kid.textContent || '').trim().slice(0, 40) || t('editor.insert.text'));
+                                                            if (!id) return null;
+                                                            return (
+                                                                <button
+                                                                    key={id}
+                                                                    type="button"
+                                                                    data-move-cell-child
+                                                                    onClick={() => {
+                                                                        flushSourceEdits();
+                                                                        openSelection(null, kid, { kind: 'obj', id });
+                                                                        setMoving({ kind: 'obj', id });
+                                                                    }}
+                                                                    style={{ width: '100%', marginTop: '6px', padding: '7px 10px', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.45)', borderRadius: '4px', color: '#059669', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}
+                                                                >
+                                                                    ↕ {t('editor.panel.move.button')} · {label}
+                                                                </button>
+                                                            );
+                                                        })}
+                                                        {selectedBindPlacement?.detach && group.length === 0 && (
+                                                            <button
+                                                                type="button"
+                                                                data-bind-detach
+                                                                onClick={() => {
+                                                                    if (sel.locator?.kind === 'bind') detachBinding(sel.locator.index);
+                                                                    else if (sel.locator?.kind === 'el') detachCell(sel.locator.ordinal);
+                                                                }}
+                                                                title={t('editor.panel.move.detachHint')}
+                                                                style={{ width: '100%', marginTop: '8px', padding: '7px 10px', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.45)', borderRadius: '4px', color: '#059669', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+                                                            >
+                                                                ✂ {selectedBindPlacement.detach === 'cell' ? t('editor.panel.move.detachCell') : t('editor.panel.move.detachValue')}
+                                                            </button>
+                                                        )}
+                                                        {selectedBindPlacement?.detach && group.length > 0 && (
+                                                            <button
+                                                                type="button"
+                                                                data-bind-detach
+                                                                onClick={() => {
+                                                                    if (sel.locator?.kind === 'bind') detachBinding(sel.locator.index);
+                                                                    else if (sel.locator?.kind === 'el') detachCell(sel.locator.ordinal);
+                                                                }}
+                                                                title={t('editor.panel.move.detachHint')}
+                                                                style={{ width: '100%', marginTop: '8px', padding: '7px 10px', background: 'rgba(16, 185, 129, 0.08)', border: '1px dashed rgba(16, 185, 129, 0.35)', borderRadius: '4px', color: '#059669', fontSize: '10px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+                                                            >
+                                                                ✂ {selectedBindPlacement.detach === 'cell' ? t('editor.panel.move.detachCell') : t('editor.panel.move.detachValue')}
+                                                            </button>
+                                                        )}
+                                                        {selectedBindPlacement?.detach === 'value' && group.length === 0 && noteBox(t('editor.panel.move.valueNote'), 'info')}
+                                                    </>
+                                                )}
+                                                {showGroupAlign && (
+                                                    <div data-group-align style={{ marginTop: showMoveStatus ? '12px' : 0 }}>
+                                                        {sectionTitle(t('editor.align.groupTitle'), '#4338ca')}
+                                                        {noteBox(t('editor.align.groupHint'), 'info')}
                                                         <button
-                                                            key={id}
                                                             type="button"
-                                                            data-move-cell-child
-                                                            onClick={() => {
-                                                                flushSourceEdits();
-                                                                openSelection(null, kid, { kind: 'obj', id });
-                                                                setMoving({ kind: 'obj', id });
-                                                            }}
-                                                            style={{ width: '100%', marginTop: '6px', padding: '7px 10px', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.45)', borderRadius: '4px', color: '#059669', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}
+                                                            data-group-select-align
+                                                            onClick={() => selectGroupForAlign(el)}
+                                                            style={{ width: '100%', marginBottom: '8px', padding: '7px 10px', background: 'rgba(99, 102, 241, 0.12)', border: '1px solid rgba(99, 102, 241, 0.45)', borderRadius: '4px', color: '#4338ca', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
                                                         >
-                                                            ↕ {t('editor.panel.move.button')} · {label}
+                                                            ⊞ {t('editor.align.selectGroup', { count: group.length })}
                                                         </button>
-                                                    );
-                                                })}
-                                                {selectedBindPlacement.detach && !hasPortable && (
-                                                    <button
-                                                        type="button"
-                                                        data-bind-detach
-                                                        onClick={() => {
-                                                            if (sel.locator?.kind === 'bind') detachBinding(sel.locator.index);
-                                                            else if (sel.locator?.kind === 'el') detachCell(sel.locator.ordinal);
-                                                        }}
-                                                        title={t('editor.panel.move.detachHint')}
-                                                        style={{ width: '100%', marginTop: '8px', padding: '7px 10px', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.45)', borderRadius: '4px', color: '#059669', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
-                                                    >
-                                                        ✂ {selectedBindPlacement.detach === 'cell' ? t('editor.panel.move.detachCell') : t('editor.panel.move.detachValue')}
-                                                    </button>
+                                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                                                            {alignKinds.map(([kind, key]) => (
+                                                                <button
+                                                                    key={kind}
+                                                                    type="button"
+                                                                    data-align={kind}
+                                                                    onClick={() => {
+                                                                        selectGroupForAlign(el);
+                                                                        applyAlign(kind);
+                                                                    }}
+                                                                    title={t(key)}
+                                                                    style={{ padding: '4px 8px', background: '#fff', border: '1px solid rgba(99, 102, 241, 0.45)', borderRadius: '4px', color: '#4338ca', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
+                                                                >
+                                                                    {t(key)}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    </div>
                                                 )}
-                                                {selectedBindPlacement.detach && hasPortable && (
-                                                    <button
-                                                        type="button"
-                                                        data-bind-detach
-                                                        onClick={() => {
-                                                            if (sel.locator?.kind === 'bind') detachBinding(sel.locator.index);
-                                                            else if (sel.locator?.kind === 'el') detachCell(sel.locator.ordinal);
-                                                        }}
-                                                        title={t('editor.panel.move.detachHint')}
-                                                        style={{ width: '100%', marginTop: '8px', padding: '7px 10px', background: 'rgba(16, 185, 129, 0.08)', border: '1px dashed rgba(16, 185, 129, 0.35)', borderRadius: '4px', color: '#059669', fontSize: '10px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
-                                                    >
-                                                        ✂ {selectedBindPlacement.detach === 'cell' ? t('editor.panel.move.detachCell') : t('editor.panel.move.detachValue')}
-                                                    </button>
-                                                )}
-                                                {selectedBindPlacement.detach === 'value' && !hasPortable && noteBox(t('editor.panel.move.valueNote'), 'info')}
                                             </div>
                                         );
                                     })()}
