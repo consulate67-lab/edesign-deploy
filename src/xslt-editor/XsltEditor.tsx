@@ -1554,8 +1554,21 @@ const FormulaEditor: React.FC<{
                     {productOfSums ? t('editor.formula.sumProduct') : t('editor.formula.sumNote')}
                 </div>
             )}
-            <div data-formula-result style={{ padding: '8px 10px', background: '#f7f8ff', border: '1px dashed #D9DEF0', borderRadius: '4px', fontSize: '12px', color: '#1e293b' }}>
+            <div data-formula-result style={{ padding: '8px 10px', background: '#f7f8ff', border: '1px dashed #D9DEF0', borderRadius: '4px', fontSize: '12px', color: '#1e293b', marginBottom: '10px' }}>
                 {inLine ? t('editor.formula.resultLine') : t('editor.formula.result')}: <b>{result || '—'}</b>
+            </div>
+            <label style={fieldLabelStyle}>{t('editor.formula.exportField')}</label>
+            <select
+                data-formula-export
+                value={model.exportField || ''}
+                onChange={(e) => update({ exportField: e.target.value })}
+                style={{ ...fieldInputStyle, marginBottom: '6px' }}
+            >
+                <option value="">{t('editor.formula.exportNone')}</option>
+                <CatalogOptions fields={catalog} xmlDoc={xmlDoc} />
+            </select>
+            <div style={{ fontSize: '10px', color: '#6b7690', marginBottom: '4px', lineHeight: 1.45 }}>
+                {t('editor.formula.exportHint')}
             </div>
         </div>
     );

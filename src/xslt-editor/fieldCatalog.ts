@@ -1251,6 +1251,12 @@ export interface FormulaModel {
     suffix: string;
     /** Belge para birimi (DocumentCurrencyCode) sembol/kod. */
     currency: CurrencyDisplay;
+    /**
+     * Gönderim / şablon kontrolü için alan adı (katalog anahtarı).
+     * Görünen değer formülden gelir; seçilen alanın değeri uygulanmaz —
+     * indirilen XSLT'de yalnızca bu alan yolu bildirilir.
+     */
+    exportField?: string;
 }
 
 /** İşlemler; görünen adları `editor.formula.ops.<id>` (arayüz dili). */
@@ -1272,6 +1278,7 @@ export const DEFAULT_FORMULA: FormulaModel = {
     label: '',
     suffix: '',
     currency: 'symbol',
+    exportField: '',
 };
 
 export function readFormula(el: Element): FormulaModel {
@@ -1286,6 +1293,7 @@ export function readFormula(el: Element): FormulaModel {
         label: get('label') ?? '',
         suffix: get('suffix') ?? '',
         currency: cur === 'symbol' || cur === 'code' || cur === 'none' ? cur : 'none',
+        exportField: get('export') ?? el.getAttribute('data-export-field') ?? '',
     };
 }
 
@@ -1297,6 +1305,8 @@ export const formulaAttrs = (m: FormulaModel): [string, string][] => [
     ['data-formula-label', m.label],
     ['data-formula-suffix', m.suffix],
     ['data-formula-currency', m.currency === 'none' ? '' : m.currency],
+    ['data-formula-export', m.exportField ?? ''],
+    ['data-export-field', m.exportField ?? ''],
 ];
 
 /**
@@ -1373,7 +1383,18 @@ export function formulaContent(m: FormulaModel, catalog: CatalogField[], inLine:
     const fx = formulaExpression(m, catalog, inLine);
     if (!fx) return null;
     const cur = currencySuffixFromDoc(m.currency ?? 'none');
-    return `${escapeText(m.label)}<xsl:if test="string(${fx.a}) != 'NaN'"><xsl:value-of select="${formatted(fx.expr, m.decimals, lang)}"/>${cur}</xsl:if>${escapeText(m.suffix)}`;
+    let body = `${escapeText(m.label)}<xsl:if test="string(${fx.a}) != 'NaN'"><xsl:value-of select="${formatted(fx.expr, m.decimals, lang)}"/>${cur}</xsl:if>${escapeText(m.suffix)}`;
+    // Gönderim alan adı: görünen değere dokunulmaz; şablon kontrolü için yol bildirilir.
+    const exportKey = m.exportField?.trim();
+    if (exportKey) {
+        const ef = catalog.find((f) => f.key === exportKey);
+        if (ef) {
+            const xp = fieldXPath(ef, inLine);
+            const leaf = (ef.path.split('/').pop() || 'field').replace(/[^A-Za-z0-9_]/g, '_');
+            body += `<xsl:variable name="edx_export_${leaf}" select="${xp}"/>`;
+        }
+    }
+    return body;
 }
 
 export function formulaSnippet(id: string, m: FormulaModel, catalog: CatalogField[], inLine: boolean, lang: DocLanguage = 'tr'): string {

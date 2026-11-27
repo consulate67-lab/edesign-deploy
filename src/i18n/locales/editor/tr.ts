@@ -106,6 +106,9 @@ const editor = {
         sumNote: 'Formül satır tablosunun dışında: satır alanlarında tüm satırların toplamı kullanılır.',
         resultLine: 'Örnek veriyle sonuç (ilk satır)',
         result: 'Örnek veriyle sonuç',
+        exportField: 'Gönderimde alan adı (şablon)',
+        exportNone: '(yok — yalnız formül)',
+        exportHint: 'Görünen değer formülden gelir; seçilen alanın değeri uygulanmaz. İndirilen XSLT / şablon kontrolünde bu alan adı bildirilir.',
     },
     toolbar: {
         back: 'Geri',

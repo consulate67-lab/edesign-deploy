@@ -108,6 +108,9 @@ const editor: typeof tr = {
         sumNote: 'A fórmula está fora da tabela de itens: os campos dos itens usam o total de todas as linhas.',
         resultLine: 'Resultado com dados de exemplo (primeira linha)',
         result: 'Resultado com dados de exemplo',
+        exportField: "Nome do campo na entrega (modelo)",
+        exportNone: "(nenhum — só fórmula)",
+        exportHint: "O valor visível continua vindo da fórmula; o valor do campo escolhido não é aplicado. No download / verificação do modelo, este nome de campo é declarado.",
     },
     toolbar: {
         back: 'Voltar',

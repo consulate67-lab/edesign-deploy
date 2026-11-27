@@ -108,6 +108,9 @@ const editor: typeof tr = {
         sumNote: 'La fórmula está fuera de la tabla de líneas: los campos de línea usan el total de todas las filas.',
         resultLine: 'Resultado con datos de ejemplo (primera fila)',
         result: 'Resultado con datos de ejemplo',
+        exportField: "Nombre de campo al entregar (plantilla)",
+        exportNone: "(ninguno — solo fórmula)",
+        exportHint: "El valor visible sigue viniendo de la fórmula; no se aplica el valor del campo elegido. En la descarga / control de plantilla se declara este nombre de campo.",
     },
     toolbar: {
         back: 'Atrás',

@@ -108,6 +108,9 @@ const editor: typeof tr = {
         sumNote: 'The formula is outside the line table: line fields use the total of all rows.',
         resultLine: 'Result with sample data (first row)',
         result: 'Result with sample data',
+        exportField: 'Field name on delivery (template)',
+        exportNone: '(none — formula only)',
+        exportHint: 'The visible value still comes from the formula; the selected field’s value is not applied. On download / template checks, this field name is declared.',
     },
     toolbar: {
         back: 'Back',

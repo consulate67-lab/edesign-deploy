@@ -108,6 +108,9 @@ const editor: typeof tr = {
         sumNote: '公式位于明细表之外：明细字段使用所有行的合计。',
         resultLine: '示例数据计算结果（第一行）',
         result: '示例数据计算结果',
+        exportField: "交付时的字段名（模板）",
+        exportNone: "（无 — 仅公式）",
+        exportHint: "显示值仍来自公式，不会套用所选字段的值。下载/模板校验时会声明此字段名。",
     },
     toolbar: {
         back: '返回',

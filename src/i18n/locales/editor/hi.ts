@@ -108,6 +108,9 @@ const editor: typeof tr = {
         sumNote: 'फ़ॉर्मूला लाइन टेबल के बाहर है: लाइन फ़ील्ड सभी पंक्तियों के कुल योग का उपयोग करते हैं।',
         resultLine: 'सैंपल डेटा के साथ परिणाम (पहली पंक्ति)',
         result: 'सैंपल डेटा के साथ परिणाम',
+        exportField: "Field name on delivery (template)",
+        exportNone: "(none — formula only)",
+        exportHint: "The visible value still comes from the formula; the selected field value is not applied. On download / template checks, this field name is declared.",
     },
     toolbar: {
         back: 'वापस',

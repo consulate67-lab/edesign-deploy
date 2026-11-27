@@ -108,6 +108,9 @@ const editor: typeof tr = {
         sumNote: 'Die Formel steht außerhalb der Positionstabelle: Positionsfelder verwenden die Summe aller Zeilen.',
         resultLine: 'Ergebnis mit Beispieldaten (erste Zeile)',
         result: 'Ergebnis mit Beispieldaten',
+        exportField: "Feldname bei Lieferung (Vorlage)",
+        exportNone: "(keins — nur Formel)",
+        exportHint: "Der sichtbare Wert kommt weiterhin aus der Formel; der Wert des gewählten Feldes wird nicht übernommen. Beim Download / der Vorlagenprüfung wird dieser Feldname gemeldet.",
     },
     toolbar: {
         back: 'Zurück',

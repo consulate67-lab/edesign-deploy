@@ -108,6 +108,9 @@ const editor: typeof tr = {
         sumNote: 'La formule est hors du tableau des lignes : les champs de ligne utilisent le total de toutes les lignes.',
         resultLine: 'Résultat avec les données d’exemple (première ligne)',
         result: 'Résultat avec les données d’exemple',
+        exportField: "Nom de champ à la livraison (modèle)",
+        exportNone: "(aucun — formule seule)",
+        exportHint: "La valeur affichée vient toujours de la formule ; la valeur du champ choisi n'est pas appliquée. Au téléchargement / contrôle du modèle, ce nom de champ est déclaré.",
     },
     toolbar: {
         back: 'Retour',
