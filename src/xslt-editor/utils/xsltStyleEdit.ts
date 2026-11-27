@@ -104,15 +104,40 @@ function decodeXmlEntities(s: string): string {
         .replace(/&amp;/g, '&');
 }
 
+/**
+ * Önizleme DOM'u `data:image/svg+xml,%3Csvg…` değerini çoğu tarayıcıda
+ * çözülmüş `data:image/svg+xml,<svg…` olarak verir; XSLT kaynağı ise
+ * yüzde kodlu kalır. Karşılaştırma için tek kanona indirger.
+ */
+export function normalizeImgSrc(src: string): string {
+    const v = decodeXmlEntities(src).trim();
+    const m = v.match(/^(data:image\/[a-z0-9.+-]+)(;charset=[^;,]*)?(;base64)?,(.*)$/i);
+    if (m) {
+        const [, mime, charset = '', b64 = '', body] = m;
+        if (b64) return `${mime}${charset}${b64},${body.replace(/\s+/g, '')}`;
+        try {
+            return `${mime}${charset},${decodeURIComponent(body.replace(/\+/g, ' '))}`;
+        } catch {
+            return `${mime}${charset},${body}`;
+        }
+    }
+    try {
+        return decodeURI(v);
+    } catch {
+        return v;
+    }
+}
+
 /** Literal src değeri `src` olan <img>'lerden ordinal'inci olanı. */
 export function findImgTagBySrc(xslt: string, src: string, ordinal: number): SourceTag | null {
+    const want = normalizeImgSrc(src);
     const re = /<img\b(?:[^>"']|"[^"]*"|'[^']*')*>/g;
     let i = 0;
     let m: RegExpExecArray | null;
     while ((m = re.exec(xslt)) !== null) {
         const sm = m[0].match(/\ssrc\s*=\s*(["'])([\s\S]*?)\1/);
         if (!sm || sm[2].includes('{')) continue;
-        if (decodeXmlEntities(sm[2]) !== src) continue;
+        if (normalizeImgSrc(sm[2]) !== want) continue;
         if (i === ordinal) return { name: 'img', start: m.index, end: m.index + m[0].length };
         i++;
     }
@@ -158,6 +183,28 @@ export function removeElement(xslt: string, tag: SourceTag): string {
     const range = findElementContentRange(xslt, tag);
     const end = range ? xslt.indexOf('>', range.end) + 1 : tag.end;
     return xslt.slice(0, tag.start) + xslt.slice(end);
+}
+
+/**
+ * img'nin ebeveyn td/th'si yalnız bu görseli (ve boşluk/yorum) içeriyorsa hücreyi döner.
+ * Logo sütununu gizlemek / silmek için kullanılır.
+ */
+export function emptyCellWrappingImg(xslt: string, imgTag: SourceTag): SourceTag | null {
+    if (imgTag.name.toLowerCase() !== 'img') return null;
+    const parent = findParentTag(xslt, imgTag.start);
+    if (!parent || (parent.name !== 'td' && parent.name !== 'th')) return null;
+    const range = findElementContentRange(xslt, parent);
+    if (!range) return null;
+    const rest = (xslt.slice(range.start, imgTag.start) + xslt.slice(imgTag.end, range.end))
+        .replace(/<!--[\s\S]*?-->/g, '')
+        .replace(/\s+/g, '');
+    return rest ? null : parent;
+}
+
+/** Logo img'sini siler; hücrede başka içerik yoksa td/th'yi de kaldırır. */
+export function removeImgAndEmptyCell(xslt: string, imgTag: SourceTag): string {
+    const cell = emptyCellWrappingImg(xslt, imgTag);
+    return removeElement(xslt, cell ?? imgTag);
 }
 
 /**

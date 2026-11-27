@@ -64,6 +64,7 @@ import type { XsltBinding, XsltInsertType } from './utils/xsltRender';
 import {
     findBindingSourceOffset, findEnclosingLiteralTag, findImgTagBySrc, findObjTag,
     setTagAttribute, setTagStyleProperty, replaceElementContent, removeElement, escapeXmlText,
+    emptyCellWrappingImg, removeImgAndEmptyCell,
     annotateLiteralTags, findLiteralTagByOrdinal, insertAtTag, moveElement, documentEndOffset,
     bindingSourceOffsets, bindingElementRange, moveElementTracked, insertOffset, elementEnd, findElementContentRange,
     literalOrdinalAt, type SourceTag, type InsertPosition,
@@ -6620,9 +6621,18 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                 return;
                             }
                             const tagRange = resolveSourceTag(xsltContent, sel.locator);
-                            if (!tagRange) return;
-                            setXsltContent(removeElement(xsltContent, tagRange));
+                            if (!tagRange) {
+                                setSaveMessage(`⚠ ${t('editor.panel.notPersisted')}`);
+                                return;
+                            }
+                            // Logo: yalnız img içeren hücreyi de kaldır — boş 60px sütun kalmasın
+                            const next = tagRange.name.toLowerCase() === 'img'
+                                ? removeImgAndEmptyCell(xsltContent, tagRange)
+                                : removeElement(xsltContent, tagRange);
+                            setXsltContent(next);
                             closeSelection();
+                            setSaveStatus('idle');
+                            setSaveMessage(`🗑 ${t('editor.panel.removedPersisted')}`);
                         };
                         return (
                             <>
@@ -7583,7 +7593,12 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
                                                 }
                                                 const open = xsltContentRef.current.slice(tag.start, tag.end);
                                                 const hide = !isHiddenOpenTag(open);
-                                                const next = setElementHiddenInXslt(xsltContentRef.current, tag, hide);
+                                                // Logo hücresi: img yerine td gizlenir (şablon CSS .logo{display:block} ezilmesin)
+                                                const cell = tag.name.toLowerCase() === 'img'
+                                                    ? emptyCellWrappingImg(xsltContentRef.current, tag)
+                                                    : null;
+                                                const target = cell ?? tag;
+                                                const next = setElementHiddenInXslt(xsltContentRef.current, target, hide);
                                                 if (next === xsltContentRef.current) {
                                                     el.style.display = hide ? 'none' : '';
                                                     closeSelection();

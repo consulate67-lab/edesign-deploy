@@ -355,6 +355,7 @@ const editor = {
         hide: 'Gizle',
         hiddenPersisted: 'Öğe gizlendi (XSLT\'ye yazıldı).',
         shownPersisted: 'Öğe yeniden gösterildi.',
+        removedPersisted: 'Öğe XSLT\'ten silindi.',
         moveObject: 'Objeyi sayfada başka bir yere taşı',
         moveElement: 'Öğeyi sayfada başka bir yere taşı',
         moveField: 'Veri alanını sayfada başka bir yere taşı',

@@ -399,19 +399,20 @@ export function countHiddenColumnCells(xslt: string): number {
 export function isHiddenOpenTag(tagText: string): boolean {
     if (attrValue(tagText, HIDDEN_ATTR) !== null) return true;
     const style = tagText.match(/\sstyle\s*=\s*(["'])([\s\S]*?)\1/i)?.[2] ?? '';
-    return /(^|;)\s*display\s*:\s*none\s*(;|$)/i.test(style);
+    return /(^|;)\s*display\s*:\s*none(?:\s*!important)?\s*(;|$)/i.test(style);
 }
 
 /**
  * Tek öğeyi XSLT'de gizler / gösterir (taşıma sonrası önizleme yenilense de kalır).
  * Kolon gizlemeden farklı: yalnız verilen etiket.
+ * `none!important`: şablon CSS'indeki `.logo{display:block}` gibi kuralları ezer.
  */
 export function setElementHiddenInXslt(xslt: string, tag: SourceTag, hidden: boolean): string {
     const open = xslt.slice(tag.start, tag.end);
     if (!open.startsWith('<') || open.startsWith('</')) return xslt;
     return rewriteOpenTag(xslt, tag, (t) => {
         if (hidden) {
-            const styled = setTagStyleProperty(t, wholeTag(t), 'display', 'none');
+            const styled = setTagStyleProperty(t, wholeTag(t), 'display', 'none!important');
             return attrValue(styled, HIDDEN_ATTR) === null
                 ? setTagAttribute(styled, wholeTag(styled), HIDDEN_ATTR, 'oge')
                 : styled;

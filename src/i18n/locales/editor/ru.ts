@@ -357,6 +357,7 @@ const editor: typeof tr = {
         hide: 'Скрыть',
         hiddenPersisted: 'Element hidden (written to XSLT).',
         shownPersisted: 'Element shown again.',
+        removedPersisted: 'Element removed from XSLT.',
         moveObject: 'Переместить объект в другое место страницы',
         moveElement: 'Переместить элемент в другое место страницы',
         moveField: 'Переместить поле данных в другое место страницы',
