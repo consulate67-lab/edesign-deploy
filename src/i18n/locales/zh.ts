@@ -21,6 +21,8 @@ const zh: Messages = {
         delete: '删除',
         loading: '加载中…',
         genericError: '出现错误',
+        downloadReady: '文件已就绪 — 如浏览器拦截，请点此下载',
+        downloadNow: '立即下载',
     },
     landing: {
         nav: { product: '产品', docs: '单据', pricing: '价格', faq: '常见问题' },
@@ -293,6 +295,9 @@ const zh: Messages = {
         colActions: '操作',
         preview: '预览',
         download: '下载',
+        downloadStarted: '正在下载 «{{name}}»…',
+        downloadEmpty: '此设计没有 XSLT 内容。',
+        downloadFailed: '下载失败：{{error}}',
         noMatch: '没有与搜索匹配的设计。',
         licensed: '授权给 {{kind}} {{id}}',
         confirmDelete: '删除“{{name}}”？',

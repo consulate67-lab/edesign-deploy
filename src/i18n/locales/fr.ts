@@ -21,6 +21,8 @@ const fr: Messages = {
         delete: 'Supprimer',
         loading: 'Chargement…',
         genericError: 'Une erreur est survenue',
+        downloadReady: 'Fichier prêt — si le navigateur l’a bloqué, téléchargez ici',
+        downloadNow: 'Télécharger',
     },
     landing: {
         nav: { product: 'Produit', docs: 'Documents', pricing: 'Tarifs', faq: 'FAQ' },
@@ -293,6 +295,9 @@ const fr: Messages = {
         colActions: 'Actions',
         preview: 'Aperçu',
         download: 'Télécharger',
+        downloadStarted: 'Téléchargement de «{{name}}»…',
+        downloadEmpty: 'Ce design n’a pas de contenu XSLT.',
+        downloadFailed: 'Échec du téléchargement : {{error}}',
         noMatch: 'Aucune conception ne correspond à votre recherche.',
         licensed: 'Sous licence pour {{kind}} {{id}}',
         confirmDelete: 'Supprimer « {{name}} » ?',

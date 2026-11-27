@@ -86,6 +86,7 @@ import { TutorialHelpButton } from '../help/Tutorials';
 import { stripFieldGuide } from './utils/fieldGuideMarker';
 import { applyGibLayout, finalizeDelivery, GIB_SIZE_LIMIT, type DeliveryReport, type LayoutResult } from './utils/gibCompliance';
 import { applyLegacyViewerCompat } from './utils/legacyViewerCompat';
+import { offerBlobDownload } from '../utils/blobDownload';
 import { ApproveDialog } from './ApproveDialog';
 import i18n, { useLocaleT } from '../i18n';
 import { numberStyleOf, type DocLanguage, type NumberStyle } from '../international/registry/docLanguages';
@@ -2489,14 +2490,8 @@ export const XSLTEditor: React.FC<XsltEditorProps> = ({
         const fileName = `${base}_${moduleId}${suffix}.xslt`;
         const clean = applyLegacyViewerCompat(stripLeadingBom(content));
         const { content: out, report } = finalizeDelivery(clean, x => withFieldGuide(x, xmlContent, catalogRef.current, design.name || docTitle));
-        const url = URL.createObjectURL(new Blob([out], { type: 'application/xml;charset=utf-8' }));
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(url), 10000);
+        // await sonrası çağrılsa bile yedek banner ile indirilebilir
+        offerBlobDownload(out, fileName, 'application/xml;charset=utf-8');
         const catalog = catalogRef.current;
         setTimeout(() => downloadFieldGuide(`${base}_${moduleId}${suffix}`, clean, xmlContent, catalog, design.name || docTitle), 400);
         return report;

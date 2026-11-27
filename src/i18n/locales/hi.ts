@@ -21,6 +21,8 @@ const hi: Messages = {
         delete: 'हटाएँ',
         loading: 'लोड हो रहा है…',
         genericError: 'कुछ गलत हो गया',
+        downloadReady: 'File ready — if the browser blocked it, download here',
+        downloadNow: 'Download now',
     },
     landing: {
         nav: { product: 'प्रोडक्ट', docs: 'दस्तावेज़', pricing: 'मूल्य', faq: 'FAQ' },
@@ -293,6 +295,9 @@ const hi: Messages = {
         colActions: 'कार्रवाइयाँ',
         preview: 'प्रीव्यू',
         download: 'डाउनलोड करें',
+        downloadStarted: 'Downloading «{{name}}»…',
+        downloadEmpty: 'This design has no XSLT content.',
+        downloadFailed: 'Download failed: {{error}}',
         noMatch: 'आपकी खोज से कोई डिज़ाइन मेल नहीं खाता।',
         licensed: '{{kind}} {{id}} के लिए लाइसेंस प्राप्त',
         confirmDelete: '"{{name}}" हटाएँ?',

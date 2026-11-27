@@ -21,6 +21,8 @@ const es: Messages = {
         delete: 'Eliminar',
         loading: 'Cargando…',
         genericError: 'Se ha producido un error',
+        downloadReady: 'Archivo listo — si el navegador lo bloqueó, descargue aquí',
+        downloadNow: 'Descargar ahora',
     },
     landing: {
         nav: { product: 'Producto', docs: 'Documentos', pricing: 'Precios', faq: 'Preguntas' },
@@ -293,6 +295,9 @@ const es: Messages = {
         colActions: 'Acciones',
         preview: 'Vista previa',
         download: 'Descargar',
+        downloadStarted: 'Descargando «{{name}}»…',
+        downloadEmpty: 'Este diseño no tiene contenido XSLT.',
+        downloadFailed: 'Error al descargar: {{error}}',
         noMatch: 'Ningún diseño coincide con la búsqueda.',
         licensed: 'Con licencia para {{kind}} {{id}}',
         confirmDelete: '¿Eliminar «{{name}}»?',

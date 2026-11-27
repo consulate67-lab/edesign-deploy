@@ -21,6 +21,8 @@ const en: Messages = {
         delete: 'Delete',
         loading: 'Loading…',
         genericError: 'Something went wrong',
+        downloadReady: 'File ready — if the browser blocked it, download here',
+        downloadNow: 'Download now',
     },
     landing: {
         nav: { product: 'Product', docs: 'Documents', pricing: 'Pricing', faq: 'FAQ' },
@@ -293,6 +295,9 @@ const en: Messages = {
         colActions: 'Actions',
         preview: 'Preview',
         download: 'Download',
+        downloadStarted: 'Downloading «{{name}}»…',
+        downloadEmpty: 'This design has no XSLT content.',
+        downloadFailed: 'Download failed: {{error}}',
         noMatch: 'No designs match your search.',
         licensed: 'Licensed for {{kind}} {{id}}',
         confirmDelete: 'Delete "{{name}}"?',

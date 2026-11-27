@@ -9,6 +9,7 @@ import { bindingLabel, type CatalogField } from '../fieldCatalog';
 import { stripPredicates, xpathPaths } from './xpathNames';
 import { GUIDE_BEGIN, GUIDE_END, stripFieldGuide } from './fieldGuideMarker';
 import type editorTr from '../../i18n/locales/editor/tr';
+import { offerBlobDownload } from '../../utils/blobDownload';
 
 const TAG_RE = /<!--[\s\S]*?-->|<(\/?)xsl:([\w-]+)\b((?:[^>"']|"[^"]*"|'[^']*')*?)(\/?)>/g;
 
@@ -588,14 +589,7 @@ export function downloadFieldGuide(baseName: string, xslt: string, xml: string, 
     }
     if (!lines) return;
     const text = `\uFEFF${lines.join('\r\n')}\r\n`;
-    const url = URL.createObjectURL(new Blob([text], { type: 'text/plain;charset=utf-8' }));
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${baseName}_${i18n.t('editor.guide.fileSuffix')}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(url), 10000);
+    offerBlobDownload(text, `${baseName}_${i18n.t('editor.guide.fileSuffix')}.txt`, 'text/plain;charset=utf-8');
 }
 
 /** Rehberi XML bildiriminin hemen altına ekler (varsa eskisini değiştirir). */

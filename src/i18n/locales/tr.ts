@@ -24,6 +24,8 @@ const tr = {
         delete: 'Sil',
         loading: 'Yükleniyor…',
         genericError: 'Bir hata oluştu',
+        downloadReady: 'Dosya hazır — tarayıcı engellediyse buradan indirin',
+        downloadNow: 'Şimdi indir',
     },
     landing: {
         nav: { product: 'Ürün', docs: 'Belgeler', pricing: 'Fiyatlar', faq: 'SSS' },
@@ -296,6 +298,9 @@ const tr = {
         colActions: 'İşlemler',
         preview: 'Önizle',
         download: 'İndir',
+        downloadStarted: '«{{name}}» indiriliyor…',
+        downloadEmpty: 'Bu tasarımın XSLT içeriği bulunamadı.',
+        downloadFailed: 'İndirme başarısız: {{error}}',
         noMatch: 'Aramaya uyan tasarım yok.',
         licensed: '{{kind}} {{id}} için lisanslı',
         confirmDelete: '"{{name}}" silinsin mi?',

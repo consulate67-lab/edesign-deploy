@@ -2,6 +2,7 @@ import React, { Suspense, lazy, useState, useEffect, useCallback } from 'react';
 import './index.css';
 import { api, API_URL } from './api';
 import { ToastHost } from './store/ToastHost.tsx';
+import { DownloadReadyBanner } from './DownloadReadyBanner';
 import { useUiStore } from './store/uiStore';
 import { Landing } from './Landing.tsx';
 import { theme } from './theme';
@@ -337,6 +338,7 @@ const App: React.FC = () => {
         return (
             <>
                 <ToastHost />
+                <DownloadReadyBanner />
                 <Suspense fallback={<ScreenFallback light />}>
                     <AdminApp />
                 </Suspense>
@@ -347,6 +349,7 @@ const App: React.FC = () => {
     return (
         <>
             <ToastHost />
+            <DownloadReadyBanner />
             {hasAnyTracking() && (
                 <Suspense fallback={null}>
                     <CookieBanner />

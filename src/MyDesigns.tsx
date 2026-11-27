@@ -13,6 +13,8 @@ import i18n, { currentLocale, useLocaleT } from './i18n';
 import { licenseIdKind } from '../shared/license-lock.js';
 import { designNeedsRevisionReview } from './designRevisionSync';
 import { fetchOfficialRevisions, type PublicOfficialRevision } from './officialArtifacts';
+import { offerBlobDownload } from './utils/blobDownload';
+import { useUiStore } from './store/uiStore';
 
 const MAX_DRAFTS = 5;
 const PAGE_SIZE = 10;
@@ -61,29 +63,37 @@ const designXml = async (d: SavedDesign) => {
 };
 
 const downloadDesign = async (d: SavedDesign) => {
-    const clean = applyLegacyViewerCompat(stripLeadingBom(d.xslt_content ?? ''));
-    const base = `${d.name.replace(/[\\/:*?"<>|\s]+/g, '_')}_${d.module_id}`;
-    let content = finalizeDelivery(clean).content;
-    let saveGuide: (() => void) | null = null;
+    const pushToast = useUiStore.getState().pushToast;
     try {
-        const [xml, { buildCatalog }, { withFieldGuide, downloadFieldGuide }] = await Promise.all([
-            designXml(d), import('./xslt-editor/catalogI18n'), import('./xslt-editor/utils/fieldGuide'),
-        ]);
-        const catalog = buildCatalog(xml, currentLocale());
-        content = finalizeDelivery(clean, x => withFieldGuide(x, xml, catalog, d.name)).content;
-        saveGuide = () => downloadFieldGuide(base, clean, xml, catalog, d.name);
+        if (!d.xslt_content?.trim()) {
+            pushToast({ kind: 'error', title: i18n.t('designs.downloadEmpty') });
+            return;
+        }
+        const clean = applyLegacyViewerCompat(stripLeadingBom(d.xslt_content));
+        const base = `${d.name.replace(/[\\/:*?"<>|\s]+/g, '_')}_${d.module_id}`;
+        const filename = `${base}.xslt`;
+        // Önce senkron indir — await sonrası Chromium/Edge jesti düşürüp a.click() engelleyebilir
+        const content = finalizeDelivery(clean).content;
+        offerBlobDownload(content, filename, 'application/xml;charset=utf-8');
+        pushToast({ kind: 'success', title: i18n.t('designs.downloadStarted', { name: filename }) });
+
+        // Alan rehberi ayrı .txt; jesti kaybettikten sonra yedek banner ile inebilir
+        try {
+            const [xml, { buildCatalog }, { downloadFieldGuide }] = await Promise.all([
+                designXml(d), import('./xslt-editor/catalogI18n'), import('./xslt-editor/utils/fieldGuide'),
+            ]);
+            const catalog = buildCatalog(xml, currentLocale());
+            window.setTimeout(() => downloadFieldGuide(base, clean, xml, catalog, d.name), 400);
+        } catch (err) {
+            console.warn('[MyDesigns] alan rehberi eklenemedi', err);
+        }
     } catch (err) {
-        console.warn('[MyDesigns] alan rehberi eklenemedi', err);
+        console.error('[MyDesigns] indirme hatası', err);
+        pushToast({
+            kind: 'error',
+            title: i18n.t('designs.downloadFailed', { error: err instanceof Error ? err.message : String(err) }),
+        });
     }
-    const url = URL.createObjectURL(new Blob([content], { type: 'application/xml;charset=utf-8' }));
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${base}.xslt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(url), 10000);
-    if (saveGuide) setTimeout(saveGuide, 400);
 };
 
 /** Hesaptaki XSLT tasarımları; taslak ve onaylı bölümler aynı listeyi paylaşır. */
@@ -418,8 +428,12 @@ const DesignPreview: React.FC<{ design: SavedDesign; onClose: () => void }> = ({
 
     useEffect(() => {
         let alive = true;
+        setHtml(null);
+        setError(null);
+        setUsesSample(false);
         (async () => {
             try {
+                if (!design.xslt_content?.trim()) throw new Error(i18n.t('designs.downloadEmpty'));
                 let xml = design.xml_content;
                 if (!xml) {
                     const docType = docTypeOf(design.module_id);
@@ -427,8 +441,14 @@ const DesignPreview: React.FC<{ design: SavedDesign; onClose: () => void }> = ({
                     xml = await loadSampleXml(docType);
                     if (alive) setUsesSample(true);
                 }
-                const out = transformXmlWithXslt(xml, stripLeadingBom(design.xslt_content ?? ''));
-                if (alive) setHtml(out);
+                const out = transformXmlWithXslt(xml, stripLeadingBom(design.xslt_content));
+                if (!alive) return;
+                if (/XSLT Dönüşümü başarısız|XSLT Transformation|XSLT Parse Error|XML Parse Error/i.test(out)) {
+                    const msg = out.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 300);
+                    setError(msg || i18n.t('designs.previewFailed', { error: 'XSLT' }));
+                    return;
+                }
+                setHtml(out.includes('<html') ? out : `<!DOCTYPE html><html><head><meta charset="utf-8"/></head><body>${out}</body></html>`);
             } catch (e) {
                 if (alive) setError(e instanceof Error ? e.message : String(e));
             }

@@ -21,6 +21,8 @@ const ru: Messages = {
         delete: 'Удалить',
         loading: 'Загрузка…',
         genericError: 'Что-то пошло не так',
+        downloadReady: 'Файл готов — если браузер заблокировал, скачайте здесь',
+        downloadNow: 'Скачать',
     },
     landing: {
         nav: { product: 'Продукт', docs: 'Документы', pricing: 'Цены', faq: 'Вопросы и ответы' },
@@ -293,6 +295,9 @@ const ru: Messages = {
         colActions: 'Действия',
         preview: 'Предпросмотр',
         download: 'Скачать',
+        downloadStarted: 'Скачивание «{{name}}»…',
+        downloadEmpty: 'У этого дизайна нет содержимого XSLT.',
+        downloadFailed: 'Ошибка скачивания: {{error}}',
         noMatch: 'Нет дизайнов, соответствующих запросу.',
         licensed: 'Лицензировано для {{kind}} {{id}}',
         confirmDelete: 'Удалить «{{name}}»?',
