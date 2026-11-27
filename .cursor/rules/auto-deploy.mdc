@@ -13,7 +13,7 @@ Bir iş bittiğinde sırayla:
 2. `npx eslint <değişen dosyalar>` yeni hata vermemeli. `XsltEditor.tsx` içindeki 5 eski hata (`Editor`, `FileCode2`, `transformXmlWithXslt`, `iframeContentHeight`, `handleEditorMount`) ve 1 uyarı önceden var; bunlar engel değil.
 3. Arayüz değişikliğiyse tarayıcıda doğrula.
 4. `npm run deploy:web` çalıştır; "Yayın tamam." görülmeli (FTP yedek / hosting).
-5. Canlı site Railway'de (`www.edxdocu.com` → Express + `dist-web`). Arayüz veya backend değiştiyse mutlaka `railway up --service edesign-deploy --detach`; bitince index.html'de yeni `index-*.js` / `Selection-*.js` hash'i görülmeli.
+5. Canlı site Railway'de (`www.edxdocu.com` → Express + `dist-web`). Arayüz veya backend değiştiyse mutlaka `railway up --service edesign-deploy --detach --no-gitignore` (`dist-web/` `.gitignore`'da; yoksa eski arayüz kalır); bitince index.html'de yeni `index-*.js` / `Selection-*.js` hash'i görülmeli.
 6. Yalnız değişen dosyaları `git add`, `git commit`, `git push`.
 7. Canlıyı https://www.edxdocu.com üzerinden kontrol et (Ctrl+F5).
 
